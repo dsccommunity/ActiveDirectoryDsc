@@ -19,6 +19,7 @@ on_finish:
         Add-Type -assemblyname System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFile)
         @(
-            $zipFile
+            # You can add other artifacts here
+            (ls $zipFile)
         ) | % { Push-AppveyorArtifact $_.FullName }
 
