@@ -13,4 +13,4 @@ For more information about Windows PowerShell Desired State Configuration, check
 
 
 ## Contributing
-Please check out common DSC Resources [contributing guidelines](CONTRIBUTING.md).
+Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/xDscResources/blob/master/CONTRIBUTING.md).
