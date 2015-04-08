@@ -14,4 +14,9 @@ test_script:
         }
 on_finish:
     - ps: |
-        # TODO: add push artifacts
+        $stagingDirectory = (Resolve-Path ..).Path
+        $zipFile = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
+        [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFile)
+        @(
+            $zipFile
+        ) | % { Push-AppveyorArtifact $_.FullName }

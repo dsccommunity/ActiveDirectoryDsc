@@ -1,5 +1,4 @@
 #xActiveDirectory
----------------
 
 The xActiveDirectory module is a part of the Windows PowerShell Desired State Configuration (DSC) Resource Kit, which is a collection of DSC Resources produced by the PowerShell Team. This module contains the xADDomain, xADDomainController, xADUser, xWaitForDomain, and xADDomainTrust resources. These DSC Resources allow you to configure and manage Active Directory.  Note: these resources do not presently install the RSAT tools. 
 
