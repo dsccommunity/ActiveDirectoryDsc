@@ -20,3 +20,4 @@ on_finish:
         @(
             $zipFile
         ) | % { Push-AppveyorArtifact $_.FullName }
+
