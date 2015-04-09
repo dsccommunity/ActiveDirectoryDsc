@@ -1,4 +1,4 @@
-﻿$Properties = @{
+$Properties = @{
                 SourceDomain    = New-xDscResourceProperty -Name SourceDomainName -Type String -Attribute Key `
                                                            -Description 'Name of the AD domain that is requesting the trust'
                 TargetDomain    = New-xDscResourceProperty -Name TargetDomainName -Type String -Attribute Key `

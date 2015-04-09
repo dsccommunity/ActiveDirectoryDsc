@@ -1,4 +1,4 @@
-﻿@{
+@{
 # Version number of this module.
 ModuleVersion = '2.2'
 
@@ -29,5 +29,6 @@ FunctionsToExport = '*'
 # Cmdlets to export from this module
 CmdletsToExport = '*'
 }
+
 
 

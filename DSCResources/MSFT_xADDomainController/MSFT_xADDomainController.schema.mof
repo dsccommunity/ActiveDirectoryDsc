@@ -1,4 +1,4 @@
-﻿[ClassVersion("1.0.0.0"), FriendlyName("xADDomainController")]
+[ClassVersion("1.0.0.0"), FriendlyName("xADDomainController")]
 class MSFT_xADDomainController : OMI_BaseResource
 {
     [Key] String DomainName;
@@ -6,3 +6,4 @@ class MSFT_xADDomainController : OMI_BaseResource
     [Required, EmbeddedInstance("MSFT_Credential")] String SafemodeAdministratorPassword;
     [Read, Description("Is this resource present or absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
+

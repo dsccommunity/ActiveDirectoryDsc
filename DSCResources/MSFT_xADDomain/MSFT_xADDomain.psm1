@@ -1,4 +1,4 @@
-﻿function Get-TargetResource
+function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
     param
@@ -166,3 +166,4 @@ function Test-TargetResource
         $false
     } 
 }
+
