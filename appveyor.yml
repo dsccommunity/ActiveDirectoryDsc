@@ -1,5 +1,5 @@
 install: 
-    - cinst pester
+    - cinst -y pester
     - git clone https://github.com/PowerShell/DscResource.Tests
 
 build: false
