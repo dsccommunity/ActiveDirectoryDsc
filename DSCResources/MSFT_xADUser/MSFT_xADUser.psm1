@@ -137,6 +137,7 @@ function ValidateProperties
             if( $Apply )
             {
                 Remove-ADUser -Identity $UserName -Credential $DomainAdministratorCredential -Confirm:$false
+                Write-Verbose -Message "Removed $UserName account in domain $DomainName."
                 return
             }
             else
@@ -201,10 +202,11 @@ function ValidateProperties
         {
             if( $Ensure -ne "Absent" )
             {
-                $params = @{ Name = $UserName; Enabled = $true; Credential = $DomainAdministratorCredential }
+                $params = @{ Name = $UserName; Credential = $DomainAdministratorCredential }
                 if( $Password )
                 {
                     $params.Add( "AccountPassword", $Password.Password )
+                    $params.Add( "Enabled", $true )
                 }
                 New-AdUser @params
                 Write-Verbose -Message "User $UserName account in domain $DomainName has been created"
