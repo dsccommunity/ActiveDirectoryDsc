@@ -64,7 +64,24 @@ Note: These are not used during domain creation.
 * **TrustDirection**: Direction of trust, the values for which may be Bidirectional,Inbound, or Outbound 
 * **SourceDomainName**: Name of the AD domain that is requesting the trust 
 
+### xADRecycleBin
+The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest. 
+This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode 
+is insufficient, then the resource will exit with an error message.  The change is executed against the  
+Domain Naming Master FSMO of the forest. 
+(Note: This resource is compatible with a Windows 2008 R2 or above target node. )
+* **ForestFQDN**:  Fully qualified domain name of forest to enable Active Directory Recycle Bin. 
+* **EnterpriseAdministratorCredential**:  Credential with Enterprise Administrator rights to the forest. 
+* **RecycleBinEnabled**:  Read-only. Returned by Get. 
+* **ForestMode**:  Read-only. Returned by Get. 
+
 ## Versions
+
+### 2.3
+
+* Added xADRecycleBin.
+* Modified xADUser to include a write-verbose after user is removed when Absent.
+* Corrected xADUser to successfully create a disabled user without a password.
 
 ### 2.2
 
@@ -459,7 +476,8 @@ Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path
 ``` 
  
 ### Create a cross-domain trust
-In this example, we setup one-way trust between two domains
+
+In this example, we setup one-way trust between two domains.
 
 ```powershell
 Configuration Sample_xADDomainTrust_OneWayTrust
@@ -630,3 +648,45 @@ Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path
 Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertParentChildDomains ` 
 -Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine") 
  ```
+
+### Enable the Active Directory Recycle Bin
+
+In this example, we enable the Active Directory Recycle Bin.
+
+```
+Configuration Example_xADRecycleBin
+{
+Param(
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $ForestFQDN,
+
+    [parameter(Mandatory = $true)]
+    [System.Management.Automation.PSCredential]
+    $EACredential 
+)
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADRecycleBin RecycleBin
+        {
+           EnterpriseAdministratorCredential = $EACredential
+           ForestFQDN = $ForestFQDN
+        }
+    }
+}
+
+$ConfigurationData = @{
+    AllNodes = @(
+        @{
+            NodeName = '2012r2-dc'
+        }
+    )
+}
+
+Example_xADRecycleBin -EACredential (Get-Credential contoso\administrator) -ForestFQDN 'contoso.com' -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADRecycleBin -Wait -Verbose
+```
