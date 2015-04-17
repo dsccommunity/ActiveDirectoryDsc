@@ -1,8 +1,8 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/p4jejr60jrgb8ity/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xactivedirectory/branch/master)
 
-#xActiveDirectory
+# xActiveDirectory
 
-The** xActiveDirectory** DSC resources allow you to configure and manage Active Directory.
+The **xActiveDirectory** DSC resources allow you to configure and manage Active Directory.
 Note: these resources do not presently install the RSAT tools.
 
 ## Contributing
@@ -13,15 +13,15 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, and ADDomainTrust** DSC Resources.
 These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers and establish cross-domain trusts.
-The  **xADDomain** resource creates new Active Directory forest configurations and new Active Directory domain configurations.
-The  **xADDomainController** installs and configures a domain controllers in Active Directory.
-The  **xADUser** resource modifies and removes Active Directory Users. 
-The **xWaitForDomain** resource is responsible to wait for new domain to setup.
-It's worth noting that the RSAT tools will not be installed when these resources are used to configure AD.
-The **xADDomainTrust** resource is used to establish a cross-domain trust.
-     
 
 ## Resources
+
+* **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
+* **xADDomainController** installs and configures domain controllers in Active Directory.
+* **xADUser** modifies and removes Active Directory Users. 
+* **xWaitForDomain** waits for new, remote domain to setup.
+(Note: the RSAT tools will not be installed when these resources are used to configure AD.)
+* **xADDomainTrust** establishes a cross-domain trusts
 
 ### **xADDomain**
 
