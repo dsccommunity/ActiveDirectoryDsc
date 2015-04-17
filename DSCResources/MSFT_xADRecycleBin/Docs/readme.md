@@ -12,4 +12,4 @@ xADRecycleBin resource has the following properties:
 -	ForestMode:  Read-only. Returned by Get.
 
 Example usage code is included in the resource subfolder:
-.\MSFT_xADRecycleBin\Examples\xActiveDirectory_xADRecycleBin.ps1
+[xActiveDirectory_xADRecycleBin.ps1](MSFT_xADRecycleBin\Examples\xActiveDirectory_xADRecycleBin.ps1)
