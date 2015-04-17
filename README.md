@@ -21,7 +21,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADUser** modifies and removes Active Directory Users. 
 * **xWaitForDomain** waits for new, remote domain to setup.
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
-* **xADDomainTrust** establishes a cross-domain trusts
+* **xADDomainTrust** establishes cross-domain trusts
 
 ### **xADDomain**
 
