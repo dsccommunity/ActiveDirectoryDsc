@@ -1,17 +1,17 @@
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$ForestFQDN,
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ForestFQDN,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$EnterpriseAdministratorCredential
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $EnterpriseAdministratorCredential
+    )
 
     Try
     {
@@ -47,29 +47,29 @@ function Get-TargetResource
         $ErrorActionPreference = 'Continue'
     }
 
-	$returnValue = @{
-		ForestFQDN = $ForestFQDN
-		RecycleBinEnabled = $RecycleBinEnabled
-		ForestMode = $RootDSE.forestFunctionality.ToString()
-	}
+    $returnValue = @{
+        ForestFQDN = $ForestFQDN
+        RecycleBinEnabled = $RecycleBinEnabled
+        ForestMode = $RootDSE.forestFunctionality.ToString()
+    }
 
-	$returnValue
+    $returnValue
 }
 
 
 function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$ForestFQDN,
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ForestFQDN,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$EnterpriseAdministratorCredential
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $EnterpriseAdministratorCredential
+    )
 
 
     Try
@@ -115,18 +115,18 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$ForestFQDN,
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ForestFQDN,
 
-		[parameter(Mandatory = $true)]
-		[System.Management.Automation.PSCredential]
-		$EnterpriseAdministratorCredential
-	)
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $EnterpriseAdministratorCredential
+    )
 
     Try {
         # AD cmdlets generate non-terminating errors.
@@ -184,5 +184,6 @@ Get-TargetResource -ForestFQDN contoso.cm -EnterpriseAdministratorCredential $cr
 Test-TargetResource -ForestFQDN contoso.cm -EnterpriseAdministratorCredential $cred
 Set-TargetResource -ForestFQDN contoso.cm -EnterpriseAdministratorCredential $cred -WhatIf
 #>
+
 
 
