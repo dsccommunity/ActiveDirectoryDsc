@@ -1,11 +1,19 @@
 install: 
     - cinst -y pester
     - git clone https://github.com/PowerShell/DscResource.Tests
+    - git clone https://github.com/PowerShell/xDSCResourceDesigner
 
 build: false
 
 test_script:
     - ps: |
+        Import-Module .\xDSCResourceDesigner
+        # We want to test dev version of the resource.
+        # xDscResouceDesigner works against standart PowerShell modules path.
+        # We need to make sure that root folder of xActiveDirectory is at the first place in $env:PSModulePath
+        if (($env:PSModulePath.Split(';') | select -First 1) -ne $pwd) {
+            $env:PSModulePath = "$pwd;$env:PSModulePath"
+        }
         $testResultsFile = ".\TestsResults.xml"
         $res = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
         (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))

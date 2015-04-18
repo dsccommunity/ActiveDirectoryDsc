@@ -1,13 +1,13 @@
 Configuration Example_xADRecycleBin
 {
 Param(
-	[parameter(Mandatory = $true)]
-	[System.String]
-	$ForestFQDN,
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $ForestFQDN,
 
-	[parameter(Mandatory = $true)]
-	[System.Management.Automation.PSCredential]
-	$EACredential 
+    [parameter(Mandatory = $true)]
+    [System.Management.Automation.PSCredential]
+    $EACredential 
 )
 
     Import-DscResource -Module xActiveDirectory
@@ -36,3 +36,4 @@ Example_xADRecycleBin -EACredential (Get-Credential contoso\administrator) -Fore
 Start-DscConfiguration -Path .\Example_xADRecycleBin -Wait -Verbose -WhatIf
 
 Start-DscConfiguration -Path .\Example_xADRecycleBin -Wait -Verbose
+
