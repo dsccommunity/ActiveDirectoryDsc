@@ -1,5 +1,6 @@
 <body>
         <div id="longDesc">
+            <p><span style="font-family:Calibri; font-size:medium">&nbsp;</span></p>
             <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Introduction</h1>       
             <div id="longDesc">
                 <span style="font-family:Calibri; font-size:medium">
@@ -95,6 +96,21 @@
                                 DnsDelegationCredential: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                             </strong><span style="font-family:Calibri; font-size:medium">Credential used for creating DNS delegation</span>
                         </li>
+                        <li>
+                            <strong>
+                                DatabasePath: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </strong><span style="font-family:Calibri; font-size:medium">Destination path for the AD database</span>
+                        </li>
+                        <li>
+                            <strong>
+                                LogPath: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </strong><span style="font-family:Calibri; font-size:medium">Destination path for the AD log files</span>
+                        </li>
+                        <li>
+                            <strong>
+                                SysvolPath: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </strong><span style="font-family:Calibri; font-size:medium">Destination path for the sysvol store</span>
+                        </li>                                                                        
                     </ul>
                     <p><strong>xADDomainController</strong> resource has following properties:</p>
                     <ul style="list-style-type:disc; direction:ltr">
@@ -111,6 +127,22 @@
                         <li>
                             <strong>SafemodeAdministratorPassword</strong>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Password for the administrator account when the computer is started in Safe Mode.
                         </li>
+                        <li>
+                            <strong>
+                                DatabasePath: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </strong><span style="font-family:Calibri; font-size:medium">Destination path for the AD database</span>
+                        </li>
+                        <li>
+                            <strong>
+                                LogPath: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </strong><span style="font-family:Calibri; font-size:medium">Destination path for the AD log files</span>
+                        </li>
+                        <li>
+                            <strong>
+                                SysvolPath: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </strong><span style="font-family:Calibri; font-size:medium">Destination path for the sysvol store</span>
+                        </li>                                                                        
+                    </ul>
                     </ul>
                     <p><strong>xADUser</strong> resource has following properties:</p>
                     <ul style="list-style-type:disc; direction:ltr">
@@ -258,6 +290,23 @@
                     <ul style="list-style-type:disc; direction:ltr">
                         <li>
                             Modified xAdDomain and xAdDomainController to support Ensure as Present / Absent, rather than True/False. Note: this may cause issues for existing scripts. Also corrected return value to be a hashtable in both resources. 
+                        </li>
+                    </ul>
+                    <p>2.3</p>
+                    <ul style="list-style-type:disc; direction:ltr">
+                        <li>
+                            Added properties to xAdDomain and xAdDomainController:
+                            <ul style="list-style-type:circle">
+                                <li>
+                                    <span style="font-family:Calibri; font-size:medium">DatabasePath</span>
+                                </li>
+                                <li>
+                                    <span style="font-family:Calibri; font-size:medium">LogPath</span>
+                                </li>
+                                <li>
+                                    <span style="font-family:Calibri; font-size:medium">SysvolPath</span>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                     <h1 style="margin-bottom:0pt; font-family:Calibri Light; color:#2e74b5; font-size:large">

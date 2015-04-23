@@ -82,3 +82,4 @@ AssertHADC -configurationData $config
 
 Start-DscConfiguration -Wait -Force -Verbose -ComputerName "sva-dsc1" -Path $PSScriptRoot\AssertHADC -Credential $localcred
 Start-DscConfiguration -Wait -Force -Verbose -ComputerName "sva-dsc2" -Path $PSScriptRoot\AssertHADC -Credential $localcred
+

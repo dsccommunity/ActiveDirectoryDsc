@@ -1,9 +1,9 @@
 @{
 # Version number of this module.
-ModuleVersion = '2.2'
+ModuleVersion = '2.3'
 
 # ID used to uniquely identify this module
-GUID = 'caedd141-8493-4af3-bda0-eef11e9ca2be'
+GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
 
 # Author of this module
 Author = 'Microsoft Corporation'
@@ -15,7 +15,9 @@ CompanyName = 'Microsoft Corporation'
 Copyright = '(c) 2014 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Module with DSC Resources for Active Directory'
+Description = 'The xActiveDirectory module is originally part of the Windows PowerShell Desired State Configuration (DSC) Resource Kit. This version has been modified for use in Azure. This module contains the xADDomain, xADDomainController, xADUser, and xWaitForDomain resources. These DSC Resources allow you to configure and manage Active Directory.
+
+All of the resources in the DSC Resource Kit are provided AS IS, and are not supported through any Microsoft standard support program or service.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '4.0'
@@ -29,6 +31,4 @@ FunctionsToExport = '*'
 # Cmdlets to export from this module
 CmdletsToExport = '*'
 }
-
-
 
