@@ -35,7 +35,7 @@ function Get-TargetResource
         [PSCredential]$TargetDomainAdministratorCredential,
 
         [parameter(Mandatory)]
-        [ValidateSet("External")]
+        [ValidateSet("External","Forest")]
         [String]$TrustType,
 
         [parameter(Mandatory)]
@@ -64,13 +64,27 @@ function Get-TargetResource
 
     try
     {
-        # Create the target domain object
-        $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
-        $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
-
-        # Create the source domain object
-        $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
-        $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
+        switch ($TrustType)
+        {
+            'External'
+            {
+                # Create the target domain object
+                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
+                $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
+                # Create the source domain object
+                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
+                $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
+            }
+            'Forest'
+            {
+                # Create the target forest object
+                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
+                $trgDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($trgDirectoryContext)
+                # Create the source forest object
+                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$SourceDomainName)
+                $srcDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($srcDirectoryContext)
+            }
+        }
 
         # Find trust betwen source & destination.
         $trust = $srcDomain.GetTrustRelationship($trgDomain)
@@ -116,7 +130,7 @@ function Set-TargetResource
         [PSCredential]$TargetDomainAdministratorCredential,
 
         [parameter(Mandatory)]
-        [ValidateSet("External")]
+        [ValidateSet("External","Forest")]
         [String]$TrustType,
 
         [parameter(Mandatory)]
@@ -147,7 +161,7 @@ function Test-TargetResource
         [PSCredential]$TargetDomainAdministratorCredential,
 
         [parameter(Mandatory)]
-        [ValidateSet("External")]
+        [ValidateSet("External","Forest")]
         [String]$TrustType,
 
         [parameter(Mandatory)]
@@ -194,7 +208,7 @@ function Validate-ResourceProperties
         [PSCredential]$TargetDomainAdministratorCredential,
 
         [parameter(Mandatory)]
-        [ValidateSet("External")]
+        [ValidateSet("External","Forest")]
         [String]$TrustType,
 
         [parameter(Mandatory)]
@@ -212,13 +226,27 @@ function Validate-ResourceProperties
         $checkingTrustMessage = $($LocalizedData.CheckingTrustMessage) -f $SourceDomainName,$TargetDomainName
         Write-Verbose -Message $checkingTrustMessage
 
-        #Create the target domain object
-        $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $($TargetDomainAdministratorCredential.GetNetworkCredential()).Password)
-        $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
-
-        # Create the source domain object
-        $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
-        $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
+        switch ($TrustType)
+        {
+            'External'
+            {
+                # Create the target domain object
+                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
+                $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
+                # Create the source domain object
+                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
+                $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
+            }
+            'Forest'
+            {
+                # Create the target forest object
+                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
+                $trgDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($trgDirectoryContext)
+                # Create the source forest object
+                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$SourceDomainName)
+                $srcDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($srcDirectoryContext)
+            }
+        }
 
         # Find trust
         try
@@ -293,7 +321,7 @@ function Validate-ResourceProperties
                 # Trust type is correct
                 else
                 {
-                    $desiredPropertyMessage = $($LocalizedData.DesiredPropertyMessage) -f 'Trust direction'
+                    $desiredPropertyMessage = $($LocalizedData.DesiredPropertyMessage) -f 'Trust type'
                     Write-Verbose -Message $desiredPropertyMessage
                 }
 
