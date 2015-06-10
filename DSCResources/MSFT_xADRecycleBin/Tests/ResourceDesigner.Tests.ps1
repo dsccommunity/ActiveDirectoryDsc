@@ -1,7 +1,7 @@
 Describe 'xADRecycleBin' {
     Context 'xDscResouceDesigner' {
         It 'Pass Test-xDscResource' {
-            Test-xDscResource xADRecycleBin -Verbose | Should Be $True
+            Test-xDscResource -Name ".\DSCResources\MSFT_xADRecycleBin" -Verbose | Should Be $True
         }
 
         It 'Pass Test-xDscSchema' {
