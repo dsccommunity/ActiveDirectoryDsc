@@ -64,8 +64,10 @@ function Get-TargetResource
 
     try
     {
-        switch ($TrustType) {
-            'External' {
+        switch ($TrustType)
+        {
+            'External'
+            {
                 # Create the target domain object
                 $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
                 $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
@@ -73,7 +75,8 @@ function Get-TargetResource
                 $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
                 $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
             }
-            'Forest' {
+            'Forest'
+            {
                 # Create the target forest object
                 $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
                 $trgDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($trgDirectoryContext)
@@ -223,8 +226,10 @@ function Validate-ResourceProperties
         $checkingTrustMessage = $($LocalizedData.CheckingTrustMessage) -f $SourceDomainName,$TargetDomainName
         Write-Verbose -Message $checkingTrustMessage
 
-        switch ($TrustType) {
-            'External' {
+        switch ($TrustType)
+        {
+            'External'
+            {
                 # Create the target domain object
                 $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
                 $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
@@ -232,7 +237,8 @@ function Validate-ResourceProperties
                 $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
                 $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
             }
-            'Forest' {
+            'Forest'
+            {
                 # Create the target forest object
                 $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
                 $trgDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($trgDirectoryContext)
