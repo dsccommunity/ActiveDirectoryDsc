@@ -66,25 +66,15 @@ function Get-TargetResource
     {
         switch ($TrustType)
         {
-            'External'
-            {
-                # Create the target domain object
-                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
-                $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
-                # Create the source domain object
-                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
-                $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
-            }
-            'Forest'
-            {
-                # Create the target forest object
-                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
-                $trgDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($trgDirectoryContext)
-                # Create the source forest object
-                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$SourceDomainName)
-                $srcDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($srcDirectoryContext)
-            }
+            'External' {$DomainOrForest = 'Domain'}
+            'Forest' {$DomainOrForest = 'Forest'}
         }
+        # Create the target object
+        $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext($DomainOrForest,$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
+        $trgDomain = ([type]"System.DirectoryServices.ActiveDirectory.$DomainOrForest")::"Get$DomainOrForest"($trgDirectoryContext)
+        # Create the source object
+        $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext($DomainOrForest,$SourceDomainName)
+        $srcDomain = ([type]"System.DirectoryServices.ActiveDirectory.$DomainOrForest")::"Get$DomainOrForest"($srcDirectoryContext)
 
         # Find trust betwen source & destination.
         $trust = $srcDomain.GetTrustRelationship($trgDomain)
@@ -228,25 +218,15 @@ function Validate-ResourceProperties
 
         switch ($TrustType)
         {
-            'External'
-            {
-                # Create the target domain object
-                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
-                $trgDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($trgDirectoryContext)
-                # Create the source domain object
-                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('domain',$SourceDomainName)
-                $srcDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($srcDirectoryContext)
-            }
-            'Forest'
-            {
-                # Create the target forest object
-                $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
-                $trgDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($trgDirectoryContext)
-                # Create the source forest object
-                $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('forest',$SourceDomainName)
-                $srcDomain = [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($srcDirectoryContext)
-            }
+            'External' {$DomainOrForest = 'Domain'}
+            'Forest' {$DomainOrForest = 'Forest'}
         }
+        # Create the target object
+        $trgDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext($DomainOrForest,$TargetDomainName, $TargetDomainAdministratorCredential.UserName, $TargetDomainAdministratorCredential.GetNetworkCredential().Password)
+        $trgDomain = ([type]"System.DirectoryServices.ActiveDirectory.$DomainOrForest")::"Get$DomainOrForest"($trgDirectoryContext)
+        # Create the source object
+        $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext($DomainOrForest,$SourceDomainName)
+        $srcDomain = ([type]"System.DirectoryServices.ActiveDirectory.$DomainOrForest")::"Get$DomainOrForest"($srcDirectoryContext)
 
         # Find trust
         try
