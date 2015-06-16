@@ -77,6 +77,11 @@ Domain Naming Master FSMO of the forest.
 
 ## Versions
 
+### 2.4.0.0
+
+* Added xADRecycleBin resource
+* Minor fixes for xADUser resource
+
 ### 2.3
 
 * Added xADRecycleBin.
