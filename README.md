@@ -39,7 +39,6 @@ Note: These are not used during domain creation.
 * **DomainAdministratorCredential**: Specifies the credential for the account used to install the domain controller.
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
 
-
 ### xADUser
 
 * **Ensure**: Specifies whether the given user is present or absent.
