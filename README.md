@@ -8,7 +8,6 @@ Note: these resources do not presently install the RSAT tools.
 ## Contributing
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/xDscResources/blob/master/CONTRIBUTING.md).
 
-
 ## Description
 
 The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, and ADDomainTrust** DSC Resources.
@@ -39,7 +38,6 @@ Note: These are not used during domain creation.
 * **DomainName**: The fully qualified domain name for the domain where the domain controller will be present.
 * **DomainAdministratorCredential**: Specifies the credential for the account used to install the domain controller.
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
-
 
 ### xADUser
 
@@ -76,6 +74,11 @@ Domain Naming Master FSMO of the forest.
 * **ForestMode**:  Read-only. Returned by Get. 
 
 ## Versions
+
+### 2.4.0.0
+
+* Added xADRecycleBin resource
+* Minor fixes for xADUser resource
 
 ### 2.3
 
