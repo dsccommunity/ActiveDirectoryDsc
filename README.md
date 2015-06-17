@@ -8,7 +8,6 @@ Note: these resources do not presently install the RSAT tools.
 ## Contributing
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/xDscResources/blob/master/CONTRIBUTING.md).
 
-
 ## Description
 
 The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, and ADDomainTrust** DSC Resources.
@@ -76,6 +75,11 @@ Domain Naming Master FSMO of the forest.
 * **ForestMode**:  Read-only. Returned by Get. 
 
 ## Versions
+
+### 2.4.0.0
+
+* Added xADRecycleBin resource
+* Minor fixes for xADUser resource
 
 ### 2.3
 
