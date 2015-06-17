@@ -4,8 +4,6 @@ Describe 'xADRecycleBin' {
             $rootDirectory = Split-Path $pwd.Path -Parent
             $oldPSModulePath = $env:PSModulePath
             $env:PSModulePath = $env:PSModulePath + ";" + $rootDirectory
-
-            Write-Host "psmodulepath: $env:PSModulePath"
             Test-xDscResource xADRecycleBin -Verbose | Should Be $True
             $env:PSModulePath = $oldPSModulePath
         }
