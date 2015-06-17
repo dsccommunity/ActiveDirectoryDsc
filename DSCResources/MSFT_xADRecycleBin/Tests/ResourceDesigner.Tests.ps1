@@ -2,7 +2,7 @@ Describe 'xADRecycleBin' {
     Context 'xDscResouceDesigner' {
         It 'Pass Test-xDscResource' {
             $rootDirectory = $pwd.Path + "\..\"
-	        $oldPSModulePath = $env:PSModulePath
+            $oldPSModulePath = $env:PSModulePath
             $env:PSModulePath = $env:PSModulePath + ";" + $rootDirectory
 
             Write-Host "psmodulepath: $env:PSModulePath"
