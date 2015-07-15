@@ -1,7 +1,3 @@
-#
-# xADUser: DSC resource to wait for the installation of a new forest or domain.
-#
-
 function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
@@ -18,14 +14,17 @@ function Get-TargetResource
         [UInt32]$RetryCount = 5
     )
 
+    $convertToCimCredential = New-CimInstance -ClassName MSFT_Credential -Property @{Username=[string]$DomainUserCredential.UserName; Password=[string]$null} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+
     $returnValue = @{
-        DomainName = $Name
-        DomainUserCredential = $DomainUserCredential.UserName
+        DomainName = $DomainName
+        DomainUserCredential = $convertToCimCredential
         RetryIntervalSec = $RetryIntervalSec
         RetryCount = $RetryCount
     }
     $returnValue
 }
+
 
 function Set-TargetResource
 {
@@ -43,30 +42,25 @@ function Set-TargetResource
     )
 
     $domainFound = $false
-    Write-Verbose -Message "Checking for domain '$($DomainName)' ..."
+    Write-Verbose -Message "Checking for domain $DomainName ..."
 
-    for ($count = 0; $count -lt $RetryCount; $count++)
+    for($count = 0; $count -lt $RetryCount; $count++)
     {
         try
         {
             $domain = Get-ADDomain -Identity $DomainName -Credential $DomainUserCredential
-            Write-Verbose -Message "Found domain '$($DomainName)'."
+            Write-Verbose -Message "Found domain $DomainName"
             $domainFound = $true
             break;
         }
-        catch
+        Catch
         {
-            if ($error[0]) {Write-Verbose $error[0].Exception}
-            Write-Verbose -Message "Domain '$($DomainName)' NOT found."
-            Write-Verbose -Message "Retrying in $RetryIntervalSec seconds ..."
+            Write-Verbose -Message "Domain $DomainName not found. Will retry again after $RetryIntervalSec sec"
             Start-Sleep -Seconds $RetryIntervalSec
         }
     }
 
-    if (!$domainFound)
-    {
-        throw "Domain '$($DomainName)' NOT found after $RetryCount attempts."
-    }
+    if(! $domainFound) {throw "Domain $DomainName not found after $count attempts with $RetryIntervalSec sec interval"}
 }
 
 function Test-TargetResource
@@ -85,21 +79,17 @@ function Test-TargetResource
         [UInt32]$RetryCount = 5
     )
 
-    Write-Verbose -Message "Checking for domain '$($DomainName)' ..."
+    Write-Verbose -Message "Checking for domain $DomainName ..."
     try
     {
         $domain = Get-ADDomain -Identity $DomainName -Credential $DomainUserCredential
-        Write-Verbose -Message "Found domain '$($DomainName)'."
+        Write-Verbose -Message "Found domain $DomainName"
         $true
     }
-    catch
+    Catch
     {
-        if ($error[0]) {Write-Verbose $error[0].Exception}
-        Write-Verbose -Message "Domain '$($DomainName)' NOT found."
+        Write-Verbose -Message "Domain $DomainName not found"
         $false
     }
 }
-
-
-Export-ModuleMember -Function *-TargetResource
 
