@@ -396,4 +396,3 @@ function New-TerminatingError
 #endregion
 
 Export-ModuleMember -Function *-TargetResource
-
