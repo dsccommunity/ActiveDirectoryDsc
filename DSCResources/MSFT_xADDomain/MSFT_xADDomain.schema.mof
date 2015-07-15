@@ -6,6 +6,9 @@ class MSFT_xADDomain : OMI_BaseResource
     [Required, EmbeddedInstance("MSFT_Credential")] String DomainAdministratorCredential;
     [Required, EmbeddedInstance("MSFT_Credential")] String SafemodeAdministratorPassword;
     [Write,EmbeddedInstance("MSFT_Credential")] String DnsDelegationCredential;
+    [write] String DatabasePath;
+    [write] String LogPath;
+    [write] String SysvolPath;
     [Read, Description("Is this resource present or absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
 
