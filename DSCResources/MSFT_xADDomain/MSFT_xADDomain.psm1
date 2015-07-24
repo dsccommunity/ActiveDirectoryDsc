@@ -160,7 +160,7 @@ function Set-TargetResource
         $params = @{
             NewDomainName = $DomainName
             ParentDomainName = $ParentDomainName
-            DomainType = [Microsoft.DirectoryServices.Deployment.Types.DomainType]::ChildDomain
+            DomainType = "ChildDomain"
             SafeModeAdministratorPassword = $SafemodeAdministratorPassword.Password
             Credential = $DomainAdministratorCredential
             InstallDns = $true
