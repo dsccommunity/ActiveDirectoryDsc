@@ -131,7 +131,7 @@ function Set-TargetResource
         }
         if ($DomainNetbiosName.length -gt 0)
         {
-            $params.Add("DomainNetbiosName", $DomainNetbiosName)
+            $params.Add("NewDomainNetbiosName", $DomainNetbiosName)
         }
         if ($DnsDelegationCredential -ne $null)
         {
@@ -167,9 +167,9 @@ function Set-TargetResource
             NoRebootOnCompletion = $true
             Force = $true
         }
-        if ($DomainNetbiosName -ne $null)
+        if ($DomainNetbiosName.length -gt 0)
         {
-            $params.Add("DomainNetbiosName", $DomainNetbiosName)
+            $params.Add("NewDomainNetbiosName", $DomainNetbiosName)
         }
         if ($DnsDelegationCredential -ne $null)
         {
