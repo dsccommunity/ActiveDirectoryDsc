@@ -129,7 +129,7 @@ function Set-TargetResource
             NoRebootOnCompletion = $true
             Force = $true
         }
-        if ($DomainNetbiosName -ne $null)
+        if ($DomainNetbiosName.length -gt 0)
         {
             $params.Add("DomainNetbiosName", $DomainNetbiosName)
         }
