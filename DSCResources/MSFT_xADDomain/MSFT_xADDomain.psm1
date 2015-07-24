@@ -47,7 +47,7 @@ function Get-TargetResource
             {
                 $dc = Get-ADDomainController -Identity $env:COMPUTERNAME -Credential $DomainAdministratorCredential
                 Write-Verbose -Message "Found domain controller '$($dc.Name)' in domain '$($dc.Domain)'."
-                Write-Verbose -Message "Found parent domain '$($dc.ParentDomain)', expected '$($ParentDomainName)'."
+                Write-Verbose -Message "Found parent domain '$($domain.ParentDomain)', expected '$($ParentDomainName)'."
                 if (($dc.Domain -eq $DomainName) -and ((!($dc.ParentDomain) -and !($ParentDomainName)) -or ($dc.ParentDomain -eq $ParentDomainName)))
                 {
                     Write-Verbose -Message "Current node '$($dc.Name)' is already a domain controller for domain '$($dc.Domain)'."
@@ -230,7 +230,16 @@ function Test-TargetResource
     {
         $parameters = $PSBoundParameters.Remove("Debug");
         $existingResource = Get-TargetResource @PSBoundParameters
-        $existingResource.DomainName -eq $DomainName
+        
+
+        $fullDomainName = $DomainName
+        if ($ParentDomainName)
+        {
+            $fullDomainName = $DomainName + "." + $ParentDomainName
+        }
+
+        Write-Verbose "Checking if $($existingResource.DomainName) matches $fullDomainName : $( ($existingResource.DomainName) -eq $fullDomainName)"
+        $existingResource.DomainName -eq $fullDomainName
     }
     catch
     {
@@ -241,4 +250,3 @@ function Test-TargetResource
 
 
 Export-ModuleMember -Function *-TargetResource
-
