@@ -230,7 +230,13 @@ function Test-TargetResource
     {
         $parameters = $PSBoundParameters.Remove("Debug");
         $existingResource = Get-TargetResource @PSBoundParameters
-        $existingResource.DomainName -eq $DomainName
+        
+        $fullDomainName = $DomainName
+        if ($ParentDomainName)
+        {
+            $fullDomainName = $DomainName + "." + $ParentDomainName
+        }
+        $existingResource.DomainName -eq $fullDomainName
     }
     catch
     {
