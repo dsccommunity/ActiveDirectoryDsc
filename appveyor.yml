@@ -1,7 +1,7 @@
 #---------------------------------# 
 #      environment configuration  # 
 #---------------------------------# 
-version: 2.5.0.{build}
+version: 2.5.{build}.0
 install: 
   - cinst -y pester
   - git clone https://github.com/PowerShell/DscResource.Tests
