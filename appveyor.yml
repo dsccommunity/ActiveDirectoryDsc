@@ -5,7 +5,6 @@ version: 2.5.{build}.0
 install: 
   - cinst -y pester
   - git clone https://github.com/PowerShell/DscResource.Tests
-  - git clone https://github.com/PowerShell/xDSCResourceDesigner
   - ps: Push-Location
   - cd DscResource.Tests
   - ps: Import-Module .\TestHelper.psm1 -force
@@ -23,9 +22,8 @@ build: false
 
 test_script:
     - ps: |
-        Import-Module .\xDSCResourceDesigner
         # We want to test dev version of the resource.
-        # xDscResouceDesigner works against standart PowerShell modules path.
+        # xDscResouceDesigner works against standard PowerShell modules path.
         # We need to make sure that root folder of xActiveDirectory is at the first place in $env:PSModulePath
         if (($env:PSModulePath.Split(';') | select -First 1) -ne $pwd) {
             $env:PSModulePath = "$pwd;$env:PSModulePath"
