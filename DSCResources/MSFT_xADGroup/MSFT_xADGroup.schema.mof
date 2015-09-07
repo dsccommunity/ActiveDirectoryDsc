@@ -2,7 +2,7 @@
 class MSFT_xADGroup : OMI_BaseResource
 {
     [Key, Description("Name of the Active Directory group")] String GroupName;
-    [Write, Description("Active Directory group scope"), ValueMap{"DomainLocal","Global","Universal"}, Values{"DomainLocal","Global","Universal"}] String Scope;
+    [Write, Description("Active Directory group scope"), ValueMap{"DomainLocal","Global","Universal"}, Values{"DomainLocal","Global","Universal"}] String GroupScope;
     [Write, Description("Active Directory group category"), ValueMap{"Security","Distribution"}, Values{"Security","Distribution"}] String Category;
     [Write, Description("Location of the group within Active Directory expressed as a Distinguished Name")] String Path;
     [Write, Description("Should this resource be present or absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;

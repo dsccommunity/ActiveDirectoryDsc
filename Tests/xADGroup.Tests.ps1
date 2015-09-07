@@ -13,7 +13,7 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..).Path
 
 $ModuleName = 'MSFT_xADGroup'
 Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
-## Active Directory module required to throw Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+## AD module required as we can't mock/reference Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
 Import-Module ActiveDirectory;
 
 Describe "xADGroup" {
@@ -22,7 +22,7 @@ Describe "xADGroup" {
 
         $testPresentParams = @{
             GroupName = 'TestGroup'
-            Scope = 'Global';
+            GroupScope = 'Global';
             Category = 'Security';
             Path = 'OU=Fake,DC=contoso,DC=com';
             Description = 'Test AD group description';
@@ -37,7 +37,7 @@ Describe "xADGroup" {
         
         $fakeADGroup = @{
             Name = $testPresentParams.GroupName;
-            GroupScope = $testPresentParams.Scope;
+            GroupScope = $testPresentParams.GroupScope;
             GroupCategory = $testPresentParams.Category;
             DistinguishedName = "CN=$($testPresentParams.GroupName),$($testPresentParams.Path)";
             Description = $testPresentParams.Description;
@@ -66,11 +66,11 @@ Describe "xADGroup" {
         }
         
         Context "Validate Get-TargetResource method" {
-            It "Returns Ensure is Present when DNS record exists" {
+            It "Returns Ensure is Present when group exists" {
                 Mock Get-ADGroup { return $fakeADGroup; }
                 (Get-TargetResource @testPresentParams).Ensure | Should Be 'Present';
             }
-            It "Returns Ensure is Absent when DNS record does not exist" {
+            It "Returns Ensure is Absent when group does not exist" {
                 Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
                 (Get-TargetResource @testPresentParams).Ensure | Should Be 'Absent';
             }
@@ -94,7 +94,7 @@ Describe "xADGroup" {
             It "Fails when group exists, Ensure is Present but Scope is wrong" {
                 Mock Get-TargetResource {
                     $duffADGroup = $testPresentParams.Clone();
-                    $duffADGroup['Scope'] = 'Universal';
+                    $duffADGroup['GroupScope'] = 'Universal';
                     return $duffADGroup;
                 }
                 Test-TargetResource @testPresentParams | Should Be $false;
@@ -153,7 +153,11 @@ Describe "xADGroup" {
                 Assert-MockCalled New-ADGroup -Scope It;
             }
             It "Calls Set-ADGroup in the set method when Ensure is Present and the group does exist" {
-                Mock Get-ADGroup { return $fakeADGroup; }
+                Mock Get-ADGroup {
+                    $duffADGroup = $fakeADGroup.Clone();
+                    $duffADGroup['Description'] = 'Test AD group description is wrong';
+                    return $duffADGroup;
+                }
                 Mock Set-ADGroup { }
                 Set-TargetResource @testPresentParams;
                 Assert-MockCalled Set-ADGroup -Scope It -Exactly 1;
@@ -161,7 +165,7 @@ Describe "xADGroup" {
             It "Calls Set-ADGroup twice when Ensure is Present, the group exists but the Scope has changed" {
                 Mock Get-ADGroup {
                     $duffADGroup = $fakeADGroup.Clone();
-                    $duffADGroup['GroupScope'] = 'DomainLocal'
+                    $duffADGroup['GroupScope'] = 'DomainLocal';
                     return $duffADGroup;
                 }
                 Mock Set-ADGroup { }

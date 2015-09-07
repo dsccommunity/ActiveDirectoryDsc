@@ -27,7 +27,7 @@ function Get-TargetResource
 
         [ValidateSet('DomainLocal','Global','Universal')]
         [System.String]
-        $Scope = 'Global',
+        $GroupScope = 'Global',
 
         [ValidateSet('Security','Distribution')]
         [System.String]
@@ -63,7 +63,7 @@ function Get-TargetResource
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName;
         $targetResource = @{
             GroupName = $adGroup.Name;
-            Scope = $adGroup.GroupScope;
+            GroupScope = $adGroup.GroupScope;
             Category = $adGroup.GroupCategory;
             Path = Get-ADObjectParentDN -DN $adGroup.DistinguishedName;
             Description = $adGroup.Description;
@@ -75,7 +75,7 @@ function Get-TargetResource
         Write-Verbose ($LocalizedData.GroupNotFound -f $GroupName);
         $targetResource = @{
             GroupName = $GroupName;
-            Scope = $Scope;
+            GroupScope = $GroupScope;
             Category = $Category;
             Path = $Path;
             Description = $Description;
@@ -98,7 +98,7 @@ function Test-TargetResource
 
         [ValidateSet('DomainLocal','Global','Universal')]
         [System.String]
-        $Scope = 'Global',
+        $GroupScope = 'Global',
 
         [ValidateSet('Security','Distribution')]
         [System.String]
@@ -130,8 +130,8 @@ function Test-TargetResource
     )
     $adGroup = Get-TargetResource @PSBoundParameters;
     $targetResourceInCompliance = $true;
-    if ($adGroup.Scope -ne $Scope) {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Scope', $Scope, $adGroup.Scope);
+    if ($adGroup.GroupScope -ne $GroupScope) {
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'GroupScope', $GroupScope, $adGroup.GroupScope);
         $targetResourceInCompliance = $false;
     }
     elseif ($adGroup.Category -ne $Category) {
@@ -169,7 +169,7 @@ function Set-TargetResource
 
         [ValidateSet('DomainLocal','Global','Universal')]
         [System.String]
-        $Scope = 'Global',
+        $GroupScope = 'Global',
 
         [ValidateSet('Security','Distribution')]
         [System.String]
@@ -214,11 +214,11 @@ function Set-TargetResource
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Category', $Category);
                 $setADGroupParams['Category'] = $Categrory;
             }
-            if ($Scope -ne $adGroup.GroupScope) {
+            if ($GroupScope -ne $adGroup.GroupScope) {
                 ## Cannot change DomainLocal to Global or vice versa. Need to change them to Universal groups first!
                 Set-ADGroup -Identity $adGroup.DistinguishedName -GroupScope Universal;
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Scope', $Scope);
-                $setADGroupParams['GroupScope'] = $Scope;
+                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope);
+                $setADGroupParams['GroupScope'] = $GroupScope;
             }
             if ($Description -and ($Description -ne $adGroup.Description)) {
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Description', $Description);
@@ -262,7 +262,7 @@ function Set-TargetResource
                 $adGroupParams['Path'] = $Path;
             }
             ## Create group
-            New-ADGroup @adGroupParams -GroupCategory $Category -GroupScope $Scope;
+            New-ADGroup @adGroupParams -GroupCategory $Category -GroupScope $GroupScope;
 
         }
     } #end catch
@@ -312,7 +312,7 @@ function Get-ADCommonParameters {
 
         [ValidateSet('DomainLocal','Global','Universal')]
         [System.String]
-        $Scope = 'Global',
+        $GroupScope = 'Global',
 
         [ValidateSet('Security','Distribution')]
         [System.String]
