@@ -11,4 +11,3 @@ class MSFT_xADGroup : OMI_BaseResource
     [Write, Description("Credentials used to enact the change upon"), EmbeddedInstance("MSFT_Credential")] String Credential;
     [Write, Description("Active Directory domain controller to enact the change upon")] String DomainController;
 };
-

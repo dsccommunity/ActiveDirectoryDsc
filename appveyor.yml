@@ -9,6 +9,8 @@ install:
   - cd DscResource.Tests
   - ps: Import-Module .\TestHelper.psm1 -force
   - ps: Pop-Location
+  - ps: |
+        Add-WindowsFeature RSAT-AD-PowerShell
 
 #---------------------------------# 
 #      build configuration        # 

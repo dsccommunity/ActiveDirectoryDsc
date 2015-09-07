@@ -17,6 +17,7 @@ UpdatingGroupProperty   = Updating AD Group property '{0}' to '{1}'
 function Get-TargetResource
 {
     [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [parameter(Mandatory = $true)]
@@ -24,11 +25,10 @@ function Get-TargetResource
         [System.String]
         $GroupName,
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('DomainLocal','Global','Universal')]
+        [System.String]
         $Scope = 'Global',
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('Security','Distribution')]
         [System.String]
         $Category = 'Security',
@@ -89,17 +89,17 @@ function Get-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param (
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $GroupName,
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('DomainLocal','Global','Universal')]
+        [System.String]
         $Scope = 'Global',
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('Security','Distribution')]
         [System.String]
         $Category = 'Security',
@@ -167,11 +167,10 @@ function Set-TargetResource
         [System.String]
         $GroupName,
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('DomainLocal','Global','Universal')]
+        [System.String]
         $Scope = 'Global',
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('Security','Distribution')]
         [System.String]
         $Category = 'Security',
@@ -217,7 +216,7 @@ function Set-TargetResource
             }
             if ($Scope -ne $adGroup.GroupScope) {
                 ## Cannot change DomainLocal to Global or vice versa. Need to change them to Universal groups first!
-                $adGroup | Set-ADGroup -GroupScope Universal;
+                Set-ADGroup -Identity $adGroup.DistinguishedName -GroupScope Universal;
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Scope', $Scope);
                 $setADGroupParams['GroupScope'] = $Scope;
             }
@@ -230,12 +229,12 @@ function Set-TargetResource
                 $setADGroupParams['DisplayName'] = $DisplayName;
             }
             Write-Verbose ($LocalizedData.UpdatingGroup -f $GroupName);
-            $adGroup | Set-ADGroup @setADGroupParams;
+            Set-ADGroup -Identity $adGroup.DistinguishedName @setADGroupParams;
 
             # Move group if the path is not correct
             if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adGroup.DistinguishedName))) {
                 Write-Verbose ($LocalizedData.MovingGroup -f $GroupName, $Path);
-                $adGroup | Move-ADObject -TargetPath $Path;
+                Move-ADObject -Identity $adGroup.DistinguishedName -TargetPath $Path;
             }
 
         }
@@ -303,6 +302,7 @@ function Get-ADObjectParentDN {
 # Internal function to build common parameters for the Active Directory cmdlets
 function Get-ADCommonParameters {
     [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [parameter(Mandatory = $true)]
@@ -310,11 +310,10 @@ function Get-ADCommonParameters {
         [System.String]
         $GroupName,
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('DomainLocal','Global','Universal')]
+        [System.String]
         $Scope = 'Global',
 
-        [ValidateNotNullOrEmpty()]
         [ValidateSet('Security','Distribution')]
         [System.String]
         $Category = 'Security',
@@ -362,3 +361,5 @@ function Get-ADCommonParameters {
     }
     return $adGroupCommonParameters;
 } #end function Get-ADCommonParameters
+
+Export-ModuleMember -Function *-TargetResource;
