@@ -75,6 +75,11 @@ Domain Naming Master FSMO of the forest.
 
 ## Versions
 
+### 2.7.0.0
+
+* Added DNS flush in retry loop
+* Bug fixes in xADDomain resource
+
 ### 2.6.0.0
 
 * Removed xDscResourceDesigner tests (moved to common tests)
