@@ -50,7 +50,7 @@ Describe "xADGroup" {
         Context "Validate Assert-Module method" {
             It "Throws if Active Directory module is not present" {
                 Mock Get-Module -ParameterFilter { $ModuleName -eq 'ActiveDirecory'} -MockWith { throw; }
-                Assert-Module -ModuleName ActiveDirectory;
+                { Assert-Module -ModuleName ActiveDirectory } | Should Throw;
             }
         }
 
