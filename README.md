@@ -88,7 +88,17 @@ __Note: This resource does not currently manage group membership.__
 
 ## Versions
 
+### 2.7.0.0
+
+* Added DNS flush in retry loop
+* Bug fixes in xADDomain resource
+
+### 2.6.0.0
+
+* Removed xDscResourceDesigner tests (moved to common tests)
+
 ### 2.5.0.0
+
 * Updated xADDomainTrust and xADRecycleBin tests
 
 ### 2.4.0.0
