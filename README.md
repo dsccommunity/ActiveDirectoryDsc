@@ -10,8 +10,8 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, and ADDomainTrust** DSC Resources.
-These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers and establish cross-domain trusts.
+The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup and xADOrganizationalUnit** DSC Resources.
+These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
 
@@ -20,7 +20,9 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADUser** modifies and removes Active Directory Users. 
 * **xWaitForDomain** waits for new, remote domain to setup.
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
-* **xADDomainTrust** establishes cross-domain trusts
+* **xADDomainTrust** establishes cross-domain trusts.
+* **xADGroup** modifies and removes Active Directory groups.
+* **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 
 ### **xADDomain**
 
@@ -84,7 +86,7 @@ __Note: This resource does not currently manage group membership.__
 * **DisplayName**: The group display name property (optional).
 * **Ensure**: Specifies whether the group is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
 * **DomainController**: An existing Active Directory domain controller used to perform the operation (optional). Note: if not running on a domain controller, this is required.
-* **Credential**: User account credentials used to perform the operation (optional). Note: if not running on a domain controller, this is required.
+* **Credential**: User account credentials used to perform the operation (optional). Note: _if not running on a domain controller, this is required_.
 
 ### xADOrganizationalUnit
 The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
@@ -93,7 +95,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **Description**: The OU description property (optional).
 * **ProtectedFromAccidentalDeletion**: Valid values are 'Yes' and 'No'. If not specified, it defaults to 'Yes'.
 * **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
-* **Credential**: User account credentials used to perform the operation . Note: if not running on a domain controller, this is required.
+* **Credential**: User account credentials used to perform the operation . Note: _if not running on a domain controller, this is required_.
 
 ## Versions
 
@@ -779,7 +781,7 @@ Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Examp
 Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose
 ```
 
-### Create an Active Directory organizational unit
+### Create an Active Directory OU
 
 In this example, we add an Active Directory organizational unit to the 'example.com' domain root.
 

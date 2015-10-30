@@ -19,18 +19,18 @@ Describe 'xADOrganizationalUnit' {
     InModuleScope $ModuleName {
 
         function Get-ADOrganizationalUnit { param ($Name) }
-        function Set-ADOrganizationalUnit { param ($Identity) }
-        function Remove-ADOrganizationalUnit { param ($Name) }
-        function New-ADOrganizationalUnit { param ($Name) }
+        function Set-ADOrganizationalUnit { param ($Identity, $Credential) }
+        function Remove-ADOrganizationalUnit { param ($Name, $Credential) }
+        function New-ADOrganizationalUnit { param ($Name, $Credential) }
 
-        $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         $testPresentParams = @{
             Name = 'TestOU'
             Path = 'OU=Fake,DC=contoso,DC=com';
             Description = 'Test AD OU description';
             Ensure = 'Present';
-            Credential = $testCredentials;
+            #Credential = $testCredential;
         }
         
         $testAbsentParams = $testPresentParams.Clone();
@@ -120,6 +120,13 @@ Describe 'xADOrganizationalUnit' {
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
+            It 'Fails when OU does exist and "Ensure" = "Absent"' {
+                Mock Assert-Module -MockWith { }
+                Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
+                
+                Test-TargetResource @testAbsentParams | Should Be $false
+            }
+
             It 'Fails when OU does exist but "Description" is incorrect' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
@@ -152,7 +159,7 @@ Describe 'xADOrganizationalUnit' {
                 Test-TargetResource @testAbsentParams | Should Be $true
             }
 
-            It 'Passes when no OU description is supplied' {
+            It 'Passes when no OU description is specified with existing OU description' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
                 $testEmptyDescriptionParams = $testPresentParams.Clone()
@@ -174,6 +181,15 @@ Describe 'xADOrganizationalUnit' {
                 Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -Scope It
             }
 
+            It 'Calls "New-ADOrganizationalUnit" with credentials when specified' {
+                Mock Assert-Module -MockWith { }
+                Mock Get-ADOrganizationalUnit -MockWith { }
+                Mock New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
+                
+                Set-TargetResource @testPresentParams -Credential $testCredential
+                Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
+            }
+
             It 'Calls "Set-ADOrganizationalUnit" when "Ensure" = "Present" and OU does exist' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
@@ -181,6 +197,15 @@ Describe 'xADOrganizationalUnit' {
                 
                 Set-TargetResource @testPresentParams
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It
+            }
+
+            It 'Calls "Set-ADOrganizationalUnit" with credentials when specified' {
+                Mock Assert-Module -MockWith { }
+                Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
+                Mock Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
+                
+                Set-TargetResource @testPresentParams -Credential $testCredential
+                Assert-MockCalled Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Remove-ADOrganizationalUnit" when "Ensure" = "Absent" and OU does exist but is unprotected' {
@@ -203,6 +228,15 @@ Describe 'xADOrganizationalUnit' {
                 
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Remove-ADOrganizationalUnit -Scope It
+            }
+
+            It 'Calls "Remove-ADOrganizationalUnit" with credentials when specified' {
+                Mock Assert-Module -MockWith { }
+                Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
+                Mock Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
+                
+                Set-TargetResource @testAbsentParams -Credential $testCredential
+                Assert-MockCalled Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" when "Ensure" = "Absent", OU does exist but is protected' {

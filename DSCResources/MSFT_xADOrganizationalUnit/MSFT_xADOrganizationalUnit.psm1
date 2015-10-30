@@ -69,7 +69,7 @@ function Test-TargetResource
         [System.String]
         $Ensure = 'Present',
 
-        [parameter(Mandatory)] 
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential] $Credential,
 
         [ValidateNotNull()]
@@ -149,7 +149,7 @@ function Set-TargetResource
         [System.String]
         $Ensure = 'Present',
 
-        [parameter(Mandatory)] 
+        [ValidateNotNull()]
         [System.Management.Automation.PSCredential] $Credential,
 
         [ValidateNotNull()]
@@ -170,23 +170,56 @@ function Set-TargetResource
         if ($Ensure -eq 'Present')
         {
             Write-Verbose ($LocalizedData.UpdatingOU -f $targetResource.Name)
-            Set-ADOrganizationalUnit -Identity $ou -Credential $Credential -Description $Description -ProtectedFromAccidentalDeletion ($ProtectedFromAccidentalDeletion -eq 'Yes')
+            $setADOrganizationalUnitParams = @{
+                Identity = $ou
+                Description = $Description
+                ProtectedFromAccidentalDeletion = ($ProtectedFromAccidentalDeletion -eq 'Yes')
+            }
+            if ($Credential)
+            {
+                $setADOrganizationalUnitParams['Credential'] = $Credential
+            }
+            Set-ADOrganizationalUnit @setADOrganizationalUnitParams
         }
         else
         {
             Write-Verbose ($LocalizedData.DeletingOU -f $targetResource.Name)
             if ($targetResource.ProtectedFromAccidentalDeletion -eq 'Yes')
             {
-                Set-ADOrganizationalUnit -Identity $ou -Credential $Credential -ProtectedFromAccidentalDeletion $false
+                $setADOrganizationalUnitParams = @{
+                    Identity = $ou
+                    ProtectedFromAccidentalDeletion = ($ProtectedFromAccidentalDeletion -eq 'Yes')
+                }
+                if ($Credential)
+                {
+                    $setADOrganizationalUnitParams['Credential'] = $Credential
+                }
+                Set-ADOrganizationalUnit @setADOrganizationalUnitParams
             }
 
-            Remove-ADOrganizationalUnit -Identity $ou -Credential $Credential 
+            $removeADOrganizationalUnitParams = @{
+                Identity = $ou
+            }
+            if ($Credential)
+            {
+                $removeADOrganizationalUnitParams['Credential'] = $Credential
+            }
+            Remove-ADOrganizationalUnit @removeADOrganizationalUnitParams
         }
     }
     else
     {
         Write-Verbose ($LocalizedData.CreatingOU -f $targetResource.Name)
-        New-ADOrganizationalUnit -Credential $Credential -Name $Name -Path $Path -Description $Description -ProtectedFromAccidentalDeletion ($ProtectedFromAccidentalDeletion -eq "Yes")
+        $newADOrganizationalUnitParams = @{
+            Name = $Name
+            Path = $Path
+            Description = $Description
+            ProtectedFromAccidentalDeletion = ($ProtectedFromAccidentalDeletion -eq "Yes")
+        }
+        if ($Credential) {
+            $newADOrganizationalUnitParams['Credential'] = $Credential
+        }
+        New-ADOrganizationalUnit @newADOrganizationalUnitParams
     }
 
 } #end function Set-TargetResource
