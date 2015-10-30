@@ -86,7 +86,21 @@ __Note: This resource does not currently manage group membership.__
 * **DomainController**: An existing Active Directory domain controller used to perform the operation (optional). Note: if not running on a domain controller, this is required.
 * **Credential**: User account credentials used to perform the operation (optional). Note: if not running on a domain controller, this is required.
 
+### xADOrganizationalUnit
+The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
+* **Name**: Name of the Active Directory organizational unit to manage.
+* **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
+* **Description**: The OU description property (optional).
+* **ProtectedFromAccidentalDeletion**: Valid values are 'Yes' and 'No'. If not specified, it defaults to 'Yes'.
+* **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
+* **Credential**: User account credentials used to perform the operation . Note: if not running on a domain controller, this is required.
+
 ## Versions
+
+### Unreleased
+
+* Added xADGroup resource
+* Merged xADOrganizationalUnit resource from the PowerShell gallery
 
 ### 2.7.0.0
 
@@ -763,4 +777,50 @@ Param(
 Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Example test domain local security group' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose
+```
+
+### Create an Active Directory organizational unit
+
+In this example, we add an Active Directory organizational unit to the 'example.com' domain root.
+
+```powershell
+configuration Example_xADOrganizationalUnit
+{
+Param(
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $Name,
+    
+    [parameter(Mandatory = $true)]    
+    [System.String]
+    $Path,
+    
+    [ValidateSet('Yes','No')]    
+    [System.String]
+    $ProtectedFromAccidentalDeletion = 'Yes',
+    
+    [ValidateNotNull()]
+    [System.String]
+    $Description = ''
+)
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADOrganizationalUnit ExampleOU
+        {
+           Name = $Name
+           Path = $Path
+           ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
+           Description = $Description
+           Ensure = 'Present'
+        }
+    }
+}
+
+Example_xADOrganizationalUnit -Name 'Example OU' -Path 'dc=example,dc=com' -Description 'Example test organizational unit' -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADOrganizationalUnit -Wait -Verbose
+
 ```
