@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xADOrganizationalUnit")] 
+class MSFT_xADUser : OMI_BaseResource
+{
+    [Key] string DomainName;
+    [Key] string OUName;
+    [Key] string OUPath;
+    [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+    [required,EmbeddedInstance("MSFT_Credential")] string DomainAdministratorCredential;
+};
