@@ -75,18 +75,51 @@ Domain Naming Master FSMO of the forest.
 
 ### xADGroup
 The xADGroup DSC resource will manage groups within Active Directory.
-__Note: This resource does not currently manage group membership.__
+
 * **GroupName**: Name of the Active Directory group to manage.
-* **Category**: Type of group to create. Valid values are 'Security' and 'Distribution'. If not specified, it defaults to 'Security'.
-* **GroupScope**: Scope of the group. Valid values are 'DomainLocal','Global' and 'Universal'. If not specified, it default to 'Global'.
+* **Category**: Type of group to create.
+ * Valid values are 'Security' and 'Distribution'.
+ * If not specified, it defaults to 'Security'.
+* **GroupScope**: Scope of the group.
+ * Valid values are 'DomainLocal', 'Global' and 'Universal'.
+ * If not specified, it defaults to 'Global'.
 * **Path**: Path in Active Directory to place the group, specified as a Distinguished Name.
 * **Description**: The group description property (optional).
 * **DisplayName**: The group display name property (optional).
-* **Ensure**: Specifies whether the group is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
+* **Members**: Specifies the exact AD objects that should comprise the group membership (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, all undefined group members will be removed the AD group.
+ * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
+* **MembersToInclude**: Specifies AD objects that must be in the group (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, only the specified members are added to the group.
+ * If specified, no users are removed from the group using this parameter.
+ * This property cannot be specified with the 'Members' parameter.
+* **MembersToExclude**: Specifies AD objects that _must not_ be in the group (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, only those specified are removed from the group.
+ * If specified, no users are added to the group using this parameter.
+ * This property cannot be specified with the 'Members' parameter.
+* **MembershipAttribute**: Defines the AD object attribute that is used to determine group membership (optional).
+ * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
+ * If not specified, it defaults to 'SamAccountName'.
+ * You cannot mix multiple attribute types.
+* **ManagedBy**: The group's managed by attribute specified in Distinguished Name (DN) format (optional).
+* **Notes**: The group's info attribute (optional).
+* **Ensure**: Specifies whether the group is present or absent.
+Valid values are 'Present' and 'Absent'.
+It not specified, it defaults to 'Present'.
 * **DomainController**: An existing Active Directory domain controller used to perform the operation (optional). Note: if not running on a domain controller, this is required.
-* **Credential**: User account credentials used to perform the operation (optional). Note: if not running on a domain controller, this is required.
+* **Credential**: User account credentials used to perform the operation (optional).
+Note: if not running on a domain controller, this is required.
 
 ## Versions
+
+### Unreleased
+
+* xADGroup: Added MemberCheckProperty, Members, MembersToInclude and MembersToExclude properties
+* xADGroup: Added ManagedBy property
+* xADGroup: Added Notes property
 
 ### 2.7.0.0
 
