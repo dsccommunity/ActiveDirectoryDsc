@@ -41,11 +41,69 @@ Note: These are not used during domain creation.
 
 ### xADUser
 
-* **Ensure**: Specifies whether the given user is present or absent.
 * **DomainName**: Name of the domain to which the user will be added.
-* **UserName**: Name of the user.
-* **Password**: Password value for the account.
-* **DomainAdministratorCredential**: User account credentials used to perform the task.
+ * The Active Directory domain's fully-qualified domain name must be specified, i.e. contoso.com.
+ * This parameter is used to query and set the user's account password.
+* **UserName**: Specifies the Security Account Manager (SAM) account name of the user.
+ * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
+ * Once created, the user's SamAccountName and CN cannot be changed.
+* **Password**: Password value for the user account.
+ * _If the account is enabled (default behaviour) you must specifiy a password._
+ * _You must ensure that the password meets the domain's complexity requirements._
+* **Ensure**: Specifies whether the given user is present or absent (optional).
+ * If not specified, this value defaults to Present.
+* **DomainController**: Specifies the Active Directory Domain Services instance to connect to (optional).
+ * This is only required if not executing the task on a domain controller. 
+* **DomainAdministratorCredential**: User account credentials used to perform the task (optional).
+ * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
+* **CommonName**: Specifies the user's CN of the user account (optional).
+ * If not specified, this defaults to the ___UserName___ value.
+* **UserPrincipalName**: Each user account has a user principal name (UPN) in the format [user]@[DNS-domain-name] (optional).
+* **DisplayName**: Specifies the display name of the user object (optional).
+* **Path**: (optional).
+* **GivenName**: Specifies the user's first or given name (optional).
+* **Initials**: Specifies the initials that represent part of a user's name (optional).
+* **Surname**: Specifies the user's last name or surname (optional).
+* **Description**: Specifies a description of the user object (optional).
+* **StreetAddress**: Specifies the user's street address (optional).
+* **POBox**: Specifies the user's post office box number (optional).
+* **City**: Specifies the user's town or city (optional).
+* **State**: Specifies the user's state or province (optional).
+* **PostalCode**: Specifies the user's postal code or zip code (optional).
+* **Country**: Specifies the country or region code for the user's language of choice (optional).
+ * This should be specified as the country's two character ISO-3166 code.
+* **Department**: Specifies the user's department (optional).
+* **Division**: Specifies the user's division (optional).
+* **Company**: Specifies the user's company (optional).
+* **Office**: Specifies the location of the user's office or place of business (optional).
+* **JobTitle**: Specifies the user's job title (optional).
+* **EmailAddress**: Specifies the user's e-mail address (optional).
+* **EmployeeID**: Specifies the user's employee ID (optional).
+* **EmployeeNumber**: Specifies the user's employee number (optional).
+* **HomeDirectory**: Specifies a user's home directory path (optional).
+* **HomeDrive**: Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (optional).
+ * The drive letter is specified as "[DriveLetter]:" where [DriveLetter] indicates the letter of the drive to associate.
+ * The [DriveLetter] must be a single, uppercase letter and the colon is required.
+* **HomePage**: Specifies the URL of the home page of the user object (optional).
+* **ProfilePath**: Specifies a path to the user's profile (optional).
+ * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
+* **LogonScript**: Specifies a path to the user's log on script (optional).
+ * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
+* **Notes**: (optional).
+* **OfficePhone**: Specifies the user's office telephone number (optional).
+* **MobilePhone**: Specifies the user's mobile phone number (optional).
+* **Fax**: Specifies the user's fax phone number (optional).
+* **Pager**: Specifies the user's pager number (optional).
+* **IPPhone**: Specifies the user's IP telephony number (optional).
+* **HomePhone**: Specifies the user's home telephone number (optional).
+* **Enabled**: Specifies if an account is enabled (optional).
+ * An enabled account requires a password.
+* **Manager**: Specifies the user's manager (optional).
+ * This value can be specified as a DN, ObjectGUID, SID or SamAccountName.
+* **PasswordNeverExpires**: Specifies whether the password of an account can expire (optional).
+ * If not specified, this value defaults to False.
+* **CannotChangePassword**: Specifies whether the account password can be changed (optional).
+ * If not specified, this value defaults to False.
 
 ### xWaitForADDomain
 
@@ -87,6 +145,11 @@ __Note: This resource does not currently manage group membership.__
 * **Credential**: User account credentials used to perform the operation (optional). Note: if not running on a domain controller, this is required.
 
 ## Versions
+
+### Unreleased
+
+* MSFT_xADUser: Adds additional property settings.
+* MSFT_xADUser: Adds unit test coverage. 
 
 ### 2.7.0.0
 
