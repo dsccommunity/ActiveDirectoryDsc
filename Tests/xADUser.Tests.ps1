@@ -7,6 +7,8 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..).Path
 
 $ModuleName = 'MSFT_xADUser'
 Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
+## Disable default ADWS drive warning
+$Env:ADPS_LoadDefaultDrive = 0;
 Import-Module -Name ActiveDirectory -Force;
 
 Describe "xADUser" {
