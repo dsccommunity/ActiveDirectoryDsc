@@ -9,12 +9,13 @@ MembersIsNullError             = The Members parameter value is null. The '{0}' 
 MembersIsEmptyError            = The Members parameter is empty.  At least one group member must be provided.
 IncludeAndExcludeConflictError = The principal '{0}' is included in both '{1}' and '{2}' parameter values. The same principal must not be included in both '{1}' and '{2}' parameter values.
 IncludeAndExcludeAreEmptyError = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters.
-
+                               
 RetrievingGroupMembers         = Retrieving group membership based on '{0}' property.
 RemovingDuplicateGroupMember   = Removing duplicate group member '{0}' definition.
 CheckingGroupMembers           = Checking for '{0}' group members.
 GroupMemberNotInDesiredState   = Group member '{0}' is not in the desired state.
 GroupMembershipInDesiredState  = Group membership is in the desired state.
+GroupMembershipNotDesiredState = Group membership is NOT in the desired state. 
 GroupMembershipCountMismatch   = Group membership count is not correct. Expected '{0}' members, actual '{1}' members.
 AddingGroupMembers             = Adding '{0}' member(s) to AD group '{1}'.
 RemovingGroupMembers           = Removing '{0}' member(s) from AD group '{1}'.
@@ -101,6 +102,7 @@ function Get-TargetResource
     try {
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info;
         Write-Verbose -Message ($LocalizedData.RetrievingGroupMembers -f $MembershipAttribute);
+        ## Retrieve the current list of members using the specified proper
         $adGroupMembers = (Get-ADGroupMember -Identity $adGroup.DistinguishedName).$MembershipAttribute; 
         $targetResource = @{
             GroupName = $adGroup.Name;
@@ -117,7 +119,7 @@ function Get-TargetResource
             Notes = $adGroup.Info;
             Ensure = 'Absent';
         }
-        if (TestGroupMembership -GroupMembers $adGroupMembers -Members $Members -MembersToInclude $MembersToInclude -MembersToExclude $MembersToExclude)
+        if ($adGroup)
         {
             $targetResource['Ensure'] = 'Present';
         }
@@ -226,46 +228,57 @@ function Test-TargetResource
     }
     ValidateMemberParameters @validateMemberParametersParams -ErrorAction Stop;
     
-    $adGroup = Get-TargetResource @PSBoundParameters;
+    $targetResource = Get-TargetResource @PSBoundParameters;
     $targetResourceInCompliance = $true;
-    if ($adGroup.GroupScope -ne $GroupScope)
+    if ($targetResource.GroupScope -ne $GroupScope)
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'GroupScope', $GroupScope, $adGroup.GroupScope);
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'GroupScope', $GroupScope, $targetResource.GroupScope);
         $targetResourceInCompliance = $false;
     }
-    if ($adGroup.Category -ne $Category)
+    if ($targetResource.Category -ne $Category)
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Category', $Category, $adGroup.Category);
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Category', $Category, $targetResource.Category);
         $targetResourceInCompliance = $false;
     }
-    if ($Path -and ($adGroup.Path -ne $Path))
+    if ($Path -and ($targetResource.Path -ne $Path))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Path', $Path, $adGroup.Path);
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Path', $Path, $targetResource.Path);
         $targetResourceInCompliance = $false;
     }
-    if ($Description -and ($adGroup.Description -ne $Description))
+    if ($Description -and ($targetResource.Description -ne $Description))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Description', $Description, $adGroup.Description);
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Description', $Description, $targetResource.Description);
         $targetResourceInCompliance = $false;
     }
-    if ($DisplayName -and ($adGroup.DisplayName -ne $DisplayName))
+    if ($DisplayName -and ($targetResource.DisplayName -ne $DisplayName))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'DisplayName', $DisplayName, $adGroup.DisplayName);
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'DisplayName', $DisplayName, $targetResource.DisplayName);
         $targetResourceInCompliance = $false;
     }
-    if ($ManagedBy -and ($adGroup.ManagedBy -ne $ManagedBy))
+    if ($ManagedBy -and ($targetResource.ManagedBy -ne $ManagedBy))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'ManagedBy', $ManagedBy, $adGroup.ManagedBy);
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'ManagedBy', $ManagedBy, $targetResource.ManagedBy);
         $targetResourceInCompliance = $false;
     }
-    if ($Notes -and ($adGroup.Notes -ne $Notes))
+    if ($Notes -and ($targetResource.Notes -ne $Notes))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Notes', $Notes, $adGroup.Notes);
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Notes', $Notes, $targetResource.Notes);
         $targetResourceInCompliance = $false;
     }
-    if ($adGroup.Ensure -ne $Ensure)
+    $testGroupMembershipParams = @{
+        GroupMembers = $targetResource.Members;
+        Members = $Members;
+        MembersToInclude=  $MembersToInclude;
+        MembersToExclude = $MembersToExclude;
+    }
+    if (-not (TestGroupMembership @testGroupMembershipParams))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Ensure', $Ensure, $adGroup.Ensure);
+        Write-Verbose -Message $LocalizedData.GroupMembershipNotDesiredState;
+        $targetResourceInCompliance = $false;
+    }
+    if ($targetResource.Ensure -ne $Ensure)
+    {
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Ensure', $Ensure, $targetResource.Ensure);
         $targetResourceInCompliance = $false;
     }
     return $targetResourceInCompliance;
@@ -357,7 +370,7 @@ function Set-TargetResource
             }
             if ($GroupScope -ne $adGroup.GroupScope)
             {
-                ## Cannot change DomainLocal to Global or vice versa. Need to change them to Universal groups first!
+                ## Cannot change DomainLocal to Global or vice versa directly. Need to change them to a Universal group first!
                 Set-ADGroup -Identity $adGroup.DistinguishedName -GroupScope Universal;
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope);
                 $setADGroupParams['GroupScope'] = $GroupScope;
@@ -401,8 +414,12 @@ function Set-TargetResource
                 {
                     # Remove all existing first and add explicit members
                     $Members = RemoveDuplicateMembers -Members $Members;
-                    Write-Verbose -Message ($LocalizedData.RemovingGroupMembers -f $adGroupMembers.Count, $GroupName);
-                    Remove-ADGroupMember @adGroupParams -Members $adGroupMembers -Confirm:$false;
+                    # We can only remove members if there are members already in the group!
+                    if ($adGroupMembers.Count -gt 0)
+                    {
+                        Write-Verbose -Message ($LocalizedData.RemovingGroupMembers -f $adGroupMembers.Count, $GroupName);
+                        Remove-ADGroupMember @adGroupParams -Members $adGroupMembers -Confirm:$false;
+                    }
                     Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $Members.Count, $GroupName);
                     Add-ADGroupMember @adGroupParams -Members $Members;
                 }

@@ -77,16 +77,16 @@ Domain Naming Master FSMO of the forest.
 The xADGroup DSC resource will manage groups within Active Directory.
 
 * **GroupName**: Name of the Active Directory group to manage.
-* **Category**: Type of group to create.
+* **Category**: This parameter sets the GroupCategory property of the group.
  * Valid values are 'Security' and 'Distribution'.
  * If not specified, it defaults to 'Security'.
-* **GroupScope**: Scope of the group.
+* **GroupScope**: Specifies the group scope of the group.
  * Valid values are 'DomainLocal', 'Global' and 'Universal'.
  * If not specified, it defaults to 'Global'.
-* **Path**: Path in Active Directory to place the group, specified as a Distinguished Name.
-* **Description**: The group description property (optional).
-* **DisplayName**: The group display name property (optional).
-* **Members**: Specifies the exact AD objects that should comprise the group membership (optional).
+* **Path**: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
+* **Description**: Specifies a description of the group object (optional).
+* **DisplayName**: Specifies the display name of the group object (optional).
+* **Members**: Specifies the explicit AD objects that should comprise the group membership (optional).
  * If not specified, no group membershup changes are made.
  * If specified, all undefined group members will be removed the AD group.
  * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
@@ -104,22 +104,24 @@ The xADGroup DSC resource will manage groups within Active Directory.
  * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
  * If not specified, it defaults to 'SamAccountName'.
  * You cannot mix multiple attribute types.
-* **ManagedBy**: The group's managed by attribute specified in Distinguished Name (DN) format (optional).
+* **ManagedBy**: Specifies the user or group that manages the group object (optional).
+ * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
 * **Notes**: The group's info attribute (optional).
 * **Ensure**: Specifies whether the group is present or absent.
-Valid values are 'Present' and 'Absent'.
-It not specified, it defaults to 'Present'.
-* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional). Note: if not running on a domain controller, this is required.
+ * Valid values are 'Present' and 'Absent'.
+ * It not specified, it defaults to 'Present'.
+* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
+ * If not running on a domain controller, this is required.
 * **Credential**: User account credentials used to perform the operation (optional).
-Note: if not running on a domain controller, this is required.
+ * If not running on a domain controller, this is required.
 
 ## Versions
 
 ### Unreleased
 
-* xADGroup: Added MemberCheckProperty, Members, MembersToInclude and MembersToExclude properties
-* xADGroup: Added ManagedBy property
-* xADGroup: Added Notes property
+* xADGroup: Added Members, MembersToInclude, MembersToExclude and MembershipAttribute properties.
+* xADGroup: Added ManagedBy property.
+* xADGroup: Added Notes property.
 
 ### 2.7.0.0
 
