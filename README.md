@@ -88,6 +88,10 @@ __Note: This resource does not currently manage group membership.__
 
 ## Versions
 
+### 2.8.0.0
+* Added new resource: xADGroup
+* Fixed issue with NewDomainNetbiosName parameter.
+
 ### 2.7.0.0
 
 * Added DNS flush in retry loop
