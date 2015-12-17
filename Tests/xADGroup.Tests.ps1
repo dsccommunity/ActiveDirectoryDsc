@@ -49,7 +49,7 @@ Describe "xADGroup" {
 
         Context "Validate Assert-Module method" {
             It "Throws if Active Directory module is not present" {
-                Mock Get-Module -ParameterFilter { $ModuleName -eq 'ActiveDirecory'} -MockWith { throw; }
+                Mock Get-Module -MockWith { } # -ParameterFilter { $ModuleName -eq 'ActiveDirecory' } does not appear to work?!
                 { Assert-Module -ModuleName ActiveDirectory } | Should Throw;
             }
         }
