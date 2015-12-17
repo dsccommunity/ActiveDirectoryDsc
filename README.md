@@ -100,9 +100,11 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 ## Versions
 
 ### Unreleased
+* Merges xADOrganizationalUnit resource from the PowerShell gallery
 
-* Added xADGroup resource
-* Merged xADOrganizationalUnit resource from the PowerShell gallery
+### 2.8.0.0
+* Added new resource: xADGroup
+* Fixed issue with NewDomainNetbiosName parameter.
 
 ### 2.7.0.0
 
