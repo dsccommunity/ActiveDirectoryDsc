@@ -123,6 +123,10 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * xADGroup: Added ManagedBy property.
 * xADGroup: Added Notes property.
 
+### 2.8.0.0
+* Added new resource: xADGroup
+* Fixed issue with NewDomainNetbiosName parameter.
+
 ### 2.7.0.0
 
 * Added DNS flush in retry loop

@@ -131,7 +131,7 @@ function Set-TargetResource
         }
         if ($DomainNetbiosName.length -gt 0)
         {
-            $params.Add("NewDomainNetbiosName", $DomainNetbiosName)
+            $params.Add("DomainNetbiosName", $DomainNetbiosName)
         }
         if ($DnsDelegationCredential -ne $null)
         {
