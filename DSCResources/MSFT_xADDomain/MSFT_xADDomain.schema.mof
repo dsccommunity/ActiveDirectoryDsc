@@ -1,11 +1,13 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xADDomain")]
+[ClassVersion("1.0.1.0"), FriendlyName("xADDomain")]
 class MSFT_xADDomain : OMI_BaseResource
 {
     [Key] String DomainName;
-    [Write] String ParentDomainName;
+    [write] String ParentDomainName;
+    [write] String DomainNetbiosName;
     [Required, EmbeddedInstance("MSFT_Credential")] String DomainAdministratorCredential;
     [Required, EmbeddedInstance("MSFT_Credential")] String SafemodeAdministratorPassword;
-    [Write,EmbeddedInstance("MSFT_Credential")] String DnsDelegationCredential;
-    [Read, Description("Is this resource present or absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [write,EmbeddedInstance("MSFT_Credential")] String DnsDelegationCredential;
+    [write] String DatabasePath;
+    [write] String LogPath;
+    [write] String SysvolPath;
 };
-

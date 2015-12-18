@@ -1,5 +1,10 @@
+#
+# xADUser: DSC resource to create a new Active Directory user.
+#
+
 function Get-TargetResource
 {
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory)]
@@ -14,25 +19,24 @@ function Get-TargetResource
         [PSCredential]$Password,
 
         [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present"                   
+        [string]$Ensure = "Present"
     )
 
     try
     {
-        Write-Verbose -Message "Checking if the user $UserName in domain $DomainName is present ..."
+        Write-Verbose -Message "Checking if the user '$($UserName)' in domain '$($DomainName)' is present ..."
         $user = Get-AdUser -Identity $UserName -Credential $DomainAdministratorCredential
-        Write-Verbose -Message "User $UserName in domain $DomainName is present."
+        Write-Verbose -Message "Found '$($UserName)' in domain '$($DomainName)'."
         $Ensure = "Present"
     }
-    # User not found
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        Write-Verbose -Message "User $UserName account in domain $DomainName is NOT present"
+        Write-Verbose -Message "User '$($UserName)' in domain '$($DomainName)' is NOT present."
         $Ensure = "Absent"
     }
     catch
     {
-        Write-Error -Message "Unhandled exception looking up $UserName account in domain $DomainName."
+        Write-Error -Message "Error looking up user '$($UserName)' in domain '$($DomainName)'."
         throw $_
     }
 
@@ -59,7 +63,7 @@ function Set-TargetResource
         [PSCredential]$Password,
 
         [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present"                    
+        [string]$Ensure = "Present"
     )
     try
     {
@@ -67,13 +71,14 @@ function Set-TargetResource
     }
     catch
     {
-        Write-Error -Message "Error setting AD User $UserName in domain $DomainName. $_"
+        Write-Error -Message "Error configuring user '$($UserName)' in domain '$($DomainName)'."
         throw $_
     }
 }
 
 function Test-TargetResource
 {
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory)]
@@ -88,17 +93,17 @@ function Test-TargetResource
         [PSCredential]$Password,
 
         [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present"          
+        [string]$Ensure = "Present"
     )
 
     try
     {
         $parameters = $PSBoundParameters.Remove("Debug");
-        ValidateProperties @PSBoundParameters    
+        ValidateProperties @PSBoundParameters
     }
     catch
     {
-        Write-Error -Message "Error testing AD User $UserName in domain $DomainName. $_"
+        Write-Error -Message "Error testing user '$($UserName)' in domain '$($DomainName)'."
         throw $_
     }
 }
@@ -119,25 +124,23 @@ function ValidateProperties
         [PSCredential]$Password,
 
         [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present",          
+        [string]$Ensure = "Present",
 
         [Switch]$Apply
     )
 
     $result = $true
-    # Check if user exists and if user exists validate the password
     try
     {
-        Write-Verbose -Message "Checking if the user $UserName in domain $DomainName is present ..."
+        Write-Verbose -Message "Checking if the user '$($UserName)' in domain '$($DomainName)' is present ..."
         $user = Get-AdUser -Identity $UserName -Credential $DomainAdministratorCredential
-        Write-Verbose -Message "User $UserName in domain $DomainName is present."
+        Write-Verbose -Message "Found '$($UserName)' in domain '$($DomainName)'."
         
-        if( $Ensure -eq "Absent" )
+        if ($Ensure -eq "Absent")
         {
-            if( $Apply )
+            if ($Apply)
             {
                 Remove-ADUser -Identity $UserName -Credential $DomainAdministratorCredential -Confirm:$false
-                Write-Verbose -Message "Removed $UserName account in domain $DomainName."
                 return
             }
             else
@@ -146,41 +149,39 @@ function ValidateProperties
             }
         }
         
-        if($Apply)
+        if ($Apply)
         {
-            # If account is not enabled, enable it. Needed for password validation
-            If(!($user.Enabled))
+            # We need to enable the account for password validation.
+            if (!($user.Enabled))
             {
                 Set-AdUser -Identity $UserName -Enabled $true -Credential $DomainAdministratorCredential
-                Write-Verbose -Message "Enabled $UserName account in domain $DomainName."
+                Write-Verbose -Message "Enabled user account '$($UserName)' in domain '$($DomainName)'."
             }
         }
         
-        # If password is specified, check if it is valid
-        if($Password)
+        if ($Password)
         {
-            Write-Verbose -Message "Checking if the user $UserName password is valid ..."
-            Add-Type -AssemblyName 'System.DirectoryServices.AccountManagement'
+            Write-Verbose -Message "Checking if the password specified for user '$($UserName)' is valid ..."
+            Add-Type -AssemblyName "System.DirectoryServices.AccountManagement"
             
-            Write-Verbose -Message "Creating connection to the domain $DomainName ..."
+            Write-Verbose -Message "Creating connection to the domain '$($DomainName)' ..."
             $prnContext = new-object System.DirectoryServices.AccountManagement.PrincipalContext(
                             "Domain", $DomainName, $DomainAdministratorCredential.UserName, `
                             $DomainAdministratorCredential.GetNetworkCredential().Password)
 
-            # This can return true or false
-            $result = $prnContext.ValidateCredentials($UserName,$Password.GetNetworkCredential().Password)
+            $result = $prnContext.ValidateCredentials($UserName, $Password.GetNetworkCredential().Password)
             if($result)
             {
-                Write-Verbose -Message "User $UserName password is valid"
+                Write-Verbose -Message "The password for user '$($UserName)' is valid."
                 return $true
             }
             else
             {
-                Write-Verbose -Message "User $UserName password is NOT valid"
-                if($Apply)
+                Write-Verbose -Message "The password for user '$($UserName)' is NOT valid."
+                if ($Apply)
                 {
                     Set-AdAccountPassword -Reset -Identity $UserName -NewPassword $Password.Password -Credential $DomainAdministratorCredential
-                    Write-Verbose -Message "User $UserName password has been reset"
+                    Write-Verbose -Message "Successfully reset password for user '$($UserName)'."
                 }
                 else
                 {
@@ -190,33 +191,39 @@ function ValidateProperties
         }
         else
         {
-            Write-Verbose -Message "User $UserName account in domain $DomainName is present"
+            Write-Verbose -Message "Found user '$($UserName)' in domain '$($DomainName)'."
             return $true
         }
     }
-    # User not found
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        Write-Verbose -Message "User $UserName account in domain $DomainName is NOT present"
-        if($Apply)
+        Write-Verbose -Message "User '$($UserName)' in domain '$($DomainName)' is NOT present."
+        if ($Apply)
         {
-            if( $Ensure -ne "Absent" )
+            if ($Ensure -ne "Absent")
             {
-                $params = @{ Name = $UserName; Credential = $DomainAdministratorCredential }
-                if( $Password )
+                $params = @{
+                    Name = $UserName
+                    Credential = $DomainAdministratorCredential
+                    Enabled = $true
+                    UserPrincipalName = "$UserName@$DomainName"
+                    PasswordNeverExpires = $true
+                }
+                if ($Password)
                 {
                     $params.Add( "AccountPassword", $Password.Password )
-                    $params.Add( "Enabled", $true )
                 }
                 New-AdUser @params
-                Write-Verbose -Message "User $UserName account in domain $DomainName has been created"
+                Write-Verbose -Message "Successfully created user account '$($UserName)' in domain '$($DomainName)'."
             }
         }
         else
         {
-            return ( $Ensure -eq "Absent" )
+            return ($Ensure -eq "Absent")
         }
     }
 }
 
+
 Export-ModuleMember -Function *-TargetResource
+

@@ -73,7 +73,37 @@ Domain Naming Master FSMO of the forest.
 * **RecycleBinEnabled**:  Read-only. Returned by Get. 
 * **ForestMode**:  Read-only. Returned by Get. 
 
+### xADGroup
+The xADGroup DSC resource will manage groups within Active Directory.
+__Note: This resource does not currently manage group membership.__
+* **GroupName**: Name of the Active Directory group to manage.
+* **Category**: Type of group to create. Valid values are 'Security' and 'Distribution'. If not specified, it defaults to 'Security'.
+* **GroupScope**: Scope of the group. Valid values are 'DomainLocal','Global' and 'Universal'. If not specified, it default to 'Global'.
+* **Path**: Path in Active Directory to place the group, specified as a Distinguished Name.
+* **Description**: The group description property (optional).
+* **DisplayName**: The group display name property (optional).
+* **Ensure**: Specifies whether the group is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
+* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional). Note: if not running on a domain controller, this is required.
+* **Credential**: User account credentials used to perform the operation (optional). Note: if not running on a domain controller, this is required.
+
 ## Versions
+
+### 2.8.0.0
+* Added new resource: xADGroup
+* Fixed issue with NewDomainNetbiosName parameter.
+
+### 2.7.0.0
+
+* Added DNS flush in retry loop
+* Bug fixes in xADDomain resource
+
+### 2.6.0.0
+
+* Removed xDscResourceDesigner tests (moved to common tests)
+
+### 2.5.0.0
+
+* Updated xADDomainTrust and xADRecycleBin tests
 
 ### 2.4.0.0
 
@@ -692,4 +722,49 @@ $ConfigurationData = @{
 Example_xADRecycleBin -EACredential (Get-Credential contoso\administrator) -ForestFQDN 'contoso.com' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADRecycleBin -Wait -Verbose
+```
+
+### Create an Active Directory group
+
+In this example, we add an Active Directory group to the default container (normally the Users OU).
+
+```
+configuration Example_xADGroup
+{
+Param(
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $GroupName,
+    
+    [ValidateSet('DomainLocal','Global','Universal')]    
+    [System.String]
+    $Scope = 'Global',
+    
+    [ValidateSet('Security','Distribution')]    
+    [System.String]
+    $Category = 'Security',
+    
+    [ValidateNotNullOrEmpty()]
+    [System.String]
+    $Description
+)
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADGroup ExampleGroup
+        {
+           GroupName = $GroupName
+           GroupScope = $Scope
+           Category = $Category
+           Description = $Description
+           Ensure = 'Present'
+        }
+    }
+}
+
+Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Example test domain local security group' -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose
 ```

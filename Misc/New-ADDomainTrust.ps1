@@ -14,3 +14,4 @@ $Properties = @{
                 
             }
 New-xDscResource -Name MSFT_xADDomainTrust -Property $Properties.Values -Path . -ModuleName xActiveDirectory -FriendlyName xADDomainTrust -Force
+
