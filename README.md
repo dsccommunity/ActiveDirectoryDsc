@@ -31,7 +31,7 @@ If no parent name is specified, this is the fully qualified domain name for the 
 Note: These are not used during domain creation.
 (AD sets the localadmin credentials as new domain administrator credentials during setup.) 
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
-* ** DnsDelegationCredential**: Credential used for creating DNS delegation.
+* **DnsDelegationCredential**: Credential used for creating DNS delegation.
 
 ### xADDomainController
 
