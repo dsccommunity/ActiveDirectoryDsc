@@ -30,7 +30,6 @@ Describe 'xADOrganizationalUnit' {
             Path = 'OU=Fake,DC=contoso,DC=com';
             Description = 'Test AD OU description';
             Ensure = 'Present';
-            #Credential = $testCredential;
         }
         
         $testAbsentParams = $testPresentParams.Clone();
@@ -44,7 +43,7 @@ Describe 'xADOrganizationalUnit' {
 
         Context "Validate Get-TargetResource method" {
 
-            It 'Returns a "System.Collections.Hashtable" type' {
+            It 'Returns a "System.Collections.Hashtable" object type' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
@@ -68,15 +67,15 @@ Describe 'xADOrganizationalUnit' {
                 $targetResource.Ensure | Should Be 'Absent'
             }
 
-            It 'Returns "ProtectedFromAccidentalDeletion" = "Yes" when OU is protected' {
+            It 'Returns "ProtectedFromAccidentalDeletion" = "$true" when OU is protected' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
                 
-                $targetResource.ProtectedFromAccidentalDeletion | Should Be 'Yes'
+                $targetResource.ProtectedFromAccidentalDeletion | Should Be $true
             }
 
-            It 'Returns "ProtectedFromAccidentalDeletion" = "No" when OU is not protected' {
+            It 'Returns "ProtectedFromAccidentalDeletion" = "$false" when OU is not protected' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith {
                     $unprotectedFakeAdOu = $protectedFakeAdOu.Clone();
@@ -85,7 +84,7 @@ Describe 'xADOrganizationalUnit' {
                 }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
                 
-                $targetResource.ProtectedFromAccidentalDeletion | Should Be 'No'
+                $targetResource.ProtectedFromAccidentalDeletion | Should Be $false
             }
 
             It 'Returns an empty description' {
@@ -105,7 +104,7 @@ Describe 'xADOrganizationalUnit' {
         
         Context "Validate Test-TargetResource method" {
 
-            It 'Returns a "System.Boolean" type' {
+            It 'Returns a "System.Boolean" object type' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Test-TargetResource @testPresentParams
@@ -140,7 +139,7 @@ Describe 'xADOrganizationalUnit' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
                 $testProtectedFromAccidentalDeletionParams = $testPresentParams.Clone()
-                $testProtectedFromAccidentalDeletionParams['ProtectedFromAccidentalDeletion'] = 'No'
+                $testProtectedFromAccidentalDeletionParams['ProtectedFromAccidentalDeletion'] = $false
                 
                 Test-TargetResource @testProtectedFromAccidentalDeletionParams | Should Be $false
             }

@@ -1,10 +1,3 @@
-<#
-Introduction
-
-The xOu module is a part of the ALM Ranger DevOps solutions (vsardevops.codeplex.com), which consists of code as config guidance, quick reference posters and supporting resources.
-This module contains the xAdOrganizationalUnit resource. This resource allows configuration of Organizational Units (OUs) in Active Directory (AD).
-#>
-
 # Localized messages
 data LocalizedData
 {
@@ -40,15 +33,10 @@ function Get-TargetResource
     $targetResource = @{
         Name = $Name
         Path = $Path
-        Ensure = 'Present'
-        ProtectedFromAccidentalDeletion = if ($ou.ProtectedFromAccidentalDeletion) { 'Yes' } else { 'No' }
+        Ensure = if ($null -eq $ou) { 'Absent' } else { 'Present' }
+        ProtectedFromAccidentalDeletion = $ou.ProtectedFromAccidentalDeletion
         Description = $ou.Description
     }
-
-    if ($ou -eq $null) {
-        $targetResource['Ensure'] = 'Absent'
-    }
-
     return $targetResource
 
 } # end function Get-TargetResource
@@ -73,8 +61,7 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential] $Credential,
 
         [ValidateNotNull()]
-        [ValidateSet('No', 'Yes')]
-        [System.String] $ProtectedFromAccidentalDeletion = 'Yes',
+        [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
         [ValidateNotNull()]
         [System.String]
@@ -153,8 +140,7 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential] $Credential,
 
         [ValidateNotNull()]
-        [ValidateSet('No', 'Yes')]
-        [System.String] $ProtectedFromAccidentalDeletion = 'Yes',
+        [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
         [ValidateNotNull()]
         [System.String]
@@ -173,7 +159,7 @@ function Set-TargetResource
             $setADOrganizationalUnitParams = @{
                 Identity = $ou
                 Description = $Description
-                ProtectedFromAccidentalDeletion = ($ProtectedFromAccidentalDeletion -eq 'Yes')
+                ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
             }
             if ($Credential)
             {
@@ -184,11 +170,11 @@ function Set-TargetResource
         else
         {
             Write-Verbose ($LocalizedData.DeletingOU -f $targetResource.Name)
-            if ($targetResource.ProtectedFromAccidentalDeletion -eq 'Yes')
+            if ($targetResource.ProtectedFromAccidentalDeletion)
             {
                 $setADOrganizationalUnitParams = @{
                     Identity = $ou
-                    ProtectedFromAccidentalDeletion = ($ProtectedFromAccidentalDeletion -eq 'Yes')
+                    ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
                 }
                 if ($Credential)
                 {
@@ -214,7 +200,7 @@ function Set-TargetResource
             Name = $Name
             Path = $Path
             Description = $Description
-            ProtectedFromAccidentalDeletion = ($ProtectedFromAccidentalDeletion -eq "Yes")
+            ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
         }
         if ($Credential) {
             $newADOrganizationalUnitParams['Credential'] = $Credential
