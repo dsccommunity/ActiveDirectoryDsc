@@ -33,7 +33,7 @@ If no parent name is specified, this is the fully qualified domain name for the 
 Note: These are not used during domain creation.
 (AD sets the localadmin credentials as new domain administrator credentials during setup.) 
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
-* ** DnsDelegationCredential**: Credential used for creating DNS delegation.
+* **DnsDelegationCredential**: Credential used for creating DNS delegation.
 
 ### xADDomainController
 
@@ -180,7 +180,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **Name**: Name of the Active Directory organizational unit to manage.
 * **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
 * **Description**: The OU description property (optional).
-* **ProtectedFromAccidentalDeletion**: Valid values are 'Yes' and 'No'. If not specified, it defaults to 'Yes'.
+* **ProtectedFromAccidentalDeletion**: Valid values are $true and $false. If not specified, it defaults to $true.
 * **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
 * **Credential**: User account credentials used to perform the operation . Note: _if not running on a domain controller, this is required_.
 
@@ -188,13 +188,16 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 
 ### Unreleased
 
-* xADOrganizationalUnit: Merged resource from the PowerShell gallery
-* xADGroup: Added resource
+* xADOrganizationalUnit: Merges xADOrganizationalUnit resource from the PowerShell gallery
 * xADGroup: Added Members, MembersToInclude, MembersToExclude and MembershipAttribute properties.
 * xADGroup: Added ManagedBy property.
 * xADGroup: Added Notes property.
 * xADUser: Adds additional property settings.
-* xADUser: Adds unit test coverage. 
+* xADUser: Adds unit test coverage.
+
+### 2.8.0.0
+* Added new resource: xADGroup
+* Fixed issue with NewDomainNetbiosName parameter.
 
 ### 2.7.0.0
 
@@ -889,9 +892,8 @@ Param(
     [System.String]
     $Path,
     
-    [ValidateSet('Yes','No')]    
-    [System.String]
-    $ProtectedFromAccidentalDeletion = 'Yes',
+    [System.Boolean]
+    $ProtectedFromAccidentalDeletion = $true,
     
     [ValidateNotNull()]
     [System.String]

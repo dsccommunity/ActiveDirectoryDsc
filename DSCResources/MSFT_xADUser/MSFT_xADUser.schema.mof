@@ -37,6 +37,8 @@ class MSFT_xADUser : OMI_BaseResource
     [Write] String MobilePhone;
     [Write] String Fax;
     [Write] String HomePhone;
+    [Write] String Pager;
+    [Write] String IPPhone;
     [Write] String Manager;
     [Write] Boolean Enabled;
     [Write] Boolean CannotChangePassword;
