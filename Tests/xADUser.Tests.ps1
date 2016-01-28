@@ -118,7 +118,6 @@ Describe "xADUser" {
         Context "Validate Get-TargetResource method" {
         
             It "Returns a 'System.Collections.Hashtable' object type" {
-                #Mock Get-ADUser -ParameterFilter { $Identity -eq $testPresentParams.UserName } -MockWith { return [PSCustomObject] $fakeADUser; }
                 Mock Get-ADUser { return [PSCustomObject] $fakeADUser; }
         
                 $adUser = Get-TargetResource @testPresentParams;
@@ -320,19 +319,20 @@ Describe "xADUser" {
         
         Context "Validate Set-TargetResource method" {
             
-            <# Cannot test account creation as mocking requires throwing an exception and this gets called twice.
-            
-            It "Calls 'New-ADUser' when 'Ensure' is 'Present' and the user account does not exist" {
-                Mock Get-ADUser { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                Mock New-ADUser -ParameterFilter { $Name.ToString() -eq $testPresentParams.UserName } -MockWith { }
+            It "Calls 'New-ADUser' when 'Ensure' is 'Present' and the account does not exist" {
+                $newUserName = 'NewUser'
+                $newAbsentParams = $testAbsentParams.Clone();
+                $newAbsentParams['UserName'] = $newUserName;
+                $newPresentParams = $testPresentParams.Clone();
+                $newPresentParams['UserName'] = $newUserName;                  
+                Mock New-ADUser -ParameterFilter { $Name -eq $newUserName } { }
                 Mock Set-ADUser { }
+                Mock Get-TargetResource -ParameterFilter { $Username -eq $newUserName } { return $newAbsentParams; }
                 
-                Set-TargetResource @testPresentParams -Description 'sdasdas';
+                Set-TargetResource @newPresentParams;
                 
-                Assert-MockCalled New-ADUser -ParameterFilter { $Name.ToString() -eq $testPresentParams.UserName } -Scope It;
+                Assert-MockCalled New-ADUser -ParameterFilter { $Name -eq $newUserName } -Scope It;
             }
-        
-            #>
             
             It "Calls 'Move-ADObject' when 'Ensure' is 'Present', the account exists but Path is incorrect" {
                 $testTargetPath = 'CN=Users,DC=contoso,DC=com';
@@ -464,6 +464,6 @@ Describe "xADUser" {
             }
         
         } #end context Validate Set-TargetResource method
-    
+   
     } #end InModuleScope
 }

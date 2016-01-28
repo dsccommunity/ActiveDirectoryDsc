@@ -193,7 +193,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * xADGroup: Added ManagedBy property.
 * xADGroup: Added Notes property.
 * xADUser: Adds additional property settings.
-* xADUser: Adds unit test coverage. 
+* xADUser: Adds unit test coverage.
 
 ### 2.8.0.0
 * Added new resource: xADGroup
