@@ -438,7 +438,6 @@ function Test-TargetResource
     else
     {
         ## Add common name, ensure and enabled as they may not be explicitly passed and we want to enumerate them
-        $PSBoundParameters['Name'] = $Name;
         $PSBoundParameters['Ensure'] = $Ensure;
         $PSBoundParameters['Enabled'] = $Enabled;
     
@@ -626,7 +625,6 @@ function Set-TargetResource
     $targetResource = Get-TargetResource @PSBoundParameters;
 
     ## Add common name, ensure and enabled as they may not be explicitly passed
-    $PSBoundParameters['Name'] = $Name;
     $PSBoundParameters['Ensure'] = $Ensure;
     $PSBoundParameters['Enabled'] = $Enabled;
 
@@ -688,10 +686,14 @@ function Set-TargetResource
                 {
                     ## Find the associated AD property
                     $adProperty = $adPropertyMap | Where-Object { $_.Parameter -eq $parameter };
-
-                    ## Are we removing properties
-                    if ([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter))
+                    
+                    if ([System.String]::IsNullOrEmpty($adProperty))
                     {
+                        ## We can't do anything is an empty AD property!
+                    }
+                    elseif ([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter))
+                    {
+                        ## We are removing properties
                         ## Only remove if the existing value in not null or empty
                         if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
                         {
@@ -743,7 +745,7 @@ function Set-TargetResource
         {        
             $setADUserParams['Remove'] = $removeUserProperties;
         }
-
+        
         Write-Verbose -Message ($LocalizedData.UpdatingADUser -f $UserName);
         Set-ADUser @setADUserParams -Enabled $Enabled;
     }
