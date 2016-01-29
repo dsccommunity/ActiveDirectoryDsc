@@ -49,13 +49,13 @@ try
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
             
-            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
+            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } { }
             
-            It 'Calls "Assert-Module" to check AD module is installed' {
+            It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
                 Mock Get-ADDomain { }
                 $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName;
                 
-                Assert-MockCalled Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It;
+                Assert-MockCalled Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } -Scope It;
             }
             
             It 'Returns "System.Collections.Hashtable" object type' {
@@ -105,9 +105,10 @@ try
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
             
             $correctDomainName = 'present.com';
+            $correctChildDomainName = 'present';
             $correctDomainNetBIOSName = 'PRESENT';
             $incorrectDomainName = 'incorrect.com';
-            $parentDomainName = 'incorrect.com';
+            $parentDomainName = 'parent.com';
             $testAdminCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
             
             $testDefaultParams = @{
@@ -117,6 +118,12 @@ try
             
             $stubDomain = @{
                 DomainName = $correctDomainName;
+                DomainNetBIOSName = $correctDomainNetBIOSName;
+            }
+            
+            ## Get-TargetResource returns the domain FQDN for .DomainName
+            $stubChildDomain = @{
+                DomainName = "$correctChildDomainName.$parentDomainName";
                 ParentDomainName = $parentDomainName;
                 DomainNetBIOSName = $correctDomainNetBIOSName;
             }
@@ -154,17 +161,17 @@ try
             }
             
             It 'Returns "True" when "ParentDomainName" matches' {
-                Mock Get-TargetResource { return $stubDomain; }
+                Mock Get-TargetResource { return $stubChildDomain; }
                 
-                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -ParentDomainName $parentDomainName;
+                $result = Test-TargetResource @testDefaultParams -DomainName $correctChildDomainName -ParentDomainName $parentDomainName;
                 
                 $result | Should Be $true;
             }
 
             It 'Returns "False" when "ParentDomainName" does not match' {
-                Mock Get-TargetResource { return $stubDomain; }
+                Mock Get-TargetResource { return $stubChildDomain; }
                 
-                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -ParentDomainName 'parent.com';
+                $result = Test-TargetResource @testDefaultParams -DomainName $correctChildDomainName -ParentDomainName 'incorrect.com';
                 
                 $result | Should Be $false;
             }

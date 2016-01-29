@@ -5,7 +5,7 @@ data localizedData
     ConvertFrom-StringData @'
         RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
         InvalidDomainError             = Computer is a member of the wrong domain?!
-        ExistingDomainMemberError      = Computer is already a domain member. Cannot create a new '{0}' domain!
+        ExistingDomainMemberError      = Computer is already a domain member. Cannot create a new '{0}' domain?
         InvalidCredentialError         = Domain '{0}' is available, but invalid credentials were supplied.
         
         QueryDomainWithLocalCredential = Computer is a domain member; querying domain '{0}' using local credential ...
@@ -58,7 +58,7 @@ function Get-TargetResource
         [System.Boolean] $ExcludeDns
     )
     
-    Assert-Module -ModuleName 'ActiveDirectory';
+    Assert-Module -ModuleName 'ADDSDeployment';
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName;
     $isDomainMember = Test-DomainMember;
 
@@ -74,8 +74,8 @@ function Get-TargetResource
             $domain = Get-ADDomain -Identity $domainFQDN -Credential $DomainAdministratorCredential -ErrorAction Stop;
         }
 
-        ## No need to check whether the node is actually a domain controller? If the
-        ## domain is already UP then this resource shouldn't run. Domain controller functionality
+        ## No need to check whether the node is actually a domain controller. If we don't throw an exception,
+        ## the domain is already UP - and this resource shouldn't run. Domain controller functionality
         ## should be checked by the xADDomainController resource?
         Write-Verbose ($localizedData.DomainFound -f $domain.DnsRoot);
         
@@ -146,11 +146,20 @@ function Test-TargetResource
         [System.Boolean] $ExcludeDns
     )
 
-    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
     $targetResource = Get-TargetResource @PSBoundParameters
-    
     $isCompliant = $true;
-    $propertyNames = @('DomainName','ParentDomainName','DomainNetBIOSName');
+
+    ## The Get-Target resource returns .DomainName as the domain's FQDN. Therefore, we
+    ## need to resolve this before comparison.
+    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
+    if ($domainFQDN -ne $targetResource.DomainName)
+    {
+        $message = $localizedData.ResourcePropertyValueIncorrect -f 'DomainName', $domainFQDN, $targetResource.DomainName;
+        Write-Verbose -Message $message;
+        $isCompliant = $false;   
+    }
+    
+    $propertyNames = @('ParentDomainName','DomainNetBIOSName');
     foreach ($propertyName in $propertyNames)
     {
         if ($PSBoundParameters.ContainsKey($propertyName))
@@ -167,12 +176,12 @@ function Test-TargetResource
         
     if ($isCompliant)
     {
-        Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $DomainName);
+        Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $domainFQDN);
         return $true;
     }
     else
     {
-        Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $DomainName);
+        Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $domainFQDN);
         return $false;
     }
 
@@ -215,7 +224,7 @@ function Set-TargetResource
 
     # Debug can pause Install-ADDSForest/Install-ADDSDomain, so we remove it.
     [ref] $null = $PSBoundParameters.Remove("Debug");
-    ## Not entirely necessary, but run the Get to ensure we raise any errors
+    ## Not entirely necessary, but run Get-TargetResouece to ensure we raise any pre-flight errors.
     $targetResource = Get-TargetResource @PSBoundParameters;
     
     $installADDSParams = @{
@@ -272,7 +281,6 @@ function Set-TargetResource
     # Signal to the LCM to reboot the node to compensate for the one we
     # suppressed from Install-ADDSForest/Install-ADDSDomain
     $global:DSCMachineStatus = 1
-    #>
 
 } #end function Set-TargetResource
 
