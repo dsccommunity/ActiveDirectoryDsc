@@ -46,14 +46,14 @@ function Set-TargetResource
 
     for($count = 0; $count -lt $RetryCount; $count++)
     {
-        try
+        $domain = New-Object DirectoryServices.DirectoryEntry("LDAP://$DomainName",$DomainUserCredential.UserName,$DomainUserCredential.GetNetworkCredential().Password)
+        if ($domain.name)
         {
-            $domain = Get-ADDomain -Identity $DomainName -Credential $DomainUserCredential
             Write-Verbose -Message "Found domain $DomainName"
             $domainFound = $true
-            break;
+            break
         }
-        Catch
+        else
         {
             Write-Verbose -Message "Domain $DomainName not found. Will retry again after $RetryIntervalSec sec"
             Start-Sleep -Seconds $RetryIntervalSec
@@ -81,13 +81,13 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Checking for domain $DomainName ..."
-    try
+    $domain = New-Object DirectoryServices.DirectoryEntry("LDAP://$DomainName",$DomainUserCredential.UserName,$DomainUserCredential.GetNetworkCredential().Password)
+    if ($domain.name)
     {
-        $domain = Get-ADDomain -Identity $DomainName -Credential $DomainUserCredential
         Write-Verbose -Message "Found domain $DomainName"
         $true
     }
-    Catch
+    else
     {
         Write-Verbose -Message "Domain $DomainName not found"
         $false
