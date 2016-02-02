@@ -27,7 +27,11 @@ function Get-TargetResource
 
         [String]$LogPath,
 
-        [String]$SysvolPath
+        [String]$SysvolPath,
+
+        [String]$DomainMode,
+
+        [String]$ForestMode
     )
 
     try
@@ -92,7 +96,11 @@ function Set-TargetResource
 
         [String]$LogPath,
 
-        [String]$SysvolPath
+        [String]$SysvolPath,
+
+        [String]$DomainMode,
+
+        [String]$ForestMode
     )
 
     # Debug can pause Install-ADDSForest/Install-ADDSDomain, so we remove it.
@@ -150,6 +158,14 @@ function Set-TargetResource
         {
             $params.Add("SysvolPath", $SysvolPath)
         }
+        if ($DomainMode -ne $null)
+        {
+            $params.Add("DomainMode", $DomainMode)
+        }
+        if ($ForestMode -ne $null)
+        {
+            $params.Add("ForestMode", $ForestMode)
+        }
 
         Install-ADDSForest @params 
         Write-Verbose -Message "Created forest '$($DomainName)'."
@@ -188,6 +204,14 @@ function Set-TargetResource
         {
             $params.Add("SysvolPath", $SysvolPath)
         }
+        if ($DomainMode -ne $null)
+        {
+            $params.Add("DomainMode", $DomainMode)
+        }
+        if ($ForestMode -ne $null)
+        {
+            $params.Add("ForestMode", $ForestMode)
+        }
 
         Install-ADDSDomain @params
         Write-Verbose -Message "Created domain '$($DomainName)'."
@@ -224,7 +248,11 @@ function Test-TargetResource
 
         [String]$LogPath,
 
-        [String]$SysvolPath
+        [String]$SysvolPath,
+
+        [String]$DomainMode,
+
+        [String]$ForestMode
     )
     try
     {
