@@ -13,8 +13,13 @@ function Get-TargetResource
 
         [UInt32]$RetryCount = 5
     )
-
-    $convertToCimCredential = New-CimInstance -ClassName MSFT_Credential -Property @{Username=[string]$DomainUserCredential.UserName; Password=[string]$null} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+    $cimInstanceParams = @{
+        ClassName = 'MSFT_Credential'
+        Property = @{Username=[string]$DomainUserCredential.UserName; Password=[string]$null}
+        Namespace = 'root/microsoft/windows/desiredstateconfiguration'
+        ClientOnly = $true
+    }
+    $convertToCimCredential = New-CimInstance @cimInstanceParams
 
     $returnValue = @{
         DomainName = $DomainName
@@ -46,7 +51,11 @@ function Set-TargetResource
 
     for($count = 0; $count -lt $RetryCount; $count++)
     {
-        $domain = New-Object DirectoryServices.DirectoryEntry("LDAP://$DomainName",$DomainUserCredential.UserName,$DomainUserCredential.GetNetworkCredential().Password)
+        $domain = New-Object DirectoryServices.DirectoryEntry(
+            "LDAP://$DomainName",
+            $DomainUserCredential.UserName,
+            $DomainUserCredential.GetNetworkCredential().Password
+        )
         if ($domain.name)
         {
             Write-Verbose -Message "Found domain $DomainName"
@@ -81,7 +90,11 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message "Checking for domain $DomainName ..."
-    $domain = New-Object DirectoryServices.DirectoryEntry("LDAP://$DomainName",$DomainUserCredential.UserName,$DomainUserCredential.GetNetworkCredential().Password)
+    $domain = New-Object DirectoryServices.DirectoryEntry(
+        "LDAP://$DomainName",
+        $DomainUserCredential.UserName,
+        $DomainUserCredential.GetNetworkCredential().Password
+    )
     if ($domain.name)
     {
         Write-Verbose -Message "Found domain $DomainName"
