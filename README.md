@@ -188,6 +188,8 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 
 ### Unreleased
 
+### 2.9.0.0
+
 * xADOrganizationalUnit: Merges xADOrganizationalUnit resource from the PowerShell gallery
 * xADGroup: Added Members, MembersToInclude, MembersToExclude and MembershipAttribute properties.
 * xADGroup: Added ManagedBy property.
