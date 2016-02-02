@@ -10,8 +10,8 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, and ADDomainTrust** DSC Resources.
-These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers and establish cross-domain trusts.
+The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup and xADOrganizationalUnit** DSC Resources.
+These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
 
@@ -20,7 +20,9 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADUser** modifies and removes Active Directory Users. 
 * **xWaitForDomain** waits for new, remote domain to setup.
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
-* **xADDomainTrust** establishes cross-domain trusts
+* **xADDomainTrust** establishes cross-domain trusts.
+* **xADGroup** modifies and removes Active Directory groups.
+* **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 
 ### **xADDomain**
 
@@ -31,7 +33,7 @@ If no parent name is specified, this is the fully qualified domain name for the 
 Note: These are not used during domain creation.
 (AD sets the localadmin credentials as new domain administrator credentials during setup.) 
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
-* ** DnsDelegationCredential**: Credential used for creating DNS delegation.
+* **DnsDelegationCredential**: Credential used for creating DNS delegation.
 
 ### xADDomainController
 
@@ -41,11 +43,69 @@ Note: These are not used during domain creation.
 
 ### xADUser
 
-* **Ensure**: Specifies whether the given user is present or absent.
 * **DomainName**: Name of the domain to which the user will be added.
-* **UserName**: Name of the user.
-* **Password**: Password value for the account.
-* **DomainAdministratorCredential**: User account credentials used to perform the task.
+ * The Active Directory domain's fully-qualified domain name must be specified, i.e. contoso.com.
+ * This parameter is used to query and set the user's account password.
+* **UserName**: Specifies the Security Account Manager (SAM) account name of the user.
+ * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
+ * Once created, the user's SamAccountName and CN cannot be changed.
+* **Password**: Password value for the user account.
+ * _If the account is enabled (default behaviour) you must specifiy a password._
+ * _You must ensure that the password meets the domain's complexity requirements._
+* **Ensure**: Specifies whether the given user is present or absent (optional).
+ * If not specified, this value defaults to Present.
+* **DomainController**: Specifies the Active Directory Domain Services instance to connect to (optional).
+ * This is only required if not executing the task on a domain controller. 
+* **DomainAdministratorCredential**: User account credentials used to perform the task (optional).
+ * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
+* **CommonName**: Specifies the user's CN of the user account (optional).
+ * If not specified, this defaults to the ___UserName___ value.
+* **UserPrincipalName**: Each user account has a user principal name (UPN) in the format [user]@[DNS-domain-name] (optional).
+* **DisplayName**: Specifies the display name of the user object (optional).
+* **Path**: (optional).
+* **GivenName**: Specifies the user's first or given name (optional).
+* **Initials**: Specifies the initials that represent part of a user's name (optional).
+* **Surname**: Specifies the user's last name or surname (optional).
+* **Description**: Specifies a description of the user object (optional).
+* **StreetAddress**: Specifies the user's street address (optional).
+* **POBox**: Specifies the user's post office box number (optional).
+* **City**: Specifies the user's town or city (optional).
+* **State**: Specifies the user's state or province (optional).
+* **PostalCode**: Specifies the user's postal code or zip code (optional).
+* **Country**: Specifies the country or region code for the user's language of choice (optional).
+ * This should be specified as the country's two character ISO-3166 code.
+* **Department**: Specifies the user's department (optional).
+* **Division**: Specifies the user's division (optional).
+* **Company**: Specifies the user's company (optional).
+* **Office**: Specifies the location of the user's office or place of business (optional).
+* **JobTitle**: Specifies the user's job title (optional).
+* **EmailAddress**: Specifies the user's e-mail address (optional).
+* **EmployeeID**: Specifies the user's employee ID (optional).
+* **EmployeeNumber**: Specifies the user's employee number (optional).
+* **HomeDirectory**: Specifies a user's home directory path (optional).
+* **HomeDrive**: Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (optional).
+ * The drive letter is specified as "[DriveLetter]:" where [DriveLetter] indicates the letter of the drive to associate.
+ * The [DriveLetter] must be a single, uppercase letter and the colon is required.
+* **HomePage**: Specifies the URL of the home page of the user object (optional).
+* **ProfilePath**: Specifies a path to the user's profile (optional).
+ * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
+* **LogonScript**: Specifies a path to the user's log on script (optional).
+ * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
+* **Notes**: (optional).
+* **OfficePhone**: Specifies the user's office telephone number (optional).
+* **MobilePhone**: Specifies the user's mobile phone number (optional).
+* **Fax**: Specifies the user's fax phone number (optional).
+* **Pager**: Specifies the user's pager number (optional).
+* **IPPhone**: Specifies the user's IP telephony number (optional).
+* **HomePhone**: Specifies the user's home telephone number (optional).
+* **Enabled**: Specifies if an account is enabled (optional).
+ * An enabled account requires a password.
+* **Manager**: Specifies the user's manager (optional).
+ * This value can be specified as a DN, ObjectGUID, SID or SamAccountName.
+* **PasswordNeverExpires**: Specifies whether the password of an account can expire (optional).
+ * If not specified, this value defaults to False.
+* **CannotChangePassword**: Specifies whether the account password can be changed (optional).
+ * If not specified, this value defaults to False.
 
 ### xWaitForADDomain
 
@@ -75,18 +135,67 @@ Domain Naming Master FSMO of the forest.
 
 ### xADGroup
 The xADGroup DSC resource will manage groups within Active Directory.
-__Note: This resource does not currently manage group membership.__
+
 * **GroupName**: Name of the Active Directory group to manage.
-* **Category**: Type of group to create. Valid values are 'Security' and 'Distribution'. If not specified, it defaults to 'Security'.
-* **GroupScope**: Scope of the group. Valid values are 'DomainLocal','Global' and 'Universal'. If not specified, it default to 'Global'.
-* **Path**: Path in Active Directory to place the group, specified as a Distinguished Name.
-* **Description**: The group description property (optional).
-* **DisplayName**: The group display name property (optional).
-* **Ensure**: Specifies whether the group is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
-* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional). Note: if not running on a domain controller, this is required.
-* **Credential**: User account credentials used to perform the operation (optional). Note: if not running on a domain controller, this is required.
+* **Category**: This parameter sets the GroupCategory property of the group.
+ * Valid values are 'Security' and 'Distribution'.
+ * If not specified, it defaults to 'Security'.
+* **GroupScope**: Specifies the group scope of the group.
+ * Valid values are 'DomainLocal', 'Global' and 'Universal'.
+ * If not specified, it defaults to 'Global'.
+* **Path**: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
+* **Description**: Specifies a description of the group object (optional).
+* **DisplayName**: Specifies the display name of the group object (optional).
+* **Members**: Specifies the explicit AD objects that should comprise the group membership (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, all undefined group members will be removed the AD group.
+ * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
+* **MembersToInclude**: Specifies AD objects that must be in the group (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, only the specified members are added to the group.
+ * If specified, no users are removed from the group using this parameter.
+ * This property cannot be specified with the 'Members' parameter.
+* **MembersToExclude**: Specifies AD objects that _must not_ be in the group (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, only those specified are removed from the group.
+ * If specified, no users are added to the group using this parameter.
+ * This property cannot be specified with the 'Members' parameter.
+* **MembershipAttribute**: Defines the AD object attribute that is used to determine group membership (optional).
+ * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
+ * If not specified, it defaults to 'SamAccountName'.
+ * You cannot mix multiple attribute types.
+* **ManagedBy**: Specifies the user or group that manages the group object (optional).
+ * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
+* **Notes**: The group's info attribute (optional).
+* **Ensure**: Specifies whether the group is present or absent.
+ * Valid values are 'Present' and 'Absent'.
+ * It not specified, it defaults to 'Present'.
+* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
+ * If not running on a domain controller, this is required.
+* **Credential**: User account credentials used to perform the operation (optional).
+ * If not running on a domain controller, this is required.
+
+### xADOrganizationalUnit
+The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
+* **Name**: Name of the Active Directory organizational unit to manage.
+* **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
+* **Description**: The OU description property (optional).
+* **ProtectedFromAccidentalDeletion**: Valid values are $true and $false. If not specified, it defaults to $true.
+* **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
+* **Credential**: User account credentials used to perform the operation . Note: _if not running on a domain controller, this is required_.
 
 ## Versions
+
+### Unreleased
+
+### 2.9.0.0
+
+* xADOrganizationalUnit: Merges xADOrganizationalUnit resource from the PowerShell gallery
+* xADGroup: Added Members, MembersToInclude, MembersToExclude and MembershipAttribute properties.
+* xADGroup: Added ManagedBy property.
+* xADGroup: Added Notes property.
+* xADUser: Adds additional property settings.
+* xADUser: Adds unit test coverage.
 
 ### 2.8.0.0
 * Added new resource: xADGroup
@@ -767,4 +876,49 @@ Param(
 Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Example test domain local security group' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose
+```
+
+### Create an Active Directory OU
+
+In this example, we add an Active Directory organizational unit to the 'example.com' domain root.
+
+```powershell
+configuration Example_xADOrganizationalUnit
+{
+Param(
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $Name,
+    
+    [parameter(Mandatory = $true)]    
+    [System.String]
+    $Path,
+    
+    [System.Boolean]
+    $ProtectedFromAccidentalDeletion = $true,
+    
+    [ValidateNotNull()]
+    [System.String]
+    $Description = ''
+)
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADOrganizationalUnit ExampleOU
+        {
+           Name = $Name
+           Path = $Path
+           ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
+           Description = $Description
+           Ensure = 'Present'
+        }
+    }
+}
+
+Example_xADOrganizationalUnit -Name 'Example OU' -Path 'dc=example,dc=com' -Description 'Example test organizational unit' -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADOrganizationalUnit -Wait -Verbose
+
 ```
