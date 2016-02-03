@@ -189,6 +189,9 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 ### Unreleased
 
 * xWaitForADDomain: Updated to make it compatible with systems that don't have the ActiveDirectory module installed, and to allow it to function with domains/forests that don't have a domain controller with Active Directory Web Services running.
+
+### 2.9.0.0
+
 * xADOrganizationalUnit: Merges xADOrganizationalUnit resource from the PowerShell gallery
 * xADGroup: Added Members, MembersToInclude, MembersToExclude and MembershipAttribute properties.
 * xADGroup: Added ManagedBy property.
