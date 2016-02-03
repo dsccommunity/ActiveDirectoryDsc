@@ -1,4 +1,4 @@
-$Global:DSCModuleName      = 'xWaitForADDomain'
+$Global:DSCModuleName      = 'xActiveDirectory'
 $Global:DSCResourceName    = 'MSFT_xWaitForADDomain'
 
 #region HEADER
