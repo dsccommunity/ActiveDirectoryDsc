@@ -20,9 +20,14 @@ function Get-TargetResource
         ClientOnly = $true
     }
     $convertToCimCredential = New-CimInstance @cimInstanceParams
-
+    Write-Verbose -Message "Checking for domain $DomainName ..."
+    $domain = New-Object DirectoryServices.DirectoryEntry(
+        "LDAP://$DomainName",
+        $DomainUserCredential.UserName,
+        $DomainUserCredential.GetNetworkCredential().Password
+    )
     $returnValue = @{
-        DomainName = $DomainName
+        DomainName = $domain.name
         DomainUserCredential = $convertToCimCredential
         RetryIntervalSec = $RetryIntervalSec
         RetryCount = $RetryCount
@@ -47,16 +52,11 @@ function Set-TargetResource
     )
 
     $domainFound = $false
-    Write-Verbose -Message "Checking for domain $DomainName ..."
-
+    
     for($count = 0; $count -lt $RetryCount; $count++)
     {
-        $domain = New-Object DirectoryServices.DirectoryEntry(
-            "LDAP://$DomainName",
-            $DomainUserCredential.UserName,
-            $DomainUserCredential.GetNetworkCredential().Password
-        )
-        if ($domain.name)
+        $targetResource = Get-TargetResource @PSBoundParameters
+        if ($targetResource.DomainName)
         {
             Write-Verbose -Message "Found domain $DomainName"
             $domainFound = $true
@@ -89,13 +89,8 @@ function Test-TargetResource
         [UInt32]$RetryCount = 5
     )
 
-    Write-Verbose -Message "Checking for domain $DomainName ..."
-    $domain = New-Object DirectoryServices.DirectoryEntry(
-        "LDAP://$DomainName",
-        $DomainUserCredential.UserName,
-        $DomainUserCredential.GetNetworkCredential().Password
-    )
-    if ($domain.name)
+    $targetResource = Get-TargetResource @PSBoundParameters
+    if ($targetResource.DomainName)
     {
         Write-Verbose -Message "Found domain $DomainName"
         $true
@@ -106,4 +101,3 @@ function Test-TargetResource
         $false
     }
 }
-
