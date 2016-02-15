@@ -13,11 +13,16 @@ function Get-TargetResource
 
         [UInt32]$RetryCount = 5
     )
-
-    $convertToCimCredential = New-CimInstance -ClassName MSFT_Credential -Property @{Username=[string]$DomainUserCredential.UserName; Password=[string]$null} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
-
+    $cimInstanceParams = @{
+        ClassName = 'MSFT_Credential'
+        Property = @{Username=[string]$DomainUserCredential.UserName; Password=[string]$null}
+        Namespace = 'root/microsoft/windows/desiredstateconfiguration'
+        ClientOnly = $true
+    }
+    $convertToCimCredential = New-CimInstance @cimInstanceParams
+    $domain = Get-Domain @PSBoundParameters
     $returnValue = @{
-        DomainName = $DomainName
+        DomainName = $domain.name
         DomainUserCredential = $convertToCimCredential
         RetryIntervalSec = $RetryIntervalSec
         RetryCount = $RetryCount
@@ -42,18 +47,17 @@ function Set-TargetResource
     )
 
     $domainFound = $false
-    Write-Verbose -Message "Checking for domain $DomainName ..."
-
+    
     for($count = 0; $count -lt $RetryCount; $count++)
     {
-        try
+        $domain = Get-Domain @PSBoundParameters
+        if ($domain.name)
         {
-            $domain = Get-ADDomain -Identity $DomainName -Credential $DomainUserCredential
             Write-Verbose -Message "Found domain $DomainName"
             $domainFound = $true
-            break;
+            break
         }
-        Catch
+        else
         {
             Write-Verbose -Message "Domain $DomainName not found. Will retry again after $RetryIntervalSec sec"
             Start-Sleep -Seconds $RetryIntervalSec
@@ -80,17 +84,38 @@ function Test-TargetResource
         [UInt32]$RetryCount = 5
     )
 
-    Write-Verbose -Message "Checking for domain $DomainName ..."
-    try
+    $domain = Get-Domain @PSBoundParameters
+    if ($domain.name)
     {
-        $domain = Get-ADDomain -Identity $DomainName -Credential $DomainUserCredential
         Write-Verbose -Message "Found domain $DomainName"
         $true
     }
-    Catch
+    else
     {
         Write-Verbose -Message "Domain $DomainName not found"
         $false
     }
 }
 
+function Get-Domain
+{
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory)]
+        [String]$DomainName,
+
+        [Parameter(Mandatory)]
+        [PSCredential]$DomainUserCredential,
+
+        [UInt64]$RetryIntervalSec = 10,
+
+        [UInt32]$RetryCount = 5
+    )
+    Write-Verbose -Message "Checking for domain $DomainName ..."
+    New-Object DirectoryServices.DirectoryEntry(
+        "LDAP://$DomainName",
+        $DomainUserCredential.UserName,
+        $DomainUserCredential.GetNetworkCredential().Password
+    )
+}
