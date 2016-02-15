@@ -9,12 +9,13 @@ data localizedString
         IncludeAndExcludeConflictError = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values.
         IncludeAndExcludeAreEmptyError = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters.
         
-        CheckingMembers               = Checking for '{0}' members.
+        CheckingMembers                = Checking for '{0}' members.
         MembershipCountMismatch        = Membership count is not correct. Expected '{0}' members, actual '{1}' members.
         MemberNotInDesiredState        = Member '{0}' is not in the desired state.
         RemovingDuplicateMember        = Removing duplicate member '{0}' definition.
         MembershipInDesiredState       = Membership is in the desired state.
-        MembershipNotDesiredState      = Membership is NOT in the desired state. 
+        MembershipNotDesiredState      = Membership is NOT in the desired state.
+        CheckingDomain                 = Checking for domain '{0}'.
 '@
 }
 
@@ -38,15 +39,18 @@ function Assert-Module
 # Internal function to test whether computer is a member of a domain
 function Test-DomainMember {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param ( )
-     $isDomainMember =  [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain;
+     $isDomainMember = [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain;
     return $isDomainMember;
 }
 
+# Internal function to build domain FQDN
 function Resolve-DomainFQDN {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
+        [OutputType([System.String])]
         [System.String] $DomainName,
         
         [Parameter()] [AllowNull()]
@@ -58,6 +62,32 @@ function Resolve-DomainFQDN {
         $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName;
     }
     return $domainFQDN
+}
+
+## Internal function to test/ domain availability
+function Test-ADDomain
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory)]
+        [String] $DomainName,
+
+        [Parameter()]
+        [PSCredential] $Credential
+    )
+    Write-Verbose -Message ($localizedString.CheckingDomain -f $DomainName);
+    $ldapDomain = 'LDAP://{0}' -f $DomainName;
+    if ($PSBoundParameters.ContainsKey('Credential'))
+    {
+        $domain = New-Object DirectoryServices.DirectoryEntry($ldapDomain, $Credential.UserName, $Credential.GetNetworkCredential().Password);
+    }
+    else
+    {
+        $domain = New-Object DirectoryServices.DirectoryEntry($ldapDomain);
+    }
+    return ($null -ne $domain);
 }
 
 # Internal function to get an Active Directory object's parent Distinguished Name
@@ -88,6 +118,7 @@ function Get-ADObjectParentDN
         http://www.uvm.edu/~gcd/code-license/
     #>
     [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory)]
