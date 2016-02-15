@@ -1,4 +1,4 @@
-# Localized messages
+﻿# Localized messages
 data LocalizedData
 {
     # culture="en-US"
@@ -82,7 +82,8 @@ function Get-TargetResource
         [System.String] $UserName,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $Password,
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
@@ -208,7 +209,8 @@ function Get-TargetResource
         
         ## Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $DomainAdministratorCredential
     )
     
     Assert-Module -ModuleName 'ActiveDirectory';
@@ -295,7 +297,8 @@ function Test-TargetResource
         [System.String] $UserName,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $Password,
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
@@ -420,7 +423,8 @@ function Test-TargetResource
         [System.String] $DomainController,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $DomainAdministratorCredential
     )
 
     Validate-Parameters @PSBoundParameters;
@@ -494,7 +498,8 @@ function Set-TargetResource
         [System.String] $UserName,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $Password,
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
@@ -618,7 +623,8 @@ function Set-TargetResource
         [System.String] $DomainController,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $DomainAdministratorCredential
     )
 
     Validate-Parameters @PSBoundParameters;
@@ -800,10 +806,12 @@ function Test-Password
         [System.String] $UserName,
     
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $Password,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()] $DomainAdministratorCredential
     )
 
     Write-Verbose -Message ($LocalizedData.CreatingADDomainConnection -f $DomainName);
@@ -842,7 +850,7 @@ function Get-ADCommonParameters
 
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential,
+        [System.Management.Automation.CredentialAttribute()] $DomainAdministratorCredential,
 
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -918,7 +926,7 @@ function Get-ADObjectParentDN
         3. Neither the name of the University nor the names of its contributors may be used to endorse or promote
            products derived from this software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE AUTHOR “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+        THIS SOFTWARE IS PROVIDED BY THE AUTHOR â€œAS ISâ€ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
         LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
         IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
         CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
