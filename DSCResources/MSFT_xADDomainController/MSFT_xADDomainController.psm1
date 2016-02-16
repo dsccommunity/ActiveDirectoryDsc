@@ -35,7 +35,7 @@ function Get-TargetResource
         $domain = Get-ADDomain -Identity $DomainName -Credential $DomainAdministratorCredential
         if ($domain -ne $null)
         {
-            Write-Verbose -Message "Domain '$($fullDomainName)' is present. Looking for DCs ..."
+            Write-Verbose -Message "Domain '$($DomainName)' is present. Looking for DCs ..."
             try
             {
                 $dc = Get-ADDomainController -Identity $env:COMPUTERNAME -Credential $DomainAdministratorCredential
