@@ -155,7 +155,7 @@ function Test-TargetResource
     catch
     {
         if ($error[0]) {Write-Verbose $error[0].Exception}
-        Write-Verbose -Message "Domain '$($Name)' is NOT present on the current node."
+        Write-Verbose -Message "Domain '$($DomainName)' is NOT present on the current node."
         $false
     }
 }
