@@ -10,5 +10,4 @@ class MSFT_xADDomain : OMI_BaseResource
     [Write, Description("Path to a directory that contains the domain database")] String DatabasePath;
     [Write, Description("Path to a directory for the log file that will be written")] String LogPath;
     [Write, Description("Path to a directory where the Sysvol file will be written")] String SysvolPath;
-    [Write, Description("Specifies the DNS Server service should be not installed")] Boolean ExcludeDns;
 };

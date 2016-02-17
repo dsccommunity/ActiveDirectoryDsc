@@ -233,22 +233,6 @@ try
                 Assert-MockCalled Install-ADDSForest -ParameterFilter  { $DomainName -eq $testDomainName } -Scope It;
             }
             
-            It 'Calls "Install-ADDSForest" with "InstallDns" by default, when creating forest' {
-                Mock Install-ADDSForest -ParameterFilter { $InstallDns -eq $true } { }
-                
-                Set-TargetResource @newForestParams;
-                
-                Assert-MockCalled Install-ADDSForest -ParameterFilter  { $InstallDns -eq $true } -Scope It;
-            }
-            
-            It 'Calls "Install-ADDSForest" with "InstallDns:$false" creating forest, when "ExcludeDns" is specified' {
-                Mock Install-ADDSForest -ParameterFilter { $InstallDns -eq $false } { }
-                
-                Set-TargetResource @newForestParams -ExcludeDns $true;
-                
-                Assert-MockCalled Install-ADDSForest -ParameterFilter  { $InstallDns -eq $false } -Scope It;
-            }
-            
             It 'Calls "Install-ADDSForest" with "SafemodeAdministratorPassword" when creating forest' {
                 Mock Install-ADDSForest -ParameterFilter { $SafemodeAdministratorPassword -eq $testSafemodePassword } { }
                 
@@ -333,23 +317,6 @@ try
                 
                 Assert-MockCalled Install-ADDSDomain -ParameterFilter  { $DomainType -eq 'ChildDomain' } -Scope It;
             }
-            
-            It 'Calls "Install-ADDSDomain" with "InstallDns" by default, when creating child domain' {
-                Mock Install-ADDSDomain -ParameterFilter { $InstallDns -eq $true } { }
-                
-                Set-TargetResource @newDomainParams;
-                
-                Assert-MockCalled Install-ADDSDomain -ParameterFilter  { $InstallDns -eq $true } -Scope It;
-            }
-            
-            It 'Calls "Install-ADDSDomain" with "InstallDns:$false" creating child domain, when "ExcludeDns" is specified' {
-                Mock Install-ADDSDomain -ParameterFilter { $InstallDns -eq $false } { }
-                
-                Set-TargetResource @newDomainParams -ExcludeDns $true;
-                
-                Assert-MockCalled Install-ADDSDomain -ParameterFilter  { $InstallDns -eq $false } -Scope It;
-            }
-
             
             It 'Calls "Install-ADDSDomain" with "SafemodeAdministratorPassword" when creating child domain' {
                 Mock Install-ADDSDomain -ParameterFilter { $SafemodeAdministratorPassword -eq $testSafemodePassword } { }

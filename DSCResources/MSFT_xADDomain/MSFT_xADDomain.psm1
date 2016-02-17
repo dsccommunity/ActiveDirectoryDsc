@@ -52,10 +52,7 @@ function Get-TargetResource
         [String] $LogPath,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
-        [String] $SysvolPath,
-        
-        [Parameter()]
-        [System.Boolean] $ExcludeDns
+        [String] $SysvolPath
     )
     
     Assert-Module -ModuleName 'ADDSDeployment';
@@ -140,10 +137,7 @@ function Test-TargetResource
         [String] $LogPath,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
-        [String] $SysvolPath,
-        
-        [Parameter()]
-        [System.Boolean] $ExcludeDns
+        [String] $SysvolPath
     )
 
     $targetResource = Get-TargetResource @PSBoundParameters
@@ -216,10 +210,7 @@ function Set-TargetResource
         [String] $LogPath,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
-        [String] $SysvolPath,
-        
-        [Parameter()]
-        [System.Boolean] $ExcludeDns
+        [String] $SysvolPath
     )
 
     # Debug can pause Install-ADDSForest/Install-ADDSDomain, so we remove it.
@@ -229,7 +220,6 @@ function Set-TargetResource
     
     $installADDSParams = @{
         SafeModeAdministratorPassword = $SafemodeAdministratorPassword.Password;
-        InstallDns = -not $ExcludeDns;
         NoRebootOnCompletion = $true;
         Force = $true;
     }
