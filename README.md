@@ -39,7 +39,6 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database (optional).
 * **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
 * **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional) 
-* **ExcludeDns**: Specifies the DNS Server service should be not installed (optional).
 
 ### xADDomainController
 
@@ -198,7 +197,6 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * xADDomain: Added check for Active Directory cmdlets.
 * xADDomain: Added additional error trapping, verbose and diagnostic information.
 * xADDomain: Added unit test coverage.
-* xADDomain: Added ExcludeDns property.
 
 ### 2.9.0.0
 
