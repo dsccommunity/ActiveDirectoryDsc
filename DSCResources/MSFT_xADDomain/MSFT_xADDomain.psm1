@@ -1,7 +1,26 @@
-#
-# xADDomain: DSC resource to install a new Active Directory forest
-# configuration, or a child domain in an existing forest.
-#
+# Localized messages
+data localizedData
+{
+    # culture="en-US"
+    ConvertFrom-StringData @'
+        RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
+        InvalidDomainError             = Computer is a member of the wrong domain?!
+        ExistingDomainMemberError      = Computer is already a domain member. Cannot create a new '{0}' domain?
+        InvalidCredentialError         = Domain '{0}' is available, but invalid credentials were supplied.
+        
+        QueryDomainWithLocalCredential = Computer is a domain member; querying domain '{0}' using local credential ...
+        QueryDomainWithCredential      = Computer is a workgroup member; querying for domain '{0}' using supplied credential ...
+        DomainFound                    = Active Directory domain '{0}' found.
+        DomainNotFound                 = Active Directory domain '{0}' cannot be found.
+        CreatingChildDomain            = Creating domain '{0}' as a child of domain '{1}' ...
+        CreatedChildDomain             = Child domain '{0}' created.
+        CreatingForest                 = Creating AD forest '{0}' ...
+        CreatedForest                  = AD forest '{0}' created.
+        ResourcePropertyValueIncorrect = Property '{0}' value is incorrect; expected '{1}', actual '{2}'.
+        ResourceInDesiredState         = Resource '{0}' is in the desired state.
+        ResourceNotInDesiredState      = Resource '{0}' is NOT in the desired state.
+'@
+}
 
 function Get-TargetResource
 {
@@ -9,196 +28,84 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory)]
-        [String]$DomainName,
-
-        [String]$ParentDomainName,
-
-        [String]$DomainNetbiosName,
+        [String] $DomainName,
 
         [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [PSCredential] $DomainAdministratorCredential,
 
         [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [PSCredential] $SafemodeAdministratorPassword,
 
-        [PSCredential]$DnsDelegationCredential,
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $ParentDomainName,
 
-        [String]$DatabasePath,
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $DomainNetBIOSName,
 
-        [String]$LogPath,
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [PSCredential] $DnsDelegationCredential,
 
-        [String]$SysvolPath
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $DatabasePath,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $LogPath,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $SysvolPath
     )
+    
+    Assert-Module -ModuleName 'ADDSDeployment';
+    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName;
+    $isDomainMember = Test-DomainMember;
 
     try
     {
-        $fullDomainName = $DomainName
-        if ($ParentDomainName)
-        {
-            $fullDomainName = $DomainName + "." + $ParentDomainName
+        if ($isDomainMember) {
+            ## We're already a domain member, so take the credentials out of the equation
+            Write-Verbose ($localizedData.QueryDomainADWithLocalCredentials -f $domainFQDN);
+            $domain = Get-ADDomain -Identity $domainFQDN -ErrorAction Stop;
+        }
+        else {
+            Write-Verbose ($localizedData.QueryDomainWithCredential -f $domainFQDN);
+            $domain = Get-ADDomain -Identity $domainFQDN -Credential $DomainAdministratorCredential -ErrorAction Stop;
         }
 
-        Write-Verbose -Message "Resolving '$($fullDomainName)' ..."
-        $domain = Get-ADDomain -Identity $fullDomainName -Credential $DomainAdministratorCredential
-        if ($domain -ne $null)
-        {
-            Write-Verbose -Message "Domain '$($fullDomainName)' is present. Looking for DCs ..."
-            try
-            {
-                $dc = Get-ADDomainController -Identity $env:COMPUTERNAME -Credential $DomainAdministratorCredential
-                Write-Verbose -Message "Found domain controller '$($dc.Name)' in domain '$($dc.Domain)'."
-                Write-Verbose -Message "Found parent domain '$($domain.ParentDomain)', expected '$($ParentDomainName)'."
-                if (($dc.Domain -eq $DomainName) -and ((!($dc.ParentDomain) -and !($ParentDomainName)) -or ($dc.ParentDomain -eq $ParentDomainName)))
-                {
-                    Write-Verbose -Message "Current node '$($dc.Name)' is already a domain controller for domain '$($dc.Domain)'."
-                }
-            }
-            catch
-            {
-                Write-Verbose -Message "Current node does not host a domain controller."
-            }
+        ## No need to check whether the node is actually a domain controller. If we don't throw an exception,
+        ## the domain is already UP - and this resource shouldn't run. Domain controller functionality
+        ## should be checked by the xADDomainController resource?
+        Write-Verbose ($localizedData.DomainFound -f $domain.DnsRoot);
+        
+        $targetResource = @{
+            DomainName = $domain.DnsRoot;
+            ParentDomainName = $domain.ParentDomain;
+            DomainNetBIOSName = $domain.NetBIOSName;
         }
+        
+        return $targetResource;
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        $errorMessage = $localizedData.ExistingDomainMemberError -f $DomainName;
+        ThrowInvalidOperationError -ErrorId 'xADDomain_DomainMember' -ErrorMessage $errorMessage;
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
+        Write-Verbose ($localizedData.DomainNotFound -f $domainFQDN)
+        $domain = @{ };
+    }
+    catch [System.Security.Authentication.AuthenticationException]
+    {
+        $errorMessage = $localizedData.InvalidCredentialError -f $DomainName;
+        ThrowInvalidOperationError -ErrorId 'xADDomain_InvalidCredential' -ErrorMessage $errorMessage;
     }
     catch
     {
-        if ($error[0]) {Write-Verbose $error[0].Exception}
-        Write-Verbose -Message "Current node is not running AD WS, and hence is not a domain controller."
-    }
-    @{
-        DomainName = $dc.Domain
-    }
-}
-
-function Set-TargetResource
-{
-    param
-    (
-        [Parameter(Mandatory)]
-        [String]$DomainName,
-
-        [String]$ParentDomainName,
-
-        [String]$DomainNetbiosName,
-
-        [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
-
-        [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
-
-        [PSCredential]$DnsDelegationCredential,
-
-        [String]$DatabasePath,
-
-        [String]$LogPath,
-
-        [String]$SysvolPath
-    )
-
-    # Debug can pause Install-ADDSForest/Install-ADDSDomain, so we remove it.
-    $parameters = $PSBoundParameters.Remove("Debug");
-
-    $fullDomainName = $DomainName
-    if ($ParentDomainName)
-    {
-        $fullDomainName = $DomainName + "." + $ParentDomainName
+        ## Not sure what's gone on here!
+        throw $_
     }
 
-    Write-Verbose -Message "Checking if domain '$($fullDomainName)' is present ..."
-    $domain = $null;
-    try
-    {
-        $domain = Get-ADDomain -Identity $fullDomainName -Credential $DomainAdministratorCredential
-    }
-    catch
-    {
-    }
-    if ($domain -ne $null)
-    {
-        throw (new-object -TypeName System.InvalidOperationException -ArgumentList "Domain '$($Name)' is already present, but it is not hosted by this node.")
-    }
-
-    Write-Verbose -Message "Verified that domain '$($DomainName)' is not already present, continuing ..."
-    if (($ParentDomainName -eq $null) -or ($ParentDomainName -eq ""))
-    {
-        Write-Verbose -Message "Domain '$($DomainName)' is NOT present. Creating forest '$($DomainName)' ..."
-        $params = @{
-            DomainName = $DomainName
-            SafeModeAdministratorPassword = $SafemodeAdministratorPassword.Password
-            InstallDns = $true
-            NoRebootOnCompletion = $true
-            Force = $true
-        }
-        if ($DomainNetbiosName.length -gt 0)
-        {
-            $params.Add("DomainNetbiosName", $DomainNetbiosName)
-        }
-        if ($DnsDelegationCredential -ne $null)
-        {
-            $params.Add("DnsDelegationCredential", $DnsDelegationCredential)
-            $params.Add("CreateDnsDelegation", $true)
-        }
-        if ($DatabasePath -ne $null)
-        {
-            $params.Add("DatabasePath", $DatabasePath)
-        }
-        if ($LogPath -ne $null)
-        {
-            $params.Add("LogPath", $LogPath)
-        }
-        if ($SysvolPath -ne $null)
-        {
-            $params.Add("SysvolPath", $SysvolPath)
-        }
-
-        Install-ADDSForest @params 
-        Write-Verbose -Message "Created forest '$($DomainName)'."
-    }
-    else
-    {
-        Write-Verbose -Message "Domain '$($DomainName)' is NOT present. Creating domain '$($DomainName)' as a child of '$($ParentDomainName)' ..."
-        $params = @{
-            NewDomainName = $DomainName
-            ParentDomainName = $ParentDomainName
-            DomainType = "ChildDomain"
-            SafeModeAdministratorPassword = $SafemodeAdministratorPassword.Password
-            Credential = $DomainAdministratorCredential
-            InstallDns = $true
-            NoRebootOnCompletion = $true
-            Force = $true
-        }
-        if ($DomainNetbiosName.length -gt 0)
-        {
-            $params.Add("NewDomainNetbiosName", $DomainNetbiosName)
-        }
-        if ($DnsDelegationCredential -ne $null)
-        {
-            $params.Add("DnsDelegationCredential", $DnsDelegationCredential)
-            $params.Add("CreateDnsDelegation", $true)
-        }
-        if ($DatabasePath -ne $null)
-        {
-            $params.Add("DatabasePath", $DatabasePath)
-        }
-        if ($LogPath -ne $null)
-        {
-            $params.Add("LogPath", $LogPath)
-        }
-        if ($SysvolPath -ne $null)
-        {
-            $params.Add("SysvolPath", $SysvolPath)
-        }
-
-        Install-ADDSDomain @params
-        Write-Verbose -Message "Created domain '$($DomainName)'."
-    }
-
-    if ($error[0]) {Write-Verbose $error[0].Exception}
-
-    # Signal to the LCM to reboot the node to compensate for the one we
-    # suppressed from Install-ADDSForest/Install-ADDSDomain
-    $global:DSCMachineStatus = 1
-}
+} #end function Get-TargetResource
 
 function Test-TargetResource
 {
@@ -206,45 +113,169 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory)]
-        [String]$DomainName,
-
-        [String]$ParentDomainName,
-
-        [String]$DomainNetbiosName,
+        [String] $DomainName,
 
         [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [PSCredential] $DomainAdministratorCredential,
 
         [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [PSCredential] $SafemodeAdministratorPassword,
 
-        [PSCredential]$DnsDelegationCredential,
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $ParentDomainName,
 
-        [String]$DatabasePath,
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $DomainNetBIOSName,
 
-        [String]$LogPath,
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [PSCredential] $DnsDelegationCredential,
 
-        [String]$SysvolPath
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $DatabasePath,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $LogPath,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $SysvolPath
     )
-    try
+
+    $targetResource = Get-TargetResource @PSBoundParameters
+    $isCompliant = $true;
+
+    ## The Get-Target resource returns .DomainName as the domain's FQDN. Therefore, we
+    ## need to resolve this before comparison.
+    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
+    if ($domainFQDN -ne $targetResource.DomainName)
     {
-        $parameters = $PSBoundParameters.Remove("Debug");
-        $existingResource = Get-TargetResource @PSBoundParameters
-        
-        $fullDomainName = $DomainName
-        if ($ParentDomainName)
+        $message = $localizedData.ResourcePropertyValueIncorrect -f 'DomainName', $domainFQDN, $targetResource.DomainName;
+        Write-Verbose -Message $message;
+        $isCompliant = $false;   
+    }
+    
+    $propertyNames = @('ParentDomainName','DomainNetBIOSName');
+    foreach ($propertyName in $propertyNames)
+    {
+        if ($PSBoundParameters.ContainsKey($propertyName))
         {
-            $fullDomainName = $DomainName + "." + $ParentDomainName
+            $propertyValue = (Get-Variable -Name $propertyName).Value;
+            if ($targetResource.$propertyName -ne $propertyValue)
+            {
+                $message = $localizedData.ResourcePropertyValueIncorrect -f $propertyName, $propertyValue, $targetResource.$propertyName;
+                Write-Verbose -Message $message;
+                $isCompliant = $false;        
+            }
         }
-        $existingResource.DomainName -eq $fullDomainName
     }
-    catch
+        
+    if ($isCompliant)
     {
-        Write-Verbose -Message "Domain '$($Name)' is NOT present on the current node."
-        $false
+        Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $domainFQDN);
+        return $true;
     }
-}
+    else
+    {
+        Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $domainFQDN);
+        return $false;
+    }
 
+} #end function Test-TargetResource
 
-Export-ModuleMember -Function *-TargetResource
+function Set-TargetResource
+{
+    param
+    (
+        [Parameter(Mandatory)]
+        [String] $DomainName,
 
+        [Parameter(Mandatory)]
+        [PSCredential] $DomainAdministratorCredential,
+
+        [Parameter(Mandatory)]
+        [PSCredential] $SafemodeAdministratorPassword,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $ParentDomainName,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $DomainNetBIOSName,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [PSCredential] $DnsDelegationCredential,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $DatabasePath,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $LogPath,
+
+        [Parameter()] [ValidateNotNullOrEmpty()]
+        [String] $SysvolPath
+    )
+
+    # Debug can pause Install-ADDSForest/Install-ADDSDomain, so we remove it.
+    [ref] $null = $PSBoundParameters.Remove("Debug");
+    ## Not entirely necessary, but run Get-TargetResouece to ensure we raise any pre-flight errors.
+    $targetResource = Get-TargetResource @PSBoundParameters;
+    
+    $installADDSParams = @{
+        SafeModeAdministratorPassword = $SafemodeAdministratorPassword.Password;
+        NoRebootOnCompletion = $true;
+        Force = $true;
+    }
+    
+    if ($PSBoundParameters.ContainsKey('DnsDelegationCredential'))
+    {
+        $installADDSParams['DnsDelegationCredential'] = $DnsDelegationCredential;
+        $installADDSParams['CreateDnsDelegation'] = $true;
+    }
+    if ($PSBoundParameters.ContainsKey('DatabasePath'))
+    {
+        $installADDSParams['DatabasePath'] = $DatabasePath;
+    }
+    if ($PSBoundParameters.ContainsKey('LogPath'))
+    {
+        $installADDSParams['LogPath'] = $LogPath;
+    }
+    if ($PSBoundParameters.ContainsKey('SysvolPath'))
+    {
+        $installADDSParams['SysvolPath'] = $SysvolPath;
+    }
+    
+    if ($PSBoundParameters.ContainsKey('ParentDomainName'))
+    {
+        Write-Verbose -Message ($localizedData.CreatingChildDomain -f $DomainName, $ParentDomainName);
+        $installADDSParams['Credential'] = $DomainAdministratorCredential
+        $installADDSParams['NewDomainName'] = $DomainName
+        $installADDSParams['ParentDomainName'] = $ParentDomainName
+        $installADDSParams['DomainType'] = 'ChildDomain';
+        if ($PSBoundParameters.ContainsKey('DomainNetBIOSName'))
+        {
+            $installADDSParams['NewDomainNetbiosName'] = $DomainNetBIOSName;
+        }
+        Install-ADDSDomain @installADDSParams;
+        Write-Verbose -Message ($localizedData.CreatedChildDomain);
+    }
+    else
+    {
+        Write-Verbose -Message ($localizedData.CreatingForest -f $DomainName);
+        $installADDSParams['DomainName'] = $DomainName;
+        if ($PSBoundParameters.ContainsKey('DomainNetbiosName'))
+        {
+            $installADDSParams['DomainNetbiosName'] = $DomainNetBIOSName;
+        }
+        Install-ADDSForest @installADDSParams;
+        Write-Verbose -Message ($localizedData.CreatedForest); 
+    }  
+
+    # Signal to the LCM to reboot the node to compensate for the one we
+    # suppressed from Install-ADDSForest/Install-ADDSDomain
+    $global:DSCMachineStatus = 1
+
+} #end function Set-TargetResource
+
+## Import the common AD functions
+$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
+. $adCommonFunctions;
+
+Export-ModuleMember -Function *-TargetResource;
