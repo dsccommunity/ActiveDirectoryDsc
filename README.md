@@ -189,6 +189,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 ### Unreleased
 
 * xWaitForADDomain: Updated to make it compatible with systems that don't have the ActiveDirectory module installed, and to allow it to function with domains/forests that don't have a domain controller with Active Directory Web Services running.
+* xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages.  Corrected.
 
 ### 2.9.0.0
 
