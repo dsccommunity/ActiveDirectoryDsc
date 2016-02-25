@@ -1,4 +1,4 @@
-# Localized messages
+﻿# Localized messages
 data LocalizedData
 {
     # culture="en-US"
@@ -812,7 +812,9 @@ function Test-Password
         [System.String] $UserName,
     
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
         
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
