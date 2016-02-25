@@ -197,6 +197,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * xADDomain: Added check for Active Directory cmdlets.
 * xADDomain: Added additional error trapping, verbose and diagnostic information.
 * xADDomain: Added unit test coverage.
+* xADDomainController: Corrected two cases of incorrect variables being called in Verbose output messages.  
 
 ### 2.9.0.0
 
