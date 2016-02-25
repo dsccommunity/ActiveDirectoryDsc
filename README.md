@@ -17,12 +17,12 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 
 * **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
-* **xADUser** modifies and removes Active Directory Users. 
-* **xWaitForDomain** waits for new, remote domain to setup.
-(Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
+* **xADUser** modifies and removes Active Directory Users. 
+* **xWaitForDomain** waits for new, remote domain to setup.
+(Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
 ### **xADDomain**
 
@@ -197,6 +197,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * xADDomain: Added check for Active Directory cmdlets.
 * xADDomain: Added additional error trapping, verbose and diagnostic information.
 * xADDomain: Added unit test coverage.
+* Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomin, xADGroup, xADOrganizationalUnit and xADUser resources.
 
 ### 2.9.0.0
 
