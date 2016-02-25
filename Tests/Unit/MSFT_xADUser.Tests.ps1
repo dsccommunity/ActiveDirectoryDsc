@@ -1,19 +1,35 @@
-[CmdletBinding()]
-param()
+$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
+$Global:DSCResourceName    = 'MSFT_xADUser' # Example MSFT_xFirewall
 
-Set-StrictMode -Version Latest
+#region HEADER
+[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
+Write-Host $moduleRoot -ForegroundColor Green;
+if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+{
+    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+}
+else
+{
+    & git @('-C',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'),'pull')
+}
+Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $Global:DSCModuleName `
+    -DSCResourceName $Global:DSCResourceName `
+    -TestType Unit 
+#endregion
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..).Path
 
-$ModuleName = 'MSFT_xADUser'
-Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
-## Disable default ADWS drive warning
-$Env:ADPS_LoadDefaultDrive = 0;
-Import-Module -Name ActiveDirectory -Force;
+# Begin Testing
+try
+{
 
-Describe "xADUser" {
+    #region Pester Tests
 
-    InModuleScope $ModuleName {
+    # The InModuleScope command allows you to perform white-box unit testing on the internal
+    # (non-exported) code of a Script Module.
+    InModuleScope $Global:DSCResourceName {
 
         $testPresentParams = @{
             DomainName = 'contoso.com';
@@ -45,77 +61,8 @@ Describe "xADUser" {
         );
         $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword','Enabled');
 
-        Context "Validate Assert-Module method" {
-        
-            It "Throws if Active Directory module is not present" {
-                $testModuleName = 'ActiveDirectory';
-                Mock Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { }
-        
-                { Assert-Module -ModuleName $testModuleName } | Should Throw;
-            }
-        
-        } #end context Validate Assert-Module method
-
-        Context "Validate Get-ADCommonParameters method" {
-
-            It "Adds 'Identity' parameter by default" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams;
-
-                $adCommonParams.Identity | Should Be $testPresentParams.UserName;
-            }
-
-            It "Adds 'Name' parameter when 'UseNameParameter' is specified" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -UseNameParameter;
-
-                $adCommonParams.Name | Should Be $testPresentParams.UserName;
-            }
-
-            It "Adds 'Name' parameter when 'UseNameParameter' and 'CommonName' are specified" {
-                $testCommonName = 'Test Common Name';
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -UseNameParameter -CommonName $testCommonName;
-
-                $adCommonParams.Name | Should Be $testCommonName;
-            }
-            
-            It "Adds 'Server' parameter when 'DomainController' parameter is specified" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -DomainController $testDomainController;
-                
-                $adCommonParams.Server | Should Be $testDomainController;
-            }
-            
-            It "Adds 'Credential' parameter when 'DomainAdministratorCredential' parameter is specified" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -DomainAdministratorCredential $testCredential;
-                
-                $adCommonParams.Credential | Should Be $testCredential;
-            }
-        
-        } #end context Validate Get-ADCommonParameters method
-
-        Context "Validate Get-ADObjectParentDN method" {
-
-            It "Returns CN object parent path" {
-                Get-ADObjectParentDN -DN 'CN=Administrator,CN=Users,DC=contoso,DC=com' | Should Be 'CN=Users,DC=contoso,DC=com';
-            }
-
-            It "Returns OU object parent path" {
-                Get-ADObjectParentDN -DN 'CN=Administrator,OU=Custom Organizational Unit,DC=contoso,DC=com' | Should Be 'OU=Custom Organizational Unit,DC=contoso,DC=com';
-            }
-
-        } #end context Validate Get-ADObjectParentDN method
-
-        Context "Validate Validate-Parameters method" {
-
-            It "Does not throw when 'PasswordNeverExpires' and 'CannotChangePassword' are specified" {
-                { Validate-Parameters -PasswordNeverExpires $true -CannotChangePassword $true } | Should Not Throw;
-            }
-
-            It "Throws when account is disabled and 'Password' is specified" {
-                { Validate-Parameters -Password $testCredential -Enabled $false } | Should Throw;
-            }
-
-        } #end context Validate Validate-PasswordParameters method
-        
-        Context "Validate Get-TargetResource method" {
+        #region Function Get-TargetResource
+        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
         
             It "Returns a 'System.Collections.Hashtable' object type" {
                 Mock Get-ADUser { return [PSCustomObject] $fakeADUser; }
@@ -157,9 +104,11 @@ Describe "xADUser" {
                 Assert-MockCalled Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It;
             }
         
-        } #end context Validate Get-TargetResource method
+        }
+        #endregion
          
-        Context "Validate Test-TargetResource method" {
+        #region Function Test-TargetResource
+        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
             
             It "Passes when user account does not exist and 'Ensure' is 'Absent'" {
                 Mock Get-TargetResource { return $testAbsentParams }
@@ -315,9 +264,11 @@ Describe "xADUser" {
             
             } #end foreach test boolean property
             
-        } #end Context Validate Test-TargetResource method
+        }
+        #endregion
         
-        Context "Validate Set-TargetResource method" {
+        #region Function Set-TargetResource
+        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
             
             It "Calls 'New-ADUser' when 'Ensure' is 'Present' and the account does not exist" {
                 $newUserName = 'NewUser'
@@ -463,7 +414,30 @@ Describe "xADUser" {
                 Assert-MockCalled Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -Scope It;
             }
         
-        } #end context Validate Set-TargetResource method
+        }
+        #endregion
+        
+        #region Function Assert-TargetResource
+        Describe "$($Global:DSCResourceName)\Assert-Parameters" {
+
+            It "Does not throw when 'PasswordNeverExpires' and 'CannotChangePassword' are specified" {
+                { Assert-Parameters -PasswordNeverExpires $true -CannotChangePassword $true } | Should Not Throw;
+            }
+
+            It "Throws when account is disabled and 'Password' is specified" {
+                { Assert-Parameters -Password $testCredential -Enabled $false } | Should Throw;
+            }
+
+        }
+        #endregion
    
-    } #end InModuleScope
+    }
+    #endregion
 }
+finally
+{
+    #region FOOTER
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+    #endregion
+}
+

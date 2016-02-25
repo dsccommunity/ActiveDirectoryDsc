@@ -56,6 +56,7 @@ function Get-TargetResource
 
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
         [ValidateNotNullOrEmpty()]
@@ -171,6 +172,7 @@ function Test-TargetResource
 
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
         [ValidateNotNullOrEmpty()]
@@ -203,20 +205,20 @@ function Test-TargetResource
         $Notes
     )
     ## Validate parameters before we even attempt to retrieve anything
-    $validateMemberParameters = @{};
+    $assertMemberParameters = @{};
     if ($PSBoundParameters.ContainsKey('Members'))
     {
-        $validateMemberParameters['Members'] = $Members;
+        $assertMemberParameters['Members'] = $Members;
     }
     if ($PSBoundParameters.ContainsKey('MembersToInclude'))
     {
-        $validateMemberParameters['MembersToInclude'] = $MembersToInclude;
+        $assertMemberParameters['MembersToInclude'] = $MembersToInclude;
     }
     if ($PSBoundParameters.ContainsKey('MembersToExclude'))
     {
-        $validateMemberParameters['MembersToExclude'] = $MembersToExclude;
+        $assertMemberParameters['MembersToExclude'] = $MembersToExclude;
     }
-    Validate-MemberParameters @validateMemberParameters -ModuleName 'xADDomain' -ErrorAction Stop;
+    Assert-MemberParameters @assertMemberParameters -ModuleName 'xADDomain' -ErrorAction Stop;
     
     $targetResource = Get-TargetResource @PSBoundParameters;
     $targetResourceInCompliance = $true;
@@ -310,6 +312,7 @@ function Set-TargetResource
 
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
         [ValidateNotNullOrEmpty()]
@@ -490,99 +493,6 @@ function Set-TargetResource
         }
     } #end catch
 } #end function Set-TargetResource
-
-# Internal function to build common parameters for the Active Directory cmdlets
-function Get-ADCommonParameters {
-    [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $GroupName,
-
-        [ValidateSet('DomainLocal','Global','Universal')]
-        [System.String]
-        $GroupScope = 'Global',
-
-        [ValidateSet('Security','Distribution')]
-        [System.String]
-        $Category = 'Security',
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
-
-        [ValidateSet("Present", "Absent")]
-        [System.String]
-        $Ensure = "Present",
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Description,
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DisplayName,
-
-        [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
-        $Credential,
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DomainController,
-
-        [ValidateNotNullOrEmpty()]
-        [System.String[]]
-        $Members,
-        
-        [ValidateNotNullOrEmpty()]
-        [System.String[]]
-        $MembersToInclude,
-        
-        [ValidateNotNullOrEmpty()]
-        [System.String[]]
-        $MembersToExclude,
-
-        [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
-        [System.String]
-        $MembershipAttribute = 'SamAccountName',
-
-        ## This must be the user's DN
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ManagedBy,
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Notes,
-
-        [System.Management.Automation.SwitchParameter]
-        $UseNameParameter
-    )
-    ## The Get-ADGroup and Set-ADGroup cmdlets take an -Identity parameter, but the New-ADGroup cmdlet uses the -Name parameter
-    if ($UseNameParameter)
-    {
-        $adGroupCommonParameters = @{ Name = $GroupName; }
-    }
-    else
-    {
-        $adGroupCommonParameters = @{ Identity = $GroupName; }
-    }
-
-    if ($Credential)
-    {
-        $adGroupCommonParameters['Credential'] = $Credential;
-    }
-    if ($DomainController)
-    {
-        $adGroupCommonParameters['Server'] = $DomainController;
-    }
-    return $adGroupCommonParameters;
-
-} #end function Get-ADCommonParameters
 
 ## Import the common AD functions
 $adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';

@@ -1,12 +1,25 @@
 $Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xADCommon' # Example MSFT_xFirewall
 
-#region HEADER
+##region HEADER
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
 Write-Host $moduleRoot -ForegroundColor Green;
+if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+{
+    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+}
+else
+{
+    & git @('-C',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'),'pull')
+}
+Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $Global:DSCModuleName `
+    -DSCResourceName $Global:DSCResourceName `
+    -TestType Unit 
 #endregion
 
-Import-Module (Join-Path $moduleRoot "DSCResources\$DSCResourceName\$DSCResourceName.psm1") -Force;
 
 # Begin Testing
 try
@@ -95,7 +108,8 @@ try
                 Get-ADObjectParentDN -DN 'CN=Administrator,OU=Custom Organizational Unit,DC=contoso,DC=com' | Should Be 'OU=Custom Organizational Unit,DC=contoso,DC=com';
             }
 
-        } 
+        }
+        #endregion 
         
         #region Function Remove-DuplicateMembers
         Describe "$($Global:DSCResourceName)\Remove-DuplicateMembers" {
@@ -125,7 +139,7 @@ try
             }
 
         }
-        #end region
+        #endregion
         
         #region Function Test-Members
         Describe "$($Global:DSCResourceName)\Test-Members" {
@@ -231,33 +245,160 @@ try
                 Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToInclude | Should Be $true;
             }
         }
-        #end region
+        #endregion
         
-        #region Function Validate-MemberParameters
-        Describe "$($Global:DSCResourceName)\Validate-MemberParameters" {
+        #region Function Assert-MemberParameters
+        Describe "$($Global:DSCResourceName)\Assert-MemberParameters" {
             
             It "Throws if 'Members' is specified but is empty" {
-                { Validate-MemberParameters -Members @() } | Should Throw 'The Members parameter value is null';
+                { Assert-MemberParameters -Members @() } | Should Throw 'The Members parameter value is null';
             }
             
             It "Throws if 'Members' and 'MembersToInclude' are specified" {
-                { Validate-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should Throw 'parameters conflict';
+                { Assert-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should Throw 'parameters conflict';
             }
             
             It "Throws if 'Members' and 'MembersToExclude' are specified" {
-                { Validate-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should Throw 'parameters conflict';
+                { Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should Throw 'parameters conflict';
             }
             
             It "Throws if 'MembersToInclude' and 'MembersToExclude' contain the same member" {
-                { Validate-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should Throw 'member must not be included in both';
+                { Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should Throw 'member must not be included in both';
             }
             
             It "Throws if 'MembersToInclude' and 'MembersToExclude' are empty" {
-                { Validate-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should Throw 'At least one member must be specified';
+                { Assert-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should Throw 'At least one member must be specified';
             }
 
         }
-        #end region
+        #endregion
+              
+        #region Function ConvertTo-Timespan
+        Describe "$($Global:DSCResourceName)\Get-ADCommonParameters" {
+            
+            It "Returns 'System.Collections.Hashtable' object type" {
+                $testIdentity = 'contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity;
+
+                $result -is [System.Collections.Hashtable] | Should Be $true;
+            }
+            
+            It "Returns 'Identity' key by default" {
+                $testIdentity = 'contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity;
+
+                $result['Identity'] | Should Be $testIdentity;
+            }
+            
+            It "Returns 'Name' key when 'UseNameParameter' is specified" {
+                $testIdentity = 'contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -UseNameParameter;
+
+                $result['Name'] | Should Be $testIdentity;
+            }
+            
+            It "Returns 'Identity' key by default when 'Identity' and 'CommonName' are specified" {
+                $testIdentity = 'contoso.com';
+                $testCommonName = 'Test Common Name';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -CommonName $testCommonName;
+
+                $result['Identity'] | Should Be $testIdentity;
+            }
+            
+            It "Returns 'Identity' key with 'CommonName' when 'Identity', 'CommonName' and 'PreferCommonName' are specified" {
+                $testIdentity = 'contoso.com';
+                $testCommonName = 'Test Common Name';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -CommonName $testCommonName -PreferCommonName;
+
+                $result['Identity'] | Should Be $testCommonName;
+            }
+            
+            It "Returns 'Identity' key with 'Identity' when 'Identity' and 'PreferCommonName' are specified" {
+                $testIdentity = 'contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -PreferCommonName;
+
+                $result['Identity'] | Should Be $testIdentity;
+            }
+            
+            it "Returns 'Name' key when 'UseNameParameter' and 'PreferCommonName' are supplied" {
+                $testIdentity = 'contoso.com';
+                $testCommonName = 'Test Common Name';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -UseNameParameter -CommonName $testCommonName -PreferCommonName;
+
+                $result['Name'] | Should Be $testCommonName;
+            }
+            
+            It "Does not return 'Credential' key by default" {
+                $testIdentity = 'contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity;
+
+                $result.ContainsKey('Credential') | Should Be $false;
+            }
+            
+            It "Returns 'Credential' key when specified" {
+                $testIdentity = 'contoso.com';
+                $testPassword = (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+                $testCredential = New-Object System.Management.Automation.PSCredential 'Safemode', $testPassword;
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -Credential $testCredential;
+
+                $result['Credential'] | Should Be $testCredential;
+            }
+            
+            It "Does not return 'Server' key by default" {
+                $testIdentity = 'contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity;
+
+                $result.ContainsKey('Server') | Should Be $false;
+            }
+            
+            It "Returns 'Server' key when specified" {
+                $testIdentity = 'contoso.com';
+                $testServer = 'testserver.contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -Server $testServer;
+
+                $result['Server'] | Should Be $testServer;
+            }
+            
+            It "Converts 'DomainAdministratorCredential' parameter to 'Credential' key" {
+                $testIdentity = 'contoso.com';
+                $testPassword = (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+                $testCredential = New-Object System.Management.Automation.PSCredential 'Safemode', $testPassword;
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -DomainAdministratorCredential $testCredential;
+
+                $result['Credential'] | Should Be $testCredential;
+            }
+            
+            It "Converts 'DomainController' parameter to 'Server' key" {
+                $testIdentity = 'contoso.com';
+                $testServer = 'testserver.contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -DomainController $testServer;
+
+                $result['Server'] | Should Be $testServer;
+            }
+            
+            It 'Accepts remaining arguments' {
+                $testIdentity = 'contoso.com';
+                
+                $result = Get-ADCommonParameters -Identity $testIdentity -UnexpectedParameter 42;
+                
+                $result['Identity'] | Should Be $testIdentity;
+            }
+            
+        }
+        #endregion
 
     }
     #endregion
@@ -265,6 +406,6 @@ try
 finally
 {
     #region FOOTER
-    
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
