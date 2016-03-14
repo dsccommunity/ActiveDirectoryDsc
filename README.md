@@ -194,6 +194,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 ### Unreleased
 
 * xWaitForADDomain: Updated to make it compatible with systems that don't have the ActiveDirectory module installed, and to allow it to function with domains/forests that don't have a domain controller with Active Directory Web Services running.
+* xADGroup: Fixed bug where specified credentials were not used to retrieve existing group membership.
 * xADDomain: Added check for Active Directory cmdlets.
 * xADDomain: Added additional error trapping, verbose and diagnostic information.
 * xADDomain: Added unit test coverage.
