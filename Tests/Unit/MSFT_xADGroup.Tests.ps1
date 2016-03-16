@@ -110,6 +110,7 @@ try
             
             It "Calls 'Get-ADGroup' with 'Server' parameter when 'DomainController' specified" {
                 Mock Get-ADGroup -ParameterFilter { $Server -eq $testDomainController } -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
             
                 Get-TargetResource @testPresentParams -DomainController $testDomainController;
             
@@ -118,10 +119,29 @@ try
             
             It "Calls 'Get-ADGroup' with 'Credential' parameter when specified" {
                 Mock Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
             
                 Get-TargetResource @testPresentParams -Credential $testCredentials;
             
                 Assert-MockCalled Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+            }
+            
+            It "Calls 'Get-ADGroupMember' with 'Server' parameter when 'DomainController' specified" {
+                Mock Get-ADGroup  -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -MockWith { return @($fakeADUser1, $fakeADUser2); }
+            
+                Get-TargetResource @testPresentParams -DomainController $testDomainController;
+            
+                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -Scope It;
+            }
+            
+            It "Calls 'Get-ADGroupMember' with 'Credential' parameter when specified" {
+                Mock Get-ADGroup -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return @($fakeADUser1, $fakeADUser2); }
+            
+                Get-TargetResource @testPresentParams -Credential $testCredentials;
+            
+                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
             }
 
         }

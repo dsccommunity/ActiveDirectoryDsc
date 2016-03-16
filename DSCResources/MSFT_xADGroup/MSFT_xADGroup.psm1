@@ -93,8 +93,8 @@ function Get-TargetResource
     try {
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info;
         Write-Verbose -Message ($LocalizedData.RetrievingGroupMembers -f $MembershipAttribute);
-        ## Retrieve the current list of members using the specified proper
-        $adGroupMembers = (Get-ADGroupMember -Identity $adGroup.DistinguishedName).$MembershipAttribute; 
+        ## Retrieve the current list of members, returning the specified membership attribute
+        $adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute; 
         $targetResource = @{
             GroupName = $adGroup.Name;
             GroupScope = $adGroup.GroupScope;
