@@ -137,7 +137,7 @@ function Get-ADObjectParentDN
 
 # Internal function that validates the Members, MembersToInclude and MembersToExclude combination
 # is valid. If the combination is invalid, an InvalidArgumentError is raised.
-function Validate-MemberParameters
+function Assert-MemberParameters
 {
     [CmdletBinding()]
     param
@@ -208,7 +208,7 @@ function Validate-MemberParameters
         }
     }
         
-} #end function ValidateMemberParameters
+} #end function Assert-MemberParameters
 
 ## Internal function to remove duplicate strings (members) from a string array
 function Remove-DuplicateMembers

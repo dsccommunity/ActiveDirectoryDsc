@@ -246,27 +246,27 @@ try
         }
         #endregion
         
-        #region Function Validate-MemberParameters
-        Describe "$($Global:DSCResourceName)\Validate-MemberParameters" {
+        #region Function Assert-MemberParameters
+        Describe "$($Global:DSCResourceName)\Assert-MemberParameters" {
             
             It "Throws if 'Members' is specified but is empty" {
-                { Validate-MemberParameters -Members @() } | Should Throw 'The Members parameter value is null';
+                { Assert-MemberParameters -Members @() } | Should Throw 'The Members parameter value is null';
             }
             
             It "Throws if 'Members' and 'MembersToInclude' are specified" {
-                { Validate-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should Throw 'parameters conflict';
+                { Assert-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should Throw 'parameters conflict';
             }
             
             It "Throws if 'Members' and 'MembersToExclude' are specified" {
-                { Validate-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should Throw 'parameters conflict';
+                { Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should Throw 'parameters conflict';
             }
             
             It "Throws if 'MembersToInclude' and 'MembersToExclude' contain the same member" {
-                { Validate-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should Throw 'member must not be included in both';
+                { Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should Throw 'member must not be included in both';
             }
             
             It "Throws if 'MembersToInclude' and 'MembersToExclude' are empty" {
-                { Validate-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should Throw 'At least one member must be specified';
+                { Assert-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should Throw 'At least one member must be specified';
             }
 
         }
@@ -369,7 +369,7 @@ try
         }
         #endregion
         
-        #region Function ConvertTo-Timespan
+        #region Function Get-ADCommonParameters
         Describe "$($Global:DSCResourceName)\Get-ADCommonParameters" {
             
             It "Returns 'System.Collections.Hashtable' object type" {

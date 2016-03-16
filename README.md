@@ -6,7 +6,7 @@ The **xActiveDirectory** DSC resources allow you to configure and manage Active 
 Note: these resources do not presently install the RSAT tools.
 
 ## Contributing
-Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/xDscResources/blob/master/CONTRIBUTING.md).
+Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
 ## Description
 
@@ -18,12 +18,12 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
-* **xADUser** modifies and removes Active Directory Users. 
-* **xWaitForDomain** waits for new, remote domain to setup.
-(Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
+* **xADUser** modifies and removes Active Directory Users. 
+* **xWaitForDomain** waits for new, remote domain to setup.
+(Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
 ### **xADDomain**
 
@@ -211,9 +211,11 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 
 * xADDomainDefaultPasswordPolicy: New resource added.
 * xWaitForADDomain: Updated to make it compatible with systems that don't have the ActiveDirectory module installed, and to allow it to function with domains/forests that don't have a domain controller with Active Directory Web Services running.
+* xADGroup: Fixed bug where specified credentials were not used to retrieve existing group membership.
 * xADDomain: Added check for Active Directory cmdlets.
 * xADDomain: Added additional error trapping, verbose and diagnostic information.
 * xADDomain: Added unit test coverage.
+* Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomin, xADGroup, xADOrganizationalUnit and xADUser resources.
 
 ### 2.9.0.0
 

@@ -1,22 +1,34 @@
-[CmdletBinding()]
-param()
+$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
+$Global:DSCResourceName    = 'MSFT_xADOrganizationalUnit' # Example MSFT_xFirewall
 
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
+#region HEADER
+[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
+Write-Host $moduleRoot -ForegroundColor Green;
+if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
+    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
+else
+{
+    & git @('-C',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'),'pull')
+}
+Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $Global:DSCModuleName `
+    -DSCResourceName $Global:DSCResourceName `
+    -TestType Unit 
+#endregion
 
-$ErrorActionPreference = 'Stop'
-Set-StrictMode -Version Latest
+# Begin Testing
+try
+{
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..).Path
+    #region Pester Tests
 
-$ModuleName = 'MSFT_xADOrganizationalUnit'
-Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
-
-Describe 'xADOrganizationalUnit' {
-    
-    InModuleScope $ModuleName {
+    # The InModuleScope command allows you to perform white-box unit testing on the internal
+    # (non-exported) code of a Script Module.
+    InModuleScope $Global:DSCResourceName {
 
         function Get-ADOrganizationalUnit { param ($Name) }
         function Set-ADOrganizationalUnit { param ($Identity, $Credential) }
@@ -41,7 +53,8 @@ Describe 'xADOrganizationalUnit' {
             Description = $testPresentParams.Description;
         }
 
-        Context "Validate Get-TargetResource method" {
+        #region Function Get-TargetResource
+        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
             It 'Returns a "System.Collections.Hashtable" object type' {
                 Mock Assert-Module -MockWith { }
@@ -100,9 +113,11 @@ Describe 'xADOrganizationalUnit' {
                 $targetResource.Description | Should BeNullOrEmpty
             }
 
-        } #end context Validate Get-TargetResource method
+        }
+        #endregion
         
-        Context "Validate Test-TargetResource method" {
+        #region Function Test-TargetResource
+        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
 
             It 'Returns a "System.Boolean" object type' {
                 Mock Assert-Module -MockWith { }
@@ -167,9 +182,11 @@ Describe 'xADOrganizationalUnit' {
                 Test-TargetResource @testEmptyDescriptionParams | Should Be $true
             }
 
-        } #end Context Validate Test-TargetResource method
+        }
+        #endregion
         
-        Context "Validate Set-TargetResource method" {
+        #region Function Set-TargetResource
+        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
 
             It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and OU does not exist' {
                 Mock Assert-Module -MockWith { }
@@ -262,7 +279,15 @@ Describe 'xADOrganizationalUnit' {
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It -Exactly 0
             }
 
-        } #end context Validate Set-TargetResource method
+        }
+        #endregion
     
-    } #end InModuleScope
+    }
+    #endregion
+}
+finally
+{
+    #region FOOTER
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+    #endregion
 }
