@@ -469,24 +469,6 @@ try
         }
         #end region
         
-        #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-ADCommonParameters" {
-        
-            It "Adds 'Server' parameter when 'DomainController' parameter is specified" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -DomainController $testDomainController;
-        
-                $adCommonParams.Server | Should Be $testDomainController;
-            }
-            
-            It "Adds 'Credential' parameter when 'Credential' parameter is specified" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -Credential $testCredentials;
-        
-                $adCommonParams.Credential | Should Be $testCredentials;
-            }
-        
-        }
-        #end region
-    
     }
     #end region
 }

@@ -3,14 +3,15 @@ data LocalizedData
 {
     # culture="en-US"
     ConvertFrom-StringData @'
-RoleNotFoundError        = Please ensure that the PowerShell module for role '{0}' is installed
-UpdatingOU               = Updating OU '{0}'
-DeletingOU               = Deleting OU '{0}'
-CreatingOU               = Creating OU '{0}'
-OUInDesiredState         = OU '{0}' exists and is in the desired state
-OUNotInDesiredState      = OU '{0}' exists but is not in the desired state
-OUExistsButShouldNot     = OU '{0}' exists when it should not exist
-OUDoesNotExistButShould  = OU '{0}' does not exist when it should exist
+        RoleNotFoundError        = Please ensure that the PowerShell module for role '{0}' is installed
+        RetrievingOU             = Retrieving OU '{0}'.
+        UpdatingOU               = Updating OU '{0}'
+        DeletingOU               = Deleting OU '{0}'
+        CreatingOU               = Creating OU '{0}'
+        OUInDesiredState         = OU '{0}' exists and is in the desired state
+        OUNotInDesiredState      = OU '{0}' exists but is not in the desired state
+        OUExistsButShouldNot     = OU '{0}' exists when it should not exist
+        OUDoesNotExistButShould  = OU '{0}' does not exist when it should exist
 '@
 }
 
@@ -28,6 +29,7 @@ function Get-TargetResource
     )
     
     Assert-Module -ModuleName 'ActiveDirectory';
+    Write-Verbose ($LocalizedData.RetrievingOU -f $Name)
     $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
 
     $targetResource = @{
@@ -44,7 +46,7 @@ function Get-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param
     (    
         [parameter(Mandatory)] 
@@ -58,14 +60,15 @@ function Test-TargetResource
         $Ensure = 'Present',
 
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
 
         [ValidateNotNull()]
         [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
         [ValidateNotNull()]
-        [System.String]
-        $Description = ''
+        [System.String] $Description = ''
     )
 
     $targetResource = Get-TargetResource -Name $Name -Path $Path
@@ -137,14 +140,15 @@ function Set-TargetResource
         $Ensure = 'Present',
 
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Credential,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
 
         [ValidateNotNull()]
         [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
         [ValidateNotNull()]
-        [System.String]
-        $Description = ''
+        [System.String] $Description = ''
     )
 
     Assert-Module -ModuleName 'ActiveDirectory';
@@ -210,21 +214,8 @@ function Set-TargetResource
 
 } #end function Set-TargetResource
 
-# Internal function to assert if the role specific module is installed or not
-function Assert-Module
-{
-    [CmdletBinding()]
-    param (
-        [System.String] $ModuleName = 'ActiveDirectory'
-    )
-
-    if (-not (Get-Module -Name $ModuleName -ListAvailable))
-    {
-        $errorMsg = $($LocalizedData.RoleNotFoundError) -f $moduleName;
-        $exception = New-Object System.InvalidOperationException $errorMessage;
-        $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null;
-        throw $errorRecord;
-    }
-} #end function Assert-Module
+## Import the common AD functions
+$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
+. $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource

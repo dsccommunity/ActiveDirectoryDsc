@@ -1,4 +1,4 @@
-# Localized messages
+﻿# Localized messages
 data LocalizedData
 {
     # culture="en-US"
@@ -82,7 +82,9 @@ function Get-TargetResource
         [System.String] $UserName,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
@@ -208,7 +210,9 @@ function Get-TargetResource
         
         ## Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $DomainAdministratorCredential
     )
     
     Assert-Module -ModuleName 'ActiveDirectory';
@@ -295,7 +299,9 @@ function Test-TargetResource
         [System.String] $UserName,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
@@ -420,10 +426,12 @@ function Test-TargetResource
         [System.String] $DomainController,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $DomainAdministratorCredential
     )
 
-    Validate-Parameters @PSBoundParameters;
+    Assert-Parameters @PSBoundParameters;
     $targetResource = Get-TargetResource @PSBoundParameters;
     $isCompliant = $true;
 
@@ -494,7 +502,9 @@ function Set-TargetResource
         [System.String] $UserName,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
@@ -618,10 +628,12 @@ function Set-TargetResource
         [System.String] $DomainController,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $DomainAdministratorCredential
     )
 
-    Validate-Parameters @PSBoundParameters;
+    Assert-Parameters @PSBoundParameters;
     $targetResource = Get-TargetResource @PSBoundParameters;
 
     ## Add common name, ensure and enabled as they may not be explicitly passed
@@ -747,20 +759,20 @@ function Set-TargetResource
         }
         
         Write-Verbose -Message ($LocalizedData.UpdatingADUser -f $UserName);
-        Set-ADUser @setADUserParams -Enabled $Enabled;
+        [ref] $null = Set-ADUser @setADUserParams -Enabled $Enabled;
     }
     elseif (($Ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present'))
     {
         ## User exists and needs removing
         Write-Verbose ($LocalizedData.RemovingADUser -f $UserName);
         $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
-        Remove-ADUser @adCommonParameters -Confirm:$false;
+        [ref] $null = Remove-ADUser @adCommonParameters -Confirm:$false;
     }
 
 } #end function Set-TargetResource
 
 # Internal function to validate unsupported options/configurations
-function Validate-Parameters
+function Assert-Parameters
 {
     [CmdletBinding()]
     param
@@ -785,7 +797,7 @@ function Validate-Parameters
         ThrowInvalidArgumentError @throwInvalidArgumentErrorParams;
     }
 
-} #end function Validate-Parameters
+} #end function Assert-Parameters
 
 # Internal function to test the validity of a user's password.
 function Test-Password
@@ -800,10 +812,14 @@ function Test-Password
         [System.String] $UserName,
     
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
         
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $DomainAdministratorCredential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $DomainAdministratorCredential
     )
 
     Write-Verbose -Message ($LocalizedData.CreatingADDomainConnection -f $DomainName);
@@ -824,167 +840,8 @@ function Test-Password
 
 } #end function Test-Password
 
-# Internal function to build common parameters for the Active Directory cmdlets
-function Get-ADCommonParameters
-{
-    [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $UserName,
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $CommonName,
-
-        [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential,
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DomainController,
-
-        [Parameter(ValueFromRemainingArguments)]
-        $IgnoredArguments,
-
-        [System.Management.Automation.SwitchParameter]
-        $UseNameParameter
-    )
-    
-    ## The Get-ADUser, Set-ADUser and Remove-ADUser cmdlets take an -Identity parameter, but the New-ADUser cmdlet uses the -Name parameter
-    if ($UseNameParameter)
-    {
-        if ($PSBoundParameters.ContainsKey('CommonName'))
-        {
-            $adUserParameters = @{ Name = $CommonName; }
-        }
-        else
-        {
-            $adUserParameters = @{ Name = $UserName; }
-        }
-    }
-    else
-    {
-        $adUserParameters = @{ Identity = $UserName; }
-    }
-
-    if ($DomainAdministratorCredential)
-    {
-        $adUserParameters['Credential'] = $DomainAdministratorCredential;
-    }
-    if ($DomainController)
-    {
-        $adUserParameters['Server'] = $DomainController;
-    }
-    return $adUserParameters;
-
-} #end function Get-ADCommonParameters
-
-# Internal function to assert if the role specific module is installed or not
-function Assert-Module
-{
-    [CmdletBinding()]
-    param
-    (
-        [System.String] $ModuleName = 'ActiveDirectory'
-    )
-
-    if (-not (Get-Module -Name $ModuleName -ListAvailable))
-    {
-        $errorId = 'xADUser_ModuleNotFound';
-        $errorMessage = $LocalizedData.RoleNotFoundError -f $moduleName;
-        ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage;
-    }
-} #end function Assert-Module
-
-# Internal function to get an Active Directory object's parent Distinguished Name
-function Get-ADObjectParentDN
-{
-    <#
-        Copyright (c) 2016 The University Of Vermont
-        All rights reserved.
-
-        Redistribution and use in source and binary forms, with or without modification, are permitted provided that
-        the following conditions are met:
-        
-        1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
-           following disclaimer.
-        2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
-           following disclaimer in the documentation and/or other materials provided with the distribution.
-        3. Neither the name of the University nor the names of its contributors may be used to endorse or promote
-           products derived from this software without specific prior written permission.
-
-        THIS SOFTWARE IS PROVIDED BY THE AUTHOR “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-        LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-        IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-        CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-        OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-        CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-        THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-        http://www.uvm.edu/~gcd/code-license/
-    #>
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory)]
-        [System.String]
-        $DN
-    )
-    
-    # https://www.uvm.edu/~gcd/2012/07/listing-parent-of-ad-object-in-powershell/
-    $distinguishedNameParts = $DN -split '(?<![\\]),';
-    $distinguishedNameParts[1..$($distinguishedNameParts.Count-1)] -join ',';
-
-} #end function Get-ADObjectParentDN
-
-function ThrowInvalidOperationError
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorId,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorMessage
-    )
-
-    $exception = New-Object -TypeName System.InvalidOperationException -ArgumentList $ErrorMessage;
-    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null;
-    throw $errorRecord;
-}
-
-function ThrowInvalidArgumentError
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorId,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorMessage
-    )
-
-    $exception = New-Object -TypeName System.ArgumentException -ArgumentList $ErrorMessage;
-    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument;
-    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null;
-    throw $errorRecord;
-
-} #end function ThrowInvalidArgumentError
+## Import the common AD functions
+$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
+. $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource

@@ -1,4 +1,4 @@
-data localizedString
+﻿data localizedString
 {
     # culture="en-US"
     ConvertFrom-StringData @'
@@ -25,6 +25,7 @@ function Assert-Module
     [CmdletBinding()]
     param
     (
+        [Parameter()] [ValidateNotNullOrEmpty()]
         [System.String] $ModuleName = 'ActiveDirectory'
     )
 
@@ -72,10 +73,12 @@ function Test-ADDomain
     param
     (
         [Parameter(Mandatory)]
-        [String] $DomainName,
+        [System.String] $DomainName,
 
         [Parameter()]
-        [PSCredential] $Credential
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
     Write-Verbose -Message ($localizedString.CheckingDomain -f $DomainName);
     $ldapDomain = 'LDAP://{0}' -f $DomainName;
@@ -107,7 +110,7 @@ function Get-ADObjectParentDN
         3. Neither the name of the University nor the names of its contributors may be used to endorse or promote
            products derived from this software without specific prior written permission.
 
-        THIS SOFTWARE IS PROVIDED BY THE AUTHOR “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+        THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
         LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
         IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
         CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
@@ -134,7 +137,7 @@ function Get-ADObjectParentDN
 
 # Internal function that validates the Members, MembersToInclude and MembersToExclude combination
 # is valid. If the combination is invalid, an InvalidArgumentError is raised.
-function Validate-MemberParameters
+function Assert-MemberParameters
 {
     [CmdletBinding()]
     param
@@ -205,7 +208,7 @@ function Validate-MemberParameters
         }
     }
         
-} #end function ValidateMemberParameters
+} #end function Assert-MemberParameters
 
 ## Internal function to remove duplicate strings (members) from a string array
 function Remove-DuplicateMembers
@@ -332,6 +335,105 @@ function Test-Members
 
 } #end function Test-Membership
 
+<#
+    .SYNOPSIS
+        Returns common AD cmdlet connection parameter for splatting
+    .PARAMETER CommonName 
+        When specified, a CommonName overrides theUsed by the xADUser cmdletReturns the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and
+        Remove-ADUser cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the
+        Name parameter.
+    .PARAMETER UseNameParameter 
+        Returns the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and
+        Remove-ADUser cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the
+        Name parameter.
+    .EXAMPLE
+        $getADUserParams = Get-CommonADParameters @PSBoundParameters
+        
+        Returns connection parameters suitable for Get-ADUser using the splatted cmdlet
+        parameters.
+    .EXAMPLE
+        $newADUserParams = Get-CommonADParameters @PSBoundParameters -UseNameParameter
+        
+        Returns connection parameters suitable for New-ADUser using the splatted cmdlet
+        parameters.
+#>
+function Get-ADCommonParameters
+{
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [Alias('UserName','GroupName')]
+        [System.String]
+        $Identity,
+        
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $CommonName,
+        
+        [Parameter()]
+        [ValidateNotNull()]
+        [Alias('DomainAdministratorCredential')]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+        
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [Alias('DomainController')]
+        [System.String]
+        $Server,
+        
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $UseNameParameter,
+        
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $PreferCommonName,
+        
+        ## Catch all to enable splatted $PSBoundParameters
+        [Parameter(ValueFromRemainingArguments)]
+        $RemainingArguments
+    )
+    
+    if ($UseNameParameter)
+    {
+        if ($PreferCommonName -and ($PSBoundParameters.ContainsKey('CommonName')))
+        {
+            $adConnectionParameters = @{ Name = $CommonName; }
+        }
+        else {
+            $adConnectionParameters = @{ Name = $Identity; }
+        }
+    }
+    else
+    {
+        if ($PreferCommonName -and ($PSBoundParameters.ContainsKey('CommonName')))
+        {
+            $adConnectionParameters = @{ Identity = $CommonName; }
+        }
+        else {
+            $adConnectionParameters = @{ Identity = $Identity; }
+        }
+    }
+    
+    if ($Credential)
+    {
+        $adConnectionParameters['Credential'] = $Credential;
+    }
+    
+    if ($Server)
+    {
+        $adConnectionParameters['Server'] = $Server;
+    }
+    
+    return $adConnectionParameters;
+} #end function Get-ADCommonParameters
+
 function ThrowInvalidOperationError
 {
     [CmdletBinding()]
@@ -376,3 +478,4 @@ function ThrowInvalidArgumentError
     throw $errorRecord;
 
 } #end function ThrowInvalidArgumentError
+
