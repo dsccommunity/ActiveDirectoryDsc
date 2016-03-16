@@ -6,7 +6,7 @@ The **xActiveDirectory** DSC resources allow you to configure and manage Active 
 Note: these resources do not presently install the RSAT tools.
 
 ## Contributing
-Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/xDscResources/blob/master/CONTRIBUTING.md).
+Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
 ## Description
 
