@@ -1,4 +1,4 @@
-﻿# NOTE: This resource requires WMF5 and PsDscRunAsCredential
+# NOTE: This resource requires WMF5 and PsDscRunAsCredential
 
 # DSC resource to manage AD service account on a member computer.
 
@@ -10,14 +10,14 @@ Import-Module $currentPath\..\..\xActiveDirectoryHelper.psm1 -Verbose:$false -Er
 
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Identity
-	)
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Identity
+    )
 
     try
     {
@@ -29,7 +29,7 @@ function Get-TargetResource
         Write-Verbose "Failed getting AD service account with identity $Identity"
         $Ensure = "Absent"
     }
-	
+    
     if($ADServiceAccount)
     {
         if(Test-ADServiceAccount -Identity $Identity)
@@ -42,28 +42,28 @@ function Get-TargetResource
         }
     }
 
-	$returnValue = @{
-		Ensure = $Ensure
-		Identity = $Identity
-	}
+    $returnValue = @{
+        Ensure = $Ensure
+        Identity = $Identity
+    }
 
-	$returnValue
+    $returnValue
 }
 
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[ValidateSet("Present","Absent")]
-		[System.String]
-		$Ensure = "Present",
+    [CmdletBinding()]
+    param
+    (
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Identity
-	)
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Identity
+    )
 
     switch($Ensure)
     {
@@ -102,22 +102,22 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[ValidateSet("Present","Absent")]
-		[System.String]
-		$Ensure = "Present",
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [ValidateSet("Present","Absent")]
+        [System.String]
+        $Ensure = "Present",
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Identity
-	)
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Identity
+    )
 
     $result = ((Get-TargetResource -Identity $Identity).Ensure -eq $Ensure)
 
-	$result
+    $result
 }
 
 

@@ -1,7 +1,7 @@
 [ClassVersion("1.0.0.0"), FriendlyName("xADComputerProperty")]
 class MSFT_xADComputerProperty : OMI_BaseResource
 {
-	[Key, Description("The name of the computer object in Active Directory.")] String Name;
-	[Key, Description("The name of the property of the computer object in Active Directory."), ValueMap{"OperatingSystem","OperatingSystemVersion"}, Values{"OperatingSystem","OperatingSystemVersion"}] String Property;
-	[Required, Description("The value of the property of the computer object in Active Directory.")] String Value;
+    [Key, Description("The name of the computer object in Active Directory.")] String Name;
+    [Key, Description("The name of the property of the computer object in Active Directory."), ValueMap{"OperatingSystem","OperatingSystemVersion"}, Values{"OperatingSystem","OperatingSystemVersion"}] String Property;
+    [Required, Description("The value of the property of the computer object in Active Directory.")] String Value;
 };

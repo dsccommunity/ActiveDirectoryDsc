@@ -1,4 +1,4 @@
-﻿$currentPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$currentPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 Write-Debug -Message "CurrentPath: $currentPath"
 
 # Load Common Code
@@ -6,11 +6,11 @@ Import-Module $currentPath\..\..\xActiveDirectoryHelper.psm1 -Verbose:$false -Er
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[ValidateSet("Present","Absent")]
-		[System.String] 
+    [CmdletBinding()]
+    param
+    (
+        [ValidateSet("Present","Absent")]
+        [System.String] 
         $Ensure = "Present",
 
         [Parameter(Mandatory=$true)]
@@ -24,7 +24,7 @@ function Set-TargetResource
         [ValidateSet("Server","User")]
         [String] 
         $ObjectType = "Server"
-	)
+    )
     
     Set-SPN @PSBoundParameters
 
@@ -37,12 +37,12 @@ function Set-TargetResource
 
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[ValidateSet("Present","Absent")]
-		[System.String] 
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [ValidateSet("Present","Absent")]
+        [System.String] 
         $Ensure = "Present",
 
         [Parameter(Mandatory=$true)]
@@ -56,7 +56,7 @@ function Get-TargetResource
         [ValidateSet("Server","User")]
         [String] 
         $ObjectType = "Server"
-	)
+    )
 
     $retVal = Test-SPN $SPN
 
@@ -75,17 +75,17 @@ function Get-TargetResource
             SPN = $SPN }
     }
 
-	$returnValue
+    $returnValue
 }
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([Boolean])]
+    [CmdletBinding()]
+    [OutputType([Boolean])]
     param
-	(
-		[ValidateSet("Present","Absent")]
-		[System.String] 
+    (
+        [ValidateSet("Present","Absent")]
+        [System.String] 
         $Ensure = "Present",
 
         [Parameter(Mandatory=$true)]
@@ -99,20 +99,20 @@ function Test-TargetResource
         [ValidateSet("Server","User")]
         [String] 
         $ObjectType = "Server"
-	)
+    )
 
     $result = ((Get-TargetResource @PSBoundParameters).Ensure -eq $Ensure)
 
-	$result
+    $result
 }
 
 function Set-SPN
 {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param
     (
-		[ValidateSet("Present","Absent")]
-		[System.String] 
+        [ValidateSet("Present","Absent")]
+        [System.String] 
         $Ensure = "Present",
 
         [Parameter(Mandatory=$true)]
@@ -155,7 +155,7 @@ function Set-SPN
 
 function Test-SPN
 {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory=$true)]
@@ -187,7 +187,7 @@ function Test-SPN
 
 function Execute-SPN 
 {
-	[CmdletBinding()]
+    [CmdletBinding()]
     param
     (
         [String[]] 

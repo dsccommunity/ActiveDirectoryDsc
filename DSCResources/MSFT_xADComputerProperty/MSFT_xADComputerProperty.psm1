@@ -1,4 +1,4 @@
-﻿# NOTE: This resource requires WMF5 and PsDscRunAsCredential
+# NOTE: This resource requires WMF5 and PsDscRunAsCredential
 
 # DSC resource to AD computer object properties.
 # Runs on the domain joined computer.
@@ -12,56 +12,56 @@ Import-Module $currentPath\..\..\xActiveDirectoryHelper.psm1 -Verbose:$false -Er
 
 function Get-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Collections.Hashtable])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[parameter(Mandatory = $true)]
-		[ValidateSet("OperatingSystem","OperatingSystemVersion")]
-		[System.String]
-		$Property,
+        [parameter(Mandatory = $true)]
+        [ValidateSet("OperatingSystem","OperatingSystemVersion")]
+        [System.String]
+        $Property,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Value
-	)
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Value
+    )
 
     Assert-Module -ModuleName ActiveDirectory
     
     $ADComputer = Get-ADComputer -Identity $Name -Properties $Property
 
-	$returnValue = @{
-		Name = $Name
-		Property = $Property
-		Value = $ADComputer."$Property"
-	}
+    $returnValue = @{
+        Name = $Name
+        Property = $Property
+        Value = $ADComputer."$Property"
+    }
 
-	$returnValue
+    $returnValue
 }
 
 
 function Set-TargetResource
 {
-	[CmdletBinding()]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[parameter(Mandatory = $true)]
-		[ValidateSet("OperatingSystem","OperatingSystemVersion")]
-		[System.String]
-		$Property,
+        [parameter(Mandatory = $true)]
+        [ValidateSet("OperatingSystem","OperatingSystemVersion")]
+        [System.String]
+        $Property,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Value
-	)
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Value
+    )
 
     Assert-Module -ModuleName ActiveDirectory
 
@@ -91,27 +91,27 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
-	[CmdletBinding()]
-	[OutputType([System.Boolean])]
-	param
-	(
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Name,
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Name,
 
-		[parameter(Mandatory = $true)]
-		[ValidateSet("OperatingSystem","OperatingSystemVersion")]
-		[System.String]
-		$Property,
+        [parameter(Mandatory = $true)]
+        [ValidateSet("OperatingSystem","OperatingSystemVersion")]
+        [System.String]
+        $Property,
 
-		[parameter(Mandatory = $true)]
-		[System.String]
-		$Value
-	)
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Value
+    )
 
     $result = ((Get-TargetResource @PSBoundParameters).Value -eq $Value)
-	
-	$result
+    
+    $result
 }
 
 
