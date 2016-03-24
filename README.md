@@ -16,16 +16,26 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 ## Resources
 
 * **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
+* **xADComputerProperty** sets properties of Active Directory computer object.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
-* **xADUser** modifies and removes Active Directory Users. 
+* **xADRecycleBin** enable the Active Directory Recycle Bin feature for the target forest.
+* **xADServiceAccountOnComputer** installs Active Directory Service Account on a computer.
+* **xADUser** modifies and removes Active Directory Users.
+* **xSPN** creates, sets, or remotes a Service Principle Name in Active Directory.
 * **xWaitForDomain** waits for new, remote domain to setup.
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
-### **xADDomain**
+### **xADComputerProperty**
 
+* **Name**: The name of the computer object in Active Directory..
+* **Proeprty**: The name of the property of the computer object in Active Directory.
+* **Value**: The value of the property of the computer object in Active Directory.
+ 
+### **xADDomain**
+ 
 * **DomainName**: Name of the domain.
  * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
 * **ParentDomainName**: Fully qualified name of the parent domain (optional).
@@ -45,6 +55,84 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **DomainName**: The fully qualified domain name for the domain where the domain controller will be present.
 * **DomainAdministratorCredential**: Specifies the credential for the account used to install the domain controller.
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
+
+### xADDomainTrust
+
+* **Ensure**: Specifies whether the domain trust is present or absent 
+* **TargetDomainAdministratorCredential**: Credentials to authenticate to the target domain 
+* **TargetDomainName**: Name of the AD domain that is being trusted 
+* **TrustType**: Type of trust 
+* **TrustDirection**: Direction of trust, the values for which may be Bidirectional,Inbound, or Outbound 
+* **SourceDomainName**: Name of the AD domain that is requesting the trust 
+
+### xADGroup
+The xADGroup DSC resource will manage groups within Active Directory.
+
+* **GroupName**: Name of the Active Directory group to manage.
+* **Category**: This parameter sets the GroupCategory property of the group.
+ * Valid values are 'Security' and 'Distribution'.
+ * If not specified, it defaults to 'Security'.
+* **GroupScope**: Specifies the group scope of the group.
+ * Valid values are 'DomainLocal', 'Global' and 'Universal'.
+ * If not specified, it defaults to 'Global'.
+* **Path**: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
+* **Description**: Specifies a description of the group object (optional).
+* **DisplayName**: Specifies the display name of the group object (optional).
+* **Members**: Specifies the explicit AD objects that should comprise the group membership (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, all undefined group members will be removed the AD group.
+ * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
+* **MembersToInclude**: Specifies AD objects that must be in the group (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, only the specified members are added to the group.
+ * If specified, no users are removed from the group using this parameter.
+ * This property cannot be specified with the 'Members' parameter.
+* **MembersToExclude**: Specifies AD objects that _must not_ be in the group (optional).
+ * If not specified, no group membershup changes are made.
+ * If specified, only those specified are removed from the group.
+ * If specified, no users are added to the group using this parameter.
+ * This property cannot be specified with the 'Members' parameter.
+* **MembershipAttribute**: Defines the AD object attribute that is used to determine group membership (optional).
+ * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
+ * If not specified, it defaults to 'SamAccountName'.
+ * You cannot mix multiple attribute types.
+* **ManagedBy**: Specifies the user or group that manages the group object (optional).
+ * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
+* **Notes**: The group's info attribute (optional).
+* **Ensure**: Specifies whether the group is present or absent.
+ * Valid values are 'Present' and 'Absent'.
+ * It not specified, it defaults to 'Present'.
+* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
+ * If not running on a domain controller, this is required.
+* **Credential**: User account credentials used to perform the operation (optional).
+ * If not running on a domain controller, this is required.
+
+### xADOrganizationalUnit
+
+The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
+* **Name**: Name of the Active Directory organizational unit to manage.
+* **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
+* **Description**: The OU description property (optional).
+* **ProtectedFromAccidentalDeletion**: Valid values are $true and $false. If not specified, it defaults to $true.
+* **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
+* **Credential**: User account credentials used to perform the operation (optional). Note: _if not running on a domain controller, this is required_.
+
+### xADRecycleBin
+
+The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest. 
+This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode 
+is insufficient, then the resource will exit with an error message.  The change is executed against the  
+Domain Naming Master FSMO of the forest. 
+(Note: This resource is compatible with a Windows 2008 R2 or above target node. )
+* **ForestFQDN**:  Fully qualified domain name of forest to enable Active Directory Recycle Bin. 
+* **EnterpriseAdministratorCredential**:  Credential with Enterprise Administrator rights to the forest. 
+* **RecycleBinEnabled**:  Read-only. Returned by Get. 
+* **ForestMode**:  Read-only. Returned by Get. 
+
+### xADServiceAccountOnComputer
+
+* **Ensure**:  An enumerated value that describes if the Active Directory service account is installed on the machine. 
+* **Identity**:  Specifies an Active Directory service account object by account name. 
 
 ### xADUser
 
@@ -112,82 +200,18 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **CannotChangePassword**: Specifies whether the account password can be changed (optional).
  * If not specified, this value defaults to False.
 
+### xSPN
+
+* **Ensure**: An enumerated value that describes if the SPN is installed.
+* **SPN**: The full SPN name including SPN Type EG: HOST/Server.
+* **ObjectName**: The name of the Computer or User the SPN is associated to.
+* **ObjectType**: An enumerated value that describes if the ObjectName is of type 'Server' or 'User'.
+
 ### xWaitForADDomain
 
 * **DomainName**: Name of the remote domain.
 * **RetryIntervalSec**: Interval to check for the domain's existance.
 * **RetryCount**: Maximum number of retries to check for the domain's existance.
-
-### xADDomainTrust
-
-* **Ensure**: Specifies whether the domain trust is present or absent 
-* **TargetDomainAdministratorCredential**: Credentials to authenticate to the target domain 
-* **TargetDomainName**: Name of the AD domain that is being trusted 
-* **TrustType**: Type of trust 
-* **TrustDirection**: Direction of trust, the values for which may be Bidirectional,Inbound, or Outbound 
-* **SourceDomainName**: Name of the AD domain that is requesting the trust 
-
-### xADRecycleBin
-The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest. 
-This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode 
-is insufficient, then the resource will exit with an error message.  The change is executed against the  
-Domain Naming Master FSMO of the forest. 
-(Note: This resource is compatible with a Windows 2008 R2 or above target node. )
-* **ForestFQDN**:  Fully qualified domain name of forest to enable Active Directory Recycle Bin. 
-* **EnterpriseAdministratorCredential**:  Credential with Enterprise Administrator rights to the forest. 
-* **RecycleBinEnabled**:  Read-only. Returned by Get. 
-* **ForestMode**:  Read-only. Returned by Get. 
-
-### xADGroup
-The xADGroup DSC resource will manage groups within Active Directory.
-
-* **GroupName**: Name of the Active Directory group to manage.
-* **Category**: This parameter sets the GroupCategory property of the group.
- * Valid values are 'Security' and 'Distribution'.
- * If not specified, it defaults to 'Security'.
-* **GroupScope**: Specifies the group scope of the group.
- * Valid values are 'DomainLocal', 'Global' and 'Universal'.
- * If not specified, it defaults to 'Global'.
-* **Path**: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
-* **Description**: Specifies a description of the group object (optional).
-* **DisplayName**: Specifies the display name of the group object (optional).
-* **Members**: Specifies the explicit AD objects that should comprise the group membership (optional).
- * If not specified, no group membershup changes are made.
- * If specified, all undefined group members will be removed the AD group.
- * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
-* **MembersToInclude**: Specifies AD objects that must be in the group (optional).
- * If not specified, no group membershup changes are made.
- * If specified, only the specified members are added to the group.
- * If specified, no users are removed from the group using this parameter.
- * This property cannot be specified with the 'Members' parameter.
-* **MembersToExclude**: Specifies AD objects that _must not_ be in the group (optional).
- * If not specified, no group membershup changes are made.
- * If specified, only those specified are removed from the group.
- * If specified, no users are added to the group using this parameter.
- * This property cannot be specified with the 'Members' parameter.
-* **MembershipAttribute**: Defines the AD object attribute that is used to determine group membership (optional).
- * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
- * If not specified, it defaults to 'SamAccountName'.
- * You cannot mix multiple attribute types.
-* **ManagedBy**: Specifies the user or group that manages the group object (optional).
- * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
-* **Notes**: The group's info attribute (optional).
-* **Ensure**: Specifies whether the group is present or absent.
- * Valid values are 'Present' and 'Absent'.
- * It not specified, it defaults to 'Present'.
-* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
- * If not running on a domain controller, this is required.
-* **Credential**: User account credentials used to perform the operation (optional).
- * If not running on a domain controller, this is required.
-
-### xADOrganizationalUnit
-The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
-* **Name**: Name of the Active Directory organizational unit to manage.
-* **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
-* **Description**: The OU description property (optional).
-* **ProtectedFromAccidentalDeletion**: Valid values are $true and $false. If not specified, it defaults to $true.
-* **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
-* **Credential**: User account credentials used to perform the operation (optional). Note: _if not running on a domain controller, this is required_.
 
 ## Versions
 
@@ -199,6 +223,9 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * xADDomain: Added additional error trapping, verbose and diagnostic information.
 * xADDomain: Added unit test coverage.
 * Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomin, xADGroup, xADOrganizationalUnit and xADUser resources.
+* xADComputerProperty: new resource
+* xADServiceAccountOnComputer: new resource
+* xSPN: new resource
 
 ### 2.9.0.0
 

@@ -1,0 +1,8 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xSPN")]
+class MSFT_xSPN : OMI_BaseResource
+{
+    [Write, Description("An enumerated value that describes if the SPN is installed.\nPresent {default}  \nAbsent   \n"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Key, Description("The full SPN name including SPN Type EG: HOST/Server.")] String SPN;
+    [Key, Description("The name of the Computer or User the SPN is associated to.")] String ObjectName;
+    [Write, Description("An enumerated value that describes if the ObjectName is of type 'Server' or 'User'.\nServer {default}  \nUser   \n"), ValueMap{"Server","User"}, Values{"Server","User"}] String ObjectType;
+};
