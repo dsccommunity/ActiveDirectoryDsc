@@ -1,7 +1,7 @@
 $Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xADCommon' # Example MSFT_xFirewall
 
-##region HEADER
+#region HEADER
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
 Write-Host $moduleRoot -ForegroundColor Green;
 if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
@@ -19,7 +19,6 @@ $TestEnvironment = Initialize-TestEnvironment `
     -DSCResourceName $Global:DSCResourceName `
     -TestType Unit 
 #endregion
-
 
 # Begin Testing
 try
@@ -272,8 +271,105 @@ try
 
         }
         #endregion
-              
+        
         #region Function ConvertTo-Timespan
+        Describe "$($Global:DSCResourceName)\ConvertTo-Timespan" {
+            
+            It "Returns 'System.TimeSpan' object type" {
+                $testIntTimeSpan = 60;
+                
+                $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Minutes;
+                
+                $result -is [System.TimeSpan] | Should Be $true;
+            }
+            
+            It "Creates TimeSpan from seconds" {
+                $testIntTimeSpan = 60;
+                
+                $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Seconds;
+                
+                $result.TotalSeconds | Should Be $testIntTimeSpan;
+            }
+            
+            It "Creates TimeSpan from minutes" {
+                $testIntTimeSpan = 60;
+                
+                $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Minutes;
+                
+                $result.TotalMinutes | Should Be $testIntTimeSpan;
+            }
+            
+            It "Creates TimeSpan from hours" {
+                $testIntTimeSpan = 60;
+                
+                $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Hours;
+                
+                $result.TotalHours | Should Be $testIntTimeSpan;
+            }
+            
+            It "Creates TimeSpan from days" {
+                $testIntTimeSpan = 60;
+                
+                $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Days;
+                
+                $result.TotalDays | Should Be $testIntTimeSpan;
+            }
+            
+        }
+        #endregion
+        
+        #region Function ConvertTo-Timespan
+        Describe "$($Global:DSCResourceName)\ConvertFrom-Timespan" {
+            
+            It "Returns 'System.UInt32' object type" {
+                $testIntTimeSpan = 60;
+                $testTimeSpan = New-TimeSpan -Seconds $testIntTimeSpan;
+                
+                $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds;
+
+                $result -is [System.UInt32] | Should Be $true;
+            }
+            
+            It "Converts TimeSpan to total seconds" {
+                $testIntTimeSpan = 60;
+                $testTimeSpan = New-TimeSpan -Seconds $testIntTimeSpan;
+                
+                $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds;
+                
+                $result | Should Be $testTimeSpan.TotalSeconds;
+            }
+            
+            It "Converts TimeSpan to total minutes" {
+                $testIntTimeSpan = 60;
+                $testTimeSpan = New-TimeSpan -Minutes $testIntTimeSpan;
+                
+                $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Minutes;
+                
+                $result | Should Be $testTimeSpan.TotalMinutes;
+            }
+            
+            It "Converts TimeSpan to total hours" {
+                $testIntTimeSpan = 60;
+                $testTimeSpan = New-TimeSpan -Hours $testIntTimeSpan;
+                
+                $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Hours;
+                
+                $result | Should Be $testTimeSpan.TotalHours;
+            }
+            
+            It "Converts TimeSpan to total days" {
+                $testIntTimeSpan = 60;
+                $testTimeSpan = New-TimeSpan -Days $testIntTimeSpan;
+                
+                $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Days;
+                
+                $result | Should Be $testTimeSpan.TotalDays;
+            }
+            
+        }
+        #endregion
+        
+        #region Function Get-ADCommonParameters
         Describe "$($Global:DSCResourceName)\Get-ADCommonParameters" {
             
             It "Returns 'System.Collections.Hashtable' object type" {

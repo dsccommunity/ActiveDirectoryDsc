@@ -335,6 +335,70 @@ function Test-Members
 
 } #end function Test-Membership
 
+function ConvertTo-TimeSpan
+{
+    [CmdletBinding()]
+    [OutputType([System.TimeSpan])]
+    param
+    (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [System.UInt32]
+        $TimeSpan,
+        
+        [Parameter(Mandatory)]
+        [ValidateSet('Seconds','Minutes','Hours','Days')]
+        [System.String]
+        $TimeSpanType
+    )
+    $newTimeSpanParams = @{ };
+    switch ($TimeSpanType)
+    {
+        'Seconds' { $newTimeSpanParams['Seconds'] = $TimeSpan }
+        'Minutes' { $newTimeSpanParams['Minutes'] = $TimeSpan }
+        'Hours' { $newTimeSpanParams['Hours'] = $TimeSpan }
+        'Days' { $newTimeSpanParams['Days'] = $TimeSpan }
+    }
+    return (New-TimeSpan @newTimeSpanParams)
+} #end function ConvertTo-TimeSpan
+
+<#
+    .SYNOPSIS
+        Converts a System.TimeSpan into the number of seconds, mintutes, hours or days.
+    .PARAMETER TimeSpan
+        TimeSpan to convert into an integer
+    .PARAMETER TimeSpanType
+        Convert timespan into the total number of seconds, minutes, hours or days.
+    .EXAMPLE
+        $Get-ADDefaultDomainPasswordPolicy
+        
+        ConvertFrom-TimeSpan 
+#>
+function ConvertFrom-TimeSpan
+{
+    [CmdletBinding()]
+    [OutputType([System.Int32])]
+    param
+    (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [System.TimeSpan]
+        $TimeSpan,
+        
+        [Parameter(Mandatory)]
+        [ValidateSet('Seconds','Minutes','Hours','Days')]
+        [System.String]
+        $TimeSpanType
+    )
+    switch ($TimeSpanType)
+    {
+        'Seconds' { return $TimeSpan.TotalSeconds -as [System.UInt32] }
+        'Minutes' { return $TimeSpan.TotalMinutes -as [System.UInt32] }
+        'Hours' { return $TimeSpan.TotalHours -as [System.UInt32] }
+        'Days' { return $TimeSpan.TotalDays -as [System.UInt32] }
+    }
+} #end function ConvertFrom-TimeSpan
+
 <#
     .SYNOPSIS
         Returns common AD cmdlet connection parameter for splatting
@@ -478,4 +542,3 @@ function ThrowInvalidArgumentError
     throw $errorRecord;
 
 } #end function ThrowInvalidArgumentError
-
