@@ -6,42 +6,48 @@ The **xActiveDirectory** DSC resources allow you to configure and manage Active 
 Note: these resources do not presently install the RSAT tools.
 
 ## Contributing
-Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/xDscResources/blob/master/CONTRIBUTING.md).
+Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup and xADOrganizationalUnit** DSC Resources.
+The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit and xADDomainDefaultPasswordPolicy** DSC Resources.
 These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
 
 * **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
-* **xADUser** modifies and removes Active Directory Users. 
-* **xWaitForDomain** waits for new, remote domain to setup.
-(Note: the RSAT tools will not be installed when these resources are used to configure AD.)
+* **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
+* **xADUser** modifies and removes Active Directory Users. 
+* **xWaitForDomain** waits for new, remote domain to setup.
+(Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
 ### **xADDomain**
 
 * **DomainName**: Name of the domain.
-If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
-* **ParentDomainName**: Name of the parent domain.
+ * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
+* **ParentDomainName**: Fully qualified name of the parent domain (optional).
 * **DomainAdministratorCredential**: Credentials used to query for domain existence.
-Note: These are not used during domain creation.
+ * __Note: These are NOT used during domain creation.__
 (AD sets the localadmin credentials as new domain administrator credentials during setup.) 
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
-* **DnsDelegationCredential**: Credential used for creating DNS delegation.
+* **DnsDelegationCredential**: Credential used for creating DNS delegation (optional).
+* **DomainNetBIOSName**: Specifies the NetBIOS name for the new domain (optional).
+ * If not specified, then the default is automatically computed from the value of the DomainName parameter.
+* **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database (optional).
+* **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
+* **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional) 
 
-### xADDomainController
+### **xADDomainController**
 
 * **DomainName**: The fully qualified domain name for the domain where the domain controller will be present.
 * **DomainAdministratorCredential**: Specifies the credential for the account used to install the domain controller.
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
 
-### xADUser
+### **xADUser**
 
 * **DomainName**: Name of the domain to which the user will be added.
  * The Active Directory domain's fully-qualified domain name must be specified, i.e. contoso.com.
@@ -107,13 +113,13 @@ Note: These are not used during domain creation.
 * **CannotChangePassword**: Specifies whether the account password can be changed (optional).
  * If not specified, this value defaults to False.
 
-### xWaitForADDomain
+### **xWaitForADDomain**
 
 * **DomainName**: Name of the remote domain.
 * **RetryIntervalSec**: Interval to check for the domain's existance.
 * **RetryCount**: Maximum number of retries to check for the domain's existance.
 
-### xADDomainTrust
+### **xADDomainTrust**
 
 * **Ensure**: Specifies whether the domain trust is present or absent 
 * **TargetDomainAdministratorCredential**: Credentials to authenticate to the target domain 
@@ -122,7 +128,7 @@ Note: These are not used during domain creation.
 * **TrustDirection**: Direction of trust, the values for which may be Bidirectional,Inbound, or Outbound 
 * **SourceDomainName**: Name of the AD domain that is requesting the trust 
 
-### xADRecycleBin
+### **xADRecycleBin**
 The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest. 
 This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode 
 is insufficient, then the resource will exit with an error message.  The change is executed against the  
@@ -133,7 +139,7 @@ Domain Naming Master FSMO of the forest.
 * **RecycleBinEnabled**:  Read-only. Returned by Get. 
 * **ForestMode**:  Read-only. Returned by Get. 
 
-### xADGroup
+### **xADGroup**
 The xADGroup DSC resource will manage groups within Active Directory.
 
 * **GroupName**: Name of the Active Directory group to manage.
@@ -175,18 +181,43 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **Credential**: User account credentials used to perform the operation (optional).
  * If not running on a domain controller, this is required.
 
-### xADOrganizationalUnit
+### **xADOrganizationalUnit**
 The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **Name**: Name of the Active Directory organizational unit to manage.
 * **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
 * **Description**: The OU description property (optional).
 * **ProtectedFromAccidentalDeletion**: Valid values are $true and $false. If not specified, it defaults to $true.
 * **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
-* **Credential**: User account credentials used to perform the operation . Note: _if not running on a domain controller, this is required_.
+* **Credential**: User account credentials used to perform the operation (optional). Note: _if not running on a domain controller, this is required_.
+
+### **xADDomainDefaultPasswordPolicy**
+The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory domain's default password policy.
+* **DomainName**: Name of the domain to which the password policy will be applied.
+* **ComplexityEnabled**: Whether password complexity is enabled for the default password policy.
+* **LockoutDuration**: Length of time that an account is locked after the number of failed login attempts (minutes).
+* **LockoutObservationWindow**: Maximum time between two unsuccessful login attempts before the counter is reset to 0 (minutes).
+* **LockoutThreshold**: Number of unsuccessful login attempts that are permitted before an account is locked out.
+* **MinPasswordAge**: Minimum length of time that you can have the same password (minutes).
+* **MaxPasswordAge**: Maximum length of time that you can have the same password (minutes).
+* **MinPasswordLength**: Minimum number of characters that a password must contain.
+* **PasswordHistoryCount**: Number of previous passwords to remember.
+* **ReversibleEncryptionEnabled**: Whether the directory must store passwords using reversible encryption.
+* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
+* **Credential**: User account credentials used to perform the operation (optional).
 
 ## Versions
 
 ### Unreleased
+
+### 2.10.0.0
+
+* xADDomainDefaultPasswordPolicy: New resource added.
+* xWaitForADDomain: Updated to make it compatible with systems that don't have the ActiveDirectory module installed, and to allow it to function with domains/forests that don't have a domain controller with Active Directory Web Services running.
+* xADGroup: Fixed bug where specified credentials were not used to retrieve existing group membership.
+* xADDomain: Added check for Active Directory cmdlets.
+* xADDomain: Added additional error trapping, verbose and diagnostic information.
+* xADDomain: Added unit test coverage.
+* Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomin, xADGroup, xADOrganizationalUnit and xADUser resources.
 
 ### 2.9.0.0
 
@@ -920,5 +951,46 @@ Param(
 Example_xADOrganizationalUnit -Name 'Example OU' -Path 'dc=example,dc=com' -Description 'Example test organizational unit' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADOrganizationalUnit -Wait -Verbose
+
+```
+
+### Configure Active Directory Domain Default Password Policy
+
+In this example, we configure an Active Directory domain's default password policy to set the minimum password length and complexity.
+
+```powershell
+configuration Example_xADDomainDefaultPasswordPolicy
+{
+    Param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+        
+        [parameter(Mandatory = $true)]    
+        [System.Boolean]
+        $ComplexityEnabled,
+        
+        [parameter(Mandatory = $true)]
+        [System.Int32]
+        $MinPasswordLength,
+    )
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADDomainDefaultPasswordPolicy 'DefaultPasswordPolicy'
+        {
+           DomainName = $DomainName
+           ComplexityEnabled = $ComplexityEnabled
+           MinPasswordLength = $MinPasswordLength
+        }
+    }
+}
+
+Example_xADDomainDefaultPasswordPolicy -DomainName 'contoso.com' -ComplexityEnabled $true -MinPasswordLength 8
+
+Start-DscConfiguration -Path .\Example_xADDomainDefaultPasswordPolicy -Wait -Verbose
 
 ```

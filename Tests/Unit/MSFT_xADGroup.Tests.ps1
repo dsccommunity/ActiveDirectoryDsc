@@ -1,19 +1,36 @@
-[CmdletBinding()]
-param()
+$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
+$Global:DSCResourceName    = 'MSFT_xADGroup' # Example MSFT_xFirewall
 
-Set-StrictMode -Version Latest
+#region HEADER
+[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
+Write-Host $moduleRoot -ForegroundColor Green;
+if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+{
+    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+}
+else
+{
+    & git @('-C',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'),'pull')
+}
+Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $Global:DSCModuleName `
+    -DSCResourceName $Global:DSCResourceName `
+    -TestType Unit 
+#endregion
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..).Path
+# Begin Testing
+try
+{
 
-$ModuleName = 'MSFT_xADGroup'
-Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
-## AD module required as we can't mock/reference Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
-Import-Module ActiveDirectory;
+    #region Pester Tests
 
-Describe "xADGroup" {
-    
-    InModuleScope $ModuleName {
+    # The InModuleScope command allows you to perform white-box unit testing on the internal
+    # (non-exported) code of a Script Module.
+    InModuleScope $Global:DSCResourceName {
 
+        #region Pester Test Initialization
         $testPresentParams = @{
             GroupName = 'TestGroup'
             GroupScope = 'Global';
@@ -63,190 +80,19 @@ Describe "xADGroup" {
         $testDomainController = 'TESTDC';
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
-        Context "Validate Assert-Module method" {
+        #region Function Get-TargetResource
+        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
             
-            It "Throws if Active Directory module is not present" {
-                Mock Get-Module -MockWith { throw; }
+            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
             
-                { Assert-Module -ModuleName ActiveDirectory } | Should Throw;
+            It 'Calls "Assert-Module" to check AD module is installed' {              
+                Mock Get-ADGroup { return $fakeADGroup; }
+                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                            
+                $result = Get-TargetResource @testPresentParams; # -DomainName $correctDomainName;
+                
+                Assert-MockCalled Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It;
             }
-
-        } #end context Validate Assert-Module method
-
-        Context "Validate Get-ADCommonParameters method" {
-        
-            It "Adds 'Server' parameter when 'DomainController' parameter is specified" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -DomainController $testDomainController;
-        
-                $adCommonParams.Server | Should Be $testDomainController;
-            }
-            
-            It "Adds 'Credential' parameter when 'Credential' parameter is specified" {
-                $adCommonParams = Get-ADCommonParameters @testPresentParams -Credential $testCredentials;
-        
-                $adCommonParams.Credential | Should Be $testCredentials;
-            }
-        
-        } #end context Validate Get-ADCommonParameters method
-
-        Context "Validate RemoveDuplicateMembers method" {
-            
-            It 'Removes one duplicate' {
-                $members = RemoveDuplicateMembers -Members 'User1','User2','USER1';
-
-                $members.Count | Should Be 2;
-                $members -contains 'User1' | Should Be $true;
-                $members -contains 'User2' | Should Be $true;
-            }
-            
-            It 'Removes two duplicates' {
-                $members = RemoveDuplicateMembers -Members 'User1','User2','USER1','USER2';
-
-                $members.Count | Should Be 2;
-                $members -contains 'User1' | Should Be $true;
-                $members -contains 'User2' | Should Be $true;
-            }
-            
-            It 'Removes double duplicates' {
-                $members = RemoveDuplicateMembers -Members 'User1','User2','USER1','user1';
-
-                $members.Count | Should Be 2;
-                $members -contains 'User1' | Should Be $true;
-                $members -contains 'User2' | Should Be $true;
-            }
-
-        } #end context Validate RemoveDuplicateMembers method
-
-        Context "Validate TestGroupMembership method" {
-
-            It 'Passes when nothing is passed' {
-
-                TestGroupMembership -GroupMembers $null | Should Be $true;
-            }
-
-            It 'Passes when there are existing members but members are required' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-
-                TestGroupMembership -GroupMembers $testGroupMembers | Should Be $true;
-            }
-
-            It 'Passes when existing members match required members' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-                $testMembers = @($fakeADUser2.SamAccountName, $fakeADUser1.SamAccountName);
-
-                TestGroupMembership -GroupMembers $testGroupMembers -Members $testMembers | Should Be $true;
-            }
-
-            It 'Fails when there are no existing members and members are required' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-                $testMembers = @($fakeADUser1.SamAccountName, $fakeADUser3.SamAccountName);
-
-                TestGroupMembership -GroupMembers $null -Members $testMembers | Should Be $false;
-            }
-
-            It 'Fails when there are more existing members than the members required' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName, $fakeADUser3.SamAccountName);
-                $testMembers = @($fakeADUser1.SamAccountName, $fakeADUser3.SamAccountName);
-
-                TestGroupMembership -GroupMembers $null -Members $testMembers | Should Be $false;
-            }
-
-            It 'Fails when there are more existing members than the members required' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-                $testMembers = @($fakeADUser1.SamAccountName, $fakeADUser3.SamAccountName, $fakeADUser2.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $null -Members $testMembers | Should Be $false;
-            }
-            
-            It 'Fails when existing members do not match required members' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-                $testMembers = @($fakeADUser1.SamAccountName, $fakeADUser3.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -Members $testMembers | Should Be $false;
-            }
-            
-            It 'Passes when existing members include required member' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-                $testMembersToInclude = @($fakeADUser2.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToInclude $testMembersToInclude | Should Be $true;
-            }
-            
-            It 'Passes when existing members include required members' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-                $testMembersToInclude = @($fakeADUser2.SamAccountName, $fakeADUser1.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToInclude $testMembersToInclude | Should Be $true;
-            }
-            
-            It 'Fails when existing members is missing a required member' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName);
-                $testMembersToInclude = @($fakeADUser2.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToInclude $testMembersToInclude | Should Be $false;
-            }
-            
-            It 'Fails when existing members is missing a required member' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser3.SamAccountName);
-                $testMembersToInclude = @($fakeADUser2.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToInclude $testMembersToInclude | Should Be $false;
-            }
-            
-            It 'Fails when existing members is missing a required members' {
-                $testGroupMembers = @($fakeADUser3.SamAccountName);
-                $testMembersToInclude = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToInclude $testMembersToInclude | Should Be $false;
-            }
-            
-            It 'Passes when existing member does not include excluded member' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName);
-                $testMembersToExclude = @($fakeADUser2.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToExclude $testMembersToInclude | Should Be $true;
-            }
-            
-            It 'Passes when existing member does not include excluded members' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName);
-                $testMembersToExclude = @($fakeADUser2.SamAccountName, $fakeADUser3.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToExclude $testMembersToInclude | Should Be $true;
-            }
-            
-            It 'Passes when existing members does not include excluded member' {
-                $testGroupMembers = @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
-                $testMembersToExclude = @($fakeADUser3.SamAccountName);
-            
-                TestGroupMembership -GroupMembers $testGroupMembers -MembersToExclude $testMembersToInclude | Should Be $true;
-            }
-        } #end context Validate TestGroupMembership method
-
-        Context "Validate ValidateMemberParameters method" {
-            
-            It "Errors if 'Members' is specified but is empty" {
-                { ValidateMemberParameters -Members @() -ErrorAction Stop } | Should Throw;
-            }
-            
-            It "Errors if 'Members' and 'MembersToInclude' are specified" {
-                { ValidateMemberParameters -Members @('User1') -MembersToInclude @('User1') -ErrorAction Stop } | Should Throw;
-            }
-            
-            It "Errors if 'Members' and 'MembersToExclude' are specified" {
-                { ValidateMemberParameters -Members @('User1') -MembersToExclude @('User2') -ErrorAction Stop } | Should Throw;
-            }
-            
-            It "Errors if 'MembersToInlcude' and 'MembersToExclude' contain the same member" {
-                { ValidateMemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') -ErrorAction Stop } | Should Throw;
-            }
-            
-            It "Errors if 'MembersToInlcude' and 'MembersToExclude' are empty" {
-                { ValidateMemberParameters -MembersToExclude @() -MembersToInclude @() -ErrorAction Stop } | Should Throw;
-            }
-
-        } #end context Validate ValidateMemberParameters method
-        
-        Context "Validate Get-TargetResource method" {
             
             It "Returns 'Ensure' is 'Present' when group exists" {
                 Mock Get-ADGroup { return $fakeADGroup; }
@@ -264,6 +110,7 @@ Describe "xADGroup" {
             
             It "Calls 'Get-ADGroup' with 'Server' parameter when 'DomainController' specified" {
                 Mock Get-ADGroup -ParameterFilter { $Server -eq $testDomainController } -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
             
                 Get-TargetResource @testPresentParams -DomainController $testDomainController;
             
@@ -272,15 +119,38 @@ Describe "xADGroup" {
             
             It "Calls 'Get-ADGroup' with 'Credential' parameter when specified" {
                 Mock Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
             
                 Get-TargetResource @testPresentParams -Credential $testCredentials;
             
                 Assert-MockCalled Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
             }
+            
+            It "Calls 'Get-ADGroupMember' with 'Server' parameter when 'DomainController' specified" {
+                Mock Get-ADGroup  -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -MockWith { return @($fakeADUser1, $fakeADUser2); }
+            
+                Get-TargetResource @testPresentParams -DomainController $testDomainController;
+            
+                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -Scope It;
+            }
+            
+            It "Calls 'Get-ADGroupMember' with 'Credential' parameter when specified" {
+                Mock Get-ADGroup -MockWith { return $fakeADGroup; }
+                Mock Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return @($fakeADUser1, $fakeADUser2); }
+            
+                Get-TargetResource @testPresentParams -Credential $testCredentials;
+            
+                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+            }
 
-        } #end context Validate Get-TargetResource method
+        }
+        #end region
         
-        Context "Validate Test-TargetResource method" {
+        #region Function Test-TargetResource
+        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+            
+            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
             
             foreach ($attribute in @('SamAccountName','DistinguishedName','ObjectGUID','SID')) {
                 
@@ -443,9 +313,13 @@ Describe "xADGroup" {
                 Test-TargetResource @testAbsentParams | Should Be $true
             }
 
-        } #end Context Validate Test-TargetResource method
+        }
+        #end region
         
-        Context "Validate Set-TargetResource method" {
+        #region Function Set-TargetResource
+        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
+            
+            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
 
             It "Calls 'New-ADGroup' when 'Ensure' is 'Present' and the group does not exist" {
                 Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
@@ -612,8 +486,17 @@ Describe "xADGroup" {
             
                 Assert-MockCalled Remove-ADGroup -Scope It;
             }
-        } #end context Validate Set-TargetResource method
-    
-    } #end InModuleScope
+        }
+        #end region
+        
+    }
+    #end region
+}
+finally
+{
+    #region FOOTER
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+    #endregion
 
+    # TODO: Other Optional Cleanup Code Goes Here...
 }
