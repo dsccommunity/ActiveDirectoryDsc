@@ -209,6 +209,8 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 
 ### Unreleased
 
+### 2.10.0.0
+
 * xADDomainDefaultPasswordPolicy: New resource added.
 * xWaitForADDomain: Updated to make it compatible with systems that don't have the ActiveDirectory module installed, and to allow it to function with domains/forests that don't have a domain controller with Active Directory Web Services running.
 * xADGroup: Fixed bug where specified credentials were not used to retrieve existing group membership.
