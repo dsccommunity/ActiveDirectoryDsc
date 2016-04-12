@@ -71,7 +71,7 @@ $adPropertyMap = @(
 function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Only used if password is managed.
@@ -289,7 +289,7 @@ function Get-TargetResource
 function Test-TargetResource
 {
     [OutputType([System.Boolean])]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Only used if password is managed.
@@ -493,7 +493,7 @@ function Test-TargetResource
 
 function Set-TargetResource
 {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Only used if password is managed.
