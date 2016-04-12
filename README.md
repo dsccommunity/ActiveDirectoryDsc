@@ -207,12 +207,13 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 
 ## **xADRequestODJ**
 The xADRequestODJ DSC resource will create a computer account in an Active Directory domain and generate an Offline Domain Join request file for it.
+For more information on Offline Domain Join, please see [this page].(https://technet.microsoft.com/en-us/library/offline-domain-join-djoin-step-by-step(v=ws.10).aspx).
 ODJ request file will only be created if the computer account does not already exist in the AD domain.
 * **Description**: The name of the domain that will contain the computer account to ODJ.
 * **ComputerName**: The computer name of the AD account to request an ODJ file for.
 * **OU**: The optional OU to create the computer account in.
-* **DCName**: The optional DC Name to target for account creation.
-* **RequestFile**: The full path to the Offline Domain Join Request file to create.
+* **DomainController**: The optional DC Name to target for account creation.
+* **Path**: The full path to the Offline Domain Join Request file to create.
 
 ## Versions
 
@@ -1024,7 +1025,7 @@ Param(
     
     [parameter(Mandatory = $true)]
     [System.String]
-    $RequestFile,
+    $Path,
 
     [ValidateNotNull()]
     [System.String]
@@ -1039,13 +1040,13 @@ Param(
         {
            ComputerName = $ComputerName
            DomainName = $DomainName
-           RequestFile = $RequestFile
+           Path = $Path
            OU = $OU
         }
     }
 }
 
-Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -OU 'cn=Servers' -RequestFile 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
+Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -OU 'cn=Servers' -Path 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADRequestODJ -Wait -Verbose
 ```

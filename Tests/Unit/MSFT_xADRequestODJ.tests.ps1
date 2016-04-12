@@ -31,7 +31,7 @@ try
         $TestRequestODJ = @{
             DomainName   = "$DomainNameNetBios.COM"
             ComputerName = $ComputerName
-            RequestFile  = 'c:\testodj.txt'
+            Path  = 'c:\testodj.txt'
         }
         $DomainName = "DC=$DomainNameNetBios,DC=COM"
         $ComputersContainerName = 'Computers'
@@ -59,7 +59,7 @@ try
                     $Result.DomainName   | Should Be $TestRequestODJ.DomainName
                     $Result.ComputerName | Should Be $TestRequestODJ.ComputerName
                     $Result.OU           | Should BeNullOrEmpty
-                    $Result.RequestFIle  | Should Be $TestRequestODJ.RequestFile
+                    $Result.Path  | Should Be $TestRequestODJ.Path
                 }
                 It 'Should do call all the mocks' {
                     Assert-MockCalled Get-ADDomain -Times 1
@@ -77,7 +77,7 @@ try
                     $Result.DomainName   | Should Be $TestRequestODJ.DomainName
                     $Result.ComputerName | Should Be $TestRequestODJ.ComputerName
                     $Result.OU           | Should Be $FakeDomain.ComputersContainer
-                    $Result.RequestFIle  | Should Be $TestRequestODJ.RequestFile
+                    $Result.Path  | Should Be $TestRequestODJ.Path
                 }
                 It 'Should do call all the mocks' {
                     Assert-MockCalled Get-ADDomain -Times 1
@@ -107,7 +107,7 @@ try
                     $errorId = 'RequestFileExistsError'
                     $errorCategory = [System.Management.Automation.ErrorCategory]::ObjectNotFound
                     $errorMessage = $($LocalizedData.RequestFileExistsError) `
-                        -f $TestRequestODJ.RequestFile
+                        -f $TestRequestODJ.Path
                     $exception = New-Object -TypeName System.ArgumentException `
                         -ArgumentList $errorMessage
                     $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `

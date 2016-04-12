@@ -11,7 +11,7 @@ Param(
     
     [parameter(Mandatory = $true)]
     [System.String]
-    $RequestFile,
+    $Path,
 
     [ValidateNotNull()]
     [System.String]
@@ -26,12 +26,12 @@ Param(
         {
            ComputerName = $ComputerName
            DomainName = $DomainName
-           RequestFile = $RequestFile
+           Path = $Path
            OU = $OU
         }
     }
 }
 
-Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -OU 'cn=Servers' -RequestFile 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
+Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -OU 'cn=Servers' -Path 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADRequestODJ -Wait -Verbose
