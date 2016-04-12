@@ -10,7 +10,7 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit and xADDomainDefaultPasswordPolicy** DSC Resources.
+The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit, xADDomainDefaultPasswordPolicy, xADRequestODJ** DSC Resources.
 These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
@@ -205,9 +205,20 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 * **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
 * **Credential**: User account credentials used to perform the operation (optional).
 
+## **xADRequestODJ**
+The xADRequestODJ DSC resource will create a computer account in an Active Directory domain and generate an Offline Domain Join request file for it.
+ODJ request file will only be created if the computer account does not already exist in the AD domain.
+* **Description**: The name of the domain that will contain the computer account to ODJ.
+* **ComputerName**: The computer name of the AD account to request an ODJ file for.
+* **OU**: The optional OU to create the computer account in.
+* **DCName**: The optional DC Name to target for account creation.
+* **RequestFile**: The full path to the Offline Domain Join Request file to create.
+
 ## Versions
 
 ### Unreleased
+
+* xADRequestODJ: New resource added.
 
 ### 2.10.0.0
 
@@ -993,4 +1004,48 @@ Example_xADDomainDefaultPasswordPolicy -DomainName 'contoso.com' -ComplexityEnab
 
 Start-DscConfiguration -Path .\Example_xADDomainDefaultPasswordPolicy -Wait -Verbose
 
+```
+
+### Provision an AD Computer account for Offline Domain Join
+
+In this example, a new Computer Account will be added to the Servers OU and an Offline Domiain Join request file will be created.
+
+```powershell
+configuration Example_xADRequestODJ
+{
+Param(
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $CompterName,
+    
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $DomainName,
+    
+    [parameter(Mandatory = $true)]
+    [System.String]
+    $RequestFile,
+
+    [ValidateNotNull()]
+    [System.String]
+    $OU
+)
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADRequestODJ ExampleRequestODJ
+        {
+           ComputerName = $ComputerName
+           DomainName = $DomainName
+           RequestFile = $RequestFile
+           OU = $OU
+        }
+    }
+}
+
+Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -OU 'cn=Servers' -RequestFile 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADRequestODJ -Wait -Verbose
 ```

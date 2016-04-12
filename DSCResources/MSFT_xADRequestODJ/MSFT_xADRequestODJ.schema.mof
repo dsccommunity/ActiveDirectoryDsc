@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xADRequestODJ")]
+class MSFT_xADRequestODJ : OMI_BaseResource
+{
+    [Key, Description("The name of the domain that will contain the computer account to ODJ.")] String DomainName;
+    [Key, Description("The computer name of the AD account to request an ODJ file for.")] String ComputerName;
+    [Write, Description("The optional OU to create the computer account in.")] String OU;
+    [Write, Description("The optional DC Name to target for account creation.")] String DCName;
+    [Required, Description("The full path to the Offline Domain Join Request file to create.")] String RequestFile;
+};
