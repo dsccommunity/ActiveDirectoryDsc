@@ -11,11 +11,11 @@ Param(
     
     [parameter(Mandatory = $true)]
     [System.String]
-    $Path,
+    $RequestFile,
 
     [ValidateNotNull()]
     [System.String]
-    $OU
+    $Path
 )
 
     Import-DscResource -Module xActiveDirectory
@@ -26,12 +26,12 @@ Param(
         {
            ComputerName = $ComputerName
            DomainName = $DomainName
+           RequestFile = $RequestFile
            Path = $Path
-           OU = $OU
         }
     }
 }
 
-Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -OU 'cn=Servers' -Path 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
+Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -Path 'cn=Servers' -RequestFile 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADRequestODJ -Wait -Verbose

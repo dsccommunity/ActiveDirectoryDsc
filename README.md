@@ -211,9 +211,9 @@ For more information on Offline Domain Join, please see [this page].(https://tec
 ODJ request file will only be created if the computer account does not already exist in the AD domain.
 * **Description**: The name of the domain that will contain the computer account to ODJ.
 * **ComputerName**: The computer name of the AD account to request an ODJ file for.
-* **OU**: The optional OU to create the computer account in.
+* **Path**: The optional OU to create the computer account in.
 * **DomainController**: The optional DC Name to target for account creation.
-* **Path**: The full path to the Offline Domain Join Request file to create.
+* **RequestFile**: The full path to the Offline Domain Join Request file to create.
 
 ## Versions
 
@@ -1025,11 +1025,11 @@ Param(
     
     [parameter(Mandatory = $true)]
     [System.String]
-    $Path,
+    $RequestFile,
 
     [ValidateNotNull()]
     [System.String]
-    $OU
+    $Path
 )
 
     Import-DscResource -Module xActiveDirectory
@@ -1040,13 +1040,13 @@ Param(
         {
            ComputerName = $ComputerName
            DomainName = $DomainName
+           RequestFile = $RequestFile
            Path = $Path
-           OU = $OU
         }
     }
 }
 
-Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -OU 'cn=Servers' -Path 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
+Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -Path 'cn=Servers' -RequestFile 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADRequestODJ -Wait -Verbose
 ```

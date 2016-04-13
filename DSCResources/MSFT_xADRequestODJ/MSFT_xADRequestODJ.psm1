@@ -35,7 +35,7 @@ function Get-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $RequestFile
     )
 
     Write-Verbose -Message ( @( "$($MyInvocation.MyCommand): "
@@ -49,7 +49,7 @@ function Get-TargetResource
     $returnValue = @{
         DomainName = $DomainName
         ComputerName = $ComputerName
-        Path = $Path
+        RequestFile = $RequestFile
     }
 
     $Domain = Get-ADDomain -Identity $DomainName
@@ -62,7 +62,7 @@ function Get-TargetResource
     if ($Computer)
     {
         $returnValue += @{
-            OU = (Get-ADObjectParentDN -DN $Computer.DistinguishedName)
+            Path = (Get-ADObjectParentDN -DN $Computer.DistinguishedName)
         }
     } # if
 
@@ -87,7 +87,7 @@ function Set-TargetResource
         $ComputerName,
 
         [System.String]
-        $OU,
+        $Path,
 
         [System.String]
         $DomainController,
@@ -95,7 +95,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $RequestFile
     )
 
     Write-Verbose -Message ( @( "$($MyInvocation.MyCommand): "
@@ -106,12 +106,12 @@ function Set-TargetResource
     # This is the safest thing to do, because once a request
     # file is deleted there is no way of recreating it except
     # by the DJOIN /REUSE flag which resets the Secure Channel.
-    if (Test-Path -Path $Path)
+    if (Test-Path -Path $RequestFile)
     {
         $errorId = 'RequestFileExistsError'
         $errorCategory = [System.Management.Automation.ErrorCategory]::ObjectNotFound
         $errorMessage = $($LocalizedData.RequestFileExistsError) `
-            -f $Path
+            -f $RequestFile
         $exception = New-Object -TypeName System.ArgumentException `
             -ArgumentList $errorMessage
         $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
@@ -143,7 +143,7 @@ function Test-TargetResource
         $ComputerName,
 
         [System.String]
-        $OU,
+        $Path,
 
         [System.String]
         $DomainController,
@@ -151,7 +151,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $RequestFile
     )
 
     # Flag to signal whether settings are correct
@@ -202,7 +202,7 @@ function Join-Domain {
         $ComputerName,
 
         [System.String]
-        $OU,
+        $Path,
 
         [System.String]
         $DomainController,
@@ -210,22 +210,22 @@ function Join-Domain {
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $RequestFile
     )
 
     Write-Verbose -Message ( @(
         "$($MyInvocation.MyCommand): "
         $($LocalizedData.ODJRequestStartMessage) `
-            -f $DomainName,$ComputerName,$Path `
+            -f $DomainName,$ComputerName,$RequestFile `
         ) -join '' )
 
     $DJoinParameters = @(
         '/PROVISION'
         '/DOMAIN',$DomainName
         '/MACHINE',$ComputerName )
-    if ($OU)
+    if ($Path)
     {
-        $DJoinParameters += @( '/MACHINEOU',$OU )
+        $DJoinParameters += @( '/MACHINEOU',$Path )
     } # if
 
     if ($DomainController)
@@ -233,7 +233,7 @@ function Join-Domain {
         $DJoinParameters += @( '/DCNAME',$DomainController )
     } # if
 
-    $DJoinParameters += @( '/SAVEFILE',$Path )
+    $DJoinParameters += @( '/SAVEFILE',$RequestFile )
     $Result = & djoin.exe @DjoinParameters
 
     if ($LASTEXITCODE -ne 0)
@@ -255,7 +255,7 @@ function Join-Domain {
     Write-Verbose -Message ( @(
         "$($MyInvocation.MyCommand): "
         $($LocalizedData.ODJRequestCompleteMessage) `
-            -f $DomainName,$ComputerName,$Path `
+            -f $DomainName,$ComputerName,$RequestFile `
         ) -join '' )
 } # function Join-Domain
 
@@ -280,7 +280,7 @@ function Test-ComputerAccount
         $ComputerName,
 
         [System.String]
-        $OU,
+        $Path,
 
         [System.String]
         $DomainController,
@@ -288,9 +288,9 @@ function Test-ComputerAccount
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $RequestFile
     )
-    # It does not matter if OU was specified, if a computer object with
+    # It does not matter if Path was specified, if a computer object with
     # the same name exists in the domain, we need to know.
     $Domain = Get-ADDomain -Identity $DomainName
     $Parameters = @{

@@ -31,7 +31,7 @@ try
         $TestRequestODJ = @{
             DomainName   = "$DomainNameNetBios.COM"
             ComputerName = $ComputerName
-            Path  = 'c:\testodj.txt'
+            RequestFile  = 'c:\testodj.txt'
         }
         $DomainName = "DC=$DomainNameNetBios,DC=COM"
         $ComputersContainerName = 'Computers'
@@ -58,8 +58,8 @@ try
 
                     $Result.DomainName   | Should Be $TestRequestODJ.DomainName
                     $Result.ComputerName | Should Be $TestRequestODJ.ComputerName
-                    $Result.OU           | Should BeNullOrEmpty
-                    $Result.Path  | Should Be $TestRequestODJ.Path
+                    $Result.Path         | Should BeNullOrEmpty
+                    $Result.RequestFile  | Should Be $TestRequestODJ.RequestFile
                 }
                 It 'Should do call all the mocks' {
                     Assert-MockCalled Get-ADDomain -Times 1
@@ -76,8 +76,8 @@ try
 
                     $Result.DomainName   | Should Be $TestRequestODJ.DomainName
                     $Result.ComputerName | Should Be $TestRequestODJ.ComputerName
-                    $Result.OU           | Should Be $FakeDomain.ComputersContainer
-                    $Result.Path  | Should Be $TestRequestODJ.Path
+                    $Result.Path         | Should Be $FakeDomain.ComputersContainer
+                    $Result.RequestFile  | Should Be $TestRequestODJ.RequestFile
                 }
                 It 'Should do call all the mocks' {
                     Assert-MockCalled Get-ADDomain -Times 1
@@ -107,7 +107,7 @@ try
                     $errorId = 'RequestFileExistsError'
                     $errorCategory = [System.Management.Automation.ErrorCategory]::ObjectNotFound
                     $errorMessage = $($LocalizedData.RequestFileExistsError) `
-                        -f $TestRequestODJ.Path
+                        -f $TestRequestODJ.RequestFile
                     $exception = New-Object -TypeName System.ArgumentException `
                         -ArgumentList $errorMessage
                     $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
