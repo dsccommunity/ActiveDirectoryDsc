@@ -1,5 +1,5 @@
 $Global:DSCModuleName      = 'xActiveDirectory'
-$Global:DSCResourceName    = 'MSFT_xADRequestODJ'
+$Global:DSCResourceName    = 'MSFT_xADDomainJoinFile'
 
 #region HEADER
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))

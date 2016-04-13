@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xADRequestODJ")]
-class MSFT_xADRequestODJ : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("xADDomainJoinFile")]
+class MSFT_xADDomainJoinFile : OMI_BaseResource
 {
     [Key, Description("The name of the domain that will contain the computer account to ODJ.")] String DomainName;
     [Key, Description("The computer name of the AD account to request an ODJ file for.")] String ComputerName;

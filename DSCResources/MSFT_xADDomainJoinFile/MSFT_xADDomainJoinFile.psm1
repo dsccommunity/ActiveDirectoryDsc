@@ -10,7 +10,7 @@ if (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath $PSUICulture))
 }
 Import-LocalizedData `
     -BindingVariable LocalizedData `
-    -Filename MSFT_xADRequestODJ.psd1 `
+    -Filename MSFT_xADDomainJoinFile.psd1 `
     -BaseDirectory $moduleRoot `
     -UICulture $Culture
 #endregion

@@ -1,4 +1,4 @@
-configuration Example_xADRequestODJ
+configuration Example_xADDomainJoinFile
 {
 Param(
     [parameter(Mandatory = $true)]
@@ -22,7 +22,7 @@ Param(
 
     Node $AllNodes.NodeName
     {
-        xADRequestODJ ExampleRequestODJ
+        xADDomainJoinFile ExampleRequestODJ
         {
            ComputerName = $ComputerName
            DomainName = $DomainName
@@ -32,6 +32,6 @@ Param(
     }
 }
 
-Example_xADRequestODJ -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -Path 'cn=Servers' -RequestFile 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
+Example_xADDomainJoinFile -ComputerName 'NANOSERVER1' -DomainName 'CONTOSO.COM' -Path 'cn=Servers' -RequestFile 'c:\NANOSERVER1-ODJ.txt' -ConfigurationData $ConfigurationData
 
-Start-DscConfiguration -Path .\Example_xADRequestODJ -Wait -Verbose
+Start-DscConfiguration -Path .\Example_xADDomainJoinFile -Wait -Verbose
