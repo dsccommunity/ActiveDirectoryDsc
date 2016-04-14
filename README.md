@@ -1009,7 +1009,7 @@ Start-DscConfiguration -Path .\Example_xADDomainDefaultPasswordPolicy -Wait -Ver
 
 ### Provision an AD Computer account for Offline Domain Join
 
-In this example, a new Computer Account will be added to the Servers OU and an Offline Domiain Join request file will be created.
+In this example, a new Computer Account will be added to the Servers OU and an Offline Domain Join request file will be created.
 
 ```powershell
 configuration Example_xADDomainJoinFile
