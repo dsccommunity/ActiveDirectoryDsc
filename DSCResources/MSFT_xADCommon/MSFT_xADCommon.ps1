@@ -1,4 +1,4 @@
-﻿data localizedString
+data localizedString
 {
     # culture="en-US"
     ConvertFrom-StringData @'
@@ -429,7 +429,7 @@ function Get-ADCommonParameters
     (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName','GroupName')]
+        [Alias('UserName','GroupName','ComputerName')]
         [System.String]
         $Identity,
         

@@ -209,6 +209,8 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 
 ### Unreleased
 
+* xADComputer: New resource added.
+
 ### 2.10.0.0
 
 * xADDomainDefaultPasswordPolicy: New resource added.

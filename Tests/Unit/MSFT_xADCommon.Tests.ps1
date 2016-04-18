@@ -396,6 +396,19 @@ try
                 $result['Name'] | Should Be $testIdentity;
             }
             
+            foreach ($identityParam in @('UserName','GroupName','ComputerName')) {
+                It "Returns 'Identity' key when '$identityParam' alias is specified" {
+                    $testIdentity = 'contoso.com';
+                    $getADCommonParameters = @{
+                        $identityParam = $testIdentity;
+                    }
+                    
+                    $result = Get-ADCommonParameters @getADCommonParameters;
+
+                    $result['Identity'] | Should Be $testIdentity;
+                }
+            }
+            
             It "Returns 'Identity' key by default when 'Identity' and 'CommonName' are specified" {
                 $testIdentity = 'contoso.com';
                 $testCommonName = 'Test Common Name';

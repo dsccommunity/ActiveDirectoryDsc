@@ -70,6 +70,7 @@ $adPropertyMap = @(
 
 function Get-TargetResource
 {
+    [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
     (
@@ -287,6 +288,7 @@ function Get-TargetResource
 
 function Test-TargetResource
 {
+    [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
@@ -491,6 +493,7 @@ function Test-TargetResource
 
 function Set-TargetResource
 {
+    [CmdletBinding()]
     param
     (
         ## Only used if password is managed.
