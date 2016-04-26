@@ -2,7 +2,7 @@
 class MSFT_xWaitForADDomain : OMI_BaseResource
 {
     [Key] String DomainName;
-    [EmbeddedInstance("MSFT_Credential")] String DomainUserCredential;
+    [Write] [EmbeddedInstance("MSFT_Credential")] String DomainUserCredential;
     [Write] uint64 RetryIntervalSec;
     [Write] uint32 RetryCount;
     [Write] uint32 RebootRetryCount;
