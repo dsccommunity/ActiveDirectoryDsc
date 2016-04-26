@@ -6,7 +6,6 @@
         [Parameter(Mandatory)]
         [String]$DomainName,
 
-        [Parameter(Mandatory=$false)]
         [PSCredential]$DomainUserCredential,
 
         [UInt64]$RetryIntervalSec = 60,
@@ -47,7 +46,6 @@ function Set-TargetResource
         [Parameter(Mandatory)]
         [String]$DomainName,
 
-        [Parameter(Mandatory=$false)]
         [PSCredential]$DomainUserCredential,
 
         [UInt64]$RetryIntervalSec = 60,
@@ -59,30 +57,14 @@ function Set-TargetResource
         [bool]$RebootIfDomainNotFound = $false
     )
 
-    $domainFound = $false
     $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
-    Write-Verbose -Message "Checking for domain $DomainName ..."
-
+    
     for($count = 0; $count -lt $RetryCount; $count++)
     {
-        try
+        $domainFound = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
+         
+        if($domainFound)
         {
-            $context = $null
-            
-            if($DomainUserCredential)
-            {
-                $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain', $domainName, $DomainUserCredential.UserName, $DomainUserCredential.GetNetworkCredential().Password)
-            }
-            else
-            {
-                $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain',$domainName)
-            }
-        
-            $domainController = $null  
-            $domainController = [System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($context)
-            Write-Verbose -Message "Found domain $DomainName"
-            $domainFound = $true
-
             if($RebootIfDomainNotFound)
             {
                 Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
@@ -90,15 +72,15 @@ function Set-TargetResource
             
             break;
         }
-        catch
+        else 
         {
             Write-Verbose -Message "Domain $DomainName not found. Will retry again after $RetryIntervalSec sec"
             Start-Sleep -Seconds $RetryIntervalSec
             Clear-DnsClientCache
-        }
+        }    
     }
 
-    if(! $domainFound) 
+    if(-not $domainFound) 
     {
         if($RebootIfDomainNotFound)
         {
@@ -106,14 +88,13 @@ function Set-TargetResource
             
             if($rebootCount -lt $RebootRetryCount)
             {
-                Write-Verbose -Message  "Domain $DomainName not found after $count attempts with $RetryIntervalSec sec interval. Rebooting.  Reboot attempt number $rebootCount of $RebootRetryCount."
                 $rebootCount = $rebootCount + 1
+                Write-Verbose -Message  "Domain $DomainName not found after $count attempts with $RetryIntervalSec sec interval. Rebooting.  Reboot attempt number $rebootCount of $RebootRetryCount."
                 Set-Content -Path $RebootLogFile -Value $rebootCount
                 $global:DSCMachineStatus = 1
             }
             else 
             {
-                Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
                 throw "Domain '$($DomainName)' NOT found after $RebootRetryCount Reboot attempts."     
             }
 
@@ -134,7 +115,6 @@ function Test-TargetResource
         [Parameter(Mandatory)]
         [String]$DomainName,
 
-        [Parameter(Mandatory=$false)]
         [PSCredential]$DomainUserCredential,
 
         [UInt64]$RetryIntervalSec = 60,
@@ -145,26 +125,48 @@ function Test-TargetResource
 
         [bool]$RebootIfDomainNotFound = $false
     )
-
-    Write-Verbose -Message "Checking for domain $DomainName ..."
-    try
+    
+    $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
+    
+    $domainFound = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
+   
+    if($domainFound -and $RebootIfDomainNotFound)
     {
-        if($DomainUserCredential)
-        {
-            $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain', $domainName, $DomainUserCredential.UserName, $DomainUserCredential.GetNetworkCredential().Password)
-        }
-        else
-        {
-           $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain',$domainName)
-        }
-            
-        $domainController = [System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($context)
-        Write-Verbose -Message "Found domain $DomainName"
+        Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
+    }
+  
+    $domainFound
+}
 
-        if($RebootIfDomainNotFound)
-        {
-            Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
-        }
+
+
+function Get-Domain
+{
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory)]
+        [String]$DomainName,
+
+        [PSCredential]$DomainUserCredential
+
+    )
+    Write-Verbose -Message "Checking for domain $DomainName ..."
+  
+    if($DomainUserCredential)
+    {
+        $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain', $DomainName, $DomainUserCredential.UserName, $DomainUserCredential.GetNetworkCredential().Password)
+    }
+    else
+    {
+        $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain',$DomainName)
+    }
+    
+    try 
+    {
+        $domainController = [System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($context)
+
+         Write-Verbose -Message "Found domain $DomainName"
             
         $true
     }
