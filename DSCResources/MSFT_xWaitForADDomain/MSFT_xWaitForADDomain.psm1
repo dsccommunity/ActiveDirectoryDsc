@@ -25,9 +25,12 @@
     {
         $convertToCimCredential = $null
     }
-
+    
+    $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
+         
+   
     $returnValue = @{
-        DomainName = $DomainName
+        DomainName = $domain.Name
         DomainUserCredential = $convertToCimCredential
         RetryIntervalSec = $RetryIntervalSec
         RetryCount = $RetryCount
@@ -61,9 +64,9 @@ function Set-TargetResource
     
     for($count = 0; $count -lt $RetryCount; $count++)
     {
-        $domainFound = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
+        $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
          
-        if($domainFound)
+        if($domain)
         {
             if($RebootIfDomainNotFound)
             {
@@ -80,7 +83,7 @@ function Set-TargetResource
         }    
     }
 
-    if(-not $domainFound) 
+    if(-not $domain) 
     {
         if($RebootIfDomainNotFound)
         {
@@ -128,21 +131,28 @@ function Test-TargetResource
     
     $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
     
-    $domainFound = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
+    $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
    
-    if($domainFound -and $RebootIfDomainNotFound)
+    if($domain)
     {
-        Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
+        if($RebootIfDomainNotFound)
+        {
+            Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
+        }
+            
+        $true
     }
-  
-    $domainFound
+    else 
+    {
+        $false
+    }    
 }
 
 
 
 function Get-Domain
 {
-    [OutputType([System.Boolean])]
+    [OutputType([PSObject])]
     param
     (
         [Parameter(Mandatory)]
@@ -164,15 +174,16 @@ function Get-Domain
     
     try 
     {
-        $domainController = [System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($context)
-
-         Write-Verbose -Message "Found domain $DomainName"
-            
-        $true
+        $domain = ([System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($context)).domain.ToString()
+        Write-Verbose -Message "Found domain $DomainName"
+        $returnValue = @{
+            Name = $domain
+        }
+    
+       $returnValue
     }
     catch
     {
         Write-Verbose -Message "Domain $DomainName not found"
-        $false
     }
 }
