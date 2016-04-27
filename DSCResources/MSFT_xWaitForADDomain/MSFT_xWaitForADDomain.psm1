@@ -12,9 +12,8 @@
 
         [UInt32]$RetryCount = 10,
         
-        [UInt32]$RebootRetryCount = 3,
+        [UInt32]$RebootRetryCount = 0
 
-        [bool]$RebootIfDomainNotFound = $false
     )
 
     if($DomainUserCredential)
@@ -35,7 +34,6 @@
         RetryIntervalSec = $RetryIntervalSec
         RetryCount = $RetryCount
         RebootRetryCount = $RebootRetryCount
-        RebootIfDomainNotFound = $RebootIfDomainNotFound
     }
     
     $returnValue
@@ -55,9 +53,8 @@ function Set-TargetResource
 
         [UInt32]$RetryCount = 10,
         
-        [UInt32]$RebootRetryCount = 3,
+        [UInt32]$RebootRetryCount = 0
 
-        [bool]$RebootIfDomainNotFound = $false
     )
 
     $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
@@ -68,7 +65,7 @@ function Set-TargetResource
          
         if($domain)
         {
-            if($RebootIfDomainNotFound)
+            if($RebootRetryCount -gt 0)
             {
                 Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
             }
@@ -85,7 +82,7 @@ function Set-TargetResource
 
     if(-not $domain) 
     {
-        if($RebootIfDomainNotFound)
+        if($RebootRetryCount -gt 0)
         {
             [UInt32]$rebootCount = Get-Content $RebootLogFile -ErrorAction SilentlyContinue
             
@@ -124,9 +121,8 @@ function Test-TargetResource
 
         [UInt32]$RetryCount = 10,
         
-        [UInt32]$RebootRetryCount = 3,
+        [UInt32]$RebootRetryCount = 0
 
-        [bool]$RebootIfDomainNotFound = $false
     )
     
     $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
@@ -135,7 +131,7 @@ function Test-TargetResource
    
     if($domain)
     {
-        if($RebootIfDomainNotFound)
+        if($RebootRetryCount -gt 0)
         {
             Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
         }
