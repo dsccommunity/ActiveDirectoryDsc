@@ -39,6 +39,15 @@ try
             RetryIntervalSec = 10
             RetryCount = 5
         }
+        
+        $rebootTestParams = @{
+            DomainName = $domainName
+            DomainUserCredential = $DomainUserCredential
+            RetryIntervalSec = 10
+            RetryCount = 5
+            RebootRetryCount = 3
+        }
+        
         $fakeDomainObject = @{Name = $domainName}
         #endregion
 
@@ -61,7 +70,7 @@ try
                 Mock -CommandName Get-Domain -MockWith {}
                 $targetResource = Get-TargetResource @testParams
                 $targetResource.DomainName | Should Be $null
-            }
+            }            
         }
         #endregion
 
@@ -89,32 +98,47 @@ try
 
         #region Function Set-TargetResource
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-            It "Doesn't throw exception and doesn't call Start-Sleep and Clear-DnsClientCache when domain found" {
+            BeforeEach{
+                $global:DSCMachineStatus = $null 
+            }
+            
+            It "Doesn't throw exception and doesn't call Start-Sleep, Clear-DnsClientCache or set `$global:DSCMachineStatus when domain found" {
                 Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
                 Mock -CommandName Start-Sleep -MockWith {}
                 Mock -CommandName Clear-DnsClientCache -MockWith {}
                 {Set-TargetResource @testParams} | Should Not Throw
-                Assert-MockCalled -CommandName Get-Domain -Times 1 -Exactly -Scope It
+                 $global:DSCMachineStatus | should not be 1  
                 Assert-MockCalled -CommandName Start-Sleep -Times 0 -Scope It
                 Assert-MockCalled -CommandName Clear-DnsClientCache -Times 0 -Scope It
             }
 
-            It "Doesn't call Start-Sleep and Clear-DnsClientCache when domain found" {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                Mock -CommandName Start-Sleep -MockWith {}
-                Mock -CommandName Clear-DnsClientCache -MockWith {}
-                {Set-TargetResource @testParams} | Should Not Throw
-                Assert-MockCalled -CommandName Start-Sleep -Times 0 -Scope It
-                Assert-MockCalled -CommandName Clear-DnsClientCache -Times 0 -Scope It
-            }
-
-            It "Throws exception when domain not found after $($testParams.RetryCount) retries" {
+            It "Throws exception and does not set `$global:DSCMachineStatus when domain not found after $($testParams.RetryCount) retries when RebootRetryCount is not set" {
                 Mock -CommandName Get-Domain -MockWith {}
-                Mock -CommandName Start-Sleep -MockWith {}
-                Mock -CommandName Clear-DnsClientCache -MockWith {}
                 {Set-TargetResource @testParams} | Should Throw
+                $global:DSCMachineStatus | should not be 1  
+            }
+            
+            It "Throws exception when domain not found after $($rebootTestParams.RebootRetryCount) reboot retries when RebootRetryCount is exceeded" {
+                Mock -CommandName Get-Domain -MockWith {}
+                Mock -CommandName Get-Content -MockWith {return $rebootTestParams.RebootRetryCount}
+                {Set-TargetResource @rebootTestParams} | Should Throw
             }
 
+            It "Calls Set-Content if reboot count is less than RebootRetryCount when domain not found" {
+                Mock -CommandName Get-Domain -MockWith {}
+                Mock -CommandName Get-Content -MockWith {return 0}
+                Mock -CommandName Set-Content -MockWith {}
+                {Set-TargetResource @rebootTestParams} | Should Not Throw
+                Assert-MockCalled -CommandName Set-Content -Times 1 -Exactly -Scope It
+            }
+            
+            It "Sets `$global:DSCMachineStatus = 1 and does not throw an exception if the domain is not found and RebootRetryCount is not exceeded" {
+                Mock -CommandName Get-Domain -MockWith {}
+                Mock -CommandName Get-Content -MockWith {return 0}
+                {Set-TargetResource @rebootTestParams} | Should Not Throw
+                $global:DSCMachineStatus | should be 1 
+            }
+                       
             It "Calls Get-Domain exactly $($testParams.RetryCount) times when domain not found" {
                 Mock -CommandName Get-Domain -MockWith {}
                 Mock -CommandName Start-Sleep -MockWith {}
