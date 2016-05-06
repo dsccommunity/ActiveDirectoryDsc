@@ -47,19 +47,36 @@ try
             SID = 'S-1-5-21-1409167834-891301383-2860967316-1143';
             ObjectClass = 'computer';
             ObjectGUID = [System.Guid]::NewGuid();
-            UserPrincipalName = '';
+            UserPrincipalName = 'TESTCOMPUTER@contoso.com';
+            ServicePrincipalNames = @('spn/a','spn/b');
+            Location = 'Test location';
+            DnsHostName = '{0}.contoso.com' -f $testPresentParams.ComputerName;
+            DisplayName = $testPresentParams.ComputerName;
+            Description = 'Test description';
+            ManagedBy = 'CN=Manager,CN=Users,DC=contoso,DC=com';
         }
 
         $testDomainController = 'TESTDC';
         $testCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
-        $testStringProperties = @(
-            'Location', 'DnsHostName', 'ServicePrincipalNames', 'UserPrincipalName', 'DisplayName', 'Path', 'Description', 'Manager'
-        );
-        $testBooleanProperties = @('Enabled');
-
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+            
+            $testStringProperties = @(
+                'Location',
+                'DnsHostName',
+                'UserPrincipalName',
+                'DisplayName',
+                'Path',
+                'Description',
+                'Manager'
+            );
+            $testArrayProperties = @(
+                'ServicePrincipalNames'
+            );
+            $testBooleanProperties = @(
+                'Enabled'
+            );
         
             It "Returns a 'System.Collections.Hashtable' object type" {
                 Mock Get-ADComputer { return [PSCustomObject] $fakeADComputer; }
@@ -106,7 +123,7 @@ try
 
         #region Function Test-TargetResource
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
-            
+
             It "Passes when computer account does not exist and 'Ensure' is 'Absent'" {
                 Mock Get-TargetResource { return $testAbsentParams }
                 
@@ -211,6 +228,101 @@ try
             
             } #end foreach test string property
             
+            foreach ($testParameter in $testArrayProperties) {
+                
+                It "Passes when computer account '$testParameter' matches empty AD account property" {
+                    $testParameterValue = @();
+                    $testValidPresentParams = $testPresentParams.Clone();
+                    $testValidPresentParams[$testParameter] = $testParameterValue;
+                    $validADComputer = $testPresentParams.Clone();
+                    Mock Get-TargetResource {
+                        $validADComputer[$testParameter] = $testParameterValue;
+                        return $validADComputer;
+                    }
+            
+                    Test-TargetResource @testValidPresentParams | Should Be $true;
+                }
+                
+                It "Passes when computer account '$testParameter' matches single AD account property" {
+                    $testParameterValue = @('Entry1');
+                    $testValidPresentParams = $testPresentParams.Clone();
+                    $testValidPresentParams[$testParameter] = $testParameterValue;
+                    $validADComputer = $testPresentParams.Clone();
+                    Mock Get-TargetResource {
+                        $validADComputer[$testParameter] = $testParameterValue;
+                        return $validADComputer;
+                    }
+            
+                    Test-TargetResource @testValidPresentParams | Should Be $true;
+                }
+                
+                It "Passes when computer account '$testParameter' matches multiple AD account property" {
+                    $testParameterValue = @('Entry1','Entry2');
+                    $testValidPresentParams = $testPresentParams.Clone();
+                    $testValidPresentParams[$testParameter] = $testParameterValue;
+                    $validADComputer = $testPresentParams.Clone();
+                    Mock Get-TargetResource {
+                        $validADComputer[$testParameter] = $testParameterValue;
+                        return $validADComputer;
+                    }
+            
+                    Test-TargetResource @testValidPresentParams | Should Be $true;
+                }
+                
+                It "Fails when computer account '$testParameter' does not match AD account property count" {
+                    $testParameterValue = @('Entry1','Entry2');
+                    $testValidPresentParams = $testPresentParams.Clone();
+                    $testValidPresentParams[$testParameter] = $testParameterValue;
+                    $validADComputer = $testPresentParams.Clone();
+                    Mock Get-TargetResource {
+                        $validADComputer[$testParameter] = @('Entry1');
+                        return $validADComputer;
+                    }
+            
+                    Test-TargetResource @testValidPresentParams | Should Be $false;
+                }
+                
+                It "Fails when computer account '$testParameter' does not match AD account property name" {
+                    $testParameterValue = @('Entry1');
+                    $testValidPresentParams = $testPresentParams.Clone();
+                    $testValidPresentParams[$testParameter] = $testParameterValue;
+                    $validADComputer = $testPresentParams.Clone();
+                    Mock Get-TargetResource {
+                        $validADComputer[$testParameter] = @('Entry2');
+                        return $validADComputer;
+                    }
+            
+                    Test-TargetResource @testValidPresentParams | Should Be $false;
+                }
+                
+                It "Fails when computer account '$testParameter' does not match empty AD account property" {
+                    $testParameterValue = @('Entry1');
+                    $testValidPresentParams = $testPresentParams.Clone();
+                    $testValidPresentParams[$testParameter] = $testParameterValue;
+                    $validADComputer = $testPresentParams.Clone();
+                    Mock Get-TargetResource {
+                        $validADComputer[$testParameter] = @();
+                        return $validADComputer;
+                    }
+            
+                    Test-TargetResource @testValidPresentParams | Should Be $false;
+                }
+                
+                It "Fails when empty computer account '$testParameter' does not match AD account property" {
+                    $testParameterValue = @();
+                    $testValidPresentParams = $testPresentParams.Clone();
+                    $testValidPresentParams[$testParameter] = $testParameterValue;
+                    $validADComputer = $testPresentParams.Clone();
+                    Mock Get-TargetResource {
+                        $validADComputer[$testParameter] = @('ExtraEntry1');
+                        return $validADComputer;
+                    }
+            
+                    Test-TargetResource @testValidPresentParams | Should Be $false;
+                }
+                
+            } #end foreach test string property
+            
             foreach ($testParameter in $testBooleanProperties) {
                 
                 It "Passes when computer account '$testParameter' matches AD account property" {
@@ -247,6 +359,22 @@ try
         #region Function Set-TargetResource
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
             
+            $testStringProperties = @(
+                'Location',
+                'DnsHostName',
+                'UserPrincipalName',
+                'DisplayName',
+                'Description'
+                # Manager is translated to ManagedBy
+            );
+            
+            $testArrayProperties = @(
+                'ServicePrincipalNames'
+            );
+            $testBooleanProperties = @(
+                'Enabled'
+            );
+            
             It "Calls 'New-ADComputer' when 'Ensure' is 'Present' and the account does not exist" {
                 $newComputerName = 'NEWCOMPUTER'
                 $newAbsentParams = $testAbsentParams.Clone();
@@ -276,101 +404,77 @@ try
                 
                 Assert-MockCalled Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -Scope It;
             }
+            
+            foreach ($testParameter in $testStringProperties) {
+                
+                It "Calls 'Set-ADComputer' with 'Remove' when '$testParameter' is `$null" {
+                    Mock Get-ADComputer { return $fakeADComputer; }
+                    Mock Set-ADComputer -ParameterFilter { $Remove.ContainsKey($testParameter) } { }
+                    
+                    $setTargetResourceParams = $testPresentParams.Clone();
+                    $setTargetResourceParams[$testParameter] = '';
+                    Set-TargetResource @setTargetResourceParams;
+                    
+                    Assert-MockCalled Set-ADComputer -ParameterFilter { $Remove.ContainsKey($testParameter) } -Scope It -Exactly 1;
+                }
+                
+                It "Calls 'Set-ADComputer' with 'Replace' when existing '$testParameter' is not `$null" {
+                    Mock Get-ADComputer { return $fakeADComputer; }
+                    Mock Set-ADComputer -ParameterFilter { $Replace.ContainsKey($testParameter) } { }
+                    
+                    $setTargetResourceParams = $testPresentParams.Clone();
+                    $setTargetResourceParams[$testParameter] = 'NewStringValue';
+                    Set-TargetResource @setTargetResourceParams;
+                    
+                    Assert-MockCalled Set-ADComputer -ParameterFilter { $Replace.ContainsKey($testParameter) } -Scope It -Exactly 1;
+                }   
+   
+            } #end foreach string parameter
+            
+            It "Calls 'Set-ADComputer' with 'Remove' when 'Manager' is `$null" {
+                ## Manager translates to AD attribute 'managedBy'
+                Mock Get-ADComputer { return $fakeADComputer; }
+                Mock Set-ADComputer -ParameterFilter { $Remove.ContainsKey('ManagedBy') } { }
+                
+                $setTargetResourceParams = $testPresentParams.Clone();
+                $setTargetResourceParams['Manager'] = '';
+                Set-TargetResource @setTargetResourceParams;
+                
+                Assert-MockCalled Set-ADComputer -ParameterFilter { $Remove.ContainsKey('ManagedBy') } -Scope It -Exactly 1;
+            }
+            
+            It "Calls 'Set-ADComputer' with 'Replace' when existing 'Manager' is not `$null" {
+                ## Manager translates to AD attribute 'managedBy'
+                Mock Get-ADComputer { return $fakeADComputer; }
+                Mock Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ManagedBy') } { }
+                
+                $setTargetResourceParams = $testPresentParams.Clone();
+                $setTargetResourceParams['Manager'] = 'NewValue';
+                Set-TargetResource @setTargetResourceParams;
+                
+                Assert-MockCalled Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ManagedBy') } -Scope It -Exactly 1;
+            }
+            
+            It "Calls 'Set-ADComputer' with 'Enabled' = 'True' by default" {
+                Mock Get-ADComputer { return $fakeADComputer; }
+                Mock Set-ADComputer -ParameterFilter { $Enabled -eq $true } { }
+                
+                $setTargetResourceParams = $testPresentParams.Clone();
+                $setTargetResourceParams[$testParameter] = -not $fakeADComputer.$testParameter;
+                Set-TargetResource @setTargetResourceParams;
+                
+                Assert-MockCalled Set-ADComputer -ParameterFilter { $Enabled -eq $true } -Scope It -Exactly 1;
+            }
 
-        
-            <# It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is null" {
-                $testADPropertyName = 'Description';
-                Mock Get-ADUser {
-                    $duffADUser = $fakeADUser.Clone();
-                    $duffADUser[$testADPropertyName] = $null;
-                    return $duffADUser;
-                }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
-        
-                Set-TargetResource @testPresentParams -Description 'My custom description';
-                
-                Assert-MockCalled Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1;
-            }
-            
-            It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is empty" {
-                $testADPropertyName = 'Description';
-                Mock Get-ADUser {
-                    $duffADUser = $fakeADUser.Clone();
-                    $duffADUser[$testADPropertyName] = '';
-                    return $duffADUser;
-                }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
-        
-                Set-TargetResource @testPresentParams -Description 'My custom description';
-                
-                Assert-MockCalled Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1;
-            }
-        
-            It "Calls 'Set-ADUser' with 'Remove' when new matching AD property is empty" {
-                $testADPropertyName = 'Description';
-                Mock Get-ADUser {
-                    $duffADUser = $fakeADUser.Clone();
-                    $duffADUser[$testADPropertyName] = 'Incorrect parameter value';
-                    return $duffADUser;
-                }
-                Mock Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
-        
-                Set-TargetResource @testPresentParams -Description '';
-                
-                Assert-MockCalled Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -Scope It -Exactly 1;
-            }
-        
-            It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {
-                $testADPropertyName = 'Title';
-                Mock Get-ADUser {
-                    $duffADUser = $fakeADUser.Clone();
-                    $duffADUser[$testADPropertyName] = $null;
-                    return $duffADUser;
-                }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
-        
-                Set-TargetResource @testPresentParams -JobTitle 'Gaffer';
-                
-                Assert-MockCalled Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1;
-            }
-        
-            It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is empty" {
-                $testADPropertyName = 'Title';
-                Mock Get-ADUser {
-                    $duffADUser = $fakeADUser.Clone();
-                    $duffADUser[$testADPropertyName] = '';
-                    return $duffADUser;
-                }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
-        
-                Set-TargetResource @testPresentParams -JobTitle 'Gaffer';
-                
-                Assert-MockCalled Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1;
-            }
-        
-            It "Calls 'Set-ADUser' with 'Remove' when new mismatched AD property is empty" {
-                $testADPropertyName = 'Title';
-                Mock Get-ADUser {
-                    $duffADUser = $fakeADUser.Clone();
-                    $duffADUser[$testADPropertyName] = 'Incorrect job title';
-                    return $duffADUser;
-                }
-                Mock Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
-        
-                Set-TargetResource @testPresentParams -JobTitle '';
-                
-                Assert-MockCalled Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -Scope It -Exactly 1;
-            }
-            
-            It "Calls 'Remove-ADUser' when 'Ensure' is 'Absent' and user account exists" {
-                Mock Get-ADUser { return [PSCustomObject] $fakeADUser; }
-                Mock Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -MockWith { }
+            It "Calls 'Remove-ADComputer' when 'Ensure' is 'Absent' and computer account exists" {
+                Mock Get-ADComputer { return $fakeADComputer; }
+                Mock Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -MockWith { }
                 
                 Set-TargetResource @testAbsentParams;
                 
-                Assert-MockCalled Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -Scope It;
+                Assert-MockCalled Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -Scope It;
             }
-        #>
+       
         }
         #endregion
     }
@@ -382,4 +486,3 @@ finally
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
-

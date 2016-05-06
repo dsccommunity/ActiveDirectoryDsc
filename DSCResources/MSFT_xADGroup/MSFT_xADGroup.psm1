@@ -349,7 +349,7 @@ function Set-TargetResource
     $adGroupParams = Get-ADCommonParameters @PSBoundParameters;
     
     try {
-        $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,Info;
+        $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info;
 
         if ($Ensure -eq 'Present') {
 
