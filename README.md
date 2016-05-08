@@ -826,7 +826,7 @@ Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path
 
 In this example, we enable the Active Directory Recycle Bin.
 
-```
+```powershell
 Configuration Example_xADRecycleBin
 {
 Param(
@@ -868,7 +868,7 @@ Start-DscConfiguration -Path .\Example_xADRecycleBin -Wait -Verbose
 
 In this example, we add an Active Directory group to the default container (normally the Users OU).
 
-```
+```powershell
 configuration Example_xADGroup
 {
 Param(
