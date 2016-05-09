@@ -89,7 +89,7 @@ function Get-TargetResource
         $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
         
         $adProperties = @();
-        ## Create an array of the AD propertie names to retrieve from the property map
+        ## Create an array of the AD property names to retrieve from the property map
         foreach ($property in $adPropertyMap)
         {
             
@@ -219,13 +219,14 @@ function Test-TargetResource
     {
         if ($targetResource.Ensure -eq 'Present')
         {
-            Write-Verbose -Message ($LocalizedData.ADComputerNotDesiredPropertyState -f 'Ensure', $PSBoundParameters.Ensure, $targetResource.Ensure);
+            Write-Verbose -Message ($LocalizedData.ADComputerNotDesiredPropertyState -f `
+                                    'Ensure', $PSBoundParameters.Ensure, $targetResource.Ensure);
             $isCompliant = $false;
         }
     }
     else
     {
-        ## Add common name, ensure and enabled as they may not be explicitly passed and we want to enumerate them
+        ## Add ensure and enabled as they may not be explicitly passed and we want to enumerate them
         $PSBoundParameters['Ensure'] = $Ensure;
         $PSBoundParameters['Enabled'] = $Enabled;
     
@@ -234,7 +235,8 @@ function Test-TargetResource
             if ($targetResource.ContainsKey($parameter))
             {
                 ## This check is required to be able to explicitly remove values with an empty string, if required
-                if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
+                if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and
+                    ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
                 {
                     # Both values are null/empty and therefore we are compliant
                 }
@@ -248,13 +250,15 @@ function Test-TargetResource
                     {
                         $existingSPNs = $testMembersParams['ExistingMembers'] -join ',';
                         $desiredSPNs = $ServicePrincipalNames -join ',';
-                        Write-Verbose -Message ($LocalizedData.ADComputerNotDesiredPropertyState -f 'ServicePrincipalNames', $desiredSPNs, $existingSPNs);
+                        Write-Verbose -Message ($LocalizedData.ADComputerNotDesiredPropertyState -f `
+                                                'ServicePrincipalNames', $desiredSPNs, $existingSPNs);
                         $isCompliant = $false;
                     }
                 }
                 elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
                 {
-                    Write-Verbose -Message ($LocalizedData.ADComputerNotDesiredPropertyState -f $parameter, $PSBoundParameters.$parameter, $targetResource.$parameter);
+                    Write-Verbose -Message ($LocalizedData.ADComputerNotDesiredPropertyState -f `
+                                            $parameter, $PSBoundParameters.$parameter, $targetResource.$parameter);
                     $isCompliant = $false;
                 }
             }
@@ -327,7 +331,7 @@ function Set-TargetResource
 
     $targetResource = Get-TargetResource @PSBoundParameters;
 
-    ## Add common name, ensure and enabled as they may not be explicitly passed
+    ## Add ensure and enabled as they may not be explicitly passed and we want to enumerate them
     $PSBoundParameters['Ensure'] = $Ensure;
     $PSBoundParameters['Enabled'] = $Enabled;
 
@@ -362,19 +366,22 @@ function Set-TargetResource
                     $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
                     ## Using the SamAccountName for identity with Move-ADObject does not work, use the DN instead
                     $adCommonParameters['Identity'] = $targetResource.DistinguishedName;
-                    Write-Verbose -Message ($LocalizedData.MovingADComputer -f $targetResource.Path, $PSBoundParameters.Path);
+                    Write-Verbose -Message ($LocalizedData.MovingADComputer -f `
+                                            $targetResource.Path, $PSBoundParameters.Path);
                     Move-ADObject @adCommonParameters -TargetPath $PSBoundParameters.Path;
                 }
                 elseif ($parameter -eq 'ServicePrincipalNames')
                 {
-                    Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f 'ServicePrincipalNames', ($ServicePrincipalNames -join ','));
+                    Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f `
+                                            'ServicePrincipalNames', ($ServicePrincipalNames -join ','));
                     $replaceComputerProperties['ServicePrincipalName'] = $ServicePrincipalNames;
                 }
                 elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
                 {
                     ## We cannot enable/disable an account with -Add or -Replace parameters, but inform that
                     ## we will change this as it is out of compliance (it always gets set anyway)
-                    Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f $parameter, $PSBoundParameters.$parameter);
+                    Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f `
+                                            $parameter, $PSBoundParameters.$parameter);
                 }
                 elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
                 {
@@ -391,7 +398,8 @@ function Set-TargetResource
                         ## Only remove if the existing value in not null or empty
                         if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
                         {
-                            Write-Verbose -Message ($LocalizedData.RemovingADComputerProperty -f $parameter, $PSBoundParameters.$parameter);
+                            Write-Verbose -Message ($LocalizedData.RemovingADComputerProperty -f `
+                                                    $parameter, $PSBoundParameters.$parameter);
                             if ($adProperty.UseCmdletParameter -eq $true)
                             {
                                 ## We need to pass the parameter explicitly to Set-ADComputer, not via -Remove
@@ -410,7 +418,8 @@ function Set-TargetResource
                     else
                     {
                         ## We are replacing the existing value
-                        Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f $parameter, $PSBoundParameters.$parameter);
+                        Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f `
+                                                $parameter, $PSBoundParameters.$parameter);
                         if ($adProperty.UseCmdletParameter -eq $true)
                         {
                             ## We need to pass the parameter explicitly to Set-ADComputer, not via -Replace
