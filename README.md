@@ -208,6 +208,8 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 ## Versions
 
 ### Unreleased
+
+### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
 
 ### 2.10.0.0
