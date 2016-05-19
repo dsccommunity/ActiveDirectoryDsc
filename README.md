@@ -208,6 +208,7 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 ## Versions
 
 ### Unreleased
+* xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages.  Corrected.
 
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
