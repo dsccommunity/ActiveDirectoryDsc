@@ -362,7 +362,7 @@ function Set-TargetResource
             {
                 if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path))
                 {
-                    ## Cannot move users by updating the DistinguishedName property
+                    ## Cannot move computers by updating the DistinguishedName property
                     $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
                     ## Using the SamAccountName for identity with Move-ADObject does not work, use the DN instead
                     $adCommonParameters['Identity'] = $targetResource.DistinguishedName;

@@ -58,25 +58,9 @@ try
 
         $testDomainController = 'TESTDC';
         $testCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
-
+        
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-            
-            $testStringProperties = @(
-                'Location',
-                'DnsHostName',
-                'UserPrincipalName',
-                'DisplayName',
-                'Path',
-                'Description',
-                'Manager'
-            );
-            $testArrayProperties = @(
-                'ServicePrincipalNames'
-            );
-            $testBooleanProperties = @(
-                'Enabled'
-            );
         
             It "Returns a 'System.Collections.Hashtable' object type" {
                 Mock Get-ADComputer { return [PSCustomObject] $fakeADComputer; }
@@ -123,6 +107,22 @@ try
 
         #region Function Test-TargetResource
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+            
+            $testStringProperties = @(
+                'Location',
+                'DnsHostName',
+                'UserPrincipalName',
+                'DisplayName',
+                'Path',
+                'Description',
+                'Manager'
+            );
+            $testArrayProperties = @(
+                'ServicePrincipalNames'
+            );
+            $testBooleanProperties = @(
+                'Enabled'
+            );
 
             It "Passes when computer account does not exist and 'Ensure' is 'Absent'" {
                 Mock Get-TargetResource { return $testAbsentParams }
@@ -390,6 +390,22 @@ try
                 Assert-MockCalled New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -Scope It;
             }
             
+            It "Calls 'New-ADComputer' with 'Path' when specified" {
+                $newComputerName = 'NEWCOMPUTER'
+                $newAbsentParams = $testAbsentParams.Clone();
+                $newAbsentParams['ComputerName'] = $newComputerName;
+                $newPresentParams = $testPresentParams.Clone();
+                $newPresentParams['ComputerName'] = $newComputerName;
+                $targetPath = 'OU=Test,DC=contoso,DC=com';                  
+                Mock New-ADComputer -ParameterFilter { $Path -eq $targetPath } -MockWith { }
+                Mock Set-ADComputer { }
+                Mock Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
+                
+                Set-TargetResource @newPresentParams -Path $targetPath;
+                
+                Assert-MockCalled New-ADComputer -ParameterFilter { $Path -eq $targetPath } -Scope It;
+            }
+            
             It "Calls 'Move-ADObject' when 'Ensure' is 'Present', the computer account exists but Path is incorrect" {
                 $testTargetPath = 'OU=NewPath,DC=contoso,DC=com';
                 Mock Set-ADComputer { }
@@ -465,6 +481,16 @@ try
                 
                 Assert-MockCalled Set-ADComputer -ParameterFilter { $Enabled -eq $true } -Scope It -Exactly 1;
             }
+            
+            It "Calls 'Set-ADComputer' with 'ServicePrincipalNames' when specified" {
+                $testSPNs = @('spn/a','spn/b');
+                Mock Get-ADComputer { return $fakeADComputer; }
+                Mock Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } { }
+                
+                Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs;
+                
+                Assert-MockCalled Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } -Scope It -Exactly 1;
+            }
 
             It "Calls 'Remove-ADComputer' when 'Ensure' is 'Absent' and computer account exists" {
                 Mock Get-ADComputer { return $fakeADComputer; }
@@ -474,7 +500,7 @@ try
                 
                 Assert-MockCalled Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -Scope It;
             }
-       
+            
         }
         #endregion
     }
