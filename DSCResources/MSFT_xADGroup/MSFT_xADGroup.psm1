@@ -257,13 +257,8 @@ function Test-TargetResource
         Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Notes', $Notes, $targetResource.Notes);
         $targetResourceInCompliance = $false;
     }
-    $testMembersParams = @{
-        ExistingMembers = $targetResource.Members;
-        Members = $Members;
-        MembersToInclude=  $MembersToInclude;
-        MembersToExclude = $MembersToExclude;
-    }
-    if (-not (Test-Members @testMembersParams))
+    ## Test group members match passed membership parameters
+    if (-not (Test-Members @assertMemberParameters -ExistingMembers $targetResource.Members))
     {
         Write-Verbose -Message $LocalizedData.GroupMembershipNotDesiredState;
         $targetResourceInCompliance = $false;
