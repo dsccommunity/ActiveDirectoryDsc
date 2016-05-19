@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '2.10.0.0'
+ModuleVersion = '2.11.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,7 +49,9 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = '* xWaitForADDomain: Made explicit credentials optional and other various updates
+
+'
 
     } # End of PSData hashtable
 
