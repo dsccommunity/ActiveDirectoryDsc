@@ -300,7 +300,7 @@ function Test-Members
         {
             if ($member -notin $ExistingMembers)
             {
-                Write-Verbose -Message ($localizedString.MemberNotInDesiredState -f $member);;
+                Write-Verbose -Message ($localizedString.MemberNotInDesiredState -f $member);
                 return $false;
             }
         }
