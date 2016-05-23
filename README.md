@@ -209,6 +209,9 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 
 ### Unreleased
 
+* xADUser: Adds 'Negotiate' option when testing user passwords to support Active Directory Certificate Services integration
+* xADUser: Adds descriptions to user properties within the schema file.
+
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
 
