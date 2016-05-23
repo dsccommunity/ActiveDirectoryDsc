@@ -454,8 +454,7 @@ try
             
             It "Returns 'Credential' key when specified" {
                 $testIdentity = 'contoso.com';
-                $testPassword = (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
-                $testCredential = New-Object System.Management.Automation.PSCredential 'Safemode', $testPassword;
+                $testCredential = [System.Management.Automation.PSCredential]::Empty;
                 
                 $result = Get-ADCommonParameters -Identity $testIdentity -Credential $testCredential;
 
@@ -481,8 +480,7 @@ try
             
             It "Converts 'DomainAdministratorCredential' parameter to 'Credential' key" {
                 $testIdentity = 'contoso.com';
-                $testPassword = (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
-                $testCredential = New-Object System.Management.Automation.PSCredential 'Safemode', $testPassword;
+                $testCredential = [System.Management.Automation.PSCredential]::Empty;
                 
                 $result = Get-ADCommonParameters -Identity $testIdentity -DomainAdministratorCredential $testCredential;
 

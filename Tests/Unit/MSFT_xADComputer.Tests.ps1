@@ -2,6 +2,7 @@ $Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xADComputer' # Example MSFT_xFirewall
 
 #region HEADER
+# Unit Test Template Version: 1.1.0
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
 if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
      (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
@@ -53,7 +54,7 @@ try
         }
 
         $testDomainController = 'TESTDC';
-        $testCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
         
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
