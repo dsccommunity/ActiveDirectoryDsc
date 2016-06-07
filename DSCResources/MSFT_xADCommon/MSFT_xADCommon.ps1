@@ -1,4 +1,4 @@
-﻿data localizedString
+data localizedString
 {
     # culture="en-US"
     ConvertFrom-StringData @'
@@ -282,8 +282,12 @@ function Test-Members
         $MembersToExclude
     )
 
-    if ($Members.Count -gt 0)
+    if ($PSBoundParameters.ContainsKey('Members'))
     {
+        if ($null -eq $Members)
+        {
+            $Members = @();    
+        }
         Write-Verbose ($localizedString.CheckingMembers -f 'Explicit');
         $Members = [System.String[]] @(Remove-DuplicateMembers -Members $Members);
         if ($ExistingMembers.Count -ne $Members.Count)
@@ -296,14 +300,18 @@ function Test-Members
         {
             if ($member -notin $ExistingMembers)
             {
-                Write-Verbose -Message ($Localizeda.MemberNotInDesiredState -f $member);;
+                Write-Verbose -Message ($localizedString.MemberNotInDesiredState -f $member);
                 return $false;
             }
         }
     } #end if $Members
 
-    if ($MembersToInclude.Count -gt 0)
-    {
+    if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+    {   
+        if ($null -eq $MembersToInclude)
+        {
+            $MembersToInclude = @();    
+        }
         Write-Verbose -Message ($localizedString.CheckingMembers -f 'Included');
         $MembersToInclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToInclude);
         foreach ($member in $MembersToInclude)
@@ -316,8 +324,13 @@ function Test-Members
         }
     } #end if $MembersToInclude
 
-    if ($MembersToExclude.Count -gt 0)
+    #if ($MembersToExclude.Count -gt 0)
+    if ($PSBoundParameters.ContainsKey('MembersToExclude'))
     {
+        if ($null -eq $MembersToExclude)
+        {
+            $MembersToExclude = @();    
+        }
         Write-Verbose -Message ($localizedString.CheckingMembers -f 'Excluded');
         $MembersToExclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToExclude);
         foreach ($member in $MembersToExclude)
@@ -429,7 +442,7 @@ function Get-ADCommonParameters
     (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName','GroupName')]
+        [Alias('UserName','GroupName','ComputerName')]
         [System.String]
         $Identity,
         

@@ -35,7 +35,7 @@ function Get-TargetResource
         $domain = Get-ADDomain -Identity $DomainName -Credential $DomainAdministratorCredential
         if ($domain -ne $null)
         {
-            Write-Verbose -Message "Domain '$($fullDomainName)' is present. Looking for DCs ..."
+            Write-Verbose -Message "Domain '$($DomainName)' is present. Looking for DCs ..."
             try
             {
                 $dc = Get-ADDomainController -Identity $env:COMPUTERNAME -Credential $DomainAdministratorCredential
@@ -155,7 +155,7 @@ function Test-TargetResource
     catch
     {
         if ($error[0]) {Write-Verbose $error[0].Exception}
-        Write-Verbose -Message "Domain '$($Name)' is NOT present on the current node."
+        Write-Verbose -Message "Domain '$($DomainName)' is NOT present on the current node."
         $false
     }
 }
