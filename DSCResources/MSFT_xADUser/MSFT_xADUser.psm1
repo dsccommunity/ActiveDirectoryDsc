@@ -6,14 +6,14 @@ data LocalizedData
         RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
         RetrievingADUserError          = Error looking up Active Directory user '{0}' ({0}@{1}).
         PasswordParameterConflictError = Parameter '{0}' cannot be set to '{1}' when the '{2}' parameter is specified.
-        
+
         RetrievingADUser               = Retrieving Active Directory user '{0}' ({0}@{1}) ...
         CreatingADDomainConnection     = Creating connection to Active Directory domain '{0}' ...
         CheckingADUserPassword         = Checking Active Directory user '{0}' password ...
         ADUserIsPresent                = Active Directory user '{0}' ({0}@{1}) is present.
         ADUserNotPresent               = Active Directory user '{0}' ({0}@{1}) was NOT present.
         ADUserNotDesiredPropertyState  = User '{0}' property is NOT in the desired state. Expected '{1}', actual '{2}'.
-        
+
         AddingADUser                   = Adding Active Directory user '{0}'.
         RemovingADUser                 = Removing Active Directory user '{0}'.
         UpdatingADUser                 = Updating Active Directory user '{0}'.
@@ -78,11 +78,11 @@ function Get-TargetResource
         ## Name of the domain where the user account is located (only used if password is managed)
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         # Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName')
         [Parameter(Mandatory)]
         [System.String] $UserName,
-        
+
         ## Specifies a new password value for an account
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
@@ -92,7 +92,7 @@ function Get-TargetResource
         ## Specifies whether the user account is created or deleted
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         ## Specifies the common nane assigned to the user account (ldapDisplayName 'cn')
         [ValidateNotNull()]
         [System.String] $CommonName = $UserName,
@@ -100,27 +100,27 @@ function Get-TargetResource
         ## Specifies the UPN assigned to the user account (ldapDisplayName 'userPrincipalName')
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         ## Specifies the display name of the object (ldapDisplayName 'displayName')
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         ## Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         ## Specifies the user's given name (ldapDisplayName 'givenName')
         [ValidateNotNull()]
         [System.String] $GivenName,
-        
+
         ## Specifies the initials that represent part of a user's name (ldapDisplayName 'initials')
         [ValidateNotNull()]
         [System.String] $Initials,
-        
+
         ## Specifies the user's last name or surname (ldapDisplayName 'sn')
         [ValidateNotNull()]
         [System.String] $Surname,
-        
+
         ## Specifies a description of the object (ldapDisplayName 'description')
         [ValidateNotNull()]
         [System.String] $Description,
@@ -172,7 +172,7 @@ function Get-TargetResource
         ## Specifies the user's e-mail address (ldapDisplayName 'mail')
         [ValidateNotNull()]
         [System.String] $EmailAddress,
-        
+
         ## Specifies the user's employee ID (ldapDisplayName 'employeeID')
         [ValidateNotNull()]
         [System.String] $EmployeeID,
@@ -192,23 +192,23 @@ function Get-TargetResource
         ## Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage')
         [ValidateNotNull()]
         [System.String] $HomePage,
-        
+
         ## Specifies a path to the user's profile (ldapDisplayName 'profilePath')
         [ValidateNotNull()]
         [System.String] $ProfilePath,
-        
+
         ## Specifies a path to the user's log on script (ldapDisplayName 'scriptPath')
         [ValidateNotNull()]
         [System.String] $LogonScript,
-        
-        ## Specifies the notes attached to the user's accoutn (ldapDisplayName 'info') 
+
+        ## Specifies the notes attached to the user's accoutn (ldapDisplayName 'info')
         [ValidateNotNull()]
         [System.String] $Notes,
-        
+
         ## Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber')
         [ValidateNotNull()]
         [System.String] $OfficePhone,
-        
+
         ## Specifies the user's mobile phone number (ldapDisplayName 'mobile')
         [ValidateNotNull()]
         [System.String] $MobilePhone,
@@ -232,7 +232,7 @@ function Get-TargetResource
         ## User's manager specified as a Distinguished Name (ldapDisplayName 'manager')
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
         ## Specifies if the account is enabled (default True)
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -240,28 +240,32 @@ function Get-TargetResource
         ## Specifies whether the account password can be changed
         [ValidateNotNull()]
         [System.Boolean] $CannotChangePassword,
-        
+
         ## Specifies whether the password of an account can expire
         [ValidateNotNull()]
         [System.Boolean] $PasswordNeverExpires,
-        
+
         ## Specifies the Active Directory Domain Services instance to use to perform the task.
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         ## Specifies the user account credentials to use to perform this task. Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $DomainAdministratorCredential
+        $DomainAdministratorCredential,
+
+        ## Specifies the authentication context type when testing user passwords #61
+        [ValidateSet('Default','Negotiate')]
+        [System.String] $PasswordAuthenticationContext = 'Default'
     )
-    
+
     Assert-Module -ModuleName 'ActiveDirectory';
 
     try
     {
         $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
-        
+
         $adProperties = @();
         ## Create an array of the AD propertie names to retrieve from the property map
         foreach ($property in $adPropertyMap)
@@ -270,7 +274,7 @@ function Get-TargetResource
             {
                 $adProperties += $property.ADProperty;
             }
-            else 
+            else
             {
                 $adProperties += $property.Parameter;
             }
@@ -336,11 +340,11 @@ function Test-TargetResource
         ## Name of the domain where the user account is located (only used if password is managed)
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         # Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName')
         [Parameter(Mandatory)]
         [System.String] $UserName,
-        
+
         ## Specifies a new password value for an account
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
@@ -350,7 +354,7 @@ function Test-TargetResource
         ## Specifies whether the user account is created or deleted
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         ## Specifies the common nane assigned to the user account (ldapDisplayName 'cn')
         [ValidateNotNull()]
         [System.String] $CommonName = $UserName,
@@ -358,27 +362,27 @@ function Test-TargetResource
         ## Specifies the UPN assigned to the user account (ldapDisplayName 'userPrincipalName')
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         ## Specifies the display name of the object (ldapDisplayName 'displayName')
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         ## Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         ## Specifies the user's given name (ldapDisplayName 'givenName')
         [ValidateNotNull()]
         [System.String] $GivenName,
-        
+
         ## Specifies the initials that represent part of a user's name (ldapDisplayName 'initials')
         [ValidateNotNull()]
         [System.String] $Initials,
-        
+
         ## Specifies the user's last name or surname (ldapDisplayName 'sn')
         [ValidateNotNull()]
         [System.String] $Surname,
-        
+
         ## Specifies a description of the object (ldapDisplayName 'description')
         [ValidateNotNull()]
         [System.String] $Description,
@@ -430,7 +434,7 @@ function Test-TargetResource
         ## Specifies the user's e-mail address (ldapDisplayName 'mail')
         [ValidateNotNull()]
         [System.String] $EmailAddress,
-        
+
         ## Specifies the user's employee ID (ldapDisplayName 'employeeID')
         [ValidateNotNull()]
         [System.String] $EmployeeID,
@@ -450,23 +454,23 @@ function Test-TargetResource
         ## Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage')
         [ValidateNotNull()]
         [System.String] $HomePage,
-        
+
         ## Specifies a path to the user's profile (ldapDisplayName 'profilePath')
         [ValidateNotNull()]
         [System.String] $ProfilePath,
-        
+
         ## Specifies a path to the user's log on script (ldapDisplayName 'scriptPath')
         [ValidateNotNull()]
         [System.String] $LogonScript,
-        
-        ## Specifies the notes attached to the user's accoutn (ldapDisplayName 'info') 
+
+        ## Specifies the notes attached to the user's accoutn (ldapDisplayName 'info')
         [ValidateNotNull()]
         [System.String] $Notes,
-        
+
         ## Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber')
         [ValidateNotNull()]
         [System.String] $OfficePhone,
-        
+
         ## Specifies the user's mobile phone number (ldapDisplayName 'mobile')
         [ValidateNotNull()]
         [System.String] $MobilePhone,
@@ -490,7 +494,7 @@ function Test-TargetResource
         ## User's manager specified as a Distinguished Name (ldapDisplayName 'manager')
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
         ## Specifies if the account is enabled (default True)
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -498,20 +502,24 @@ function Test-TargetResource
         ## Specifies whether the account password can be changed
         [ValidateNotNull()]
         [System.Boolean] $CannotChangePassword,
-        
+
         ## Specifies whether the password of an account can expire
         [ValidateNotNull()]
         [System.Boolean] $PasswordNeverExpires,
-        
+
         ## Specifies the Active Directory Domain Services instance to use to perform the task.
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         ## Specifies the user account credentials to use to perform this task. Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $DomainAdministratorCredential
+        $DomainAdministratorCredential,
+
+        ## Specifies the authentication context type when testing user passwords #61
+        [ValidateSet('Default','Negotiate')]
+        [System.String] $PasswordAuthenticationContext = 'Default'
     )
 
     Assert-Parameters @PSBoundParameters;
@@ -531,7 +539,7 @@ function Test-TargetResource
         ## Add common name, ensure and enabled as they may not be explicitly passed and we want to enumerate them
         $PSBoundParameters['Ensure'] = $Ensure;
         $PSBoundParameters['Enabled'] = $Enabled;
-    
+
         foreach ($parameter in $PSBoundParameters.Keys)
         {
             if ($parameter -eq 'Password')
@@ -540,6 +548,7 @@ function Test-TargetResource
                     Username = $UserName;
                     Password = $Password;
                     DomainName = $DomainName;
+                    PasswordAuthenticationContext = $PasswordAuthenticationContext;
                 }
                 if ($DomainAdministratorCredential)
                 {
@@ -581,11 +590,11 @@ function Set-TargetResource
         ## Name of the domain where the user account is located (only used if password is managed)
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         # Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName')
         [Parameter(Mandatory)]
         [System.String] $UserName,
-        
+
         ## Specifies a new password value for an account
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
@@ -595,7 +604,7 @@ function Set-TargetResource
         ## Specifies whether the user account is created or deleted
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         ## Specifies the common nane assigned to the user account (ldapDisplayName 'cn')
         [ValidateNotNull()]
         [System.String] $CommonName = $UserName,
@@ -603,27 +612,27 @@ function Set-TargetResource
         ## Specifies the UPN assigned to the user account (ldapDisplayName 'userPrincipalName')
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         ## Specifies the display name of the object (ldapDisplayName 'displayName')
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         ## Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         ## Specifies the user's given name (ldapDisplayName 'givenName')
         [ValidateNotNull()]
         [System.String] $GivenName,
-        
+
         ## Specifies the initials that represent part of a user's name (ldapDisplayName 'initials')
         [ValidateNotNull()]
         [System.String] $Initials,
-        
+
         ## Specifies the user's last name or surname (ldapDisplayName 'sn')
         [ValidateNotNull()]
         [System.String] $Surname,
-        
+
         ## Specifies a description of the object (ldapDisplayName 'description')
         [ValidateNotNull()]
         [System.String] $Description,
@@ -675,7 +684,7 @@ function Set-TargetResource
         ## Specifies the user's e-mail address (ldapDisplayName 'mail')
         [ValidateNotNull()]
         [System.String] $EmailAddress,
-        
+
         ## Specifies the user's employee ID (ldapDisplayName 'employeeID')
         [ValidateNotNull()]
         [System.String] $EmployeeID,
@@ -695,23 +704,23 @@ function Set-TargetResource
         ## Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage')
         [ValidateNotNull()]
         [System.String] $HomePage,
-        
+
         ## Specifies a path to the user's profile (ldapDisplayName 'profilePath')
         [ValidateNotNull()]
         [System.String] $ProfilePath,
-        
+
         ## Specifies a path to the user's log on script (ldapDisplayName 'scriptPath')
         [ValidateNotNull()]
         [System.String] $LogonScript,
-        
-        ## Specifies the notes attached to the user's accoutn (ldapDisplayName 'info') 
+
+        ## Specifies the notes attached to the user's accoutn (ldapDisplayName 'info')
         [ValidateNotNull()]
         [System.String] $Notes,
-        
+
         ## Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber')
         [ValidateNotNull()]
         [System.String] $OfficePhone,
-        
+
         ## Specifies the user's mobile phone number (ldapDisplayName 'mobile')
         [ValidateNotNull()]
         [System.String] $MobilePhone,
@@ -735,7 +744,7 @@ function Set-TargetResource
         ## User's manager specified as a Distinguished Name (ldapDisplayName 'manager')
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
         ## Specifies if the account is enabled (default True)
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -743,20 +752,24 @@ function Set-TargetResource
         ## Specifies whether the account password can be changed
         [ValidateNotNull()]
         [System.Boolean] $CannotChangePassword,
-        
+
         ## Specifies whether the password of an account can expire
         [ValidateNotNull()]
         [System.Boolean] $PasswordNeverExpires,
-        
+
         ## Specifies the Active Directory Domain Services instance to use to perform the task.
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         ## Specifies the user account credentials to use to perform this task. Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $DomainAdministratorCredential
+        $DomainAdministratorCredential,
+
+        ## Specifies the authentication context type when testing user passwords #61
+        [ValidateSet('Default','Negotiate')]
+        [System.String] $PasswordAuthenticationContext = 'Default'
     )
 
     Assert-Parameters @PSBoundParameters;
@@ -824,7 +837,7 @@ function Set-TargetResource
                 {
                     ## Find the associated AD property
                     $adProperty = $adPropertyMap | Where-Object { $_.Parameter -eq $parameter };
-                    
+
                     if ([System.String]::IsNullOrEmpty($adProperty))
                     {
                         ## We can't do anything is an empty AD property!
@@ -870,20 +883,20 @@ function Set-TargetResource
                         }
                     } #end if replace existing value
                 }
-            
+
             } #end if TargetResource parameter
         } #end foreach PSBoundParameter
-        
+
         ## Only pass -Remove and/or -Replace if we have something to set/change
         if ($replaceUserProperties.Count -gt 0)
-        {        
+        {
             $setADUserParams['Replace'] = $replaceUserProperties;
         }
         if ($removeUserProperties.Count -gt 0)
-        {        
+        {
             $setADUserParams['Remove'] = $removeUserProperties;
         }
-        
+
         Write-Verbose -Message ($LocalizedData.UpdatingADUser -f $UserName);
         [ref] $null = Set-ADUser @setADUserParams -Enabled $Enabled;
     }
@@ -912,7 +925,7 @@ function Assert-Parameters
         [Parameter(ValueFromRemainingArguments)]
         $IgnoredArguments
     )
-    
+
     ## We cannot test/set passwords on disabled AD accounts
     if (($PSBoundParameters.ContainsKey('Password')) -and ($Enabled -eq $false))
     {
@@ -936,21 +949,26 @@ function Test-Password
 
         [Parameter(Mandatory)]
         [System.String] $UserName,
-    
+
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Password,
-        
+
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $DomainAdministratorCredential
+        $DomainAdministratorCredential,
+
+        ## Specifies the authentication context type when testing user passwords #61
+        [Parameter(Mandatory)]
+        [ValidateSet('Default','Negotiate')]
+        [System.String] $PasswordAuthenticationContext
     )
-    
+
     Write-Verbose -Message ($LocalizedData.CreatingADDomainConnection -f $DomainName);
     Add-Type -AssemblyName 'System.DirectoryServices.AccountManagement';
-            
+
     if ($DomainAdministratorCredential)
     {
         $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext(
@@ -970,11 +988,25 @@ function Test-Password
                             );
     }
     Write-Verbose -Message ($LocalizedData.CheckingADUserPassword -f $UserName);
-    return $principalContext.ValidateCredentials(
-        $UserName,
-        $Password.GetNetworkCredential().Password,
-        [System.DirectoryServices.AccountManagement.ContextOptions]::Negotiate
-    );
+
+    if ($PasswordAuthenticationContext -eq 'Negotiate')
+    {
+        return $principalContext.ValidateCredentials(
+            $UserName,
+            $Password.GetNetworkCredential().Password,
+            [System.DirectoryServices.AccountManagement.ContextOptions]::Negotiate -bor
+                [System.DirectoryServices.AccountManagement.ContextOptions]::Signing -bor
+                    [System.DirectoryServices.AccountManagement.ContextOptions]::Sealing
+        );
+    }
+    else
+    {
+        ## Use default authentication context
+        return $principalContext.ValidateCredentials(
+            $UserName,
+            $Password.GetNetworkCredential().Password
+        );
+    }
 
 } #end function Test-Password
 

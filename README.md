@@ -21,7 +21,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
-* **xADUser** modifies and removes Active Directory Users. 
+* **xADUser** modifies and removes Active Directory Users.
 * **xWaitForDomain** waits for new, remote domain to setup.
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
@@ -32,14 +32,14 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **ParentDomainName**: Fully qualified name of the parent domain (optional).
 * **DomainAdministratorCredential**: Credentials used to query for domain existence.
  * __Note: These are NOT used during domain creation.__
-(AD sets the localadmin credentials as new domain administrator credentials during setup.) 
+(AD sets the localadmin credentials as new domain administrator credentials during setup.)
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
 * **DnsDelegationCredential**: Credential used for creating DNS delegation (optional).
 * **DomainNetBIOSName**: Specifies the NetBIOS name for the new domain (optional).
  * If not specified, then the default is automatically computed from the value of the DomainName parameter.
 * **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database (optional).
 * **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
-* **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional) 
+* **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional)
 
 ### **xADDomainController**
 
@@ -61,7 +61,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **Ensure**: Specifies whether the given user is present or absent (optional).
  * If not specified, this value defaults to Present.
 * **DomainController**: Specifies the Active Directory Domain Services instance to connect to (optional).
- * This is only required if not executing the task on a domain controller. 
+ * This is only required if not executing the task on a domain controller.
 * **DomainAdministratorCredential**: User account credentials used to perform the task (optional).
  * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 * **CommonName**: Specifies the user's CN of the user account (optional).
@@ -112,6 +112,8 @@ These DSC Resources allow you to configure new domains, child domains, and high 
  * If not specified, this value defaults to False.
 * **CannotChangePassword**: Specifies whether the account password can be changed (optional).
  * If not specified, this value defaults to False.
+* **PasswordAuthenticationContext**: Specifies the authentication context used when testing users' passwords (optional).
+ * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 
 ### **xWaitForADDomain**
 
@@ -121,23 +123,23 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 
 ### **xADDomainTrust**
 
-* **Ensure**: Specifies whether the domain trust is present or absent 
-* **TargetDomainAdministratorCredential**: Credentials to authenticate to the target domain 
-* **TargetDomainName**: Name of the AD domain that is being trusted 
-* **TrustType**: Type of trust 
-* **TrustDirection**: Direction of trust, the values for which may be Bidirectional,Inbound, or Outbound 
-* **SourceDomainName**: Name of the AD domain that is requesting the trust 
+* **Ensure**: Specifies whether the domain trust is present or absent
+* **TargetDomainAdministratorCredential**: Credentials to authenticate to the target domain
+* **TargetDomainName**: Name of the AD domain that is being trusted
+* **TrustType**: Type of trust
+* **TrustDirection**: Direction of trust, the values for which may be Bidirectional,Inbound, or Outbound
+* **SourceDomainName**: Name of the AD domain that is requesting the trust
 
 ### **xADRecycleBin**
-The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest. 
-This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode 
-is insufficient, then the resource will exit with an error message.  The change is executed against the  
-Domain Naming Master FSMO of the forest. 
+The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest.
+This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode
+is insufficient, then the resource will exit with an error message.  The change is executed against the
+Domain Naming Master FSMO of the forest.
 (Note: This resource is compatible with a Windows 2008 R2 or above target node. )
-* **ForestFQDN**:  Fully qualified domain name of forest to enable Active Directory Recycle Bin. 
-* **EnterpriseAdministratorCredential**:  Credential with Enterprise Administrator rights to the forest. 
-* **RecycleBinEnabled**:  Read-only. Returned by Get. 
-* **ForestMode**:  Read-only. Returned by Get. 
+* **ForestFQDN**:  Fully qualified domain name of forest to enable Active Directory Recycle Bin.
+* **EnterpriseAdministratorCredential**:  Credential with Enterprise Administrator rights to the forest.
+* **RecycleBinEnabled**:  Read-only. Returned by Get.
+* **ForestMode**:  Read-only. Returned by Get.
 
 ### **xADGroup**
 The xADGroup DSC resource will manage groups within Active Directory.
@@ -209,7 +211,7 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 
 ### Unreleased
 
-* xADUser: Adds 'Negotiate' option when testing user passwords to support Active Directory Certificate Services integration
+* xADUser: Adds 'PasswordAuthenticationContext' option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
 * xADUser: Adds descriptions to user properties within the schema file.
 
 ### 2.11.0.0
@@ -290,7 +292,7 @@ In the following example configuration, a highly available domain is created by 
 This example uses the xWaitForDomain resource to ensure that the domain is present before the second domain controller is added.
 
 ```powershell
-# A configuration to Create High Availability Domain Controller 
+# A configuration to Create High Availability Domain Controller
 Configuration AssertHADC
 {
    param
@@ -363,26 +365,26 @@ Configuration AssertHADC
         }
     }
 }
-# Configuration Data for AD 
+# Configuration Data for AD
 $ConfigData = @{
     AllNodes = @(
         @{
             Nodename = "dsc-testNode1"
             Role = "Primary DC"
             DomainName = "dsc-test.contoso.com"
-            CertificateFile = "C:\publicKeys\targetNode.cer"  
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8" 
-            RetryCount = 20 
-            RetryIntervalSec = 30 
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 20
+            RetryIntervalSec = 30
         },
         @{
             Nodename = "dsc-testNode2"
             Role = "Replica DC"
             DomainName = "dsc-test.contoso.com"
-            CertificateFile = "C:\publicKeys\targetNode.cer"  
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8" 
-            RetryCount = 20 
-            RetryIntervalSec = 30 
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 20
+            RetryIntervalSec = 30
         }
     )
 }
@@ -395,131 +397,131 @@ Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path
 -Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
 Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertHADC `
 -Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
-# A configuration to Create High Availability Domain Controller  
- 
-Configuration AssertHADC 
-{ 
- 
-   param 
-    ( 
-        [Parameter(Mandatory)] 
-        [pscredential]$safemodeAdministratorCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$domainCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$DNSDelegationCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$NewADUserCred 
-    ) 
- 
-    Import-DscResource -ModuleName xActiveDirectory 
- 
-    Node $AllNodes.Where{$_.Role -eq "Primary DC"}.Nodename 
-    { 
-        WindowsFeature ADDSInstall 
-        { 
-            Ensure = "Present" 
-            Name = "AD-Domain-Services" 
-        } 
- 
-        xADDomain FirstDS 
-        { 
-            DomainName = $Node.DomainName 
-            DomainAdministratorCredential = $domainCred 
-            SafemodeAdministratorPassword = $safemodeAdministratorCred 
-            DnsDelegationCredential = $DNSDelegationCred 
-            DependsOn = "[WindowsFeature]ADDSInstall" 
-        } 
- 
-        xWaitForADDomain DscForestWait 
-        { 
-            DomainName = $Node.DomainName 
-            DomainUserCredential = $domainCred 
-            RetryCount = $Node.RetryCount 
-            RetryIntervalSec = $Node.RetryIntervalSec 
-            DependsOn = "[xADDomain]FirstDS" 
-        } 
- 
-        xADUser FirstUser 
-        { 
-            DomainName = $Node.DomainName 
-            DomainAdministratorCredential = $domainCred 
-            UserName = "dummy" 
-            Password = $NewADUserCred 
-            Ensure = "Present" 
-            DependsOn = "[xWaitForADDomain]DscForestWait" 
-        } 
- 
-    } 
- 
-    Node $AllNodes.Where{$_.Role -eq "Replica DC"}.Nodename 
-    { 
-        WindowsFeature ADDSInstall 
-        { 
-            Ensure = "Present" 
-            Name = "AD-Domain-Services" 
-        } 
- 
-        xWaitForADDomain DscForestWait 
-        { 
-            DomainName = $Node.DomainName 
-            DomainUserCredential = $domainCred 
-            RetryCount = $Node.RetryCount 
-            RetryIntervalSec = $Node.RetryIntervalSec 
-            DependsOn = "[WindowsFeature]ADDSInstall" 
-        } 
- 
-        xADDomainController SecondDC 
-        { 
-            DomainName = $Node.DomainName 
-            DomainAdministratorCredential = $domainCred 
-            SafemodeAdministratorPassword = $safemodeAdministratorCred 
-            DnsDelegationCredential = $DNSDelegationCred 
-            DependsOn = "[xWaitForADDomain]DscForestWait" 
-        } 
-    } 
-} 
- 
-# Configuration Data for AD  
- 
-$ConfigData = @{ 
-    AllNodes = @( 
-        @{ 
-            Nodename = "dsc-testNode1" 
-            Role = "Primary DC" 
-            DomainName = "dsc-test.contoso.com" 
-            CertificateFile = "C:\publicKeys\targetNode.cer"   
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"  
-            RetryCount = 20  
-            RetryIntervalSec = 30  
-        }, 
- 
-        @{ 
-            Nodename = "dsc-testNode2" 
-            Role = "Replica DC" 
-            DomainName = "dsc-test.contoso.com" 
-            CertificateFile = "C:\publicKeys\targetNode.cer"   
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"  
-            RetryCount = 20  
-            RetryIntervalSec = 30  
-        } 
-    ) 
-} 
- 
-AssertHADC -configurationData $ConfigData ` 
--safemodeAdministratorCred (Get-Credential -Message "New Domain Safe Mode Admin Credentials") ` 
--domainCred (Get-Credential -Message "New Domain Admin Credentials") ` 
--DNSDelegationCred (Get-Credential -Message "Credentials to Setup DNS Delegation") ` 
--NewADUserCred (Get-Credential -Message "New AD User Credentials") 
- 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path $PSScriptRoot\AssertHADC ` 
--Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine") 
- 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertHADC ` 
--Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine") 
+# A configuration to Create High Availability Domain Controller
+
+Configuration AssertHADC
+{
+
+   param
+    (
+        [Parameter(Mandatory)]
+        [pscredential]$safemodeAdministratorCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$domainCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$DNSDelegationCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$NewADUserCred
+    )
+
+    Import-DscResource -ModuleName xActiveDirectory
+
+    Node $AllNodes.Where{$_.Role -eq "Primary DC"}.Nodename
+    {
+        WindowsFeature ADDSInstall
+        {
+            Ensure = "Present"
+            Name = "AD-Domain-Services"
+        }
+
+        xADDomain FirstDS
+        {
+            DomainName = $Node.DomainName
+            DomainAdministratorCredential = $domainCred
+            SafemodeAdministratorPassword = $safemodeAdministratorCred
+            DnsDelegationCredential = $DNSDelegationCred
+            DependsOn = "[WindowsFeature]ADDSInstall"
+        }
+
+        xWaitForADDomain DscForestWait
+        {
+            DomainName = $Node.DomainName
+            DomainUserCredential = $domainCred
+            RetryCount = $Node.RetryCount
+            RetryIntervalSec = $Node.RetryIntervalSec
+            DependsOn = "[xADDomain]FirstDS"
+        }
+
+        xADUser FirstUser
+        {
+            DomainName = $Node.DomainName
+            DomainAdministratorCredential = $domainCred
+            UserName = "dummy"
+            Password = $NewADUserCred
+            Ensure = "Present"
+            DependsOn = "[xWaitForADDomain]DscForestWait"
+        }
+
+    }
+
+    Node $AllNodes.Where{$_.Role -eq "Replica DC"}.Nodename
+    {
+        WindowsFeature ADDSInstall
+        {
+            Ensure = "Present"
+            Name = "AD-Domain-Services"
+        }
+
+        xWaitForADDomain DscForestWait
+        {
+            DomainName = $Node.DomainName
+            DomainUserCredential = $domainCred
+            RetryCount = $Node.RetryCount
+            RetryIntervalSec = $Node.RetryIntervalSec
+            DependsOn = "[WindowsFeature]ADDSInstall"
+        }
+
+        xADDomainController SecondDC
+        {
+            DomainName = $Node.DomainName
+            DomainAdministratorCredential = $domainCred
+            SafemodeAdministratorPassword = $safemodeAdministratorCred
+            DnsDelegationCredential = $DNSDelegationCred
+            DependsOn = "[xWaitForADDomain]DscForestWait"
+        }
+    }
+}
+
+# Configuration Data for AD
+
+$ConfigData = @{
+    AllNodes = @(
+        @{
+            Nodename = "dsc-testNode1"
+            Role = "Primary DC"
+            DomainName = "dsc-test.contoso.com"
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 20
+            RetryIntervalSec = 30
+        },
+
+        @{
+            Nodename = "dsc-testNode2"
+            Role = "Replica DC"
+            DomainName = "dsc-test.contoso.com"
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 20
+            RetryIntervalSec = 30
+        }
+    )
+}
+
+AssertHADC -configurationData $ConfigData `
+-safemodeAdministratorCred (Get-Credential -Message "New Domain Safe Mode Admin Credentials") `
+-domainCred (Get-Credential -Message "New Domain Admin Credentials") `
+-DNSDelegationCred (Get-Credential -Message "Credentials to Setup DNS Delegation") `
+-NewADUserCred (Get-Credential -Message "New AD User Credentials")
+
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path $PSScriptRoot\AssertHADC `
+-Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
+
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertHADC `
+-Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
 ```
 
 
@@ -528,132 +530,132 @@ Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path
 In this example, we create a domain, and then create a child domain on another node.
 
 ```powershell
-# Configuration to Setup Parent Child Domains  
- 
-Configuration AssertParentChildDomains 
-{ 
-    param 
-    ( 
-        [Parameter(Mandatory)] 
-        [pscredential]$safemodeAdministratorCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$domainCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$DNSDelegationCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$NewADUserCred 
-    ) 
- 
-    Import-DscResource -ModuleName xActiveDirectory 
- 
-    Node $AllNodes.Where{$_.Role -eq "Parent DC"}.Nodename 
-    { 
-        WindowsFeature ADDSInstall 
-        { 
-            Ensure = "Present" 
-            Name = "AD-Domain-Services" 
-        } 
- 
-        xADDomain FirstDS 
-        { 
-            DomainName = $Node.DomainName 
-            DomainAdministratorCredential = $domainCred 
-            SafemodeAdministratorPassword = $safemodeAdministratorCred 
-            DnsDelegationCredential = $DNSDelegationCred 
-            DependsOn = "[WindowsFeature]ADDSInstall" 
-        } 
- 
-        xWaitForADDomain DscForestWait 
-        { 
-            DomainName = $Node.DomainName 
-            DomainUserCredential = $domainCred 
-            RetryCount = $Node.RetryCount 
-            RetryIntervalSec = $Node.RetryIntervalSec 
-            DependsOn = "[xADDomain]FirstDS" 
-        } 
- 
-        xADUser FirstUser 
-        { 
-            DomainName = $Node.DomainName 
-            DomainAdministratorCredential = $domaincred 
-            UserName = "dummy" 
-            Password = $NewADUserCred 
-            Ensure = "Present" 
-            DependsOn = "[xWaitForADDomain]DscForestWait" 
-        } 
- 
-    } 
- 
-    Node $AllNodes.Where{$_.Role -eq "Child DC"}.Nodename 
-    { 
-        WindowsFeature ADDSInstall 
-        { 
-            Ensure = "Present" 
-            Name = "AD-Domain-Services" 
-        } 
- 
-        xWaitForADDomain DscForestWait 
-        { 
-            DomainName = $Node.ParentDomainName 
-            DomainUserCredential = $domainCred 
-            RetryCount = $Node.RetryCount 
-            RetryIntervalSec = $Node.RetryIntervalSec 
-            DependsOn = "[WindowsFeature]ADDSInstall" 
-        } 
- 
-        xADDomain ChildDS 
-        { 
-            DomainName = $Node.DomainName 
-            ParentDomainName = $Node.ParentDomainName 
-            DomainAdministratorCredential = $domainCred 
-            SafemodeAdministratorPassword = $safemodeAdministratorCred 
-            DependsOn = "[xWaitForADDomain]DscForestWait" 
-        } 
-    } 
-} 
- 
-$ConfigData = @{ 
- 
-    AllNodes = @( 
-        @{ 
-            Nodename = "dsc-testNode1" 
-            Role = "Parent DC" 
-            DomainName = "dsc-test.contoso.com"         
-            CertificateFile = "C:\publicKeys\targetNode.cer"   
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"  
-            RetryCount = 50  
-            RetryIntervalSec = 30  
-        }, 
- 
-        @{ 
-            Nodename = "dsc-testNode2" 
-            Role = "Child DC" 
-            DomainName = "dsc-child" 
-            ParentDomainName = "dsc-test.contoso.com"              
-            CertificateFile = "C:\publicKeys\targetNode.cer"   
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"  
-            RetryCount = 50  
-            RetryIntervalSec = 30         
-        } 
-    ) 
-} 
- 
-AssertParentChildDomains -configurationData $ConfigData ` 
--safemodeAdministratorCred (Get-Credential -Message "New Domain Safe Mode Admin Credentials") ` 
--domainCred (Get-Credential -Message "New Domain Admin Credentials") ` 
--DNSDelegationCred (Get-Credential -Message "Credentials to Setup DNS Delegation") ` 
--NewADUserCred (Get-Credential -Message "New AD User Credentials") 
- 
- 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path $PSScriptRoot\AssertParentChildDomains ` 
--Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine") 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertParentChildDomains ` 
--Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine") 
-``` 
- 
+# Configuration to Setup Parent Child Domains
+
+Configuration AssertParentChildDomains
+{
+    param
+    (
+        [Parameter(Mandatory)]
+        [pscredential]$safemodeAdministratorCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$domainCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$DNSDelegationCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$NewADUserCred
+    )
+
+    Import-DscResource -ModuleName xActiveDirectory
+
+    Node $AllNodes.Where{$_.Role -eq "Parent DC"}.Nodename
+    {
+        WindowsFeature ADDSInstall
+        {
+            Ensure = "Present"
+            Name = "AD-Domain-Services"
+        }
+
+        xADDomain FirstDS
+        {
+            DomainName = $Node.DomainName
+            DomainAdministratorCredential = $domainCred
+            SafemodeAdministratorPassword = $safemodeAdministratorCred
+            DnsDelegationCredential = $DNSDelegationCred
+            DependsOn = "[WindowsFeature]ADDSInstall"
+        }
+
+        xWaitForADDomain DscForestWait
+        {
+            DomainName = $Node.DomainName
+            DomainUserCredential = $domainCred
+            RetryCount = $Node.RetryCount
+            RetryIntervalSec = $Node.RetryIntervalSec
+            DependsOn = "[xADDomain]FirstDS"
+        }
+
+        xADUser FirstUser
+        {
+            DomainName = $Node.DomainName
+            DomainAdministratorCredential = $domaincred
+            UserName = "dummy"
+            Password = $NewADUserCred
+            Ensure = "Present"
+            DependsOn = "[xWaitForADDomain]DscForestWait"
+        }
+
+    }
+
+    Node $AllNodes.Where{$_.Role -eq "Child DC"}.Nodename
+    {
+        WindowsFeature ADDSInstall
+        {
+            Ensure = "Present"
+            Name = "AD-Domain-Services"
+        }
+
+        xWaitForADDomain DscForestWait
+        {
+            DomainName = $Node.ParentDomainName
+            DomainUserCredential = $domainCred
+            RetryCount = $Node.RetryCount
+            RetryIntervalSec = $Node.RetryIntervalSec
+            DependsOn = "[WindowsFeature]ADDSInstall"
+        }
+
+        xADDomain ChildDS
+        {
+            DomainName = $Node.DomainName
+            ParentDomainName = $Node.ParentDomainName
+            DomainAdministratorCredential = $domainCred
+            SafemodeAdministratorPassword = $safemodeAdministratorCred
+            DependsOn = "[xWaitForADDomain]DscForestWait"
+        }
+    }
+}
+
+$ConfigData = @{
+
+    AllNodes = @(
+        @{
+            Nodename = "dsc-testNode1"
+            Role = "Parent DC"
+            DomainName = "dsc-test.contoso.com"
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 50
+            RetryIntervalSec = 30
+        },
+
+        @{
+            Nodename = "dsc-testNode2"
+            Role = "Child DC"
+            DomainName = "dsc-child"
+            ParentDomainName = "dsc-test.contoso.com"
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 50
+            RetryIntervalSec = 30
+        }
+    )
+}
+
+AssertParentChildDomains -configurationData $ConfigData `
+-safemodeAdministratorCred (Get-Credential -Message "New Domain Safe Mode Admin Credentials") `
+-domainCred (Get-Credential -Message "New Domain Admin Credentials") `
+-DNSDelegationCred (Get-Credential -Message "Credentials to Setup DNS Delegation") `
+-NewADUserCred (Get-Credential -Message "New AD User Credentials")
+
+
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path $PSScriptRoot\AssertParentChildDomains `
+-Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertParentChildDomains `
+-Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
+```
+
 ### Create a cross-domain trust
 
 In this example, we setup one-way trust between two domains.
@@ -667,7 +669,7 @@ Configuration Sample_xADDomainTrust_OneWayTrust
         [String]$SourceDomain,
         [Parameter(Mandatory)]
         [String]$TargetDomain,
-        
+
         [Parameter(Mandatory)]
         [PSCredential]$TargetDomainAdminCred,
         [Parameter(Mandatory)]
@@ -702,130 +704,130 @@ Sample_xADDomainTrust_OneWayTrust -configurationdata $config `
                                   -TargetDomain corporate.contoso.com `
                                   -TargetDomainAdminCred (get-credential) `
                                   -TrustDirection 'Inbound'
-# Configuration to Setup Parent Child Domains  
- 
-configuration AssertParentChildDomains 
-{ 
-    param 
-    ( 
-        [Parameter(Mandatory)] 
-        [pscredential]$safemodeAdministratorCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$domainCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$DNSDelegationCred, 
- 
-        [Parameter(Mandatory)] 
-        [pscredential]$NewADUserCred 
-    ) 
- 
-    Import-DscResource -ModuleName xActiveDirectory 
- 
-    Node $AllNodes.Where{$_.Role -eq "Parent DC"}.Nodename 
-    { 
-        WindowsFeature ADDSInstall 
-        { 
-            Ensure = "Present" 
-            Name = "AD-Domain-Services" 
-        } 
- 
-        xADDomain FirstDS 
-        { 
-            DomainName = $Node.DomainName 
-            DomainAdministratorCredential = $domainCred 
-            SafemodeAdministratorPassword = $safemodeAdministratorCred 
-            DnsDelegationCredential = $DNSDelegationCred 
-            DependsOn = "[WindowsFeature]ADDSInstall" 
-        } 
- 
-        xWaitForADDomain DscForestWait 
-        { 
-            DomainName = $Node.DomainName 
-            DomainUserCredential = $domainCred 
-            RetryCount = $Node.RetryCount 
-            RetryIntervalSec = $Node.RetryIntervalSec 
-            DependsOn = "[xADDomain]FirstDS" 
-        } 
- 
-        xADUser FirstUser 
-        { 
-            DomainName = $Node.DomainName 
-            DomainAdministratorCredential = $domaincred 
-            UserName = "dummy" 
-            Password = $NewADUserCred 
-            Ensure = "Present" 
-            DependsOn = "[xWaitForADDomain]DscForestWait" 
-        } 
- 
-    } 
- 
-    Node $AllNodes.Where{$_.Role -eq "Child DC"}.Nodename 
-    { 
-        WindowsFeature ADDSInstall 
-        { 
-            Ensure = "Present" 
-            Name = "AD-Domain-Services" 
-        } 
- 
-        xWaitForADDomain DscForestWait 
-        { 
-            DomainName = $Node.ParentDomainName 
-            DomainUserCredential = $domainCred 
-            RetryCount = $Node.RetryCount 
-            RetryIntervalSec = $Node.RetryIntervalSec 
-            DependsOn = "[WindowsFeature]ADDSInstall" 
-        } 
- 
-        xADDomain ChildDS 
-        { 
-            DomainName = $Node.DomainName 
-            ParentDomainName = $Node.ParentDomainName 
-            DomainAdministratorCredential = $domainCred 
-            SafemodeAdministratorPassword = $safemodeAdministratorCred 
-            DependsOn = "[xWaitForADDomain]DscForestWait" 
-        } 
-    } 
-} 
- 
-$ConfigData = @{ 
- 
-    AllNodes = @( 
-        @{ 
-            Nodename = "dsc-testNode1" 
-            Role = "Parent DC" 
-            DomainName = "dsc-test.contoso.com"         
-            CertificateFile = "C:\publicKeys\targetNode.cer"   
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"  
-            RetryCount = 50  
-            RetryIntervalSec = 30  
-        }, 
- 
-        @{ 
-            Nodename = "dsc-testNode2" 
-            Role = "Child DC" 
-            DomainName = "dsc-child" 
-            ParentDomainName = "dsc-test.contoso.com"              
-            CertificateFile = "C:\publicKeys\targetNode.cer"   
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"  
-            RetryCount = 50  
-            RetryIntervalSec = 30         
-        } 
-    ) 
-} 
- 
-AssertParentChildDomains -configurationData $ConfigData ` 
--safemodeAdministratorCred (Get-Credential -Message "New Domain Safe Mode Admin Credentials") ` 
--domainCred (Get-Credential -Message "New Domain Admin Credentials") ` 
--DNSDelegationCred (Get-Credential -Message "Credentials to Setup DNS Delegation") ` 
--NewADUserCred (Get-Credential -Message "New AD User Credentials") 
- 
- 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path $PSScriptRoot\AssertParentChildDomains ` 
--Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine") 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertParentChildDomains ` 
--Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine") 
+# Configuration to Setup Parent Child Domains
+
+configuration AssertParentChildDomains
+{
+    param
+    (
+        [Parameter(Mandatory)]
+        [pscredential]$safemodeAdministratorCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$domainCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$DNSDelegationCred,
+
+        [Parameter(Mandatory)]
+        [pscredential]$NewADUserCred
+    )
+
+    Import-DscResource -ModuleName xActiveDirectory
+
+    Node $AllNodes.Where{$_.Role -eq "Parent DC"}.Nodename
+    {
+        WindowsFeature ADDSInstall
+        {
+            Ensure = "Present"
+            Name = "AD-Domain-Services"
+        }
+
+        xADDomain FirstDS
+        {
+            DomainName = $Node.DomainName
+            DomainAdministratorCredential = $domainCred
+            SafemodeAdministratorPassword = $safemodeAdministratorCred
+            DnsDelegationCredential = $DNSDelegationCred
+            DependsOn = "[WindowsFeature]ADDSInstall"
+        }
+
+        xWaitForADDomain DscForestWait
+        {
+            DomainName = $Node.DomainName
+            DomainUserCredential = $domainCred
+            RetryCount = $Node.RetryCount
+            RetryIntervalSec = $Node.RetryIntervalSec
+            DependsOn = "[xADDomain]FirstDS"
+        }
+
+        xADUser FirstUser
+        {
+            DomainName = $Node.DomainName
+            DomainAdministratorCredential = $domaincred
+            UserName = "dummy"
+            Password = $NewADUserCred
+            Ensure = "Present"
+            DependsOn = "[xWaitForADDomain]DscForestWait"
+        }
+
+    }
+
+    Node $AllNodes.Where{$_.Role -eq "Child DC"}.Nodename
+    {
+        WindowsFeature ADDSInstall
+        {
+            Ensure = "Present"
+            Name = "AD-Domain-Services"
+        }
+
+        xWaitForADDomain DscForestWait
+        {
+            DomainName = $Node.ParentDomainName
+            DomainUserCredential = $domainCred
+            RetryCount = $Node.RetryCount
+            RetryIntervalSec = $Node.RetryIntervalSec
+            DependsOn = "[WindowsFeature]ADDSInstall"
+        }
+
+        xADDomain ChildDS
+        {
+            DomainName = $Node.DomainName
+            ParentDomainName = $Node.ParentDomainName
+            DomainAdministratorCredential = $domainCred
+            SafemodeAdministratorPassword = $safemodeAdministratorCred
+            DependsOn = "[xWaitForADDomain]DscForestWait"
+        }
+    }
+}
+
+$ConfigData = @{
+
+    AllNodes = @(
+        @{
+            Nodename = "dsc-testNode1"
+            Role = "Parent DC"
+            DomainName = "dsc-test.contoso.com"
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 50
+            RetryIntervalSec = 30
+        },
+
+        @{
+            Nodename = "dsc-testNode2"
+            Role = "Child DC"
+            DomainName = "dsc-child"
+            ParentDomainName = "dsc-test.contoso.com"
+            CertificateFile = "C:\publicKeys\targetNode.cer"
+            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount = 50
+            RetryIntervalSec = 30
+        }
+    )
+}
+
+AssertParentChildDomains -configurationData $ConfigData `
+-safemodeAdministratorCred (Get-Credential -Message "New Domain Safe Mode Admin Credentials") `
+-domainCred (Get-Credential -Message "New Domain Admin Credentials") `
+-DNSDelegationCred (Get-Credential -Message "Credentials to Setup DNS Delegation") `
+-NewADUserCred (Get-Credential -Message "New AD User Credentials")
+
+
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path $PSScriptRoot\AssertParentChildDomains `
+-Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertParentChildDomains `
+-Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
  ```
 
 ### Enable the Active Directory Recycle Bin
@@ -842,7 +844,7 @@ Param(
 
     [parameter(Mandatory = $true)]
     [System.Management.Automation.PSCredential]
-    $EACredential 
+    $EACredential
 )
 
     Import-DscResource -Module xActiveDirectory
@@ -881,15 +883,15 @@ Param(
     [parameter(Mandatory = $true)]
     [System.String]
     $GroupName,
-    
-    [ValidateSet('DomainLocal','Global','Universal')]    
+
+    [ValidateSet('DomainLocal','Global','Universal')]
     [System.String]
     $Scope = 'Global',
-    
-    [ValidateSet('Security','Distribution')]    
+
+    [ValidateSet('Security','Distribution')]
     [System.String]
     $Category = 'Security',
-    
+
     [ValidateNotNullOrEmpty()]
     [System.String]
     $Description
@@ -926,14 +928,14 @@ Param(
     [parameter(Mandatory = $true)]
     [System.String]
     $Name,
-    
-    [parameter(Mandatory = $true)]    
+
+    [parameter(Mandatory = $true)]
     [System.String]
     $Path,
-    
+
     [System.Boolean]
     $ProtectedFromAccidentalDeletion = $true,
-    
+
     [ValidateNotNull()]
     [System.String]
     $Description = ''
@@ -972,11 +974,11 @@ configuration Example_xADDomainDefaultPasswordPolicy
         [parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
-        
-        [parameter(Mandatory = $true)]    
+
+        [parameter(Mandatory = $true)]
         [System.Boolean]
         $ComplexityEnabled,
-        
+
         [parameter(Mandatory = $true)]
         [System.Int32]
         $MinPasswordLength,
