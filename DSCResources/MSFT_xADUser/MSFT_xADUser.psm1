@@ -1,4 +1,7 @@
-﻿# Localized messages
+﻿[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+param()
+
+# Localized messages
 data LocalizedData
 {
     # culture="en-US"
@@ -6,14 +9,14 @@ data LocalizedData
         RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
         RetrievingADUserError          = Error looking up Active Directory user '{0}' ({0}@{1}).
         PasswordParameterConflictError = Parameter '{0}' cannot be set to '{1}' when the '{2}' parameter is specified.
-        
+
         RetrievingADUser               = Retrieving Active Directory user '{0}' ({0}@{1}) ...
         CreatingADDomainConnection     = Creating connection to Active Directory domain '{0}' ...
         CheckingADUserPassword         = Checking Active Directory user '{0}' password ...
         ADUserIsPresent                = Active Directory user '{0}' ({0}@{1}) is present.
         ADUserNotPresent               = Active Directory user '{0}' ({0}@{1}) was NOT present.
         ADUserNotDesiredPropertyState  = User '{0}' property is NOT in the desired state. Expected '{1}', actual '{2}'.
-        
+
         AddingADUser                   = Adding Active Directory user '{0}'.
         RemovingADUser                 = Removing Active Directory user '{0}'.
         UpdatingADUser                 = Updating Active Directory user '{0}'.
@@ -72,17 +75,16 @@ function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Only used if password is managed.
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         # SamAccountName
         [Parameter(Mandatory)]
         [System.String] $UserName,
-        
+
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
@@ -90,29 +92,29 @@ function Get-TargetResource
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         # Common name (CN)
         [ValidateNotNull()]
         [System.String] $CommonName = $UserName,
 
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         [ValidateNotNull()]
         [System.String] $GivenName,
-        
+
         [ValidateNotNull()]
         [System.String] $Initials,
-        
+
         [ValidateNotNull()]
         [System.String] $Surname,
-        
+
         [ValidateNotNull()]
         [System.String] $Description,
 
@@ -151,7 +153,7 @@ function Get-TargetResource
 
         [ValidateNotNull()]
         [System.String] $EmailAddress,
-        
+
         [ValidateNotNull()]
         [System.String] $EmployeeID,
 
@@ -166,19 +168,19 @@ function Get-TargetResource
 
         [ValidateNotNull()]
         [System.String] $HomePage,
-        
+
         [ValidateNotNull()]
         [System.String] $ProfilePath,
-        
+
         [ValidateNotNull()]
         [System.String] $LogonScript,
-        
+
         [ValidateNotNull()]
         [System.String] $Notes,
-        
+
         [ValidateNotNull()]
         [System.String] $OfficePhone,
-        
+
         [ValidateNotNull()]
         [System.String] $MobilePhone,
 
@@ -197,32 +199,32 @@ function Get-TargetResource
         ## User's manager specified as a Distinguished Name (DN)
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
 
         [ValidateNotNull()]
         [System.Boolean] $CannotChangePassword,
-        
+
         [ValidateNotNull()]
         [System.Boolean] $PasswordNeverExpires,
-        
+
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         ## Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $DomainAdministratorCredential
     )
-    
+
     Assert-Module -ModuleName 'ActiveDirectory';
 
     try
     {
         $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
-        
+
         $adProperties = @();
         ## Create an array of the AD propertie names to retrieve from the property map
         foreach ($property in $adPropertyMap)
@@ -231,7 +233,7 @@ function Get-TargetResource
             {
                 $adProperties += $property.ADProperty;
             }
-            else 
+            else
             {
                 $adProperties += $property.Parameter;
             }
@@ -291,17 +293,16 @@ function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Only used if password is managed.
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         # SamAccountName
         [Parameter(Mandatory)]
         [System.String] $UserName,
-        
+
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
@@ -309,29 +310,29 @@ function Test-TargetResource
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         # Common name (CN)
         [ValidateNotNull()]
         [System.String] $CommonName = $UserName,
-        
+
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         [ValidateNotNull()]
         [System.String] $GivenName,
-        
+
         [ValidateNotNull()]
         [System.String] $Initials,
-        
+
         [ValidateNotNull()]
         [System.String] $Surname,
-        
+
         [ValidateNotNull()]
         [System.String] $Description,
 
@@ -370,7 +371,7 @@ function Test-TargetResource
 
         [ValidateNotNull()]
         [System.String] $EmailAddress,
-        
+
         [ValidateNotNull()]
         [System.String] $EmployeeID,
 
@@ -385,19 +386,19 @@ function Test-TargetResource
 
         [ValidateNotNull()]
         [System.String] $HomePage,
-        
+
         [ValidateNotNull()]
         [System.String] $ProfilePath,
-        
+
         [ValidateNotNull()]
         [System.String] $LogonScript,
-        
+
         [ValidateNotNull()]
         [System.String] $Notes,
-        
+
         [ValidateNotNull()]
         [System.String] $OfficePhone,
-        
+
         [ValidateNotNull()]
         [System.String] $MobilePhone,
 
@@ -416,19 +417,19 @@ function Test-TargetResource
         ## User's manager specified as a Distinguished Name (DN)
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
 
         [ValidateNotNull()]
         [System.Boolean] $CannotChangePassword,
-        
+
         [ValidateNotNull()]
         [System.Boolean] $PasswordNeverExpires,
-        
+
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
@@ -452,7 +453,7 @@ function Test-TargetResource
         ## Add common name, ensure and enabled as they may not be explicitly passed and we want to enumerate them
         $PSBoundParameters['Ensure'] = $Ensure;
         $PSBoundParameters['Enabled'] = $Enabled;
-    
+
         foreach ($parameter in $PSBoundParameters.Keys)
         {
             if ($parameter -eq 'Password')
@@ -496,17 +497,16 @@ function Test-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Only used if password is managed.
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         # SamAccountName
         [Parameter(Mandatory)]
         [System.String] $UserName,
-        
+
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
@@ -514,28 +514,28 @@ function Set-TargetResource
 
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [ValidateNotNull()]
         [System.String] $CommonName = $UserName,
 
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         [ValidateNotNull()]
         [System.String] $GivenName,
-        
+
         [ValidateNotNull()]
         [System.String] $Initials,
-        
+
         [ValidateNotNull()]
         [System.String] $Surname,
-        
+
         [ValidateNotNull()]
         [System.String] $Description,
 
@@ -574,7 +574,7 @@ function Set-TargetResource
 
         [ValidateNotNull()]
         [System.String] $EmailAddress,
-        
+
         [ValidateNotNull()]
         [System.String] $EmployeeID,
 
@@ -589,19 +589,19 @@ function Set-TargetResource
 
         [ValidateNotNull()]
         [System.String] $HomePage,
-        
+
         [ValidateNotNull()]
         [System.String] $ProfilePath,
-        
+
         [ValidateNotNull()]
         [System.String] $LogonScript,
-        
+
         [ValidateNotNull()]
         [System.String] $Notes,
-        
+
         [ValidateNotNull()]
         [System.String] $OfficePhone,
-        
+
         [ValidateNotNull()]
         [System.String] $MobilePhone,
 
@@ -620,19 +620,19 @@ function Set-TargetResource
         ## User's manager specified as a Distinguished Name (DN)
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
-        
+
         [ValidateNotNull()]
         [System.Boolean] $CannotChangePassword,
-        
+
         [ValidateNotNull()]
         [System.Boolean] $PasswordNeverExpires,
-        
+
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
@@ -704,7 +704,7 @@ function Set-TargetResource
                 {
                     ## Find the associated AD property
                     $adProperty = $adPropertyMap | Where-Object { $_.Parameter -eq $parameter };
-                    
+
                     if ([System.String]::IsNullOrEmpty($adProperty))
                     {
                         ## We can't do anything is an empty AD property!
@@ -750,20 +750,20 @@ function Set-TargetResource
                         }
                     } #end if replace existing value
                 }
-            
+
             } #end if TargetResource parameter
         } #end foreach PSBoundParameter
-        
+
         ## Only pass -Remove and/or -Replace if we have something to set/change
         if ($replaceUserProperties.Count -gt 0)
-        {        
+        {
             $setADUserParams['Replace'] = $replaceUserProperties;
         }
         if ($removeUserProperties.Count -gt 0)
-        {        
+        {
             $setADUserParams['Remove'] = $removeUserProperties;
         }
-        
+
         Write-Verbose -Message ($LocalizedData.UpdatingADUser -f $UserName);
         [ref] $null = Set-ADUser @setADUserParams -Enabled $Enabled;
     }
@@ -792,7 +792,7 @@ function Assert-Parameters
         [Parameter(ValueFromRemainingArguments)]
         $IgnoredArguments
     )
-    
+
     ## We cannot test/set passwords on disabled AD accounts
     if (($PSBoundParameters.ContainsKey('Password')) -and ($Enabled -eq $false))
     {
@@ -816,12 +816,12 @@ function Test-Password
 
         [Parameter(Mandatory)]
         [System.String] $UserName,
-    
+
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Password,
-        
+
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
@@ -830,7 +830,7 @@ function Test-Password
 
     Write-Verbose -Message ($LocalizedData.CreatingADDomainConnection -f $DomainName);
     Add-Type -AssemblyName 'System.DirectoryServices.AccountManagement';
-            
+
     if ($DomainAdministratorCredential)
     {
         $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext(

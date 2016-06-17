@@ -237,6 +237,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
 * xADComputer: New resource added.
 * xADComputer: Added ODJRequestFile support.
+* Fixed PSScriptAnalyzer Errors with v1.6.0.
 
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
