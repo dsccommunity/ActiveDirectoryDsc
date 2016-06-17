@@ -128,7 +128,7 @@ function Get-TargetResource
         SID               = $adComputer.SID; ## Read-only property
         Ensure            = $Ensure;
         DomainController  = $DomainController;
-        ODJRequestFile    = ''; # This property can only be set, not read.
+        ODJRequestFile    = $ODJRequestFile;
     }
 
     ## Retrieve each property from the ADPropertyMap and add to the hashtable
