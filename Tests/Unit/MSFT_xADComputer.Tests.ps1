@@ -387,6 +387,24 @@ try
                 Assert-MockCalled New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -Scope It;
             }
 
+            It "Calls 'New-ADComputer' when 'Ensure' is 'Present' and the account does not exist, ODJRequestFile is set, DJOIN OK" {
+                $newComputerName = 'NEWCOMPUTER'
+                $newAbsentParams = $testAbsentParams.Clone();
+                $newAbsentParams['ComputerName'] = $newComputerName;
+                $newPresentParams = $testPresentParams.Clone();
+                $newPresentParams['ComputerName'] = $newComputerName;
+                $newPresentParams['ODJRequestFile'] = 'c:\ODJTest.txt';
+                Mock New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -MockWith { }
+                Mock djoin.exe -MockWith { $LASTEXITCODE = 0; 'OK' }
+                Mock Set-ADComputer { }
+                Mock Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
+
+                Set-TargetResource @newPresentParams;
+
+                Assert-MockCalled New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -Scope It -Exactly 0;
+                Assert-MockCalled djoin.exe -Exactly 1;
+            }
+
             It "Calls 'New-ADComputer' with 'Path' when specified" {
                 $newComputerName = 'NEWCOMPUTER'
                 $newAbsentParams = $testAbsentParams.Clone();
