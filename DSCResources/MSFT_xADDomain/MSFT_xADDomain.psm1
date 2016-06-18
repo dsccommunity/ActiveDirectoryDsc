@@ -7,7 +7,7 @@ data localizedData
         InvalidDomainError                   = Computer is a member of the wrong domain?!
         ExistingDomainMemberError            = Computer is already a domain member. Cannot create a new '{0}' domain?
         InvalidCredentialError               = Domain '{0}' is available, but invalid credentials were supplied.
-        							         
+                                             
         QueryDomainWithLocalCredential       = Computer is a domain member; querying domain '{0}' using local credential ...
         QueryDomainWithCredential            = Computer is a workgroup member; querying for domain '{0}' using supplied credential ...
         DomainFound                          = Active Directory domain '{0}' found.
@@ -20,18 +20,18 @@ data localizedData
         ResourceInDesiredState               = Resource '{0}' is in the desired state.
         ResourceNotInDesiredState            = Resource '{0}' is NOT in the desired state.
         RetryingGetADDomain                  = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds.
-	UnhandledError                       = Unhandled error occured, detail here: {0}
-	FaultExceptionAndDomainShouldExist = ServiceModel FaultException detected and domain should exist, performing retry...
+    UnhandledError                       = Unhandled error occured, detail here: {0}
+    FaultExceptionAndDomainShouldExist = ServiceModel FaultException detected and domain should exist, performing retry...
 
 '@
 }
 
 function Get-TrackingFilename {
 param(
-	[Parameter(Mandatory)]
+    [Parameter(Mandatory)]
     [String] $DomainName
-	)
-	Join-Path $Env:TEMP ('{0}.xADDomain.completed' -f $DomainName)
+    )
+    Join-Path $Env:TEMP ('{0}.xADDomain.completed' -f $DomainName)
 }
 
 function Get-TargetResource
@@ -75,68 +75,68 @@ function Get-TargetResource
     $maxRetries = 5
     $retryIntervalInSeconds = 30
     $domainShouldExist = (Test-Path (Get-TrackingFilename -DomainName $DomainName))
-    do {			
-	try
-	{
-		if ($isDomainMember) {
-			## We're already a domain member, so take the credentials out of the equation
-			Write-Verbose ($localizedData.QueryDomainADWithLocalCredentials -f $domainFQDN);
-			$domain = Get-ADDomain -Identity $domainFQDN -ErrorAction Stop;
-		}
-		else {
-			Write-Verbose ($localizedData.QueryDomainWithCredential -f $domainFQDN);
-			$domain = Get-ADDomain -Identity $domainFQDN -Credential $DomainAdministratorCredential -ErrorAction Stop;
-		}
+    do {            
+    try
+    {
+        if ($isDomainMember) {
+            ## We're already a domain member, so take the credentials out of the equation
+            Write-Verbose ($localizedData.QueryDomainADWithLocalCredentials -f $domainFQDN);
+            $domain = Get-ADDomain -Identity $domainFQDN -ErrorAction Stop;
+        }
+        else {
+            Write-Verbose ($localizedData.QueryDomainWithCredential -f $domainFQDN);
+            $domain = Get-ADDomain -Identity $domainFQDN -Credential $DomainAdministratorCredential -ErrorAction Stop;
+        }
 
-		## No need to check whether the node is actually a domain controller. If we don't throw an exception,
-		## the domain is already UP - and this resource shouldn't run. Domain controller functionality
-		## should be checked by the xADDomainController resource?
-		Write-Verbose ($localizedData.DomainFound -f $domain.DnsRoot);
+        ## No need to check whether the node is actually a domain controller. If we don't throw an exception,
+        ## the domain is already UP - and this resource shouldn't run. Domain controller functionality
+        ## should be checked by the xADDomainController resource?
+        Write-Verbose ($localizedData.DomainFound -f $domain.DnsRoot);
         
-		$targetResource = @{
-			DomainName = $domain.DnsRoot;
-			ParentDomainName = $domain.ParentDomain;
-			DomainNetBIOSName = $domain.NetBIOSName;
-		}
+        $targetResource = @{
+            DomainName = $domain.DnsRoot;
+            ParentDomainName = $domain.ParentDomain;
+            DomainNetBIOSName = $domain.NetBIOSName;
+        }
         
-		return $targetResource;
-	}
-	catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
-	{
-		$errorMessage = $localizedData.ExistingDomainMemberError -f $DomainName;
-		ThrowInvalidOperationError -ErrorId 'xADDomain_DomainMember' -ErrorMessage $errorMessage;
-	}
-	catch [Microsoft.ActiveDirectory.Management.ADServerDownException]
-	{
-		Write-Verbose ($localizedData.DomainNotFound -f $domainFQDN)
-		$domain = @{ };
-		# will fall into retry mechanism
-	}
-	catch [System.Security.Authentication.AuthenticationException]
-	{
-		$errorMessage = $localizedData.InvalidCredentialError -f $DomainName;
-		ThrowInvalidOperationError -ErrorId 'xADDomain_InvalidCredential' -ErrorMessage $errorMessage;
-	}
-	catch
-	{
-		$errorMessage = $localizedData.UnhandledError -f ($_.Exception | Format-List -Force | Out-String)
-		Write-Verbose $errorMessage
+        return $targetResource;
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        $errorMessage = $localizedData.ExistingDomainMemberError -f $DomainName;
+        ThrowInvalidOperationError -ErrorId 'xADDomain_DomainMember' -ErrorMessage $errorMessage;
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
+        Write-Verbose ($localizedData.DomainNotFound -f $domainFQDN)
+        $domain = @{ };
+        # will fall into retry mechanism
+    }
+    catch [System.Security.Authentication.AuthenticationException]
+    {
+        $errorMessage = $localizedData.InvalidCredentialError -f $DomainName;
+        ThrowInvalidOperationError -ErrorId 'xADDomain_InvalidCredential' -ErrorMessage $errorMessage;
+    }
+    catch
+    {
+        $errorMessage = $localizedData.UnhandledError -f ($_.Exception | Format-List -Force | Out-String)
+        Write-Verbose $errorMessage
 
-		if ($domainShouldExist -and ($_.Exception.InnerException -is [System.ServiceModel.FaultException]))
-		{
-			Write-Verbose $localizedData.FaultExceptionAndDomainShouldExist
-			# will fall into retry mechanism
-		} else {
-			## Not sure what's gone on here!
-			throw $_
-		}
-	}
+        if ($domainShouldExist -and ($_.Exception.InnerException -is [System.ServiceModel.FaultException]))
+        {
+            Write-Verbose $localizedData.FaultExceptionAndDomainShouldExist
+            # will fall into retry mechanism
+        } else {
+            ## Not sure what's gone on here!
+            throw $_
+        }
+    }
 
-	if($domainShouldExist) {
-		$retries++
-		Write-Verbose ($localizedData.RetryingGetADDomain -f $retries, $maxRetries, $retryIntervalInSeconds)
-		Sleep -Seconds ($retries * $retryIntervalInSeconds)
-	}
+    if($domainShouldExist) {
+        $retries++
+        Write-Verbose ($localizedData.RetryingGetADDomain -f $retries, $maxRetries, $retryIntervalInSeconds)
+        Sleep -Seconds ($retries * $retryIntervalInSeconds)
+    }
 
     } while ($domainShouldExist -and ($retries -le $maxRetries) )
 
@@ -303,7 +303,7 @@ function Set-TargetResource
         Write-Verbose -Message ($localizedData.CreatedForest -f $DomainName); 
     }  
 
-	"Finished" | Out-File -FilePath (Get-TrackingFilename -DomainName $DomainName) -Force
+    "Finished" | Out-File -FilePath (Get-TrackingFilename -DomainName $DomainName) -Force
 
     # Signal to the LCM to reboot the node to compensate for the one we
     # suppressed from Install-ADDSForest/Install-ADDSDomain
