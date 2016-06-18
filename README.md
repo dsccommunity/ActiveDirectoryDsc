@@ -221,7 +221,7 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
  * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
 * **DomainController**: Specifies the Active Directory Domain Services instance to connect to perform the task (optional).
 * **DomainAdministratorCredential**: Specifies the user account credentials to use to perform the task (optional).
-* **ODJRequestFile**: Specifies the full path to the Offline Domain Join Request file to create (optional).
+* **RequestFile**: Specifies the full path to the Offline Domain Join Request file to create (optional).
 * **Ensure**: Specifies whether the computer account is present or absent.
  * Valid values are 'Present' and 'Absent'.
  * It not specified, it defaults to 'Present'.
@@ -236,7 +236,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ### Unreleased
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
 * xADComputer: New resource added.
-* xADComputer: Added ODJRequestFile support.
+* xADComputer: Added RequestFile support.
 * Fixed PSScriptAnalyzer Errors with v1.6.0.
 
 ### 2.11.0.0
@@ -1105,7 +1105,7 @@ configuration Example_xADComputerAccountODJ
 
         [parameter(Mandatory = $true)]
         [System.String]
-        $ODJRequestFile
+        $RequestFile
     )
 
     Import-DscResource -Module xActiveDirectory
@@ -1118,7 +1118,7 @@ configuration Example_xADComputerAccountODJ
            DomainAdministratorCredential = $DomainCredential
            ComputerName = $ComputerName
            Path = $Path
-           ODJRequestFile = $ODJRequestFile
+           RequestFile = $RequestFile
         }
     }
 }
@@ -1127,7 +1127,7 @@ Example_xADComputerAccountODJ -DomainController 'DC01' `
     -DomainCredential (Get-Credential -Message "Domain Credentials") `
     -ComputerName 'NANO-200' `
     -Path 'ou=Nano,dc=example,dc=com' `
-    -ODJRequestFile 'd:\ODJFiles\NANO-200.txt' `
+    -RequestFile 'd:\ODJFiles\NANO-200.txt' `
     -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose

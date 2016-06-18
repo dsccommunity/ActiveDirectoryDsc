@@ -69,7 +69,7 @@ function Get-TargetResource
         [System.String] $Manager,
 
         [ValidateNotNull()]
-        [System.String] $ODJRequestFile,
+        [System.String] $RequestFile,
 
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -128,7 +128,7 @@ function Get-TargetResource
         SID               = $adComputer.SID; ## Read-only property
         Ensure            = $Ensure;
         DomainController  = $DomainController;
-        ODJRequestFile    = $ODJRequestFile;
+        RequestFile    = $RequestFile;
     }
 
     ## Retrieve each property from the ADPropertyMap and add to the hashtable
@@ -204,7 +204,7 @@ function Test-TargetResource
         [System.String] $Manager,
 
         [ValidateNotNull()]
-        [System.String] $ODJRequestFile,
+        [System.String] $RequestFile,
 
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -324,7 +324,7 @@ function Set-TargetResource
         [System.String] $Manager,
 
         [ValidateNotNull()]
-        [System.String] $ODJRequestFile,
+        [System.String] $RequestFile,
 
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
@@ -349,7 +349,7 @@ function Set-TargetResource
     {
         if ($targetResource.Ensure -eq 'Absent') {
             ## Computer does not exist and needs creating
-            if ($ODJRequestFile)
+            if ($RequestFile)
             {
                 ## Use DJOIN to create the computer account as well as the ODJ Request file.
                 Write-Verbose -Message ($LocalizedData.ODJRequestStartMessage -f `
@@ -371,7 +371,7 @@ function Set-TargetResource
                     $DJoinParameters += @( '/DCNAME',$DomainController )
                 } # if
 
-                $DJoinParameters += @( '/SAVEFILE',$ODJRequestFile )
+                $DJoinParameters += @( '/SAVEFILE',$RequestFile )
                 $Result = & djoin.exe @DjoinParameters
 
                 if ($LASTEXITCODE -ne 0)
