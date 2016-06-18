@@ -232,6 +232,7 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 ### Unreleased
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
 * xADComputer: New resource added.
+* xADDomain: Added retry logic to prevent FaultException to crash in Get-TargetResource on subsequent reboots after a domain is created because the service is not yet running. This error is mostly occur when the resource is used with the DSCExtension on Azure. 
 
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
