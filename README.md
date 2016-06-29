@@ -233,6 +233,8 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 ## Versions
 
 ### Unreleased
+
+### 2.12.0.0
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
 * xADComputer: New resource added.
 
