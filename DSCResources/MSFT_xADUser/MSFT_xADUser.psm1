@@ -1,4 +1,7 @@
-﻿# Localized messages
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUserNameAndPassWordParams", "")]
+param ()
+
+# Localized messages
 data LocalizedData
 {
     # culture="en-US"
@@ -70,6 +73,7 @@ $adPropertyMap = @(
 
 function Get-TargetResource
 {
+    [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
@@ -288,6 +292,7 @@ function Get-TargetResource
 
 function Test-TargetResource
 {
+    [CmdletBinding()]
     [OutputType([System.Boolean])]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
@@ -493,6 +498,7 @@ function Test-TargetResource
 
 function Set-TargetResource
 {
+    [CmdletBinding()]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (

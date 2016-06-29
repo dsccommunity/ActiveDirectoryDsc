@@ -5,16 +5,20 @@
 The **xActiveDirectory** DSC resources allow you to configure and manage Active Directory.
 Note: these resources do not presently install the RSAT tools.
 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
 ## Contributing
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit and xADDomainDefaultPasswordPolicy** DSC Resources.
+The **xActiveDirectory** module contains the **xADComputer, xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit and xADDomainDefaultPasswordPolicy** DSC Resources.
 These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
 
+* **xADComputer** creates and manages Active Directory computer accounts.
 * **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
@@ -205,9 +209,34 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 * **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
 * **Credential**: User account credentials used to perform the operation (optional).
 
+### **xADComputer**
+The xADComputer DSC resource will manage computer accounts within Active Directory.
+* **ComputerName**: Specifies the name of the computer to manage.
+* **Location**: Specifies the location of the computer, such as an office number (optional).
+* **DnsHostName**: Specifies the fully qualified domain name (FQDN) of the computer (optional).
+* **ServicePrincipalNames**: Specifies the service principal names for the computer account (optional).
+* **UserPrincipalName** :Specifies the UPN assigned to the computer account (optional).
+* **DisplayName**: "Specifies the display name of the computer (optional).
+* **Path**: Specifies the X.500 path of the container where the computer is located (optional).
+* **Description**: Specifies a description of the computer object (optional). 
+* **Enabled**: Specifies if the computer account is enabled (optional).
+* **Manager**: Specifies the user or group Distinguished Name that manages the computer object (optional).
+ * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
+* **DomainController**: Specifies the Active Directory Domain Services instance to connect to perform the task (optional).
+* **DomainAdministratorCredential**: Specifies the user account credentials to use to perform the task (optional).
+* **Ensure**: Specifies whether the computer account is present or absent.
+ * Valid values are 'Present' and 'Absent'.
+ * It not specified, it defaults to 'Present'.
+* **DistinguishedName**: Returns the X.500 path of the computer object (read-only).
+* **SID**: Returns the security identifier of the computer object (read-only).
+
 ## Versions
 
 ### Unreleased
+
+### 2.12.0.0
+* xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
+* xADComputer: New resource added.
 
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
@@ -995,5 +1024,55 @@ configuration Example_xADDomainDefaultPasswordPolicy
 Example_xADDomainDefaultPasswordPolicy -DomainName 'contoso.com' -ComplexityEnabled $true -MinPasswordLength 8
 
 Start-DscConfiguration -Path .\Example_xADDomainDefaultPasswordPolicy -Wait -Verbose
+
+```
+
+### Create an Active Directory Computer Account
+
+In this example, we create a 'NANO-001' computer account in the 'Server' OU of the 'example.com' Active Directory domain.
+
+```powershell
+configuration Example_xADComputerAccount
+{
+    Param
+    (    
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainController,
+        
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $DomainCredential,
+        
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ComputerName,
+        
+        [parameter(Mandatory = $true)]    
+        [System.String]
+        $Path  
+    )
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADComputer "$ComputerName"
+        {
+           DomainController = $DomainController
+           DomainAdministratorCredential = $DomainCredential
+           ComputerName = $ComputerName
+           Path = $Path
+        }
+    }
+}
+
+Example_xADComputerAccount -DomainController 'DC01' `
+    -DomainCredential (Get-Credential -Message "Domain Credentials") `
+    -ComputerName 'NANO-001' `
+    -Path 'ou=Servers,dc=example,dc=com' `
+    -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
 
 ```
