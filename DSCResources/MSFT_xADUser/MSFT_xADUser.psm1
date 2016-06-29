@@ -1,4 +1,7 @@
-﻿# Localized messages
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUserNameAndPassWordParams", "")]
+param ()
+
+# Localized messages
 data LocalizedData
 {
     # culture="en-US"
