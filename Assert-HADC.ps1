@@ -1,4 +1,4 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "PSAvoidUsingComputerNameHardcoded", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param ()
 
 # A configuration to Create High Availability Domain Controller 
@@ -83,6 +83,9 @@ configuration AssertHADC
 $config = Invoke-Expression (Get-content $PSScriptRoot\HADCconfiguration.psd1 -Raw)
 AssertHADC -configurationData $config
 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "sva-dsc1" -Path $PSScriptRoot\AssertHADC -Credential $localcred
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "sva-dsc2" -Path $PSScriptRoot\AssertHADC -Credential $localcred
+$computerName1 = "sva-dsc1"
+$computerName2 = "sva-dsc2"
+
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName $computerName1 -Path $PSScriptRoot\AssertHADC -Credential $localcred
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName $computerName2 -Path $PSScriptRoot\AssertHADC -Credential $localcred
 
