@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "PSAvoidUsingComputerNameHardcoded", "")]
+param ()
+
 # A configuration to Create High Availability Domain Controller 
 
 $secpasswd = ConvertTo-SecureString "Adrumble@6" -AsPlainText -Force

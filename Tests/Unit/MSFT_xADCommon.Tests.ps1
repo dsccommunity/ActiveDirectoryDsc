@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param ()
+
 $Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xADCommon' # Example MSFT_xFirewall
 

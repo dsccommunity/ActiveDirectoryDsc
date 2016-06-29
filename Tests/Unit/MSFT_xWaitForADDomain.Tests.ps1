@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param ()
+
 $Global:DSCModuleName      = 'xActiveDirectory'
 $Global:DSCResourceName    = 'MSFT_xWaitForADDomain'
 
