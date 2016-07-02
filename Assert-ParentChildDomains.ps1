@@ -1,5 +1,6 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
-param ()
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingComputerNameHardcoded', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param()
 
 $secpasswd = ConvertTo-SecureString "Adrumble@6" -AsPlainText -Force
 $domainCred = New-Object System.Management.Automation.PSCredential ("sva-dscdom\Administrator", $secpasswd)

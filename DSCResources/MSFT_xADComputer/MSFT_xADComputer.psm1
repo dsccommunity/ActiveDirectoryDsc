@@ -8,11 +8,11 @@ if (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath $PSUICulture))
 $importLocalizedDataParams = @{
     BindingVariable = 'LocalizedData'
     Filename = 'MSFT_xADComputer.psd1'
-    BaseDirectory = $moduleRoot 
+    BaseDirectory = $moduleRoot
     UICulture = $culture
 }
 Import-LocalizedData @importLocalizedDataParams
-#endregion    
+#endregion
 
 ## Create a property map that maps the DSC resource parameters to the
 ## Active Directory computer attributes.
@@ -39,65 +39,68 @@ function Get-TargetResource
         # Common Name
         [Parameter(Mandatory)]
         [System.String] $ComputerName,
-        
+
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         [ValidateNotNull()]
         [System.String] $Location,
-        
+
         [ValidateNotNull()]
         [System.String] $DnsHostName,
-        
+
         [ValidateNotNull()]
         [System.String[]] $ServicePrincipalNames,
-        
+
         [ValidateNotNull()]
         [System.String] $Description,
 
         ## Computer's manager specified as a Distinguished Name (DN)
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
+        [ValidateNotNull()]
+        [System.String] $RequestFile,
+
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
 
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         ## Ideally this should just be called 'Credential' but is here for consistency with xADUser
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $DomainAdministratorCredential
     )
-    
+
     Assert-Module -ModuleName 'ActiveDirectory';
     Import-Module -Name 'ActiveDirectory' -Verbose:$false;
 
     try
     {
         $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
-        
+
         $adProperties = @();
         ## Create an array of the AD property names to retrieve from the property map
         foreach ($property in $adPropertyMap)
         {
-            
+
             if ($property.ADProperty)
             {
                 $adProperties += $property.ADProperty;
             }
-            else 
+            else
             {
                 $adProperties += $property.Parameter;
             }
@@ -125,6 +128,7 @@ function Get-TargetResource
         SID               = $adComputer.SID; ## Read-only property
         Ensure            = $Ensure;
         DomainController  = $DomainController;
+        RequestFile    = $RequestFile;
     }
 
     ## Retrieve each property from the ADPropertyMap and add to the hashtable
@@ -170,41 +174,44 @@ function Test-TargetResource
         # Common Name
         [Parameter(Mandatory)]
         [System.String] $ComputerName,
-        
+
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         [ValidateNotNull()]
         [System.String] $Location,
-        
+
         [ValidateNotNull()]
         [System.String] $DnsHostName,
-        
+
         [ValidateNotNull()]
         [System.String[]] $ServicePrincipalNames,
-        
+
         [ValidateNotNull()]
         [System.String] $Description,
 
         ## Computer's manager specified as a Distinguished Name (DN)
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
+        [ValidateNotNull()]
+        [System.String] $RequestFile,
+
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
 
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         ## Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
@@ -229,7 +236,7 @@ function Test-TargetResource
         ## Add ensure and enabled as they may not be explicitly passed and we want to enumerate them
         $PSBoundParameters['Ensure'] = $Ensure;
         $PSBoundParameters['Enabled'] = $Enabled;
-    
+
         foreach ($parameter in $PSBoundParameters.Keys)
         {
             if ($targetResource.ContainsKey($parameter))
@@ -287,41 +294,44 @@ function Set-TargetResource
         # Common Name
         [Parameter(Mandatory)]
         [System.String] $ComputerName,
-        
+
         [ValidateSet('Present', 'Absent')]
         [System.String] $Ensure = 'Present',
-        
+
         [ValidateNotNull()]
         [System.String] $UserPrincipalName,
-        
+
         [ValidateNotNull()]
         [System.String] $DisplayName,
-        
+
         [ValidateNotNull()]
         [System.String] $Path,
-        
+
         [ValidateNotNull()]
         [System.String] $Location,
-        
+
         [ValidateNotNull()]
         [System.String] $DnsHostName,
-        
+
         [ValidateNotNull()]
         [System.String[]] $ServicePrincipalNames,
-        
+
         [ValidateNotNull()]
         [System.String] $Description,
 
         ## Computer's manager specified as a Distinguished Name (DN)
         [ValidateNotNull()]
         [System.String] $Manager,
-        
+
+        [ValidateNotNull()]
+        [System.String] $RequestFile,
+
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
 
         [ValidateNotNull()]
         [System.String] $DomainController,
-        
+
         ## Ideally this should just be called 'Credential' but is here for backwards compatibility
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
@@ -339,14 +349,54 @@ function Set-TargetResource
     {
         if ($targetResource.Ensure -eq 'Absent') {
             ## Computer does not exist and needs creating
-            $newADComputerParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter;
-            if ($PSBoundParameters.ContainsKey('Path'))
+            if ($RequestFile)
             {
-                Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f 'Path', $Path);
-                $newADComputerParams['Path'] = $Path;
+                ## Use DJOIN to create the computer account as well as the ODJ Request file.
+                Write-Verbose -Message ($LocalizedData.ODJRequestStartMessage -f `
+                        $DomainName,$ComputerName,$RequestFile)
+
+                # This should only be performed on a Domain Member, so detect the Domain Name.
+                $DomainName = Get-DomainName
+                $DJoinParameters = @(
+                    '/PROVISION'
+                    '/DOMAIN',$DomainName
+                    '/MACHINE',$ComputerName )
+                if ($PSBoundParameters.ContainsKey('Path'))
+                {
+                    $DJoinParameters += @( '/MACHINEOU',$Path )
+                } # if
+
+                if ($PSBoundParameters.ContainsKey('DomainController'))
+                {
+                    $DJoinParameters += @( '/DCNAME',$DomainController )
+                } # if
+
+                $DJoinParameters += @( '/SAVEFILE',$RequestFile )
+                $Result = & djoin.exe @DjoinParameters
+
+                if ($LASTEXITCODE -ne 0)
+                {
+                    $errorId = 'ODJRequestError'
+                    $errorMessage = $($LocalizedData.ODJRequestError `
+                        -f $LASTEXITCODE,$Result)
+                    ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage
+                } # if
+
+                Write-Verbose -Message ($LocalizedData.ODJRequestCompleteMessage -f `
+                        $DomainName,$ComputerName,$RequestFile)
             }
-            Write-Verbose -Message ($LocalizedData.AddingADComputer -f $ComputerName);
-            New-ADComputer @newADComputerParams;
+            else
+            {
+                ## Create the computer account using New-ADComputer
+                $newADComputerParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter;
+                if ($PSBoundParameters.ContainsKey('Path'))
+                {
+                    Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f 'Path', $Path);
+                    $newADComputerParams['Path'] = $Path;
+                }
+                Write-Verbose -Message ($LocalizedData.AddingADComputer -f $ComputerName);
+                New-ADComputer @newADComputerParams;
+            } # if
             ## Now retrieve the newly created computer
             $targetResource = Get-TargetResource @PSBoundParameters;
         }
@@ -387,7 +437,7 @@ function Set-TargetResource
                 {
                     ## Find the associated AD property
                     $adProperty = $adPropertyMap | Where-Object { $_.Parameter -eq $parameter };
-                    
+
                     if ([System.String]::IsNullOrEmpty($adProperty))
                     {
                         ## We can't do anything with an empty AD property!
@@ -435,20 +485,20 @@ function Set-TargetResource
                         }
                     } #end if replace existing value
                 }
-            
+
             } #end if TargetResource parameter
         } #end foreach PSBoundParameter
-        
+
         ## Only pass -Remove and/or -Replace if we have something to set/change
         if ($replaceComputerProperties.Count -gt 0)
-        {        
+        {
             $setADComputerParams['Replace'] = $replaceComputerProperties;
         }
         if ($removeComputerProperties.Count -gt 0)
-        {        
+        {
             $setADComputerParams['Remove'] = $removeComputerProperties;
         }
-        
+
         Write-Verbose -Message ($LocalizedData.UpdatingADComputer -f $ComputerName);
         [ref] $null = Set-ADComputer @setADComputerParams -Enabled $Enabled;
     }
@@ -462,9 +512,10 @@ function Set-TargetResource
 
 } #end function Set-TargetResource
 
-
 ## Import the common AD functions
-$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
+$adCommonFunctions = Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
 . $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource

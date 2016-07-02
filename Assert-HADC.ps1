@@ -1,8 +1,8 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
-param ()
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingComputerNameHardcoded', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param()
 
-# A configuration to Create High Availability Domain Controller 
-
+# A configuration to Create High Availability Domain Controller
 $secpasswd = ConvertTo-SecureString "Adrumble@6" -AsPlainText -Force
 $domainCred = New-Object System.Management.Automation.PSCredential ("sva-dscdom\Administrator", $secpasswd)
 $safemodeAdministratorCred = New-Object System.Management.Automation.PSCredential ("sva-dscdom\Administrator", $secpasswd)
