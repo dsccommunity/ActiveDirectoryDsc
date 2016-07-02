@@ -237,7 +237,6 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
-* Moved Assert_*.ps1 files to Tests folder.
 
 ### 2.12.0.0
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
