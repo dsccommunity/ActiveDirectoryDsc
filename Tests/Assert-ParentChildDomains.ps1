@@ -84,6 +84,9 @@ configuration AssertParentChildDomains
 $config = Invoke-Expression (Get-content $PSScriptRoot\ParentChildconfig.psd1 -Raw)
 AssertParentChildDomains -configurationData $config
 
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "sva-dsc1" -Path $PSScriptRoot\AssertParentChildDomains -Credential $localcred
-Start-DscConfiguration -Wait -Force -Verbose -ComputerName "sva-dsc2" -Path $PSScriptRoot\AssertParentChildDomains -Credential $localcred
+$computerName1 = "sva-dsc1"
+$computerName2 = "sva-dsc2"
+
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName $computerName1 -Path $PSScriptRoot\AssertParentChildDomains -Credential $localcred
+Start-DscConfiguration -Wait -Force -Verbose -ComputerName $computerName2 -Path $PSScriptRoot\AssertParentChildDomains -Credential $localcred
 

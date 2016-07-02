@@ -5,6 +5,9 @@
 The **xActiveDirectory** DSC resources allow you to configure and manage Active Directory.
 Note: these resources do not presently install the RSAT tools.
 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
 ## Contributing
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
@@ -234,11 +237,13 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
+* Moved Assert_*.ps1 files to Tests folder.
+
+### 2.12.0.0
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
 * xADComputer: New resource added.
 * xADComputer: Added RequestFile support.
 * Fixed PSScriptAnalyzer Errors with v1.6.0.
-* Moved Assert_*.ps1 files to Tests folder.
 
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates

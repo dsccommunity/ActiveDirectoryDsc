@@ -1,7 +1,7 @@
 #---------------------------------# 
 #      environment configuration  # 
 #---------------------------------# 
-version: 2.11.{build}.0
+version: 2.12.{build}.0
 install: 
   - cinst -y pester
   - git clone https://github.com/PowerShell/DscResource.Tests
@@ -47,7 +47,7 @@ deploy_script:
       # Creating project artifact
       $stagingDirectory = (Resolve-Path ..).Path
       $manifest = Join-Path $pwd "xActiveDirectory.psd1"
-      (Get-Content $manifest -Raw).Replace("2.11.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
+      (Get-Content $manifest -Raw).Replace("2.12.0.0", $env:APPVEYOR_BUILD_VERSION) | Out-File $manifest
       $zipFilePath = Join-Path $stagingDirectory "$(Split-Path $pwd -Leaf).zip"
       Add-Type -assemblyname System.IO.Compression.FileSystem
       [System.IO.Compression.ZipFile]::CreateFromDirectory($pwd, $zipFilePath)
