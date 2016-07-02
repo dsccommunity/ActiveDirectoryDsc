@@ -238,6 +238,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 * xADComputer: New resource added.
 * xADComputer: Added RequestFile support.
 * Fixed PSScriptAnalyzer Errors with v1.6.0.
+* Moved Assert_*.ps1 files to Tests folder.
 
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
