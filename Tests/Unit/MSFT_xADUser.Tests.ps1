@@ -45,7 +45,7 @@ try
         }
 
         $testDomainController = 'TESTDC';
-        $testCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         $testStringProperties = @(
             'UserPrincipalName', 'DisplayName', 'Path',  'GivenName', 'Initials', 'Surname', 'Description', 'StreetAddress',
@@ -142,22 +142,22 @@ try
                 Test-TargetResource @testPresentParams -Password $testCredential | Should Be $false;
             }
 
-            It "Calls 'Test-Password' with 'Default' PasswordAuthenticationContext by default" {
+            It "Calls 'Test-Password' with 'Default' PasswordAuthentication by default" {
                 Mock Get-TargetResource { return $testPresentParams }
-                Mock Test-Password -ParameterFilter { $PasswordAuthenticationContext -eq 'Default' } { return $true; }
+                Mock Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } { return $true; }
 
                 Test-TargetResource @testPresentParams -Password $testCredential;
 
-                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthenticationContext -eq 'Default' } -Scope It;
+                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } -Scope It;
             }
 
-            It "Calls 'Test-Password' with 'Negotiate' PasswordAuthenticationContext when specified" {
+            It "Calls 'Test-Password' with 'Negotiate' PasswordAuthentication when specified" {
                 Mock Get-TargetResource { return $testPresentParams }
-                Mock Test-Password -ParameterFilter { $PasswordAuthenticationContext -eq 'Negotiate' } { return $false; }
+                Mock Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } { return $false; }
 
-                Test-TargetResource @testPresentParams -Password $testCredential -PasswordAuthenticationContext 'Negotiate';
+                Test-TargetResource @testPresentParams -Password $testCredential -PasswordAuthentication 'Negotiate';
 
-                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthenticationContext -eq 'Negotiate' } -Scope It;
+                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } -Scope It;
             }
 
             foreach ($testParameter in $testStringProperties) {

@@ -5,6 +5,9 @@
 The **xActiveDirectory** DSC resources allow you to configure and manage Active Directory.
 Note: these resources do not presently install the RSAT tools.
 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
 ## Contributing
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
@@ -113,7 +116,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
  * If not specified, this value defaults to False.
 * **CannotChangePassword**: Specifies whether the account password can be changed (optional).
  * If not specified, this value defaults to False.
-* **PasswordAuthenticationContext**: Specifies the authentication context used when testing users' passwords (optional).
+* **PasswordAuthentication**: Specifies the authentication context used when testing users' passwords (optional).
  * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 
 ### **xWaitForADDomain**
@@ -217,26 +220,35 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **UserPrincipalName** :Specifies the UPN assigned to the computer account (optional).
 * **DisplayName**: "Specifies the display name of the computer (optional).
 * **Path**: Specifies the X.500 path of the container where the computer is located (optional).
-* **Description**: Specifies a description of the computer object (optional). 
+* **Description**: Specifies a description of the computer object (optional).
 * **Enabled**: Specifies if the computer account is enabled (optional).
 * **Manager**: Specifies the user or group Distinguished Name that manages the computer object (optional).
  * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
 * **DomainController**: Specifies the Active Directory Domain Services instance to connect to perform the task (optional).
 * **DomainAdministratorCredential**: Specifies the user account credentials to use to perform the task (optional).
+* **RequestFile**: Specifies the full path to the Offline Domain Join Request file to create (optional).
 * **Ensure**: Specifies whether the computer account is present or absent.
  * Valid values are 'Present' and 'Absent'.
  * It not specified, it defaults to 'Present'.
 * **DistinguishedName**: Returns the X.500 path of the computer object (read-only).
 * **SID**: Returns the security identifier of the computer object (read-only).
 
+Note: An ODJ Request file will only be created when a computer account is first created in the domain.
+Setting an ODJ Request file path for a configuration that creates a computer account that already exists will not cause the file to be created.
+
 ## Versions
 
 ### Unreleased
+
+* xADUser: Adds 'PasswordAuthentication' option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
+* xADUser: Adds descriptions to user properties within the schema file.
+
+
+### 2.12.0.0
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
 * xADComputer: New resource added.
-
-* xADUser: Adds 'PasswordAuthenticationContext' option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
-* xADUser: Adds descriptions to user properties within the schema file.
+* xADComputer: Added RequestFile support.
+* Fixed PSScriptAnalyzer Errors with v1.6.0.
 
 ### 2.11.0.0
 * xWaitForADDomain: Made explicit credentials optional and other various updates
@@ -1035,22 +1047,22 @@ In this example, we create a 'NANO-001' computer account in the 'Server' OU of t
 configuration Example_xADComputerAccount
 {
     Param
-    (    
+    (
         [parameter(Mandatory = $true)]
         [System.String]
         $DomainController,
-        
+
         [parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $DomainCredential,
-        
+
         [parameter(Mandatory = $true)]
         [System.String]
         $ComputerName,
-        
-        [parameter(Mandatory = $true)]    
+
+        [parameter(Mandatory = $true)]
         [System.String]
-        $Path  
+        $Path
     )
 
     Import-DscResource -Module xActiveDirectory
@@ -1071,6 +1083,62 @@ Example_xADComputerAccount -DomainController 'DC01' `
     -DomainCredential (Get-Credential -Message "Domain Credentials") `
     -ComputerName 'NANO-001' `
     -Path 'ou=Servers,dc=example,dc=com' `
+    -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
+
+```
+
+### Create an Active Directory Computer Account and an ODJ Request File
+
+In this example, we create a 'NANO-200' computer account in the 'Nano' OU of the 'example.com' Active Directory domain as well as creating an Offline Domain Join Request file.
+
+```powershell
+configuration Example_xADComputerAccountODJ
+{
+    Param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainController,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $DomainCredential,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ComputerName,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Path,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $RequestFile
+    )
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADComputer "$ComputerName"
+        {
+           DomainController = $DomainController
+           DomainAdministratorCredential = $DomainCredential
+           ComputerName = $ComputerName
+           Path = $Path
+           RequestFile = $RequestFile
+        }
+    }
+}
+
+Example_xADComputerAccountODJ -DomainController 'DC01' `
+    -DomainCredential (Get-Credential -Message "Domain Credentials") `
+    -ComputerName 'NANO-200' `
+    -Path 'ou=Nano,dc=example,dc=com' `
+    -RequestFile 'd:\ODJFiles\NANO-200.txt' `
     -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose

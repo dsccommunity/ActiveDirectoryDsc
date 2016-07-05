@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+param()
+
 # Localized messages
 data LocalizedData
 {
@@ -72,7 +75,6 @@ function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Name of the domain where the user account is located (only used if password is managed)
@@ -257,7 +259,7 @@ function Get-TargetResource
 
         ## Specifies the authentication context type when testing user passwords #61
         [ValidateSet('Default','Negotiate')]
-        [System.String] $PasswordAuthenticationContext = 'Default'
+        [System.String] $PasswordAuthentication = 'Default'
     )
 
     Assert-Module -ModuleName 'ActiveDirectory';
@@ -334,7 +336,6 @@ function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Name of the domain where the user account is located (only used if password is managed)
@@ -519,7 +520,7 @@ function Test-TargetResource
 
         ## Specifies the authentication context type when testing user passwords #61
         [ValidateSet('Default','Negotiate')]
-        [System.String] $PasswordAuthenticationContext = 'Default'
+        [System.String] $PasswordAuthentication = 'Default'
     )
 
     Assert-Parameters @PSBoundParameters;
@@ -548,7 +549,7 @@ function Test-TargetResource
                     Username = $UserName;
                     Password = $Password;
                     DomainName = $DomainName;
-                    PasswordAuthenticationContext = $PasswordAuthenticationContext;
+                    PasswordAuthentication = $PasswordAuthentication;
                 }
                 if ($DomainAdministratorCredential)
                 {
@@ -584,7 +585,6 @@ function Test-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
     param
     (
         ## Name of the domain where the user account is located (only used if password is managed)
@@ -769,7 +769,7 @@ function Set-TargetResource
 
         ## Specifies the authentication context type when testing user passwords #61
         [ValidateSet('Default','Negotiate')]
-        [System.String] $PasswordAuthenticationContext = 'Default'
+        [System.String] $PasswordAuthentication = 'Default'
     )
 
     Assert-Parameters @PSBoundParameters;
@@ -963,7 +963,7 @@ function Test-Password
         ## Specifies the authentication context type when testing user passwords #61
         [Parameter(Mandatory)]
         [ValidateSet('Default','Negotiate')]
-        [System.String] $PasswordAuthenticationContext
+        [System.String] $PasswordAuthentication
     )
 
     Write-Verbose -Message ($LocalizedData.CreatingADDomainConnection -f $DomainName);
@@ -989,7 +989,7 @@ function Test-Password
     }
     Write-Verbose -Message ($LocalizedData.CheckingADUserPassword -f $UserName);
 
-    if ($PasswordAuthenticationContext -eq 'Negotiate')
+    if ($PasswordAuthentication -eq 'Negotiate')
     {
         return $principalContext.ValidateCredentials(
             $UserName,
