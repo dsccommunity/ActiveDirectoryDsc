@@ -231,7 +231,7 @@ function Get-TargetResource
         [ValidateNotNull()]
         [System.String] $IPPhone,
 
-        ## User's manager specified as a Distinguished Name (ldapDisplayName 'manager')
+        ## Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')
         [ValidateNotNull()]
         [System.String] $Manager,
 
@@ -492,7 +492,7 @@ function Test-TargetResource
         [ValidateNotNull()]
         [System.String] $IPPhone,
 
-        ## User's manager specified as a Distinguished Name (ldapDisplayName 'manager')
+        ## Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')
         [ValidateNotNull()]
         [System.String] $Manager,
 
@@ -741,7 +741,7 @@ function Set-TargetResource
         [ValidateNotNull()]
         [System.String] $IPPhone,
 
-        ## User's manager specified as a Distinguished Name (ldapDisplayName 'manager')
+        ## Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')
         [ValidateNotNull()]
         [System.String] $Manager,
 

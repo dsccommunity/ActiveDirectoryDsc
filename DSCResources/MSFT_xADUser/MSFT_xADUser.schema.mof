@@ -39,12 +39,12 @@ class MSFT_xADUser : OMI_BaseResource
     [Write, Description("Specifies the user's home telephone number (ldapDisplayName 'homePhone')")] String HomePhone;
     [Write, Description("Specifies the user's pager number (ldapDisplayName 'pager')")] String Pager;
     [Write, Description("Specifies the user's IP telephony phone number (ldapDisplayName 'ipPhone')")] String IPPhone;
-    [Write, Description("User's manager specified as a Distinguished Name (ldapDisplayName 'manager')")] String Manager;
+    [Write, Description("Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')")] String Manager;
     [Write, Description("Specifies if the account is enabled (default True)")] Boolean Enabled;
     [Write, Description("Specifies whether the account password can be changed")] Boolean CannotChangePassword;
     [Write, Description("Specifies whether the password of an account can expire")] Boolean PasswordNeverExpires;
     [Write, Description("Specifies the Active Directory Domain Services instance to use to perform the task.")] String DomainController;
     [Write, Description("Specifies the user account credentials to use to perform this task"), EmbeddedInstance("MSFT_Credential")] String DomainAdministratorCredential;
-    [Write, Description("Specifies the authentication context type used when testing passwords"), ValueMap{"Default","Negotiate"},Values{"Default","Negotiate"}] String PasswordAuthenticationContext;
+    [Write, Description("Specifies the authentication context type used when testing passwords"), ValueMap{"Default","Negotiate"},Values{"Default","Negotiate"}] String PasswordAuthentication;
     [Read, Description("Returns the X.500 path of the object")] String DistinguishedName;
 };
