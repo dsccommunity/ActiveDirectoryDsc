@@ -116,6 +116,8 @@ These DSC Resources allow you to configure new domains, child domains, and high 
  * If not specified, this value defaults to False.
 * **CannotChangePassword**: Specifies whether the account password can be changed (optional).
  * If not specified, this value defaults to False.
+* **PasswordAuthentication**: Specifies the authentication context used when testing users' passwords (optional).
+ * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 
 ### **xWaitForADDomain**
 
@@ -238,6 +240,10 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 
 ### Unreleased
 * Converted AppVeyor.yml to pull Pester from PSGallery instead of Chocolatey
+
+* xADUser: Adds 'PasswordAuthentication' option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
+* xADUser: Adds descriptions to user properties within the schema file.
+
 
 ### 2.12.0.0
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
@@ -1139,4 +1145,3 @@ Example_xADComputerAccountODJ -DomainController 'DC01' `
 Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
 
 ```
-

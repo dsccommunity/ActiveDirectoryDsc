@@ -1,27 +1,20 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-param()
-
-$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
-$Global:DSCResourceName    = 'MSFT_xADUser' # Example MSFT_xFirewall
+$Global:DSCModuleName      = 'xActiveDirectory'
+$Global:DSCResourceName    = 'MSFT_xADUser'
 
 #region HEADER
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green;
 if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
      (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
     & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
-else
-{
-    & git @('-C',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'),'pull')
-}
+
 Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $Global:DSCModuleName `
     -DSCResourceName $Global:DSCResourceName `
     -TestType Unit
-#endregion
+#endregion HEADER
 
 
 # Begin Testing
@@ -30,8 +23,6 @@ try
 
     #region Pester Tests
 
-    # The InModuleScope command allows you to perform white-box unit testing on the internal
-    # (non-exported) code of a Script Module.
     InModuleScope $Global:DSCResourceName {
 
         $testPresentParams = @{
@@ -54,7 +45,7 @@ try
         }
 
         $testDomainController = 'TESTDC';
-        $testCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        $testCredential = [System.Management.Automation.PSCredential]::Empty;
 
         $testStringProperties = @(
             'UserPrincipalName', 'DisplayName', 'Path',  'GivenName', 'Initials', 'Surname', 'Description', 'StreetAddress',
@@ -149,6 +140,24 @@ try
                 Mock Test-Password { return $false; }
 
                 Test-TargetResource @testPresentParams -Password $testCredential | Should Be $false;
+            }
+
+            It "Calls 'Test-Password' with 'Default' PasswordAuthentication by default" {
+                Mock Get-TargetResource { return $testPresentParams }
+                Mock Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } { return $true; }
+
+                Test-TargetResource @testPresentParams -Password $testCredential;
+
+                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } -Scope It;
+            }
+
+            It "Calls 'Test-Password' with 'Negotiate' PasswordAuthentication when specified" {
+                Mock Get-TargetResource { return $testPresentParams }
+                Mock Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } { return $false; }
+
+                Test-TargetResource @testPresentParams -Password $testCredential -PasswordAuthentication 'Negotiate';
+
+                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } -Scope It;
             }
 
             foreach ($testParameter in $testStringProperties) {
