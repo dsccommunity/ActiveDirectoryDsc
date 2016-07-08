@@ -489,6 +489,43 @@ try
 
                 Assert-MockCalled Remove-ADGroup -Scope It;
             }
+
+            It "Calls 'Set-ADGroup' with credentials when 'Ensure' is 'Present' and the group exists (#106)" {
+                Mock Get-ADGroup { return $fakeADGroup; }
+                Mock New-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock Get-ADGroupMember { }
+                Mock Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -MockWith { }
+
+                Set-TargetResource @testPresentParams -Credential $testCredentials;
+
+                Assert-MockCalled Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+            }
+
+            It "Calls 'Set-ADGroup' with credentials when 'Ensure' is 'Present' and the group does not exist  (#106)" {
+                Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials }  { }
+                Mock New-ADGroup { return [PSCustomObject] $fakeADGroup; }
+
+                Set-TargetResource @testPresentParams -Credential $testCredentials;
+
+                Assert-MockCalled Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+            }
+
+            It "Calls 'Move-ADObject' with credentials when specified (#106)" {
+                Mock Set-ADGroup { }
+                Mock Get-ADGroupMember { }
+                Mock Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } { }
+                Mock Get-ADGroup {
+                    $duffADGroup = $fakeADGroup.Clone();
+                    $duffADGroup['DistinguishedName'] = "CN=$($testPresentParams.GroupName),OU=WrongPath,DC=contoso,DC=com";
+                    return $duffADGroup;
+                }
+
+                Set-TargetResource @testPresentParams -Credential $testCredentials;
+
+                Assert-MockCalled Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+            }
+
         }
         #end region
 
