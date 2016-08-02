@@ -66,11 +66,11 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $Members,
-        
+
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToInclude,
-        
+
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToExclude,
@@ -94,7 +94,7 @@ function Get-TargetResource
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info;
         Write-Verbose -Message ($LocalizedData.RetrievingGroupMembers -f $MembershipAttribute);
         ## Retrieve the current list of members, returning the specified membership attribute
-        $adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute; 
+        $adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute;
         $targetResource = @{
             GroupName = $adGroup.Name;
             GroupScope = $adGroup.GroupScope;
@@ -182,11 +182,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $Members,
-        
+
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToInclude,
-        
+
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToExclude,
@@ -219,7 +219,7 @@ function Test-TargetResource
         $assertMemberParameters['MembersToExclude'] = $MembersToExclude;
     }
     Assert-MemberParameters @assertMemberParameters -ModuleName 'xADDomain' -ErrorAction Stop;
-    
+
     $targetResource = Get-TargetResource @PSBoundParameters;
     $targetResourceInCompliance = $true;
     if ($targetResource.GroupScope -ne $GroupScope)
@@ -317,11 +317,11 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $Members,
-        
+
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToInclude,
-        
+
         [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToExclude,
@@ -342,13 +342,14 @@ function Set-TargetResource
     )
     Assert-Module -ModuleName 'ActiveDirectory';
     $adGroupParams = Get-ADCommonParameters @PSBoundParameters;
-    
+
     try {
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info;
 
         if ($Ensure -eq 'Present') {
 
-            $setADGroupParams = @{};
+            $setADGroupParams = $adGroupParams.Clone();
+            $setADGroupParams['Identity'] = $adGroup.DistinguishedName;
 
             # Update existing group properties
             if ($Category -ne $adGroup.GroupCategory)
@@ -384,12 +385,14 @@ function Set-TargetResource
                 $setADGroupParams['Replace'] = @{ Info = $Notes };
             }
             Write-Verbose ($LocalizedData.UpdatingGroup -f $GroupName);
-            Set-ADGroup -Identity $adGroup.DistinguishedName @setADGroupParams;
+            Set-ADGroup @setADGroupParams;
 
             # Move group if the path is not correct
             if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adGroup.DistinguishedName))) {
                 Write-Verbose ($LocalizedData.MovingGroup -f $GroupName, $Path);
-                Move-ADObject -Identity $adGroup.DistinguishedName -TargetPath $Path;
+                $moveADObjectParams = $adGroupParams.Clone();
+                $moveADObjectParams['Identity'] = $adGroup.DistinguishedName
+                Move-ADObject @moveADObjectParams -TargetPath $Path;
             }
 
             Write-Verbose -Message ($LocalizedData.RetrievingGroupMembers -f $MembershipAttribute);
@@ -437,10 +440,10 @@ function Set-TargetResource
         ## The AD group doesn't exist
         if ($Ensure -eq 'Present')
         {
-      
+
             Write-Verbose ($LocalizedData.GroupNotFound -f $GroupName);
             Write-Verbose ($LocalizedData.AddingGroup -f $GroupName);
-      
+
             $adGroupParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter;
             if ($Description)
             {
@@ -460,17 +463,19 @@ function Set-TargetResource
             }
             ## Create group
             $adGroup = New-ADGroup @adGroupParams -GroupCategory $Category -GroupScope $GroupScope -PassThru;
-      
+
             ## Only the New-ADGroup cmdlet takes a -Name parameter. Refresh
             ## the parameters with the -Identity parameter rather than -Name
             $adGroupParams = Get-ADCommonParameters @PSBoundParameters
-      
+
             if ($Notes) {
                 ## Can't set the Notes field when creating the group
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Notes', $Notes);
-                Set-ADGroup -Identity $adGroup.DistinguishedName -Add @{ Info = $Notes };
+                $setADGroupParams = $adGroupParams.Clone();
+                $setADGroupParams['Identity'] = $adGroup.DistinguishedName;
+                Set-ADGroup @setADGroupParams -Add @{ Info = $Notes };
             }
-      
+
             ## Add the required members
             if ($PSBoundParameters.ContainsKey('Members'))
             {
@@ -484,7 +489,7 @@ function Set-TargetResource
                 Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName);
                 Add-ADGroupMember @adGroupParams -Members $MembersToInclude;
             }
-      
+
         }
     } #end catch
 } #end function Set-TargetResource
