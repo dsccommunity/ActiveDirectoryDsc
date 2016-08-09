@@ -7,5 +7,5 @@ class MSFT_xADDomainController : OMI_BaseResource
     [write] String DatabasePath;
     [write] String LogPath;
     [write] String SysvolPath;
-	[read] String Ensure;
+    [read] String Ensure;
 };
