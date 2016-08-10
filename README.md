@@ -239,6 +239,8 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
+
+### 2.13.0.0
 * Converted AppVeyor.yml to pull Pester from PSGallery instead of Chocolatey
 * xADUser: Adds 'PasswordAuthentication' option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
 * xADUser: Adds descriptions to user properties within the schema file.
