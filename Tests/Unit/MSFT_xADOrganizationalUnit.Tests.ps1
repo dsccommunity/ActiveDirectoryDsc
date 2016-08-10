@@ -1,5 +1,5 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
-param ()
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param()
 
 $Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xADOrganizationalUnit' # Example MSFT_xFirewall
@@ -20,7 +20,7 @@ Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHel
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $Global:DSCModuleName `
     -DSCResourceName $Global:DSCResourceName `
-    -TestType Unit 
+    -TestType Unit
 #endregion
 
 # Begin Testing
@@ -46,10 +46,10 @@ try
             Description = 'Test AD OU description';
             Ensure = 'Present';
         }
-        
+
         $testAbsentParams = $testPresentParams.Clone();
         $testAbsentParams['Ensure'] = 'Absent';
-        
+
         $protectedFakeAdOu = @{
             Name = $testPresentParams.Name;
             ProtectedFromAccidentalDeletion = $true;
@@ -63,7 +63,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
-                
+
                 $targetResource -is [System.Collections.Hashtable] | Should Be $true
             }
 
@@ -71,7 +71,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
-                
+
                 $targetResource.Ensure | Should Be 'Present'
             }
 
@@ -79,7 +79,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
-                
+
                 $targetResource.Ensure | Should Be 'Absent'
             }
 
@@ -87,7 +87,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
-                
+
                 $targetResource.ProtectedFromAccidentalDeletion | Should Be $true
             }
 
@@ -99,7 +99,7 @@ try
                     return [PSCustomObject] $unprotectedFakeAdOu
                 }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
-                
+
                 $targetResource.ProtectedFromAccidentalDeletion | Should Be $false
             }
 
@@ -118,7 +118,7 @@ try
 
         }
         #endregion
-        
+
         #region Function Test-TargetResource
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
 
@@ -126,21 +126,21 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Test-TargetResource @testPresentParams
-                
+
                 $targetResource -is [System.Boolean] | Should Be $true
             }
 
             It 'Fails when OU does not exist and "Ensure" = "Present"' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { }
-                
+
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
             It 'Fails when OU does exist and "Ensure" = "Absent"' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
-                
+
                 Test-TargetResource @testAbsentParams | Should Be $false
             }
 
@@ -149,7 +149,7 @@ try
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
                 $testDescriptionParams = $testPresentParams.Clone()
                 $testDescriptionParams['Description'] = 'Wrong description'
-                
+
                 Test-TargetResource @testDescriptionParams | Should Be $false
             }
 
@@ -158,21 +158,21 @@ try
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
                 $testProtectedFromAccidentalDeletionParams = $testPresentParams.Clone()
                 $testProtectedFromAccidentalDeletionParams['ProtectedFromAccidentalDeletion'] = $false
-                
+
                 Test-TargetResource @testProtectedFromAccidentalDeletionParams | Should Be $false
             }
 
             It 'Passes when OU does exist, "Ensure" = "Present" and all properties are correct' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
-                
+
                 Test-TargetResource @testPresentParams | Should Be $true
             }
 
             It 'Passes when OU does not exist and "Ensure" = "Absent"' {
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { }
-                
+
                 Test-TargetResource @testAbsentParams | Should Be $true
             }
 
@@ -181,13 +181,13 @@ try
                 Mock Get-ADOrganizationalUnit { return [PSCustomObject] $protectedFakeAdOu }
                 $testEmptyDescriptionParams = $testPresentParams.Clone()
                 $testEmptyDescriptionParams['Description'] = ''
-                
+
                 Test-TargetResource @testEmptyDescriptionParams | Should Be $true
             }
 
         }
         #endregion
-        
+
         #region Function Set-TargetResource
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
 
@@ -195,7 +195,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { }
                 Mock New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith { }
-                
+
                 Set-TargetResource @testPresentParams
                 Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -Scope It
             }
@@ -204,7 +204,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { }
                 Mock New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
-                
+
                 Set-TargetResource @testPresentParams -Credential $testCredential
                 Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
@@ -213,7 +213,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 Mock Set-ADOrganizationalUnit -MockWith { }
-                
+
                 Set-TargetResource @testPresentParams
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It
             }
@@ -222,7 +222,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 Mock Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
-                
+
                 Set-TargetResource @testPresentParams -Credential $testCredential
                 Assert-MockCalled Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
@@ -235,7 +235,7 @@ try
                     return [PSCustomObject] $unprotectedFakeAdOu
                 }
                 Mock Remove-ADOrganizationalUnit -MockWith { }
-                
+
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Remove-ADOrganizationalUnit -Scope It
             }
@@ -244,7 +244,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 Mock Remove-ADOrganizationalUnit -MockWith { }
-                
+
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Remove-ADOrganizationalUnit -Scope It
             }
@@ -253,7 +253,7 @@ try
                 Mock Assert-Module -MockWith { }
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 Mock Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
-                
+
                 Set-TargetResource @testAbsentParams -Credential $testCredential
                 Assert-MockCalled Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
@@ -263,7 +263,7 @@ try
                 Mock Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 Mock Remove-ADOrganizationalUnit -MockWith { }
                 Mock Set-ADOrganizationalUnit -MockWith { }
-                
+
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It
             }
@@ -277,14 +277,14 @@ try
                 }
                 Mock Remove-ADOrganizationalUnit -MockWith { }
                 Mock Set-ADOrganizationalUnit -MockWith { }
-                
+
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It -Exactly 0
             }
 
         }
         #endregion
-    
+
     }
     #endregion
 }
