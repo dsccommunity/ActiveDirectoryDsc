@@ -1,25 +1,21 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param()
 
-$Global:DSCModuleName      = 'xActiveDirectory'
-$Global:DSCResourceName    = 'MSFT_xADDomainController'
+$Script:DSCModuleName      = 'xActiveDirectory'
+$Script:DSCResourceName    = 'MSFT_xADDomainController'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
-else
-{
-    & git @('-C',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'),'pull')
-}
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+
+Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $Script:DSCModuleName `
+    -DSCResourceName $Script:DSCResourceName `
     -TestType Unit
 #endregion
 
@@ -38,11 +34,11 @@ try
     }
 
     $commonMockParams = @{
-        ModuleName = $Global:DSCResourceName
+        ModuleName = $Script:DSCResourceName
     }
 
     $commonAssertParams = @{
-        ModuleName = $Global:DSCResourceName
+        ModuleName = $Script:DSCResourceName
         Scope = 'It'
         Exactly = $true
     }
@@ -59,7 +55,7 @@ try
     #endregion Pester Test Initialization
 
     #region Function Get-TargetResource
-    Describe -Tag 'xADDomainController' "$($Global:DSCResourceName)\Get-TargetResource" {
+    Describe -Tag 'xADDomainController' "$($Script:DSCResourceName)\Get-TargetResource" {
         It 'Returns current "SiteName"' {
             Mock Get-ADDomain { return $true } @commonMockParams
             Mock Get-ADDomainController {
@@ -77,8 +73,8 @@ try
     #endregion
 
     #region Function Test-TargetResource
-    Describe -Tag 'xADDomainController' "$($Global:DSCResourceName)\Test-TargetResource" {
-        InModuleScope $Global:DSCResourceName {
+    Describe -Tag 'xADDomainController' "$($Script:DSCResourceName)\Test-TargetResource" {
+        InModuleScope $Script:DSCResourceName {
             $correctSiteName = 'PresentSite'
             $incorrectSiteName = 'IncorrectSite'
             $correctDomainName = 'present.com'
@@ -141,7 +137,7 @@ try
     #endregion
 
     #region Function Set-TargetResource
-    Describe -Tag 'xADDomainController' "$($Global:DSCResourceName)\Set-TargetResource" {
+    Describe -Tag 'xADDomainController' "$($Script:DSCResourceName)\Set-TargetResource" {
         It 'Calls "Install-ADDSDomainController" with "Site", if specified' {
             Mock Get-ADDomain {
                 return $true
