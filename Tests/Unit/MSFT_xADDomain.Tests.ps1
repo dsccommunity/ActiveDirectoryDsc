@@ -52,7 +52,7 @@ try
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
-            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } { }
+            #Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } { }
 
             It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
                 Mock Get-ADDomain { }
