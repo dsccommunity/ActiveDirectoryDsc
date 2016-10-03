@@ -295,7 +295,7 @@ function Test-Members
 
     if ($PSBoundParameters.ContainsKey('Members'))
     {
-        if ($null -eq $Members)
+        if ($null -eq $Members -or (($Members.Count -eq 1) -and ($Members[0].Length -eq 0)))
         {
             $Members = @();
         }
@@ -319,7 +319,7 @@ function Test-Members
 
     if ($PSBoundParameters.ContainsKey('MembersToInclude'))
     {
-        if ($null -eq $MembersToInclude)
+        if ($null -eq $MembersToInclude -or (($MembersToInclude.Count -eq 1) -and ($MembersToInclude[0].Length -eq 0)))
         {
             $MembersToInclude = @();
         }
@@ -335,10 +335,9 @@ function Test-Members
         }
     } #end if $MembersToInclude
 
-    #if ($MembersToExclude.Count -gt 0)
     if ($PSBoundParameters.ContainsKey('MembersToExclude'))
     {
-        if ($null -eq $MembersToExclude)
+        if ($null -eq $MembersToExclude -or (($MembersToExclude.Count -eq 1) -and ($MembersToExclude[0].Length -eq 0)))
         {
             $MembersToExclude = @();
         }
