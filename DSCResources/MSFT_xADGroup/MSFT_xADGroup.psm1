@@ -63,15 +63,12 @@ function Get-TargetResource
         [System.String]
         $DomainController,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $Members,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToInclude,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToExclude,
 
@@ -179,15 +176,12 @@ function Test-TargetResource
         [System.String]
         $DomainController,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $Members,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToInclude,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToExclude,
 
@@ -206,15 +200,15 @@ function Test-TargetResource
     )
     ## Validate parameters before we even attempt to retrieve anything
     $assertMemberParameters = @{};
-    if ($PSBoundParameters.ContainsKey('Members'))
+    if ($PSBoundParameters.ContainsKey('Members') -and -not [system.string]::IsNullOrEmpty($Members))
     {
         $assertMemberParameters['Members'] = $Members;
     }
-    if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
     {
         $assertMemberParameters['MembersToInclude'] = $MembersToInclude;
     }
-    if ($PSBoundParameters.ContainsKey('MembersToExclude'))
+    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [system.string]::IsNullOrEmpty($MembersToExclude))
     {
         $assertMemberParameters['MembersToExclude'] = $MembersToExclude;
     }
@@ -314,15 +308,12 @@ function Set-TargetResource
         [System.String]
         $DomainController,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $Members,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToInclude,
 
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $MembersToExclude,
 
@@ -401,7 +392,7 @@ function Set-TargetResource
             {
                 ## The fact that we're in the Set method, there is no need to validate the parameter
                 ## combination as this was performed in the Test method
-                if ($PSBoundParameters.ContainsKey('Members'))
+                if ($PSBoundParameters.ContainsKey('Members') -and -not [system.string]::IsNullOrEmpty($Members))
                 {
                     # Remove all existing first and add explicit members
                     $Members = Remove-DuplicateMembers -Members $Members;
@@ -414,13 +405,13 @@ function Set-TargetResource
                     Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $Members.Count, $GroupName);
                     Add-ADGroupMember @adGroupParams -Members $Members;
                 }
-                if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+                if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
                 {
                     $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude;
                     Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName);
                     Add-ADGroupMember @adGroupParams -Members $MembersToInclude;
                 }
-                if ($PSBoundParameters.ContainsKey('MembersToExclude'))
+                if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [system.string]::IsNullOrEmpty($MembersToExclude))
                 {
                     $MembersToExclude = Remove-DuplicateMembers -Members $MembersToExclude;
                     Write-Verbose -Message ($LocalizedData.RemovingGroupMembers -f $MembersToExclude.Count, $GroupName);
@@ -477,13 +468,13 @@ function Set-TargetResource
             }
 
             ## Add the required members
-            if ($PSBoundParameters.ContainsKey('Members'))
+            if ($PSBoundParameters.ContainsKey('Members') -and -not [system.string]::IsNullOrEmpty($Members))
             {
                 $Members = Remove-DuplicateMembers -Members $Members;
                 Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $Members.Count, $GroupName);
                 Add-ADGroupMember @adGroupParams -Members $Members;
             }
-            elseif ($PSBoundParameters.ContainsKey('MembersToInclude'))
+            elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
             {
                 $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude;
                 Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName);
