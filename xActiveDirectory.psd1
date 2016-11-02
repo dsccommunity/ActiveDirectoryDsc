@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '2.13.0.0'
+ModuleVersion = '2.14.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,10 +49,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Converted AppVeyor.yml to pull Pester from PSGallery instead of Chocolatey
-* xADUser: Adds "PasswordAuthentication" option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
-* xADUser: Adds descriptions to user properties within the schema file.
-* xADGroup: Fixes bug when updating groups when alternate Credentials are specified.
+        ReleaseNotes = '* xADDomainController: Adds Site option.
 
 '
 
@@ -60,6 +57,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
