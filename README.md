@@ -246,6 +246,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 
 ### 2.14.0.0
 * xADDomainController: Adds Site option.
+* xADDomainController: Populate values for DatabasePath, LogPath and SysvolPath during Get-TargetResource.
 
 ### 2.13.0.0
 * Converted AppVeyor.yml to pull Pester from PSGallery instead of Chocolatey

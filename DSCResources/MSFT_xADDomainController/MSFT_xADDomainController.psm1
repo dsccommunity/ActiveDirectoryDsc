@@ -45,8 +45,15 @@ function Get-TargetResource
                 if ($dc.Domain -eq $DomainName)
                 {
                     Write-Verbose -Message "Current node '$($dc.Name)' is already a domain controller for domain '$($dc.Domain)'."
-                    $returnValue.Ensure = $true
-                    $returnValue.SiteName = $dc.Site
+
+                    $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
+                    $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
+
+                    $returnValue.Ensure       = $true
+                    $returnValue.DatabasePath = $serviceNTDS.'DSA Working Directory'
+                    $returnValue.LogPath      = $serviceNTDS.'Database log files path'
+                    $returnValue.SysvolPath   = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+                    $returnValue.SiteName     = $dc.Site
                 }
             }
             catch
