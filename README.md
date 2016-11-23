@@ -243,6 +243,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
+* xAdDomainController: Fixes SiteName being required field.
 
 ### 2.14.0.0
 * xADDomainController: Adds Site option.

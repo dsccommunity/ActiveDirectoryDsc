@@ -147,7 +147,7 @@ function Set-TargetResource
     elseif ($targetResource.Ensure)
     {
         ## Node is a domain controller. We check if other properties are in desired state
-        if ($targetResource.SiteName -ne $SiteName)
+        if ($PSBoundParameters["SiteName"] -and $targetResource.SiteName -ne $SiteName)
         {
             ## DC is not in correct site. Move it.
             Write-Verbose "Moving Domain Controller from '$($targetResource.SiteName)' to '$SiteName'"
