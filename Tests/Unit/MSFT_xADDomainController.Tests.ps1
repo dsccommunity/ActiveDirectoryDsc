@@ -217,6 +217,21 @@ try
 
             Assert-MockCalled Move-ADDirectoryServer -Times 0 @commonAssertParams
         }
+
+        It 'Does not call "Move-ADDirectoryServer" when "SiteName" is not specified' {
+            Mock Get-TargetResource {
+                return $stubTargetResource = @{
+                    Ensure = $true
+                    SiteName = 'PresentSite'
+                }
+            } @commonMockParams
+
+            Mock Move-ADDirectoryServer {} @commonMockParams
+
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName
+
+            Assert-MockCalled Move-ADDirectoryServer -Times 0 @commonAssertParams
+        }
     }
     #endregion
 }
