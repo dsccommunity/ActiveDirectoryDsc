@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '2.14.0.0'
+ModuleVersion = '2.15.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,7 +49,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xADDomainController: Adds Site option.
+        ReleaseNotes = '* xAdDomainController: Fixes SiteName being required field.
 
 '
 
@@ -57,6 +57,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
