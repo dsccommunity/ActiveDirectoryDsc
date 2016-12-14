@@ -45,8 +45,15 @@ function Get-TargetResource
                 if ($dc.Domain -eq $DomainName)
                 {
                     Write-Verbose -Message "Current node '$($dc.Name)' is already a domain controller for domain '$($dc.Domain)'."
-                    $returnValue.Ensure = $true
-                    $returnValue.SiteName = $dc.Site
+
+                    $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
+                    $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
+
+                    $returnValue.Ensure       = $true
+                    $returnValue.DatabasePath = $serviceNTDS.'DSA Working Directory'
+                    $returnValue.LogPath      = $serviceNTDS.'Database log files path'
+                    $returnValue.SysvolPath   = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+                    $returnValue.SiteName     = $dc.Site
                 }
             }
             catch
@@ -140,7 +147,7 @@ function Set-TargetResource
     elseif ($targetResource.Ensure)
     {
         ## Node is a domain controller. We check if other properties are in desired state
-        if ($targetResource.SiteName -ne $SiteName)
+        if ($PSBoundParameters["SiteName"] -and $targetResource.SiteName -ne $SiteName)
         {
             ## DC is not in correct site. Move it.
             Write-Verbose "Moving Domain Controller from '$($targetResource.SiteName)' to '$SiteName'"

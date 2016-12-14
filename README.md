@@ -36,7 +36,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **ParentDomainName**: Fully qualified name of the parent domain (optional).
 * **DomainAdministratorCredential**: Credentials used to query for domain existence.
  * __Note: These are NOT used during domain creation.__
-(AD sets the localadmin credentials as new domain administrator credentials during setup.)
+(AD sets the local admin credentials as new domain administrator credentials during setup.)
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
 * **DnsDelegationCredential**: Credential used for creating DNS delegation (optional).
 * **DomainNetBIOSName**: Specifies the NetBIOS name for the new domain (optional).
@@ -64,7 +64,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
  * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
  * Once created, the user's SamAccountName and CN cannot be changed.
 * **Password**: Password value for the user account.
- * _If the account is enabled (default behaviour) you must specifiy a password._
+ * _If the account is enabled (default behaviour) you must specify a password._
  * _You must ensure that the password meets the domain's complexity requirements._
 * **Ensure**: Specifies whether the given user is present or absent (optional).
  * If not specified, this value defaults to Present.
@@ -74,7 +74,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
  * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 * **CommonName**: Specifies the user's CN of the user account (optional).
  * If not specified, this defaults to the ___UserName___ value.
-* **UserPrincipalName**: Each user account has a user principal name (UPN) in the format [user]@[DNS-domain-name] (optional).
+* **UserPrincipalName**: Each user account has a user principal name (UPN) in the format [user]@[DNS-domain-name] &#40;optional&#41;.
 * **DisplayName**: Specifies the display name of the user object (optional).
 * **Path**: (optional).
 * **GivenName**: Specifies the user's first or given name (optional).
@@ -126,8 +126,8 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 ### **xWaitForADDomain**
 
 * **DomainName**: Name of the remote domain.
-* **RetryIntervalSec**: Interval to check for the domain's existance.
-* **RetryCount**: Maximum number of retries to check for the domain's existance.
+* **RetryIntervalSec**: Interval to check for the domain's existence.
+* **RetryCount**: Maximum number of retries to check for the domain's existence.
 
 ### **xADDomainTrust**
 
@@ -163,16 +163,16 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **Description**: Specifies a description of the group object (optional).
 * **DisplayName**: Specifies the display name of the group object (optional).
 * **Members**: Specifies the explicit AD objects that should comprise the group membership (optional).
- * If not specified, no group membershup changes are made.
+ * If not specified, no group membership changes are made.
  * If specified, all undefined group members will be removed the AD group.
  * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
 * **MembersToInclude**: Specifies AD objects that must be in the group (optional).
- * If not specified, no group membershup changes are made.
+ * If not specified, no group membership changes are made.
  * If specified, only the specified members are added to the group.
  * If specified, no users are removed from the group using this parameter.
  * This property cannot be specified with the 'Members' parameter.
 * **MembersToExclude**: Specifies AD objects that _must not_ be in the group (optional).
- * If not specified, no group membershup changes are made.
+ * If not specified, no group membership changes are made.
  * If specified, only those specified are removed from the group.
  * If specified, no users are added to the group using this parameter.
  * This property cannot be specified with the 'Members' parameter.
@@ -244,8 +244,12 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 
 ### Unreleased
 
+### 2.15.0.0
+* xAdDomainController: Fixes SiteName being required field.
+
 ### 2.14.0.0
 * xADDomainController: Adds Site option.
+* xADDomainController: Populate values for DatabasePath, LogPath and SysvolPath during Get-TargetResource.
 
 ### 2.13.0.0
 * Converted AppVeyor.yml to pull Pester from PSGallery instead of Chocolatey

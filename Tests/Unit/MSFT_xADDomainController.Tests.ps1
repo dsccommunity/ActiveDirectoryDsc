@@ -23,10 +23,13 @@ $TestEnvironment = Initialize-TestEnvironment `
 try
 {
     #region Pester Test Initialization
-    $correctSiteName = 'PresentSite'
-    $incorrectSiteName = 'IncorrectSite'
-    $correctDomainName = 'present.com'
+    $correctDomainName   = 'present.com'
     $testAdminCredential = [System.Management.Automation.PSCredential]::Empty
+    $correctDatabasePath = 'C:\Windows\NTDS'
+    $correctLogPath      = 'C:\Windows\NTDS'
+    $correctSysvolPath   = 'C:\Windows\SYSVOL'
+    $correctSiteName     = 'PresentSite'
+    $incorrectSiteName   = 'IncorrectSite'
 
     $testDefaultParams = @{
         DomainAdministratorCredential = $testAdminCredential
@@ -56,17 +59,43 @@ try
 
     #region Function Get-TargetResource
     Describe -Tag 'xADDomainController' "$($Script:DSCResourceName)\Get-TargetResource" {
+
+        Mock Get-ADDomain { return $true } @commonMockParams
+        Mock Get-ADDomainController {
+            return $stubDomainController = @{
+                Site = 'PresentSite'
+                Domain = 'present.com'
+            }
+        } @commonMockParams
+        Mock Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } {
+            return @{
+                'Database log files path' = 'C:\Windows\NTDS'
+                'DSA Working Directory'   = 'C:\Windows\NTDS'
+            }
+        } @commonMockParams
+        Mock Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' } {
+            return @{
+                'SysVol' = 'C:\Windows\SYSVOL\sysvol'
+            }
+        } @commonMockParams
+
+        It 'Returns current "DatabasePath"' {
+            $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+            $result.DatabasePath | Should Be $correctDatabasePath
+        }
+
+        It 'Returns current "LogPath"' {
+            $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+            $result.LogPath | Should Be $correctLogPath
+        }
+
+        It 'Returns current "SysvolPath"' {
+            $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+            $result.SysvolPath | Should Be $correctSysvolPath
+        }
+
         It 'Returns current "SiteName"' {
-            Mock Get-ADDomain { return $true } @commonMockParams
-            Mock Get-ADDomainController {
-                return $stubDomainController = @{
-                    Site = 'PresentSite'
-                    Domain = 'present.com'
-                }
-            } @commonMockParams
-
-            $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
-
+            $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
             $result.SiteName | Should Be $correctSiteName
         }
     }
@@ -98,6 +127,8 @@ try
                 Mock Get-ADDomain { return $true }
                 Mock Get-ADDomainController { return $stubDomainController }
                 Mock Test-ADReplicationSite { return $true }
+                Mock Get-ItemProperty { return @{} }
+
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
                 $result | Should Be $false
@@ -113,6 +144,7 @@ try
                 Mock Get-ADDomain { return $true }
                 Mock Get-ADDomainController { return $stubDomainController }
                 Mock Test-ADReplicationSite { return $true }
+                Mock Get-ItemProperty { return @{} }
 
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
@@ -182,6 +214,21 @@ try
             Mock Move-ADDirectoryServer {} @commonMockParams
 
             Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
+
+            Assert-MockCalled Move-ADDirectoryServer -Times 0 @commonAssertParams
+        }
+
+        It 'Does not call "Move-ADDirectoryServer" when "SiteName" is not specified' {
+            Mock Get-TargetResource {
+                return $stubTargetResource = @{
+                    Ensure = $true
+                    SiteName = 'PresentSite'
+                }
+            } @commonMockParams
+
+            Mock Move-ADDirectoryServer {} @commonMockParams
+
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName
 
             Assert-MockCalled Move-ADDirectoryServer -Times 0 @commonAssertParams
         }
