@@ -200,7 +200,7 @@ function Test-TargetResource
 
         [String]$SiteName,
 
-        [Bool]$IsGlobalCatalog = $true
+        [Bool]$IsGlobalCatalog = $true,
 	
 	[Bool]$Ensure = $true,
 
