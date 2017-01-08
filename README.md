@@ -54,6 +54,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
 * **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional)
 * **SiteName**: Specify the name of an existing site where new domain controller will be placed. (optional)
+* **IsGlobalCatalog**: Specify if the new Domain Controller will be a Global Catalog Server (Default = $True, Optional)
 
 ### **xADUser**
 
@@ -243,7 +244,8 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
-* xAdDomainController: Updates line 135 to Fix SiteName being required field.
+* xAdDomainController: Add Option to disable or enable the global catalog
+
 ### 2.15.0.0
 * xAdDomainController: Fixes SiteName being required field.
 
