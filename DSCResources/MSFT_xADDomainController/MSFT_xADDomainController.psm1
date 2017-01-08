@@ -5,7 +5,7 @@
 
 function Get-TargetResource
 {
-	[OutputType([System.Collections.Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory)]
@@ -47,7 +47,7 @@ function Get-TargetResource
                 if ($dc.Domain -eq $DomainName)
                 {
                     Write-Verbose -Message "Current node '$($dc.Name)' is already a domain controller for domain '$($dc.Domain)'."
-                    $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
+                    $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' 
                     $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
                     $returnValue.Ensure       = $true
                     $returnValue.DatabasePath = $serviceNTDS.'DSA Working Directory'
