@@ -5,7 +5,7 @@
 
 function Get-TargetResource
 {
-    [OutputType([System.Collections.Hashtable])]
+	[OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory)]
@@ -169,7 +169,7 @@ function Set-TargetResource
             ## DC is not in the expected Global Catalog state
             Write-Verbose "Setting the Global Catalog state to '$IsGlobalCatalog'"
             if ($IsGlobalCatalog = $true){$value = 1}
-            if ($IsGlobalCatalog - $false){$value = 0}
+            if ($IsGlobalCatalog = $false){$value = 0}
             Set-adobject $targetresource.NTDSSettingsObjectDN -replace @{options = $value}
         }
     }
