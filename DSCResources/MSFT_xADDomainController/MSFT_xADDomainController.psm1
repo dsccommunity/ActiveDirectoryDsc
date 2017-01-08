@@ -239,7 +239,7 @@ function Test-TargetResource
         }
         if ($isGCCorrect -eq $false -or $isinsite -eq $false)
         {
-            $iscomplaint = $False
+            $iscompliant = $False
         }
     }
     catch
