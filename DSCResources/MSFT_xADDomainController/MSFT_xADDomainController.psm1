@@ -8,7 +8,7 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory)]    
         [String]$DomainName,
 
         [Parameter(Mandatory)]
@@ -95,10 +95,10 @@ function Set-TargetResource
         [String]$SiteName,
         
         [Bool]$IsGlobalCatalog = $true,
-	
-	[Bool]$ensure,
-	
-	[String]$NTDSSettingsObjectDN
+    
+    [Bool]$ensure,
+    
+    [String]$NTDSSettingsObjectDN
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
@@ -200,10 +200,10 @@ function Test-TargetResource
         [String]$SiteName,
 
         [Bool]$IsGlobalCatalog = $true,
-	
-	[Bool]$Ensure = $true,
+    
+    [Bool]$Ensure = $true,
 
-	[String]$NTDSSettingsObjectDN
+    [String]$NTDSSettingsObjectDN
     )
 
     if ($PSBoundParameters.SiteName)
