@@ -23,7 +23,9 @@ function Get-TargetResource
 
         [String]$SysvolPath,
 
-        [String]$SiteName
+        [String]$SiteName,
+        
+        [Bool]$IsGlobalCatalog = $true
     )
 
     $returnValue = @{
@@ -54,6 +56,8 @@ function Get-TargetResource
                     $returnValue.LogPath      = $serviceNTDS.'Database log files path'
                     $returnValue.SysvolPath   = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
                     $returnValue.SiteName     = $dc.Site
+                    $returnValue.IsGlobalCatalog = $dc.IsGlobalCatalog
+                    $returnValue.NTDSSettingsObjectDN = $dc.NTDSSettingsObjectDN
                 }
             }
             catch
@@ -90,7 +94,9 @@ function Set-TargetResource
 
         [String]$SysvolPath,
 
-        [String]$SiteName
+        [String]$SiteName,
+        
+        [Bool]$IsGlobalCatalog = $true
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
@@ -136,6 +142,10 @@ function Set-TargetResource
         {
             $params.Add("SiteName", $SiteName)
         }
+        if ($IsGlobalCatalog -eq $False)
+        {
+            $params.Add("NoGlobalCatalog", $True)
+        }
 
         Install-ADDSDomainController @params
         Write-Verbose -Message "Node is now a domain controller for '$($DomainName)'."
@@ -152,6 +162,15 @@ function Set-TargetResource
             ## DC is not in correct site. Move it.
             Write-Verbose "Moving Domain Controller from '$($targetResource.SiteName)' to '$SiteName'"
             Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $DomainAdministratorCredential
+        }
+        ## Check if Node Global Catalog state is correct
+        if ($targetresource.IsGlobalCatalog -ne $IsGlobalCatalog)
+        {
+            ## DC is not in the expected Global Catalog state
+            Write-Verbose "Setting the Global Catalog state to '$IsGlobalCatalog'"
+            if ($IsGlobalCatalog = $true){$value = 1}
+            if ($IsGlobalCatalog - $false){$value = 0}
+            Set-adobject $targetresource.NTDSSettingsObjectDN -replace @{options = $value}
         }
     }
 }
@@ -176,7 +195,9 @@ function Test-TargetResource
 
         [String]$SysvolPath,
 
-        [String]$SiteName
+        [String]$SiteName,
+
+        [Bool]$IsGlobalCatalog = $true
     )
 
     if ($PSBoundParameters.SiteName)
@@ -203,6 +224,11 @@ function Test-TargetResource
         elseif ($existingResource.SiteName -ne $SiteName)
         {
             Write-Verbose "Domain Controller Site is not in a desired state. Expected '$SiteName', actual '$($existingResource.SiteName)'"
+            $isCompliant = $false
+        }
+        ## Check Global Catalog Config
+        if ($existingresource.isglobalcatalog -ne $IsglobalCatalog)
+        {
             $isCompliant = $false
         }
     }
