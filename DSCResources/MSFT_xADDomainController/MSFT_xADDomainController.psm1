@@ -230,12 +230,16 @@ function Test-TargetResource
         elseif ($existingResource.SiteName -ne $SiteName)
         {
             Write-Verbose "Domain Controller Site is not in a desired state. Expected '$SiteName', actual '$($existingResource.SiteName)'"
-            $isCompliant = $false
+            $isInSite = $false
         }
         ## Check Global Catalog Config
         if ($existingresource.isglobalcatalog -ne $IsglobalCatalog)
         {
-            $isCompliant = $false
+            $isGCCorrect = $false
+        }
+        if ($isGCCorrect -eq $false -or $isinsite -eq $false)
+        {
+            $iscomplaint = $False
         }
     }
     catch
