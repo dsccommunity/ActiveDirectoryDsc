@@ -50,7 +50,6 @@ function Get-TargetResource
 
                     $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
                     $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
-
                     $returnValue.Ensure       = $true
                     $returnValue.DatabasePath = $serviceNTDS.'DSA Working Directory'
                     $returnValue.LogPath      = $serviceNTDS.'Database log files path'
@@ -97,6 +96,10 @@ function Set-TargetResource
         [String]$SiteName,
         
         [Bool]$IsGlobalCatalog = $true
+	
+	[Bool]$ensure,
+	
+	[String]$NTDSSettingsObjectDN
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
@@ -198,6 +201,10 @@ function Test-TargetResource
         [String]$SiteName,
 
         [Bool]$IsGlobalCatalog = $true
+	
+	[Bool]$Ensure = $true,
+
+	[String]$NTDSSettingsObjectDN
     )
 
     if ($PSBoundParameters.SiteName)
