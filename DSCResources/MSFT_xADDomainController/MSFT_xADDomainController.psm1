@@ -96,9 +96,9 @@ function Set-TargetResource
         
         [Bool]$IsGlobalCatalog = $true,
     
-    [Bool]$ensure,
+        [Bool]$ensure,
     
-    [String]$NTDSSettingsObjectDN
+        [String]$NTDSSettingsObjectDN
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
@@ -140,7 +140,7 @@ function Set-TargetResource
         {
             $params.Add("SysvolPath", $SysvolPath)
         }
-        if ($SiteName -ne $null)
+        if ($SiteName -ne $null  -and $SiteName -ne "")
         {
             $params.Add("SiteName", $SiteName)
         }
@@ -201,9 +201,9 @@ function Test-TargetResource
 
         [Bool]$IsGlobalCatalog = $true,
     
-    [Bool]$Ensure = $true,
+        [Bool]$Ensure = $true,
 
-    [String]$NTDSSettingsObjectDN
+        [String]$NTDSSettingsObjectDN
     )
 
     if ($PSBoundParameters.SiteName)
