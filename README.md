@@ -244,7 +244,8 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
-* xAdDomainController: Add Option to disable or enable the global catalog
+* xAdDomainController: Add Option to disable or enable the global catalog per issue #75
+* xAdDomainController: Fix to get-dscconfiguration issue with Ensure (Reference to Pull Request #111)
 
 ### 2.15.0.0
 * xAdDomainController: Fixes SiteName being required field.
