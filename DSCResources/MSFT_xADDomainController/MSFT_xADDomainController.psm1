@@ -95,7 +95,7 @@ function Set-TargetResource
 
         [String]$SiteName,
         
-        [Bool]$IsGlobalCatalog = $true
+        [Bool]$IsGlobalCatalog = $true,
 	
 	[Bool]$ensure,
 	
