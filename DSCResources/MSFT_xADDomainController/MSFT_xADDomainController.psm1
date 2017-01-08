@@ -140,7 +140,7 @@ function Set-TargetResource
         {
             $params.Add("SysvolPath", $SysvolPath)
         }
-        if ($SiteName -ne $null  -and $SiteName -ne "")
+        if ($SiteName -ne $null)
         {
             $params.Add("SiteName", $SiteName)
         }
@@ -156,7 +156,7 @@ function Set-TargetResource
         # suppressed from Install-ADDSDomainController
         $global:DSCMachineStatus = 1
     }
-    elseif ($targetResource.Ensure -eq $true)
+    elseif ($targetResource.Ensure)
     {
         ## Node is a domain controller. We check if other properties are in desired state
         if ($PSBoundParameters["SiteName"] -and $targetResource.SiteName -ne $SiteName)
@@ -201,7 +201,7 @@ function Test-TargetResource
 
         [Bool]$IsGlobalCatalog = $true,
     
-        [Bool]$Ensure = $true,
+        [Bool]$Ensure,
 
         [String]$NTDSSettingsObjectDN
     )
