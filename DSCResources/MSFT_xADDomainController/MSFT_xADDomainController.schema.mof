@@ -9,6 +9,6 @@ class MSFT_xADDomainController : OMI_BaseResource
     [write] String SysvolPath;
     [write] String SiteName;
     [write] Boolean IsGlobalCatalog;
-    [write] String Ensure;
+    [write] Boolean Ensure;
     [write] String NTDSSettingsObjectDN;
 };
