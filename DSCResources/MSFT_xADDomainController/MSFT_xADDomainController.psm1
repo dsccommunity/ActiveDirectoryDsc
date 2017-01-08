@@ -47,7 +47,6 @@ function Get-TargetResource
                 if ($dc.Domain -eq $DomainName)
                 {
                     Write-Verbose -Message "Current node '$($dc.Name)' is already a domain controller for domain '$($dc.Domain)'."
-
                     $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
                     $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
                     $returnValue.Ensure       = $true
