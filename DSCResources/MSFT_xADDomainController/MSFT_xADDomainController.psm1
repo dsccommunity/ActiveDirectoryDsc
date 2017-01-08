@@ -156,7 +156,7 @@ function Set-TargetResource
         # suppressed from Install-ADDSDomainController
         $global:DSCMachineStatus = 1
     }
-    elseif ($targetResource.Ensure)
+    elseif ($targetResource.Ensure -eq $true)
     {
         ## Node is a domain controller. We check if other properties are in desired state
         if ($PSBoundParameters["SiteName"] -and $targetResource.SiteName -ne $SiteName)
