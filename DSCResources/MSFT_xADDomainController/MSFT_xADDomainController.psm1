@@ -158,13 +158,6 @@ function Set-TargetResource
     }
     elseif ($targetResource.Ensure)
     {
-        ## Node is a domain controller. We check if other properties are in desired state
-        if ($PSBoundParameters["SiteName"] -and $targetResource.SiteName -ne $SiteName)
-        {
-            ## DC is not in correct site. Move it.
-            Write-Verbose "Moving Domain Controller from '$($targetResource.SiteName)' to '$SiteName'"
-            Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $DomainAdministratorCredential
-        }
         ## Check if Node Global Catalog state is correct
         if ($targetresource.IsGlobalCatalog -ne $IsGlobalCatalog)
         {
@@ -174,6 +167,15 @@ function Set-TargetResource
             if ($IsGlobalCatalog -eq $false){$value = 0}
             Set-adobject $targetresource.NTDSSettingsObjectDN -replace @{options = $value}
         }
+        
+        ## Node is a domain controller. We check if other properties are in desired state
+        if ($PSBoundParameters["SiteName"] -and $targetResource.SiteName -ne $SiteName)
+        {
+            ## DC is not in correct site. Move it.
+            Write-Verbose "Moving Domain Controller from '$($targetResource.SiteName)' to '$SiteName'"
+            Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $DomainAdministratorCredential
+        }
+        
     }
 }
 
