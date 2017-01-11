@@ -3,23 +3,64 @@ data localizedData
 {
     # culture="en-US"
     ConvertFrom-StringData @'
-        RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
-        InvalidDomainError             = Computer is a member of the wrong domain?!
-        ExistingDomainMemberError      = Computer is already a domain member. Cannot create a new '{0}' domain?
-        InvalidCredentialError         = Domain '{0}' is available, but invalid credentials were supplied.
-        
-        QueryDomainWithLocalCredential = Computer is a domain member; querying domain '{0}' using local credential ...
-        QueryDomainWithCredential      = Computer is a workgroup member; querying for domain '{0}' using supplied credential ...
-        DomainFound                    = Active Directory domain '{0}' found.
-        DomainNotFound                 = Active Directory domain '{0}' cannot be found.
-        CreatingChildDomain            = Creating domain '{0}' as a child of domain '{1}' ...
-        CreatedChildDomain             = Child domain '{0}' created.
-        CreatingForest                 = Creating AD forest '{0}' ...
-        CreatedForest                  = AD forest '{0}' created.
-        ResourcePropertyValueIncorrect = Property '{0}' value is incorrect; expected '{1}', actual '{2}'.
-        ResourceInDesiredState         = Resource '{0}' is in the desired state.
-        ResourceNotInDesiredState      = Resource '{0}' is NOT in the desired state.
+        RoleNotFoundError                    = Please ensure that the PowerShell module for role '{0}' is installed.
+        InvalidDomainError                   = Computer is a member of the wrong domain?!
+        ExistingDomainMemberError            = Computer is already a domain member. Cannot create a new '{0}' domain?
+        InvalidCredentialError               = Domain '{0}' is available, but invalid credentials were supplied.
+                                             
+        QueryDomainWithLocalCredential       = Computer is a domain member; querying domain '{0}' using local credential ...
+        QueryDomainWithCredential            = Computer is a workgroup member; querying for domain '{0}' using supplied credential ...
+        DomainFound                          = Active Directory domain '{0}' found.
+        DomainNotFound                       = Active Directory domain '{0}' cannot be found.
+        CreatingChildDomain                  = Creating domain '{0}' as a child of domain '{1}' ...
+        CreatedChildDomain                   = Child domain '{0}' created.
+        CreatingForest                       = Creating AD forest '{0}' ...
+        CreatedForest                        = AD forest '{0}' created.
+        ResourcePropertyValueIncorrect       = Property '{0}' value is incorrect; expected '{1}', actual '{2}'.
+        ResourceInDesiredState               = Resource '{0}' is in the desired state.
+        ResourceNotInDesiredState            = Resource '{0}' is NOT in the desired state.
+        RetryingGetADDomain                  = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds.
+        UnhandledError                       = Unhandled error occured, detail here: {0}
+        FaultExceptionAndDomainShouldExist = ServiceModel FaultException detected and domain should exist, performing retry...
 '@
+}
+
+<#
+    .SYNOPSIS
+        Retrieves the name of the file that tracks the status of the xADDomain resource with the
+        specified domain name.
+
+    .PARAMETER DomainName
+        The domain name of the xADDomain resource to retrieve the tracking file name of.
+
+    .NOTES
+        The tracking file is currently output to the environment's temp directory.
+        
+        This file is NOT removed when a configuration completes, so if another call to a xADDomain
+        resource with the same domain name occurs in the same environment, this file will already
+        be present.
+        
+        This is so that when another call is made to the same resource, the resource will not
+        attempt to promote the machine to a domain controller again (which would cause an error).
+        
+        If the resource should be promoted to a domain controller once again, you must first remove
+        this file from the environment's temp directory (usually C:\Temp).
+
+        If in the future this functionality needs to change so that future configurations are not
+        affected, $env:temp should be changed to the resource's cache location which is removed
+        after each configuration.
+        ($env:systemRoot\system32\Configuration\BuiltinProvCache\MSFT_xADDomain)
+#>
+function Get-TrackingFilename {
+    [OutputType([String])]
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]
+        $DomainName
+    )
+
+    return Join-Path -Path ($env:temp) -ChildPath ('{0}.xADDomain.completed' -f $DomainName)
 }
 
 function Get-TargetResource
@@ -59,6 +100,11 @@ function Get-TargetResource
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName;
     $isDomainMember = Test-DomainMember;
 
+    $retries = 0
+    $maxRetries = 5
+    $retryIntervalInSeconds = 30
+    $domainShouldExist = (Test-Path (Get-TrackingFilename -DomainName $DomainName))
+    do {            
     try
     {
         if ($isDomainMember) {
@@ -93,6 +139,7 @@ function Get-TargetResource
     {
         Write-Verbose ($localizedData.DomainNotFound -f $domainFQDN)
         $domain = @{ };
+        # will fall into retry mechanism
     }
     catch [System.Security.Authentication.AuthenticationException]
     {
@@ -101,9 +148,26 @@ function Get-TargetResource
     }
     catch
     {
-        ## Not sure what's gone on here!
-        throw $_
+        $errorMessage = $localizedData.UnhandledError -f ($_.Exception | Format-List -Force | Out-String)
+        Write-Verbose $errorMessage
+
+        if ($domainShouldExist -and ($_.Exception.InnerException -is [System.ServiceModel.FaultException]))
+        {
+            Write-Verbose $localizedData.FaultExceptionAndDomainShouldExist
+            # will fall into retry mechanism
+        } else {
+            ## Not sure what's gone on here!
+            throw $_
+        }
     }
+
+    if($domainShouldExist) {
+        $retries++
+        Write-Verbose ($localizedData.RetryingGetADDomain -f $retries, $maxRetries, $retryIntervalInSeconds)
+        Start-Sleep -Seconds ($retries * $retryIntervalInSeconds)
+    }
+
+    } while ($domainShouldExist -and ($retries -le $maxRetries) )
 
 } #end function Get-TargetResource
 
@@ -265,8 +329,10 @@ function Set-TargetResource
             $installADDSParams['DomainNetbiosName'] = $DomainNetBIOSName;
         }
         Install-ADDSForest @installADDSParams;
-        Write-Verbose -Message ($localizedData.CreatedForest); 
+        Write-Verbose -Message ($localizedData.CreatedForest -f $DomainName); 
     }  
+
+    "Finished" | Out-File -FilePath (Get-TrackingFilename -DomainName $DomainName) -Force
 
     # Signal to the LCM to reboot the node to compensate for the one we
     # suppressed from Install-ADDSForest/Install-ADDSDomain
