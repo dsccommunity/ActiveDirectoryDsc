@@ -132,7 +132,7 @@ function Set-TargetResource
         {
             $params.Add("SysvolPath", $SysvolPath)
         }
-        if ($SiteName -ne $null)
+        if ($SiteName -ne $null -and $SiteName -ne "")
         {
             $params.Add("SiteName", $SiteName)
         }
