@@ -20,18 +20,47 @@ data localizedData
         ResourceInDesiredState               = Resource '{0}' is in the desired state.
         ResourceNotInDesiredState            = Resource '{0}' is NOT in the desired state.
         RetryingGetADDomain                  = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds.
-    UnhandledError                       = Unhandled error occured, detail here: {0}
-    FaultExceptionAndDomainShouldExist = ServiceModel FaultException detected and domain should exist, performing retry...
-
+        UnhandledError                       = Unhandled error occured, detail here: {0}
+        FaultExceptionAndDomainShouldExist = ServiceModel FaultException detected and domain should exist, performing retry...
 '@
 }
 
+<#
+    .SYNOPSIS
+        Retrieves the name of the file that tracks the status of the xADDomain resource with the
+        specified domain name.
+
+    .PARAMETER DomainName
+        The domain name of the xADDomain resource to retrieve the tracking file name of.
+
+    .NOTES
+        The tracking file is currently output to the environment's temp directory.
+        
+        This file is NOT removed when a configuration completes, so if another call to a xADDomain
+        resource with the same domain name occurs in the same environment, this file will already
+        be present.
+        
+        This is so that when another call is made to the same resource, the resource will not
+        attempt to promote the machine to a domain controller again (which would cause an error).
+        
+        If the resource should be promoted to a domain controller once again, you must first remove
+        this file from the environment's temp directory (usually C:\Temp).
+
+        If in the future this functionality needs to change so that future configurations are not
+        affected, $env:temp should be changed to the resource's cache location which is removed
+        after each configuration.
+        ($env:systemRoot\system32\Configuration\BuiltinProvCache\MSFT_xADDomain)
+#>
 function Get-TrackingFilename {
-param(
-    [Parameter(Mandatory)]
-    [String] $DomainName
+    [OutputType([String])]
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]
+        $DomainName
     )
-    Join-Path $Env:TEMP ('{0}.xADDomain.completed' -f $DomainName)
+
+    return Join-Path -Path ($env:temp) -ChildPath ('{0}.xADDomain.completed' -f $DomainName)
 }
 
 function Get-TargetResource
@@ -135,7 +164,7 @@ function Get-TargetResource
     if($domainShouldExist) {
         $retries++
         Write-Verbose ($localizedData.RetryingGetADDomain -f $retries, $maxRetries, $retryIntervalInSeconds)
-        Sleep -Seconds ($retries * $retryIntervalInSeconds)
+        Start-Sleep -Seconds ($retries * $retryIntervalInSeconds)
     }
 
     } while ($domainShouldExist -and ($retries -le $maxRetries) )
