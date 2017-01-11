@@ -244,6 +244,8 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 
 ### Unreleased
 
+### 2.16.0.0
+
 * xAdDomainController: Update to complete fix for SiteName being required field.
 * xADDomain: Added retry logic to prevent FaultException to crash in Get-TargetResource on subsequent reboots after a domain is created because the service is not yet running. This error is mostly occur when the resource is used with the DSCExtension on Azure. 
 
