@@ -30,6 +30,13 @@ try
     $correctSysvolPath   = 'C:\Windows\SYSVOL'
     $correctSiteName     = 'PresentSite'
     $incorrectSiteName   = 'IncorrectSite'
+    #NTDS Settings needed for correcting Global Catalog Parameter
+    $GoodNTDSPath        = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=presentsite,CN=Sites,CN=Configuration,DC=present,DC=com'
+    #Global Catalog States
+    $IsGlobalCatalogTrue = $true
+    $IsGlobalCatalogFalse = $False
+
+
 
     $testDefaultParams = @{
         DomainAdministratorCredential = $testAdminCredential
@@ -65,6 +72,7 @@ try
             return $stubDomainController = @{
                 Site = 'PresentSite'
                 Domain = 'present.com'
+                IsGlobalCatalog = $True                
             }
         } @commonMockParams
         Mock Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } {
@@ -98,6 +106,10 @@ try
             $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
             $result.SiteName | Should Be $correctSiteName
         }
+        It 'Returns Current "Global Catalog State"' {
+            $Result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+            $result.IsGlobalCatalog | Should Be $IsGlobalCatalogTrue
+        }
     }
     #endregion
 
@@ -108,6 +120,11 @@ try
             $incorrectSiteName = 'IncorrectSite'
             $correctDomainName = 'present.com'
             $testAdminCredential = [System.Management.Automation.PSCredential]::Empty
+            #NTDS Settings needed for correcting Global Catalog Parameter            
+            $GoodNTDSPath        = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=presentsite,CN=Sites,CN=Configuration,DC=present,DC=com'
+            #Global Catalog States
+            $IsGlobalCatalogTrue = $true
+            $IsGlobalCatalogFalse = $False
 
             $testDefaultParams = @{
                 DomainAdministratorCredential = $testAdminCredential
@@ -122,6 +139,7 @@ try
                 $stubDomainController = @{
                     Site = $incorrectSiteName
                     Domain = $correctDomainName
+                    IsGlobalCatalog = $True
                 }
 
                 Mock Get-ADDomain { return $true }
@@ -139,6 +157,7 @@ try
                 $stubDomainController = @{
                     Site = $correctSiteName
                     Domain = $correctDomainName
+                    IsGlobalCatalog = $True
                 }
 
                 Mock Get-ADDomain { return $true }
@@ -164,6 +183,50 @@ try
                 { Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $incorrectSiteName } |
                     Should Throw "Site '$($incorrectSiteName)' could not be found."
             }
+
+            It 'Returns "False" when "IsGlobalCatalog" does not match' {
+                $stubDomain = @{
+                    DNSRoot = $correctDomainName
+                }
+
+                $stubDomainController = @{
+                    Site = $correctSiteName
+                    Domain = $correctDomainName
+                    IsGlobalCatalog = $False
+                }
+
+                Mock Get-ADDomain { return $true }
+                Mock Get-ADDomainController { return $stubDomainController }
+                Mock Test-ADReplicationSite { return $true }
+                Mock Get-ItemProperty { return @{} }
+
+                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName -IsGlobalCatalog $true
+
+                $result | Should Be $false
+            
+            }
+
+            It 'Returns "True when "IsGlobalCatalog" matches' {
+                $stubDomain = @{
+                    DNSRoot = $correctDomainName
+                }
+
+                $stubDomainController = @{
+                    Site = $correctSiteName
+                    Domain = $correctDomainName
+                    IsGlobalCatalog = $True
+                }
+
+                Mock Get-ADDomain { return $true }
+                Mock Get-ADDomainController { return $stubDomainController }
+                Mock Test-ADReplicationSite { return $true }
+                Mock Get-ItemProperty { return @{} }
+
+                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
+
+                $result | Should Be $True
+            }
+
         }
     }
     #endregion
@@ -192,6 +255,7 @@ try
                 return $stubTargetResource = @{
                     Ensure = $true
                     SiteName = 'IncorrectSite'
+                    IsGlobalCatalog = $true
                 }
             } @commonMockParams
 
@@ -208,6 +272,7 @@ try
                 return $stubTargetResource = @{
                     Ensure = $true
                     SiteName = 'PresentSite'
+                    IsGlobalCatalog = $True
                 }
             } @commonMockParams
 
@@ -223,6 +288,7 @@ try
                 return $stubTargetResource = @{
                     Ensure = $true
                     SiteName = 'PresentSite'
+                    IsGlobalCatalog = $true
                 }
             } @commonMockParams
 
@@ -231,6 +297,90 @@ try
             Set-TargetResource @testDefaultParams -DomainName $correctDomainName
 
             Assert-MockCalled Move-ADDirectoryServer -Times 0 @commonAssertParams
+        }
+
+       It 'Calls "Set-ADObject" when "IsGlobalCatalog" does not match' {
+         Mock Get-TargetResource {
+                return $TargetResource = @{
+                    Ensure = $true
+                    SiteName = 'PresentSite'
+                    IsGlobalCatalog = $false
+                    NTDSSettingsObjectDN = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=presentsite,CN=Sites,CN=Configuration,DC=present,DC=com'
+                    
+                }
+            } @commonMockParams
+
+            
+            Mock Set-ADObject  -MockWith {} -ParameterFilter {$Replace.values -eq  '1'} @commonMockParams
+            Mock Set-ADObject  -MockWith {} @commonMockParams
+
+           
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName -isglobalcatalog $true
+
+            Assert-MockCalled Set-ADObject -Times 1 -ParameterFilter { $Replace.values -eq  '1' } @commonAssertParams
+        }
+
+        It 'Does not call "Set-ADObject" when "IsGlobalCatalog" matches' {
+         Mock Get-TargetResource {
+                return $TargetResource = @{
+                    Ensure = $true
+                    SiteName = 'PresentSite'
+                    IsGlobalCatalog = $true
+                    NTDSSettingsObjectDN = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=presentsite,CN=Sites,CN=Configuration,DC=present,DC=com'
+                    
+                }
+            } @commonMockParams
+
+            
+            Mock Set-ADObject  -MockWith {} -ParameterFilter {$Replace.values -eq  '1'} @commonMockParams
+            Mock Set-ADObject  -MockWith {} @commonMockParams
+
+           
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName -isglobalcatalog $true
+
+            Assert-MockCalled Set-ADObject -Times 0 -ParameterFilter { $Replace.values -eq  '1' } @commonAssertParams
+        }
+
+        It 'Does not call "Set-ADObject" when "IsGlobalCatalog" is not specified and GC is True' {
+         Mock Get-TargetResource {
+                return $TargetResource = @{
+                    Ensure = $true
+                    SiteName = 'PresentSite'
+                    IsGlobalCatalog = $true
+                    NTDSSettingsObjectDN = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=presentsite,CN=Sites,CN=Configuration,DC=present,DC=com'
+                    
+                }
+            } @commonMockParams
+
+            
+            Mock Set-ADObject  -MockWith {} -ParameterFilter {$Replace.values -eq  '1'} @commonMockParams
+            Mock Set-ADObject  -MockWith {} @commonMockParams
+
+           
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName
+
+            Assert-MockCalled Set-ADObject -Times 0 -ParameterFilter { $Replace.values -eq  '1' } @commonAssertParams
+        }
+
+        It 'Calls "Set-ADObject" when "IsGlobalCatalog" is not specified and does not match' {
+         Mock Get-TargetResource {
+                return $TargetResource = @{
+                    Ensure = $true
+                    SiteName = 'PresentSite'
+                    IsGlobalCatalog = $false
+                    NTDSSettingsObjectDN = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=presentsite,CN=Sites,CN=Configuration,DC=present,DC=com'
+                    
+                }
+            } @commonMockParams
+
+            
+            Mock Set-ADObject  -MockWith {} -ParameterFilter {$Replace.values -eq  '1'} @commonMockParams
+            Mock Set-ADObject  -MockWith {} @commonMockParams
+
+           
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName
+
+            Assert-MockCalled Set-ADObject -Times 1 -ParameterFilter { $Replace.values -eq  '1' } @commonAssertParams
         }
     }
     #endregion
