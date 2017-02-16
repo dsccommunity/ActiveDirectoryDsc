@@ -5,7 +5,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory)]
-        [DateTime] $StartTime
+        [DateTime] $EffectiveTime
     )
 
     try
@@ -37,18 +37,18 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory)]
-        [DateTime] $StartTime
+        [DateTime] $EffectiveTime
     )
 
     $Keys = Get-TargetResource @PSBoundParameters
 
-    if($StartTime -le (get-date))
+    if($EffectiveTime -le (get-date))
     {
        [bool]($Keys.EffectiveTime | ? {$_ -le (get-date)})
     }
     else
     {
-        [bool]($Keys.EffectiveTime | ? {$_ -eq $StartTime})
+        [bool]($Keys.EffectiveTime | ? {$_ -eq $EffectiveTime})
     }
 
 } #end function Test-TargetResource
@@ -59,18 +59,18 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory)]
-        [DateTime] $StartTime
+        [DateTime] $EffectiveTime
     )
 
     $Params = @{}
 
-    if($StartTime -le (get-date))
+    if($EffectiveTime -le (get-date))
     {
         $params.add("EffectiveImmediately",$true)
     }
     else
     {
-        $params.add("EffectiveTime",$StartTime)
+        $params.add("EffectiveTime",$EffectiveTime)
     }
 
     Add-KDSRootKey @params | out-null
