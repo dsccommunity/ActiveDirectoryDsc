@@ -33,15 +33,15 @@ try
         $BaseTime = (Get-Date)
 
         $testImmediateParams = @{
-            StartTime = $BaseTime
+            EffectiveTime = $BaseTime
         }
 
         $TestLaterParams = @{
-            StartTime = $BaseTime.AddDays(1)
+            EffectiveTime = $BaseTime.AddDays(1)
         }
 
         $TestEalierParams = @{
-            StartTime = $BaseTime.AddDays(-5)
+            EffectiveTime = $BaseTime.AddDays(-5)
         }
 
         $fakeOlderKeyObject = @{
