@@ -1,6 +1,7 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/p4jejr60jrgb8ity/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xactivedirectory/branch/master)
-
 # xActiveDirectory
+
+[![Build status](https://ci.appveyor.com/api/projects/status/p4jejr60jrgb8ity/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xactivedirectory/branch/master)
+[![codecov](https://codecov.io/gh/PowerShell/xActiveDirectory/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xActiveDirectory)
 
 The **xActiveDirectory** DSC resources allow you to configure and manage Active Directory.
 Note: these resources do not presently install the RSAT tools.
@@ -9,6 +10,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 ## Contributing
+
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
 ## Description
@@ -27,20 +29,23 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADUser** modifies and removes Active Directory Users.
 * **xWaitForDomain** waits for new, remote domain to setup.
+
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
 ### **xADDomain**
 
 * **DomainName**: Name of the domain.
- * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
+  * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
 * **ParentDomainName**: Fully qualified name of the parent domain (optional).
 * **DomainAdministratorCredential**: Credentials used to query for domain existence.
- * __Note: These are NOT used during domain creation.__
+  * _Note: These are NOT used during domain creation._
+
 (AD sets the local admin credentials as new domain administrator credentials during setup.)
+
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
 * **DnsDelegationCredential**: Credential used for creating DNS delegation (optional).
 * **DomainNetBIOSName**: Specifies the NetBIOS name for the new domain (optional).
- * If not specified, then the default is automatically computed from the value of the DomainName parameter.
+  * If not specified, then the default is automatically computed from the value of the DomainName parameter.
 * **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database (optional).
 * **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
 * **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional)
@@ -58,22 +63,22 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 ### **xADUser**
 
 * **DomainName**: Name of the domain to which the user will be added.
- * The Active Directory domain's fully-qualified domain name must be specified, i.e. contoso.com.
- * This parameter is used to query and set the user's account password.
+  * The Active Directory domain's fully-qualified domain name must be specified, i.e. contoso.com.
+  * This parameter is used to query and set the user's account password.
 * **UserName**: Specifies the Security Account Manager (SAM) account name of the user.
- * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
- * Once created, the user's SamAccountName and CN cannot be changed.
+  * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
+  * Once created, the user's SamAccountName and CN cannot be changed.
 * **Password**: Password value for the user account.
- * _If the account is enabled (default behaviour) you must specify a password._
- * _You must ensure that the password meets the domain's complexity requirements._
+  * _If the account is enabled (default behaviour) you must specify a password._
+  * _You must ensure that the password meets the domain's complexity requirements._
 * **Ensure**: Specifies whether the given user is present or absent (optional).
- * If not specified, this value defaults to Present.
+  * If not specified, this value defaults to Present.
 * **DomainController**: Specifies the Active Directory Domain Services instance to connect to (optional).
- * This is only required if not executing the task on a domain controller.
+  * This is only required if not executing the task on a domain controller.
 * **DomainAdministratorCredential**: User account credentials used to perform the task (optional).
- * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
+  * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 * **CommonName**: Specifies the user's CN of the user account (optional).
- * If not specified, this defaults to the ___UserName___ value.
+  * If not specified, this defaults to the ___UserName___ value.
 * **UserPrincipalName**: Each user account has a user principal name (UPN) in the format [user]@[DNS-domain-name] &#40;optional&#41;.
 * **DisplayName**: Specifies the display name of the user object (optional).
 * **Path**: (optional).
@@ -87,7 +92,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **State**: Specifies the user's state or province (optional).
 * **PostalCode**: Specifies the user's postal code or zip code (optional).
 * **Country**: Specifies the country or region code for the user's language of choice (optional).
- * This should be specified as the country's two character ISO-3166 code.
+  * This should be specified as the country's two character ISO-3166 code.
 * **Department**: Specifies the user's department (optional).
 * **Division**: Specifies the user's division (optional).
 * **Company**: Specifies the user's company (optional).
@@ -98,13 +103,13 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **EmployeeNumber**: Specifies the user's employee number (optional).
 * **HomeDirectory**: Specifies a user's home directory path (optional).
 * **HomeDrive**: Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (optional).
- * The drive letter is specified as "[DriveLetter]:" where [DriveLetter] indicates the letter of the drive to associate.
- * The [DriveLetter] must be a single, uppercase letter and the colon is required.
+  * The drive letter is specified as "[DriveLetter]:" where [DriveLetter] indicates the letter of the drive to associate.
+  * The [DriveLetter] must be a single, uppercase letter and the colon is required.
 * **HomePage**: Specifies the URL of the home page of the user object (optional).
 * **ProfilePath**: Specifies a path to the user's profile (optional).
- * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
+  * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
 * **LogonScript**: Specifies a path to the user's log on script (optional).
- * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
+  * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
 * **Notes**: (optional).
 * **OfficePhone**: Specifies the user's office telephone number (optional).
 * **MobilePhone**: Specifies the user's mobile phone number (optional).
@@ -113,15 +118,15 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **IPPhone**: Specifies the user's IP telephony number (optional).
 * **HomePhone**: Specifies the user's home telephone number (optional).
 * **Enabled**: Specifies if an account is enabled (optional).
- * An enabled account requires a password.
+  * An enabled account requires a password.
 * **Manager**: Specifies the user's manager (optional).
- * This value can be specified as a DN, ObjectGUID, SID or SamAccountName.
+  * This value can be specified as a DN, ObjectGUID, SID or SamAccountName.
 * **PasswordNeverExpires**: Specifies whether the password of an account can expire (optional).
- * If not specified, this value defaults to False.
+  * If not specified, this value defaults to False.
 * **CannotChangePassword**: Specifies whether the account password can be changed (optional).
- * If not specified, this value defaults to False.
+  * If not specified, this value defaults to False.
 * **PasswordAuthentication**: Specifies the authentication context used when testing users' passwords (optional).
- * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
+  * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 
 ### **xWaitForADDomain**
 
@@ -139,60 +144,65 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **SourceDomainName**: Name of the AD domain that is requesting the trust
 
 ### **xADRecycleBin**
+
 The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest.
 This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode
 is insufficient, then the resource will exit with an error message.  The change is executed against the
 Domain Naming Master FSMO of the forest.
-(Note: This resource is compatible with a Windows 2008 R2 or above target node. )
+(Note: This resource is compatible with a Windows 2008 R2 or above target node.)
+
 * **ForestFQDN**:  Fully qualified domain name of forest to enable Active Directory Recycle Bin.
 * **EnterpriseAdministratorCredential**:  Credential with Enterprise Administrator rights to the forest.
 * **RecycleBinEnabled**:  Read-only. Returned by Get.
 * **ForestMode**:  Read-only. Returned by Get.
 
 ### **xADGroup**
+
 The xADGroup DSC resource will manage groups within Active Directory.
 
 * **GroupName**: Name of the Active Directory group to manage.
 * **Category**: This parameter sets the GroupCategory property of the group.
- * Valid values are 'Security' and 'Distribution'.
- * If not specified, it defaults to 'Security'.
+  * Valid values are 'Security' and 'Distribution'.
+  * If not specified, it defaults to 'Security'.
 * **GroupScope**: Specifies the group scope of the group.
- * Valid values are 'DomainLocal', 'Global' and 'Universal'.
- * If not specified, it defaults to 'Global'.
+  * Valid values are 'DomainLocal', 'Global' and 'Universal'.
+  * If not specified, it defaults to 'Global'.
 * **Path**: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
 * **Description**: Specifies a description of the group object (optional).
 * **DisplayName**: Specifies the display name of the group object (optional).
 * **Members**: Specifies the explicit AD objects that should comprise the group membership (optional).
- * If not specified, no group membership changes are made.
- * If specified, all undefined group members will be removed the AD group.
- * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
+  * If not specified, no group membership changes are made.
+  * If specified, all undefined group members will be removed the AD group.
+  * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
 * **MembersToInclude**: Specifies AD objects that must be in the group (optional).
- * If not specified, no group membership changes are made.
- * If specified, only the specified members are added to the group.
- * If specified, no users are removed from the group using this parameter.
- * This property cannot be specified with the 'Members' parameter.
+  * If not specified, no group membership changes are made.
+  * If specified, only the specified members are added to the group.
+  * If specified, no users are removed from the group using this parameter.
+  * This property cannot be specified with the 'Members' parameter.
 * **MembersToExclude**: Specifies AD objects that _must not_ be in the group (optional).
- * If not specified, no group membership changes are made.
- * If specified, only those specified are removed from the group.
- * If specified, no users are added to the group using this parameter.
- * This property cannot be specified with the 'Members' parameter.
+  * If not specified, no group membership changes are made.
+  * If specified, only those specified are removed from the group.
+  * If specified, no users are added to the group using this parameter.
+  * This property cannot be specified with the 'Members' parameter.
 * **MembershipAttribute**: Defines the AD object attribute that is used to determine group membership (optional).
- * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
- * If not specified, it defaults to 'SamAccountName'.
- * You cannot mix multiple attribute types.
+  * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
+  * If not specified, it defaults to 'SamAccountName'.
+  * You cannot mix multiple attribute types.
 * **ManagedBy**: Specifies the user or group that manages the group object (optional).
- * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
+  * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
 * **Notes**: The group's info attribute (optional).
 * **Ensure**: Specifies whether the group is present or absent.
- * Valid values are 'Present' and 'Absent'.
- * It not specified, it defaults to 'Present'.
+  * Valid values are 'Present' and 'Absent'.
+  * It not specified, it defaults to 'Present'.
 * **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
- * If not running on a domain controller, this is required.
+  * If not running on a domain controller, this is required.
 * **Credential**: User account credentials used to perform the operation (optional).
- * If not running on a domain controller, this is required.
+  * If not running on a domain controller, this is required.
 
 ### **xADOrganizationalUnit**
+
 The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
+
 * **Name**: Name of the Active Directory organizational unit to manage.
 * **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
 * **Description**: The OU description property (optional).
@@ -201,7 +211,9 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **Credential**: User account credentials used to perform the operation (optional). Note: _if not running on a domain controller, this is required_.
 
 ### **xADDomainDefaultPasswordPolicy**
+
 The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory domain's default password policy.
+
 * **DomainName**: Name of the domain to which the password policy will be applied.
 * **ComplexityEnabled**: Whether password complexity is enabled for the default password policy.
 * **LockoutDuration**: Length of time that an account is locked after the number of failed login attempts (minutes).
@@ -216,7 +228,9 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 * **Credential**: User account credentials used to perform the operation (optional).
 
 ### **xADComputer**
+
 The xADComputer DSC resource will manage computer accounts within Active Directory.
+
 * **ComputerName**: Specifies the name of the computer to manage.
 * **Location**: Specifies the location of the computer, such as an office number (optional).
 * **DnsHostName**: Specifies the fully qualified domain name (FQDN) of the computer (optional).
@@ -227,13 +241,13 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **Description**: Specifies a description of the computer object (optional).
 * **Enabled**: Specifies if the computer account is enabled (optional).
 * **Manager**: Specifies the user or group Distinguished Name that manages the computer object (optional).
- * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
+  * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
 * **DomainController**: Specifies the Active Directory Domain Services instance to connect to perform the task (optional).
 * **DomainAdministratorCredential**: Specifies the user account credentials to use to perform the task (optional).
 * **RequestFile**: Specifies the full path to the Offline Domain Join Request file to create (optional).
 * **Ensure**: Specifies whether the computer account is present or absent.
- * Valid values are 'Present' and 'Absent'.
- * It not specified, it defaults to 'Present'.
+  * Valid values are 'Present' and 'Absent'.
+  * It not specified, it defaults to 'Present'.
 * **DistinguishedName**: Returns the X.500 path of the computer object (read-only).
 * **SID**: Returns the security identifier of the computer object (read-only).
 
@@ -247,28 +261,37 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ### 2.16.0.0
 
 * xAdDomainController: Update to complete fix for SiteName being required field.
-* xADDomain: Added retry logic to prevent FaultException to crash in Get-TargetResource on subsequent reboots after a domain is created because the service is not yet running. This error is mostly occur when the resource is used with the DSCExtension on Azure. 
+* xADDomain: Added retry logic to prevent FaultException to crash in Get-TargetResource on subsequent reboots after a domain is created because the service is not yet running. This error is mostly occur when the resource is used with the DSCExtension on Azure.
+* Converted AppVeyor.yml to use DSCResource.tests shared code.
+* Opted-In to markdown rule validation.
+* Readme.md modified resolve markdown rule violations.
+* Added CodeCov.io support.
 
 ### 2.15.0.0
+
 * xAdDomainController: Fixes SiteName being required field.
 
 ### 2.14.0.0
+
 * xADDomainController: Adds Site option.
 * xADDomainController: Populate values for DatabasePath, LogPath and SysvolPath during Get-TargetResource.
 
 ### 2.13.0.0
+
 * Converted AppVeyor.yml to pull Pester from PSGallery instead of Chocolatey
 * xADUser: Adds 'PasswordAuthentication' option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
 * xADUser: Adds descriptions to user properties within the schema file.
 * xADGroup: Fixes bug when updating groups when alternate Credentials are specified.
 
 ### 2.12.0.0
+
 * xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
 * xADComputer: New resource added.
 * xADComputer: Added RequestFile support.
 * Fixed PSScriptAnalyzer Errors with v1.6.0.
 
 ### 2.11.0.0
+
 * xWaitForADDomain: Made explicit credentials optional and other various updates
 
 ### 2.10.0.0
@@ -291,6 +314,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 * xADUser: Adds unit test coverage.
 
 ### 2.8.0.0
+
 * Added new resource: xADGroup
 * Fixed issue with NewDomainNetbiosName parameter.
 
@@ -321,7 +345,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ### 2.2
 
 * Modified xAdDomain and xAdDomainController to support Ensure as Present / Absent, rather than True/False.
-Note: this may cause issues for existing scripts.
+  Note: this may cause issues for existing scripts.
 * Corrected return value to be a hashtable in both resources.
 
 ### 2.1.0.0
@@ -331,17 +355,17 @@ Note: this may cause issues for existing scripts.
 ### 2.0.0.0
 
 * Updated release, which added the resource:
-    * xADDomainTrust
+  * xADDomainTrust
 
 ### 1.0.0.0
 
 * Initial release with the following resources:
-    * xADDomain, xADDomainController, xADUser, and xWaitForDomain
-
+  * xADDomain, xADDomainController, xADUser, and xWaitForDomain
 
 ## Examples
 
 ### Create a highly available Domain using multiple domain controllers
+
 In the following example configuration, a highly available domain is created by adding a domain controller to an existing domain.
 This example uses the xWaitForDomain resource to ensure that the domain is present before the second domain controller is added.
 
@@ -578,7 +602,6 @@ Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path
 -Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
 ```
 
-
 ### Create a child domain under a parent domain
 
 In this example, we create a domain, and then create a child domain on another node.
@@ -759,7 +782,9 @@ Sample_xADDomainTrust_OneWayTrust -configurationdata $config `
                                   -TargetDomainAdminCred (get-credential) `
                                   -TrustDirection 'Inbound'
 # Configuration to Setup Parent Child Domains
+```
 
+```powershell
 configuration AssertParentChildDomains
 {
     param
@@ -882,7 +907,7 @@ Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode1" -Path
 -Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
 Start-DscConfiguration -Wait -Force -Verbose -ComputerName "dsc-testNode2" -Path $PSScriptRoot\AssertParentChildDomains `
 -Credential (Get-Credential -Message "Local Admin Credentials on Remote Machine")
- ```
+```
 
 ### Enable the Active Directory Recycle Bin
 
@@ -1054,7 +1079,6 @@ configuration Example_xADDomainDefaultPasswordPolicy
 Example_xADDomainDefaultPasswordPolicy -DomainName 'contoso.com' -ComplexityEnabled $true -MinPasswordLength 8
 
 Start-DscConfiguration -Path .\Example_xADDomainDefaultPasswordPolicy -Wait -Verbose
-
 ```
 
 ### Create an Active Directory Computer Account
@@ -1104,7 +1128,6 @@ Example_xADComputerAccount -DomainController 'DC01' `
     -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
-
 ```
 
 ### Create an Active Directory Computer Account and an ODJ Request File
@@ -1160,5 +1183,4 @@ Example_xADComputerAccountODJ -DomainController 'DC01' `
     -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
-
 ```
