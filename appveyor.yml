@@ -22,7 +22,8 @@ build: false
 test_script:
     - ps: |
         Invoke-AppveyorTestScriptTask `
-            -CodeCoverage
+            -CodeCoverage `
+            -CodeCovIo
 
 #---------------------------------#
 #      deployment configuration   #
