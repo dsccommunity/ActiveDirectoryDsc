@@ -1,0 +1,10 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xADGroupMember")]
+class MSFT_xADGroupMember : OMI_BaseResource
+{
+    [Key, Description("Specifies an Active Directory group object")] String Identity;
+    [Key, Description("Specifies a user, group, or computer object to add to a group.")] String Members;
+    [Required, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies the credentials used to update group membership.")] String Credential;
+};
+
