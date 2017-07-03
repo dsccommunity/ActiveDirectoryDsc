@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xKDSKey")]
+[ClassVersion("1.0.0.1"), FriendlyName("xKDSKey")]
 class MSFT_xKDSKey : OMI_BaseResource
 {
     [Key, Description("Time at which key will become active")] DateTime EffectiveTime;
