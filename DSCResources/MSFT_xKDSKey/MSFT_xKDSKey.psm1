@@ -1,5 +1,4 @@
-function Get-TargetResource
-{
+function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
@@ -8,30 +7,27 @@ function Get-TargetResource
         [DateTime] $EffectiveTime
     )
 
-    try
-    {
+    try {
         $KDSKeys = @(Get-KDSRootKey)
         return @{
+            EffectiveTime          = $KDSKeys[0].EffectiveTime
             AttributeOfWrongFormat = $KDSKeys[0].AttributeOfWrongFormat
-            KeyValue = $KDSKeys[0].KeyValue
-            EffectiveTime = $KDSKeys[0].EffectiveTime
-            CreationTime = $KDSKeys[0].CreationTime
-            IsFormatValid = $KDSKeys[0].IsFormatValid
-            DomainController = $KDSKeys[0].DomainController
-            ServerConfiguration = $KDSKeys[0].ServerConfiguration
-            KeyId = $KDSKeys[0].KeyId
-            VersionNumber = $KDSKeys[0].VersionNumber
+            KeyValue               = $KDSKeys[0].KeyValue
+            CreationTime           = $KDSKeys[0].CreationTime
+            IsFormatValid          = $KDSKeys[0].IsFormatValid
+            DomainController       = $KDSKeys[0].DomainController
+            ServerConfiguration    = $KDSKeys[0].ServerConfiguration
+            KeyId                  = $KDSKeys[0].KeyId
+            VersionNumber          = $KDSKeys[0].VersionNumber
         }
-     }
-    catch
-    {
+    }
+    catch {
         throw $_
     }
 
 } #end function Get-TargetResource
 
-function Test-TargetResource
-{
+function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -42,19 +38,16 @@ function Test-TargetResource
 
     $Keys = Get-TargetResource @PSBoundParameters
 
-    if($EffectiveTime -le (get-date))
-    {
-       [bool]($Keys.EffectiveTime | ? {$_ -le (get-date)})
+    if ($EffectiveTime -le (get-date)) {
+        [bool]($Keys.EffectiveTime | ? {$_ -le (get-date)})
     }
-    else
-    {
+    else {
         [bool]($Keys.EffectiveTime | ? {$_ -eq $EffectiveTime})
     }
 
 } #end function Test-TargetResource
 
-function Set-TargetResource
-{
+function Set-TargetResource {
     [CmdletBinding()]
     param
     (
@@ -64,13 +57,11 @@ function Set-TargetResource
 
     $Params = @{}
 
-    if($EffectiveTime -le (get-date))
-    {
-        $params.add("EffectiveImmediately",$true)
+    if ($EffectiveTime -le (get-date)) {
+        $params.add("EffectiveImmediately", $true)
     }
-    else
-    {
-        $params.add("EffectiveTime",$EffectiveTime)
+    else {
+        $params.add("EffectiveTime", $EffectiveTime)
     }
 
     Add-KDSRootKey @params | out-null
