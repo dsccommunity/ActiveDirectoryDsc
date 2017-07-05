@@ -1,0 +1,13 @@
+[ClassVersion("1.0.0.1"), FriendlyName("xKDSKey")]
+class MSFT_xKDSKey : OMI_BaseResource
+{
+    [Key, Description("Time at which key will become active")] DateTime EffectiveTime;
+    [Read] String AttributeOfWrongFormat;
+    [Read] String KeyValue;
+    [Read] DateTime CreationTime;
+    [Read] Boolean IsFormatValid;
+    [Read] String DomainController;
+    [Read] String ServerConfiguration;
+    [Read] String KeyId;
+    [Read] String VersionNumber;
+};

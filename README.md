@@ -15,7 +15,7 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADComputer, xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit and xADDomainDefaultPasswordPolicy** DSC Resources.
+The **xActiveDirectory** module contains the **xADComputer, xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit, xADDomainDefaultPasswordPolicy and xKDSKey** DSC Resources.
 These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
@@ -29,7 +29,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADUser** modifies and removes Active Directory Users.
 * **xWaitForDomain** waits for new, remote domain to setup.
-
+* **xKDSKey** creates KDS keys for use with MSAs
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
 ### **xADDomain**
@@ -253,6 +253,10 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 
 Note: An ODJ Request file will only be created when a computer account is first created in the domain.
 Setting an ODJ Request file path for a configuration that creates a computer account that already exists will not cause the file to be created.
+
+### **xKDSKey**
+The xKDSKey DSC resource will create KDS Keys within Active Directory.
+* **EffectiveTime**: Specifies the time at which key will become active.
 
 ## Versions
 
