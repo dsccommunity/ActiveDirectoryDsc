@@ -28,7 +28,6 @@ function Get-TargetResource
 
     $returnValue = @{
         DomainName = $DomainName
-        Ensure = $false
     }
 
     try
@@ -49,7 +48,6 @@ function Get-TargetResource
                     $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
                     $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
 
-                    $returnValue.Ensure       = $true
                     $returnValue.DatabasePath = $serviceNTDS.'DSA Working Directory'
                     $returnValue.LogPath      = $serviceNTDS.'Database log files path'
                     $returnValue.SysvolPath   = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
