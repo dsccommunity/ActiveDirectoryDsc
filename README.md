@@ -258,6 +258,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 
 ### Unreleased
 
+* Removed Ensure property from xADDomainController, fixes #155.
 * Converted AppVeyor.yml to use DSCResource.tests shared code.
 * Opted-In to markdown rule validation.
 * Readme.md modified resolve markdown rule violations.
