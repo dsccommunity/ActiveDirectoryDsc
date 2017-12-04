@@ -8,17 +8,17 @@ function Get-TargetResource {
     )
 
     try {
-        $KDSKeys = @(Get-KDSRootKey)
+        $KDSKeys = Get-KDSRootKey | Select-Object -First 1
         return @{
-            EffectiveTime          = $KDSKeys[0].EffectiveTime
-            AttributeOfWrongFormat = $KDSKeys[0].AttributeOfWrongFormat
-            KeyValue               = $KDSKeys[0].KeyValue
-            CreationTime           = $KDSKeys[0].CreationTime
-            IsFormatValid          = $KDSKeys[0].IsFormatValid
-            DomainController       = $KDSKeys[0].DomainController
-            ServerConfiguration    = $KDSKeys[0].ServerConfiguration
-            KeyId                  = $KDSKeys[0].KeyId
-            VersionNumber          = $KDSKeys[0].VersionNumber
+            EffectiveTime          = $KDSKeys.EffectiveTime
+            AttributeOfWrongFormat = $KDSKeys.AttributeOfWrongFormat
+            KeyValue               = $KDSKeys.KeyValue
+            CreationTime           = $KDSKeys.CreationTime
+            IsFormatValid          = $KDSKeys.IsFormatValid
+            DomainController       = $KDSKeys.DomainController
+            ServerConfiguration    = $KDSKeys.ServerConfiguration
+            KeyId                  = $KDSKeys.KeyId
+            VersionNumber          = $KDSKeys.VersionNumber
         }
     }
     catch {
@@ -39,10 +39,10 @@ function Test-TargetResource {
     $Keys = Get-TargetResource @PSBoundParameters
 
     if ($EffectiveTime -le (get-date)) {
-        [bool]($Keys.EffectiveTime | ? {$_ -le (get-date)})
+        [bool]($Keys.EffectiveTime | Where-Object {$_ -le (get-date)})
     }
     else {
-        [bool]($Keys.EffectiveTime | ? {$_ -eq $EffectiveTime})
+        [bool]($Keys.EffectiveTime | Where-Object {$_ -eq $EffectiveTime})
     }
 
 } #end function Test-TargetResource
