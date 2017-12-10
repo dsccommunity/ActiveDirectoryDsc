@@ -12,6 +12,7 @@ ConvertFrom-StringData @'
     ADComputerNotInDesiredState       = Active Directory computer '{0}' is NOT in the desired state.
 
     AddingADComputer                  = Adding Active Directory computer '{0}'.
+    AddingADComputerAsDisabled        = Adding a disabled Active Directory computer account '{0}'.
     RemovingADComputer                = Removing Active Directory computer '{0}'.
     UpdatingADComputer                = Updating Active Directory computer '{0}'.
     UpdatingADComputerProperty        = Updating computer property '{0}' with/to '{1}'.

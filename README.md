@@ -250,6 +250,10 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
   * It not specified, it defaults to 'Present'.
 * **DistinguishedName**: Returns the X.500 path of the computer object (read-only).
 * **SID**: Returns the security identifier of the computer object (read-only).
+* **CreateDisabled*: Specifies if the the computer account should be created disabled ($true)
+  or enabled ($false). Default a computer account will be created as enabled. If
+  the parameter Enabled is used in the same configuration then that will override this
+  parameter.
 
 Note: An ODJ Request file will only be created when a computer account is first created in the domain.
 Setting an ODJ Request file path for a configuration that creates a computer account that already exists will not cause the file to be created.
@@ -262,6 +266,16 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 * Opted-In to markdown rule validation.
 * Readme.md modified resolve markdown rule violations.
 * Added CodeCov.io support.
+* Changes to xADComputer
+  * BREAKING CHANGE: Previously a computer account was always set to enabled
+    regardless of `Enabled` parameter was used in a configuration. Now if
+    the `Enabled` parameter is left out of the configuration, the
+    computer account will not be evaluated if it enabled. So if a computer is
+    disabled, the resource will not enabled it unless `Enabled` parameter is
+    set to `$true` in the configuration.
+  * A computer account can now be created disabled by setting the parameter
+    `CreateDisabled` to `$true`. Default a computer account will be created
+    as enabled.
 
 ### 2.16.0.0
 
