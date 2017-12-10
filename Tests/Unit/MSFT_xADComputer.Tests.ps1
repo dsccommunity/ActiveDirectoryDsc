@@ -351,6 +351,103 @@ try
 
             } #end foreach test boolean property
 
+            Context 'When configuration is in desired state' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return $fakeADComputer
+                    }
+                }
+
+                Context 'When not specifying the parameter Enabled' {
+                    It 'Should return the desired state as $true' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $true
+                    }
+                }
+
+                Context 'When specifying the parameter Enabled with the value $true' {
+                    It 'Should return the desired state as $true' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['Enabled'] = $true
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $true
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $false' {
+                    It 'Should return the desired state as $true' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['CreateDisabled'] = $false
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $true
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $false and parameter Enabled with value $true' {
+                    It 'Should return the desired state as $true' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['Enabled'] = $true
+                        $setTargetResourceParameters['CreateDisabled'] = $false
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $true
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $true' {
+                    It 'Should return the desired state as $true' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['CreateDisabled'] = $true
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $true
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $true and parameter Enabled with value $true' {
+                    It 'Should return the desired state as $true' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['Enabled'] = $true
+                        $setTargetResourceParameters['CreateDisabled'] = $true
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $true
+                    }
+                }
+            }
+
+            Context 'When configuration is not in desired state' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return $fakeADComputer
+                    }
+                }
+
+                Context 'When specifying the parameter Enabled with the value $false' {
+                    It 'Should return the desired state as $false' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['Enabled'] = $false
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $false
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $false and parameter Enabled with value $false' {
+                    It 'Should return the desired state as $false' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['Enabled'] = $false
+                        $setTargetResourceParameters['CreateDisabled'] = $false
+
+                        $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                        $testTargetResourceResult | Should -Be $false
+                    }
+                }
+            }
         }
         #endregion
 
@@ -591,6 +688,174 @@ try
                     Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It -Exactly -Times 1
                     Assert-MockCalled -CommandName New-ADComputer -Scope It -Exactly -Times 0
                     Assert-MockCalled -CommandName Set-ADComputer -Scope It -Exactly -Times 0
+                }
+            }
+
+            Context 'When creating a computer account that should be enabled' {
+                BeforeAll {
+                    Mock -CommandName Set-ADComputer
+                    Mock -CommandName New-ADComputer
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Ensure = 'Absent'
+                        }
+                    }
+                }
+
+                Context 'When not specifying the parameter Enabled' {
+                    It 'Should create a computer account that are enabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $true
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
+                }
+
+                Context 'When specifying the parameter Enabled with the value $true' {
+                    It 'Should create a computer account that are enabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['Enabled'] = $true
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $true
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $false and parameter Enabled with value $true' {
+                    It 'Should create a computer account that are enabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['CreateDisabled'] = $false
+                        $setTargetResourceParameters['Enabled'] = $true
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $true
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $true and parameter Enabled with value $true' {
+                    It 'Should create a computer account that are enabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['CreateDisabled'] = $true
+                        $setTargetResourceParameters['Enabled'] = $true
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $true
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
+                }
+            }
+
+            Context 'When creating a computer account that should be disabled' {
+                BeforeAll {
+                    Mock -CommandName Set-ADComputer
+                    Mock -CommandName New-ADComputer
+
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Ensure = 'Absent'
+
+                            # This is needed for the second call to Get-TargetResource.
+                            # Enabled = $true
+                        }
+                    }
+                }
+
+                Context 'When specifying the parameter Enabled with the value $false' {
+                    It 'Should create a computer account that are disabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['Enabled'] = $false
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $false
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $true' {
+                    It 'Should create a computer account that are disabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['CreateDisabled'] = $true
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $false
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $false and Enabled with value $false' {
+                    It 'Should create a computer account that are disabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['CreateDisabled'] = $false
+                        $setTargetResourceParameters['Enabled'] = $false
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $false
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
+                }
+
+                Context 'When specifying the parameter CreateDisabled with the value $true and Enabled with value $false' {
+                    It 'Should create a computer account that are disabled' {
+                        $setTargetResourceParameters = $testPresentParams.Clone()
+                        $setTargetResourceParameters['CreateDisabled'] = $true
+                        $setTargetResourceParameters['Enabled'] = $false
+
+                        Set-TargetResource @setTargetResourceParameters
+
+                        Assert-MockCalled New-ADComputer -ParameterFilter {
+                            $Enabled -eq $false
+                        } -Scope It -Exactly -Times 1
+
+                        Assert-MockCalled Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true -or $Enabled -eq $false
+                        } -Scope It -Exactly -Times 0
+                    }
                 }
             }
         }

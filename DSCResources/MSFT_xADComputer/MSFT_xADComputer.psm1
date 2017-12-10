@@ -79,7 +79,7 @@ function Get-TargetResource
         [System.String] $RequestFile,
 
         [ValidateNotNull()]
-        [System.Boolean] $Enabled = $true,
+        [System.Boolean] $Enabled,
 
         [ValidateNotNull()]
         [System.String] $DomainController,
@@ -93,7 +93,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
-        $RestoreFromRecycleBin
+        $RestoreFromRecycleBin,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $CreateDisabled = $false
     )
 
     Assert-Module -ModuleName 'ActiveDirectory';
@@ -219,7 +224,7 @@ function Test-TargetResource
         [System.String] $RequestFile,
 
         [ValidateNotNull()]
-        [System.Boolean] $Enabled = $true,
+        [System.Boolean] $Enabled,
 
         [ValidateNotNull()]
         [System.String] $DomainController,
@@ -232,7 +237,12 @@ function Test-TargetResource
 
         [ValidateNotNull()]
         [System.Boolean]
-        $RestoreFromRecycleBin
+        $RestoreFromRecycleBin,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $CreateDisabled = $false
     )
 
     $targetResource = Get-TargetResource @PSBoundParameters;
@@ -251,7 +261,6 @@ function Test-TargetResource
     {
         # Add ensure and enabled as they may not be explicitly passed and we want to enumerate them
         $PSBoundParameters['Ensure'] = $Ensure;
-        $PSBoundParameters['Enabled'] = $Enabled;
 
         foreach ($parameter in $PSBoundParameters.Keys)
         {
@@ -343,7 +352,7 @@ function Set-TargetResource
         [System.String] $RequestFile,
 
         [ValidateNotNull()]
-        [System.Boolean] $Enabled = $true,
+        [System.Boolean] $Enabled,
 
         [ValidateNotNull()]
         [System.String] $DomainController,
@@ -356,14 +365,18 @@ function Set-TargetResource
 
         [ValidateNotNull()]
         [System.Boolean]
-        $RestoreFromRecycleBin
+        $RestoreFromRecycleBin,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $CreateDisabled = $false
     )
 
     $targetResource = Get-TargetResource @PSBoundParameters;
 
-    # Add ensure and enabled as they may not be explicitly passed and we want to enumerate them
+    ## Add ensure as they may not be explicitly passed and we want to enumerate them
     $PSBoundParameters['Ensure'] = $Ensure;
-    $PSBoundParameters['Enabled'] = $Enabled;
 
     if ($Ensure -eq 'Present')
     {
@@ -431,7 +444,38 @@ function Set-TargetResource
                     New-ADComputer @newADComputerParams;
                 } # if
             }
-            # Now retrieve the newly created computer
+            else
+            {
+                ## Create the computer account using New-ADComputer
+                $newADComputerParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter;
+                if ($PSBoundParameters.ContainsKey('Path'))
+                {
+                    Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f 'Path', $Path);
+                    $newADComputerParams['Path'] = $Path;
+                }
+
+                <#
+                    If CreateDisabled is set to $true, or Enabled is set to $false,
+                    then create the computer account disabled.
+                    If not then create the computer account enabled.
+                #>
+                if (
+                    ($CreateDisabled -and -not $PSBoundParameters.ContainsKey('Enabled')) `
+                    -or ($PSBoundParameters.ContainsKey('Enabled') -and -not $Enabled)
+                )
+                {
+                    Write-Verbose -Message ($LocalizedData.AddingADComputerAsDisabled -f $ComputerName);
+                    $newADComputerParams['Enabled'] = $false;
+                }
+                else
+                {
+                    Write-Verbose -Message ($LocalizedData.AddingADComputer -f $ComputerName);
+                    $newADComputerParams['Enabled'] = $true;
+                }
+
+                New-ADComputer @newADComputerParams;
+            } # if
+            ## Now retrieve the newly created computer
             $targetResource = Get-TargetResource @PSBoundParameters;
         }
 
@@ -462,10 +506,15 @@ function Set-TargetResource
                 }
                 elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
                 {
-                    # We cannot enable/disable an account with -Add or -Replace parameters, but inform that
-                    # we will change this as it is out of compliance (it always gets set anyway)
                     Write-Verbose -Message ($LocalizedData.UpdatingADComputerProperty -f `
                                             $parameter, $PSBoundParameters.$parameter);
+
+                    <#
+                        The Enabled property cannot be set as a hash table value in the
+                        Remove or Replace parameter of the Set-ADComputer cmdlet. So
+                        adding it as a parameter to the Set-ADComputer cmdlet.
+                    #>
+                    $setADComputerParams['Enabled'] = $PSBoundParameters.$parameter
                 }
                 elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
                 {
@@ -523,18 +572,21 @@ function Set-TargetResource
             } #end if TargetResource parameter
         } #end foreach PSBoundParameter
 
-        # Only pass -Remove and/or -Replace if we have something to set/change
-        if ($replaceComputerProperties.Count -gt 0)
+        ## Only pass -Remove and/or -Replace if we have something to set/change
+        if ($replaceComputerProperties.Count -or $removeComputerProperties.Count)
         {
-            $setADComputerParams['Replace'] = $replaceComputerProperties;
-        }
-        if ($removeComputerProperties.Count -gt 0)
-        {
-            $setADComputerParams['Remove'] = $removeComputerProperties;
-        }
+            if ($replaceComputerProperties.Count -gt 0)
+            {
+                $setADComputerParams['Replace'] = $replaceComputerProperties;
+            }
+            if ($removeComputerProperties.Count -gt 0)
+            {
+                $setADComputerParams['Remove'] = $removeComputerProperties;
+            }
 
-        Write-Verbose -Message ($LocalizedData.UpdatingADComputer -f $ComputerName);
-        [ref] $null = Set-ADComputer @setADComputerParams -Enabled $Enabled;
+            Write-Verbose -Message ($LocalizedData.UpdatingADComputer -f $ComputerName);
+            [ref] $null = Set-ADComputer @setADComputerParams;
+        }
     }
     elseif (($Ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present'))
     {
