@@ -758,7 +758,7 @@ try
                 }
 
                 Context 'When not specifying the parameter Enabled' {
-                    It 'Should create a computer account that are enabled' {
+                    It 'Should create a computer account that is enabled' {
                         $setTargetResourceParameters = $testPresentParams.Clone()
 
                         Set-TargetResource @setTargetResourceParameters
@@ -774,7 +774,7 @@ try
                 }
 
                 Context 'When specifying the parameter Enabled with the value $true' {
-                    It 'Should create a computer account that are enabled' {
+                    It 'Should create a computer account that is enabled' {
                         $setTargetResourceParameters = $testPresentParams.Clone()
                         $setTargetResourceParameters['Enabled'] = $true
 
@@ -791,7 +791,7 @@ try
                 }
 
                 Context 'When specifying the parameter CreateDisabled with the value $false and parameter Enabled with value $true' {
-                    It 'Should create a computer account that are enabled' {
+                    It 'Should create a computer account that is enabled' {
                         $setTargetResourceParameters = $testPresentParams.Clone()
                         $setTargetResourceParameters['CreateDisabled'] = $false
                         $setTargetResourceParameters['Enabled'] = $true
@@ -843,7 +843,7 @@ try
                 }
 
                 Context 'When specifying the parameter Enabled with the value $false' {
-                    It 'Should create a computer account that are disabled' {
+                    It 'Should create a computer account that is disabled' {
                         $setTargetResourceParameters = $testPresentParams.Clone()
                         $setTargetResourceParameters['Enabled'] = $false
 
@@ -860,7 +860,7 @@ try
                 }
 
                 Context 'When specifying the parameter CreateDisabled with the value $true' {
-                    It 'Should create a computer account that are disabled' {
+                    It 'Should create a computer account that is disabled' {
                         $setTargetResourceParameters = $testPresentParams.Clone()
                         $setTargetResourceParameters['CreateDisabled'] = $true
 
@@ -877,7 +877,7 @@ try
                 }
 
                 Context 'When specifying the parameter CreateDisabled with the value $false and Enabled with value $false' {
-                    It 'Should create a computer account that are disabled' {
+                    It 'Should create a computer account that is disabled' {
                         $setTargetResourceParameters = $testPresentParams.Clone()
                         $setTargetResourceParameters['CreateDisabled'] = $false
                         $setTargetResourceParameters['Enabled'] = $false
@@ -895,7 +895,7 @@ try
                 }
 
                 Context 'When specifying the parameter CreateDisabled with the value $true and Enabled with value $false' {
-                    It 'Should create a computer account that are disabled' {
+                    It 'Should create a computer account that is disabled' {
                         $setTargetResourceParameters = $testPresentParams.Clone()
                         $setTargetResourceParameters['CreateDisabled'] = $true
                         $setTargetResourceParameters['Enabled'] = $false
