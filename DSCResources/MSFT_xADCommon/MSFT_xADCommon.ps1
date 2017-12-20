@@ -104,6 +104,37 @@ function Test-ADDomain
     return ($null -ne $domain);
 }
 
+<#
+.Synopsis
+    Author: Robert D. Biddle (https://github.com/RobBiddle)
+    Created: December.20.2017
+.DESCRIPTION
+    Takes an Active Directory DistinguishedName as input, returns the domain FQDN
+.EXAMPLE
+    Get-ADDomainNameFromDistinguishedName 'CN=ExampleObject,OU=ExampleOU,DC=example,DC=com'
+#>
+function Get-ADDomainNameFromDistinguishedName
+{
+    [CmdletBinding()]
+    param 
+    (
+        [Parameter(    
+            Mandatory = $false,        
+            ValueFromPipeline = $false)] 
+        [string]$DN
+    )
+
+    $SplitDN = ($DN -split 'DC=');
+    $DomainDNSplitParts = $SplitDN[1..$SplitDN.Length];
+    $DomainDN = "";
+    foreach($part in $DomainDNSplitParts) {
+        $DomainDN += "DC=$part"
+    };
+    $DomainName = (($DomainDN -replace 'DC=', '') -replace ',', '.');
+    return $DomainName;
+
+} #end function Get-ADDomainNameFromDistinguishedName
+
 # Internal function to get an Active Directory object's parent Distinguished Name
 function Get-ADObjectParentDN
 {
