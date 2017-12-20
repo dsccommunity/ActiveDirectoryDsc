@@ -99,7 +99,7 @@ function Get-TargetResource
             Path = Get-ADObjectParentDN -DN $adGroup.DistinguishedName;
             Description = $adGroup.Description;
             DisplayName = $adGroup.DisplayName;
-            Members = $adGroupMembers;
+            Members = @($adGroupMembers);
             MembersToInclude = $MembersToInclude;
             MembersToExclude = $MembersToExclude;
             MembershipAttribute = $MembershipAttribute;
