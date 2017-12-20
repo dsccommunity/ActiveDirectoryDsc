@@ -243,6 +243,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
+* xADGroup: Fixes for issue #152 relating to errors when adding Group Members from a different domain.  This DSC Resource now supports AD Group membership consisting of AD Objects from multiple AD Domains.
 
 ### 2.16.0.0
 

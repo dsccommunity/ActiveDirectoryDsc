@@ -4,11 +4,13 @@ data LocalizedData
     # culture="en-US"
     ConvertFrom-StringData @'
         RetrievingGroupMembers         = Retrieving group membership based on '{0}' property.
+        GroupMembershipMultipleDomains = Group membership objects are in '{0}' different AD Domains.
         GroupMembershipInDesiredState  = Group membership is in the desired state.
         GroupMembershipNotDesiredState = Group membership is NOT in the desired state.
 
         AddingGroupMembers             = Adding '{0}' member(s) to AD group '{1}'.
         RemovingGroupMembers           = Removing '{0}' member(s) from AD group '{1}'.
+        AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'. 
         AddingGroup                    = Adding AD Group '{0}'
         UpdatingGroup                  = Updating AD Group '{0}'
         RemovingGroup                  = Removing AD Group '{0}'
@@ -335,6 +337,23 @@ function Set-TargetResource
     $adGroupParams = Get-ADCommonParameters @PSBoundParameters;
 
     try {
+
+        if ($MembershipAttribute -eq 'DistinguishedName') 
+        {
+            $AllMembers = $Members + $MembersToInclude + $MembersToExclude
+            $GroupMemberDomains = @();
+            foreach($member in $AllMembers)
+            {
+                $GroupMemberDomains += Get-ADDomainNameFromDistinguishedName -DN $member
+            }
+            $GroupMemberDomainCount = ($GroupMemberDomains | Select-Object -Unique).count
+            if( ($GroupMemberDomainCount -gt 1) -or ($GroupMemberDomains -ine (Get-DomainName)).count -gt 0  )
+            {
+                Write-Verbose ($LocalizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount);
+                $MembersInMultipleDomains = $true
+            }
+        }
+
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info;
 
         if ($Ensure -eq 'Present') {
@@ -403,13 +422,57 @@ function Set-TargetResource
                         Remove-ADGroupMember @adGroupParams -Members $adGroupMembers -Confirm:$false;
                     }
                     Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $Members.Count, $GroupName);
-                    Add-ADGroupMember @adGroupParams -Members $Members;
+                    if ($MembersInMultipleDomains)
+                    {
+                        foreach($member in $Members)
+                        {
+                            $memberDomain = Get-ADDomainNameFromDistinguishedName -DN $member;
+                            Write-Verbose -Message ($LocalizedData.AddingGroupMember -f $member, $memberDomain, $GroupName);
+                            $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass;
+                            if ($memberObjectClass -eq 'computer')
+                            {
+                                $memberObject = Get-ADComputer -Identity $member -Server $memberDomain;
+                            }elseif ($memberObjectClass -eq 'group')
+                            {
+                                $memberObject = Get-ADGroup -Identity $member -Server $memberDomain;
+                            }elseif ($memberObjectClass -eq 'user')
+                            {
+                                $memberObject = Get-ADUser -Identity $member -Server $memberDomain;
+                            }
+                            Add-ADGroupMember @adGroupParams -Members $memberObject;
+                        }
+                    }else
+                    {
+                        Add-ADGroupMember @adGroupParams -Members $Members;
+                    }
                 }
                 if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
                 {
                     $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude;
                     Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName);
-                    Add-ADGroupMember @adGroupParams -Members $MembersToInclude;
+                    if ($MembersInMultipleDomains)
+                    {
+                        foreach($member in $MembersToInclude)
+                        {
+                            $memberDomain = Get-ADDomainNameFromDistinguishedName -DN $member;
+                            Write-Verbose -Message ($LocalizedData.AddingGroupMember -f $member, $memberDomain, $GroupName);
+                            $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass;
+                            if ($memberObjectClass -eq 'computer')
+                            {
+                                $memberObject = Get-ADComputer -Identity $member -Server $memberDomain;
+                            }elseif ($memberObjectClass -eq 'group')
+                            {
+                                $memberObject = Get-ADGroup -Identity $member -Server $memberDomain;
+                            }elseif ($memberObjectClass -eq 'user')
+                            {
+                                $memberObject = Get-ADUser -Identity $member -Server $memberDomain;
+                            }
+                            Add-ADGroupMember @adGroupParams -Members $memberObject;
+                        }
+                    }else 
+                    {
+                        Add-ADGroupMember @adGroupParams -Members $MembersToInclude;
+                    }
                 }
                 if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [system.string]::IsNullOrEmpty($MembersToExclude))
                 {
@@ -472,13 +535,57 @@ function Set-TargetResource
             {
                 $Members = Remove-DuplicateMembers -Members $Members;
                 Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $Members.Count, $GroupName);
-                Add-ADGroupMember @adGroupParams -Members $Members;
+                if ($MembersInMultipleDomains)
+                {
+                    foreach($member in $Members)
+                    {
+                        $memberDomain = Get-ADDomainNameFromDistinguishedName -DN $member;
+                        Write-Verbose -Message ($LocalizedData.AddingGroupMember -f $member, $memberDomain, $GroupName);
+                        $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass;
+                        if ($memberObjectClass -eq 'computer')
+                        {
+                            $memberObject = Get-ADComputer -Identity $member -Server $memberDomain;
+                        }elseif ($memberObjectClass -eq 'group')
+                        {
+                            $memberObject = Get-ADGroup -Identity $member -Server $memberDomain;
+                        }elseif ($memberObjectClass -eq 'user')
+                        {
+                            $memberObject = Get-ADUser -Identity $member -Server $memberDomain;
+                        }
+                        Add-ADGroupMember @adGroupParams -Members $memberObject;
+                    }
+                }else
+                {
+                    Add-ADGroupMember @adGroupParams -Members $Members;
+                }
             }
             elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
             {
                 $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude;
                 Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName);
-                Add-ADGroupMember @adGroupParams -Members $MembersToInclude;
+                if ($MembersInMultipleDomains)
+                {
+                    foreach($member in $MembersToInclude)
+                    {
+                        $memberDomain = Get-ADDomainNameFromDistinguishedName -DN $member;
+                        Write-Verbose -Message ($LocalizedData.AddingGroupMember -f $member, $memberDomain, $GroupName);
+                        $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass;
+                        if ($memberObjectClass -eq 'computer')
+                        {
+                            $memberObject = Get-ADComputer -Identity $member -Server $memberDomain;
+                        }elseif ($memberObjectClass -eq 'group')
+                        {
+                            $memberObject = Get-ADGroup -Identity $member -Server $memberDomain;
+                        }elseif ($memberObjectClass -eq 'user')
+                        {
+                            $memberObject = Get-ADUser -Identity $member -Server $memberDomain;
+                        }
+                        Add-ADGroupMember @adGroupParams -Members $memberObject;
+                    }
+                }else 
+                {
+                    Add-ADGroupMember @adGroupParams -Members $MembersToInclude;
+                }
             }
 
         }
