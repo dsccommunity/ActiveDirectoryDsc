@@ -773,6 +773,7 @@ function Test-Password
 } #end function Test-Password
 
 ## Import the common AD functions
-Import-Module $PSScriptRoot\..\..\ADHelper.psm1 -Verbose:$false -ErrorAction Stop
+$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
+. $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource
