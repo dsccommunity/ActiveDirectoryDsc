@@ -254,6 +254,37 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 Note: An ODJ Request file will only be created when a computer account is first created in the domain.
 Setting an ODJ Request file path for a configuration that creates a computer account that already exists will not cause the file to be created.
 
+### **xADServiceAccount**
+
+* **DomainName**: Name of the domain to which the user will be added.
+  * The Active Directory domain's fully-qualified domain name must be specified, i.e. contoso.com.
+  * This parameter is used to query and set the user's account password.
+* **UserName**: Specifies the Security Account Manager (SAM) account name of the user.
+  * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
+  * Once created, the user's SamAccountName and CN cannot be changed.
+* **Ensure**: Specifies whether the given user is present or absent (optional).
+  * If not specified, this value defaults to Present.
+* **DomainController**: Specifies the Active Directory Domain Services instance to connect to (optional).
+  * This is only required if not executing the task on a domain controller.
+* **DomainAdministratorCredential**: User account credentials used to perform the task (optional).
+  * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
+* **DisplayName**: Specifies the display name of the user object (optional).
+* **Path**: (optional).
+* **Description**: Specifies a description of the user object (optional).
+* **DNSHostName**: Specifies the DNS Host Name assigned to the user account (optional).
+* **ServicePrincipalName**: Specifies SPNs to be set (optional).
+* **Enabled**: Specifies if the account is enabled (default True).
+* **AccountExpirationDate**: Specifies a time when account will expire (optional).
+* **AccountNotDelegated**: Specifies a whether account be delegated (optional).
+* **TrustedForDelegation**: Specifies a whether account is to be trusted for delegation (optional).
+* **CompoundIdentitySupported**: Specifies a whether kerberos authorization data for user devices is supported (optional).
+* **ManagedPasswordIntervalInDays**: Specifies how often the password is changed (optional).
+* **PrincipalsAllowedToDelegateToAccount**: Specifies to whom account is delegated (optional).
+* **PrincipalsAllowedToRetrieveManagedPassword**: SSpecifies who can retrieve account password (optional).
+* **RestrictToSingleComputer**: Specifies a whether account is restricted to single Computer only (optional).
+* **PasswordAuthentication**: Specifies the authentication context used when testing users' passwords (optional).
+  * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
+
 ## Versions
 
 ### Unreleased
@@ -262,6 +293,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 * Opted-In to markdown rule validation.
 * Readme.md modified resolve markdown rule violations.
 * Added CodeCov.io support.
+* Added Support for creating and maintaining Managed Service Accounts
 
 ### 2.16.0.0
 
@@ -1185,3 +1217,65 @@ Example_xADComputerAccountODJ -DomainController 'DC01' `
 
 Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
 ```
+
+### Create an Active Directory group Managed Service Request
+
+In this example, we create a group managed service account and assign SQLServers to retrieve the password
+
+```powershell
+configuration Example_xADManagedServiceAccount
+{
+    Param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+
+        [parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $DomainCredential,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Username,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DNSHostName,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $Path,
+
+        [parameter(Mandatory = $true)]
+        [System.String[]]
+        $PrincipalsAllowedToRetrieveManagedPassword
+    )
+
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADManagedServiceAccount "$Username"
+        {
+           DomainName = $DomainName
+           DomainAdministratorCredential = $DomainCredential
+           Username = $Username
+           DNSHostName = $DNSHostName
+           Path = $Path
+           PrincipalsAllowedToRetrieveManagedPassword = $IdenitiesAllowedToRetrievePassword
+        }
+    }
+}
+
+Example_xADManagedServiceAccount -DomainName 'exmaple.com' `
+    -DomainCredential (Get-Credential -Message "Domain Credentials") `
+    -Username 'SQLServerSvc' `
+    -DNSHostName 'sql.example.com' `
+    -Path 'ou=gMSAs,dc=example,dc=com' `
+    -PrincipalsAllowedToRetrieveManagedPassword 'SQLServers' `
+    -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADManagedServiceAccount -Wait -Verbose
+```
+
