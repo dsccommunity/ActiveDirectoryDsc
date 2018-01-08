@@ -4,8 +4,7 @@ $Global:DSCResourceName = 'MSFT_xADManagedServiceAccount'
 #region HEADER
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
 if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-    (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
-{
+    (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) ) {
     & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
 
@@ -18,8 +17,7 @@ $TestEnvironment = Initialize-TestEnvironment `
 
 
 # Begin Testing
-try
-{
+try {
 
     #region Pester Tests
 
@@ -41,7 +39,7 @@ try
             DistinguishedName                          = "CN=$($testPresentParams.UserName),CN=Managed Service Accounts,DC=contoso,DC=com"
             Path                                       = "CN=Managed Service Accounts,DC=contoso,DC=com"
             Enabled                                    = $true
-            Name                                       = "$($testPresentParams.UserName)$"
+            Name                                       = "$($testPresentParams.UserName)"
             SamAccountName                             = "$($testPresentParams.UserName)$"
             DNSHostname                                = $testPresentParams.DNSHostname
             PrincipalsAllowedToRetrieveManagedPassword = @("CN=SQLServers,CN=Users,DC=contoso,DC=com")
@@ -157,16 +155,19 @@ try
                 Test-TargetResource @testAbsentParams | Should Be $false
             }
 
-            foreach ($testParameter in $testStringProperties)
-            {
+            foreach ($testParameter in $testStringProperties) {
                 $get = $fakeADServiceAccount.Clone()
                 $get["Ensure"] = "Present"
 
                 It "Should pass when service account '$testParameter' matches AD account property" {
-                    $testParameterValue = 'Test Parameter String Value'
+                    $testParameterValue = 'TestParameterStringValue'
                     $testValidPresentParams = $testPresentParams.Clone()
                     $testValidPresentParams[$testParameter] = $testParameterValue
+
                     Mock Get-TargetResource {
+                        if ($testParameter -eq "username") {
+                            $testParameterValue = "$testParameterValue$"
+                        }
                         $get[$testParameter] = $testParameterValue
                         return $get
                     }
@@ -198,8 +199,7 @@ try
                     Test-TargetResource @testValidPresentParams | Should Be $false
                 }
 
-                if ($Mandatory.Contains($testParameter) -eq $false)
-                {
+                if ($Mandatory.Contains($testParameter) -eq $false) {
                     It "Should fail when service account '$testParameter' does not match null AD account property value" {
                         $testParameterValue = 'Test Parameter String Value'
                         $testValidPresentParams = $testPresentParams.Clone()
@@ -239,8 +239,7 @@ try
 
             } #end foreach test string property
 
-            foreach ($testParameter in $testBooleanProperties)
-            {
+            foreach ($testParameter in $testBooleanProperties) {
                 $get = $fakeADServiceAccount.Clone()
                 $get["Ensure"] = "Present"
                 It "Should pass when service account '$testParameter' matches AD account property" {
@@ -269,8 +268,7 @@ try
 
             } #end foreach test boolean property
 
-            foreach ($testParameter in $testintProperties)
-            {
+            foreach ($testParameter in $testintProperties) {
                 $get = $fakeADServiceAccount.Clone()
                 $get["Ensure"] = "Present"
                 It "Should pass when service account '$testParameter' matches AD account property" {
@@ -321,7 +319,7 @@ try
                 $newPresentParams['UserName'] = $newUserName
                 Mock New-ADServiceAccount -ParameterFilter { $Name -match $newUserName -and $DNSHostName -match $newAbsentParams["DNSHostName"] } { }
                 Mock Set-ADServiceAccount { }
-                Mock Get-TargetResource -ParameterFilter { $Username -match $newUserName } { return $newAbsentParams }
+                Mock Get-TargetResource -ParameterFilter { $UserName -match $newUserName } { return $newAbsentParams }
 
                 Set-TargetResource @newPresentParams
 
@@ -408,10 +406,8 @@ try
     }
     #endregion
 }
-finally
-{
+finally {
     #region FOOTER
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
-

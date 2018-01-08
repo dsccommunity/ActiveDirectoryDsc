@@ -2,8 +2,7 @@
 param()
 
 # Localized messages
-data LocalizedData
-{
+data LocalizedData {
     # culture="en-US"
     ConvertFrom-StringData @'
         RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
@@ -49,8 +48,7 @@ $adPropertyMap = @(
     @{ Parameter = 'UserName'; ADProperty = "samAccountName" }
 )
 
-function Get-TargetResource
-{
+function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
@@ -135,20 +133,16 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory';
 
-    try
-    {
+    try {
         $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
 
         $adProperties = @();
         ## Create an array of the AD propertie names to retrieve from the property map
-        foreach ($property in $adPropertyMap)
-        {
-            if ($property.ADProperty)
-            {
+        foreach ($property in $adPropertyMap) {
+            if ($property.ADProperty) {
                 $adProperties += $property.ADProperty;
             }
-            else
-            {
+            else {
                 $adProperties += $property.Parameter;
             }
         }
@@ -158,13 +152,11 @@ function Get-TargetResource
         Write-Verbose -Message ($LocalizedData.ADUserIsPresent -f $UserName, $DomainName);
         $Ensure = 'Present';
     }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
-    {
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
         Write-Verbose -Message ($LocalizedData.ADUserNotPresent -f $UserName, $DomainName);
         $Ensure = 'Absent';
     }
-    catch
-    {
+    catch {
         Write-Error -Message ($LocalizedData.RetrievingADUserError -f $UserName, $DomainName);
         throw $_;
     }
@@ -178,40 +170,31 @@ function Get-TargetResource
     }
 
     ## Retrieve each property from the ADPropertyMap and add to the hashtable
-    foreach ($property in $adPropertyMap)
-    {
-        if ($property.Parameter -eq 'Path')
-        {
+    foreach ($property in $adPropertyMap) {
+        if ($property.Parameter -eq 'Path') {
             ## The path returned is not the parent container
-            if (-not [System.String]::IsNullOrEmpty($adUser.DistinguishedName))
-            {
+            if (-not [System.String]::IsNullOrEmpty($adUser.DistinguishedName)) {
                 $targetResource['Path'] = Get-ADObjectParentDN -DN $adUser.DistinguishedName;
             }
         }
-        elseif ($property.Parameter -eq 'RestrictToOutboundAuthenticationOnly')
-        {
+        elseif ($property.Parameter -eq 'RestrictToOutboundAuthenticationOnly') {
             ## Unable to query RestrictToOutboundAuthenticationOnly
             $targetResource['RestrictToOutboundAuthenticationOnly'] = $null
         }
-        elseif ($property.Parameter -eq 'RestrictToSingleComputer')
-        {
+        elseif ($property.Parameter -eq 'RestrictToSingleComputer') {
             ## Identity ObjectClass
-            if ($adUser.ObjectClass -eq 'msDS-GroupManagedServiceAccount')
-            {
+            if ($adUser.ObjectClass -eq 'msDS-GroupManagedServiceAccount') {
                 $targetResource['RestrictToSingleComputer'] = $false;
             }
-            elseif ($adUser.ObjectClass -eq 'msDS-ManagedServiceAccount')
-            {
+            elseif ($adUser.ObjectClass -eq 'msDS-ManagedServiceAccount') {
                 $targetResource['RestrictToSingleComputer'] = $true;
             }
         }
-        elseif ($property.ADProperty)
-        {
+        elseif ($property.ADProperty) {
             ## The AD property name is different to the function parameter to use this
             $targetResource[$property.Parameter] = $adUser.($property.ADProperty);
         }
-        else
-        {
+        else {
             ## The AD property name matches the function parameter
             $targetResource[$property.Parameter] = $adUser.($property.Parameter);
         }
@@ -220,8 +203,7 @@ function Get-TargetResource
 
 } #end function Get-TargetResource
 
-function Test-TargetResource
-{
+function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -304,8 +286,7 @@ function Test-TargetResource
         [System.String] $PasswordAuthentication = 'Default'
     )
 
-    if ($PSBoundParameters['Username'] -inotmatch '[a-z0-9]+\$$')
-    {
+    if ($PSBoundParameters['Username'] -inotmatch '[a-z0-9]+\$$') {
         $PSBoundParameters['Username'] = ('{0}$' -f $UserName);
     }
 
@@ -313,38 +294,30 @@ function Test-TargetResource
     $targetResource = Get-TargetResource @PSBoundParameters;
     $isCompliant = $true;
 
-    if ($Ensure -eq 'Absent')
-    {
-        if ($targetResource.Ensure -eq 'Present')
-        {
+    if ($Ensure -eq 'Absent') {
+        if ($targetResource.Ensure -eq 'Present') {
             Write-Verbose -Message ($LocalizedData.ADUserNotDesiredPropertyState -f 'Ensure', $PSBoundParameters.Ensure, $targetResource.Ensure);
             $isCompliant = $false;
         }
     }
-    else
-    {
+    else {
         ## Add common name, ensure and enabled as they may not be explicitly passed and we want to enumerate them
         $PSBoundParameters['Ensure'] = $Ensure;
         $PSBoundParameters['Enabled'] = $Enabled;
 
-        foreach ($parameter in $PSBoundParameters.Keys)
-        {
-            if ($PSBoundParameters[$parameter] -is [system.array])
-            {
+        foreach ($parameter in $PSBoundParameters.Keys) {
+            if ($PSBoundParameters[$parameter] -is [system.array]) {
                 $PSBoundParameters[$parameter] | % {
                     $compareString = $_
 
-                    if ($parameter -eq 'PrincipalsAllowedToDelegateToAccount' -or $parameter -eq 'PrincipalsAllowedToRetrieveManagedPassword')
-                    {
-                        if ($compareString -match '.+\\(.+)')
-                        {
+                    if ($parameter -eq 'PrincipalsAllowedToDelegateToAccount' -or $parameter -eq 'PrincipalsAllowedToRetrieveManagedPassword') {
+                        if ($compareString -match '.+\\(.+)') {
                             $compareString = $matches[1]
                         }
                         $compareString = (Get-ADObject -Filter "samaccountname -eq '$compareString'").DistinguishedName
                     }
 
-                    if (@($targetResource.$parameter).contains($compareString) -eq $false -and $PSBoundParameters[$parameter].count -ne @($targetResource.$parameter).count)
-                    {
+                    if (@($targetResource.$parameter).contains($compareString) -eq $false -and $PSBoundParameters[$parameter].count -ne @($targetResource.$parameter).count) {
                         Write-Verbose -Message ($LocalizedData.ADUserNotDesiredPropertyState -f $parameter, (@($PSBoundParameters.$parameter) -join ','), (@($targetResource.$parameter) -join ','));
                         $isCompliant = $false;
                         break
@@ -352,15 +325,12 @@ function Test-TargetResource
                 }
             }
             # Only check properties that are returned by Get-TargetResource
-            elseif ($targetResource.ContainsKey($parameter))
-            {
+            elseif ($targetResource.ContainsKey($parameter)) {
                 ## This check is required to be able to explicitly remove values with an empty string, if required
-                if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
-                {
+                if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter))) {
                     # Both values are null/empty and therefore we are compliant
                 }
-                elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
-                {
+                elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter) {
                     Write-Verbose -Message ($LocalizedData.ADUserNotDesiredPropertyState -f $parameter, $PSBoundParameters.$parameter, $targetResource.$parameter);
                     $isCompliant = $false;
                 }
@@ -372,8 +342,7 @@ function Test-TargetResource
 
 } #end function Test-TargetResource
 
-function Set-TargetResource
-{
+function Set-TargetResource {
     [CmdletBinding()]
     param
     (
@@ -461,23 +430,26 @@ function Set-TargetResource
     ## Add common name, ensure and enabled as they may not be explicitly passed
     $PSBoundParameters['Ensure'] = $Ensure;
     $PSBoundParameters['Enabled'] = $Enabled;
-    if ($PSBoundParameters['Username'] -inotmatch '[a-z0-9]+\$$')
-    {
-        $PSBoundParameters['Username'] = ('{0}$' -f $UserName);
-    }
 
-    if ($Ensure -eq 'Present')
-    {
-        if ($targetResource.Ensure -eq 'Absent')
-        {
+    if ($Ensure -eq 'Present') {
+        if ($targetResource.Ensure -eq 'Absent') {
             ## User does not exist and needs creating
             $newADUserParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter;
-            if ($PSBoundParameters.ContainsKey('Path'))
-            {
+            if ($PSBoundParameters.ContainsKey('Path')) {
                 $newADUserParams['Path'] = $Path;
             }
+            if ($PSBoundParameters.ContainsKey('DNSHostName')) {
+                $newADUserParams['DNSHostName'] = $DNSHostName;
+            }
+            if ($PSBoundParameters.ContainsKey('ManagedPasswordIntervalInDays')) {
+                $newADUserParams['ManagedPasswordIntervalInDays'] = $ManagedPasswordIntervalInDays;
+            }
+            if ($PSBoundParameters.ContainsKey('RestrictToSingleComputer')) {
+                $newADUserParams['RestrictToSingleComputer'] = $RestrictToSingleComputer;
+            }
             Write-Verbose -Message ($LocalizedData.AddingADUser -f $UserName);
-            New-ADServiceAccount @newADUserParams -SamAccountName $UserName -DNSHostName $DNSHostName;
+            $newaduserparams
+            New-ADServiceAccount @newADUserParams -SamAccountName $UserName;
             ## Now retrieve the newly created user
             $targetResource = Get-TargetResource @PSBoundParameters;
         }
@@ -485,14 +457,11 @@ function Set-TargetResource
         $setADUserParams = Get-ADCommonParameters @PSBoundParameters;
         $replaceUserProperties = @{};
         $removeUserProperties = @{};
-        foreach ($parameter in $PSBoundParameters.Keys)
-        {
+        foreach ($parameter in $PSBoundParameters.Keys) {
             ## Only check/action properties specified/declared parameters that match one of the function's
             ## parameters. This will ignore common parameters such as -Verbose etc.
-            if ($targetResource.ContainsKey($parameter))
-            {
-                if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path))
-                {
+            if ($targetResource.ContainsKey($parameter)) {
+                if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path)) {
                     ## Cannot move users by updating the DistinguishedName property
                     $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
                     ## Using the SamAccountName for identity with Move-ADObject does not work, use the DN instead
@@ -500,8 +469,7 @@ function Set-TargetResource
                     Write-Verbose -Message ($LocalizedData.MovingADUser -f $targetResource.Path, $PSBoundParameters.Path);
                     Move-ADObject @adCommonParameters -TargetPath $PSBoundParameters.Path;
                 }
-                elseif ($parameter -eq 'Username' -and ($PSBoundParameters.username -ne $targetResource.username))
-                {
+                elseif ($parameter -eq 'Username' -and ($PSBoundParameters.username -ne $targetResource.username)) {
                     ## Cannot rename users by updating the CN property directly
                     $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
                     ## Using the SamAccountName for identity with Rename-ADObject does not work, use the DN instead
@@ -510,18 +478,18 @@ function Set-TargetResource
                     Rename-ADObject @adCommonParameters -NewName $PSBoundParameters.username;
                     [ref] $null = Set-ADServiceAccount @adCommonParameters -samaccountname ('{0}$' -f ($PSBoundParameters.username -replace '\$$'));
                 }
-                elseif ($parameter -eq 'RestrictToSingleComputer')
-                {
+                elseif ($parameter -eq 'RestrictToSingleComputer') {
                     Write-Verbose -Message ($LocalizedData.UnsupportedPropertyUpdate -f 'RestrictToSingleComputer', $RestrictToSingleComputer);
                 }
-                elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
-                {
+                elseif ($parameter -eq 'ManagedPasswordIntervalInDays') {
+                    Write-Verbose -Message ($LocalizedData.UnsupportedPropertyUpdate -f 'ManagedPasswordIntervalInDays', $ManagedPasswordIntervalInDays);
+                }
+                elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter)) {
                     ## We cannot enable/disable an account with -Add or -Replace parameters, but inform that
                     ## we will change this as it is out of compliance (it always gets set anyway)
                     Write-Verbose -Message ($LocalizedData.UpdatingADUserProperty -f $parameter, $PSBoundParameters.$parameter);
                 }
-                elseif ($PSBoundParameters.$parameter -is [System.Array] -and (($PSBoundParameters.$parameter -join ',') -ne ($targetResource.$parameter -join ',')))
-                {
+                elseif ($PSBoundParameters.$parameter -is [System.Array] -and (($PSBoundParameters.$parameter -join ',') -ne ($targetResource.$parameter -join ','))) {
                     $ValueToSet = $PSBoundParameters.$parameter
                     #Setting Array property
                     Write-Verbose -Message ($LocalizedData.UpdatingADUserProperty -f $parameter, ($ValueToSet -join ','));
@@ -529,118 +497,136 @@ function Set-TargetResource
                     ## Find the associated AD property
                     $adProperty = $adPropertyMap | Where-Object { $_.Parameter -eq $parameter };
 
-                    if ($parameter -eq 'PrincipalsAllowedToDelegateToAccount' -or $parameter -eq 'PrincipalsAllowedToRetrieveManagedPassword')
-                    {
+                    if ($parameter -eq 'PrincipalsAllowedToDelegateToAccount' -or $parameter -eq 'PrincipalsAllowedToRetrieveManagedPassword') {
                         $Principals = $ValueToSet
                         $ValueToSet = @()
                         $Principals | % {
-                            if ($_ -match '.+\\(.+)')
-                            {
+                            if ($_ -match '.+\\(.+)') {
                                 $ValueToSet += $matches[1]
+                            }
+                            else {
+                                $ValueToSet += $_
                             }
                         }
                     }
 
-                    if ([System.String]::IsNullOrEmpty($adProperty))
-                    {
+                    if ([System.String]::IsNullOrEmpty($adProperty)) {
                         ## We can't do anything is an empty AD property!
                     }
-                    elseif ([System.String]::IsNullOrEmpty($ValueToSet))
-                    {
+                    elseif ([System.String]::IsNullOrEmpty($ValueToSet)) {
                         ## We are removing properties
                         ## Only remove if the existing value in not null or empty
-                        if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
-                        {
+                        if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter))) {
                             Write-Verbose -Message ($LocalizedData.RemovingADUserProperty -f $parameter, $ValueToSet);
-                            if ($adProperty.UseCmdletParameter -eq $true)
-                            {
-                                ## We need to pass the parameter explicitly to Set-ADUser, not via -Remove
-                                $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                            if ($adProperty.UseCmdletParameter -eq $true) {
+                                if ($adProperty.Parameter -imatch "ServicePrincipalName") {
+                                    ($targetResource.$parameter).Split(",").Trim() | % {
+                                        Set-ADServiceAccount -Identity $UserName -ServicePrincipalNames @{"Remove" = $_}
+                                    }
+                                }
+                                else {
+                                    ## We need to pass the parameter explicitly to Set-ADUser, not via -Remove
+                                    $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                                }
                             }
-                            elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
-                            {
+                            elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty)) {
                                 $removeUserProperties[$adProperty.Parameter] = $targetResource.$parameter;
                             }
-                            else
-                            {
+                            else {
                                 $removeUserProperties[$adProperty.ADProperty] = $targetResource.$parameter;
                             }
                         }
                     } #end if remove existing value
-                    else
-                    {
+                    else {
                         ## We are replacing the existing value
-                        if ($adProperty.UseCmdletParameter -eq $true)
-                        {
-                            ## We need to pass the parameter explicitly to Set-ADUser, not via -Replace
-                            $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                        if ($adProperty.UseCmdletParameter -eq $true) {
+                            if ($adProperty.Parameter -imatch "ServicePrincipalName") {
+                                if ($targetResource.$parameter) {
+                                    ($targetResource.$parameter).Split(",").Trim() | % {
+                                        Set-ADServiceAccount -Identity $UserName -ServicePrincipalNames @{"Remove" = $_}
+                                    }
+                                }
+                                $ValueToSet | % {
+                                    Set-ADServiceAccount -Identity $UserName -ServicePrincipalNames @{Add = $_}
+                                }
+                            }
+                            else {
+                                $ValueToSet
+                                ## We need to pass the parameter explicitly to Set-ADUser, not via -Remove
+                                $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                            }
                         }
-                        elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
-                        {
+                        elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty)) {
                             $replaceUserProperties[$adProperty.Parameter] = $ValueToSet;
                         }
-                        else
-                        {
+                        else {
                             $replaceUserProperties[$adProperty.ADProperty] = $ValueToSet;
                         }
                     } #end if replace existing value
+                    $setADUserParams.serviceprincipalname
                 }
-                elseif ($ValueToSet -ne $targetResource.$parameter)
-                {
+                elseif ($ValueToSet -ne $targetResource.$parameter) {
                     $ValueToSet = $PSBoundParameters.$parameter
 
                     ## Find the associated AD property
                     $adProperty = $adPropertyMap | Where-Object { $_.Parameter -eq $parameter };
 
-                    if ($parameter -eq 'PrincipalsAllowedToDelegateToAccount' -or $parameter -eq 'PrincipalsAllowedToRetrieveManagedPassword')
-                    {
-                        if ($ValueToSet -match '.+\\(.+)')
-                        {
+                    if ($parameter -eq 'PrincipalsAllowedToDelegateToAccount' -or $parameter -eq 'PrincipalsAllowedToRetrieveManagedPassword') {
+                        if ($ValueToSet -match '.+\\(.+)') {
                             $ValueToSet = $matches[1]
                         }
                     }
 
-                    if ([System.String]::IsNullOrEmpty($adProperty))
-                    {
+                    if ([System.String]::IsNullOrEmpty($adProperty)) {
                         ## We can't do anything is an empty AD property!
                     }
-                    elseif ([System.String]::IsNullOrEmpty($ValueToSet))
-                    {
+                    elseif ([System.String]::IsNullOrEmpty($ValueToSet)) {
                         ## We are removing properties
                         ## Only remove if the existing value in not null or empty
-                        if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
-                        {
+                        if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter))) {
                             Write-Verbose -Message ($LocalizedData.RemovingADUserProperty -f $parameter, $ValueToSet);
-                            if ($adProperty.UseCmdletParameter -eq $true)
-                            {
-                                ## We need to pass the parameter explicitly to Set-ADUser, not via -Remove
-                                $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                            if ($adProperty.UseCmdletParameter -eq $true) {
+                                if ($adProperty.Parameter -imatch "ServicePrincipalName") {
+                                    if ($targetResource.$parameter) {
+                                        ($targetResource.$parameter).Split(",").Trim() | % {
+                                            Set-ADServiceAccount -Identity $UserName -ServicePrincipalNames @{"Remove" = $_}
+                                        }
+                                    }
+                                }
+                                else {
+                                    ## We need to pass the parameter explicitly to Set-ADUser, not via -Remove
+                                    $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                                }
                             }
-                            elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
-                            {
+                            elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty)) {
                                 $removeUserProperties[$adProperty.Parameter] = $targetResource.$parameter;
                             }
-                            else
-                            {
+                            else {
                                 $removeUserProperties[$adProperty.ADProperty] = $targetResource.$parameter;
                             }
                         }
                     } #end if remove existing value
-                    else
-                    {
+                    else {
                         ## We are replacing the existing value
                         Write-Verbose -Message ($LocalizedData.UpdatingADUserProperty -f $parameter, $ValueToSet);
-                        if ($adProperty.UseCmdletParameter -eq $true)
-                        {
-                            ## We need to pass the parameter explicitly to Set-ADUser, not via -Replace
-                            $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                        if ($adProperty.UseCmdletParameter -eq $true) {
+                            if ($adProperty.Parameter -imatch "ServicePrincipalName") {
+                                ($targetResource.$parameter).Split(",").Trim() | % {
+                                    Set-ADServiceAccount -Identity $UserName -ServicePrincipalNames @{Remove = $_}
+                                }
+                                $ValueToSet | % {
+                                    Set-ADServiceAccount -Identity $UserName -ServicePrincipalNames @{Add = $_}
+                                }
+                            }
+                            else {
+                                ## We need to pass the parameter explicitly to Set-ADUser, not via -Replace
+                                $setADUserParams[$adProperty.Parameter] = $ValueToSet;
+                            }
                         }
-                        elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
-                        {
+                        elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty)) {
                             $replaceUserProperties[$adProperty.Parameter] = $ValueToSet;
                         }
-                        else
-                        {
+                        else {
                             $replaceUserProperties[$adProperty.ADProperty] = $ValueToSet;
                         }
                     } #end if replace existing value
@@ -650,20 +636,17 @@ function Set-TargetResource
         } #end foreach PSBoundParameter
 
         ## Only pass -Remove and/or -Replace if we have something to set/change
-        if ($replaceUserProperties.Count -gt 0)
-        {
+        if ($replaceUserProperties.Count -gt 0) {
             $setADUserParams['Replace'] = $replaceUserProperties;
         }
-        if ($removeUserProperties.Count -gt 0)
-        {
+        if ($removeUserProperties.Count -gt 0) {
             $setADUserParams['Remove'] = $removeUserProperties;
         }
 
         Write-Verbose -Message ($LocalizedData.UpdatingADUser -f $UserName);
         [ref] $null = Set-ADServiceAccount @setADUserParams;
     }
-    elseif (($Ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present'))
-    {
+    elseif (($Ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present')) {
         ## User exists and needs removing
         Write-Verbose ($LocalizedData.RemovingADUser -f $UserName);
         $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
@@ -673,8 +656,7 @@ function Set-TargetResource
 } #end function Set-TargetResource
 
 # Internal function to validate unsupported options/configurations
-function Assert-Parameters
-{
+function Assert-Parameters {
     [CmdletBinding()]
     param
     (
@@ -689,8 +671,7 @@ function Assert-Parameters
     )
 
     ## We cannot test/set passwords on disabled AD accounts
-    if (($PSBoundParameters.ContainsKey('Password')) -and ($Enabled -eq $false))
-    {
+    if (($PSBoundParameters.ContainsKey('Password')) -and ($Enabled -eq $false)) {
         $throwInvalidArgumentErrorParams = @{
             ErrorId      = 'xADServiceAccount_DisabledAccountPasswordConflict';
             ErrorMessage = $LocalizedData.PasswordParameterConflictError -f 'Enabled', $false, 'Password';
@@ -701,8 +682,7 @@ function Assert-Parameters
 } #end function Assert-Parameters
 
 # Internal function to test the validity of a user's password.
-function Test-Password
-{
+function Test-Password {
     [CmdletBinding()]
     param
     (
@@ -731,8 +711,7 @@ function Test-Password
     Write-Verbose -Message ($LocalizedData.CreatingADDomainConnection -f $DomainName);
     Add-Type -AssemblyName 'System.DirectoryServices.AccountManagement';
 
-    if ($DomainAdministratorCredential)
-    {
+    if ($DomainAdministratorCredential) {
         $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext(
             [System.DirectoryServices.AccountManagement.ContextType]::Domain,
             $DomainName,
@@ -740,8 +719,7 @@ function Test-Password
             $DomainAdministratorCredential.GetNetworkCredential().Password
         );
     }
-    else
-    {
+    else {
         $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext(
             [System.DirectoryServices.AccountManagement.ContextType]::Domain,
             $DomainName,
@@ -751,8 +729,7 @@ function Test-Password
     }
     Write-Verbose -Message ($LocalizedData.CheckingADUserPassword -f $UserName);
 
-    if ($PasswordAuthentication -eq 'Negotiate')
-    {
+    if ($PasswordAuthentication -eq 'Negotiate') {
         return $principalContext.ValidateCredentials(
             $UserName,
             $Password.GetNetworkCredential().Password,
@@ -761,8 +738,7 @@ function Test-Password
             [System.DirectoryServices.AccountManagement.ContextOptions]::Sealing
         );
     }
-    else
-    {
+    else {
         ## Use default authentication context
         return $principalContext.ValidateCredentials(
             $UserName,
