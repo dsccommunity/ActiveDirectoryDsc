@@ -108,7 +108,7 @@ function Get-TargetResource {
         [System.Boolean] $RestrictToSingleComputer,
 
         [ValidateNotNull()]
-        [System.int32] $ManagedPasswordIntervalInDays,
+        [System.Uint32] $ManagedPasswordIntervalInDays,
 
         [ValidateNotNull()]
         [System.String[]] $PrincipalsAllowedToDelegateToAccount,
@@ -263,7 +263,7 @@ function Test-TargetResource {
         [System.Boolean] $RestrictToSingleComputer,
 
         [ValidateNotNull()]
-        [System.int32] $ManagedPasswordIntervalInDays,
+        [System.Uint32] $ManagedPasswordIntervalInDays,
 
         [ValidateNotNull()]
         [System.String[]] $PrincipalsAllowedToDelegateToAccount,
@@ -401,7 +401,7 @@ function Set-TargetResource {
         [System.Boolean] $RestrictToSingleComputer,
 
         [ValidateNotNull()]
-        [System.int32] $ManagedPasswordIntervalInDays,
+        [System.Uint32] $ManagedPasswordIntervalInDays,
 
         [ValidateNotNull()]
         [System.String[]] $PrincipalsAllowedToDelegateToAccount,
