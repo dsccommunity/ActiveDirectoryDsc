@@ -82,7 +82,7 @@ function Set-TargetResource
         [Parameter()]
         [AllowEmptyString()]
         [System.String]
-        $Account = ''
+        $Account
     )
 
     # Get all Active Directory object having the target SPN configured.
@@ -159,7 +159,7 @@ function Test-TargetResource
         [Parameter()]
         [AllowEmptyString()]
         [System.String]
-        $Account = ''
+        $Account
     )
 
     $currentConfiguration = Get-TargetResource -ServicePrincipalName $ServicePrincipalName
