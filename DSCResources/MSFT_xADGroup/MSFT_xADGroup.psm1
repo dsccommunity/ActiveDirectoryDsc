@@ -91,7 +91,7 @@ function Get-TargetResource
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info;
         Write-Verbose -Message ($LocalizedData.RetrievingGroupMembers -f $MembershipAttribute);
         ## Retrieve the current list of members, returning the specified membership attribute
-        $adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute;
+        [System.Array]$adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute;
         $targetResource = @{
             GroupName = $adGroup.Name;
             GroupScope = $adGroup.GroupScope;
@@ -99,7 +99,7 @@ function Get-TargetResource
             Path = Get-ADObjectParentDN -DN $adGroup.DistinguishedName;
             Description = $adGroup.Description;
             DisplayName = $adGroup.DisplayName;
-            Members = @($adGroupMembers);
+            Members = $adGroupMembers;
             MembersToInclude = $MembersToInclude;
             MembersToExclude = $MembersToExclude;
             MembershipAttribute = $MembershipAttribute;
