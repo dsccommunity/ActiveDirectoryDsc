@@ -227,6 +227,15 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 * **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
 * **Credential**: User account credentials used to perform the operation (optional).
 
+### **xADReplicationSubnet**
+
+The xADReplicationSubnet DSC resource will manage replication subnets.
+
+* **Ensure**: Specifies if the AD replication subnet should be added or remove. Default value is 'Present'.
+* **Name**: The name of the AD replication subnet, e.g. 10.0.0.0/24.
+* **Site**: The name of the assigned AD replication site, e.g. Default-First-Site-Name.
+* **Location**: The location for the AD replication site. Default value is empty.
+
 ### **xADComputer**
 
 The xADComputer DSC resource will manage computer accounts within Active Directory.
@@ -262,6 +271,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 * Opted-In to markdown rule validation.
 * Readme.md modified resolve markdown rule violations.
 * Added CodeCov.io support.
+* Added xADReplicationSubnet resource.
 
 ### 2.16.0.0
 
