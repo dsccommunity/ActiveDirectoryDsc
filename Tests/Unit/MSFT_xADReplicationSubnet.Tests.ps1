@@ -29,6 +29,7 @@ try
 
             $testDefaultParameters = @{
                 Name = '10.0.0.0/8'
+                Site = 'Default-First-Site-Name'
             }
 
             Context 'Subnet does not exist' {

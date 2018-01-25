@@ -191,7 +191,7 @@ function Test-TargetResource
         $Location = ''
     )
 
-    $currentConfiguration = Get-TargetResource -Name $Name
+    $currentConfiguration = Get-TargetResource -Name $Name -Site $Site
 
     $desiredConfigurationMatch = $currentConfiguration.Ensure -eq $Ensure
 
