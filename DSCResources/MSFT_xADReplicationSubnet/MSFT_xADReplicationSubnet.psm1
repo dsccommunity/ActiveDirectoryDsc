@@ -4,6 +4,9 @@
 
     .PARAMETER Name
         The name of the AD replication subnet, e.g. 10.0.0.0/24.
+
+    .PARAMETER Site
+        The name of the assigned AD replication site, e.g. Default-First-Site-Name.
 #>
 function Get-TargetResource
 {
@@ -14,7 +17,12 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Name
+        $Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Site
     )
 
     # Get the replication subnet filtered by it's name. If the subnet is not
