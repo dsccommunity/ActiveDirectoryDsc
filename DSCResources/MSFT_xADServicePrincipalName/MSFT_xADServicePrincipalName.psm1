@@ -3,15 +3,8 @@
     .SYNOPSIS
         Returns the current state of the specified service principal name.
 
-    .PARAMETER Ensure
-        Specifies if the service principal name should be added or remove.
-
     .PARAMETER ServicePrincipalName
         The full SPN to add or remove, e.g. HOST/LON-DC1.
-
-    .PARAMETER Account
-        The user or computer account to add or remove the SPN, e.b. User1 or
-        LON-DC1$.
 #>
 function Get-TargetResource
 {
@@ -174,5 +167,3 @@ function Test-TargetResource
 
     return $desiredConfigurationMatch
 }
-
-Export-ModuleMember -function *-TargetResource
