@@ -128,12 +128,19 @@ function Set-TargetResource
             Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Site $Site -PassThru
         }
 
-        # Update the location, if it's not valid.
-        if ($replicationSubnet.Location -ne $Location)
+        # Update the location, if it's not valid. Ensure an empty location
+        # string is converted to $null, because the Set-ADReplicationSubnet does
+        # not accept an empty string for the location, but $null.
+        $nullableLocation = $Location
+        if ([String]::IsNullOrEmpty($Location))
         {
-            Write-Verbose "Set on replication subnet $Name the location to $Location"
+            $nullableLocation = $null
+        }
+        if ($replicationSubnet.Location -ne $nullableLocation)
+        {
+            Write-Verbose "Set on replication subnet $Name the location to $nullableLocation"
 
-            Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Location $Location -PassThru
+            Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Location $nullableLocation -PassThru
         }
     }
 
