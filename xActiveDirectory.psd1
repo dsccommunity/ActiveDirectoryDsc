@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '2.16.0.0'
+ModuleVersion = '2.17.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,8 +49,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xAdDomainController: Update to complete fix for SiteName being required field.
-* xADDomain: Added retry logic to prevent FaultException to crash in Get-TargetResource on subsequent reboots after a domain is created because the service is not yet running. This error is mostly occur when the resource is used with the DSCExtension on Azure. 
+        ReleaseNotes = '* Converted AppVeyor.yml to use DSCResource.tests shared code.
+* Opted-In to markdown rule validation.
+* Readme.md modified resolve markdown rule violations.
+* Added CodeCov.io support.
+* Added xADServicePrincipalName resource.
 
 '
 
@@ -58,6 +61,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
