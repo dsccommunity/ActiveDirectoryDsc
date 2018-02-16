@@ -53,7 +53,7 @@ function Get-TargetResource
             Ensure   = 'Present'
             Name     = $Name
             Site     = $replicationSiteName
-            Location = $replicationSubnet.Location
+            Location = [String] $replicationSubnet.Location
         }
     }
 
