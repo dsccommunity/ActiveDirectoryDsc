@@ -15,7 +15,7 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADComputer, xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit and xADDomainDefaultPasswordPolicy** DSC Resources.
+The **xActiveDirectory** module contains the **xADComputer, xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit, xADReplicationSite and xADDomainDefaultPasswordPolicy** DSC Resources.
 These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
@@ -27,6 +27,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
+* **xADReplicationSite** creates and deletes Active Directory replication sites.
 * **xADUser** modifies and removes Active Directory Users.
 * **xADServicePrincipalName** adds or removes the SPN to a user or computer account.
 * **xWaitForDomain** waits for new, remote domain to setup.
@@ -60,6 +61,12 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
 * **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional)
 * **SiteName**: Specify the name of an existing site where new domain controller will be placed. (optional)
+
+### **xADReplicationSite**
+
+* **Ensure**: Specifies if the AD replication site should be added or remove. Default value is 'Present'. { *Present* | Absent }.
+* **Name**: Specifies the name of the AD replication site.
+* **RenameDefaultFirstSiteName**: Specify if the Default-First-Site-Name should be renamed, if it exists. Dafult value is 'false'.
 
 ### **xADUser**
 
@@ -266,6 +273,8 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
+
+* xADReplicationSite: Resource added.
 
 ### 2.17.0.0
 
@@ -1007,6 +1016,83 @@ Param(
 Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Example test domain local security group' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose
+```
+
+### Create an Active Directory Replication Site
+
+In this example, we will create an Active Directory replication site called
+'Seattle'.
+
+```powershell
+configuration Example_xADReplicationSite
+{
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADReplicationSite 'SeattleSite'
+        {
+           Ensure = 'Present'
+           Name   = 'Seattle'
+        }
+    }
+}
+
+Example_xADReplicationSite
+
+Start-DscConfiguration -Path .\Example_xADReplicationSite -Wait -Verbose
+```
+
+### Create an Active Directory Replication Site (Rename Default-First-Site-Name)
+
+In this example, we will create an Active Directory replication site called
+'Seattle'. If the 'Default-First-Site-Name' site exists, it will rename this
+site instead of create a new one.
+
+```powershell
+configuration Example_xADReplicationSite
+{
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADReplicationSite 'SeattleSite'
+        {
+           Ensure                     = 'Present'
+           Name                       = 'Seattle'
+           RenameDefaultFirstSiteName = $true
+        }
+    }
+}
+
+Example_xADReplicationSite
+
+Start-DscConfiguration -Path .\Example_xADReplicationSite -Wait -Verbose
+```
+
+### Remove an Active Directory Replication Site
+
+In this example, we will remove the Active Directory replication site called
+'Cupertino'.
+
+```powershell
+configuration Example_xADReplicationSite
+{
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADReplicationSite 'CupertinoSite'
+        {
+           Ensure = 'Absent'
+           Name   = 'Cupertino'
+        }
+    }
+}
+
+Example_xADReplicationSite
+
+Start-DscConfiguration -Path .\Example_xADReplicationSite -Wait -Verbose
 ```
 
 ### Create an Active Directory OU
