@@ -15,7 +15,7 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 ## Description
 
-The **xActiveDirectory** module contains the **xADComputer, xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit and xADDomainDefaultPasswordPolicy** DSC Resources.
+The **xActiveDirectory** module contains the **xADComputer, xADDomain, xADDomainController, xADUser, xWaitForDomain, xADDomainTrust, xADRecycleBin, xADGroup, xADOrganizationalUnit, xADReplicationSubnet and xADDomainDefaultPasswordPolicy** DSC Resources.
 These DSC Resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.
 
 ## Resources
