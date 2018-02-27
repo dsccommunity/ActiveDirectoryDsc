@@ -78,8 +78,10 @@ function Get-TargetResource
     {
         if ($access.IsInherited -eq $false)
         {
-            # Check if the ace does match the parameters. If yes, the target ace
-            # has been found, return present-
+            <#
+                Check if the ace does match the parameters. If yes, the target
+                ace has been found, return present with the assigned rights.
+            #>
             if ($access.IdentityReference.Value -eq $IdentityReference -and
                 $access.AccessControlType -eq $AccessControlType -and
                 $access.ObjectType.Guid -eq $ObjectType -and
@@ -197,12 +199,14 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Absent')
     {
+        <#
+            Iterate through all ace entries to find the desired ace, which
+            should be absent. If found, remove the ace from the acl.
+        #>
         foreach ($access in $acl.Access)
         {
             if ($access.IsInherited -eq $false)
             {
-                # Check if the ace does match the parameters. If yes, remove the
-                # ace from the acl.
                 if ($access.IdentityReference.Value -eq $IdentityReference -and
                     $access.AccessControlType -eq $AccessControlType -and
                     $access.ObjectType.Guid -eq $ObjectType -and
@@ -215,12 +219,9 @@ function Set-TargetResource
                 }
             }
         }
-        $acl.Access | ForEach-Object {
-            $acl.RemoveAccessRule($_)
-        }
     }
 
-    # Set the updated acl
+    # Set the updated acl to the object
     $acl | Set-Acl -Path "Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/$Path"
 }
 
@@ -303,8 +304,10 @@ function Test-TargetResource
     # Get the current state
     $currentState = Get-TargetResource -Path $Path -IdentityReference $IdentityReference -AccessControlType $AccessControlType -ObjectType $ObjectType -ActiveDirectorySecurityInheritance $ActiveDirectorySecurityInheritance -InheritedObjectType $InheritedObjectType
 
+    # Always check, if the ensure state is desired
     $returnValue = $currentState.Ensure -eq $Ensure
 
+    # Only checn the Active Directory rights, if ensure is set to present
     if ($Ensure -eq 'Present')
     {
         # Convert to array to a string for easy compare
