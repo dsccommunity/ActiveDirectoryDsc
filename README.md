@@ -26,6 +26,7 @@ These DSC Resources allow you to configure new domains, child domains, and high 
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
+* **xADObjectPermissionEntry** modifies the access control list of an Active Directory object.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADUser** modifies and removes Active Directory Users.
 * **xADServicePrincipalName** adds or removes the SPN to a user or computer account.
@@ -200,6 +201,43 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **Credential**: User account credentials used to perform the operation (optional).
   * If not running on a domain controller, this is required.
 
+### **xADObjectPermissionEntry**
+
+The xADObjectPermissionEntry DSC resource will manage access control lists on Active Directory objects-
+
+* **Ensure**: Indicates if the access will be added (Present) or will be removed (Absent). Default is 'Present'.
+* **Path**: Active Directory path of the object, specified as a Distinguished Name.
+* **IdentityReference**: Indicates the identity of the principal for the ace.
+* **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values:
+  * AccessSystemSecurity
+  * CreateChild
+  * Delete
+  * DeleteChild
+  * DeleteTree
+  * ExtendedRight
+  * GenericAll
+  * GenericExecute
+  * GenericRead
+  * GenericWrite
+  * ListChildren
+  * ListObject
+  * ReadControl
+  * ReadProperty
+  * Self
+  * Synchronize
+  * WriteDacl
+  * WriteOwner
+  * WriteProperty
+* **AccessControlType**: Indicates whether to Allow or Deny access to the target object.
+* **ObjectType**: The schema GUID of the object to which the access rule applies.
+* **ActiveDirectorySecurityInheritance**: One of the 'ActiveDirectorySecurityInheritance' enumeration values that specifies the inheritance type of the access rule.
+  * All
+  * Children
+  * Descendents
+  * None
+  * SelfAndChildren
+* **InheritedObjectType**: The schema GUID of the child object type that can inherit this access rule.
+
 ### **xADOrganizationalUnit**
 
 The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
@@ -266,6 +304,8 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 ## Versions
 
 ### Unreleased
+
+* Added xADObjectPermissionEntry resource.
 
 ### 2.17.0.0
 
@@ -1007,6 +1047,37 @@ Param(
 Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Example test domain local security group' -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose
+```
+
+### Delegate full control for an CNO to a VCO
+
+In this example, we will add full control (GeneralAll) permissions to the
+virtual computer object (VCO) for a cluster name object (CNO).
+
+```powershell
+configuration Example_xADObjectPermissionEntry
+{
+    Import-DscResource -Module xActiveDirectory
+
+    Node $AllNodes.NodeName
+    {
+        xADObjectPermissionEntry ADObjectPermissionEntry
+        {
+            Ensure                             = 'Present'
+            Path                               = 'CN=ROLE01,CN=Computers,DC=contoso,DC=com'
+            IdentityReference                  = 'CONTOSO\CLUSTER01$'
+            ActiveDirectoryRights              = 'GenericAll'
+            AccessControlType                  = 'Allow'
+            ObjectType                         = '00000000-0000-0000-0000-000000000000'
+            ActiveDirectorySecurityInheritance = 'None'
+            InheritedObjectType                = '00000000-0000-0000-0000-000000000000'
+        }
+    }
+}
+
+Example_xADObjectPermissionEntry
+
+Start-DscConfiguration -Path .\Example_xADObjectPermissionEntry -Wait -Verbose
 ```
 
 ### Create an Active Directory OU
