@@ -48,7 +48,7 @@ try
             ActiveDirectoryRights              = 'GenericAll'
         }
         $mockGetAclPresent = {
-            [PSCustomObject] @{
+            $mock = [PSCustomObject] @{
                 Path   = 'Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/CN=PC01,CN=Computers,DC=contoso,DC=com'
                 Owner  = 'BUILTIN\Administrators'
                 Access = @(
@@ -66,13 +66,19 @@ try
                     }
                 )
             }
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value {}
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value {}
+            return $mock
         }
         $mockGetAclAbsent = {
-            [PSCustomObject] @{
+            $mock = [PSCustomObject] @{
                 Path   = 'Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/CN=PC,CN=Computers,DC=lab,DC=local'
                 Owner  = 'BUILTIN\Administrators'
                 Access = @()
             }
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value {}
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value {}
+            return $mock
         }
         #endregion
 
@@ -141,7 +147,6 @@ try
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
 
                 It 'Should return a "System.Boolean" object type' {
-
                     # Act
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters
 
@@ -150,7 +155,6 @@ try
                 }
 
                 It 'Should return $true if the ace desired state is present' {
-
                     # Act
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters -Verbose
 
@@ -159,7 +163,6 @@ try
                 }
 
                 It 'Should return $false if the ace desired state is absent' {
-
                     # Act
                     $targetResource = Test-TargetResource @testDefaultParameters @testAbsentParameters
 
@@ -173,7 +176,6 @@ try
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
 
                 It 'Should return $false if the ace desired state is present' {
-
                     # Act
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters
 
@@ -182,7 +184,6 @@ try
                 }
 
                 It 'Should return $true if the ace desired state is absent' {
-
                     # Act
                     $targetResource = Test-TargetResource @testDefaultParameters @testAbsentParameters
 
@@ -201,13 +202,29 @@ try
             Context 'The desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
+                Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
 
+                It 'Should remove the ace from the existing acl' {
+                    # Act
+                    Set-TargetResource @testDefaultParameters @testAbsentParameters
+
+                    # Assert
+                    Assert-MockCalled -CommandName 'Set-Acl' -Scope It -Times 1 -Exactly
+                }
             }
 
             Context 'The desired ace is absent' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
+                Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
 
+                It 'Should add the ace to the existing acl' {
+                    # Act
+                    Set-TargetResource @testDefaultParameters @testPresentParameters
+
+                    # Assert
+                    Assert-MockCalled -CommandName 'Set-Acl' -Scope It -Times 1 -Exactly
+                }
             }
         }
     }
