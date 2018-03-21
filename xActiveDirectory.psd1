@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '2.17.0.0'
+moduleVersion = '2.18.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,11 +49,9 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Converted AppVeyor.yml to use DSCResource.tests shared code.
-* Opted-In to markdown rule validation.
-* Readme.md modified resolve markdown rule violations.
-* Added CodeCov.io support.
-* Added xADServicePrincipalName resource.
+        ReleaseNotes = '* xADReplicationSite: Resource added.
+* Added xADReplicationSubnet resource.
+* Fixed bug with group members in xADGroup
 
 '
 
@@ -61,6 +59,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
