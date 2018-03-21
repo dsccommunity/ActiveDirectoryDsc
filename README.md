@@ -285,6 +285,7 @@ Setting an ODJ Request file path for a configuration that creates a computer acc
 
 * xADReplicationSite: Resource added.
 * Added xADReplicationSubnet resource.
+* Fixed bug with group members in xADGroup
 
 ### 2.17.0.0
 
