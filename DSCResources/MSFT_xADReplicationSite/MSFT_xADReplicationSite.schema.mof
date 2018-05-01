@@ -1,0 +1,7 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xADReplicationSite")]
+class MSFT_xADReplicationSite : OMI_BaseResource
+{
+    [Write, Description("Specifies if the AD replication site should be added or remove. Default value is 'Present'. { *Present* | Absent }."), ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+    [Key, Description("Specifies the name of the AD replication site.")] String Name;
+    [Write, Description("Specify if the Default-First-Site-Name should be renamed, if it exists. Dafult value is 'false'.")] Boolean RenameDefaultFirstSiteName;
+};
