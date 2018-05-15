@@ -4,7 +4,8 @@
         Get the current state of the object access entry.
 
     .PARAMETER Path
-        Active Directory path of the object, specified as a Distinguished Name.
+        Active Directory path of the target object to add or remove the
+        permission entry, specified as a Distinguished Name.
 
     .PARAMETER IdentityReference
         Indicates the identity of the principal for the ace.
@@ -108,7 +109,8 @@ function Get-TargetResource
         (Absent). Default is 'Present'.
 
     .PARAMETER Path
-        Active Directory path of the object, specified as a Distinguished Name.
+        Active Directory path of the target object to add or remove the
+        permission entry, specified as a Distinguished Name.
 
     .PARAMETER IdentityReference
         Indicates the identity of the principal for the ace.
@@ -234,7 +236,8 @@ function Set-TargetResource
         (Absent). Default is 'Present'.
 
     .PARAMETER Path
-        Active Directory path of the object, specified as a Distinguished Name.
+        Active Directory path of the target object to add or remove the
+        permission entry, specified as a Distinguished Name.
 
     .PARAMETER IdentityReference
         Indicates the identity of the principal for the ace.
