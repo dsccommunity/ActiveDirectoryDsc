@@ -1071,37 +1071,6 @@ Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Examp
 Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose
 ```
 
-### Delegate full control for an CNO to a VCO
-
-In this example, we will add full control (GeneralAll) permissions to the
-virtual computer object (VCO) for a cluster name object (CNO).
-
-```powershell
-configuration Example_xADObjectPermissionEntry
-{
-    Import-DscResource -Module xActiveDirectory
-
-    Node $AllNodes.NodeName
-    {
-        xADObjectPermissionEntry ADObjectPermissionEntry
-        {
-            Ensure                             = 'Present'
-            Path                               = 'CN=ROLE01,CN=Computers,DC=contoso,DC=com'
-            IdentityReference                  = 'CONTOSO\CLUSTER01$'
-            ActiveDirectoryRights              = 'GenericAll'
-            AccessControlType                  = 'Allow'
-            ObjectType                         = '00000000-0000-0000-0000-000000000000'
-            ActiveDirectorySecurityInheritance = 'None'
-            InheritedObjectType                = '00000000-0000-0000-0000-000000000000'
-        }
-    }
-}
-
-Example_xADObjectPermissionEntry
-
-Start-DscConfiguration -Path .\Example_xADObjectPermissionEntry -Wait -Verbose
-```
-
 ### Create an Active Directory Replication Site
 
 In this example, we will create an Active Directory replication site called
