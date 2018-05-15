@@ -8,7 +8,7 @@
         permission entry, specified as a Distinguished Name.
 
     .PARAMETER IdentityReference
-        Indicates the identity of the principal for the ace.
+        Indicates the identity of the principal for the permission entry.
 
     .PARAMETER AccessControlType
         Indicates whether to Allow or Deny access to the target object.
@@ -113,7 +113,7 @@ function Get-TargetResource
         permission entry, specified as a Distinguished Name.
 
     .PARAMETER IdentityReference
-        Indicates the identity of the principal for the ace.
+        Indicates the identity of the principal for the permission entry.
 
     .PARAMETER ActiveDirectoryRights
         A combination of one or more of the ActiveDirectoryRights enumeration
@@ -240,7 +240,7 @@ function Set-TargetResource
         permission entry, specified as a Distinguished Name.
 
     .PARAMETER IdentityReference
-        Indicates the identity of the principal for the ace.
+        Indicates the identity of the principal for the permission entry.
 
     .PARAMETER ActiveDirectoryRights
         A combination of one or more of the ActiveDirectoryRights enumeration
