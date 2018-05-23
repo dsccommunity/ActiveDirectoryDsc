@@ -1,7 +1,7 @@
 # Localized messages
 data LocalizedData
 {
-    # culture="en-US"
+    # culture='en-US'
     ConvertFrom-StringData @'
         RetrievingGroupMembers         = Retrieving group membership based on '{0}' property.
         GroupMembershipInDesiredState  = Group membership is in the desired state.
@@ -46,9 +46,9 @@ function Get-TargetResource
         $Path,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = "Present",
+        $Ensure = 'Present',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -173,9 +173,9 @@ function Test-TargetResource
         $Path,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = "Present",
+        $Ensure = 'Present',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -319,9 +319,9 @@ function Set-TargetResource
         $Path,
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = "Present",
+        $Ensure = 'Present',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
