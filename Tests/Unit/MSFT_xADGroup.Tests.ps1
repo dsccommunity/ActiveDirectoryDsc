@@ -535,7 +535,7 @@ try
                 Mock -CommandName Set-ADGroup
                 Mock -CommandName Add-ADGroupMember
 
-                Set-TargetResource @testUniversalPresentParams -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
+                Set-TargetResource -GroupName $testUniversalPresentParams.GroupName -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
 
                 Assert-MockCalled -CommandName Set-ADGroup -Times 0 -Scope It
             }
@@ -551,7 +551,7 @@ try
                 Mock -CommandName Set-ADGroup
                 Mock -CommandName Add-ADGroupMember
 
-                Set-TargetResource @testUniversalPresentParams -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
+                Set-TargetResource -GroupName $testUniversalPresentParams.GroupName -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
 
                 Assert-MockCalled -CommandName Set-ADGroup -Times 0 -Scope It
             }
