@@ -553,7 +553,7 @@ try
 
                 Set-TargetResource -GroupName $testUniversalPresentParams.GroupName -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
 
-                Assert-MockCalled -CommandName Set-ADGroup -Times 0 -Scope It
+                Assert-MockCalled -CommandName Set-ADGroup -Times 1 -Scope It
             }
 
         }
