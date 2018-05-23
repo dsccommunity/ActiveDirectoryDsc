@@ -532,12 +532,12 @@ try
                 $fakeADUniversalGroup['GroupScope'] = 'Universal'
 
                 Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
-                Mock -CommandName Set-ADGroup
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope') }
                 Mock -CommandName Add-ADGroupMember
 
                 Set-TargetResource -GroupName $testUniversalPresentParams.GroupName -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
 
-                Assert-MockCalled -CommandName Set-ADGroup -Times 0 -Scope It
+                Assert-MockCalled -CommandName Set-ADGroup -Times 1 -Scope It
             }
 
             # tests for issue 183
@@ -548,7 +548,7 @@ try
                 $fakeADUniversalGroup['GroupCategory'] = 'Distribution'
 
                 Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
-                Mock -CommandName Set-ADGroup
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupCategory') }
                 Mock -CommandName Add-ADGroupMember
 
                 Set-TargetResource -GroupName $testUniversalPresentParams.GroupName -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
