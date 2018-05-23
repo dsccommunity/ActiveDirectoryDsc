@@ -381,10 +381,12 @@ function Set-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
     $adGroupParams = Get-ADCommonParameters @PSBoundParameters
 
-    try {
+    try
+    {
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info
 
-        if ($Ensure -eq 'Present') {
+        if ($Ensure -eq 'Present')
+        {
 
             $setADGroupParams = $adGroupParams.Clone()
             $setADGroupParams['Identity'] = $adGroup.DistinguishedName
@@ -426,7 +428,8 @@ function Set-TargetResource
             Set-ADGroup @setADGroupParams
 
             # Move group if the path is not correct
-            if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adGroup.DistinguishedName))) {
+            if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adGroup.DistinguishedName)))
+            {
                 Write-Verbose ($LocalizedData.MovingGroup -f $GroupName, $Path)
                 $moveADObjectParams = $adGroupParams.Clone()
                 $moveADObjectParams['Identity'] = $adGroup.DistinguishedName
@@ -506,7 +509,8 @@ function Set-TargetResource
             ## the parameters with the -Identity parameter rather than -Name
             $adGroupParams = Get-ADCommonParameters @PSBoundParameters
 
-            if ($Notes) {
+            if ($Notes)
+            {
                 ## Can't set the Notes field when creating the group
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Notes', $Notes)
                 $setADGroupParams = $adGroupParams.Clone()
