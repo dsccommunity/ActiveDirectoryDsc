@@ -25,62 +25,76 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('DomainLocal','Global','Universal')]
         [System.String]
         $GroupScope = 'Global',
 
+        [Parameter()]
         [ValidateSet('Security','Distribution')]
         [System.String]
         $Category = 'Security',
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DisplayName,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DomainController,
 
+        [Parameter()]
         [System.String[]]
         $Members,
 
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
         ## This must be the user's DN
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ManagedBy,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Notes
@@ -138,62 +152,76 @@ function Test-TargetResource
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('DomainLocal','Global','Universal')]
         [System.String]
         $GroupScope = 'Global',
 
+        [Parameter()]
         [ValidateSet('Security','Distribution')]
         [System.String]
         $Category = 'Security',
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DisplayName,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DomainController,
 
+        [Parameter()]
         [System.String[]]
         $Members,
 
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
         ## This must be the user's DN
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ManagedBy,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Notes
@@ -270,62 +298,76 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('DomainLocal','Global','Universal')]
         [System.String]
         $GroupScope = 'Global',
 
+        [Parameter()]
         [ValidateSet('Security','Distribution')]
         [System.String]
         $Category = 'Security',
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet("Present", "Absent")]
         [System.String]
         $Ensure = "Present",
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DisplayName,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DomainController,
 
+        [Parameter()]
         [System.String[]]
         $Members,
 
+        [Parameter()]
         [System.String[]]
         $MembersToInclude,
 
+        [Parameter()]
         [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
         ## This must be the user's DN
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ManagedBy,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Notes
