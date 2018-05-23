@@ -523,6 +523,39 @@ try
                 Assert-MockCalled Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
             }
 
+
+            # tests for issue 183
+            It "Doesn't reset to 'Global' when not specifying a 'Scope' and updating group membership" {
+                $testUniversalPresentParams = $testUniversalPresentParams.Clone()
+                $testUniversalPresentParams['Scope'] = 'Universal'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupScope'] = 'Universal'
+
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup { }
+                Mock -CommandName Add-ADGroupMember { }
+
+                Set-TargetResource @testUniversalPresentParams -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
+
+                Assert-MockCalled -CommandName Set-ADGroup -Times 0 -Scope It;
+            }
+
+            # tests for issue 183
+            It "Doesn't reset to 'Security' when not specifying a 'Category' and updating group membership" {
+                $testUniversalPresentParams = $testUniversalPresentParams.Clone()
+                $testUniversalPresentParams['Category'] = 'Distribution'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupCategory'] = 'Distribution'
+
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup { }
+                Mock -CommandName Add-ADGroupMember { }
+
+                Set-TargetResource @testUniversalPresentParams -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
+
+                Assert-MockCalled -CommandName Set-ADGroup -Times 0 -Scope It;
+            }
+
         }
         #end region
 

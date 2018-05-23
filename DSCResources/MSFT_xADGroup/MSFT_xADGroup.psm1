@@ -244,12 +244,12 @@ function Test-TargetResource
 
     $targetResource = Get-TargetResource @PSBoundParameters;
     $targetResourceInCompliance = $true;
-    if ($targetResource.GroupScope -ne $GroupScope)
+    if ($PSBoundParameters.ContainsKey('GroupScope') -and $targetResource.GroupScope -ne $GroupScope)
     {
         Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'GroupScope', $GroupScope, $targetResource.GroupScope);
         $targetResourceInCompliance = $false;
     }
-    if ($targetResource.Category -ne $Category)
+    if ($PSBoundParameters.ContainsKey('Category') -and $targetResource.Category -ne $Category)
     {
         Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Category', $Category, $targetResource.Category);
         $targetResourceInCompliance = $false;
