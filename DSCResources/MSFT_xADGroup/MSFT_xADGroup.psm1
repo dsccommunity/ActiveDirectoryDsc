@@ -392,12 +392,12 @@ function Set-TargetResource
             $setADGroupParams['Identity'] = $adGroup.DistinguishedName
 
             # Update existing group properties
-            if ($Category -ne $adGroup.GroupCategory)
+            if ($PSBoundParameters.ContainsKey('Category') -and $Category -ne $adGroup.GroupCategory)
             {
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Category', $Category)
                 $setADGroupParams['GroupCategory'] = $Category
             }
-            if ($GroupScope -ne $adGroup.GroupScope)
+            if ($PSBoundParameters.ContainsKey('GroupScope') -and $GroupScope -ne $adGroup.GroupScope)
             {
                 ## Cannot change DomainLocal to Global or vice versa directly. Need to change them to a Universal group first!
                 Set-ADGroup -Identity $adGroup.DistinguishedName -GroupScope Universal
