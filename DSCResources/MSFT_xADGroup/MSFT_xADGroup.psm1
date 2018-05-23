@@ -131,7 +131,8 @@ function Get-TargetResource
             $targetResource['Ensure'] = 'Present'
         }
     }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
         Write-Verbose ($LocalizedData.GroupNotFound -f $GroupName)
         $targetResource = @{
             GroupName = $GroupName
@@ -387,7 +388,6 @@ function Set-TargetResource
 
         if ($Ensure -eq 'Present')
         {
-
             $setADGroupParams = $adGroupParams.Clone()
             $setADGroupParams['Identity'] = $adGroup.DistinguishedName
 
@@ -481,7 +481,6 @@ function Set-TargetResource
         ## The AD group doesn't exist
         if ($Ensure -eq 'Present')
         {
-
             Write-Verbose ($LocalizedData.GroupNotFound -f $GroupName)
             Write-Verbose ($LocalizedData.AddingGroup -f $GroupName)
 
