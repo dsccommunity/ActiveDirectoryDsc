@@ -526,7 +526,7 @@ try
 
             # tests for issue 183
             It "Doesn't reset to 'Global' when not specifying a 'Scope' and updating group membership" {
-                $testUniversalPresentParams = $testUniversalPresentParams.Clone()
+                $testUniversalPresentParams = $testPresentParams.Clone()
                 $testUniversalPresentParams['Scope'] = 'Universal'
                 $fakeADUniversalGroup = $fakeADGroup.Clone()
                 $fakeADUniversalGroup['GroupScope'] = 'Universal'
@@ -542,7 +542,7 @@ try
 
             # tests for issue 183
             It "Doesn't reset to 'Security' when not specifying a 'Category' and updating group membership" {
-                $testUniversalPresentParams = $testUniversalPresentParams.Clone()
+                $testUniversalPresentParams = $testPresentParams.Clone()
                 $testUniversalPresentParams['Category'] = 'Distribution'
                 $fakeADUniversalGroup = $fakeADGroup.Clone()
                 $fakeADUniversalGroup['GroupCategory'] = 'Distribution'
