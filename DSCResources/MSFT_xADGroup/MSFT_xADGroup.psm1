@@ -133,7 +133,7 @@ function Get-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        Write-Verbose ($LocalizedData.GroupNotFound -f $GroupName)
+        Write-Verbose -Message ($LocalizedData.GroupNotFound -f $GroupName)
         $targetResource = @{
             GroupName = $GroupName
             GroupScope = $GroupScope
@@ -252,37 +252,37 @@ function Test-TargetResource
     $targetResourceInCompliance = $true
     if ($PSBoundParameters.ContainsKey('GroupScope') -and $targetResource.GroupScope -ne $GroupScope)
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'GroupScope', $GroupScope, $targetResource.GroupScope)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'GroupScope', $GroupScope, $targetResource.GroupScope)
         $targetResourceInCompliance = $false
     }
     if ($PSBoundParameters.ContainsKey('Category') -and $targetResource.Category -ne $Category)
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Category', $Category, $targetResource.Category)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'Category', $Category, $targetResource.Category)
         $targetResourceInCompliance = $false
     }
     if ($Path -and ($targetResource.Path -ne $Path))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Path', $Path, $targetResource.Path)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'Path', $Path, $targetResource.Path)
         $targetResourceInCompliance = $false
     }
     if ($Description -and ($targetResource.Description -ne $Description))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Description', $Description, $targetResource.Description)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'Description', $Description, $targetResource.Description)
         $targetResourceInCompliance = $false
     }
     if ($DisplayName -and ($targetResource.DisplayName -ne $DisplayName))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'DisplayName', $DisplayName, $targetResource.DisplayName)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'DisplayName', $DisplayName, $targetResource.DisplayName)
         $targetResourceInCompliance = $false
     }
     if ($ManagedBy -and ($targetResource.ManagedBy -ne $ManagedBy))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'ManagedBy', $ManagedBy, $targetResource.ManagedBy)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'ManagedBy', $ManagedBy, $targetResource.ManagedBy)
         $targetResourceInCompliance = $false
     }
     if ($Notes -and ($targetResource.Notes -ne $Notes))
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Notes', $Notes, $targetResource.Notes)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'Notes', $Notes, $targetResource.Notes)
         $targetResourceInCompliance = $false
     }
     # Test group members match passed membership parameters
@@ -293,7 +293,7 @@ function Test-TargetResource
     }
     if ($targetResource.Ensure -ne $Ensure)
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Ensure', $Ensure, $targetResource.Ensure)
+        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f 'Ensure', $Ensure, $targetResource.Ensure)
         $targetResourceInCompliance = $false
     }
     return $targetResourceInCompliance
@@ -394,43 +394,43 @@ function Set-TargetResource
             # Update existing group properties
             if ($PSBoundParameters.ContainsKey('Category') -and $Category -ne $adGroup.GroupCategory)
             {
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Category', $Category)
+                Write-Verbose -Message ($LocalizedData.UpdatingGroupProperty -f 'Category', $Category)
                 $setADGroupParams['GroupCategory'] = $Category
             }
             if ($PSBoundParameters.ContainsKey('GroupScope') -and $GroupScope -ne $adGroup.GroupScope)
             {
                 # Cannot change DomainLocal to Global or vice versa directly. Need to change them to a Universal group first!
                 Set-ADGroup -Identity $adGroup.DistinguishedName -GroupScope Universal
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope)
+                Write-Verbose -Message ($LocalizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope)
                 $setADGroupParams['GroupScope'] = $GroupScope
             }
             if ($Description -and ($Description -ne $adGroup.Description))
             {
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Description', $Description)
+                Write-Verbose -Message ($LocalizedData.UpdatingGroupProperty -f 'Description', $Description)
                 $setADGroupParams['Description'] = $Description
             }
             if ($DisplayName -and ($DisplayName -ne $adGroup.DisplayName))
             {
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'DisplayName', $DisplayName)
+                Write-Verbose -Message ($LocalizedData.UpdatingGroupProperty -f 'DisplayName', $DisplayName)
                 $setADGroupParams['DisplayName'] = $DisplayName
             }
             if ($ManagedBy -and ($ManagedBy -ne $adGroup.ManagedBy))
             {
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'ManagedBy', $ManagedBy)
+                Write-Verbose -Message ($LocalizedData.UpdatingGroupProperty -f 'ManagedBy', $ManagedBy)
                 $setADGroupParams['ManagedBy'] = $ManagedBy
             }
             if ($Notes -and ($Notes -ne $adGroup.Info))
             {
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Notes', $Notes)
+                Write-Verbose -Message ($LocalizedData.UpdatingGroupProperty -f 'Notes', $Notes)
                 $setADGroupParams['Replace'] = @{ Info = $Notes }
             }
-            Write-Verbose ($LocalizedData.UpdatingGroup -f $GroupName)
+            Write-Verbose -Message ($LocalizedData.UpdatingGroup -f $GroupName)
             Set-ADGroup @setADGroupParams
 
             # Move group if the path is not correct
             if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adGroup.DistinguishedName)))
             {
-                Write-Verbose ($LocalizedData.MovingGroup -f $GroupName, $Path)
+                Write-Verbose -Message ($LocalizedData.MovingGroup -f $GroupName, $Path)
                 $moveADObjectParams = $adGroupParams.Clone()
                 $moveADObjectParams['Identity'] = $adGroup.DistinguishedName
                 Move-ADObject @moveADObjectParams -TargetPath $Path
@@ -472,7 +472,7 @@ function Set-TargetResource
         elseif ($Ensure -eq 'Absent')
         {
             # Remove existing group
-            Write-Verbose ($LocalizedData.RemovingGroup -f $GroupName)
+            Write-Verbose -Message ($LocalizedData.RemovingGroup -f $GroupName)
             Remove-ADGroup @adGroupParams -Confirm:$false
         }
     }
@@ -481,8 +481,8 @@ function Set-TargetResource
         # The AD group doesn't exist
         if ($Ensure -eq 'Present')
         {
-            Write-Verbose ($LocalizedData.GroupNotFound -f $GroupName)
-            Write-Verbose ($LocalizedData.AddingGroup -f $GroupName)
+            Write-Verbose -Message ($LocalizedData.GroupNotFound -f $GroupName)
+            Write-Verbose -Message ($LocalizedData.AddingGroup -f $GroupName)
 
             $adGroupParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
             if ($Description)
@@ -511,7 +511,7 @@ function Set-TargetResource
             if ($Notes)
             {
                 # Can't set the Notes field when creating the group
-                Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Notes', $Notes)
+                Write-Verbose -Message ($LocalizedData.UpdatingGroupProperty -f 'Notes', $Notes)
                 $setADGroupParams = $adGroupParams.Clone()
                 $setADGroupParams['Identity'] = $adGroup.DistinguishedName
                 Set-ADGroup @setADGroupParams -Add @{ Info = $Notes }
