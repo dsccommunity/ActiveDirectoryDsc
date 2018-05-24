@@ -578,6 +578,10 @@ try
                 $fakeADUniversalGroup = $fakeADGroup.Clone()
                 $fakeADUniversalGroup['GroupCategory'] = 'Distribution'
 
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope') }
+                Mock -CommandName Add-ADGroupMember
+
                 $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName | Should Be $true
                 $universalGroupInCompliance | Should Be $true
             }
