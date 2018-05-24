@@ -556,6 +556,32 @@ try
                 Assert-MockCalled -CommandName Set-ADGroup -Times 1 -Scope It
             }
 
+            # tests for issue 183
+            It "Doesn't reset to 'Global' when not specifying a 'Scope' and testing display name" {
+                $testUniversalPresentParams = $testPresentParams.Clone()
+                $testUniversalPresentParams['GroupScope'] = 'Universal'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupScope'] = 'Universal'
+
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope') }
+                Mock -CommandName Add-ADGroupMember
+
+                $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
+                $universalGroupInCompliance | Should Be $true
+            }
+
+            # tests for issue 183
+            It "Doesn't reset to 'Security' when not specifying a 'Category' and testing display name" {
+                $testUniversalPresentParams = $testPresentParams.Clone()
+                $testUniversalPresentParams['Category'] = 'Distribution'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupCategory'] = 'Distribution'
+
+                $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName | Should Be $true
+                $universalGroupInCompliance | Should Be $true
+            }
+
         }
         #end region
 
