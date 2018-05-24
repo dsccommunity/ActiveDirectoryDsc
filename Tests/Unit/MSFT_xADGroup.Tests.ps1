@@ -582,7 +582,7 @@ try
                 Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope') }
                 Mock -CommandName Add-ADGroupMember
 
-                $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName | Should Be $true
+                $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
                 $universalGroupInCompliance | Should Be $true
             }
 
