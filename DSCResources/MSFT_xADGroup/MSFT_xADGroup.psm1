@@ -1,4 +1,4 @@
-## Import the common AD functions
+# Import the common AD functions
 $adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1'
 . $adCommonFunctions
 
@@ -92,7 +92,7 @@ function Get-TargetResource
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
-        ## This must be the user's DN
+        # This must be the user's DN
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -109,7 +109,7 @@ function Get-TargetResource
     {
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info
         Write-Verbose -Message ($LocalizedData.RetrievingGroupMembers -f $MembershipAttribute)
-        ## Retrieve the current list of members, returning the specified membership attribute
+        # Retrieve the current list of members, returning the specified membership attribute
         [System.Array]$adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute
         $targetResource = @{
             GroupName = $adGroup.Name
@@ -221,7 +221,7 @@ function Test-TargetResource
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
-        ## This must be the user's DN
+        # This must be the user's DN
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -232,7 +232,7 @@ function Test-TargetResource
         [System.String]
         $Notes
     )
-    ## Validate parameters before we even attempt to retrieve anything
+    # Validate parameters before we even attempt to retrieve anything
     $assertMemberParameters = @{}
     if ($PSBoundParameters.ContainsKey('Members') -and -not [system.string]::IsNullOrEmpty($Members))
     {
@@ -285,7 +285,7 @@ function Test-TargetResource
         Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Notes', $Notes, $targetResource.Notes)
         $targetResourceInCompliance = $false
     }
-    ## Test group members match passed membership parameters
+    # Test group members match passed membership parameters
     if (-not (Test-Members @assertMemberParameters -ExistingMembers $targetResource.Members))
     {
         Write-Verbose -Message $LocalizedData.GroupMembershipNotDesiredState
@@ -367,7 +367,7 @@ function Set-TargetResource
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
-        ## This must be the user's DN
+        # This must be the user's DN
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -399,7 +399,7 @@ function Set-TargetResource
             }
             if ($PSBoundParameters.ContainsKey('GroupScope') -and $GroupScope -ne $adGroup.GroupScope)
             {
-                ## Cannot change DomainLocal to Global or vice versa directly. Need to change them to a Universal group first!
+                # Cannot change DomainLocal to Global or vice versa directly. Need to change them to a Universal group first!
                 Set-ADGroup -Identity $adGroup.DistinguishedName -GroupScope Universal
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope)
                 $setADGroupParams['GroupScope'] = $GroupScope
@@ -440,8 +440,8 @@ function Set-TargetResource
             $adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute
             if (-not (Test-Members -ExistingMembers $adGroupMembers -Members $Members -MembersToInclude $MembersToInclude -MembersToExclude $MembersToExclude))
             {
-                ## The fact that we're in the Set method, there is no need to validate the parameter
-                ## combination as this was performed in the Test method
+                # The fact that we're in the Set method, there is no need to validate the parameter
+                # combination as this was performed in the Test method
                 if ($PSBoundParameters.ContainsKey('Members') -and -not [system.string]::IsNullOrEmpty($Members))
                 {
                     # Remove all existing first and add explicit members
@@ -478,7 +478,7 @@ function Set-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        ## The AD group doesn't exist
+        # The AD group doesn't exist
         if ($Ensure -eq 'Present')
         {
             Write-Verbose ($LocalizedData.GroupNotFound -f $GroupName)
@@ -501,23 +501,23 @@ function Set-TargetResource
             {
                 $adGroupParams['Path'] = $Path
             }
-            ## Create group
+            # Create group
             $adGroup = New-ADGroup @adGroupParams -GroupCategory $Category -GroupScope $GroupScope -PassThru
 
-            ## Only the New-ADGroup cmdlet takes a -Name parameter. Refresh
-            ## the parameters with the -Identity parameter rather than -Name
+            # Only the New-ADGroup cmdlet takes a -Name parameter. Refresh
+            # the parameters with the -Identity parameter rather than -Name
             $adGroupParams = Get-ADCommonParameters @PSBoundParameters
 
             if ($Notes)
             {
-                ## Can't set the Notes field when creating the group
+                # Can't set the Notes field when creating the group
                 Write-Verbose ($LocalizedData.UpdatingGroupProperty -f 'Notes', $Notes)
                 $setADGroupParams = $adGroupParams.Clone()
                 $setADGroupParams['Identity'] = $adGroup.DistinguishedName
                 Set-ADGroup @setADGroupParams -Add @{ Info = $Notes }
             }
 
-            ## Add the required members
+            # Add the required members
             if ($PSBoundParameters.ContainsKey('Members') -and -not [system.string]::IsNullOrEmpty($Members))
             {
                 $Members = Remove-DuplicateMembers -Members $Members
