@@ -312,6 +312,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
     ([issue #194](https://github.com/PowerShell/xActiveDirectory/issues/194)).
   * Adding a Branches section to the README.md with Codecov badges for both
     master and dev branch ([issue #192](https://github.com/PowerShell/xActiveDirectory/issues/192)).
+  * xADGroup no longer resets GroupScope and Category to default values ([issue #183](https://github.com/PowerShell/xActiveDirectory/issues/183)).
 
 ### 2.18.0.0
 
