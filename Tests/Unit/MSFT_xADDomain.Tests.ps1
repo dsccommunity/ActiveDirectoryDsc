@@ -98,7 +98,7 @@ try
                     Write-Error -Exception (New-Object System.Security.Authentication.AuthenticationException);
                 }
                 Mock Get-ADForest { }
-
+                
                 ## Match operator is case-sensitive!
                 { Get-TargetResource @testDefaultParams -DomainName $incorrectDomainName } | Should Throw 'invalid credentials';
             }
