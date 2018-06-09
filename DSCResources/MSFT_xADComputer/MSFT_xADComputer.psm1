@@ -4,7 +4,7 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 $adCommonFunctions = Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
     -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
-Import-Module -Path $adCommonFunctions
+Import-Module -Name $adCommonFunctions
 
 #region Loca
 lizedData

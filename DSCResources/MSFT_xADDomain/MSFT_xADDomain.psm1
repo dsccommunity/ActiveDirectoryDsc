@@ -2,7 +2,7 @@
 $adCommonFunctions = Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
     -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
-Import-Module -Path $adCommonFunctions
+Import-Module -Name $adCommonFunctions
 
 # Localized messages
 data localizedData
