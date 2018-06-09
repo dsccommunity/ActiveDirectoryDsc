@@ -1,3 +1,9 @@
+## Import the common AD functions
+$adCommonFunctions = Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
+Import-Module -Path $adCommonFunctions
+
 # Localized messages
 data LocalizedData
 {
@@ -20,14 +26,14 @@ function Get-TargetResource
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
-    (    
-        [parameter(Mandatory)] 
+    (
+        [parameter(Mandatory)]
         [System.String] $Name,
 
-        [parameter(Mandatory)] 
+        [parameter(Mandatory)]
         [System.String] $Path
     )
-    
+
     Assert-Module -ModuleName 'ActiveDirectory';
     Write-Verbose ($LocalizedData.RetrievingOU -f $Name)
     $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
@@ -48,13 +54,13 @@ function Test-TargetResource
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
-    (    
-        [parameter(Mandatory)] 
+    (
+        [parameter(Mandatory)]
         [System.String] $Name,
 
-        [parameter(Mandatory)] 
+        [parameter(Mandatory)]
         [System.String] $Path,
-        
+
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
@@ -72,7 +78,7 @@ function Test-TargetResource
     )
 
     $targetResource = Get-TargetResource -Name $Name -Path $Path
-    
+
     if ($targetResource.Ensure -eq 'Present')
     {
         if ($Ensure -eq 'Present')
@@ -128,13 +134,13 @@ function Set-TargetResource
 {
     [CmdletBinding()]
     param
-    (    
-        [parameter(Mandatory)] 
+    (
+        [parameter(Mandatory)]
         [System.String] $Name,
 
-        [parameter(Mandatory)] 
+        [parameter(Mandatory)]
         [System.String] $Path,
-        
+
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
@@ -153,7 +159,7 @@ function Set-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory';
     $targetResource = Get-TargetResource -Name $Name -Path $Path
-    
+
     if ($targetResource.Ensure -eq 'Present')
     {
         $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel
@@ -213,9 +219,5 @@ function Set-TargetResource
     }
 
 } #end function Set-TargetResource
-
-## Import the common AD functions
-$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
-. $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource
