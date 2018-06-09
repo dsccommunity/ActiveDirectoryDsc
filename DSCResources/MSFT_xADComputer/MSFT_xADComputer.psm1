@@ -6,8 +6,7 @@ $adCommonFunctions = Join-Path `
     -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
 Import-Module -Name $adCommonFunctions
 
-#region Loca
-lizedData
+#region LocalizedData
 $culture = 'en-us'
 if (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath $PSUICulture))
 {
