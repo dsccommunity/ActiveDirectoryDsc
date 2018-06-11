@@ -1,6 +1,12 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
 param()
 
+## Import the common AD functions
+$adCommonFunctions = Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
+Import-Module -Name $adCommonFunctions
+
 # Localized messages
 data LocalizedData
 {
@@ -1009,9 +1015,5 @@ function Test-Password
     }
 
 } #end function Test-Password
-
-## Import the common AD functions
-$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
-. $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource

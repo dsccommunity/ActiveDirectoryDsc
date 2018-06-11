@@ -1,4 +1,11 @@
 $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+
+## Import the common AD functions
+$adCommonFunctions = Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
+Import-Module -Name $adCommonFunctions
+
 #region LocalizedData
 $culture = 'en-us'
 if (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath $PSUICulture))
@@ -511,11 +518,5 @@ function Set-TargetResource
     }
 
 } #end function Set-TargetResource
-
-## Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
-. $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource
