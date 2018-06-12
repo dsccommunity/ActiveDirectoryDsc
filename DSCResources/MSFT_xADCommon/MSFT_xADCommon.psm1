@@ -616,7 +616,7 @@ function ConvertTo-DeploymentForestMode
         [Parameter(
             Mandatory = $true,
             ParameterSetName = 'ByName')]
-        [System.DirectoryServices.ActiveDirectory.ForestMode]
+        [Microsoft.ActiveDirectory.Management.ADForestMode]
         $Mode,
 
         [ValidateNotNullOrEmpty()]
@@ -636,6 +636,7 @@ function ConvertTo-DeploymentForestMode
         $errorId = '{0}_InvalidObjectType' -f $ModuleName
         $errorMessage = $localizedString.InvalidTypeError -f ($DomainMode.GetType().FullName), 'Microsoft.DirectoryServices.Deployment.Types.ForestMode'
         ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
+        return
     }
 
     return $convertedMode
@@ -656,7 +657,7 @@ function ConvertTo-DeploymentDomainMode
         [Parameter(
             Mandatory = $true,
             ParameterSetName = 'ByName')]
-        [System.DirectoryServices.ActiveDirectory.DomainMode]
+        [Microsoft.ActiveDirectory.Management.ADDomainMode]
         $Mode,
 
         [ValidateNotNullOrEmpty()]
@@ -676,6 +677,7 @@ function ConvertTo-DeploymentDomainMode
         $errorId = '{0}_InvalidObjectType' -f $ModuleName
         $errorMessage = $localizedString.InvalidTypeError -f ($DomainMode.GetType().FullName), 'Microsoft.DirectoryServices.Deployment.Types.DomainMode'
         ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
+        return
     }
 
     return $convertedMode
