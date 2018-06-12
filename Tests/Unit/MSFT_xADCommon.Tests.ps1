@@ -20,9 +20,15 @@ $TestEnvironment = Initialize-TestEnvironment `
     -TestType Unit
 #endregion
 
+function Invoke-TestSetup {
+    Add-Type -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'Tests') -ChildPath 'Unit') -ChildPath 'Stubs') -ChildPath 'Microsoft.DirectoryServices.Deployment.Types.cs')
+    Add-Type -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'Tests') -ChildPath 'Unit') -ChildPath 'Stubs') -ChildPath 'Microsoft.ActiveDirectory.Management.cs')
+}
+
 # Begin Testing
 try
 {
+    Invoke-TestSetup
 
     #region Pester Tests
 
@@ -516,6 +522,62 @@ try
                 $result['Identity'] | Should Be $testIdentity;
             }
 
+        }
+        #endregion
+
+        #region Function ConvertTo-DeploymentForestMode
+        Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentForestMode" {
+            It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -Mode Windows2016Forest | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
+            }
+
+            It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -Mode Windows2016Forest | Should Be WinThreshold
+            }
+
+            It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -ModeId 7 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
+            }
+
+            It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -ModeId 5 | Should Be Win2012
+            }
+
+            It 'Throws an exception when an invalid forest mode is selected' {
+                {ConvertTo-DeploymentForestMode -Mode Nonexistant } | Should Throw
+            }
+
+            It 'Throws an exception when an invalid mode id is selected' {
+                {ConvertTo-DeploymentForestMode -ModeId 666 } | Should Throw
+            }
+        }
+        #endregion
+
+        #region Function ConvertTo-DeploymentDomainMode
+        Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentDomainMode" {
+            It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -Mode Windows2016Domain | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
+            }
+
+            It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -Mode Windows2016Domain | Should Be WinThreshold
+            }
+
+            It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -ModeId 7 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
+            }
+
+            It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -ModeId 5 | Should Be Win2012
+            }
+
+            It 'Throws an exception when an invalid forest mode is selected' {
+                {ConvertTo-DeploymentDomainMode -Mode Nonexistant } | Should Throw
+            }
+
+            It 'Throws an exception when an invalid mode id is selected' {
+                {ConvertTo-DeploymentDomainMode -ModeId 666 } | Should Throw
+            }
         }
         #endregion
 
