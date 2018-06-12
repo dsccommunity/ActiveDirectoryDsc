@@ -1,4 +1,4 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xADUser")]
+[ClassVersion("1.0.0.0"), FriendlyName("xADUser")]
 class MSFT_xADUser : OMI_BaseResource
 {
     [Key, Description("Name of the domain where the user account is located (only used if password is managed)")] String DomainName;
