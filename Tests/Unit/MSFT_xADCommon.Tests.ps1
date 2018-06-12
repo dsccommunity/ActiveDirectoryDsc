@@ -528,15 +528,15 @@ try
         #region Function ConvertTo-DeploymentForestMode
         Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentForestMode" {
             It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
-                ConvertTo-DeploymentForestMode -Mode Windows2016Forest | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
+                ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
             }
 
             It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
-                ConvertTo-DeploymentForestMode -Mode Windows2016Forest | Should Be WinThreshold
+                ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should Be Win2012
             }
 
             It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
-                ConvertTo-DeploymentForestMode -ModeId 7 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
+                ConvertTo-DeploymentForestMode -ModeId 5 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
             }
 
             It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
@@ -556,15 +556,15 @@ try
         #region Function ConvertTo-DeploymentDomainMode
         Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentDomainMode" {
             It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
-                ConvertTo-DeploymentDomainMode -Mode Windows2016Domain | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
+                ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
             }
 
             It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
-                ConvertTo-DeploymentDomainMode -Mode Windows2016Domain | Should Be WinThreshold
+                ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should Be Win2012
             }
 
             It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
-                ConvertTo-DeploymentDomainMode -ModeId 7 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
+                ConvertTo-DeploymentDomainMode -ModeId 5 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
             }
 
             It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
