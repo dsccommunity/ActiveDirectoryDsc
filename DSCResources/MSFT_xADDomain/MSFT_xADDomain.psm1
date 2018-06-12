@@ -101,10 +101,10 @@ function Get-TargetResource
         [Parameter()] [ValidateNotNullOrEmpty()]
         [String] $SysvolPath,
 
-        [Parameter()] [ValidateSet("Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold")]
+        [Parameter()] [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
         [String] $ForestMode,
 
-        [Parameter()] [ValidateSet("Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold")]
+        [Parameter()] [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
         [String] $DomainMode
     )
 
@@ -219,10 +219,10 @@ function Test-TargetResource
         [Parameter()] [ValidateNotNullOrEmpty()]
         [String] $SysvolPath,
 
-        [Parameter()] [ValidateSet("Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold")]
+        [Parameter()] [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
         [String] $ForestMode,
 
-        [Parameter()]  [ValidateSet("Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold")]
+        [Parameter()]  [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
         [String] $DomainMode
     )
 
@@ -298,15 +298,15 @@ function Set-TargetResource
         [Parameter()] [ValidateNotNullOrEmpty()]
         [String] $SysvolPath,
 
-        [Parameter()] [ValidateSet("Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold")]
+        [Parameter()] [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
         [String] $ForestMode,
 
-        [Parameter()] [ValidateSet("Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold")]
+        [Parameter()] [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
         [String] $DomainMode
     )
 
     # Debug can pause Install-ADDSForest/Install-ADDSDomain, so we remove it.
-    [ref] $null = $PSBoundParameters.Remove("Debug");
+    [ref] $null = $PSBoundParameters.Remove('Debug');
     ## Not entirely necessary, but run Get-TargetResouece to ensure we raise any pre-flight errors.
     $targetResource = Get-TargetResource @PSBoundParameters;
 
@@ -368,7 +368,7 @@ function Set-TargetResource
         Write-Verbose -Message ($localizedData.CreatedForest -f $DomainName);
     }
 
-    "Finished" | Out-File -FilePath (Get-TrackingFilename -DomainName $DomainName) -Force
+    'Finished' | Out-File -FilePath (Get-TrackingFilename -DomainName $DomainName) -Force
 
     # Signal to the LCM to reboot the node to compensate for the one we
     # suppressed from Install-ADDSForest/Install-ADDSDomain
