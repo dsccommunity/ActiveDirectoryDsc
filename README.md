@@ -308,6 +308,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 ### Unreleased
 
 * Changes to xActiveDirectory
+  * Activated the GitHub App Stale on the GitHub repository.
   * The resources are now in alphabetical order in the README.md
     ([issue #194](https://github.com/PowerShell/xActiveDirectory/issues/194)).
   * Adding a Branches section to the README.md with Codecov badges for both
