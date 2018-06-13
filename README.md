@@ -308,6 +308,8 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 ### Unreleased
 
 * Changes to xActiveDirectory
+  * Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/xActiveDirectory/issues/190). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
+  * Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/xActiveDirectory/issues/198). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
   * Activated the GitHub App Stale on the GitHub repository.
   * The resources are now in alphabetical order in the README.md
     ([issue #194](https://github.com/PowerShell/xActiveDirectory/issues/194)).
