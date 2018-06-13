@@ -307,6 +307,8 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 
 ### Unreleased
 
+### 2.19.0.0
+
 * Changes to xActiveDirectory
   * Activated the GitHub App Stale on the GitHub repository.
   * The resources are now in alphabetical order in the README.md
