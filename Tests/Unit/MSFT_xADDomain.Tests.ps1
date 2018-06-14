@@ -59,8 +59,6 @@ try
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } -MockWith { }
-            Mock -CommandName ConvertTo-DeploymentDomainMode -MockWith { return $domainMode }
-            Mock -CommandName ConvertTo-DeploymentForestMode -MockWith { return $forestMode }
 
             It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
                 Mock -CommandName Get-ADDomain -MockWith { 
@@ -124,7 +122,6 @@ try
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Identity.ToString() -eq $incorrectDomainName } -MockWith {
                     Write-Error -Exception (New-Object System.Security.Authentication.AuthenticationException);
                 }
-                #Mock -CommandName Get-ADForest -MockWith { }
 
                 ## Match operator is case-sensitive!
                 { Get-TargetResource @testDefaultParams -DomainName $incorrectDomainName } | Should Throw 'invalid credentials';
@@ -134,7 +131,6 @@ try
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Identity.ToString() -eq $incorrectDomainName } -MockWith {
                     Write-Error -Exception (New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException);
                 }
-                #Mock -CommandName Get-ADForest -MockWith { }
 
                 { Get-TargetResource @testDefaultParams -DomainName $incorrectDomainName } | Should Throw 'Computer is already a domain member';
             }
@@ -143,7 +139,6 @@ try
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Identity.ToString() -eq $missingDomainName } -MockWith {
                     Write-Error -Exception (New-Object Microsoft.ActiveDirectory.Management.ADServerDownException);
                 }
-                #Mock -CommandName Get-ADForest -MockWith { }
 
                 { Get-TargetResource @testDefaultParams -DomainName $missingDomainName } | Should Not Throw;
             }
@@ -154,42 +149,37 @@ try
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
-                }   
+                }
+                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }  
 
                 (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).DomainMode | Should Be $domainMode.ToString()
-
-                Assert-MockCalled -CommandName ConvertTo-DeploymentDomainMode
-                Assert-MockCalled -CommandName ConvertTo-DeploymentForestMode
             }
 
             It 'Returns the correct forest mode' {
                 Mock -CommandName Get-ADDomain -MockWith { 
                     [psobject]@{
-                        Forest = $correctDomainName
+                        Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
                 }
                 Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
 
                 (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).ForestMode | Should Be $forestMode.ToString()
-
-                Assert-MockCalled -CommandName ConvertTo-DeploymentDomainMode
-                Assert-MockCalled -CommandName ConvertTo-DeploymentForestMode
             }
 
             It 'Does not return $null as forest or domain mode' {
+                Mock -CommandName Get-ADDomain -MockWith { 
+                    [psobject]@{
+                        Forest     = $correctDomainName
+                        DomainMode = $mgmtDomainMode
+                    }
+                }
+                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
+
                 $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
                 $result.DomainMode | Should Not Be $null
                 $result.ForestMode | Should Not Be $null
-
-                Assert-MockCalled -CommandName ConvertTo-DeploymentDomainMode
-                Assert-MockCalled -CommandName ConvertTo-DeploymentForestMode
-            }
-
-            It 'Calls ConvertTo-DeploymentForestMode and ConvertTo-DeploymentDomainMode' {
-                Assert-MockCalled -CommandName ConvertTo-DeploymentDomainMode
-                Assert-MockCalled -CommandName ConvertTo-DeploymentForestMode
             }
         }
         #endregion
