@@ -57,7 +57,7 @@ try
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
             It 'Returns a "System.Collections.Hashtable" object type' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
@@ -65,7 +65,7 @@ try
             }
 
             It 'Returns "Ensure" = "Present" when OU exists' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
@@ -73,15 +73,15 @@ try
             }
 
             It 'Returns "Ensure" = "Absent" when OU does not exist' {
-                Mock -CommandName Assert-Module -MockWith { }
-                Mock -CommandName Get-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
                 $targetResource.Ensure | Should Be 'Absent'
             }
 
             It 'Returns "ProtectedFromAccidentalDeletion" = "$true" when OU is protected' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
@@ -89,7 +89,7 @@ try
             }
 
             It 'Returns "ProtectedFromAccidentalDeletion" = "$false" when OU is not protected' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith {
                     $unprotectedFakeAdOu = $protectedFakeAdOu.Clone();
                     $unprotectedFakeAdOu['ProtectedFromAccidentalDeletion'] = $false;
@@ -101,7 +101,7 @@ try
             }
 
             It 'Returns an empty description' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith {
                     $noDescriptionFakeAdOu = $protectedFakeAdOu.Clone();
                     $noDescriptionFakeAdOu['Description'] = '';
@@ -120,7 +120,7 @@ try
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
 
             It 'Returns a "System.Boolean" object type' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Test-TargetResource @testPresentParams
 
@@ -128,21 +128,21 @@ try
             }
 
             It 'Fails when OU does not exist and "Ensure" = "Present"' {
-                Mock -CommandName Assert-Module -MockWith { }
-                Mock -CommandName Get-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit
 
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
             It 'Fails when OU does exist and "Ensure" = "Absent"' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
 
                 Test-TargetResource @testAbsentParams | Should Be $false
             }
 
             It 'Fails when OU does exist but "Description" is incorrect' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $testDescriptionParams = $testPresentParams.Clone()
                 $testDescriptionParams['Description'] = 'Wrong description'
@@ -151,7 +151,7 @@ try
             }
 
             It 'Fails when OU does exist but "ProtectedFromAccidentalDeletion" is incorrect' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $testProtectedFromAccidentalDeletionParams = $testPresentParams.Clone()
                 $testProtectedFromAccidentalDeletionParams['ProtectedFromAccidentalDeletion'] = $false
@@ -160,21 +160,21 @@ try
             }
 
             It 'Passes when OU does exist, "Ensure" = "Present" and all properties are correct' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
 
                 Test-TargetResource @testPresentParams | Should Be $true
             }
 
             It 'Passes when OU does not exist and "Ensure" = "Absent"' {
-                Mock -CommandName Assert-Module -MockWith { }
-                Mock -CommandName Get-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit
 
                 Test-TargetResource @testAbsentParams | Should Be $true
             }
 
             It 'Passes when no OU description is specified with existing OU description' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $testEmptyDescriptionParams = $testPresentParams.Clone()
                 $testEmptyDescriptionParams['Description'] = ''
@@ -189,91 +189,91 @@ try
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
 
             It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and OU does not exist' {
-                Mock -CommandName Assert-Module -MockWith { }
-                Mock -CommandName Get-ADOrganizationalUnit -MockWith { }
-                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith { }
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit
+                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name }
 
                 Set-TargetResource @testPresentParams
                 Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -Scope It
             }
 
             It 'Calls "New-ADOrganizationalUnit" with credentials when specified' {
-                Mock -CommandName Assert-Module -MockWith { }
-                Mock -CommandName Get-ADOrganizationalUnit -MockWith { }
-                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit
+                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential }
 
                 Set-TargetResource @testPresentParams -Credential $testCredential
                 Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" when "Ensure" = "Present" and OU does exist' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
-                Mock -CommandName Set-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Set-ADOrganizationalUnit
 
                 Set-TargetResource @testPresentParams
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" with credentials when specified' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
-                Mock -CommandName Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
+                Mock -CommandName Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential }
 
                 Set-TargetResource @testPresentParams -Credential $testCredential
                 Assert-MockCalled Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Remove-ADOrganizationalUnit" when "Ensure" = "Absent" and OU does exist but is unprotected' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith {
                     $unprotectedFakeAdOu = $protectedFakeAdOu.Clone()
                     $unprotectedFakeAdOu['ProtectedFromAccidentalDeletion'] = $false
                     return [PSCustomObject] $unprotectedFakeAdOu
                 }
-                Mock -CommandName Remove-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Remove-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Remove-ADOrganizationalUnit -Scope It
             }
 
             It 'Calls "Remove-ADOrganizationalUnit" when "Ensure" = "Absent" and OU does exist and is protected' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
-                Mock -CommandName Remove-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Remove-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Remove-ADOrganizationalUnit -Scope It
             }
 
             It 'Calls "Remove-ADOrganizationalUnit" with credentials when specified' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
-                Mock -CommandName Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
+                Mock -CommandName Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential }
 
                 Set-TargetResource @testAbsentParams -Credential $testCredential
                 Assert-MockCalled Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" when "Ensure" = "Absent", OU does exist but is protected' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
-                Mock -CommandName Remove-ADOrganizationalUnit -MockWith { }
-                Mock -CommandName Set-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Remove-ADOrganizationalUnit
+                Mock -CommandName Set-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It
             }
 
             It 'Does not call "Set-ADOrganizationalUnit" when "Ensure" = "Absent", OU does exist but is unprotected' {
-                Mock -CommandName Assert-Module -MockWith { }
+                Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith {
                     $unprotectedFakeAdOu = $protectedFakeAdOu.Clone()
                     $unprotectedFakeAdOu['ProtectedFromAccidentalDeletion'] = $false
                     return [PSCustomObject] $unprotectedFakeAdOu
                 }
-                Mock -CommandName Remove-ADOrganizationalUnit -MockWith { }
-                Mock -CommandName Set-ADOrganizationalUnit -MockWith { }
+                Mock -CommandName Remove-ADOrganizationalUnit
+                Mock -CommandName Set-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
                 Assert-MockCalled Set-ADOrganizationalUnit -Scope It -Exactly 0

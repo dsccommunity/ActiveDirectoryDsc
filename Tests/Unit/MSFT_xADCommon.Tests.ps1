@@ -106,7 +106,7 @@ try
 
             It 'Throws when module is not installed' {
                 $testModuleName = 'TestModule';
-                Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { }
+                Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName }
 
                 { Assert-Module -ModuleName $testModuleName } | Should Throw;
             }

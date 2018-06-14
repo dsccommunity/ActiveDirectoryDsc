@@ -381,8 +381,8 @@ try
                 $newAbsentParams['ComputerName'] = $newComputerName;
                 $newPresentParams = $testPresentParams.Clone();
                 $newPresentParams['ComputerName'] = $newComputerName;
-                Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -MockWith { }
-                Mock -CommandName Set-ADComputer -MockWith { }
+                Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName }
+                Mock -CommandName Set-ADComputer
                 Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
 
                 Set-TargetResource @newPresentParams;
@@ -397,7 +397,7 @@ try
                 $newPresentParams = $testPresentParams.Clone();
                 $newPresentParams['ComputerName'] = $newComputerName;
                 $newPresentParams['RequestFile'] = 'c:\ODJTest.txt';
-                Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -MockWith { }
+                Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName }
                 Mock djoin.exe { $LASTEXITCODE = 0; 'OK' }
                 Mock -CommandName Set-ADComputer { }
                 Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
@@ -415,7 +415,7 @@ try
                 $newPresentParams = $testPresentParams.Clone();
                 $newPresentParams['ComputerName'] = $newComputerName;
                 $targetPath = 'OU=Test,DC=contoso,DC=com';
-                Mock -CommandName New-ADComputer -ParameterFilter { $Path -eq $targetPath } -MockWith { }
+                Mock -CommandName New-ADComputer -ParameterFilter { $Path -eq $targetPath }
                 Mock -CommandName Set-ADComputer { }
                 Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
 
@@ -432,7 +432,7 @@ try
                     $duffADComputer['DistinguishedName'] = 'CN={0},OU=WrongPath,DC=contoso,DC=com' -f $testPresentParams.ComputerName;
                     return $duffADComputer;
                 }
-                Mock -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -MockWith { }
+                Mock -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath }
 
                 Set-TargetResource @testPresentParams -Path $testTargetPath;
 
@@ -512,7 +512,7 @@ try
 
             It "Calls 'Remove-ADComputer' when 'Ensure' is 'Absent' and computer account exists" {
                 Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
-                Mock -CommandName Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -MockWith { }
+                Mock -CommandName Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName }
 
                 Set-TargetResource @testAbsentParams;
 

@@ -305,7 +305,7 @@ try
                     $duffADUser['DistinguishedName'] = "CN=$($testPresentParams.UserName),OU=WrongPath,DC=contoso,DC=com";
                     return $duffADUser;
                 }
-                Mock -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -MockWith { }
+                Mock -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath }
 
                 Set-TargetResource @testPresentParams -Path $testTargetPath -Enabled $true;
 
@@ -316,7 +316,7 @@ try
                 $testCommonName = 'Test Common Name';
                 Mock -CommandName Set-ADUser { }
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser; }
-                Mock -CommandName Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName } -MockWith { }
+                Mock -CommandName Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName }
 
                 Set-TargetResource @testPresentParams -CommonName $testCommonName -Enabled $true;
 
@@ -326,7 +326,7 @@ try
             It "Calls 'Set-ADAccountPassword' when 'Password' parameter is specified" {
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser; }
                 Mock -CommandName Set-ADUser { }
-                Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password } -MockWith { }
+                Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password }
 
                 Set-TargetResource @testPresentParams -Password $testCredential;
 
@@ -340,7 +340,7 @@ try
                     $duffADUser[$testADPropertyName] = $null;
                     return $duffADUser;
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) }
 
                 Set-TargetResource @testPresentParams -Description 'My custom description';
 
@@ -354,7 +354,7 @@ try
                     $duffADUser[$testADPropertyName] = '';
                     return $duffADUser;
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) }
 
                 Set-TargetResource @testPresentParams -Description 'My custom description';
 
@@ -368,7 +368,7 @@ try
                     $duffADUser[$testADPropertyName] = 'Incorrect parameter value';
                     return $duffADUser;
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) }
 
                 Set-TargetResource @testPresentParams -Description '';
 
@@ -382,7 +382,7 @@ try
                     $duffADUser[$testADPropertyName] = $null;
                     return $duffADUser;
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) }
 
                 Set-TargetResource @testPresentParams -JobTitle 'Gaffer';
 
@@ -396,7 +396,7 @@ try
                     $duffADUser[$testADPropertyName] = '';
                     return $duffADUser;
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) }
 
                 Set-TargetResource @testPresentParams -JobTitle 'Gaffer';
 
@@ -410,7 +410,7 @@ try
                     $duffADUser[$testADPropertyName] = 'Incorrect job title';
                     return $duffADUser;
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) }
 
                 Set-TargetResource @testPresentParams -JobTitle '';
 
@@ -419,7 +419,7 @@ try
 
             It "Calls 'Remove-ADUser' when 'Ensure' is 'Absent' and user account exists" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser; }
-                Mock -CommandName Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -MockWith { }
+                Mock -CommandName Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName }
 
                 Set-TargetResource @testAbsentParams;
 

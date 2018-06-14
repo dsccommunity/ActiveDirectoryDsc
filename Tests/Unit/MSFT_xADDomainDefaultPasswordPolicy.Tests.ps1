@@ -230,7 +230,7 @@ try
             }
 
             It 'Calls "Set-ADDefaultDomainPasswordPolicy" without "Credential" parameter by default' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $null } -MockWith { }
+                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $null }
 
                 $result = Set-TargetResource @testDefaultParams;
 
@@ -238,7 +238,7 @@ try
             }
 
             It 'Calls "Set-ADDefaultDomainPasswordPolicy" with "Credential" parameter when specified' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $testCredential } -MockWith { }
+                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $testCredential }
 
                 $result = Set-TargetResource @testDefaultParams -Credential $testCredential;
 
@@ -246,7 +246,7 @@ try
             }
 
             It 'Calls "Set-ADDefaultDomainPasswordPolicy" without "Server" parameter by default' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $null } -MockWith { }
+                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $null }
 
                 $result = Set-TargetResource @testDefaultParams;
 
@@ -254,7 +254,7 @@ try
             }
 
             It 'Calls "Set-ADDefaultDomainPasswordPolicy" with "Server" parameter when specified' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $testDomainController } -MockWith { }
+                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $testDomainController }
 
                 $result = Set-TargetResource @testDefaultParams -DomainController $testDomainController;
 
@@ -266,7 +266,7 @@ try
                 It "Calls 'Set-ADDefaultDomainPasswordPolicy' with '$propertyName' parameter when specified" {
                     $propertyDefaultParams = $testDefaultParams.Clone();
                     $propertyDefaultParams[$propertyName] = $stubPasswordPolicy[$propertyName];
-                    Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) } -MockWith { }
+                    Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) }
 
                     $result = Set-TargetResource @propertyDefaultParams;
 

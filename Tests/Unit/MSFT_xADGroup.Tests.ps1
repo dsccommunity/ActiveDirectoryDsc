@@ -491,7 +491,7 @@ try
                 Mock -CommandName Get-ADGroup { return $fakeADGroup; }
                 Mock -CommandName New-ADGroup { return [PSCustomObject] $fakeADGroup; }
                 Mock -CommandName Get-ADGroupMember { }
-                Mock -CommandName Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -MockWith { }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials }
 
                 Set-TargetResource @testPresentParams -Credential $testCredentials;
 

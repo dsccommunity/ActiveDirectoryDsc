@@ -58,7 +58,7 @@ try
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
-            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } -MockWith { }
+            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' }
 
             It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
                 Mock -CommandName Get-ADDomain -MockWith { 
@@ -298,7 +298,7 @@ try
             Mock -CommandName Get-TargetResource -MockWith { return $stubTargetResource; }
 
             It 'Calls "Install-ADDSForest" with "DomainName" when creating forest' {
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $DomainName -eq $testDomainName } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $DomainName -eq $testDomainName }
 
                 Set-TargetResource @newForestParams;
 
@@ -306,7 +306,7 @@ try
             }
 
             It 'Calls "Install-ADDSForest" with "SafemodeAdministratorPassword" when creating forest' {
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $SafemodeAdministratorPassword -eq $testSafemodePassword } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $SafemodeAdministratorPassword -eq $testSafemodePassword }
 
                 Set-TargetResource @newForestParams;
 
@@ -314,7 +314,7 @@ try
             }
 
             It 'Calls "Install-ADDSForest" with "DnsDelegationCredential" when creating forest, if specified' {
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $DnsDelegationCredential -eq $testDelegationCredential } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $DnsDelegationCredential -eq $testDelegationCredential }
 
                 Set-TargetResource @newForestParams -DnsDelegationCredential $testDelegationCredential;
 
@@ -322,7 +322,7 @@ try
             }
 
             It 'Calls "Install-ADDSForest" with "CreateDnsDelegation" when creating forest, if specified' {
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $CreateDnsDelegation -eq $true } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $CreateDnsDelegation -eq $true }
 
                 Set-TargetResource @newForestParams -DnsDelegationCredential $testDelegationCredential;
 
@@ -331,7 +331,7 @@ try
 
             It 'Calls "Install-ADDSForest" with "DatabasePath" when creating forest, if specified' {
                 $testPath = 'TestPath';
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $DatabasePath -eq $testPath } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $DatabasePath -eq $testPath }
 
                 Set-TargetResource @newForestParams -DatabasePath $testPath;
 
@@ -340,7 +340,7 @@ try
 
             It 'Calls "Install-ADDSForest" with "LogPath" when creating forest, if specified' {
                 $testPath = 'TestPath';
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $LogPath -eq $testPath } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $LogPath -eq $testPath }
 
                 Set-TargetResource @newForestParams -LogPath $testPath;
 
@@ -349,7 +349,7 @@ try
 
             It 'Calls "Install-ADDSForest" with "SysvolPath" when creating forest, if specified' {
                 $testPath = 'TestPath';
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $SysvolPath -eq $testPath } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $SysvolPath -eq $testPath }
 
                 Set-TargetResource @newForestParams -SysvolPath $testPath;
 
@@ -357,7 +357,7 @@ try
             }
 
             It 'Calls "Install-ADDSForest" with "DomainNetbiosName" when creating forest, if specified' {
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $DomainNetbiosName -eq $testDomainNetBIOSNameName } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $DomainNetbiosName -eq $testDomainNetBIOSNameName }
 
                 Set-TargetResource @newForestParams -DomainNetBIOSName $testDomainNetBIOSNameName;
 
@@ -365,7 +365,7 @@ try
             }
 
             It 'Calls "Install-ADDSForest" with "ForestMode" when creating forest, if specified' {
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $ForestMode -eq $testDomainForestMode } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $ForestMode -eq $testDomainForestMode }
 
                 Set-TargetResource @newForestParams -ForestMode $testDomainForestMode;
 
@@ -373,7 +373,7 @@ try
             }
 
             It 'Calls "Install-ADDSForest" with "DomainMode" when creating forest, if specified' {
-                Mock -CommandName Install-ADDSForest -ParameterFilter { $DomainMode -eq $testDomainForestMode } -MockWith { }
+                Mock -CommandName Install-ADDSForest -ParameterFilter { $DomainMode -eq $testDomainForestMode }
 
                 Set-TargetResource @newForestParams -DomainMode $testDomainForestMode;
 
@@ -383,7 +383,7 @@ try
             #### ADDSDomain
 
             It 'Calls "Install-ADDSDomain" with "NewDomainName" when creating child domain' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $NewDomainName -eq $testDomainName } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $NewDomainName -eq $testDomainName }
 
                 Set-TargetResource @newDomainParams;
 
@@ -391,7 +391,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "ParentDomainName" when creating child domain' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $ParentDomainName -eq $testParentDomainName } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $ParentDomainName -eq $testParentDomainName }
 
                 Set-TargetResource @newDomainParams;
 
@@ -399,7 +399,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "DomainType" when creating child domain' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DomainType -eq 'ChildDomain' } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DomainType -eq 'ChildDomain' }
 
                 Set-TargetResource @newDomainParams;
 
@@ -407,7 +407,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "SafemodeAdministratorPassword" when creating child domain' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $SafemodeAdministratorPassword -eq $testSafemodePassword } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $SafemodeAdministratorPassword -eq $testSafemodePassword }
 
                 Set-TargetResource @newDomainParams;
 
@@ -415,7 +415,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "Credential" when creating child domain' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $Credential -eq $testParentDomainName } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $Credential -eq $testParentDomainName }
 
                 Set-TargetResource @newDomainParams;
 
@@ -423,7 +423,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "ParentDomainName" when creating child domain' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $ParentDomainName -eq $testParentDomainName } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $ParentDomainName -eq $testParentDomainName }
 
                 Set-TargetResource @newDomainParams;
 
@@ -431,7 +431,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "DnsDelegationCredential" when creating child domain, if specified' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DnsDelegationCredential -eq $testDelegationCredential } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DnsDelegationCredential -eq $testDelegationCredential }
 
                 Set-TargetResource @newDomainParams -DnsDelegationCredential $testDelegationCredential;
 
@@ -439,7 +439,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "CreateDnsDelegation" when creating child domain, if specified' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $CreateDnsDelegation -eq $true } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $CreateDnsDelegation -eq $true }
 
                 Set-TargetResource @newDomainParams -DnsDelegationCredential $testDelegationCredential;
 
@@ -448,7 +448,7 @@ try
 
             It 'Calls "Install-ADDSDomain" with "DatabasePath" when creating child domain, if specified' {
                 $testPath = 'TestPath';
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DatabasePath -eq $testPath } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DatabasePath -eq $testPath }
 
                 Set-TargetResource @newDomainParams -DatabasePath $testPath;
 
@@ -457,7 +457,7 @@ try
 
             It 'Calls "Install-ADDSDomain" with "LogPath" when creating child domain, if specified' {
                 $testPath = 'TestPath';
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $LogPath -eq $testPath } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $LogPath -eq $testPath }
 
                 Set-TargetResource @newDomainParams -LogPath $testPath;
 
@@ -466,7 +466,7 @@ try
 
             It 'Calls "Install-ADDSDomain" with "SysvolPath" when creating child domain, if specified' {
                 $testPath = 'TestPath';
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $SysvolPath -eq $testPath } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $SysvolPath -eq $testPath }
 
                 Set-TargetResource @newDomainParams -SysvolPath $testPath;
 
@@ -474,7 +474,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "NewDomainNetbiosName" when creating child domain, if specified' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $NewDomainNetbiosName -eq $testDomainNetBIOSNameName } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $NewDomainNetbiosName -eq $testDomainNetBIOSNameName }
 
                 Set-TargetResource @newDomainParams -DomainNetBIOSName $testDomainNetBIOSNameName;
 
@@ -482,7 +482,7 @@ try
             }
 
             It 'Calls "Install-ADDSDomain" with "DomainMode" when creating child domain, if specified' {
-                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DomainMode -eq $testDomainForestMode } -MockWith { }
+                Mock -CommandName Install-ADDSDomain -ParameterFilter { $DomainMode -eq $testDomainForestMode }
 
                 Set-TargetResource @newDomainParams -DomainMode $testDomainForestMode;
 
