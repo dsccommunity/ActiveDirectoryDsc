@@ -36,7 +36,8 @@ try
         $correctDomainName = 'present.com';
         $incorrectDomainName = 'incorrect.com';
         $missingDomainName = 'missing.com';
-        $mode = 'WinThreshold';
+        $forestMode = 'WinThreshold';
+        $domainMode = $forestMode;
         $testAdminCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
         $invalidCredential = New-Object System.Management.Automation.PSCredential 'Invalid', (ConvertTo-SecureString 'InvalidPassword' -AsPlainText -Force);
 
@@ -50,11 +51,9 @@ try
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
-            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } { }
-            function ConvertTo-DeploymentForestMode { }
-            function ConvertTo-DeploymentDomainMode { }
-            Mock ConvertTo-DeploymentDomainMode { return $mode }
-            Mock ConvertTo-DeploymentForestMode { return $mode }
+            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' } { }
+            Mock -CommandName ConvertTo-DeploymentDomainMode { return $domainMode }
+            Mock -CommandName ConvertTo-DeploymentForestMode { return $forestMode }
 
             It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
                 Mock Get-ADDomain { [psobject]@{Forest = $correctDomainName}}
@@ -122,14 +121,14 @@ try
             }
 
             It 'Returns the correct domain mode' {
-                (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).DomainMode | Should Be $mode
+                (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).DomainMode | Should Be $domainMode
 
                 Assert-MockCalled -CommandName ConvertTo-DeploymentDomainMode
                 Assert-MockCalled -CommandName ConvertTo-DeploymentForestMode
             }
 
             It 'Returns the correct forest mode' {
-                (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).ForestMode | Should Be $mode
+                (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).ForestMode | Should Be $forestMode
 
                 Assert-MockCalled -CommandName ConvertTo-DeploymentDomainMode
                 Assert-MockCalled -CommandName ConvertTo-DeploymentForestMode
