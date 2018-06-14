@@ -63,50 +63,50 @@ groups and OUs.
 The xADComputer DSC resource will manage computer accounts within Active Directory.
 
 * **ComputerName**: Specifies the name of the computer to manage.
-* **Location**: Specifies the location of the computer, such as an office number (optional).
-* **DnsHostName**: Specifies the fully qualified domain name (FQDN) of the computer (optional).
-* **ServicePrincipalNames**: Specifies the service principal names for the computer account (optional).
-* **UserPrincipalName** :Specifies the UPN assigned to the computer account (optional).
-* **DisplayName**: "Specifies the display name of the computer (optional).
-* **Path**: Specifies the X.500 path of the container where the computer is located (optional).
-* **Description**: Specifies a description of the computer object (optional).
-* **Enabled**: Specifies if the computer account is enabled (optional).
-* **Manager**: Specifies the user or group Distinguished Name that manages the computer object (optional).
+* (optional) **Location**: Specifies the location of the computer, such as an office number.
+* (optional) **DnsHostName**: Specifies the fully qualified domain name (FQDN) of the computer.
+* (optional) **ServicePrincipalNames**: Specifies the service principal names for the computer account.
+* (optional) **UserPrincipalName** :Specifies the UPN assigned to the computer account.
+* (optional) **DisplayName**: "Specifies the display name of the computer.
+* (optional) **Path**: Specifies the X.500 path of the container where the computer is located.
+* (optional) **Description**: Specifies a description of the computer object.
+* (optional) **Enabled**: Specifies if the computer account is enabled.
+* (optional) **Manager**: Specifies the user or group Distinguished Name that manages the computer object.
   * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
-* **DomainController**: Specifies the Active Directory Domain Services instance to connect to perform the task (optional).
-* **DomainAdministratorCredential**: Specifies the user account credentials to use to perform the task (optional).
-* **RequestFile**: Specifies the full path to the Offline Domain Join Request file to create (optional).
+* (optional) **DomainController**: Specifies the Active Directory Domain Services instance to connect to perform the task.
+* (optional) **DomainAdministratorCredential**: Specifies the user account credentials to use to perform the task.
+* (optional) **RequestFile**: Specifies the full path to the Offline Domain Join Request file to create.
 * **Ensure**: Specifies whether the computer account is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
-* **DistinguishedName**: Returns the X.500 path of the computer object (read-only).
-* **SID**: Returns the security identifier of the computer object (read-only).
+* (read-only) **DistinguishedName**: Returns the X.500 path of the computer object.
+* (read-only) **SID**: Returns the security identifier of the computer object.
 
 Note: An ODJ Request file will only be created when a computer account is first created in the domain.
 Setting an ODJ Request file path for a configuration that creates a computer account that already exists will not cause the file to be created.
 
 ### **xADDomain**
 
-The xADDomain resource creates a new domain in a new forest or a child domain in an existing forest. While it is possible to set the forest functional level and the domain functional level during deployment with this resource the common restrictions apply. For more information see [TechNet](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels)
+The xADDomain resource creates a new domain in a new forest or a child domain in an existing forest. While it is possible to set the forest functional level and the domain functional level during deployment with this resource the common restrictions apply. For more information see [TechNet](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels).
 
 * **DomainName**: Name of the domain.
   * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
-* **ParentDomainName**: Fully qualified name of the parent domain (optional).
+* (optional) **ParentDomainName**: Fully qualified name of the parent domain.
 * **DomainAdministratorCredential**: Credentials used to query for domain existence.
   * _Note: These are NOT used during domain creation._
 
 (AD sets the local admin credentials as new domain administrator credentials during setup.)
 
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
-* **DnsDelegationCredential**: Credential used for creating DNS delegation (optional).
-* **DomainNetBIOSName**: Specifies the NetBIOS name for the new domain (optional).
+* (optional) **DnsDelegationCredential**: Credential used for creating DNS delegation.
+* (optional) **DomainNetBIOSName**: Specifies the NetBIOS name for the new domain.
   * If not specified, then the default is automatically computed from the value of the DomainName parameter.
-* **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database (optional).
-* **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
-* **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional)
-* **ForestMode**: Specifies the forest mode if a new forest is deployed. ForestMode will not be raised by this resource for existing forests. (optional)
+* (optional) **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database.
+* (optional) **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
+* (optional) **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
+* (optional) **ForestMode**: Specifies the forest mode if a new forest is deployed. ForestMode will not be raised by this resource for existing forests.
   * Valid values are Win2008, Win2008R2, Win2012, Win2012R2 and WinThreshold (for Windows Server 2016 FFL)
-* **DomainMode**: Specifies the domain mode if a new domain is deployed. DomainMode will not be raised by this resource for existing domains. (optional)
+* (optional) **DomainMode**: Specifies the domain mode if a new domain is deployed. DomainMode will not be raised by this resource for existing domains.
   * Valid values are Win2008, Win2008R2, Win2012, Win2012R2 and WinThreshold (for Windows Server 2016 DFL)
 
 ### **xADDomainController**
@@ -114,10 +114,10 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 * **DomainName**: The fully qualified domain name for the domain where the domain controller will be present.
 * **DomainAdministratorCredential**: Specifies the credential for the account used to install the domain controller.
 * **SafemodeAdministratorPassword**: Password for the administrator account when the computer is started in Safe Mode.
-* **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database (optional).
-* **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written (optional).
-* **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written. (optional)
-* **SiteName**: Specify the name of an existing site where new domain controller will be placed. (optional)
+* (optional) **DatabasePath**: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database.
+* (optional) **LogPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
+* (optional) **SysvolPath**: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
+* (optional) **SiteName**: Specify the name of an existing site where new domain controller will be placed.
 
 ### **xADDomainDefaultPasswordPolicy**
 
@@ -133,8 +133,8 @@ The xADDomainDefaultPasswordPolicy DSC resource will manage an Active Directory 
 * **MinPasswordLength**: Minimum number of characters that a password must contain.
 * **PasswordHistoryCount**: Number of previous passwords to remember.
 * **ReversibleEncryptionEnabled**: Whether the directory must store passwords using reversible encryption.
-* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
-* **Credential**: User account credentials used to perform the operation (optional).
+* (optional) **DomainController**: An existing Active Directory domain controller used to perform the operation.
+* (optional) **Credential**: User account credentials used to perform the operation.
 
 ### **xADDomainTrust**
 
@@ -157,35 +157,35 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * Valid values are 'DomainLocal', 'Global' and 'Universal'.
   * If not specified, it defaults to 'Global'.
 * **Path**: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
-* **Description**: Specifies a description of the group object (optional).
-* **DisplayName**: Specifies the display name of the group object (optional).
-* **Members**: Specifies the explicit AD objects that should comprise the group membership (optional).
+* (optional) **Description**: Specifies a description of the group object.
+* (optional) **DisplayName**: Specifies the display name of the group object.
+* (optional) **Members**: Specifies the explicit AD objects that should comprise the group membership.
   * If not specified, no group membership changes are made.
   * If specified, all undefined group members will be removed the AD group.
   * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
-* **MembersToInclude**: Specifies AD objects that must be in the group (optional).
+* (optional) **MembersToInclude**: Specifies AD objects that must be in the group.
   * If not specified, no group membership changes are made.
   * If specified, only the specified members are added to the group.
   * If specified, no users are removed from the group using this parameter.
   * This property cannot be specified with the 'Members' parameter.
-* **MembersToExclude**: Specifies AD objects that _must not_ be in the group (optional).
+* (optional) **MembersToExclude**: Specifies AD objects that _must not_ be in the group.
   * If not specified, no group membership changes are made.
   * If specified, only those specified are removed from the group.
   * If specified, no users are added to the group using this parameter.
   * This property cannot be specified with the 'Members' parameter.
-* **MembershipAttribute**: Defines the AD object attribute that is used to determine group membership (optional).
+* (optional) **MembershipAttribute**: Defines the AD object attribute that is used to determine group membership.
   * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
   * If not specified, it defaults to 'SamAccountName'.
   * You cannot mix multiple attribute types.
-* **ManagedBy**: Specifies the user or group that manages the group object (optional).
+* (optional) **ManagedBy**: Specifies the user or group that manages the group object.
   * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
-* **Notes**: The group's info attribute (optional).
-* **Ensure**: Specifies whether the group is present or absent.
+* (optional) **Notes**: The group's info attribute.
+* (optional) **Ensure**: Specifies whether the group is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
-* **DomainController**: An existing Active Directory domain controller used to perform the operation (optional).
+* (optional) **DomainController**: An existing Active Directory domain controller used to perform the operation.
   * If not running on a domain controller, this is required.
-* **Credential**: User account credentials used to perform the operation (optional).
+* (optional) **Credential**: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
 
 ### **xADOrganizationalUnit**
@@ -194,10 +194,10 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 
 * **Name**: Name of the Active Directory organizational unit to manage.
 * **Path**: Specified the X500 (DN) path of the organizational unit's parent object.
-* **Description**: The OU description property (optional).
-* **ProtectedFromAccidentalDeletion**: Valid values are $true and $false. If not specified, it defaults to $true.
-* **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
-* **Credential**: User account credentials used to perform the operation (optional). Note: _if not running on a domain controller, this is required_.
+* (optional) **Description**: The OU description property.
+* (optional) **ProtectedFromAccidentalDeletion**: Valid values are $true and $false. If not specified, it defaults to $true.
+* (optional) **Ensure**: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
+* (optional) **Credential**: User account credentials used to perform the operation. Note: _if not running on a domain controller, this is required_.
 
 ### **xADRecycleBin**
 
@@ -209,31 +209,31 @@ Domain Naming Master FSMO of the forest.
 
 * **ForestFQDN**:  Fully qualified domain name of forest to enable Active Directory Recycle Bin.
 * **EnterpriseAdministratorCredential**:  Credential with Enterprise Administrator rights to the forest.
-* **RecycleBinEnabled**:  Read-only. Returned by Get.
-* **ForestMode**:  Read-only. Returned by Get.
+* (read-only) **RecycleBinEnabled**:  Read-only. Returned by Get.
+* (read-only) **ForestMode**:  Read-only. Returned by Get.
 
 ### **xADReplicationSite**
 
-* **Ensure**: Specifies if the AD replication site should be added or remove. Default value is 'Present'. { *Present* | Absent }.
+* (optional) **Ensure**: Specifies if the AD replication site should be added or remove. Default value is 'Present'. { *Present* | Absent }.
 * **Name**: Specifies the name of the AD replication site.
-* **RenameDefaultFirstSiteName**: Specify if the Default-First-Site-Name should be renamed, if it exists. Dafult value is 'false'.
+* (optional) **RenameDefaultFirstSiteName**: Specify if the Default-First-Site-Name should be renamed, if it exists. Dafult value is 'false'.
 
 ### **xADReplicationSubnet**
 
 The xADReplicationSubnet DSC resource will manage replication subnets.
 
-* **Ensure**: Specifies if the AD replication subnet should be added or remove. Default value is 'Present'.
+* (optional) **Ensure**: Specifies if the AD replication subnet should be added or remove. Default value is 'Present'.
 * **Name**: The name of the AD replication subnet, e.g. 10.0.0.0/24.
 * **Site**: The name of the assigned AD replication site, e.g. Default-First-Site-Name.
-* **Location**: The location for the AD replication site. Default value is empty.
+* (optional) **Location**: The location for the AD replication site. Default value is empty.
 
 ### **xADServicePrincipalName**
 
 The xADServicePrincipalName DSC resource will manage service principal names.
 
-* **Ensure**: Specifies if the service principal name should be added or remove. Default value is 'Present'. { *Present* | Absent }.
+* (optional) **Ensure**: Specifies if the service principal name should be added or remove. Default value is 'Present'. { *Present* | Absent }.
 * **ServicePrincipalName**: The full SPN to add or remove, e.g. HOST/LON-DC1.
-* **Account**: The user or computer account to add or remove the SPN, e.b. User1 or LON-DC1$. Default value is ''. If Ensure is set to Present, a value must be specified.
+* (optional) **Account**: The user or computer account to add or remove the SPN, e.b. User1 or LON-DC1$. Default value is ''. If Ensure is set to Present, a value must be specified.
 
 ### **xADUser**
 
@@ -246,61 +246,61 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 * **Password**: Password value for the user account.
   * _If the account is enabled (default behaviour) you must specify a password._
   * _You must ensure that the password meets the domain's complexity requirements._
-* **Ensure**: Specifies whether the given user is present or absent (optional).
+* (optional) **Ensure**: Specifies whether the given user is present or absent.
   * If not specified, this value defaults to Present.
-* **DomainController**: Specifies the Active Directory Domain Services instance to connect to (optional).
+* (optional) **DomainController**: Specifies the Active Directory Domain Services instance to connect to.
   * This is only required if not executing the task on a domain controller.
-* **DomainAdministratorCredential**: User account credentials used to perform the task (optional).
+* (optional) **DomainAdministratorCredential**: User account credentials used to perform the task.
   * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
-* **CommonName**: Specifies the user's CN of the user account (optional).
+* (optional) **CommonName**: Specifies the user's CN of the user account.
   * If not specified, this defaults to the ___UserName___ value.
-* **UserPrincipalName**: Each user account has a user principal name (UPN) in the format [user]@[DNS-domain-name] &#40;optional&#41;.
-* **DisplayName**: Specifies the display name of the user object (optional).
-* **Path**: (optional).
-* **GivenName**: Specifies the user's first or given name (optional).
-* **Initials**: Specifies the initials that represent part of a user's name (optional).
-* **Surname**: Specifies the user's last name or surname (optional).
-* **Description**: Specifies a description of the user object (optional).
-* **StreetAddress**: Specifies the user's street address (optional).
-* **POBox**: Specifies the user's post office box number (optional).
-* **City**: Specifies the user's town or city (optional).
-* **State**: Specifies the user's state or province (optional).
-* **PostalCode**: Specifies the user's postal code or zip code (optional).
-* **Country**: Specifies the country or region code for the user's language of choice (optional).
+* (optional) **UserPrincipalName**: Each user account has a user principal name (UPN) in the format [user]@[DNS-domain-name].
+* (optional) **DisplayName**: Specifies the display name of the user object.
+* (optional) **Path**: The organizational unit to place the user in.
+* (optional) **GivenName**: Specifies the user's first or given name.
+* (optional) **Initials**: Specifies the initials that represent part of a user's name.
+* (optional) **Surname**: Specifies the user's last name or surname.
+* (optional) **Description**: Specifies a description of the user object.
+* (optional) **StreetAddress**: Specifies the user's street address.
+* (optional) **POBox**: Specifies the user's post office box number.
+* (optional) **City**: Specifies the user's town or city.
+* (optional) **State**: Specifies the user's state or province.
+* (optional) **PostalCode**: Specifies the user's postal code or zip code.
+* (optional) **Country**: Specifies the country or region code for the user's language of choice.
   * This should be specified as the country's two character ISO-3166 code.
-* **Department**: Specifies the user's department (optional).
-* **Division**: Specifies the user's division (optional).
-* **Company**: Specifies the user's company (optional).
-* **Office**: Specifies the location of the user's office or place of business (optional).
-* **JobTitle**: Specifies the user's job title (optional).
-* **EmailAddress**: Specifies the user's e-mail address (optional).
-* **EmployeeID**: Specifies the user's employee ID (optional).
-* **EmployeeNumber**: Specifies the user's employee number (optional).
-* **HomeDirectory**: Specifies a user's home directory path (optional).
-* **HomeDrive**: Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (optional).
+* (optional) **Department**: Specifies the user's department.
+* (optional) **Division**: Specifies the user's division.
+* (optional) **Company**: Specifies the user's company.
+* (optional) **Office**: Specifies the location of the user's office or place of business.
+* (optional) **JobTitle**: Specifies the user's job title.
+* (optional) **EmailAddress**: Specifies the user's e-mail address.
+* (optional) **EmployeeID**: Specifies the user's employee ID.
+* (optional) **EmployeeNumber**: Specifies the user's employee number.
+* (optional) **HomeDirectory**: Specifies a user's home directory path.
+* (optional) **HomeDrive**: Specifies a drive that is associated with the UNC path defined by the HomeDirectory property.
   * The drive letter is specified as "[DriveLetter]:" where [DriveLetter] indicates the letter of the drive to associate.
   * The [DriveLetter] must be a single, uppercase letter and the colon is required.
-* **HomePage**: Specifies the URL of the home page of the user object (optional).
-* **ProfilePath**: Specifies a path to the user's profile (optional).
+* (optional) **HomePage**: Specifies the URL of the home page of the user object.
+* (optional) **ProfilePath**: Specifies a path to the user's profile.
   * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
-* **LogonScript**: Specifies a path to the user's log on script (optional).
+* (optional) **LogonScript**: Specifies a path to the user's log on script.
   * This value can be a local absolute path or a Universal Naming Convention (UNC) path.
-* **Notes**: (optional).
-* **OfficePhone**: Specifies the user's office telephone number (optional).
-* **MobilePhone**: Specifies the user's mobile phone number (optional).
-* **Fax**: Specifies the user's fax phone number (optional).
-* **Pager**: Specifies the user's pager number (optional).
-* **IPPhone**: Specifies the user's IP telephony number (optional).
-* **HomePhone**: Specifies the user's home telephone number (optional).
-* **Enabled**: Specifies if an account is enabled (optional).
+* (optional) **Notes**: Sets the notes attribute.
+* (optional) **OfficePhone**: Specifies the user's office telephone number.
+* (optional) **MobilePhone**: Specifies the user's mobile phone number.
+* (optional) **Fax**: Specifies the user's fax phone number.
+* (optional) **Pager**: Specifies the user's pager number.
+* (optional) **IPPhone**: Specifies the user's IP telephony number.
+* (optional) **HomePhone**: Specifies the user's home telephone number.
+* (optional) **Enabled**: Specifies if an account is enabled.
   * An enabled account requires a password.
-* **Manager**: Specifies the user's manager (optional).
+* (optional) **Manager**: Specifies the user's manager.
   * This value can be specified as a DN, ObjectGUID, SID or SamAccountName.
-* **PasswordNeverExpires**: Specifies whether the password of an account can expire (optional).
+* (optional) **PasswordNeverExpires**: Specifies whether the password of an account can expire.
   * If not specified, this value defaults to False.
-* **CannotChangePassword**: Specifies whether the account password can be changed (optional).
+* (optional) **CannotChangePassword**: Specifies whether the account password can be changed.
   * If not specified, this value defaults to False.
-* **PasswordAuthentication**: Specifies the authentication context used when testing users' passwords (optional).
+* (optional) **PasswordAuthentication**: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 
 ### **xWaitForADDomain**
