@@ -166,21 +166,6 @@ try
 
                 (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).ForestMode | Should Be $forestMode.ToString()
             }
-
-            It 'Does not return $null as forest or domain mode' {
-                Mock -CommandName Get-ADDomain -MockWith { 
-                    [psobject]@{
-                        Forest     = $correctDomainName
-                        DomainMode = $mgmtDomainMode
-                    }
-                }
-                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
-
-                $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
-
-                $result.DomainMode | Should Not Be $null
-                $result.ForestMode | Should Not Be $null
-            }
         }
         #endregion
 
