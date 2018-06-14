@@ -59,7 +59,7 @@ try
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
             It "Returns a 'System.Collections.Hashtable' object type" {
-                Mock Get-ADUser { return [PSCustomObject] $fakeADUser; }
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser; }
 
                 $adUser = Get-TargetResource @testPresentParams;
 
@@ -67,7 +67,7 @@ try
             }
 
             It "Returns 'Ensure' is 'Present' when user account exists" {
-                Mock Get-ADUser { return [PSCustomObject] $fakeADUser; }
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser; }
 
                 $adUser = Get-TargetResource @testPresentParams;
 
@@ -75,7 +75,7 @@ try
             }
 
             It "Returns 'Ensure' is 'Absent' when user account does not exist" {
-                Mock Get-ADUser { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Get-ADUser -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
                 $adUser = Get-TargetResource @testPresentParams;
 
@@ -83,19 +83,19 @@ try
             }
 
             It "Calls 'Get-ADUser' with 'Server' parameter when 'DomainController' specified" {
-                Mock Get-ADUser -ParameterFilter { $Server -eq $testDomainController } -MockWith { return [PSCustomObject] $fakeADUser; }
+                Mock -CommandName Get-ADUser -ParameterFilter { $Server -eq $testDomainController } -MockWith { return [PSCustomObject] $fakeADUser; }
 
                 Get-TargetResource @testPresentParams -DomainController $testDomainController;
 
-                Assert-MockCalled Get-ADUser -ParameterFilter { $Server -eq $testDomainController } -Scope It;
+                Assert-MockCalled Get-ADUser -ParameterFilter { $Server -eq $testDomainController } -Scope It
             }
 
             It "Calls 'Get-ADUser' with 'Credential' parameter when 'DomainAdministratorCredential' specified" {
-                Mock Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -MockWith { return [PSCustomObject] $fakeADUser; }
+                Mock -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -MockWith { return [PSCustomObject] $fakeADUser; }
 
                 Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential;
 
-                Assert-MockCalled Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It;
+                Assert-MockCalled Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
         }
@@ -105,59 +105,59 @@ try
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
 
             It "Passes when user account does not exist and 'Ensure' is 'Absent'" {
-                Mock Get-TargetResource { return $testAbsentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
                 Test-TargetResource @testAbsentParams | Should Be $true;
             }
 
             It "Passes when user account exists and 'Ensure' is 'Present'" {
-                Mock Get-TargetResource { return $testPresentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
                 Test-TargetResource @testPresentParams | Should Be $true;
             }
 
             It "Passes when user account password matches and 'Password' is specified" {
-                Mock Get-TargetResource { return $testPresentParams }
-                Mock Test-Password { return $true; }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                Mock -CommandName Test-Password { return $true; }
 
                 Test-TargetResource @testPresentParams -Password $testCredential | Should Be $true;
             }
 
             It "Fails when user account does not exist and 'Ensure' is 'Present'" {
-                Mock Get-TargetResource { return $testAbsentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
                 Test-TargetResource @testPresentParams | Should Be $false;
             }
 
             It "Fails when user account exists, and 'Ensure' is 'Absent'" {
-                Mock Get-TargetResource { return $testPresentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
                 Test-TargetResource @testAbsentParams | Should Be $false;
             }
 
             It "Fails when user account password is incorrect and 'Password' is specified" {
-                Mock Get-TargetResource { return $testPresentParams }
-                Mock Test-Password { return $false; }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                Mock -CommandName Test-Password { return $false; }
 
                 Test-TargetResource @testPresentParams -Password $testCredential | Should Be $false;
             }
 
             It "Calls 'Test-Password' with 'Default' PasswordAuthentication by default" {
-                Mock Get-TargetResource { return $testPresentParams }
-                Mock Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } { return $true; }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                Mock -CommandName Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } { return $true; }
 
                 Test-TargetResource @testPresentParams -Password $testCredential;
 
-                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } -Scope It;
+                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Default' } -Scope It
             }
 
             It "Calls 'Test-Password' with 'Negotiate' PasswordAuthentication when specified" {
-                Mock Get-TargetResource { return $testPresentParams }
-                Mock Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } { return $false; }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                Mock -CommandName Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } { return $false; }
 
                 Test-TargetResource @testPresentParams -Password $testCredential -PasswordAuthentication 'Negotiate';
 
-                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } -Scope It;
+                Assert-MockCalled Test-Password -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' } -Scope It
             }
 
             foreach ($testParameter in $testStringProperties) {
@@ -168,7 +168,7 @@ try
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
                     $invalidADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADUser[$testParameter] = $testParameterValue;
                         return $validADUser;
                     }
@@ -182,7 +182,7 @@ try
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
                     $invalidADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADUser[$testParameter] = $testParameterValue.Substring(0, ([System.Int32] $testParameterValue.Length/2));
                         return $invalidADUser;
                     }
@@ -196,7 +196,7 @@ try
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
                     $invalidADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADUser[$testParameter] = '';
                         return $invalidADUser;
                     }
@@ -210,7 +210,7 @@ try
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
                     $invalidADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADUser[$testParameter] = $null;
                         return $invalidADUser;
                     }
@@ -222,7 +222,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADUser[$testParameter] = '';
                         return $validADUser;
                     }
@@ -234,7 +234,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADUser[$testParameter] = $null;
                         return $validADUser;
                     }
@@ -252,7 +252,7 @@ try
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
                     $invalidADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADUser[$testParameter] = $testParameterValue;
                         return $validADUser;
                     }
@@ -266,7 +266,7 @@ try
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADUser = $testPresentParams.Clone();
                     $invalidADUser = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADUser[$testParameter] = -not $testParameterValue;
                         return $invalidADUser;
                     }
@@ -288,59 +288,59 @@ try
                 $newAbsentParams['UserName'] = $newUserName;
                 $newPresentParams = $testPresentParams.Clone();
                 $newPresentParams['UserName'] = $newUserName;
-                Mock New-ADUser -ParameterFilter { $Name -eq $newUserName } { }
-                Mock Set-ADUser { }
-                Mock Get-TargetResource -ParameterFilter { $Username -eq $newUserName } { return $newAbsentParams; }
+                Mock -CommandName New-ADUser -ParameterFilter { $Name -eq $newUserName } { }
+                Mock -CommandName Set-ADUser { }
+                Mock -CommandName Get-TargetResource -ParameterFilter { $Username -eq $newUserName } { return $newAbsentParams; }
 
                 Set-TargetResource @newPresentParams;
 
-                Assert-MockCalled New-ADUser -ParameterFilter { $Name -eq $newUserName } -Scope It;
+                Assert-MockCalled New-ADUser -ParameterFilter { $Name -eq $newUserName } -Scope It
             }
 
             It "Calls 'Move-ADObject' when 'Ensure' is 'Present', the account exists but Path is incorrect" {
                 $testTargetPath = 'CN=Users,DC=contoso,DC=com';
-                Mock Set-ADUser { }
-                Mock Get-ADUser {
+                Mock -CommandName Set-ADUser { }
+                Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone();
                     $duffADUser['DistinguishedName'] = "CN=$($testPresentParams.UserName),OU=WrongPath,DC=contoso,DC=com";
                     return $duffADUser;
                 }
-                Mock Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -MockWith { }
+                Mock -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -MockWith { }
 
                 Set-TargetResource @testPresentParams -Path $testTargetPath -Enabled $true;
 
-                Assert-MockCalled Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -Scope It;
+                Assert-MockCalled Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -Scope It
             }
 
             It "Calls 'Rename-ADObject' when 'Ensure' is 'Present', the account exists but 'CommonName' is incorrect" {
                 $testCommonName = 'Test Common Name';
-                Mock Set-ADUser { }
-                Mock Get-ADUser { return $fakeADUser; }
-                Mock Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName } -MockWith { }
+                Mock -CommandName Set-ADUser { }
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser; }
+                Mock -CommandName Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName } -MockWith { }
 
                 Set-TargetResource @testPresentParams -CommonName $testCommonName -Enabled $true;
 
-                Assert-MockCalled Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName } -Scope It;
+                Assert-MockCalled Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName } -Scope It
             }
 
             It "Calls 'Set-ADAccountPassword' when 'Password' parameter is specified" {
-                Mock Get-ADUser { return $fakeADUser; }
-                Mock Set-ADUser { }
-                Mock Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password } -MockWith { }
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser; }
+                Mock -CommandName Set-ADUser { }
+                Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password } -MockWith { }
 
                 Set-TargetResource @testPresentParams -Password $testCredential;
 
-                Assert-MockCalled Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password } -Scope It;
+                Assert-MockCalled Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password } -Scope It
             }
 
             It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is null" {
                 $testADPropertyName = 'Description';
-                Mock Get-ADUser {
+                Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone();
                     $duffADUser[$testADPropertyName] = $null;
                     return $duffADUser;
                 }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
 
                 Set-TargetResource @testPresentParams -Description 'My custom description';
 
@@ -349,12 +349,12 @@ try
 
             It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is empty" {
                 $testADPropertyName = 'Description';
-                Mock Get-ADUser {
+                Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone();
                     $duffADUser[$testADPropertyName] = '';
                     return $duffADUser;
                 }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
 
                 Set-TargetResource @testPresentParams -Description 'My custom description';
 
@@ -363,12 +363,12 @@ try
 
             It "Calls 'Set-ADUser' with 'Remove' when new matching AD property is empty" {
                 $testADPropertyName = 'Description';
-                Mock Get-ADUser {
+                Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone();
                     $duffADUser[$testADPropertyName] = 'Incorrect parameter value';
                     return $duffADUser;
                 }
-                Mock Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
 
                 Set-TargetResource @testPresentParams -Description '';
 
@@ -377,12 +377,12 @@ try
 
             It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {
                 $testADPropertyName = 'Title';
-                Mock Get-ADUser {
+                Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone();
                     $duffADUser[$testADPropertyName] = $null;
                     return $duffADUser;
                 }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
 
                 Set-TargetResource @testPresentParams -JobTitle 'Gaffer';
 
@@ -391,12 +391,12 @@ try
 
             It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is empty" {
                 $testADPropertyName = 'Title';
-                Mock Get-ADUser {
+                Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone();
                     $duffADUser[$testADPropertyName] = '';
                     return $duffADUser;
                 }
-                Mock Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -MockWith { }
 
                 Set-TargetResource @testPresentParams -JobTitle 'Gaffer';
 
@@ -405,12 +405,12 @@ try
 
             It "Calls 'Set-ADUser' with 'Remove' when new mismatched AD property is empty" {
                 $testADPropertyName = 'Title';
-                Mock Get-ADUser {
+                Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone();
                     $duffADUser[$testADPropertyName] = 'Incorrect job title';
                     return $duffADUser;
                 }
-                Mock Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -MockWith { }
 
                 Set-TargetResource @testPresentParams -JobTitle '';
 
@@ -418,12 +418,12 @@ try
             }
 
             It "Calls 'Remove-ADUser' when 'Ensure' is 'Absent' and user account exists" {
-                Mock Get-ADUser { return [PSCustomObject] $fakeADUser; }
-                Mock Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -MockWith { }
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser; }
+                Mock -CommandName Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -MockWith { }
 
                 Set-TargetResource @testAbsentParams;
 
-                Assert-MockCalled Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -Scope It;
+                Assert-MockCalled Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -Scope It
             }
 
         }
@@ -452,4 +452,5 @@ finally
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
+
 
