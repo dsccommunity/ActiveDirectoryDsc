@@ -532,7 +532,7 @@ try
             }
 
             It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
-                ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should Be Win2012
+                ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should Be ([Microsoft.DirectoryServices.Deployment.Types.ForestMode]::Win2012)
             }
 
             It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
@@ -540,7 +540,7 @@ try
             }
 
             It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
-                ConvertTo-DeploymentForestMode -ModeId 5 | Should Be Win2012
+                ConvertTo-DeploymentForestMode -ModeId 5 | Should Be ([Microsoft.DirectoryServices.Deployment.Types.ForestMode]::Win2012)
             }
 
             It 'Throws an exception when an invalid forest mode is selected' {
@@ -560,7 +560,7 @@ try
             }
 
             It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
-                ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should Be Win2012
+                ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should Be ([Microsoft.DirectoryServices.Deployment.Types.DomainMode]::Win2012)
             }
 
             It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
@@ -568,7 +568,7 @@ try
             }
 
             It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
-                ConvertTo-DeploymentDomainMode -ModeId 5 | Should Be Win2012
+                ConvertTo-DeploymentDomainMode -ModeId 5 | Should Be ([Microsoft.DirectoryServices.Deployment.Types.DomainMode]::Win2012)
             }
 
             It 'Throws an exception when an invalid forest mode is selected' {
