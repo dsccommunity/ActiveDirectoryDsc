@@ -93,9 +93,7 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
   * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
 * **`[String]` ParentDomainName** _(Write)_: Fully qualified name of the parent domain.
 * **`[PSCredential]` DomainAdministratorCredential** _(Required)_: Credentials used to query for domain existence.
-  * _Note: These are NOT used during domain creation._
-
-(AD sets the local admin credentials as new domain administrator credentials during setup.)
+  * _Note: These are NOT used during domain creation._ During an Active Directory deployment the local administrator credentials are used for the domain administrator.
 
 * **`[PSCredential]` SafemodeAdministratorPassword** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.
 * **`[PSCredential]` DnsDelegationCredential** _(Write)_: Credential used for creating DNS delegation.
@@ -318,6 +316,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 * Changes to xActiveDirectory
   * Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/xActiveDirectory/issues/190). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
   * Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/xActiveDirectory/issues/198). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
+  * xADDomain is now capable of setting the forest and domain functional level ([issue #187](https://github.com/PowerShell/xActiveDirectory/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.19.0.0
 
@@ -331,7 +330,6 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * The helper function script file MSFT_xADCommon.ps1 was renamed to
     MSFT_xADCommon.psm1 to be a module script file instead. This makes it
     possible to report code coverage for the helper functions ([issue #201](https://github.com/PowerShell/xActiveDirectory/issues/201)).
-  * xADDomain is now capable of setting the forest and domain functional level ([issue #187](https://github.com/PowerShell/xActiveDirectory/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.18.0.0
 
