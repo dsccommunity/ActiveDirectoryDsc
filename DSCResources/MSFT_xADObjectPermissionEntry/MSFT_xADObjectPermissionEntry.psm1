@@ -89,10 +89,16 @@ function Get-TargetResource
                 $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
                 $access.InheritedObjectType.Guid -eq $InheritedObjectType)
             {
+                Write-Verbose "Target ace has been found"
+
                 $returnValue['Ensure'] = 'Present'
                 $returnValue['ActiveDirectoryRights'] = [String[]] $access.ActiveDirectoryRights.ToString().Split(',').ForEach({ $_.Trim() })
 
                 return $returnValue
+            }
+            else
+            {
+                Write-Verbose "Target ace has not been found"
             }
         }
     }
@@ -198,8 +204,7 @@ function Set-TargetResource
 
         $acl.AddAccessRule($ace)
     }
-
-    if ($Ensure -eq 'Absent')
+    else
     {
         <#
             Iterate through all ace entries to find the desired ace, which
@@ -305,7 +310,15 @@ function Test-TargetResource
     )
 
     # Get the current state
-    $currentState = Get-TargetResource -Path $Path -IdentityReference $IdentityReference -AccessControlType $AccessControlType -ObjectType $ObjectType -ActiveDirectorySecurityInheritance $ActiveDirectorySecurityInheritance -InheritedObjectType $InheritedObjectType
+    $getTargetResourceSplat = @{
+        Path                               = $Path
+        IdentityReference                  = $IdentityReference
+        AccessControlType                  = $AccessControlType
+        ObjectType                         = $ObjectType
+        ActiveDirectorySecurityInheritance = $ActiveDirectorySecurityInheritance
+        InheritedObjectType                = $InheritedObjectType
+    }
+    $currentState = Get-TargetResource @getTargetResourceSplat
 
     # Always check, if the ensure state is desired
     $returnValue = $currentState.Ensure -eq $Ensure
