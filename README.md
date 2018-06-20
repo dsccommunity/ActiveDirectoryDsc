@@ -189,39 +189,15 @@ The xADGroup DSC resource will manage groups within Active Directory.
 
 ### **xADObjectPermissionEntry**
 
-The xADObjectPermissionEntry DSC resource will manage access control lists on Active Directory objects-
+The xADObjectPermissionEntry DSC resource will manage access control lists on Active Directory objects.
 
 * **Ensure**: Indicates if the access will be added (Present) or will be removed (Absent). Default is 'Present'.
 * **Path**: Active Directory path of the object, specified as a Distinguished Name.
 * **IdentityReference**: Indicates the identity of the principal for the ace.
-* **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values:
-  * AccessSystemSecurity
-  * CreateChild
-  * Delete
-  * DeleteChild
-  * DeleteTree
-  * ExtendedRight
-  * GenericAll
-  * GenericExecute
-  * GenericRead
-  * GenericWrite
-  * ListChildren
-  * ListObject
-  * ReadControl
-  * ReadProperty
-  * Self
-  * Synchronize
-  * WriteDacl
-  * WriteOwner
-  * WriteProperty
+* **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values: { AccessSystemSecurity | CreateChild | Delete | DeleteChild | DeleteTree | ExtendedRight | GenericAll | GenericExecute | GenericRead | GenericWrite | ListChildren | ListObject | ReadControl | ReadProperty | Self | Synchronize | WriteDacl | WriteOwner | WriteProperty }
 * **AccessControlType**: Indicates whether to Allow or Deny access to the target object.
 * **ObjectType**: The schema GUID of the object to which the access rule applies.
-* **ActiveDirectorySecurityInheritance**: One of the 'ActiveDirectorySecurityInheritance' enumeration values that specifies the inheritance type of the access rule.
-  * All
-  * Children
-  * Descendents
-  * None
-  * SelfAndChildren
+* **ActiveDirectorySecurityInheritance**: One of the 'ActiveDirectorySecurityInheritance' enumeration values that specifies the inheritance type of the access rule. { All | Children | Descendents | None | SelfAndChildren }.
 * **InheritedObjectType**: The schema GUID of the child object type that can inherit this access rule.
 
 ### **xADOrganizationalUnit**
