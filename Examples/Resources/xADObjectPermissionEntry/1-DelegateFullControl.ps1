@@ -1,7 +1,9 @@
 <#
     .EXAMPLE
-        In this example, we will add full control (GeneralAll) permissions to
-        the virtual computer object (VCO) for a cluster name object (CNO).
+        In this example, we will add full control (GenericAll) permissions to
+        the virtual computer object (VCO) ROLE01 for a cluster name object (CNO)
+        CONTOSO\CLUSTER01$. This is used so that the Windows Failover Cluster
+        can control the roles AD objects.
 #>
 
 configuration Example
