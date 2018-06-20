@@ -87,7 +87,7 @@ try
 
             Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
 
-            Context 'The desired ace is present' {
+            Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
 
@@ -115,7 +115,7 @@ try
                 }
             }
 
-            Context 'The desired ace is absent' {
+            Context 'When the desired ace is absent' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
 
@@ -142,7 +142,7 @@ try
 
             Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
 
-            Context 'The desired ace is present' {
+            Context 'When he desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
 
@@ -171,7 +171,7 @@ try
                 }
             }
 
-            Context 'The desired ace is absent' {
+            Context 'When the desired ace is absent' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
 
@@ -199,7 +199,7 @@ try
 
             Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
 
-            Context 'The desired ace is present' {
+            Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
                 Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
@@ -213,7 +213,7 @@ try
                 }
             }
 
-            Context 'The desired ace is absent' {
+            Context 'When the desired ace is absent' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
                 Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
