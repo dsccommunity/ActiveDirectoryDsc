@@ -323,7 +323,7 @@ function Test-TargetResource
     # Always check, if the ensure state is desired
     $returnValue = $currentState.Ensure -eq $Ensure
 
-    # Only checn the Active Directory rights, if ensure is set to present
+    # Only check the Active Directory rights, if ensure is set to present
     if ($Ensure -eq 'Present')
     {
         # Convert to array to a string for easy compare
