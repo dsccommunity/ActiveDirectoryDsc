@@ -1,4 +1,10 @@
-﻿# Localized messages
+﻿## Import the common AD functions
+$adCommonFunctions = Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
+Import-Module -Name $adCommonFunctions
+
+# Localized messages
 data localizedData
 {
     # culture="en-US"
@@ -34,18 +40,18 @@ function Get-TargetResource
     (
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String] $DomainController,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $Credential      
+        $Credential
     )
     Assert-Module -ModuleName 'ActiveDirectory';
-    
+
     $PSBoundParameters['Identity'] = $DomainName;
     $getADDefaultDomainPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters;
     Write-Verbose -Message ($localizedData.QueryingDomainPasswordPolicy -f $DomainName);
@@ -73,42 +79,42 @@ function Test-TargetResource
     (
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         [Parameter()]
         [System.Boolean] $ComplexityEnabled,
-        
+
         [Parameter()]
         [System.UInt32] $LockoutDuration,
-        
+
         [Parameter()]
         [System.UInt32] $LockoutObservationWindow,
-        
+
         [Parameter()]
         [System.UInt32] $LockoutThreshold,
-        
+
         [Parameter()]
         [System.UInt32] $MinPasswordAge,
-        
+
         [Parameter()]
         [System.UInt32] $MaxPasswordAge,
-        
+
         [Parameter()]
         [System.UInt32] $MinPasswordLength,
-        
+
         [Parameter()]
         [System.UInt32] $PasswordHistoryCount,
-        
+
         [Parameter()]
         [System.Boolean] $ReversibleEncryptionEnabled,
-        
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String] $DomainController,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $Credential        
+        $Credential
     )
     $getTargetResourceParams = @{
         DomainName = $DomainName;
@@ -122,7 +128,7 @@ function Test-TargetResource
         $getTargetResourceParams['DomainController'] = $DomainController;
     }
     $targetResource = Get-TargetResource @getTargetResourceParams;
-    
+
     $inDesiredState = $true;
     foreach ($property in $mutablePropertyMap)
     {
@@ -159,42 +165,42 @@ function Set-TargetResource
     (
         [Parameter(Mandatory)]
         [System.String] $DomainName,
-        
+
         [Parameter()]
         [System.Boolean] $ComplexityEnabled,
-        
+
         [Parameter()]
         [System.UInt32] $LockoutDuration,
-        
+
         [Parameter()]
         [System.UInt32] $LockoutObservationWindow,
-        
+
         [Parameter()]
         [System.UInt32] $LockoutThreshold,
-        
+
         [Parameter()]
         [System.UInt32] $MinPasswordAge,
-        
+
         [Parameter()]
         [System.UInt32] $MaxPasswordAge,
-        
+
         [Parameter()]
         [System.UInt32] $MinPasswordLength,
-        
+
         [Parameter()]
         [System.UInt32] $PasswordHistoryCount,
-        
+
         [Parameter()]
         [System.Boolean] $ReversibleEncryptionEnabled,
-        
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String] $DomainController,
-        
+
         [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $Credential        
+        $Credential
     )
     Assert-Module -ModuleName 'ActiveDirectory';
     $PSBoundParameters['Identity'] = $DomainName;
@@ -218,9 +224,5 @@ function Set-TargetResource
     Write-Verbose -Message ($localizedData.UpdatingDomainPasswordPolicy -f $DomainName);
     [ref] $null = Set-ADDefaultDomainPasswordPolicy @setADDefaultDomainPasswordPolicyParams;
 } #end Set-TargetResource
-
-## Import the common AD functions
-$adCommonFunctions = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.ps1';
-. $adCommonFunctions;
 
 Export-ModuleMember -Function *-TargetResource;

@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '2.18.0.0'
+moduleVersion = '2.19.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,9 +49,16 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xADReplicationSite: Resource added.
-* Added xADReplicationSubnet resource.
-* Fixed bug with group members in xADGroup
+        ReleaseNotes = '* Changes to xActiveDirectory
+  * Activated the GitHub App Stale on the GitHub repository.
+  * The resources are now in alphabetical order in the README.md
+    ([issue 194](https://github.com/PowerShell/xActiveDirectory/issues/194)).
+  * Adding a Branches section to the README.md with Codecov badges for both
+    master and dev branch ([issue 192](https://github.com/PowerShell/xActiveDirectory/issues/192)).
+  * xADGroup no longer resets GroupScope and Category to default values ([issue 183](https://github.com/PowerShell/xActiveDirectory/issues/183)).
+  * The helper function script file MSFT_xADCommon.ps1 was renamed to
+    MSFT_xADCommon.psm1 to be a module script file instead. This makes it
+    possible to report code coverage for the helper functions ([issue 201](https://github.com/PowerShell/xActiveDirectory/issues/201)).
 
 '
 
@@ -59,6 +66,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 

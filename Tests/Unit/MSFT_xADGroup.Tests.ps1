@@ -83,65 +83,65 @@ try
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
-            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
+            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Calls "Assert-Module" to check AD module is installed' {
-                Mock Get-ADGroup { return $fakeADGroup; }
-                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                 $result = Get-TargetResource @testPresentParams; # -DomainName $correctDomainName;
 
-                Assert-MockCalled Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It;
+                Assert-MockCalled Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It
             }
 
             It "Returns 'Ensure' is 'Present' when group exists" {
-                Mock Get-ADGroup { return $fakeADGroup; }
-                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                 (Get-TargetResource @testPresentParams).Ensure | Should Be 'Present';
             }
 
             It "Returns 'Ensure' is 'Absent' when group does not exist" {
-                Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
                 (Get-TargetResource @testPresentParams).Ensure | Should Be 'Absent';
             }
 
 
             It "Calls 'Get-ADGroup' with 'Server' parameter when 'DomainController' specified" {
-                Mock Get-ADGroup -ParameterFilter { $Server -eq $testDomainController } -MockWith { return $fakeADGroup; }
-                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Get-ADGroup -ParameterFilter { $Server -eq $testDomainController } -MockWith { return $fakeADGroup; }
+                Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                 Get-TargetResource @testPresentParams -DomainController $testDomainController;
 
-                Assert-MockCalled Get-ADGroup -ParameterFilter { $Server -eq $testDomainController } -Scope It;
+                Assert-MockCalled Get-ADGroup -ParameterFilter { $Server -eq $testDomainController } -Scope It
             }
 
             It "Calls 'Get-ADGroup' with 'Credential' parameter when specified" {
-                Mock Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return $fakeADGroup; }
-                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return $fakeADGroup; }
+                Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                 Get-TargetResource @testPresentParams -Credential $testCredentials;
 
-                Assert-MockCalled Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+                Assert-MockCalled Get-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It
             }
 
             It "Calls 'Get-ADGroupMember' with 'Server' parameter when 'DomainController' specified" {
-                Mock Get-ADGroup  -MockWith { return $fakeADGroup; }
-                Mock Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -MockWith { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Get-ADGroup  -MockWith { return $fakeADGroup; }
+                Mock -CommandName Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -MockWith { return @($fakeADUser1, $fakeADUser2); }
 
                 Get-TargetResource @testPresentParams -DomainController $testDomainController;
 
-                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -Scope It;
+                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Server -eq $testDomainController } -Scope It
             }
 
             It "Calls 'Get-ADGroupMember' with 'Credential' parameter when specified" {
-                Mock Get-ADGroup -MockWith { return $fakeADGroup; }
-                Mock Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Get-ADGroup -MockWith { return $fakeADGroup; }
+                Mock -CommandName Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return @($fakeADUser1, $fakeADUser2); }
 
                 Get-TargetResource @testPresentParams -Credential $testCredentials;
 
-                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+                Assert-MockCalled Get-ADGroupMember -ParameterFilter { $Credential -eq $testCredentials } -Scope It
             }
 
         }
@@ -150,13 +150,13 @@ try
         #region Function Test-TargetResource
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
 
-            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
+            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             foreach ($attribute in @('SamAccountName','DistinguishedName','ObjectGUID','SID')) {
 
                 It "Passes when group 'Members' match using '$attribute'" {
-                    Mock Get-ADGroup { return $fakeADGroup; }
-                    Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                    Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                    Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                     $targetResource = Test-TargetResource @testPresentParams -Members $fakeADUser1.$attribute, $fakeADUser2.$attribute -MembershipAttribute $attribute;
 
@@ -164,8 +164,8 @@ try
                 }
 
                 It "Fails when group membership counts do not match using '$attribute'" {
-                    Mock Get-ADGroup { return $fakeADGroup; }
-                    Mock Get-ADGroupMember { return @($fakeADUser1); }
+                    Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                    Mock -CommandName Get-ADGroupMember { return @($fakeADUser1); }
 
                     $targetResource = Test-TargetResource @testPresentParams -Members $fakeADUser2.$attribute, $fakeADUser3.$attribute -MembershipAttribute $attribute;
 
@@ -173,8 +173,8 @@ try
                 }
 
                 It "Fails when group 'Members' do not match using '$attribute'" {
-                    Mock Get-ADGroup { return $fakeADGroup; }
-                    Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                    Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                    Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                     $targetResource = Test-TargetResource @testPresentParams -Members $fakeADUser2.$attribute, $fakeADUser3.$attribute -MembershipAttribute $attribute;
 
@@ -182,8 +182,8 @@ try
                 }
 
                 It "Passes when specified 'MembersToInclude' match using '$attribute'" {
-                    Mock Get-ADGroup { return $fakeADGroup; }
-                    Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                    Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                    Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToInclude $fakeADUser2.$attribute -MembershipAttribute $attribute;
 
@@ -191,8 +191,8 @@ try
                 }
 
                 It "Fails when specified 'MembersToInclude' are missing using '$attribute'" {
-                    Mock Get-ADGroup { return $fakeADGroup; }
-                    Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                    Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                    Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToInclude $fakeADUser3.$attribute -MembershipAttribute $attribute;
 
@@ -200,8 +200,8 @@ try
                 }
 
                 It "Passes when specified 'MembersToExclude' are missing using '$attribute'" {
-                    Mock Get-ADGroup { return $fakeADGroup; }
-                    Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                    Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                    Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToExclude $fakeADUser3.$attribute -MembershipAttribute $attribute;
 
@@ -209,8 +209,8 @@ try
                 }
 
                 It "Fails when when specified 'MembersToExclude' match using '$attribute'" {
-                    Mock Get-ADGroup { return $fakeADGroup; }
-                    Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                    Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                    Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToExclude $fakeADUser2.$attribute -MembershipAttribute $attribute;
 
@@ -220,13 +220,13 @@ try
             } #end foreach attribute
 
             It "Fails when group does not exist and 'Ensure' is 'Present'" {
-                Mock Get-TargetResource { return $testAbsentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Scope' is wrong" {
-                Mock Get-TargetResource {
+                Mock -CommandName Get-TargetResource -MockWith {
                     $duffADGroup = $testPresentParams.Clone();
                     $duffADGroup['GroupScope'] = 'Universal';
                     return $duffADGroup;
@@ -236,7 +236,7 @@ try
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Category' is wrong" {
-                Mock Get-TargetResource {
+                Mock -CommandName Get-TargetResource -MockWith {
                     $duffADGroup = $testPresentParams.Clone();
                     $duffADGroup['Category'] = 'Distribution';
                     return $duffADGroup;
@@ -246,7 +246,7 @@ try
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Path' is wrong" {
-                Mock Get-TargetResource {
+                Mock -CommandName Get-TargetResource -MockWith {
                     $duffADGroup = $testPresentParams.Clone();
                     $duffADGroup['Path'] = 'OU=WrongPath,DC=contoso,DC=com';
                     return $duffADGroup;
@@ -256,7 +256,7 @@ try
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Description' is wrong" {
-                Mock Get-TargetResource {
+                Mock -CommandName Get-TargetResource -MockWith {
                     $duffADGroup = $testPresentParams.Clone();
                     $duffADGroup['Description'] = 'Test AD group description is wrong';
                     return $duffADGroup;
@@ -266,7 +266,7 @@ try
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'DisplayName' is wrong" {
-                Mock Get-TargetResource {
+                Mock -CommandName Get-TargetResource -MockWith {
                     $duffADGroup = $testPresentParams.Clone();
                     $duffADGroup['DisplayName'] = 'Wrong display name';
                     return $duffADGroup;
@@ -276,7 +276,7 @@ try
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'ManagedBy' is wrong" {
-                Mock Get-TargetResource {
+                Mock -CommandName Get-TargetResource -MockWith {
                     $duffADGroup = $testPresentParams.Clone();
                     $duffADGroup['ManagedBy'] = $fakeADUser3.DistinguishedName;
                     return $duffADGroup;
@@ -286,7 +286,7 @@ try
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Notes' is wrong" {
-                Mock Get-TargetResource {
+                Mock -CommandName Get-TargetResource -MockWith {
                     $duffADGroup = $testPresentParams.Clone();
                     $duffADGroup['Notes'] = 'These notes are clearly wrong';
                     return $duffADGroup;
@@ -296,19 +296,19 @@ try
             }
 
             It "Fails when group exists and 'Ensure' is 'Absent'" {
-                Mock Get-TargetResource { return $testPresentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
                 Test-TargetResource @testAbsentParams | Should Be $false
             }
 
             It "Passes when group exists, target matches and 'Ensure' is 'Present'" {
-                Mock Get-TargetResource { return $testPresentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
                 Test-TargetResource @testPresentParams | Should Be $true
             }
 
             It "Passes when group does not exist and 'Ensure' is 'Absent'" {
-                Mock Get-TargetResource { return $testAbsentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
                 Test-TargetResource @testAbsentParams | Should Be $true
             }
@@ -319,16 +319,16 @@ try
         #region Function Set-TargetResource
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
 
-            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
+            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It "Calls 'New-ADGroup' when 'Ensure' is 'Present' and the group does not exist" {
-                Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                Mock Set-ADGroup { }
-                Mock New-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName New-ADGroup { return [PSCustomObject] $fakeADGroup; }
 
                 Set-TargetResource @testPresentParams;
 
-                Assert-MockCalled New-ADGroup -Scope It;
+                Assert-MockCalled New-ADGroup -Scope It
             }
 
             $testProperties = @{
@@ -339,9 +339,9 @@ try
 
             foreach ($property in $testProperties.Keys) {
                 It "Calls 'Set-ADGroup' when 'Ensure' is 'Present' and '$property' is specified" {
-                    Mock Set-ADGroup { }
-                    Mock Get-ADGroupMember { }
-                    Mock Get-ADGroup {
+                    Mock -CommandName Set-ADGroup
+                    Mock -CommandName Get-ADGroupMember
+                    Mock -CommandName Get-ADGroup {
                         $duffADGroup = $fakeADGroup.Clone();
                         $duffADGroup[$property] = $testProperties.$property;
                         return $duffADGroup;
@@ -354,9 +354,9 @@ try
             }
 
             It "Calls 'Set-ADGroup' when 'Ensure' is 'Present' and 'Category' is specified" {
-                Mock Set-ADGroup -ParameterFilter { $GroupCategory -eq $testPresentParams.Category } { }
-                Mock Get-ADGroupMember { }
-                Mock Get-ADGroup {
+                Mock -CommandName Set-ADGroup -ParameterFilter { $GroupCategory -eq $testPresentParams.Category }
+                Mock -CommandName Get-ADGroupMember
+                Mock -CommandName Get-ADGroup {
                     $duffADGroup = $fakeADGroup.Clone();
                     $duffADGroup['GroupCategory'] = 'Distribution';
                     return $duffADGroup;
@@ -368,9 +368,9 @@ try
             }
 
             It "Calls 'Set-ADGroup' when 'Ensure' is 'Present' and 'Notes' is specified" {
-                Mock Set-ADGroup -ParameterFilter { $Replace -ne $null } { }
-                Mock Get-ADGroupMember { }
-                Mock Get-ADGroup {
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Replace -ne $null }
+                Mock -CommandName Get-ADGroupMember
+                Mock -CommandName Get-ADGroup {
                     $duffADGroup = $fakeADGroup.Clone();
                     $duffADGroup['Info'] = 'My test note..';
                     return $duffADGroup;
@@ -382,9 +382,9 @@ try
             }
 
             It "Calls 'Set-ADGroup' twice when 'Ensure' is 'Present', the group exists but the 'Scope' has changed" {
-                Mock Set-ADGroup { }
-                Mock Get-ADGroupMember { }
-                Mock Get-ADGroup {
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
+                Mock -CommandName Get-ADGroup {
                     $duffADGroup = $fakeADGroup.Clone();
                     $duffADGroup['GroupScope'] = 'DomainLocal';
                     return $duffADGroup;
@@ -396,32 +396,32 @@ try
             }
 
             It "Adds group members when 'Ensure' is 'Present', the group exists and 'Members' are specified" {
-                Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                Mock Set-ADGroup { }
-                Mock Add-ADGroupMember { }
-                Mock New-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Add-ADGroupMember
+                Mock -CommandName New-ADGroup { return [PSCustomObject] $fakeADGroup; }
 
                 Set-TargetResource @testPresentParams -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
 
-                Assert-MockCalled Add-ADGroupMember -Scope It;
+                Assert-MockCalled Add-ADGroupMember -Scope It
             }
 
             It "Adds group members when 'Ensure' is 'Present', the group exists and 'MembersToInclude' are specified" {
-                Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                Mock Set-ADGroup { }
-                Mock Add-ADGroupMember { }
-                Mock New-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Add-ADGroupMember
+                Mock -CommandName New-ADGroup { return [PSCustomObject] $fakeADGroup; }
 
                 Set-TargetResource @testPresentParams -MembersToInclude @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
 
-                Assert-MockCalled Add-ADGroupMember -Scope It;
+                Assert-MockCalled Add-ADGroupMember -Scope It
             }
 
             It "Moves group when 'Ensure' is 'Present', the group exists but the 'Path' has changed" {
-                Mock Set-ADGroup { }
-                Mock Get-ADGroupMember { }
-                Mock Move-ADObject { }
-                Mock Get-ADGroup {
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
+                Mock -CommandName Move-ADObject
+                Mock -CommandName Get-ADGroup {
                     $duffADGroup = $fakeADGroup.Clone();
                     $duffADGroup['DistinguishedName'] = "CN=$($testPresentParams.GroupName),OU=WrongPath,DC=contoso,DC=com";
                     return $duffADGroup;
@@ -429,15 +429,15 @@ try
 
                 Set-TargetResource @testPresentParams;
 
-                Assert-MockCalled Move-ADObject -Scope It;
+                Assert-MockCalled Move-ADObject -Scope It
             }
 
             It "Resets group membership when 'Ensure' is 'Present' and 'Members' is incorrect" {
-                Mock Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
-                Mock Set-ADGroup { }
-                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
-                Mock Add-ADGroupMember { }
-                Mock Remove-ADGroupMember { }
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Add-ADGroupMember
+                Mock -CommandName Remove-ADGroupMember
 
                 Set-TargetResource @testPresentParams -Members $fakeADuser1.SamAccountName;
 
@@ -446,10 +446,10 @@ try
             }
 
             It "Does not reset group membership when 'Ensure' is 'Present' and existing group is empty" {
-                Mock Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
-                Mock Set-ADGroup { }
-                Mock Get-ADGroupMember { }
-                Mock Remove-ADGroupMember { }
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
+                Mock -CommandName Remove-ADGroupMember
 
                 Set-TargetResource @testPresentParams -MembersToExclude $fakeADuser1.SamAccountName;
 
@@ -457,10 +457,10 @@ try
             }
 
             It "Removes members when 'Ensure' is 'Present' and 'MembersToExclude' is incorrect" {
-                Mock Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
-                Mock Set-ADGroup { }
-                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
-                Mock Remove-ADGroupMember { }
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Remove-ADGroupMember
 
                 Set-TargetResource @testPresentParams -MembersToExclude $fakeADuser1.SamAccountName;
 
@@ -468,10 +468,10 @@ try
             }
 
             It "Adds members when 'Ensure' is 'Present' and 'MembersToInclude' is incorrect" {
-                Mock Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
-                Mock Set-ADGroup { }
-                Mock Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
-                Mock Add-ADGroupMember { }
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
+                Mock -CommandName Add-ADGroupMember
 
                 Set-TargetResource @testPresentParams -MembersToInclude $fakeADuser3.SamAccountName;
 
@@ -479,40 +479,40 @@ try
             }
 
             It "Removes group when 'Ensure' is 'Absent' and group exists" {
-                Mock Get-ADGroup { return $fakeADGroup; }
-                Mock Remove-ADGroup { }
+                Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                Mock -CommandName Remove-ADGroup
 
                 Set-TargetResource @testAbsentParams;
 
-                Assert-MockCalled Remove-ADGroup -Scope It;
+                Assert-MockCalled Remove-ADGroup -Scope It
             }
 
             It "Calls 'Set-ADGroup' with credentials when 'Ensure' is 'Present' and the group exists (#106)" {
-                Mock Get-ADGroup { return $fakeADGroup; }
-                Mock New-ADGroup { return [PSCustomObject] $fakeADGroup; }
-                Mock Get-ADGroupMember { }
-                Mock Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -MockWith { }
+                Mock -CommandName Get-ADGroup { return $fakeADGroup; }
+                Mock -CommandName New-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Get-ADGroupMember
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials }
 
                 Set-TargetResource @testPresentParams -Credential $testCredentials;
 
-                Assert-MockCalled Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+                Assert-MockCalled Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It
             }
 
             It "Calls 'Set-ADGroup' with credentials when 'Ensure' is 'Present' and the group does not exist  (#106)" {
-                Mock Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                Mock Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials }  { }
-                Mock New-ADGroup { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Get-ADGroup { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } 
+                Mock -CommandName New-ADGroup { return [PSCustomObject] $fakeADGroup; }
 
                 Set-TargetResource @testPresentParams -Credential $testCredentials;
 
-                Assert-MockCalled Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+                Assert-MockCalled Set-ADGroup -ParameterFilter { $Credential -eq $testCredentials } -Scope It
             }
 
             It "Calls 'Move-ADObject' with credentials when specified (#106)" {
-                Mock Set-ADGroup { }
-                Mock Get-ADGroupMember { }
-                Mock Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } { }
-                Mock Get-ADGroup {
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
+                Mock -CommandName Move-ADObject -ParameterFilter { $Credential -eq $testCredentials }
+                Mock -CommandName Get-ADGroup {
                     $duffADGroup = $fakeADGroup.Clone();
                     $duffADGroup['DistinguishedName'] = "CN=$($testPresentParams.GroupName),OU=WrongPath,DC=contoso,DC=com";
                     return $duffADGroup;
@@ -520,7 +520,70 @@ try
 
                 Set-TargetResource @testPresentParams -Credential $testCredentials;
 
-                Assert-MockCalled Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } -Scope It;
+                Assert-MockCalled Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } -Scope It
+            }
+
+
+            # tests for issue 183
+            It "Doesn't reset to 'Global' when not specifying a 'Scope' and updating group membership" {
+                $testUniversalPresentParams = $testPresentParams.Clone()
+                $testUniversalPresentParams['GroupScope'] = 'Universal'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupScope'] = 'Universal'
+
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope') }
+                Mock -CommandName Add-ADGroupMember
+
+                Set-TargetResource -GroupName $testUniversalPresentParams.GroupName -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
+
+                Assert-MockCalled -CommandName Set-ADGroup -Times 1 -Scope It
+            }
+
+            # tests for issue 183
+            It "Doesn't reset to 'Security' when not specifying a 'Category' and updating group membership" {
+                $testUniversalPresentParams = $testPresentParams.Clone()
+                $testUniversalPresentParams['Category'] = 'Distribution'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupCategory'] = 'Distribution'
+
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupCategory') }
+                Mock -CommandName Add-ADGroupMember
+
+                Set-TargetResource -GroupName $testUniversalPresentParams.GroupName -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
+
+                Assert-MockCalled -CommandName Set-ADGroup -Times 1 -Scope It
+            }
+
+            # tests for issue 183
+            It "Doesn't reset to 'Global' when not specifying a 'Scope' and testing display name" {
+                $testUniversalPresentParams = $testPresentParams.Clone()
+                $testUniversalPresentParams['GroupScope'] = 'Universal'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupScope'] = 'Universal'
+
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope') }
+                Mock -CommandName Add-ADGroupMember
+
+                $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
+                $universalGroupInCompliance | Should Be $true
+            }
+
+            # tests for issue 183
+            It "Doesn't reset to 'Security' when not specifying a 'Category' and testing display name" {
+                $testUniversalPresentParams = $testPresentParams.Clone()
+                $testUniversalPresentParams['Category'] = 'Distribution'
+                $fakeADUniversalGroup = $fakeADGroup.Clone()
+                $fakeADUniversalGroup['GroupCategory'] = 'Distribution'
+
+                Mock -CommandName Get-ADGroup { return [PSCustomObject] $fakeADUniversalGroup }
+                Mock -CommandName Set-ADGroup -ParameterFilter { $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope') }
+                Mock -CommandName Add-ADGroupMember
+
+                $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
+                $universalGroupInCompliance | Should Be $true
             }
 
         }
@@ -537,3 +600,4 @@ finally
 
     # TODO: Other Optional Cleanup Code Goes Here...
 }
+

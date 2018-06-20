@@ -63,7 +63,7 @@ try
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
             It "Returns a 'System.Collections.Hashtable' object type" {
-                Mock Get-ADComputer { return [PSCustomObject] $fakeADComputer; }
+                Mock -CommandName Get-ADComputer -MockWith { return [PSCustomObject] $fakeADComputer; }
 
                 $adUser = Get-TargetResource @testPresentParams;
 
@@ -71,7 +71,7 @@ try
             }
 
             It "Returns 'Ensure' is 'Present' when user account exists" {
-                Mock Get-ADComputer { return [PSCustomObject] $fakeADComputer; }
+                Mock -CommandName Get-ADComputer -MockWith { return [PSCustomObject] $fakeADComputer; }
 
                 $adUser = Get-TargetResource @testPresentParams;
 
@@ -79,7 +79,7 @@ try
             }
 
             It "Returns 'Ensure' is 'Absent' when user account does not exist" {
-                Mock Get-ADComputer { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Get-ADComputer -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
                 $adUser = Get-TargetResource @testPresentParams;
 
@@ -87,19 +87,19 @@ try
             }
 
             It "Calls 'Get-ADComputer' with 'Server' parameter when 'DomainController' specified" {
-                Mock Get-ADComputer -ParameterFilter { $Server -eq $testDomainController } -MockWith { return [PSCustomObject] $fakeADComputer; }
+                Mock -CommandName Get-ADComputer -ParameterFilter { $Server -eq $testDomainController } -MockWith { return [PSCustomObject] $fakeADComputer; }
 
                 Get-TargetResource @testPresentParams -DomainController $testDomainController;
 
-                Assert-MockCalled Get-ADComputer -ParameterFilter { $Server -eq $testDomainController } -Scope It;
+                Assert-MockCalled Get-ADComputer -ParameterFilter { $Server -eq $testDomainController } -Scope It
             }
 
             It "Calls 'Get-ADComputer' with 'Credential' parameter when 'DomainAdministratorCredential' specified" {
-                Mock Get-ADComputer -ParameterFilter { $Credential -eq $testCredential } -MockWith { return [PSCustomObject] $fakeADComputer; }
+                Mock -CommandName Get-ADComputer -ParameterFilter { $Credential -eq $testCredential } -MockWith { return [PSCustomObject] $fakeADComputer; }
 
                 Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential;
 
-                Assert-MockCalled Get-ADComputer -ParameterFilter { $Credential -eq $testCredential } -Scope It;
+                Assert-MockCalled Get-ADComputer -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
         }
@@ -125,25 +125,25 @@ try
             );
 
             It "Passes when computer account does not exist and 'Ensure' is 'Absent'" {
-                Mock Get-TargetResource { return $testAbsentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
                 Test-TargetResource @testAbsentParams | Should Be $true;
             }
 
             It "Passes when computer account exists and 'Ensure' is 'Present'" {
-                Mock Get-TargetResource { return $testPresentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
                 Test-TargetResource @testPresentParams | Should Be $true;
             }
 
             It "Fails when computer account does not exist and 'Ensure' is 'Present'" {
-                Mock Get-TargetResource { return $testAbsentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
                 Test-TargetResource @testPresentParams | Should Be $false;
             }
 
             It "Fails when computer account exists, and 'Ensure' is 'Absent'" {
-                Mock Get-TargetResource { return $testPresentParams }
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
                 Test-TargetResource @testAbsentParams | Should Be $false;
             }
@@ -155,7 +155,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = $testParameterValue;
                         return $validADComputer;
                     }
@@ -168,7 +168,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $invalidADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADComputer[$testParameter] = $testParameterValue.Substring(0, ([System.Int32] $testParameterValue.Length/2));
                         return $invalidADComputer;
                     }
@@ -181,7 +181,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $invalidADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADComputer[$testParameter] = '';
                         return $invalidADComputer;
                     }
@@ -194,7 +194,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $invalidADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADComputer[$testParameter] = $null;
                         return $invalidADComputer;
                     }
@@ -206,7 +206,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = '';
                         return $validADComputer;
                     }
@@ -218,7 +218,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = $null;
                         return $validADComputer;
                     }
@@ -235,7 +235,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = $testParameterValue;
                         return $validADComputer;
                     }
@@ -248,7 +248,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = $testParameterValue;
                         return $validADComputer;
                     }
@@ -261,7 +261,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = $testParameterValue;
                         return $validADComputer;
                     }
@@ -274,7 +274,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = @('Entry1');
                         return $validADComputer;
                     }
@@ -287,7 +287,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = @('Entry2');
                         return $validADComputer;
                     }
@@ -300,7 +300,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = @();
                         return $validADComputer;
                     }
@@ -313,7 +313,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = @('ExtraEntry1');
                         return $validADComputer;
                     }
@@ -330,7 +330,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $validADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $validADComputer[$testParameter] = $testParameterValue;
                         return $validADComputer;
                     }
@@ -343,7 +343,7 @@ try
                     $testValidPresentParams = $testPresentParams.Clone();
                     $testValidPresentParams[$testParameter] = $testParameterValue;
                     $invalidADComputer = $testPresentParams.Clone();
-                    Mock Get-TargetResource {
+                    Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADComputer[$testParameter] = -not $testParameterValue;
                         return $invalidADComputer;
                     }
@@ -381,13 +381,13 @@ try
                 $newAbsentParams['ComputerName'] = $newComputerName;
                 $newPresentParams = $testPresentParams.Clone();
                 $newPresentParams['ComputerName'] = $newComputerName;
-                Mock New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -MockWith { }
-                Mock Set-ADComputer { }
-                Mock Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
+                Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName }
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
 
                 Set-TargetResource @newPresentParams;
 
-                Assert-MockCalled New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -Scope It;
+                Assert-MockCalled New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -Scope It
             }
 
             It "Calls 'New-ADComputer' when 'Ensure' is 'Present' and the account does not exist, RequestFile is set, DJOIN OK" {
@@ -397,10 +397,10 @@ try
                 $newPresentParams = $testPresentParams.Clone();
                 $newPresentParams['ComputerName'] = $newComputerName;
                 $newPresentParams['RequestFile'] = 'c:\ODJTest.txt';
-                Mock New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -MockWith { }
-                Mock djoin.exe -MockWith { $LASTEXITCODE = 0; 'OK' }
-                Mock Set-ADComputer { }
-                Mock Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
+                Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName }
+                Mock -CommandName djoin.exe -MockWith { $LASTEXITCODE = 0; 'OK' }
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
 
                 Set-TargetResource @newPresentParams;
 
@@ -415,35 +415,35 @@ try
                 $newPresentParams = $testPresentParams.Clone();
                 $newPresentParams['ComputerName'] = $newComputerName;
                 $targetPath = 'OU=Test,DC=contoso,DC=com';
-                Mock New-ADComputer -ParameterFilter { $Path -eq $targetPath } -MockWith { }
-                Mock Set-ADComputer { }
-                Mock Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
+                Mock -CommandName New-ADComputer -ParameterFilter { $Path -eq $targetPath }
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams; }
 
                 Set-TargetResource @newPresentParams -Path $targetPath;
 
-                Assert-MockCalled New-ADComputer -ParameterFilter { $Path -eq $targetPath } -Scope It;
+                Assert-MockCalled New-ADComputer -ParameterFilter { $Path -eq $targetPath } -Scope It
             }
 
             It "Calls 'Move-ADObject' when 'Ensure' is 'Present', the computer account exists but Path is incorrect" {
                 $testTargetPath = 'OU=NewPath,DC=contoso,DC=com';
-                Mock Set-ADComputer { }
-                Mock Get-ADComputer {
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-ADComputer -MockWith {
                     $duffADComputer = $fakeADComputer.Clone();
                     $duffADComputer['DistinguishedName'] = 'CN={0},OU=WrongPath,DC=contoso,DC=com' -f $testPresentParams.ComputerName;
                     return $duffADComputer;
                 }
-                Mock Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -MockWith { }
+                Mock -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath }
 
                 Set-TargetResource @testPresentParams -Path $testTargetPath;
 
-                Assert-MockCalled Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -Scope It;
+                Assert-MockCalled Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -Scope It
             }
 
             foreach ($testParameter in $testStringProperties) {
 
                 It "Calls 'Set-ADComputer' with 'Remove' when '$testParameter' is `$null" {
-                    Mock Get-ADComputer { return $fakeADComputer; }
-                    Mock Set-ADComputer -ParameterFilter { $Remove.ContainsKey($testParameter) } { }
+                    Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
+                    Mock -CommandName Set-ADComputer -ParameterFilter { $Remove.ContainsKey($testParameter) }
 
                     $setTargetResourceParams = $testPresentParams.Clone();
                     $setTargetResourceParams[$testParameter] = '';
@@ -453,8 +453,8 @@ try
                 }
 
                 It "Calls 'Set-ADComputer' with 'Replace' when existing '$testParameter' is not `$null" {
-                    Mock Get-ADComputer { return $fakeADComputer; }
-                    Mock Set-ADComputer -ParameterFilter { $Replace.ContainsKey($testParameter) } { }
+                    Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
+                    Mock -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey($testParameter) }
 
                     $setTargetResourceParams = $testPresentParams.Clone();
                     $setTargetResourceParams[$testParameter] = 'NewStringValue';
@@ -467,8 +467,8 @@ try
 
             It "Calls 'Set-ADComputer' with 'Remove' when 'Manager' is `$null" {
                 ## Manager translates to AD attribute 'managedBy'
-                Mock Get-ADComputer { return $fakeADComputer; }
-                Mock Set-ADComputer -ParameterFilter { $Remove.ContainsKey('ManagedBy') } { }
+                Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
+                Mock -CommandName Set-ADComputer -ParameterFilter { $Remove.ContainsKey('ManagedBy') }
 
                 $setTargetResourceParams = $testPresentParams.Clone();
                 $setTargetResourceParams['Manager'] = '';
@@ -479,8 +479,8 @@ try
 
             It "Calls 'Set-ADComputer' with 'Replace' when existing 'Manager' is not `$null" {
                 ## Manager translates to AD attribute 'managedBy'
-                Mock Get-ADComputer { return $fakeADComputer; }
-                Mock Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ManagedBy') } { }
+                Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
+                Mock -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ManagedBy') }
 
                 $setTargetResourceParams = $testPresentParams.Clone();
                 $setTargetResourceParams['Manager'] = 'NewValue';
@@ -490,8 +490,8 @@ try
             }
 
             It "Calls 'Set-ADComputer' with 'Enabled' = 'True' by default" {
-                Mock Get-ADComputer { return $fakeADComputer; }
-                Mock Set-ADComputer -ParameterFilter { $Enabled -eq $true } { }
+                Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
+                Mock -CommandName Set-ADComputer -ParameterFilter { $Enabled -eq $true }
 
                 $setTargetResourceParams = $testPresentParams.Clone();
                 $setTargetResourceParams[$testParameter] = -not $fakeADComputer.$testParameter;
@@ -502,8 +502,8 @@ try
 
             It "Calls 'Set-ADComputer' with 'ServicePrincipalNames' when specified" {
                 $testSPNs = @('spn/a','spn/b');
-                Mock Get-ADComputer { return $fakeADComputer; }
-                Mock Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } { }
+                Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
+                Mock -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
 
                 Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs;
 
@@ -511,12 +511,12 @@ try
             }
 
             It "Calls 'Remove-ADComputer' when 'Ensure' is 'Absent' and computer account exists" {
-                Mock Get-ADComputer { return $fakeADComputer; }
-                Mock Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -MockWith { }
+                Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer; }
+                Mock -CommandName Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName }
 
                 Set-TargetResource @testAbsentParams;
 
-                Assert-MockCalled Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -Scope It;
+                Assert-MockCalled Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -Scope It
             }
 
         }
