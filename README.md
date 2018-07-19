@@ -157,7 +157,7 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **`[String]` Path** _(Write)_: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
 * **`[String]` Description** _(Write)_: Specifies a description of the group object.
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of the group object.
-* **`[String]` Members** _(Write)_: Specifies the explicit AD objects that should comprise the group membership.
+* **`[String[]]` Members** _(Write)_: Specifies the explicit AD objects that should comprise the group membership.
   * If not specified, no group membership changes are made.
   * If specified, all undefined group members will be removed the AD group.
   * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
