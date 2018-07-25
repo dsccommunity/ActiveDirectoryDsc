@@ -20,9 +20,24 @@ $TestEnvironment = Initialize-TestEnvironment `
     -TestType Unit
 #endregion
 
+function Invoke-TestSetup {
+    # If one type does not exist, it's assumed the other ones does not exist either.
+    if (-not ('Microsoft.DirectoryServices.Deployment.Types.ForestMode' -as [Type]))
+    {
+        Add-Type -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'Tests') -ChildPath 'Unit') -ChildPath 'Stubs') -ChildPath 'Microsoft.DirectoryServices.Deployment.Types.cs')
+    }
+
+    # If one type does not exist, it's assumed the other ones does not exist either.
+    if (-not ('Microsoft.ActiveDirectory.Management.ADForestMode' -as [Type]))
+    {
+        Add-Type -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'Tests') -ChildPath 'Unit') -ChildPath 'Stubs') -ChildPath 'Microsoft.ActiveDirectory.Management.cs')
+    }
+}
+
 # Begin Testing
 try
 {
+    Invoke-TestSetup
 
     #region Pester Tests
 
@@ -62,13 +77,13 @@ try
         Describe "$($Global:DSCResourceName)\Test-DomainMember" {
 
             It 'Returns "True" when domain member' {
-                Mock Get-CimInstance { return @{ Name = $env:COMPUTERNAME; PartOfDomain = $true; } }
+                Mock -CommandName Get-CimInstance -MockWith { return @{ Name = $env:COMPUTERNAME; PartOfDomain = $true; } }
 
                 Test-DomainMember | Should Be $true;
             }
 
             It 'Returns "False" when workgroup member' {
-                Mock Get-CimInstance { return @{ Name = $env:COMPUTERNAME; } }
+                Mock -CommandName Get-CimInstance -MockWith { return @{ Name = $env:COMPUTERNAME; } }
 
                 Test-DomainMember | Should Be $false;
             }
@@ -80,7 +95,7 @@ try
         Describe "$($Global:DSCResourceName)\Get-DomainName" {
 
             It 'Returns exepected domain name' {
-                Mock Get-CimInstance { return @{ Name = $env:COMPUTERNAME; Domain = 'contoso.com'; } }
+                Mock -CommandName Get-CimInstance -MockWith { return @{ Name = $env:COMPUTERNAME; Domain = 'contoso.com'; } }
 
                 Get-DomainName | Should Be 'contoso.com';
             }
@@ -93,14 +108,14 @@ try
 
             It 'Does not throw when module is installed' {
                 $testModuleName = 'TestModule';
-                Mock Get-Module -ParameterFilter { $Name -eq $testModuleName } { return $true; }
+                Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true; }
 
                 { Assert-Module -ModuleName $testModuleName } | Should Not Throw;
             }
 
             It 'Throws when module is not installed' {
                 $testModuleName = 'TestModule';
-                Mock Get-Module -ParameterFilter { $Name -eq $testModuleName } { }
+                Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName }
 
                 { Assert-Module -ModuleName $testModuleName } | Should Throw;
             }
@@ -519,6 +534,86 @@ try
         }
         #endregion
 
+        #region Function ConvertTo-DeploymentForestMode
+        Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentForestMode" {
+            It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
+            }
+
+            It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should Be ([Microsoft.DirectoryServices.Deployment.Types.ForestMode]::Win2012)
+            }
+
+            It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -ModeId 5 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
+            }
+
+            It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
+                ConvertTo-DeploymentForestMode -ModeId 5 | Should Be ([Microsoft.DirectoryServices.Deployment.Types.ForestMode]::Win2012)
+            }
+
+            It 'Throws an exception when an invalid forest mode is selected' {
+                { ConvertTo-DeploymentForestMode -Mode Nonexistant } | Should Throw
+            }
+
+            It 'Throws no exception when a null value is passed' {
+                { ConvertTo-DeploymentForestMode -Mode $null } | Should Not Throw
+            }
+            
+            It 'Throws no exception when an invalid mode id is selected' {
+                { ConvertTo-DeploymentForestMode -ModeId 666 } | Should Not Throw
+            }
+
+            It 'Returns $null when a null value is passed' {
+                ConvertTo-DeploymentForestMode -Mode $null | Should Be $null
+            }
+
+            It 'Returns $null when an invalid mode id is selected' {
+                ConvertTo-DeploymentForestMode -ModeId 666 | Should Be $null
+            }
+        }
+        #endregion
+
+        #region Function ConvertTo-DeploymentDomainMode
+        Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentDomainMode" {
+            It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
+            }
+
+            It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should Be ([Microsoft.DirectoryServices.Deployment.Types.DomainMode]::Win2012)
+            }
+
+            It 'Converts valid integer to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -ModeId 5 | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
+            }
+
+            It 'Converts a valid integer to the correct Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
+                ConvertTo-DeploymentDomainMode -ModeId 5 | Should Be ([Microsoft.DirectoryServices.Deployment.Types.DomainMode]::Win2012)
+            }
+
+            It 'Throws an exception when an invalid domain mode is selected' {
+                { ConvertTo-DeploymentDomainMode -Mode Nonexistant } | Should Throw
+            }
+
+            It 'Throws no exception when a null value is passed' {
+                { ConvertTo-DeploymentDomainMode -Mode $null } | Should Not Throw
+            }
+            
+            It 'Throws no exception when an invalid mode id is selected' {
+                { ConvertTo-DeploymentDomainMode -ModeId 666 } | Should Not Throw
+            }
+
+            It 'Returns $null when a null value is passed' {
+                ConvertTo-DeploymentDomainMode -Mode $null | Should Be $null
+            }
+
+            It 'Returns $null when an invalid mode id is selected' {
+                ConvertTo-DeploymentDomainMode -ModeId 666 | Should Be $null
+            }
+        }
+        #endregion
+
     }
     #endregion
 }
@@ -528,3 +623,4 @@ finally
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
+
