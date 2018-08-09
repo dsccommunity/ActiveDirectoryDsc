@@ -79,7 +79,7 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[String]` Ensure**: Specifies whether the computer account is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer should be restored instead of created if possible.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer object should first tried to be restored from the recycle bin before creating a new computer object.
 * **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of the computer object.
 * **`[String]` SID** _(Read)_: Returns the security identifier of the computer object.
 
@@ -321,6 +321,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 * Changes to xADDomain
   * xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue #221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.20.0.0
 
@@ -328,7 +329,6 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/xActiveDirectory/issues/190)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
   * Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/xActiveDirectory/issues/198)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
   * xADDomain is now capable of setting the forest and domain functional level ([issue #187](https://github.com/PowerShell/xActiveDirectory/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-  * xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue #221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.19.0.0
 

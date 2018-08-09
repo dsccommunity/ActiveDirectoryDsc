@@ -268,7 +268,7 @@ function Get-TargetResource
         [ValidateSet('Default','Negotiate')]
         [System.String] $PasswordAuthentication = 'Default',
 
-        ## Indicates whether or not objects should be restored from recycle bin instead of recreating them
+        ## Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new computer object.
         [ValidateNotNull()]
         [System.Boolean] $RestoreFromRecycleBin
     )
@@ -533,7 +533,7 @@ function Test-TargetResource
         [ValidateSet('Default','Negotiate')]
         [System.String] $PasswordAuthentication = 'Default',
 
-        ## Indicates whether or not objects should be restored from recycle bin instead of recreating them
+        ## Indicates whether or not the computer object should first tried to be restored from the recycle bin before creating a new computer object.
         [ValidateNotNull()]
         [System.Boolean] $RestoreFromRecycleBin
     )
@@ -786,7 +786,7 @@ function Set-TargetResource
         [ValidateSet('Default','Negotiate')]
         [System.String] $PasswordAuthentication = 'Default',
 
-        ## Indicates whether or not objects should be restored from recycle bin instead of recreating them
+        ## Indicates whether or not the computer object should first tried to be restored from the recycle bin before creating a new computer object.
         [ValidateNotNull()]
         [System.Boolean] $RestoreFromRecycleBin
     )
