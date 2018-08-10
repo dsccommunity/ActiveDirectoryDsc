@@ -108,7 +108,7 @@ function Get-TargetResource
         [String] $DomainMode
     )
 
-    Assert-Module -ModuleName 'ADDSDeployment';
+    Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName;
     $isDomainMember = Test-DomainMember;
 

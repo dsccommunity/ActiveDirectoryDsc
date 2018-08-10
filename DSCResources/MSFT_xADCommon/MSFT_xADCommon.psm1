@@ -27,8 +27,14 @@ function Assert-Module
     [CmdletBinding()]
     param
     (
-        [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $ModuleName = 'ActiveDirectory'
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ModuleName = 'ActiveDirectory',
+
+        [Parameter()]
+        [switch]
+        $ImportModule
     )
 
     if (-not (Get-Module -Name $ModuleName -ListAvailable))
@@ -36,6 +42,11 @@ function Assert-Module
         $errorId = '{0}_ModuleNotFound' -f $ModuleName;
         $errorMessage = $localizedString.RoleNotFoundError -f $moduleName;
         ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage;
+    }
+
+    if ($ImportModule)
+    {
+        Import-Module -Name $ModuleName
     }
 } #end function Assert-Module
 
