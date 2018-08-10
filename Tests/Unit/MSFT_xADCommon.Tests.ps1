@@ -113,6 +113,16 @@ try
                 { Assert-Module -ModuleName $testModuleName } | Should Not Throw;
             }
 
+            It 'Should call Import-Module when the module is installed and ImportModule is specified' {
+                $testModuleName = 'TestModule'
+                Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true; }
+                Mock -CommandName Import-Module -ParameterFilter { $Name -eq $testModuleName }
+
+                Assert-Module -ModuleName $testModuleName -ImportModule
+
+                Assert-MockCalled -CommandName Import-Module
+            }
+
             It 'Throws when module is not installed' {
                 $testModuleName = 'TestModule';
                 Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName }

@@ -313,6 +313,11 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 
 ### Unreleased
 
+* Changes to xADCommon
+  * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* Changes to xADDomain
+  * xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+
 ### 2.20.0.0
 
 * Changes to xActiveDirectory
