@@ -186,7 +186,7 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * If not running on a domain controller, this is required.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group should be restored instead of created if possible.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
 
 ### **xADOrganizationalUnit**
 
@@ -198,7 +198,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **`[Boolean]` ProtectedFromAccidentalDeletion** _(Write)_: Valid values are $true and $false. If not specified, it defaults to $true.
 * **`[String]` Ensure** _(Write)_: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation. Note: _if not running on a domain controller, this is required_.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the OU should be restored instead of created if possible.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the organizational unit should first tried to be restored from the recycle bin before creating a new organizational unit.
 
 ### **xADRecycleBin**
 
@@ -303,7 +303,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * If not specified, this value defaults to False.
 * **`[String]` PasswordAuthentication** _(Write)_: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user should be restored instead of created if possible.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
 ### **xWaitForADDomain**

@@ -519,7 +519,7 @@ try
                 Assert-MockCalled -CommandName Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -Scope It
             }
 
-            It 'Calls Restore-AdCommonObject when RestoreFromRecycleBin is used' {
+            It 'Should call Restore-AdCommonObject when RestoreFromRecycleBin is used' {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
                 $script:mockCounter = 0
@@ -536,16 +536,17 @@ try
                     ObjectClass = 'computer'
                 }}
                 Mock -CommandName New-ADComputer
-                Mock -CommandName Set-ADComputer -ParameterFilter { $true} # Had to overwrite parameter filter from an earlier test
+                 # Had to overwrite parameter filter from an earlier test
+                Mock -CommandName Set-ADComputer -ParameterFilter { $true }
 
                 Set-TargetResource @restoreParam
 
-                Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It
+                Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
                 Assert-MockCalled -CommandName New-ADComputer -Times 0 -Exactly -Scope It
-                Assert-MockCalled -CommandName Set-ADComputer -Scope It
+                Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 1 -Scope It
             }
 
-            It 'Calls New-ADComputer when RestoreFromRecycleBin is used and if no object was found in the recycle bin' {
+            It 'Should call New-ADComputer when RestoreFromRecycleBin is used and if no object was found in the recycle bin' {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
                 $script:mockCounter = 0
@@ -560,16 +561,17 @@ try
                 }
                 Mock -CommandName Restore-ADCommonObject
                 Mock -CommandName New-ADComputer
-                Mock -CommandName Set-ADComputer -ParameterFilter { $true} # Had to overwrite parameter filter from an earlier test
+                # Had to overwrite parameter filter from an earlier test
+                Mock -CommandName Set-ADComputer -ParameterFilter { $true }
 
                 Set-TargetResource @restoreParam
 
-                Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It
-                Assert-MockCalled -CommandName New-ADComputer -Scope It
-                Assert-MockCalled -CommandName Set-ADComputer -Scope It
+                Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 1 -Scope It
             }
 
-            It 'Throws when object cannot be restored from recycle bin' {
+            It 'Should throw the correct error when object cannot be restored from recycle bin' {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
                 $script:mockCounter = 0
@@ -584,11 +586,12 @@ try
                 }
                 Mock -CommandName Restore-ADCommonObject -MockWith {throw (New-Object -TypeName System.InvalidOperationException)}
                 Mock -CommandName New-ADComputer
-                Mock -CommandName Set-ADComputer -ParameterFilter { $true} # Had to overwrite parameter filter from an earlier test
+                # Had to overwrite parameter filter from an earlier test
+                Mock -CommandName Set-ADComputer -ParameterFilter { $true }
 
-                {Set-TargetResource @restoreParam} | Should -Throw
+                {Set-TargetResource @restoreParam} | Should -Throw -ExceptionType ([System.InvalidOperationException])
 
-                Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It
+                Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It -Exactly -Times 1
                 Assert-MockCalled -CommandName New-ADComputer -Scope It -Exactly -Times 0
                 Assert-MockCalled -CommandName Set-ADComputer -Scope It -Exactly -Times 0
             }

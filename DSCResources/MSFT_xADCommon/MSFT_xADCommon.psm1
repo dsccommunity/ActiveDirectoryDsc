@@ -9,7 +9,7 @@ data localizedString
         IncludeAndExcludeConflictError = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values.
         IncludeAndExcludeAreEmptyError = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters.
         ModeConversionError            = Converted mode {0} is not a {1}.
-        RestoreFailed                  = Restoring {0} ({1}) failed. {2}.
+        RecycleBinRestoreFailed        = Restoring {0} ({1}) from the recycle bin failed. Error message: {2}.
 
         CheckingMembers                = Checking for '{0}' members.
         MembershipCountMismatch        = Membership count is not correct. Expected '{0}' members, actual '{1}' members.
@@ -19,9 +19,9 @@ data localizedString
         MembershipNotDesiredState      = Membership is NOT in the desired state.
         CheckingDomain                 = Checking for domain '{0}'.
         CheckingSite                   = Checking for site '{0}'.
-        FindInRecycleBin               = Finding objects in recycle bin matching filter {0}.
-        FoundRestoreTarget             = Found object {0} ({1}) in recycle bin as {2}. Attempting to restore the object.
-        RestoreOk                      = Successfully restored object {0} ({1}).
+        FindInRecycleBin               = Finding objects in the recycle bin matching the filter {0}.
+        FoundRestoreTargetInRecycleBin = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object.
+        RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
 '@
 }
 
@@ -731,35 +731,44 @@ function Restore-ADCommonObject
         [ValidateNotNullOrEmpty()]
         [Alias('DomainController')]
         [System.String]
-        $Server,
-
-        [Parameter()]
-        [switch]
-        $PassThru
+        $Server
     )
 
     $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f $Identity, $ObjectClass
     Write-Verbose -Message ($localizedString.FindInRecycleBin -f $restoreFilter)
 
-    # Using IsDeleted and IncludeDeletedObjects will mean that the cmdlet does not throw
-    # any more, and simply returns $null instead
-    $restoreParams = Get-ADCommonParameters @PSBoundParameters
-    $restoreParams.Remove('Identity')
-    $restorableObject = Get-ADObject -Filter $restoreFilter -IncludeDeletedObjects @restoreParams
+    <#
+        Using IsDeleted and IncludeDeletedObjects will mean that the cmdlet does not throw
+        any more, and simply returns $null instead
+    #>
+    $commonParams = Get-ADCommonParameters @PSBoundParameters
+    $getAdObjectParams = $commonParams.Clone()
+    $getAdObjectParams.Remove('Identity')
+    $getAdObjectParams['Filter'] = $restoreFilter
+    $getAdObjectParams['IncludeDeletedObjects'] = $true
+    $restoreParams = $commonParams.Clone()
+    $restoreParams['PassThru'] = $true
+    $restoreParams['ErrorAction'] = 'Stop'
+
+    $restorableObject = Get-ADObject @getAdObjectParams
+    $restoredObject = $null
 
     if ($restorableObject)
     {
-        Write-Verbose -Message ($localizedString.FoundRestoreTarget -f $Identity, $ObjectClass, $restorableObject.DistinguishedName)
+        Write-Verbose -Message ($localizedString.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName)
 
         try
         {
-            $restorableObject | Restore-ADObject @restoreParams -ErrorAction Stop -PassThru:$PassThru
-            Write-Verbose -Message ($localizedString.RestoreOk -f $Identity, $ObjectClass)
+            $restoreParams['Identity'] = $restorableObject.DistinguishedName
+            $restoredObject = Restore-ADObject @restoreParams
+            Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass)
         }
         catch [Microsoft.ActiveDirectory.Management.ADException]
         {
             # After Get-TargetResource is through, only one error can occur here: Object parent does not exist
-            ThrowInvalidOperationError -ErrorId "$($Identity)_RestoreFailed" -ErrorMessage ($localizedString.RestoreFailed -f $Identity, $ObjectClass, $_.Exception.Message)
+            ThrowInvalidOperationError -ErrorId "$($Identity)_RecycleBinRestoreFailed" -ErrorMessage ($localizedString.RecycleBinRestoreFailed -f $Identity, $ObjectClass, $_.Exception.Message)
         }
     }
+
+    return $restoredObject
 }
