@@ -746,9 +746,6 @@ function Restore-ADCommonObject
     $getAdObjectParams.Remove('Identity')
     $getAdObjectParams['Filter'] = $restoreFilter
     $getAdObjectParams['IncludeDeletedObjects'] = $true
-    $restoreParams = $commonParams.Clone()
-    $restoreParams['PassThru'] = $true
-    $restoreParams['ErrorAction'] = 'Stop'
 
     $restorableObject = Get-ADObject @getAdObjectParams
     $restoredObject = $null
@@ -759,6 +756,9 @@ function Restore-ADCommonObject
 
         try
         {
+            $restoreParams = $commonParams.Clone()
+            $restoreParams['PassThru'] = $true
+            $restoreParams['ErrorAction'] = 'Stop'
             $restoreParams['Identity'] = $restorableObject.DistinguishedName
             $restoredObject = Restore-ADObject @restoreParams
             Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass)

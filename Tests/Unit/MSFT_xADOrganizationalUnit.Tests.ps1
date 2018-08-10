@@ -283,11 +283,12 @@ try
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
                 Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
-                Mock -CommandName Restore-ADCommonObject
+                Mock -CommandName Restore-ADCommonObject -MockWith { return [PSCustomObject] $protectedFakeAdOu }
 
                 Set-TargetResource @restoreParam;
 
                 Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Scope It -Exactly -Times 0
             }
 
             It "Calls New-ADOrganizationalUnit when RestoreFromRecycleBin is used and if no object was found in the recycle bin" {
