@@ -334,7 +334,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 
 ### Unreleased
 
-* ADded xADObjectPermissionEntry
+* Added xADObjectPermissionEntry
   * New resource added to control the AD object permissions entries [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
 * Changes to xADCommon
   * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
