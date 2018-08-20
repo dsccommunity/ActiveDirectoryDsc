@@ -201,9 +201,9 @@ one ACL.
 * **IdentityReference**: Indicates the identity of the principal for the ace. Use the notation <Domain>\<SamAccountName> for the identity.
 * **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values: { AccessSystemSecurity | CreateChild | Delete | DeleteChild | DeleteTree | ExtendedRight | GenericAll | GenericExecute | GenericRead | GenericWrite | ListChildren | ListObject | ReadControl | ReadProperty | Self | Synchronize | WriteDacl | WriteOwner | WriteProperty }
 * **AccessControlType**: Indicates whether to Allow or Deny access to the target object.
-* **ObjectType**: The schema GUID of the object to which the access rule applies.
+* **ObjectType**: The schema GUID of the object to which the access rule applies. If the permission entry shouldn't be restricted to a specific object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
 * **ActiveDirectorySecurityInheritance**: One of the 'ActiveDirectorySecurityInheritance' enumeration values that specifies the inheritance type of the access rule. { All | Children | Descendents | None | SelfAndChildren }.
-* **InheritedObjectType**: The schema GUID of the child object type that can inherit this access rule.
+* **InheritedObjectType**: The schema GUID of the child object type that can inherit this access rule. If the permission entry shouldn't be restricted to a specific inherited object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
 
 ### **xADOrganizationalUnit**
 
@@ -334,7 +334,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 
 ### Unreleased
 
-* Added xADObjectPermissionEntry resource.
+* Added xADObjectPermissionEntry resource [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi).
 * Changes to xADCommon
   * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 * Changes to xADDomain
