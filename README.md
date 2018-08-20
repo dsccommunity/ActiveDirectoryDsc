@@ -196,7 +196,7 @@ one ACL.
 
 * **Ensure**: Indicates if the access will be added (Present) or will be removed (Absent). Default is 'Present'.
 * **Path**: Active Directory path of the object, specified as a Distinguished Name.
-* **IdentityReference**: Indicates the identity of the principal for the ace.
+* **IdentityReference**: Indicates the identity of the principal for the ace. Use the notation <Domain>\<SamAccountName> for the identity.
 * **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values: { AccessSystemSecurity | CreateChild | Delete | DeleteChild | DeleteTree | ExtendedRight | GenericAll | GenericExecute | GenericRead | GenericWrite | ListChildren | ListObject | ReadControl | ReadProperty | Self | Synchronize | WriteDacl | WriteOwner | WriteProperty }
 * **AccessControlType**: Indicates whether to Allow or Deny access to the target object.
 * **ObjectType**: The schema GUID of the object to which the access rule applies.
