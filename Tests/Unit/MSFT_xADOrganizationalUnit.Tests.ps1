@@ -194,7 +194,7 @@ try
                 Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name }
 
                 Set-TargetResource @testPresentParams
-                Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -Scope It
             }
 
             It 'Calls "New-ADOrganizationalUnit" with credentials when specified' {
@@ -203,7 +203,7 @@ try
                 Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential }
 
                 Set-TargetResource @testPresentParams -Credential $testCredential
-                Assert-MockCalled New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" when "Ensure" = "Present" and OU does exist' {
@@ -212,7 +212,7 @@ try
                 Mock -CommandName Set-ADOrganizationalUnit
 
                 Set-TargetResource @testPresentParams
-                Assert-MockCalled Set-ADOrganizationalUnit -Scope It
+                Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" with credentials when specified' {
@@ -221,7 +221,7 @@ try
                 Mock -CommandName Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential }
 
                 Set-TargetResource @testPresentParams -Credential $testCredential
-                Assert-MockCalled Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
+                Assert-MockCalled -CommandName Set-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Remove-ADOrganizationalUnit" when "Ensure" = "Absent" and OU does exist but is unprotected' {
@@ -234,7 +234,7 @@ try
                 Mock -CommandName Remove-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
-                Assert-MockCalled Remove-ADOrganizationalUnit -Scope It
+                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Scope It
             }
 
             It 'Calls "Remove-ADOrganizationalUnit" when "Ensure" = "Absent" and OU does exist and is protected' {
@@ -243,7 +243,7 @@ try
                 Mock -CommandName Remove-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
-                Assert-MockCalled Remove-ADOrganizationalUnit -Scope It
+                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Scope It
             }
 
             It 'Calls "Remove-ADOrganizationalUnit" with credentials when specified' {
@@ -252,7 +252,7 @@ try
                 Mock -CommandName Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential }
 
                 Set-TargetResource @testAbsentParams -Credential $testCredential
-                Assert-MockCalled Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
+                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" when "Ensure" = "Absent", OU does exist but is protected' {
@@ -262,7 +262,7 @@ try
                 Mock -CommandName Set-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
-                Assert-MockCalled Set-ADOrganizationalUnit -Scope It
+                Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Scope It
             }
 
             It 'Does not call "Set-ADOrganizationalUnit" when "Ensure" = "Absent", OU does exist but is unprotected' {
@@ -276,9 +276,46 @@ try
                 Mock -CommandName Set-ADOrganizationalUnit
 
                 Set-TargetResource @testAbsentParams
-                Assert-MockCalled Set-ADOrganizationalUnit -Scope It -Exactly 0
+                Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Scope It -Exactly 0
             }
 
+            It "Calls Restore-AdCommonObject when RestoreFromRecycleBin is used" {
+                $restoreParam = $testPresentParams.Clone()
+                $restoreParam.RestoreFromRecycleBin = $true
+                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
+                Mock -CommandName Restore-ADCommonObject -MockWith { return [PSCustomObject] $protectedFakeAdOu }
+
+                Set-TargetResource @restoreParam;
+
+                Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Scope It -Exactly -Times 0
+            }
+
+            It "Calls New-ADOrganizationalUnit when RestoreFromRecycleBin is used and if no object was found in the recycle bin" {
+                $restoreParam = $testPresentParams.Clone()
+                $restoreParam.RestoreFromRecycleBin = $true
+                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
+                Mock -CommandName New-ADOrganizationalUnit
+                Mock -CommandName Restore-ADCommonObject
+
+                Set-TargetResource @restoreParam;
+
+                Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Scope It
+            }
+
+            It "Throws if the object cannot be restored" {
+                $restoreParam = $testPresentParams.Clone()
+                $restoreParam.RestoreFromRecycleBin = $true
+                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
+                Mock -CommandName New-ADOrganizationalUnit
+                Mock -CommandName Restore-ADCommonObject -MockWith { throw (New-Object -TypeName System.InvalidOperationException)}
+
+                {Set-TargetResource @restoreParam;} | Should -Throw
+
+                Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Scope It -Exactly -Times 0
+            }
         }
         #endregion
 

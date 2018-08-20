@@ -9,6 +9,7 @@ data localizedString
         IncludeAndExcludeConflictError = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values.
         IncludeAndExcludeAreEmptyError = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters.
         ModeConversionError            = Converted mode {0} is not a {1}.
+        RecycleBinRestoreFailed        = Restoring {0} ({1}) from the recycle bin failed. Error message: {2}.
 
         CheckingMembers                = Checking for '{0}' members.
         MembershipCountMismatch        = Membership count is not correct. Expected '{0}' members, actual '{1}' members.
@@ -18,6 +19,9 @@ data localizedString
         MembershipNotDesiredState      = Membership is NOT in the desired state.
         CheckingDomain                 = Checking for domain '{0}'.
         CheckingSite                   = Checking for site '{0}'.
+        FindInRecycleBin               = Finding objects in the recycle bin matching the filter {0}.
+        FoundRestoreTargetInRecycleBin = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object.
+        RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
 '@
 }
 
@@ -27,8 +31,14 @@ function Assert-Module
     [CmdletBinding()]
     param
     (
-        [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $ModuleName = 'ActiveDirectory'
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ModuleName = 'ActiveDirectory',
+
+        [Parameter()]
+        [switch]
+        $ImportModule
     )
 
     if (-not (Get-Module -Name $ModuleName -ListAvailable))
@@ -36,6 +46,11 @@ function Assert-Module
         $errorId = '{0}_ModuleNotFound' -f $ModuleName;
         $errorMessage = $localizedString.RoleNotFoundError -f $moduleName;
         ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage;
+    }
+
+    if ($ImportModule)
+    {
+        Import-Module -Name $ModuleName
     }
 } #end function Assert-Module
 
@@ -687,4 +702,73 @@ function ConvertTo-DeploymentDomainMode
     }
 
     return $convertedMode
+}
+
+function Restore-ADCommonObject
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [Alias('UserName','GroupName','ComputerName')]
+        [System.String]
+        $Identity,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Computer','OrganizationalUnit','User','Group')]
+        [System.String]
+        $ObjectClass,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [Alias('DomainAdministratorCredential')]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [Alias('DomainController')]
+        [System.String]
+        $Server
+    )
+
+    $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f $Identity, $ObjectClass
+    Write-Verbose -Message ($localizedString.FindInRecycleBin -f $restoreFilter)
+
+    <#
+        Using IsDeleted and IncludeDeletedObjects will mean that the cmdlet does not throw
+        any more, and simply returns $null instead
+    #>
+    $commonParams = Get-ADCommonParameters @PSBoundParameters
+    $getAdObjectParams = $commonParams.Clone()
+    $getAdObjectParams.Remove('Identity')
+    $getAdObjectParams['Filter'] = $restoreFilter
+    $getAdObjectParams['IncludeDeletedObjects'] = $true
+
+    $restorableObject = Get-ADObject @getAdObjectParams
+    $restoredObject = $null
+
+    if ($restorableObject)
+    {
+        Write-Verbose -Message ($localizedString.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName)
+
+        try
+        {
+            $restoreParams = $commonParams.Clone()
+            $restoreParams['PassThru'] = $true
+            $restoreParams['ErrorAction'] = 'Stop'
+            $restoreParams['Identity'] = $restorableObject.DistinguishedName
+            $restoredObject = Restore-ADObject @restoreParams
+            Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass)
+        }
+        catch [Microsoft.ActiveDirectory.Management.ADException]
+        {
+            # After Get-TargetResource is through, only one error can occur here: Object parent does not exist
+            ThrowInvalidOperationError -ErrorId "$($Identity)_RecycleBinRestoreFailed" -ErrorMessage ($localizedString.RecycleBinRestoreFailed -f $Identity, $ObjectClass, $_.Exception.Message)
+        }
+    }
+
+    return $restoredObject
 }

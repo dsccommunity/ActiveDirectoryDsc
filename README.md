@@ -80,6 +80,7 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[String]` Ensure**: Specifies whether the computer account is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer object should first tried to be restored from the recycle bin before creating a new computer object.
 * **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of the computer object.
 * **`[String]` SID** _(Read)_: Returns the security identifier of the computer object.
 
@@ -158,7 +159,7 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **`[String]` Path** _(Write)_: Path in Active Directory to place the group, specified as a Distinguished Name (DN).
 * **`[String]` Description** _(Write)_: Specifies a description of the group object.
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of the group object.
-* **`[String]` Members** _(Write)_: Specifies the explicit AD objects that should comprise the group membership.
+* **`[String[]]` Members** _(Write)_: Specifies the explicit AD objects that should comprise the group membership.
   * If not specified, no group membership changes are made.
   * If specified, all undefined group members will be removed the AD group.
   * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
@@ -182,10 +183,11 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **`[String]` Ensure** _(Write)_: Specifies whether the group is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
-* **`[String]` DomainController**: An existing Active Directory domain controller used to perform the operation.
+* **`[String]` DomainController** _(Write)_: An existing Active Directory domain controller used to perform the operation.
   * If not running on a domain controller, this is required.
-* **`[PSCredential]` Credential**: User account credentials used to perform the operation.
+* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
 
 ### **xADObjectPermissionEntry**
 
@@ -213,6 +215,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **`[Boolean]` ProtectedFromAccidentalDeletion** _(Write)_: Valid values are $true and $false. If not specified, it defaults to $true.
 * **`[String]` Ensure** _(Write)_: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation. Note: _if not running on a domain controller, this is required_.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the organizational unit should first tried to be restored from the recycle bin before creating a new organizational unit.
 
 ### **xADRecycleBin**
 
@@ -317,6 +320,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * If not specified, this value defaults to False.
 * **`[String]` PasswordAuthentication** _(Write)_: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
 ### **xWaitForADDomain**
@@ -331,9 +335,17 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 ### Unreleased
 
 * Added xADObjectPermissionEntry resource.
+* Changes to xADCommon
+  * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* Changes to xADDomain
+  * xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue #221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+
+### 2.20.0.0
+
 * Changes to xActiveDirectory
-  * Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/xActiveDirectory/issues/190). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
-  * Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/xActiveDirectory/issues/198). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
+  * Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/xActiveDirectory/issues/190)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
+  * Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/xActiveDirectory/issues/198)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
   * xADDomain is now capable of setting the forest and domain functional level ([issue #187](https://github.com/PowerShell/xActiveDirectory/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.19.0.0
