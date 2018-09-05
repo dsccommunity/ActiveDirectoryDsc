@@ -334,6 +334,8 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 
 ### Unreleased
 
+### 2.21.0.0
+
 * Added xADObjectPermissionEntry
   * New resource added to control the AD object permissions entries [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
 * Changes to xADCommon

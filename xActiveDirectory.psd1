@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '2.20.0.0'
+moduleVersion = '2.21.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,10 +49,13 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Changes to xActiveDirectory
-  * Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue 190](https://github.com/PowerShell/xActiveDirectory/issues/190)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
-  * Removed duplicated code from examples in README.md ([issue 198](https://github.com/PowerShell/xActiveDirectory/issues/198)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
-  * xADDomain is now capable of setting the forest and domain functional level ([issue 187](https://github.com/PowerShell/xActiveDirectory/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+        ReleaseNotes = '* Added xADObjectPermissionEntry
+  * New resource added to control the AD object permissions entries [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
+* Changes to xADCommon
+  * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue 218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* Changes to xADDomain
+  * xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue 218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue 221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 '
 
@@ -60,6 +63,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
