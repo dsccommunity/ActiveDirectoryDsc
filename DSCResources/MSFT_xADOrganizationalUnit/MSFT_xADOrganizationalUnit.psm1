@@ -9,15 +9,16 @@ data LocalizedData
 {
     # culture="en-US"
     ConvertFrom-StringData @'
-        RoleNotFoundError        = Please ensure that the PowerShell module for role '{0}' is installed
+        RoleNotFoundError        = Please ensure that the PowerShell module for role '{0}' is installed.
         RetrievingOU             = Retrieving OU '{0}'.
-        UpdatingOU               = Updating OU '{0}'
-        DeletingOU               = Deleting OU '{0}'
-        CreatingOU               = Creating OU '{0}'
-        OUInDesiredState         = OU '{0}' exists and is in the desired state
-        OUNotInDesiredState      = OU '{0}' exists but is not in the desired state
-        OUExistsButShouldNot     = OU '{0}' exists when it should not exist
-        OUDoesNotExistButShould  = OU '{0}' does not exist when it should exist
+        UpdatingOU               = Updating OU '{0}'.
+        DeletingOU               = Deleting OU '{0}'.
+        CreatingOU               = Creating OU '{0}'.
+        RestoringOU              = Attempting to restore the organizational unit object {0} from the recycle bin.
+        OUInDesiredState         = OU '{0}' exists and is in the desired state.
+        OUNotInDesiredState      = OU '{0}' exists but is not in the desired state.
+        OUExistsButShouldNot     = OU '{0}' exists when it should not exist.
+        OUDoesNotExistButShould  = OU '{0}' does not exist when it should exist.
 '@
 }
 
@@ -74,7 +75,11 @@ function Test-TargetResource
         [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
         [ValidateNotNull()]
-        [System.String] $Description = ''
+        [System.String] $Description = '',
+
+        [ValidateNotNull()]
+        [System.Boolean]
+        $RestoreFromRecycleBin
     )
 
     $targetResource = Get-TargetResource -Name $Name -Path $Path
@@ -154,7 +159,11 @@ function Set-TargetResource
         [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
         [ValidateNotNull()]
-        [System.String] $Description = ''
+        [System.String] $Description = '',
+
+        [ValidateNotNull()]
+        [System.Boolean]
+        $RestoreFromRecycleBin
     )
 
     Assert-Module -ModuleName 'ActiveDirectory';
@@ -202,22 +211,43 @@ function Set-TargetResource
             }
             Remove-ADOrganizationalUnit @removeADOrganizationalUnitParams
         }
+
+        return # return from Set method to make it easier to test for a succesful restore
     }
     else
     {
-        Write-Verbose ($LocalizedData.CreatingOU -f $targetResource.Name)
-        $newADOrganizationalUnitParams = @{
-            Name = $Name
-            Path = $Path
-            Description = $Description
-            ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
-        }
-        if ($Credential) {
-            $newADOrganizationalUnitParams['Credential'] = $Credential
-        }
-        New-ADOrganizationalUnit @newADOrganizationalUnitParams
-    }
+        if  ($RestoreFromRecycleBin)
+        {
+            Write-Verbose -Message ($LocalizedData.RestoringOu -f $Name)
+            $restoreParams = @{
+                Identity    = $Name
+                ObjectClass = 'OrganizationalUnit'
+                ErrorAction = 'Stop'
+            }
 
+            if ($Credential)
+            {
+                $restoreParams['Credential'] = $Credential
+            }
+
+            $restoreSuccessful = Restore-ADCommonObject @restoreParams
+        }
+
+        if (-not $RestoreFromRecycleBin -or ($RestoreFromRecycleBin -and -not $restoreSuccessful))
+        {
+            Write-Verbose ($LocalizedData.CreatingOU -f $targetResource.Name)
+            $newADOrganizationalUnitParams = @{
+                Name = $Name
+                Path = $Path
+                Description = $Description
+                ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
+            }
+            if ($Credential) {
+                $newADOrganizationalUnitParams['Credential'] = $Credential
+            }
+            New-ADOrganizationalUnit @newADOrganizationalUnitParams
+        }
+    }
 } #end function Set-TargetResource
 
 Export-ModuleMember -Function *-TargetResource

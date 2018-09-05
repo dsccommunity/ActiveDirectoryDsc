@@ -48,6 +48,7 @@ groups and OUs.
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADGroup** modifies and removes Active Directory groups.
+* **xADObjectPermissionEntry** modifies the access control list of an Active Directory object.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADRecycleBin** enables or disabled Active Directory Recycle Bin.
 * **xADReplicationSite** creates and deletes Active Directory replication sites.
@@ -79,6 +80,7 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[String]` Ensure**: Specifies whether the computer account is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer object should first tried to be restored from the recycle bin before creating a new computer object.
 * **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of the computer object.
 * **`[String]` SID** _(Read)_: Returns the security identifier of the computer object.
 
@@ -181,10 +183,27 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **`[String]` Ensure** _(Write)_: Specifies whether the group is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
-* **`[String]` DomainController**: An existing Active Directory domain controller used to perform the operation.
+* **`[String]` DomainController** _(Write)_: An existing Active Directory domain controller used to perform the operation.
   * If not running on a domain controller, this is required.
-* **`[PSCredential]` Credential**: User account credentials used to perform the operation.
+* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
+
+### **xADObjectPermissionEntry**
+
+The xADObjectPermissionEntry DSC resource will manage access control lists on Active Directory objects. The resource is
+designed to to manage just one entry in the list of permissios (ACL) for one AD object. It will only interact with the
+one permission and leave all others as they were. The resource can be used multiple times to add multiple entries into
+one ACL.
+
+* **Ensure**: Indicates if the access will be added (Present) or will be removed (Absent). Default is 'Present'.
+* **Path**: Active Directory path of the object, specified as a Distinguished Name.
+* **IdentityReference**: Indicates the identity of the principal for the ace. Use the notation DOMAIN\SamAccountName for the identity.
+* **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values: { AccessSystemSecurity | CreateChild | Delete | DeleteChild | DeleteTree | ExtendedRight | GenericAll | GenericExecute | GenericRead | GenericWrite | ListChildren | ListObject | ReadControl | ReadProperty | Self | Synchronize | WriteDacl | WriteOwner | WriteProperty }
+* **AccessControlType**: Indicates whether to Allow or Deny access to the target object.
+* **ObjectType**: The schema GUID of the object to which the access rule applies. If the permission entry shouldn't be restricted to a specific object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
+* **ActiveDirectorySecurityInheritance**: One of the 'ActiveDirectorySecurityInheritance' enumeration values that specifies the inheritance type of the access rule. { All | Children | Descendents | None | SelfAndChildren }.
+* **InheritedObjectType**: The schema GUID of the child object type that can inherit this access rule. If the permission entry shouldn't be restricted to a specific inherited object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
 
 ### **xADOrganizationalUnit**
 
@@ -196,6 +215,7 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **`[Boolean]` ProtectedFromAccidentalDeletion** _(Write)_: Valid values are $true and $false. If not specified, it defaults to $true.
 * **`[String]` Ensure** _(Write)_: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation. Note: _if not running on a domain controller, this is required_.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the organizational unit should first tried to be restored from the recycle bin before creating a new organizational unit.
 
 ### **xADRecycleBin**
 
@@ -300,6 +320,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * If not specified, this value defaults to False.
 * **`[String]` PasswordAuthentication** _(Write)_: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
 ### **xWaitForADDomain**
@@ -312,6 +333,16 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 ## Versions
 
 ### Unreleased
+
+### 2.21.0.0
+
+* Added xADObjectPermissionEntry
+  * New resource added to control the AD object permissions entries [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
+* Changes to xADCommon
+  * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* Changes to xADDomain
+  * xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+* xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue #221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.20.0.0
 
