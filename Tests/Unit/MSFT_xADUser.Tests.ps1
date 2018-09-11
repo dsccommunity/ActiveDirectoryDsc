@@ -116,7 +116,7 @@ try
                 Test-TargetResource @testPresentParams | Should Be $true;
             }
 
-            It "Passes when user account password matches and 'Password' is specified" {
+            It "Passes when user account password matches, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $true; }
 
@@ -135,7 +135,7 @@ try
                 Test-TargetResource @testAbsentParams | Should Be $false;
             }
 
-            It "Fails when user account password is incorrect and 'Password' is specified" {
+            It "Fails when user account password is incorrect, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $false; }
 
@@ -323,7 +323,7 @@ try
                 Assert-MockCalled -CommandName Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName } -Scope It
             }
 
-            It "Calls 'Set-ADAccountPassword' when 'Password' parameter is specified" {
+            It "Calls 'Set-ADAccountPassword' when 'Password' parameter is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser; }
                 Mock -CommandName Set-ADUser
                 Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password }
@@ -525,5 +525,3 @@ finally
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
-
-
