@@ -268,6 +268,10 @@ function Get-TargetResource
         [ValidateSet('Default','Negotiate')]
         [System.String] $PasswordAuthentication = 'Default',
 
+        # Specifies whether an existing user's password should be reset (default False).
+        [ValidateNotNull()]
+        [System.Boolean] $PasswordNeverResets = $false,
+
         # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
         [ValidateNotNull()]
         [System.Boolean]
@@ -534,6 +538,10 @@ function Test-TargetResource
         [ValidateSet('Default','Negotiate')]
         [System.String] $PasswordAuthentication = 'Default',
 
+        # Specifies whether an existing user's password should be reset (default False).
+        [ValidateNotNull()]
+        [System.Boolean] $PasswordNeverResets = $false,
+
         # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
         [ValidateNotNull()]
         [System.Boolean]
@@ -560,7 +568,7 @@ function Test-TargetResource
 
         foreach ($parameter in $PSBoundParameters.Keys)
         {
-            if ($parameter -eq 'Password')
+            if ($parameter -eq 'Password' -and $PasswordNeverResets -eq $false)
             {
                 $testPasswordParams = @{
                     Username = $UserName;
@@ -788,6 +796,10 @@ function Set-TargetResource
         [ValidateSet('Default','Negotiate')]
         [System.String] $PasswordAuthentication = 'Default',
 
+        # Specifies whether an existing user's password should be reset (default False).
+        [ValidateNotNull()]
+        [System.Boolean] $PasswordNeverResets = $false,
+
         # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
         [ValidateNotNull()]
         [System.Boolean]
@@ -855,7 +867,7 @@ function Set-TargetResource
                     Write-Verbose -Message ($LocalizedData.RenamingADUser -f $targetResource.CommonName, $PSBoundParameters.CommonName);
                     Rename-ADObject @adCommonParameters -NewName $PSBoundParameters.CommonName;
                 }
-                elseif ($parameter -eq 'Password')
+                elseif ($parameter -eq 'Password' -and $PasswordNeverResets -eq $false)
                 {
                     $adCommonParameters = Get-ADCommonParameters @PSBoundParameters;
                     Write-Verbose -Message ($LocalizedData.SettingADUserPassword -f $UserName);
