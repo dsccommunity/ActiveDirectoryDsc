@@ -334,6 +334,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 ## Versions
 
 ### Unreleased
+
 * Add PasswordNeverResets parameter to xADUser to facilitate user lifecycle management
   
 ### 2.21.0.0
