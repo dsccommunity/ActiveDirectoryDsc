@@ -1,4 +1,5 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "PasswordAuthentication")]
 param()
 
 # Import the common AD functions
@@ -85,237 +86,283 @@ function Get-TargetResource
     param
     (
         # Name of the domain where the user account is located (only used if password is managed)
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
         # Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName')
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $UserName,
 
         # Specifies a new password value for an account
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Password,
 
         # Specifies whether the user account is created or deleted
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
         # Specifies the common nane assigned to the user account (ldapDisplayName 'cn')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $CommonName = $UserName,
 
         # Specifies the UPN assigned to the user account (ldapDisplayName 'userPrincipalName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $UserPrincipalName,
 
         # Specifies the display name of the object (ldapDisplayName 'displayName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $DisplayName,
 
         # Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Path,
 
         # Specifies the user's given name (ldapDisplayName 'givenName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $GivenName,
 
         # Specifies the initials that represent part of a user's name (ldapDisplayName 'initials')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Initials,
 
         # Specifies the user's last name or surname (ldapDisplayName 'sn')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Surname,
 
         # Specifies a description of the object (ldapDisplayName 'description')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Description,
 
         # Specifies the user's street address (ldapDisplayName 'streetAddress')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $StreetAddress,
 
         # Specifies the user's post office box number (ldapDisplayName 'postOfficeBox')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $POBox,
 
         # Specifies the user's town or city (ldapDisplayName 'l')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $City,
 
         # Specifies the user's or Organizational Unit's state or province (ldapDisplayName 'st')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $State,
 
         # Specifies the user's postal code or zip code (ldapDisplayName 'postalCode')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $PostalCode,
 
         # Specifies the country or region code for the user's language of choice (ldapDisplayName 'c')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Country,
 
         # Specifies the user's department (ldapDisplayName 'department')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Department,
 
         # Specifies the user's division (ldapDisplayName 'division')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Division,
 
         # Specifies the user's company (ldapDisplayName 'company')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Company,
 
         # Specifies the location of the user's office or place of business (ldapDisplayName 'physicalDeliveryOfficeName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Office,
 
         # Specifies the user's title (ldapDisplayName 'title')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $JobTitle,
 
         # Specifies the user's e-mail address (ldapDisplayName 'mail')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmailAddress,
 
         # Specifies the user's employee ID (ldapDisplayName 'employeeID')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmployeeID,
 
         # Specifies the user's employee number (ldapDisplayName 'employeeNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmployeeNumber,
 
         # Specifies a user's home directory path (ldapDisplayName 'homeDirectory')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomeDirectory,
 
         # Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (ldapDisplayName 'homeDrive')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomeDrive,
 
         # Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomePage,
 
         # Specifies a path to the user's profile (ldapDisplayName 'profilePath')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $ProfilePath,
 
         # Specifies a path to the user's log on script (ldapDisplayName 'scriptPath')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $LogonScript,
 
         # Specifies the notes attached to the user's accoutn (ldapDisplayName 'info')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Notes,
 
         # Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $OfficePhone,
 
         # Specifies the user's mobile phone number (ldapDisplayName 'mobile')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $MobilePhone,
 
         # Specifies the user's fax phone number (ldapDisplayName 'facsimileTelephoneNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Fax,
 
         # Specifies the user's home telephone number (ldapDisplayName 'homePhone')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomePhone,
 
          # Specifies the user's pager number (ldapDisplayName 'pager')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Pager,
 
         # Specifies the user's IP telephony phone number (ldapDisplayName 'ipPhone')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $IPPhone,
 
         # Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Manager,
 
         # Specifies if the account is enabled (default True)
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $Enabled = $true,
 
         # Specifies whether the account password can be changed
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $CannotChangePassword,
 
         # Specifies whether the password of an account can expire
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $PasswordNeverExpires,
 
         # Specifies the Active Directory Domain Services instance to use to perform the task.
+        [Parameter()]
         [ValidateNotNull()]
-        [System.String] $DomainController,
+        [System.String]
+        $DomainController,
 
         # Specifies the user account credentials to use to perform this task. Ideally this should just be called 'Credential' but is here for backwards compatibility
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $DomainAdministratorCredential,
 
         # Specifies the authentication context type when testing user passwords #61
+        [Parameter()]
         [ValidateSet('Default','Negotiate')]
         [System.String]
         $PasswordAuthentication = 'Default',
 
         # Specifies whether an existing user's password should be reset (default $false).
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $PasswordNeverResets = $false,
 
         # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $RestoreFromRecycleBin
@@ -369,7 +416,8 @@ function Get-TargetResource
     # Retrieve each property from the ADPropertyMap and add to the hashtable
     foreach ($property in $adPropertyMap)
     {
-        if ($property.Parameter -eq 'Path') {
+        if ($property.Parameter -eq 'Path')
+        {
             # The path returned is not the parent container
             if (-not [System.String]::IsNullOrEmpty($adUser.DistinguishedName))
             {
@@ -398,237 +446,283 @@ function Test-TargetResource
     param
     (
         # Name of the domain where the user account is located (only used if password is managed)
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
         # Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName')
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $UserName,
 
         # Specifies a new password value for an account
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Password,
 
         # Specifies whether the user account is created or deleted
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
         # Specifies the common nane assigned to the user account (ldapDisplayName 'cn')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $CommonName = $UserName,
 
         # Specifies the UPN assigned to the user account (ldapDisplayName 'userPrincipalName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $UserPrincipalName,
 
         # Specifies the display name of the object (ldapDisplayName 'displayName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $DisplayName,
 
         # Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Path,
 
         # Specifies the user's given name (ldapDisplayName 'givenName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $GivenName,
 
         # Specifies the initials that represent part of a user's name (ldapDisplayName 'initials')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Initials,
 
         # Specifies the user's last name or surname (ldapDisplayName 'sn')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Surname,
 
         # Specifies a description of the object (ldapDisplayName 'description')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Description,
 
         # Specifies the user's street address (ldapDisplayName 'streetAddress')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $StreetAddress,
 
         # Specifies the user's post office box number (ldapDisplayName 'postOfficeBox')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $POBox,
 
         # Specifies the user's town or city (ldapDisplayName 'l')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $City,
 
         # Specifies the user's or Organizational Unit's state or province (ldapDisplayName 'st')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $State,
 
         # Specifies the user's postal code or zip code (ldapDisplayName 'postalCode')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $PostalCode,
 
         # Specifies the country or region code for the user's language of choice (ldapDisplayName 'c')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Country,
 
         # Specifies the user's department (ldapDisplayName 'department')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Department,
 
         # Specifies the user's division (ldapDisplayName 'division')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Division,
 
         # Specifies the user's company (ldapDisplayName 'company')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Company,
 
         # Specifies the location of the user's office or place of business (ldapDisplayName 'physicalDeliveryOfficeName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Office,
 
         # Specifies the user's title (ldapDisplayName 'title')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $JobTitle,
 
         # Specifies the user's e-mail address (ldapDisplayName 'mail')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmailAddress,
 
         # Specifies the user's employee ID (ldapDisplayName 'employeeID')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmployeeID,
 
         # Specifies the user's employee number (ldapDisplayName 'employeeNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmployeeNumber,
 
         # Specifies a user's home directory path (ldapDisplayName 'homeDirectory')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomeDirectory,
 
         # Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (ldapDisplayName 'homeDrive')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomeDrive,
 
         # Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomePage,
 
         # Specifies a path to the user's profile (ldapDisplayName 'profilePath')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $ProfilePath,
 
         # Specifies a path to the user's log on script (ldapDisplayName 'scriptPath')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $LogonScript,
 
         # Specifies the notes attached to the user's accoutn (ldapDisplayName 'info')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Notes,
 
         # Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $OfficePhone,
 
         # Specifies the user's mobile phone number (ldapDisplayName 'mobile')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $MobilePhone,
 
         # Specifies the user's fax phone number (ldapDisplayName 'facsimileTelephoneNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Fax,
 
         # Specifies the user's home telephone number (ldapDisplayName 'homePhone')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomePhone,
 
          # Specifies the user's pager number (ldapDisplayName 'pager')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Pager,
 
         # Specifies the user's IP telephony phone number (ldapDisplayName 'ipPhone')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $IPPhone,
 
         # Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Manager,
 
         # Specifies if the account is enabled (default True)
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $Enabled = $true,
 
         # Specifies whether the account password can be changed
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $CannotChangePassword,
 
         # Specifies whether the password of an account can expire
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $PasswordNeverExpires,
 
         # Specifies the Active Directory Domain Services instance to use to perform the task.
+        [Parameter()]
         [ValidateNotNull()]
-        [System.String] $DomainController,
+        [System.String]
+        $DomainController,
 
         # Specifies the user account credentials to use to perform this task. Ideally this should just be called 'Credential' but is here for backwards compatibility
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $DomainAdministratorCredential,
 
         # Specifies the authentication context type when testing user passwords #61
+        [Parameter()]
         [ValidateSet('Default','Negotiate')]
         [System.String]
         $PasswordAuthentication = 'Default',
 
         # Specifies whether an existing user's password should be reset (default $false).
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $PasswordNeverResets = $false,
 
         # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $RestoreFromRecycleBin
@@ -699,237 +793,283 @@ function Set-TargetResource
     param
     (
         # Name of the domain where the user account is located (only used if password is managed)
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
         # Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName')
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $UserName,
 
         # Specifies a new password value for an account
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Password,
 
         # Specifies whether the user account is created or deleted
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
         # Specifies the common nane assigned to the user account (ldapDisplayName 'cn')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $CommonName = $UserName,
 
         # Specifies the UPN assigned to the user account (ldapDisplayName 'userPrincipalName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $UserPrincipalName,
 
         # Specifies the display name of the object (ldapDisplayName 'displayName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $DisplayName,
 
         # Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Path,
 
         # Specifies the user's given name (ldapDisplayName 'givenName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $GivenName,
 
         # Specifies the initials that represent part of a user's name (ldapDisplayName 'initials')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Initials,
 
         # Specifies the user's last name or surname (ldapDisplayName 'sn')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Surname,
 
         # Specifies a description of the object (ldapDisplayName 'description')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Description,
 
         # Specifies the user's street address (ldapDisplayName 'streetAddress')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $StreetAddress,
 
         # Specifies the user's post office box number (ldapDisplayName 'postOfficeBox')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $POBox,
 
         # Specifies the user's town or city (ldapDisplayName 'l')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $City,
 
         # Specifies the user's or Organizational Unit's state or province (ldapDisplayName 'st')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $State,
 
         # Specifies the user's postal code or zip code (ldapDisplayName 'postalCode')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $PostalCode,
 
         # Specifies the country or region code for the user's language of choice (ldapDisplayName 'c')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Country,
 
         # Specifies the user's department (ldapDisplayName 'department')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Department,
 
         # Specifies the user's division (ldapDisplayName 'division')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Division,
 
         # Specifies the user's company (ldapDisplayName 'company')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Company,
 
         # Specifies the location of the user's office or place of business (ldapDisplayName 'physicalDeliveryOfficeName')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Office,
 
         # Specifies the user's title (ldapDisplayName 'title')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $JobTitle,
 
         # Specifies the user's e-mail address (ldapDisplayName 'mail')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmailAddress,
 
         # Specifies the user's employee ID (ldapDisplayName 'employeeID')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmployeeID,
 
         # Specifies the user's employee number (ldapDisplayName 'employeeNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $EmployeeNumber,
 
         # Specifies a user's home directory path (ldapDisplayName 'homeDirectory')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomeDirectory,
 
         # Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (ldapDisplayName 'homeDrive')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomeDrive,
 
         # Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomePage,
 
         # Specifies a path to the user's profile (ldapDisplayName 'profilePath')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $ProfilePath,
 
         # Specifies a path to the user's log on script (ldapDisplayName 'scriptPath')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $LogonScript,
 
         # Specifies the notes attached to the user's accoutn (ldapDisplayName 'info')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Notes,
 
         # Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $OfficePhone,
 
         # Specifies the user's mobile phone number (ldapDisplayName 'mobile')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $MobilePhone,
 
         # Specifies the user's fax phone number (ldapDisplayName 'facsimileTelephoneNumber')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Fax,
 
         # Specifies the user's home telephone number (ldapDisplayName 'homePhone')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $HomePhone,
 
          # Specifies the user's pager number (ldapDisplayName 'pager')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Pager,
 
         # Specifies the user's IP telephony phone number (ldapDisplayName 'ipPhone')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $IPPhone,
 
         # Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')
+        [Parameter()]
         [ValidateNotNull()]
         [System.String]
         $Manager,
 
         # Specifies if the account is enabled (default True)
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $Enabled = $true,
 
         # Specifies whether the account password can be changed
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $CannotChangePassword,
 
         # Specifies whether the password of an account can expire
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $PasswordNeverExpires,
 
         # Specifies the Active Directory Domain Services instance to use to perform the task.
+        [Parameter()]
         [ValidateNotNull()]
-        [System.String] $DomainController,
+        [System.String]
+        $DomainController,
 
         # Specifies the user account credentials to use to perform this task. Ideally this should just be called 'Credential' but is here for backwards compatibility
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $DomainAdministratorCredential,
 
         # Specifies the authentication context type when testing user passwords #61
+        [Parameter()]
         [ValidateSet('Default','Negotiate')]
         [System.String]
         $PasswordAuthentication = 'Default',
 
         # Specifies whether an existing user's password should be reset (default $false).
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $PasswordNeverResets = $false,
 
         # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $RestoreFromRecycleBin
@@ -944,8 +1084,8 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        if ($targetResource.Ensure -eq 'Absent') {
-
+        if ($targetResource.Ensure -eq 'Absent')
+        {
             # Try to restore account if it exists
             if($RestoreFromRecycleBin)
             {
@@ -1091,12 +1231,15 @@ function Assert-Parameters
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential] $Password,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean] $Enabled = $true,
 
+        [Parameter()]
         [Parameter(ValueFromRemainingArguments)]
         $IgnoredArguments
     )
@@ -1119,26 +1262,30 @@ function Test-Password
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
-        [System.String] $DomainName,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
 
-        [Parameter(Mandatory)]
-        [System.String] $UserName,
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $UserName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Password,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $DomainAdministratorCredential,
 
         # Specifies the authentication context type when testing user passwords #61
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Default','Negotiate')]
-        [System.String] $PasswordAuthentication
+        [System.String]
+        $PasswordAuthentication
     )
 
     Write-Verbose -Message ($LocalizedData.CreatingADDomainConnection -f $DomainName);
