@@ -1,6 +1,7 @@
 <#
     .EXAMPLE
         In this example we will create a user with a managed password.
+        This might be used to manage the lifecycle of a service account.
 #>
 
 configuration Example
