@@ -1233,13 +1233,14 @@ function Assert-Parameters
     (
         [Parameter()]
         [ValidateNotNull()]
-        [System.Management.Automation.PSCredential] $Password,
+        [System.Management.Automation.PSCredential]
+        $Password,
 
         [Parameter()]
         [ValidateNotNull()]
-        [System.Boolean] $Enabled = $true,
+        [System.Boolean]
+        $Enabled = $true,
 
-        [Parameter()]
         [Parameter(ValueFromRemainingArguments)]
         $IgnoredArguments
     )
