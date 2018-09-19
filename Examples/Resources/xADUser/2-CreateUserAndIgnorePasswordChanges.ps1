@@ -23,7 +23,7 @@ configuration Example
             Ensure              = 'Present'
             UserName            = "ExampleUser"
             Password            = $Password
-            PaswordNeverResets  = $true
+            PasswordNeverResets  = $true
             DomainName          = "contoso.com"
             Path                = "CN=Users,DC=contoso,DC=com"
         }
