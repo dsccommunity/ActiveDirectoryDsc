@@ -1105,7 +1105,7 @@ function Set-TargetResource
                 # Populate the AccountPassword parameter of New-ADUser if password declared
                 if ($PSBoundParameters.ContainsKey('Password'))
                 {
-                    $newADUserParams['AccountPassword'] = $Password.Password
+                    $newADUserParams['AccountPassword'] = $Password.Password;
                 }
                 Write-Verbose -Message ($LocalizedData.AddingADUser -f $UserName);
                 New-ADUser @newADUserParams -SamAccountName $UserName;
