@@ -116,11 +116,18 @@ try
                 Test-TargetResource @testPresentParams | Should Be $true;
             }
 
-            It "Passes when user account password matches and 'Password' is specified" {
+            It "Passes when user account password matches, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $true; }
 
                 Test-TargetResource @testPresentParams -Password $testCredential | Should Be $true;
+            }
+
+            It "Passes when user account password does not match, 'Password' is specified and 'PasswordNeverResets' is True" {
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                Mock -CommandName Test-Password { return $false; }
+
+                Test-TargetResource @testPresentParams -Password $testCredential -PasswordNeverResets $true | Should Be $true;
             }
 
             It "Fails when user account does not exist and 'Ensure' is 'Present'" {
@@ -135,7 +142,7 @@ try
                 Test-TargetResource @testAbsentParams | Should Be $false;
             }
 
-            It "Fails when user account password is incorrect and 'Password' is specified" {
+            It "Fails when user account password is incorrect, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $false; }
 
@@ -323,7 +330,7 @@ try
                 Assert-MockCalled -CommandName Rename-ADObject -ParameterFilter { $NewName -eq $testCommonName } -Scope It
             }
 
-            It "Calls 'Set-ADAccountPassword' when 'Password' parameter is specified" {
+            It "Calls 'Set-ADAccountPassword' when 'Password' parameter is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser; }
                 Mock -CommandName Set-ADUser
                 Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password }
@@ -331,6 +338,16 @@ try
                 Set-TargetResource @testPresentParams -Password $testCredential;
 
                 Assert-MockCalled -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password } -Scope It
+            }
+
+            It "Does not call 'Set-ADAccountPassword' when 'Password' parameter is specified and 'PasswordNeverResets' is True" {
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser; }
+                Mock -CommandName Set-ADUser
+                Mock -CommandName Set-ADAccountPassword
+
+                Set-TargetResource @testPresentParams -Password $testCredential -PasswordNeverResets $true;
+
+                Assert-MockCalled -CommandName Set-ADAccountPassword -Scope It -Times 0;
             }
 
             It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is null" {
@@ -435,7 +452,7 @@ try
                     {
                         return @{Ensure = 'Present'}
                     }
-    
+
                     $script:mockCounter++
                     return @{Ensure = 'Absent'}
                 }
@@ -444,14 +461,14 @@ try
                 }}
                 Mock -CommandName New-ADUser
                 Mock -CommandName Set-ADUser -ParameterFilter { $true}
-    
+
                 Set-TargetResource @restoreParam
-    
+
                 Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADUser -Times 0 -Exactly -Scope It
                 Assert-MockCalled -CommandName Set-ADUser -Scope It
             }
-    
+
             It 'Calls New-ADUser when RestoreFromRecycleBin is used and if no object was found in the recycle bin' {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
@@ -461,21 +478,21 @@ try
                     {
                         return @{Ensure = 'Present'}
                     }
-    
+
                     $script:mockCounter++
                     return @{Ensure = 'Absent'}
                 }
                 Mock -CommandName Restore-ADCommonObject
                 Mock -CommandName New-ADUser
                 Mock -CommandName Set-ADUser -ParameterFilter { $true}
-    
+
                 Set-TargetResource @restoreParam
-    
+
                 Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADUser -Scope It
                 Assert-MockCalled -CommandName Set-ADUser -Scope It
             }
-    
+
             It 'Throws when object cannot be restored from recycle bin' {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
@@ -485,16 +502,16 @@ try
                     {
                         return @{Ensure = 'Present'}
                     }
-    
+
                     $script:mockCounter++
                     return @{Ensure = 'Absent'}
                 }
                 Mock -CommandName Restore-ADCommonObject -MockWith {throw (New-Object -TypeName System.InvalidOperationException)}
                 Mock -CommandName New-ADUser
                 Mock -CommandName Set-ADUser -ParameterFilter { $true}
-    
+
                 {Set-TargetResource @restoreParam} | Should -Throw
-    
+
                 Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADUser -Scope It -Exactly -Times 0
                 Assert-MockCalled -CommandName Set-ADUser -Scope It -Exactly -Times 0

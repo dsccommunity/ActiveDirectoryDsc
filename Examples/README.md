@@ -8,3 +8,4 @@ xActiveDirectory resource module.
 These are the links to the examples for each individual resource.
 
 - [xADObjectPermissionEntry](/Examples/Resources/xADObjectPermissionEntry)
+- [xADUser](/Examples/Resources/xADUser)

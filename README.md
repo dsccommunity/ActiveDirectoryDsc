@@ -320,6 +320,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * If not specified, this value defaults to False.
 * **`[String]` PasswordAuthentication** _(Write)_: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
+* **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).  
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
@@ -334,6 +335,8 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 
 ### Unreleased
 
+* Add PasswordNeverResets parameter to xADUser to facilitate user lifecycle management
+  
 ### 2.21.0.0
 
 * Added xADObjectPermissionEntry
