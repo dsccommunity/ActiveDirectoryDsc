@@ -10,11 +10,10 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
 }
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'Tests\ActiveDirectoryStub.psm1')
 
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName 'RPS_xActiveDirectory' `
-    -DSCResourceName 'MSFT_xADSiteLink' `
+    -DSCModuleName 'xActiveDirectory' `
+    -DSCResourceName 'MSFT_xADReplicationSiteLink' `
     -TestType Unit
 
 #endregion HEADER
@@ -27,8 +26,8 @@ function Invoke-TestCleanup
 # Begin Testing
 try
 {
-    InModuleScope 'MSFT_xADSiteLink' {
-        Describe 'xADSiteLink\Get-TargetResource' {
+    InModuleScope 'MSFT_xADReplicationSiteLink' {
+        Describe 'xADReplicationSiteLink\Get-TargetResource' {
             $mockGetADSiteLink = @{
                 Name                          = 'TestSiteLink'
                 Cost                          = 100
@@ -84,13 +83,13 @@ try
             }
         }
 
-        Describe 'xADSiteLink\Test-TargetResource' {
+        Describe 'xADReplicationSiteLink\Test-TargetResource' {
             $mockGetTarget = @{
                 Name                          = 'TestSiteLink'
                 Cost                          = 100
                 Description                   = 'HQ Site'
                 ReplicationFrequencyInMinutes = 180
-                SitesIncluded                 = @( 'site1', 'site2' )
+                SitesIncluded                 = @('site1', 'site2')
                 Ensure                        = 'Present'
             }
 
@@ -100,7 +99,7 @@ try
                     Cost                          = 101
                     Description                   = 'WH Site'
                     ReplicationFrequencyInMinutes = 181
-                    SitesIncluded                 = @( 'site11', 'site22' )
+                    SitesIncluded                 = @('site11', 'site22')
                     Ensure                        = 'Absent'
                 }
 
@@ -108,19 +107,19 @@ try
                     Name = 'TestSiteLink'
                 }
 
-                foreach ( $key in $falseTestParameters.Keys )
+                foreach ($key in $falseTestParameters.Keys)
                 {
                     $testParameters = $testParametersStarter.Clone()
-                    if ( $key -ne 'Name')
+                    if ($key -ne 'Name')
                     {
-                        if ( $key -ne 'Ensure' )
+                        if ($key -ne 'Ensure')
                         {
-                            $testParameters.Add( 'Ensure' , $mockGetTarget['Ensure'] )
-                            $testParameters.Add( $key, $falseTestParameters[$key] )
+                            $testParameters.Add('Ensure' , $mockGetTarget['Ensure'])
+                            $testParameters.Add($key, $falseTestParameters[$key])
                         }
                         else
                         {
-                            $testParameters.Add( $key, 'Absent' )
+                            $testParameters.Add($key, 'Absent')
                         }
 
                         It "Should return False when $key not in desired state" {
@@ -143,7 +142,7 @@ try
             }
         }
 
-        Describe 'xADSiteLink\Set-TargetResource' {
+        Describe 'xADReplicationSiteLink\Set-TargetResource' {
             Context 'Site Link is Absent but is desired Present' {
                 Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Absent' } } -Verifiable
                 Mock -CommandName New-ADReplicationSiteLink -Verifiable
@@ -204,5 +203,4 @@ try
 finally
 {
     Invoke-TestCleanup
-    Remove-Module -Name ActiveDirectoryStub
 }
