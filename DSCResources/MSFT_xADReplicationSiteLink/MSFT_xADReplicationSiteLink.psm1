@@ -44,7 +44,7 @@ function Get-TargetResource
         $siteCommonNames = @()
         foreach ($siteDN in $siteLink.SitesIncluded)
         {
-            $siteCommonNames += Resolve-SiteLinkName -SiteName $siteDn
+            $siteCommonNames += (Get-ADReplicationSite -Identity $siteDn).Name
         }
     }
 
@@ -281,34 +281,6 @@ function Test-TargetResource
     }
 
     return $isCompliant
-}
-
-<#
-    .SYNOPSIS
-        Resolves the AD replication site link distinguished names to short names
-
-    .PARAMETER SiteName
-        Specifies the distinguished name of a AD replication site link
-
-    .EXAMPLE
-        PS C:\> Resolve-SiteLinkName -SiteName 'CN=Site1,CN=Sites,CN=Configuration,DC=contoso,DC=com'
-        Site1
-#>
-function Resolve-SiteLinkName
-{
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseCmdletCorrectly', '')]
-    [OutputType([string])]
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $SiteName
-    )
-
-    $adSite = Get-ADReplicationSite -Identity $SiteName
-
-    return $adSite.Name
 }
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADReplicationSiteLink'
