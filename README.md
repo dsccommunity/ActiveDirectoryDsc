@@ -244,7 +244,7 @@ Domain Naming Master FSMO of the forest.
 * **`[Sint32]` ReplicationFrequencyInMinutes** _(Write)_: Species the frequency (in minutes) for which replication will occur where this site link is in use between sites.
 * **`[String[]]` SitesIncluded** _(Write)_: Specifies the list of sites included in the site link.
 * **`[String[]]` SitesExcluded** _(Write)_: Specifies the list of sites to excluded from the site link.
-* **`[String]` Ensure** _(Write)_: Specifies if the AD replication site should be added or remove. Default value is 'Present'. { *Present* | Absent }.
+* **`[String]` Ensure** _(Write)_: Specifies if the site link is created or deleted. Default value is empty.
 
 ### **xADReplicationSubnet**
 
