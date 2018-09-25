@@ -1,13 +1,18 @@
 #---------------------------------#
 #      environment configuration  #
 #---------------------------------#
+
 version: 2.16.{build}.0
+environment:
+  gallery_api:
+    secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
+
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
-    - ps: |
-        Add-WindowsFeature RSAT-AD-PowerShell
-        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-        Invoke-AppveyorInstallTask
+    - ps: Write-Verbose -Message "PowerShell version $($PSVersionTable.PSVersion)" -Verbose
+    - ps: Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+    - ps: Invoke-AppveyorInstallTask
+    - ps: Add-WindowsFeature RSAT-AD-PowerShell
 
 #---------------------------------#
 #      build configuration        #
@@ -21,15 +26,18 @@ build: false
 
 test_script:
     - ps: |
-        Invoke-AppveyorTestScriptTask `
-            -CodeCoverage `
-            -CodeCovIo
+        Invoke-AppveyorTestScriptTask -CodeCoverage -CodeCovIo
+
+# scripts to run before deployment
+after_test:
+    - ps: |
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Invoke-AppveyorAfterTestTask
 
 #---------------------------------#
 #      deployment configuration   #
 #---------------------------------#
 
-# scripts to run before deployment
 deploy_script:
   - ps: |
-      Invoke-AppveyorAfterTestTask
+        Invoke-AppVeyorDeployTask
