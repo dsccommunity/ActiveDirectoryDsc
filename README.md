@@ -320,7 +320,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * If not specified, this value defaults to False.
 * **`[String]` PasswordAuthentication** _(Write)_: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
-* **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).  
+* **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
@@ -333,15 +333,15 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 
 ### **xADForestProperties**
 
-The xADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name suffixes in a forest.
+The xADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
 
 * **Credential**: (optional) "Specifies the user account credentials to use to perform this task.
 * **ForestName**: Specifies the target Active Directory forest for the change.
 * **ServicePrincipalNameSuffix**: (optional) Specifies one or more Service Principal Name (SPN) Suffix to add/remove.
-* **ServicePrincipalNameSuffixToExclude**: (optional) The Service Principal Name Suffix(es) to exclude in the forest.
+* **ServicePrincipalNameSuffixToRemove**: (optional) The Service Principal Name Suffix(es) to remove in the forest.
 * **ServicePrincipalNameSuffixToInclude**: (optional) The Service Principal Name Suffix(es) to include in the forest.
 * **UserPrincipalNameSuffix**: (optional) The User Principal Name Suffix(es) to be explicitly defined in the forest.
-* **UserPrincipalNameSuffixToExclude**: (optional) The User Principal Name Suffix(es) to exclude in the forest.
+* **UserPrincipalNameSuffixToRemove**: (optional) The User Principal Name Suffix(es) to remove in the forest.
 * **UserPrincipalNameSuffixToInclude**: (optional) The User Principal Name Suffix(es) to include in the forest.
 
 ## Versions
@@ -349,8 +349,11 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 ### Unreleased
 
 * Add PasswordNeverResets parameter to xADUser to facilitate user lifecycle management
-* Added xADForestProperties: New resource to manage User and Principal Name Suffixes for a Forest
-  
+* Update appveyor.yml to use the default template.
+* Added default template files .gitattributes, and .gitignore, and
+  .vscode folder.
+* Added xADForestProperties: New resource to manage User and Principal Name Suffixes for a Forest.
+
 ### 2.21.0.0
 
 * Added xADObjectPermissionEntry
