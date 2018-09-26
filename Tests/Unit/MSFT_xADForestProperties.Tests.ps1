@@ -28,20 +28,20 @@ try
             Credential                 = $testCredential
         }
 
-        $includeRemoveParameters = @{
-            ForestName                          = $forestName
-            ServicePrincipalNameSuffixToRemove  = 'test.com'
-            ServicePrincipalNameSuffixToInclude = 'test.net'
-            UserPrincipalNameSuffixToRemove     = 'pester.net'
-            UserPrincipalNameSuffixToInclude    = 'cloudapp.net', 'fabrikam.com'
-            Credential                          = $testCredential
+        $addRemoveParameters = @{
+            ForestName                         = $forestName
+            ServicePrincipalNameSuffixToRemove = 'test.com'
+            ServicePrincipalNameSuffixToAdd    = 'test.net'
+            UserPrincipalNameSuffixToRemove    = 'pester.net'
+            UserPrincipalNameSuffixToAdd       = 'cloudapp.net', 'fabrikam.com'
+            Credential                         = $testCredential
         }
 
-        $removeParameters = $includeRemoveParameters.clone()
-        $removeParameters['ServicePrincipalNameSuffixToInclude'] = $null
-        $removeParameters['UserPrincipalNameSuffixToInclude'] = $null
+        $removeParameters = $addRemoveParameters.clone()
+        $removeParameters['ServicePrincipalNameSuffixToAdd'] = $null
+        $removeParameters['UserPrincipalNameSuffixToAdd'] = $null
 
-        $invalidParameters = $includeRemoveParameters.clone()
+        $invalidParameters = $addRemoveParameters.clone()
         $invalidParameters['UserPrincipalNameSuffix'] = 'test.com'
 
         $mockADForestDesiredState = @{
@@ -62,19 +62,19 @@ try
         Describe 'MSFT_xADForestProperties\Get-TargetResource' {
             Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
 
-            Context 'When used with include/remove parameters' {
+            Context 'When used with add/remove parameters' {
 
                 It 'Should return expected properties' {
-                    $targetResource = Get-TargetResource @includeRemoveParameters
+                    $targetResource = Get-TargetResource @addRemoveParameters
 
-                    $targetResource.ServicePrincipalNameSuffix          | Should -Be $mockADForestDesiredState.SpnSuffixes
-                    $targetResource.ServicePrincipalNameSuffixToInclude | Should -Be $includeRemoveParameters.ServicePrincipalNameSuffixToInclude
-                    $targetResource.ServicePrincipalNameSuffixToRemove  | Should -Be $includeRemoveParameters.ServicePrincipalNameSuffixToRemove
-                    $targetResource.UserPrincipalNameSuffix             | Should -Be $mockADForestDesiredState.UpnSuffixes
-                    $targetResource.UserPrincipalNameSuffixToInclude    | Should -Be $includeRemoveParameters.UserPrincipalNameSuffixToInclude
-                    $targetResource.UserPrincipalNameSuffixToRemove     | Should -Be $includeRemoveParameters.UserPrincipalNameSuffixToRemove
-                    $targetResource.Credential                          | Should -BeNullOrEmpty
-                    $targetResource.ForestName                          | Should -Be $mockADForestDesiredState.Name
+                    $targetResource.ServicePrincipalNameSuffix         | Should -Be $mockADForestDesiredState.SpnSuffixes
+                    $targetResource.ServicePrincipalNameSuffixToAdd    | Should -Be $addRemoveParameters.ServicePrincipalNameSuffixToAdd
+                    $targetResource.ServicePrincipalNameSuffixToRemove | Should -Be $addRemoveParameters.ServicePrincipalNameSuffixToRemove
+                    $targetResource.UserPrincipalNameSuffix            | Should -Be $mockADForestDesiredState.UpnSuffixes
+                    $targetResource.UserPrincipalNameSuffixToAdd       | Should -Be $addRemoveParameters.UserPrincipalNameSuffixToAdd
+                    $targetResource.UserPrincipalNameSuffixToRemove    | Should -Be $addRemoveParameters.UserPrincipalNameSuffixToRemove
+                    $targetResource.Credential                         | Should -BeNullOrEmpty
+                    $targetResource.ForestName                         | Should -Be $mockADForestDesiredState.Name
                 }
             }
 
@@ -83,14 +83,14 @@ try
                 It 'Should return expected properties' {
                     $targetResource = Get-TargetResource @replaceParameters
 
-                    $targetResource.ServicePrincipalNameSuffix          | Should -Be $mockADForestDesiredState.SpnSuffixes
-                    $targetResource.ServicePrincipalNameSuffixToInclude | Should -BeNullOrEmpty
-                    $targetResource.ServicePrincipalNameSuffixToRemove  | Should -BeNullOrEmpty
-                    $targetResource.UserPrincipalNameSuffix             | Should -Be $mockADForestDesiredState.UpnSuffixes
-                    $targetResource.UserPrincipalNameSuffixToInclude    | Should -BeNullOrEmpty
-                    $targetResource.UserPrincipalNameSuffixToRemove     | Should -BeNullOrEmpty
-                    $targetResource.Credential                          | Should -BeNullOrEmpty
-                    $targetResource.ForestName                          | Should -Be $mockADForestDesiredState.Name
+                    $targetResource.ServicePrincipalNameSuffix         | Should -Be $mockADForestDesiredState.SpnSuffixes
+                    $targetResource.ServicePrincipalNameSuffixToAdd    | Should -BeNullOrEmpty
+                    $targetResource.ServicePrincipalNameSuffixToRemove | Should -BeNullOrEmpty
+                    $targetResource.UserPrincipalNameSuffix            | Should -Be $mockADForestDesiredState.UpnSuffixes
+                    $targetResource.UserPrincipalNameSuffixToAdd       | Should -BeNullOrEmpty
+                    $targetResource.UserPrincipalNameSuffixToRemove    | Should -BeNullOrEmpty
+                    $targetResource.Credential                         | Should -BeNullOrEmpty
+                    $targetResource.ForestName                         | Should -Be $mockADForestDesiredState.Name
                 }
             }
         }
@@ -99,8 +99,8 @@ try
             Context 'When target resource in desired state' {
                 Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
 
-                It 'Should return $true when using include/remove parameters' {
-                    Test-TargetResource @includeRemoveParameters | Should -Be $true
+                It 'Should return $true when using add/remove parameters' {
+                    Test-TargetResource @addRemoveParameters | Should -Be $true
                 }
 
                 It 'Should return $true when using replace parameters' {
@@ -108,11 +108,11 @@ try
                 }
             }
 
-            Context 'When using Include and Remove parameters and target not in desired state' {
+            Context 'When using Add and Remove parameters and target not in desired state' {
                 Mock -CommandName Get-ADForest -MockWith { $mockADForestNonDesiredState }
 
-                It 'Should return $false when using include/remove parameters' {
-                    Test-TargetResource @includeRemoveParameters | Should -Be $false
+                It 'Should return $false when using add/remove parameters' {
+                    Test-TargetResource @addRemoveParameters | Should -Be $false
                 }
 
                 It 'Should return $false when using replace parameters' {
@@ -136,23 +136,23 @@ try
                     ($UpnSuffixes.Replace -join ',') -eq ($replaceParameters.UserPrincipalNameSuffix -join ',')
                 }
 
-                It 'Should call Set-ADForest with the replace action'  {
+                It 'Should call Set-ADForest with the replace action' {
                     Set-TargetResource @replaceParameters
 
                     Assert-MockCalled Set-ADForest -Scope It -Times 1 -Exactly
                 }
             }
 
-            Context 'When using include/remove parameters' {
+            Context 'When using add/remove parameters' {
                 Mock -CommandName Set-ADForest -ParameterFilter {
-                    ($SpnSuffixes.Add -join ',') -eq ($includeRemoveParameters.ServicePrincipalNameSuffixToInclude -join ',') -and
-                    ($SpnSuffixes.Remove -join ',') -eq ($includeRemoveParameters.ServicePrincipalNameSuffixToRemove -join ',') -and
-                    ($UpnSuffixes.Add -join ',') -eq ($includeRemoveParameters.UserPrincipalNameSuffixToInclude -join ',') -and
-                    ($UpnSuffixes.Remove -join ',') -eq ($includeRemoveParameters.UserPrincipalNameSuffixToRemove -join ',')
+                    ($SpnSuffixes.Add -join ',') -eq ($addRemoveParameters.ServicePrincipalNameSuffixToAdd -join ',') -and
+                    ($SpnSuffixes.Remove -join ',') -eq ($addRemoveParameters.ServicePrincipalNameSuffixToRemove -join ',') -and
+                    ($UpnSuffixes.Add -join ',') -eq ($addRemoveParameters.UserPrincipalNameSuffixToAdd -join ',') -and
+                    ($UpnSuffixes.Remove -join ',') -eq ($addRemoveParameters.UserPrincipalNameSuffixToRemove -join ',')
                 }
 
                 It 'Should call Set-ADForest with the add and remove actions' {
-                    Set-TargetResource @includeRemoveParameters
+                    Set-TargetResource @addRemoveParameters
 
                     Assert-MockCalled Set-ADForest -Scope It -Times 1 -Exactly
                 }

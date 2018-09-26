@@ -47,6 +47,7 @@ groups and OUs.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
 * **xADDomainTrust** establishes cross-domain trusts.
+* **xADForestProperties** manages User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADObjectPermissionEntry** modifies the access control list of an Active Directory object.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
@@ -337,12 +338,14 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 * **Credential**: (optional) "Specifies the user account credentials to use to perform this task.
 * **ForestName**: Specifies the target Active Directory forest for the change.
-* **ServicePrincipalNameSuffix**: (optional) Specifies one or more Service Principal Name (SPN) Suffix to add/remove.
-* **ServicePrincipalNameSuffixToRemove**: (optional) The Service Principal Name Suffix(es) to remove in the forest.
-* **ServicePrincipalNameSuffixToInclude**: (optional) The Service Principal Name Suffix(es) to include in the forest.
-* **UserPrincipalNameSuffix**: (optional) The User Principal Name Suffix(es) to be explicitly defined in the forest.
-* **UserPrincipalNameSuffixToRemove**: (optional) The User Principal Name Suffix(es) to remove in the forest.
-* **UserPrincipalNameSuffixToInclude**: (optional) The User Principal Name Suffix(es) to include in the forest.
+* **ServicePrincipalNameSuffix**: (optional) The Service Principal Name Suffix(es) to be explicitly defined in the forest and replace existing
+    SPNs. Cannot be used with ServicePrincipalNameSuffixToAdd or ServicePrincipalNameSuffixToRemove.
+* **ServicePrincipalNameSuffixToAdd**: (optional) The Service Principal Name Suffix(es) to add in the forest. Cannot be used with ServicePrincipalNameSuffix.
+* **ServicePrincipalNameSuffixToRemove**: (optional) The Service Principal Name Suffix(es) to remove in the forest. Cannot be used with ServicePrincipalNameSuffix.
+* **UserPrincipalNameSuffix**: (optional) The User Principal Name Suffix(es) to be explicitly defined in the forest and replace existing
+    UPNs. Cannot be used with UserPrincipalNameSuffixToAdd or UserPrincipalNameSuffixToRemove.
+* **UserPrincipalNameSuffixToAdd**: (optional) The User Principal Name Suffix(es) to add in the forest. Cannot be used with UserPrincipalNameSuffix.
+* **UserPrincipalNameSuffixToRemove**: (optional) The User Principal Name Suffix(es) to remove in the forest. Cannot be used with UserPrincipalNameSuffix.
 
 ## Versions
 
