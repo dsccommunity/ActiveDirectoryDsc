@@ -4,9 +4,9 @@ class MSFT_xADForestProperties : OMI_BaseResource
     [Key, Description("Specifies the target Active Directory forest for the change.")] String ForestName;
     [Write, Description("Specifies the User Principal Name (UPN) Suffix(es) to be explicitly defined in the forest.")] String UserPrincipalNameSuffix[];
     [Write, Description("Specifies the User Principal Name (UPN) Suffix(es) to be included to the forest.")] String UserPrincipalNameSuffixToInclude[];
-    [Write, Description("Specifies the User Principal Name (UPN) Suffix(es) to be excluded from the forest.")] String UserPrincipalNameSuffixToExclude[];
+    [Write, Description("Specifies the User Principal Name (UPN) Suffix(es) to be removed from the forest.")] String UserPrincipalNameSuffixToRemove[];
     [Write, Description("Specifies the Service Principal Name (SPN) Suffix(es) to be explicitly defined in the forest.")] String ServicePrincipalNameSuffix[];
     [Write, Description("Specifies the Service Principal Name (SPN) Suffix(es) to be included to the forest.")] String ServicePrincipalNameSuffixToInclude[];
-    [Write, Description("Specifies the Service Principal Name (SPN) Suffix(es) to be excluded from the forest.")] String ServicePrincipalNameSuffixToExclude[];
+    [Write, Description("Specifies the Service Principal Name (SPN) Suffix(es) to be removed from the forest.")] String ServicePrincipalNameSuffixToRemove[];
     [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies the user account credentials to use to perform this task.")] String Credential;
 };

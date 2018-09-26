@@ -13,9 +13,9 @@ configuration Example
         xADForestProperties ContosoProperties
         {
             ForestName                          = 'contoso.com'
-            ServicePrincipalNameSuffixToExclude = 'test.com'
+            ServicePrincipalNameSuffixToRemove  = 'test.com'
             ServicePrincipalNameSuffixToInclude = 'test.net'
-            UserPrincipalNameSuffixToExclude    = 'pester.net'
+            UserPrincipalNameSuffixToRemove     = 'pester.net'
             UserPrincipalNameSuffixToInclude    = 'cloudapp.net', 'fabrikam.com'
         }
     }

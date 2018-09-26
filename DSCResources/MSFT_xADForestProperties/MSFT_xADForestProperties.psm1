@@ -33,8 +33,8 @@ Import-Module -Name $adCommonFunctions
 .PARAMETER ServicePrincipalNameSuffix
     The Service Principal Name Suffix(es) to be explicitly defined in the forest.
 
-.PARAMETER ServicePrincipalNameSuffixToExclude
-    The Service Principal Name Suffix(es) to exclude in the forest.
+.PARAMETER ServicePrincipalNameSuffixToRemove
+    The Service Principal Name Suffix(es) to remove in the forest.
 
 .PARAMETER ServicePrincipalNameSuffixToInclude
     The Service Principal Name Suffix(es) to include in the forest.
@@ -42,8 +42,8 @@ Import-Module -Name $adCommonFunctions
 .PARAMETER UserPrincipalNameSuffix
     The User Principal Name Suffix(es) to be explicitly defined in the forest.
 
-.PARAMETER UserPrincipalNameSuffixToExclude
-    The User Principal Name Suffix(es) to exclude in the forest.
+.PARAMETER UserPrincipalNameSuffixToRemove
+    The User Principal Name Suffix(es) to remove in the forest.
 
 .PARAMETER UserPrincipalNameSuffixToInclude
     The User Principal Name Suffix(es) to include in the forest.
@@ -68,7 +68,7 @@ function Get-TargetResource
 
         [Parameter()]
         [String[]]
-        $ServicePrincipalNameSuffixToExclude,
+        $ServicePrincipalNameSuffixToRemove,
 
         [Parameter()]
         [String[]]
@@ -80,7 +80,7 @@ function Get-TargetResource
 
         [Parameter()]
         [String[]]
-        $UserPrincipalNameSuffixToExclude,
+        $UserPrincipalNameSuffixToRemove,
 
         [Parameter()]
         [String[]]
@@ -104,12 +104,12 @@ function Get-TargetResource
 
     $targetResource = @{
         ForestName                          = $forest.Name
-        UserPrincipalNameSuffix             = [Array]$forest.UpnSuffixes
-        UserPrincipalNameSuffixToInclude    = [Array]$UserPrincipalNameSuffixToInclude
-        UserPrincipalNameSuffixToExclude    = [Array]$UserPrincipalNameSuffixToExclude
-        ServicePrincipalNameSuffix          = [Array]$forest.SpnSuffixes
-        ServicePrincipalNameSuffixToInclude = [Array]$ServicePrincipalNameSuffixToInclude
-        ServicePrincipalNameSuffixToExclude = [Array]$ServicePrincipalNameSuffixToExclude
+        UserPrincipalNameSuffix             = [Array] $forest.UpnSuffixes
+        UserPrincipalNameSuffixToInclude    = [Array] $UserPrincipalNameSuffixToInclude
+        UserPrincipalNameSuffixToRemove     = [Array] $UserPrincipalNameSuffixToRemove
+        ServicePrincipalNameSuffix          = [Array] $forest.SpnSuffixes
+        ServicePrincipalNameSuffixToInclude = [Array] $ServicePrincipalNameSuffixToInclude
+        ServicePrincipalNameSuffixToRemove  = [Array] $ServicePrincipalNameSuffixToRemove
         Credential                          = ''
     }
 
@@ -129,8 +129,8 @@ function Get-TargetResource
 .PARAMETER ServicePrincipalNameSuffix
     The Service Principal Name Suffix(es) to be explicitly defined in the forest.
 
-.PARAMETER ServicePrincipalNameSuffixToExclude
-    The Service Principal Name Suffix(es) to exclude in the forest.
+.PARAMETER ServicePrincipalNameSuffixToRemove
+    The Service Principal Name Suffix(es) to remove in the forest.
 
 .PARAMETER ServicePrincipalNameSuffixToInclude
     The Service Principal Name Suffix(es) to include in the forest.
@@ -138,8 +138,8 @@ function Get-TargetResource
 .PARAMETER UserPrincipalNameSuffix
     The User Principal Name Suffix(es) to be explicitly defined in the forest.
 
-.PARAMETER UserPrincipalNameSuffixToExclude
-    The User Principal Name Suffix(es) to exclude in the forest.
+.PARAMETER UserPrincipalNameSuffixToRemove
+    The User Principal Name Suffix(es) to remove in the forest.
 
 .PARAMETER UserPrincipalNameSuffixToInclude
     The User Principal Name Suffix(es) to include in the forest.
@@ -164,7 +164,7 @@ function Test-TargetResource
 
         [Parameter()]
         [String[]]
-        $ServicePrincipalNameSuffixToExclude,
+        $ServicePrincipalNameSuffixToRemove,
 
         [Parameter()]
         [String[]]
@@ -176,7 +176,7 @@ function Test-TargetResource
 
         [Parameter()]
         [String[]]
-        $UserPrincipalNameSuffixToExclude,
+        $UserPrincipalNameSuffixToRemove,
 
         [Parameter()]
         [String[]]
@@ -200,9 +200,9 @@ function Test-TargetResource
     {
         $assertMemberParameters['MembersToInclude'] = $ServicePrincipalNameSuffixToInclude
     }
-    if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffixToExclude') -and -not [system.string]::IsNullOrEmpty($ServicePrincipalNameSuffixToExclude))
+    if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffixToRemove') -and -not [system.string]::IsNullOrEmpty($ServicePrincipalNameSuffixToRemove))
     {
-        $assertMemberParameters['MembersToExclude'] = $ServicePrincipalNameSuffixToExclude
+        $assertMemberParameters['MembersToExclude'] = $ServicePrincipalNameSuffixToRemove
     }
 
     Assert-MemberParameters @assertMemberParameters -ErrorAction Stop
@@ -222,9 +222,9 @@ function Test-TargetResource
     {
         $assertMemberParameters['MembersToInclude'] = $UserPrincipalNameSuffixToInclude
     }
-    if ($PSBoundParameters.ContainsKey('UserPrincipalNameSuffixToExclude') -and -not [system.string]::IsNullOrEmpty($UserPrincipalNameSuffixToExclude))
+    if ($PSBoundParameters.ContainsKey('UserPrincipalNameSuffixToRemove') -and -not [system.string]::IsNullOrEmpty($UserPrincipalNameSuffixToRemove))
     {
-        $assertMemberParameters['MembersToExclude'] = $UserPrincipalNameSuffixToExclude
+        $assertMemberParameters['MembersToExclude'] = $UserPrincipalNameSuffixToRemove
     }
 
     Assert-MemberParameters @assertMemberParameters -ErrorAction Stop
@@ -251,8 +251,8 @@ function Test-TargetResource
 .PARAMETER ServicePrincipalNameSuffix
     The Service Principal Name Suffix(es) to be explicitly defined in the forest.
 
-.PARAMETER ServicePrincipalNameSuffixToExclude
-    The Service Principal Name Suffix(es) to exclude in the forest.
+.PARAMETER ServicePrincipalNameSuffixToRemove
+    The Service Principal Name Suffix(es) to remove in the forest.
 
 .PARAMETER ServicePrincipalNameSuffixToInclude
     The Service Principal Name Suffix(es) to include in the forest.
@@ -260,8 +260,8 @@ function Test-TargetResource
 .PARAMETER UserPrincipalNameSuffix
     The User Principal Name Suffix(es) to be explicitly defined in the forest.
 
-.PARAMETER UserPrincipalNameSuffixToExclude
-    The User Principal Name Suffix(es) to exclude in the forest.
+.PARAMETER UserPrincipalNameSuffixToRemove
+    The User Principal Name Suffix(es) to remove in the forest.
 
 .PARAMETER UserPrincipalNameSuffixToInclude
     The User Principal Name Suffix(es) to include in the forest.
@@ -285,7 +285,7 @@ function Set-TargetResource
 
         [Parameter()]
         [String[]]
-        $ServicePrincipalNameSuffixToExclude,
+        $ServicePrincipalNameSuffixToRemove,
 
         [Parameter()]
         [String[]]
@@ -297,7 +297,7 @@ function Set-TargetResource
 
         [Parameter()]
         [String[]]
-        $UserPrincipalNameSuffixToExclude,
+        $UserPrincipalNameSuffixToRemove,
 
         [Parameter()]
         [String[]]
@@ -321,35 +321,35 @@ function Set-TargetResource
     {
         $replaceServicePrincipalNameSuffix = $ServicePrincipalNameSuffix -join ','
         $setADForestParameters['SpnSuffixes'] = @{
-            replace = $replaceServicePrincipalNameSuffix
+            replace = $($ServicePrincipalNameSuffix)
         }
 
-        Write-Verbose -Message ($localizedData.SetSpnSuffix -f 'replacing with', $replaceServicePrincipalNameSuffix)
+        Write-Verbose -Message ($localizedData.ReplaceSpnSuffix -f $replaceServicePrincipalNameSuffix)
     }
     if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffixToInclude') -and -not [system.string]::IsNullOrEmpty($ServicePrincipalNameSuffixToInclude))
     {
         $addServicePrincipalNameSuffix = $ServicePrincipalNameSuffixToInclude -join ','
         $setADForestParameters['SpnSuffixes'] = @{
-            add = $addServicePrincipalNameSuffix
+            add = $($ServicePrincipalNameSuffixToInclude)
         }
 
-        Write-Verbose -Message ($localizedData.SetSpnSuffix -f 'adding', $addServicePrincipalNameSuffix)
+        Write-Verbose -Message ($localizedData.AddSpnSuffix -f $addServicePrincipalNameSuffix)
     }
-    if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffixToExclude') -and -not [system.string]::IsNullOrEmpty($ServicePrincipalNameSuffixToExclude))
+    if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffixToRemove') -and -not [system.string]::IsNullOrEmpty($ServicePrincipalNameSuffixToRemove))
     {
-        $removeServicePrincipalNameSuffix = $ServicePrincipalNameSuffixToExclude -join ','
+        $removeServicePrincipalNameSuffix = $ServicePrincipalNameSuffixToRemove -join ','
         if ($setADForestParameters['SpnSuffixes'])
         {
-            $setADForestParameters['SpnSuffixes']['remove'] = $removeServicePrincipalNameSuffix
+            $setADForestParameters['SpnSuffixes']['remove'] = $($ServicePrincipalNameSuffixToRemove)
         }
         else
         {
             $setADForestParameters['SpnSuffixes'] = @{
-                remove = $removeServicePrincipalNameSuffix
+                remove = $($ServicePrincipalNameSuffixToRemove)
             }
         }
 
-        Write-Verbose -Message ($localizedData.SetSpnSuffix -f 'removing', $removeServicePrincipalNameSuffix)
+        Write-Verbose -Message ($localizedData.RemoveSpnSuffix -f $removeServicePrincipalNameSuffix)
     }
 
     # add UserPrincipalName parameter
@@ -357,35 +357,35 @@ function Set-TargetResource
     {
         $replaceUserPrincipalNameSuffix = $UserPrincipalNameSuffix -join ','
         $setADForestParameters['UpnSuffixes'] = @{
-            replace = $replaceUserPrincipalNameSuffix
+            replace = $($UserPrincipalNameSuffix)
         }
 
-        Write-Verbose -Message ($localizedData.SetUpnSuffix -f 'replacing with', $replaceUserPrincipalNameSuffix)
+        Write-Verbose -Message ($localizedData.ReplaceUpnSuffix -f $replaceUserPrincipalNameSuffix)
     }
     if ($PSBoundParameters.ContainsKey('UserPrincipalNameSuffixToInclude') -and -not [system.string]::IsNullOrEmpty($UserPrincipalNameSuffixToInclude))
     {
         $addUserPrincipalNameSuffix = $UserPrincipalNameSuffixToInclude -join ','
         $setADForestParameters['UpnSuffixes'] = @{
-            add = $addUserPrincipalNameSuffix
+            add = $($UserPrincipalNameSuffixToInclude)
         }
 
-        Write-Verbose -Message ($localizedData.SetUpnSuffix -f 'adding', $addUserPrincipalNameSuffix)
+        Write-Verbose -Message ($localizedData.AddUpnSuffix -f $addUserPrincipalNameSuffix)
     }
-    if ($PSBoundParameters.ContainsKey('UserPrincipalNameSuffixToExclude') -and -not [system.string]::IsNullOrEmpty($UserPrincipalNameSuffixToExclude))
+    if ($PSBoundParameters.ContainsKey('UserPrincipalNameSuffixToRemove') -and -not [system.string]::IsNullOrEmpty($UserPrincipalNameSuffixToRemove))
     {
-        $removeUserPrincipalNameSuffix = $UserPrincipalNameSuffixToExclude -join ','
+        $removeUserPrincipalNameSuffix = $UserPrincipalNameSuffixToRemove -join ','
         if ($setADForestParameters['UpnSuffixes'])
         {
-            $setADForestParameters['UpnSuffixes']['remove'] = $removeUserPrincipalNameSuffix
+            $setADForestParameters['UpnSuffixes']['remove'] = $($UserPrincipalNameSuffixToRemove)
         }
         else
         {
             $setADForestParameters['UpnSuffixes'] = @{
-                remove = $removeUserPrincipalNameSuffix
+                remove = $($UserPrincipalNameSuffixToRemove)
             }
         }
 
-        Write-Verbose -Message ($localizedData.SetUpnSuffix -f 'removing', $removeUserPrincipalNameSuffix)
+        Write-Verbose -Message ($localizedData.RemoveUpnSuffix -f $removeUserPrincipalNameSuffix)
     }
 
     Set-ADForest @setADForestParameters
