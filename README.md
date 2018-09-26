@@ -47,6 +47,7 @@ groups and OUs.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
 * **xADDomainTrust** establishes cross-domain trusts.
+* **xADForestProperties** manages User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
 * **xADGroup** modifies and removes Active Directory groups.
 * **xADObjectPermissionEntry** modifies the access control list of an Active Directory object.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
@@ -331,6 +332,21 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 * **`[UInt32]` RetryCount** _(Write)_: Maximum number of retries to check for the domain's existence.
 * **`[UInt32]` RebootRetryCount** _(Write)_: Maximum number of reboots to process in order to wait for a domain's existence.
 
+### **xADForestProperties**
+
+The xADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
+
+* **Credential**: (optional) "Specifies the user account credentials to use to perform this task.
+* **ForestName**: Specifies the target Active Directory forest for the change.
+* **ServicePrincipalNameSuffix**: (optional) The Service Principal Name Suffix(es) to be explicitly defined in the forest and replace existing
+    SPNs. Cannot be used with ServicePrincipalNameSuffixToAdd or ServicePrincipalNameSuffixToRemove.
+* **ServicePrincipalNameSuffixToAdd**: (optional) The Service Principal Name Suffix(es) to add in the forest. Cannot be used with ServicePrincipalNameSuffix.
+* **ServicePrincipalNameSuffixToRemove**: (optional) The Service Principal Name Suffix(es) to remove in the forest. Cannot be used with ServicePrincipalNameSuffix.
+* **UserPrincipalNameSuffix**: (optional) The User Principal Name Suffix(es) to be explicitly defined in the forest and replace existing
+    UPNs. Cannot be used with UserPrincipalNameSuffixToAdd or UserPrincipalNameSuffixToRemove.
+* **UserPrincipalNameSuffixToAdd**: (optional) The User Principal Name Suffix(es) to add in the forest. Cannot be used with UserPrincipalNameSuffix.
+* **UserPrincipalNameSuffixToRemove**: (optional) The User Principal Name Suffix(es) to remove in the forest. Cannot be used with UserPrincipalNameSuffix.
+
 ## Versions
 
 ### Unreleased
@@ -339,6 +355,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 * Update appveyor.yml to use the default template.
 * Added default template files .gitattributes, and .gitignore, and
   .vscode folder.
+* Added xADForestProperties: New resource to manage User and Principal Name Suffixes for a Forest.
 
 ### 2.21.0.0
 
@@ -1131,4 +1148,56 @@ Example_xADComputerAccountODJ -DomainController 'DC01' `
     -ConfigurationData $ConfigurationData
 
 Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
+```
+
+### Create User Principal Name (UPN) suffixes and Service Principal Name suffixes
+
+In this example the User Principal name suffixes "fabrikam.com" and "industry.com" and Service Principal name suffixes "corporate.com" are added to the Contoso forest.
+
+```powershell
+configuration Example_ADPrincipalSuffix
+{
+    Param
+    (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $TargetName,
+
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $ForestName,
+
+        [parameter(Mandatory = $true)]
+        [String[]]
+        $UserPrincipalNameSuffix,
+
+        [parameter(Mandatory = $true)]
+        [String[]]
+        $ServicePrincipalNameSuffix
+    )
+
+Import-DscResource -ModuleName xActiveDirectory
+
+    node $TargetName
+    {
+        xADForestProperties $ForestName
+        {
+            ForestName = $ForestName
+            UserPrincipalNameSuffix = $UserPrincipalNameSuffix
+            ServicePrincipalNameSuffix = $ServicePrincipalNameSuffix
+        }
+    }
+}
+
+$parameters = @{
+    TargetName = 'dc.contoso.com'
+    ForestName = 'contoso.com'
+    UserPrincipalNameSuffix = 'fabrikam.com','industry.com'
+    ServicePrincipalNameSuffix = 'corporate.com'
+    OutputPath = c:\output
+}
+
+Example_ADPrincipalSuffix @parameters
+
+Start-DscConfiguration -Path c:\output -Wait -Verbose
 ```
