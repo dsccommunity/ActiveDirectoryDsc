@@ -110,10 +110,10 @@ function Set-TargetResource
         [System.String[]]
         $SitesExcluded,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
+        $Ensure = 'Present'
     )
 
     if ($Ensure -eq 'Present')
@@ -134,7 +134,7 @@ function Set-TargetResource
             $setParameters = @{
                 Identity = $Name
             }
-            
+
             # build the SitesIncluded hashtable
             $sitesIncludedParameters = @{}
             if ($SitesExcluded)
@@ -142,18 +142,18 @@ function Set-TargetResource
                 Write-Verbose -Message ($script:localizedData.RemovingSites -f $($SiteExcluded -join ', '), $Name)
                 $sitesIncludedParameters.Add('Remove', $($SitesExcluded))
             }
-            
+
             if ($SitesIncluded)
             {
                 Write-Verbose -Message ($script:localizedData.AddingSites -f $($SitesIncluded -join ', '), $Name)
                 $sitesIncludedParameters.Add('Add', $($SitesIncluded))
             }
-            
+
             if ($null -ne $($sitesIncludedParameters.Keys))
             {
                 $setParameters.Add('SitesIncluded', $sitesIncludedParameters)
             }
-            
+
             # add the rest of the parameteres
             foreach ($parameter in $PSBoundParameters.Keys)
             {
@@ -179,7 +179,7 @@ function Set-TargetResource
 
     .PARAMETER Name
         Specifies the name of the AD Replication Site Link.
-        
+
     .PARAMETER Cost
         Specifies the cost to be placed on the site link.
 
@@ -228,10 +228,10 @@ function Test-TargetResource
         [System.String[]]
         $SitesExcluded,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [ValidateSet('Present','Absent')]
         [System.String]
-        $Ensure
+        $Ensure = 'Present'
     )
 
     $isCompliant = $true

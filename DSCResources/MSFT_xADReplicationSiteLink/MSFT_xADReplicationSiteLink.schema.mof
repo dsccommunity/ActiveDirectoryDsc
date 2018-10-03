@@ -8,5 +8,5 @@ class MSFT_xADReplicationSiteLink : OMI_BaseResource
     [Write, Description("Species the frequency (in minutes) for which replication will occur where this site link is in use between sites")] Sint32 ReplicationFrequencyInMinutes;
     [Write, Description("Specifies the list of sites included in the site link")] String SitesIncluded[];
     [Write, Description("Specifies the list of sites to exclude from the site link")] String SitesExcluded[];
-    [Required, Description("Specifies if the site link is created or deleted"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, Description("Specifies if the site link is created or deleted"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };

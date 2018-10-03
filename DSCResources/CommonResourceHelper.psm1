@@ -26,8 +26,8 @@ function Get-LocalizedData
         [System.String]
         $HelperName
     )
-    
-    # With the helper module just update the name and path variables as if it were a resource. 
+
+    # With the helper module just update the name and path variables as if it were a resource.
     if ($PSCmdlet.ParameterSetName -eq 'helper')
     {
         $resourceDirectory = $PSScriptRoot
@@ -36,7 +36,7 @@ function Get-LocalizedData
     else
     {
         # Step up one additional level to build the correct path to the resource culture.
-        $resourceDirectory = Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath (Join-Path -Path 'DSCResources' -ChildPath $ResourceName) 
+        $resourceDirectory = Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath (Join-Path -Path 'DSCResources' -ChildPath $ResourceName)
     }
 
     $localizedStringFileLocation = Join-Path -Path $resourceDirectory -ChildPath $PSUICulture
