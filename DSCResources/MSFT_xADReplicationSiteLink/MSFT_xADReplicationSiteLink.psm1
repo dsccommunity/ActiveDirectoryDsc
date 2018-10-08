@@ -5,8 +5,8 @@ Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot) -ChildPath
         Gets the current configuration on an AD Replication Site Link.
     .PARAMETER Name
         Specifies the name of the AD Replication Site Link.
-    .PARAMETER Ensure
-        Specifies if the site link is created or deleted.
+    .PARAMETER SitesExcluded
+        Specifies the list of sites to remove from a site link.
 #>
 function Get-TargetResource
 {
@@ -118,8 +118,10 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
+        # modify parameters for splatting to New-ADReplicationSiteLink
         $desiredParameters = $PSBoundParameters
         $desiredParameters.Remove('Ensure')
+        $desiredParameters.Remove('SitesExcluded')
 
         $currentADSiteLink = Get-TargetResource -Name $Name
         # since Set and New have different parameters we have to test if the site link exists to determine what cmdlet we need to use
