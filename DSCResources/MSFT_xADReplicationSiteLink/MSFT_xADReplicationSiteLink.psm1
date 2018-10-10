@@ -1,10 +1,13 @@
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot) -ChildPath CommonResourceHelper.psm1)
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADReplicationSiteLink'
 
 <#
     .SYNOPSIS
         Gets the current configuration on an AD Replication Site Link.
+
     .PARAMETER Name
         Specifies the name of the AD Replication Site Link.
+
     .PARAMETER SitesExcluded
         Specifies the list of sites to remove from a site link.
 #>
@@ -23,37 +26,47 @@ function Get-TargetResource
         $SitesExcluded
     )
 
-    try
-    {
-        $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties Description -ErrorAction Stop
-        $ensureResult = 'Present'
-    }
-    catch
-    {
-        $ensureResult = 'Absent'
-        Write-Verbose -Message $PSItem
-    }
+    $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties Description -ErrorAction SilentlyContinue
 
-    if ($siteLink.SitesIncluded)
+    if ($null -ne $siteLink)
     {
-        $siteCommonNames = @()
-        foreach ($siteDN in $siteLink.SitesIncluded)
+        if ($siteLink.SitesIncluded)
         {
-            $siteCommonNames += Resolve-SiteLinkName -SiteName $siteDn
+            $siteCommonNames = @()
+            foreach ($siteDN in $siteLink.SitesIncluded)
+            {
+                $siteCommonNames += Resolve-SiteLinkName -SiteName $siteDn
+            }
+        }
+
+        $sitesExcludedEvaluated = $SitesExcluded | Where-Object -FilterScript {$_ -notin $siteCommonNames}
+
+        $returnValue = @{
+            Name                          = $Name
+            Cost                          = $siteLink.Cost
+            Description                   = $siteLink.Description
+            ReplicationFrequencyInMinutes = $siteLink.ReplicationFrequencyInMinutes
+            SitesIncluded                 = $siteCommonNames
+            SitesExcluded                 = $sitesExcludedEvaluated
+            Ensure                        = 'Present'
+        }
+
+    }
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.SiteLinkNotFound -f $Name)
+        $returnValue = @{
+            Name                          = $Name
+            Cost                          = $null
+            Description                   = $null
+            ReplicationFrequencyInMinutes = $null
+            SitesIncluded                 = $null
+            SitesExcluded                 = $SitesExcluded
+            Ensure                        = 'Absent'
         }
     }
 
-    $returnValue = @{
-        Name = $Name
-        Cost = $siteLink.Cost
-        Description = $siteLink.Description
-        ReplicationFrequencyInMinutes = $siteLink.ReplicationFrequencyInMinutes
-        SitesIncluded = $siteCommonNames
-        SitesExcluded = $SitesExcluded
-        Ensure = $ensureResult
-    }
-
-    $returnValue
+    return $returnValue
 }
 
 <#
@@ -111,7 +124,7 @@ function Set-TargetResource
         $SitesExcluded,
 
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
     )
@@ -142,13 +155,13 @@ function Set-TargetResource
             if ($SitesExcluded)
             {
                 Write-Verbose -Message ($script:localizedData.RemovingSites -f $($SiteExcluded -join ', '), $Name)
-                $sitesIncludedParameters.Add('Remove', $($SitesExcluded))
+                $sitesIncludedParameters.Add('Remove', $SitesExcluded)
             }
 
             if ($SitesIncluded)
             {
                 Write-Verbose -Message ($script:localizedData.AddingSites -f $($SitesIncluded -join ', '), $Name)
-                $sitesIncludedParameters.Add('Add', $($SitesIncluded))
+                $sitesIncludedParameters.Add('Add', $SitesIncluded)
             }
 
             if ($null -ne $($sitesIncludedParameters.Keys))
@@ -231,7 +244,7 @@ function Test-TargetResource
         $SitesExcluded,
 
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
     )
@@ -271,7 +284,7 @@ function Test-TargetResource
         {
             if ($PSBoundParameters[$parameter] -ne $currentSiteLink[$parameter])
             {
-                Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameter,$($currentSiteLink[$parameter]),$($PSBoundParameters[$parameter]))
+                Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameter, $($currentSiteLink[$parameter]), $($PSBoundParameters[$parameter]))
                 $isCompliant = $false
             }
         }
@@ -307,7 +320,5 @@ function Resolve-SiteLinkName
 
     return $adSite.Name
 }
-
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADReplicationSiteLink'
 
 Export-ModuleMember -Function *-TargetResource

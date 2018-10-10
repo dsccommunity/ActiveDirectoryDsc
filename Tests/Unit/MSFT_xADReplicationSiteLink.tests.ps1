@@ -110,7 +110,7 @@ try
         Describe 'xADReplicationSiteLink\Test-TargetResource' {
             Context 'When target resource in desired state' {
                 Mock -CommandName Get-TargetResource -MockWith { $targetResourceParameters }
-                
+
                 It 'Should return $true when sites included' {
                     Test-TargetResource @targetResourceParameters | Should -Be $true
                 }
@@ -124,7 +124,7 @@ try
                 BeforeEach {
                     $mockTargetResourceNotInDesiredState = $targetResourceParameters.clone()
                 }
-                
+
                 It 'Should return $false with Cost is non compliant' {
                     $mockTargetResourceNotInDesiredState['Cost'] = 1
 
@@ -157,6 +157,14 @@ try
                     Test-TargetResource @targetResourceParameters | Should -Be $false
                 }
 
+                It 'Should return $false with Ensure is non compliant' {
+                    $mockTargetResourceNotInDesiredState['Ensure'] = 'Absent'
+
+                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
+
+                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -Be $false
+                }
+
                 It 'Should return $false with Sites Excluded is non compliant' {
                     $mockTargetResourceNotInDesiredState['SitesIncluded'] = @('site1','site2','site3','site4')
                     $mockTargetResourceNotInDesiredState['SitesExcluded'] = @('site3','site4')
@@ -173,7 +181,7 @@ try
                 Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Absent' } }
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Set-ADReplicationSiteLink
-                Mock -CommandName Remove-ADReplicationSiteLink                
+                Mock -CommandName Remove-ADReplicationSiteLink
 
                 It 'Should assert mock calls when Present' {
                     Set-TargetResource -Name 'TestSiteLink' -Ensure 'Present'
@@ -188,7 +196,7 @@ try
                 Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Present' } }
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Set-ADReplicationSiteLink
-                Mock -CommandName Remove-ADReplicationSiteLink                
+                Mock -CommandName Remove-ADReplicationSiteLink
 
                 It 'Should assert mock calls when Absent' {
                     Set-TargetResource -Name 'TestSiteLink' -Ensure 'Absent'
@@ -215,7 +223,7 @@ try
                 Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Present' ; SitesIncluded = 'Site0'} }
                 Mock -CommandName Set-ADReplicationSiteLink
                 Mock -CommandName New-ADReplicationSiteLink
-                Mock -CommandName Remove-ADReplicationSiteLink               
+                Mock -CommandName Remove-ADReplicationSiteLink
 
                 It "Should call Set-ADReplicationSiteLink with SitesIncluded-Add when SitesInluded is populated" {
                     Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter {$SitesIncluded -and $SitesIncluded['Add'] -eq 'Site1'}
@@ -229,7 +237,7 @@ try
                 It 'Should call Set-ADReplicationSiteLink with SitesIncluded-Remove when SitesExcluded is populated' {
                     Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter {$SitesIncluded -and $SitesIncluded['Remove'] -eq 'Site1'}
                     Set-TargetResource @removeSitesParameters
-                    
+
                     Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
                     Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 1 -Exactly
                     Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly

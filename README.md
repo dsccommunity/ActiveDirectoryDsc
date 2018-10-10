@@ -53,6 +53,7 @@ groups and OUs.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADRecycleBin** enables or disabled Active Directory Recycle Bin.
 * **xADReplicationSite** creates and deletes Active Directory replication sites.
+* **xADReplicationSiteLink** creates, deletes and modifies Active Directory replication site links.
 * **xADReplicationSubnet** add or removes Active Directory replication subnet.
 * **xADServicePrincipalName** adds or removes the SPN to a user or computer account.
 * **xADUser** modifies and removes Active Directory Users.
