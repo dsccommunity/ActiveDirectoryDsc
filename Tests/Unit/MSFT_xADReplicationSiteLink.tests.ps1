@@ -86,7 +86,7 @@ try
                     $getResult.ReplicationFrequencyInMinutes | Should -BeNullOrEmpty
                     $getResult.SitesIncluded                 | Should -BeNullOrEmpty
                     $getResult.SitesExcluded                 | Should -BeNullOrEmpty
-                    $getResult.Ensure                        | Should Be 'Absent'
+                    $getResult.Ensure                        | Should -Be 'Absent'
                 }
             }
 
