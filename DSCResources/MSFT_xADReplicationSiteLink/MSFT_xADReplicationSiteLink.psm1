@@ -155,13 +155,13 @@ function Set-TargetResource
             if ($SitesExcluded)
             {
                 Write-Verbose -Message ($script:localizedData.RemovingSites -f $($SiteExcluded -join ', '), $Name)
-                $sitesIncludedParameters.Add('Remove', $SitesExcluded)
+                $sitesIncludedParameters.Add('Remove', $($SitesExcluded))
             }
 
             if ($SitesIncluded)
             {
                 Write-Verbose -Message ($script:localizedData.AddingSites -f $($SitesIncluded -join ', '), $Name)
-                $sitesIncludedParameters.Add('Add', $SitesIncluded)
+                $sitesIncludedParameters.Add('Add', $($SitesIncluded))
             }
 
             if ($null -ne $($sitesIncludedParameters.Keys))
