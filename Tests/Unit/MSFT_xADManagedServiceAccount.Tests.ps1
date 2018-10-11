@@ -1,8 +1,8 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param()
 
-$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
-$Global:DSCResourceName    = 'MSFT_xADManagedServiceAccount' # Example MSFT_xFirewall
+$Global:DSCModuleName      = 'xActiveDirectory'
+$Global:DSCResourceName    = 'MSFT_xADManagedServiceAccount'
 
 #region HEADER
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
