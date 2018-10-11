@@ -332,7 +332,6 @@ function Set-TargetResource
         ## The service account doesn't exist
         if ($Ensure -eq 'Present')
         {
-            Write-Verbose ($LocalizedData.ManagedServiceAccountNotFound -f $ServiceAccountName)
             Write-Verbose ($LocalizedData.AddingManagedServiceAccount -f $ServiceAccountName)
 
             $adServiceAccountParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
