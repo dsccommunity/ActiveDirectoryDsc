@@ -61,13 +61,13 @@ try
                 Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It -Exactly -Times 1
             }
 
-            It "Should returns 'Ensure' is 'Present' when group exists" {
+            It "Should returns 'Ensure' is 'Present' when MSA exists" {
                 Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
 
                 (Get-TargetResource @testPresentParams).Ensure | Should Be 'Present'
             }
 
-            It "Should return 'Ensure' is 'Absent' when group does not exist" {
+            It "Should return 'Ensure' is 'Absent' when MSA does not exist" {
                 Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
                 (Get-TargetResource @testPresentParams).Ensure | Should Be 'Absent'
@@ -157,7 +157,7 @@ try
 
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
-            It "Should call 'New-ADServiceAccount' when 'Ensure' is 'Present' and the group does not exist" {
+            It "Should call 'New-ADServiceAccount' when 'Ensure' is 'Present' and the MSA does not exist" {
                 Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
                 Mock -CommandName Set-ADServiceAccount
                 Mock -CommandName New-ADServiceAccount -MockWith { return [PSCustomObject] $fakeADMSA }
