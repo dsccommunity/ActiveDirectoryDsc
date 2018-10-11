@@ -95,13 +95,13 @@ try
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
-            It "Should fail when MSA does not exist and 'Ensure' is 'Present'" {
+            It "Should return $false when MSA does not exist and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
-            It "Should fail when MSA exists, 'Ensure' is 'Present' but 'Path' is wrong" {
+            It "Should return $false when MSA exists, 'Ensure' is 'Present' but 'Path' is wrong" {
                 Mock -CommandName Get-TargetResource -MockWith {
                     $duffADMSA = $testPresentParams.Clone()
                     $duffADMSA['Path'] = 'OU=WrongPath,DC=contoso,DC=com'
@@ -111,7 +111,7 @@ try
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
-            It "Should fail when MSA exists, 'Ensure' is 'Present' but 'Description' is wrong" {
+            It "Should return $false when MSA exists, 'Ensure' is 'Present' but 'Description' is wrong" {
                 Mock -CommandName Get-TargetResource -MockWith {
                     $duffADMSA = $testPresentParams.Clone()
                     $duffADMSA['Description'] = 'Test AD MSA description is wrong'
@@ -121,7 +121,7 @@ try
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
-            It "Should fail when MSA exists, 'Ensure' is 'Present' but 'DisplayName' is wrong" {
+            It "Should return $false when MSA exists, 'Ensure' is 'Present' but 'DisplayName' is wrong" {
                 Mock -CommandName Get-TargetResource -MockWith {
                     $duffADMSA = $testPresentParams.Clone()
                     $duffADMSA['DisplayName'] = 'Wrong display name'
@@ -131,7 +131,7 @@ try
                 Test-TargetResource @testPresentParams | Should Be $false
             }
 
-            It "Should fail when MSA exists and 'Ensure' is 'Absent'" {
+            It "Should return $false when MSA exists and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
                 Test-TargetResource @testAbsentParams | Should Be $false
