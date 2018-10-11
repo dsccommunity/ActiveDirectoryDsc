@@ -50,7 +50,7 @@ try
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+        Describe -Name "$($Global:DSCResourceName)\Get-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Should call "Assert-Module" to check AD module is installed' {
@@ -59,18 +59,6 @@ try
                 $null = Get-TargetResource @testPresentParams
 
                 Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It -Exactly -Times 1
-            }
-
-            It "Should returns 'Ensure' is 'Present' when Managed Service Account exists" {
-                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
-
-                (Get-TargetResource @testPresentParams).Ensure | Should Be 'Present'
-            }
-
-            It "Should return 'Ensure' is 'Absent' when Managed Service Account does not exist" {
-                Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-
-                (Get-TargetResource @testPresentParams).Ensure | Should Be 'Absent'
             }
 
             It "Should call 'Get-ADServiceAccount' with 'Server' parameter when 'DomainController' specified" {
@@ -87,6 +75,23 @@ try
                 $null = Get-TargetResource @testPresentParams -Credential $testCredentials
 
                 Assert-MockCalled -CommandName Get-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
+            }
+
+            Context -Name 'When the system is in the desired state' {
+                It "Should returns 'Ensure' is 'Present'" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
+
+                    (Get-TargetResource @testPresentParams).Ensure | Should Be 'Present'
+                }
+            }
+
+            Context -Name 'When the system is not in the desired state' {
+                It "Should return 'Ensure' is 'Absent'" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+
+                    (Get-TargetResource @testPresentParams).Ensure | Should Be 'Absent'
+                }
+
             }
         }
         #end region
