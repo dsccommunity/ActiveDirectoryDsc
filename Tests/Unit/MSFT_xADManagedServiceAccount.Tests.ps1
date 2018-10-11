@@ -183,7 +183,7 @@ try
 
                     Set-TargetResource @testPresentParams
 
-                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly 1 -Exactly -Times 1
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
                 }
             }
 
