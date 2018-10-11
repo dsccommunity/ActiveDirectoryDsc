@@ -215,7 +215,8 @@ try
                 Assert-MockCalled -CommandName New-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
             }
 
-            It "Should call 'Move-ADObject' with credentials when specified (#106)" {
+            # Regression test for issue #106
+            It "Should call 'Move-ADObject' with credentials when specified" {
                 Mock -CommandName Set-ADServiceAccount
                 Mock -CommandName Move-ADObject -ParameterFilter { $Credential -eq $testCredentials }
                 Mock -CommandName Get-ADServiceAccount -MockWith {
