@@ -51,7 +51,7 @@ try
 
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } { }
+            Mock Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Calls "Assert-Module" to check AD module is installed' {
                 Mock Get-ADServiceAccount { return $fakeADMSA }
