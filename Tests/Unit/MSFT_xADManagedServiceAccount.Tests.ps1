@@ -167,24 +167,28 @@ try
                 Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
             }
 
-            $testProperties = @{
-                Description = 'Test AD MSA description is wrong'
-                DisplayName = 'Test DisplayName'
+            $testCases = @{
+
             }
 
-            foreach ($property in $testProperties.Keys) {
-                It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and '$property' is specified" {
-                    Mock -CommandName Set-ADServiceAccount
-                    Mock -CommandName Get-ADServiceAccount -MockWith {
-                        $duffADMSA = $fakeADMSA.Clone()
-                        $duffADMSA[$property] = $testProperties.$property
-                        return $duffADMSA
-                    }
+            $testCases = @(
+                @{Property = 'Description'; Value = 'Test AD MSA description is wrong'},
+                @{Property = 'DisplayName'; Value = 'Test DisplayName'}
+            )
 
-                    Set-TargetResource @testPresentParams
+            It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and '<Parameter>' is specified" -TestCases $testCases {
+                param ($Property, $Value)
 
-                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
+                Mock -CommandName Set-ADServiceAccount
+                Mock -CommandName Get-ADServiceAccount -MockWith {
+                    $duffADMSA = $fakeADMSA.Clone()
+                    $duffADMSA[$Property] = $Value
+                    return $duffADMSA
                 }
+
+                Set-TargetResource @testPresentParams
+
+                Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
             }
 
             It "Should remove MSA when 'Ensure' is 'Absent' and MSA exists" {
