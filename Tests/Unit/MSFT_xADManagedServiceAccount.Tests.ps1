@@ -167,16 +167,12 @@ try
                 Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
             }
 
-            $testCases = @{
-
-            }
-
             $testCases = @(
                 @{Property = 'Description'; Value = 'Test AD MSA description is wrong'},
                 @{Property = 'DisplayName'; Value = 'Test DisplayName'}
             )
 
-            It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and '<Parameter>' is specified" -TestCases $testCases {
+            It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and <Property> is specified" -TestCases $testCases {
                 param ($Property, $Value)
 
                 Mock -CommandName Set-ADServiceAccount
