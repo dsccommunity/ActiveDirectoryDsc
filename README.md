@@ -362,6 +362,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
+### 2.22.0.0
+
 * Add PasswordNeverResets parameter to xADUser to facilitate user lifecycle management
 * Update appveyor.yml to use the default template.
 * Added default template files .gitattributes, and .gitignore, and

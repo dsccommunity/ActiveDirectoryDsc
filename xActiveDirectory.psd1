@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '2.21.0.0'
+moduleVersion = '2.22.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,13 +49,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Added xADObjectPermissionEntry
-  * New resource added to control the AD object permissions entries [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
-* Changes to xADCommon
-  * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue 218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-* Changes to xADDomain
-  * xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue 218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-* xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue 221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+        ReleaseNotes = '* Add PasswordNeverResets parameter to xADUser to facilitate user lifecycle management
+* Update appveyor.yml to use the default template.
+* Added default template files .gitattributes, and .gitignore, and
+  .vscode folder.
+* Added xADForestProperties: New resource to manage User and Principal Name Suffixes for a Forest.
 
 '
 
@@ -63,6 +61,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
