@@ -351,6 +351,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
+### 2.23.0.0
+
 * Explicitly removed extra hidden files from release package
 
 ### 2.22.0.0
