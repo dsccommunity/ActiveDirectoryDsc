@@ -11,25 +11,37 @@ Import-Module -Name $adCommonFunctions
 
 function Get-TargetResource
 {
+    [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
+        [System.String]
         [String]$DomainName,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $DomainAdministratorCredential,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $SafemodeAdministratorPassword,
 
-        [String]$DatabasePath,
+        [System.String]
+        $DatabasePath,
 
-        [String]$LogPath,
+        [System.String]
+        $LogPath,
 
-        [String]$SysvolPath,
+        [System.String]
+        $SysvolPath,
 
-        [String]$SiteName
+        [System.String]
+        $SiteName,
+
+        [ValidateScript( {$_ | Test-Path } )]
+        [System.String]
+        $InstallationMediaPath
     )
 
     $returnValue = @{
@@ -79,24 +91,36 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
+        [System.String]
         [String]$DomainName,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $DomainAdministratorCredential,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $SafemodeAdministratorPassword,
 
-        [String]$DatabasePath,
+        [System.String]
+        $DatabasePath,
 
-        [String]$LogPath,
+        [System.String]
+        $LogPath,
 
-        [String]$SysvolPath,
+        [System.String]
+        $SysvolPath,
 
-        [String]$SiteName
+        [System.String]
+        $SiteName,
+
+        [ValidateScript( {$_ | Test-Path } )]
+        [System.String]
+        $InstallationMediaPath
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
@@ -142,6 +166,10 @@ function Set-TargetResource
         {
             $params.Add("SiteName", $SiteName)
         }
+        if (-not [string]::IsNullOrWhiteSpace($InstallationMediaPath))
+        {
+            $params.Add("InstallationMediaPath", $InstallationMediaPath)
+        }
 
         Install-ADDSDomainController @params
         Write-Verbose -Message "Node is now a domain controller for '$($DomainName)'."
@@ -164,25 +192,37 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
+    [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
+        [System.String]
         [String]$DomainName,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $DomainAdministratorCredential,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $SafemodeAdministratorPassword,
 
-        [String]$DatabasePath,
+        [System.String]
+        $DatabasePath,
 
-        [String]$LogPath,
+        [System.String]
+        $LogPath,
 
-        [String]$SysvolPath,
+        [System.String]
+        $SysvolPath,
 
-        [String]$SiteName
+        [System.String]
+        $SiteName,
+
+        [ValidateScript( {$_ | Test-Path } )]
+        [System.String]
+        $InstallationMediaPath
     )
 
     if ($PSBoundParameters.SiteName)
