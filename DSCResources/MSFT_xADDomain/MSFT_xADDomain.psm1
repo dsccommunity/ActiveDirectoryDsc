@@ -57,7 +57,8 @@ data localizedData
         after each configuration.
         ($env:systemRoot\system32\Configuration\BuiltinProvCache\MSFT_xADDomain)
 #>
-function Get-TrackingFilename {
+function Get-TrackingFilename
+{
     [OutputType([String])]
     [CmdletBinding()]
     param(
@@ -74,13 +75,13 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $DomainName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential] $DomainAdministratorCredential,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential] $SafemodeAdministratorPassword,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
@@ -116,10 +117,12 @@ function Get-TargetResource
     $maxRetries = 5
     $retryIntervalInSeconds = 30
     $domainShouldExist = (Test-Path (Get-TrackingFilename -DomainName $DomainName))
-    do {
+    do
+    {
     try
     {
-        if ($isDomainMember) {
+        if ($isDomainMember)
+        {
             ## We're already a domain member, so take the credentials out of the equation
             Write-Verbose ($localizedData.QueryDomainADWithLocalCredentials -f $domainFQDN);
             $domain = Get-ADDomain -Identity $domainFQDN -ErrorAction Stop;
@@ -177,7 +180,8 @@ function Get-TargetResource
         }
     }
 
-    if($domainShouldExist) {
+    if($domainShouldExist)
+    {
         $retries++
         Write-Verbose ($localizedData.RetryingGetADDomain -f $retries, $maxRetries, $retryIntervalInSeconds)
         Start-Sleep -Seconds ($retries * $retryIntervalInSeconds)
@@ -192,13 +196,13 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $DomainName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential] $DomainAdministratorCredential,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential] $SafemodeAdministratorPassword,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
@@ -271,13 +275,13 @@ function Set-TargetResource
 {
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $DomainName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential] $DomainAdministratorCredential,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential] $SafemodeAdministratorPassword,
 
         [Parameter()] [ValidateNotNullOrEmpty()]
@@ -337,7 +341,7 @@ function Set-TargetResource
     {
         $installADDSParams['DomainMode'] = $DomainMode;
     }
-    
+
     if ($PSBoundParameters.ContainsKey('ParentDomainName'))
     {
         Write-Verbose -Message ($localizedData.CreatingChildDomain -f $DomainName, $ParentDomainName);
