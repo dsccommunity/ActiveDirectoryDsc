@@ -8,5 +8,5 @@ class MSFT_xADDomainController : OMI_BaseResource
     [write] String LogPath;
     [write] String SysvolPath;
     [write] String SiteName;
-    [write, Description("Specify Install From Media, IFM, path.)] String InstallationMediaPath;
+    [write] String InstallationMediaPath;
 };
