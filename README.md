@@ -352,8 +352,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
-* Added parameter to xADDomainController to support InstallationMediaPath
-* Updated xADDomainController schema to be standard and provide Descriptions
+* Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
+* Updated xADDomainController schema to be standard and provide Descriptions.
 
 ### 2.23.0.0
 
