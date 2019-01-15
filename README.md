@@ -119,6 +119,7 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 * **`[String]` LogPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
 * **`[String]` SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
 * **`[String]` SiteName** _(Write)_: Specify the name of an existing site where new domain controller will be placed.
+* **`[String]` InstallationMediaPath** _(Write)_: Specify the path of the folder containg the Installation Media created in NTDSutil.
 
 ### **xADDomainDefaultPasswordPolicy**
 
@@ -350,6 +351,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 ## Versions
 
 ### Unreleased
+* Added parameter to xADDomainController to support InstallationMediaPath
+* Updated xADDomainController schema to be standard and provide Descriptions
 
 ### 2.23.0.0
 
