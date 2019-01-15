@@ -23,13 +23,14 @@ $TestEnvironment = Initialize-TestEnvironment `
 try
 {
     #region Pester Test Initialization
-    $correctDomainName   = 'present.com'
-    $testAdminCredential = [System.Management.Automation.PSCredential]::Empty
-    $correctDatabasePath = 'C:\Windows\NTDS'
-    $correctLogPath      = 'C:\Windows\NTDS'
-    $correctSysvolPath   = 'C:\Windows\SYSVOL'
-    $correctSiteName     = 'PresentSite'
-    $incorrectSiteName   = 'IncorrectSite'
+    $correctDomainName              = 'present.com'
+    $testAdminCredential            = [System.Management.Automation.PSCredential]::Empty
+    $correctDatabasePath            = 'C:\Windows\NTDS'
+    $correctLogPath                 = 'C:\Windows\NTDS'
+    $correctSysvolPath              = 'C:\Windows\SYSVOL'
+    $correctSiteName                = 'PresentSite'
+    $incorrectSiteName              = 'IncorrectSite'
+    $correctInstallationMediaPath   = 'Testdrive:\IFM'
 
     $testDefaultParams = @{
         DomainAdministratorCredential = $testAdminCredential
@@ -50,7 +51,7 @@ try
     function Install-ADDSDomainController {
         param(
             $DomainName, $SafeModeAdministratorPassword, $Credential, $NoRebootOnCompletion, $Force, $DatabasePath,
-            $LogPath, $SysvolPath, $SiteName
+            $LogPath, $SysvolPath, $SiteName, $InstallationMediaPath
         )
 
         throw [exception] 'Not Implemented'
@@ -79,6 +80,12 @@ try
             }
         } @commonMockParams
 
+        New-Item -Path Testdrive:\ -ItemType Directory -Name IFM
+
+        It 'Accepts InstallationMediaPath'{
+            $results = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallationMediaPath $correctInstallationMediaPath
+        }
+
         It 'Returns current "DatabasePath"' {
             $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
             $result.DatabasePath | Should Be $correctDatabasePath
@@ -98,6 +105,8 @@ try
             $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
             $result.SiteName | Should Be $correctSiteName
         }
+
+
     }
     #endregion
 
@@ -185,6 +194,25 @@ try
             Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
             Assert-MockCalled -CommandName Install-ADDSDomainController -Times 1 -ParameterFilter { $SiteName -eq $correctSiteName } @commonAssertParams
+        }
+
+        New-Item -Path Testdrive:\ -ItemType Directory -Name IFM
+        It 'Calls "Install-ADDSDomainController" with InstallationMediaPath specified' {
+            Mock -CommandName Get-ADDomain -MockWith {
+                return $true
+            } @commonMockParams
+
+            Mock -CommandName Get-TargetResource -MockWith {
+                return $stubTargetResource = @{
+                    Ensure = $false
+                }
+            } @commonMockParams
+            Mock -CommandName Install-ADDSDomainController @commonMockParams -ParameterFilter {$InstallationMediaPath -eq $correctInstallationMediaPath}
+
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallationMediaPath $correctInstallationMediaPath
+
+            Assert-MockCalled -CommandName Install-ADDSDomainController -Times 1 `
+                -ParameterFilter {$InstallationMediaPath -eq $correctInstallationMediaPath}  @commonAssertParams
         }
 
         It 'Calls "Move-ADDirectoryServer" when "SiteName" does not match' {

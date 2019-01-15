@@ -39,7 +39,7 @@ function Get-TargetResource
         [System.String]
         $SiteName,
 
-        [ValidateScript( {$_ | Test-Path } )]
+        [ValidateScript( { Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
     )
@@ -118,7 +118,7 @@ function Set-TargetResource
         [System.String]
         $SiteName,
 
-        [ValidateScript( {$_ | Test-Path } )]
+        [ValidateScript( {Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
     )
@@ -220,7 +220,7 @@ function Test-TargetResource
         [System.String]
         $SiteName,
 
-        [ValidateScript( {$_ | Test-Path } )]
+        [ValidateScript( {Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
     )
