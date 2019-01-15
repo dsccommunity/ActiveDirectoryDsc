@@ -27,18 +27,23 @@ function Get-TargetResource
         [System.Management.Automation.PSCredential]
         $SafemodeAdministratorPassword,
 
+        [Parameter()]
         [System.String]
         $DatabasePath,
 
+        [Parameter()]
         [System.String]
         $LogPath,
 
+        [Parameter()]
         [System.String]
         $SysvolPath,
 
+        [Parameter()]
         [System.String]
         $SiteName,
 
+        [Parameter()]
         [ValidateScript( { Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
@@ -53,7 +58,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message "Resolving '$($DomainName)' ..."
         $domain = Get-ADDomain -Identity $DomainName -Credential $DomainAdministratorCredential
-        if ($domain -ne $null)
+        if ($null -ne $domain)
         {
             Write-Verbose -Message "Domain '$($DomainName)' is present. Looking for DCs ..."
             try
@@ -106,18 +111,23 @@ function Set-TargetResource
         [System.Management.Automation.PSCredential]
         $SafemodeAdministratorPassword,
 
+        [Parameter()]
         [System.String]
         $DatabasePath,
 
+        [Parameter()]
         [System.String]
         $LogPath,
 
+        [Parameter()]
         [System.String]
         $SysvolPath,
 
+        [Parameter()]
         [System.String]
         $SiteName,
 
+        [Parameter()]
         [ValidateScript( {Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
@@ -208,18 +218,23 @@ function Test-TargetResource
         [System.Management.Automation.PSCredential]
         $SafemodeAdministratorPassword,
 
+        [Parameter()]
         [System.String]
         $DatabasePath,
 
+        [Parameter()]
         [System.String]
         $LogPath,
 
+        [Parameter()]
         [System.String]
         $SysvolPath,
 
+        [Parameter()]
         [System.String]
         $SiteName,
 
+        [Parameter()]
         [ValidateScript( {Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
