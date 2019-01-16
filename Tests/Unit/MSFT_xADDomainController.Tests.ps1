@@ -48,10 +48,42 @@ try
     }
 
     #Fake function because it is only available on Windows Server
-    function Install-ADDSDomainController {
-        param(
-            $DomainName, $SafeModeAdministratorPassword, $Credential, $NoRebootOnCompletion, $Force, $DatabasePath,
-            $LogPath, $SysvolPath, $SiteName, $InstallationMediaPath
+    function Install-ADDSDomainController
+    {
+        [CmdletBinding()]
+        param
+        (
+            [Parameter()]
+            $DomainName,
+
+            [Parameter()]
+            [System.Management.Automation.PSCredential]
+            $SafeModeAdministratorPassword,
+
+            [Parameter()]
+            [System.Management.Automation.PSCredential]
+            $Credential,
+
+            [Parameter()]
+            $NoRebootOnCompletion,
+
+            [Parameter()]
+            $Force,
+
+            [Parameter()]
+            $DatabasePath,
+
+            [Parameter()]
+            $LogPath,
+
+            [Parameter()]
+            $SysvolPath,
+
+            [Parameter()]
+            $SiteName,
+
+            [Parameter()]
+            $InstallationMediaPath
         )
 
         throw [exception] 'Not Implemented'
