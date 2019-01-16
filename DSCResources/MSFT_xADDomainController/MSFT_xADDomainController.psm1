@@ -41,12 +41,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $SiteName,
-
-        [Parameter()]
-        [ValidateScript( { Test-Path $_} )]
-        [System.String]
-        $InstallationMediaPath
+        $SiteName
     )
 
     $returnValue = @{
@@ -235,7 +230,6 @@ function Test-TargetResource
         $SiteName,
 
         [Parameter()]
-        [ValidateScript( {Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
     )
