@@ -9,6 +9,31 @@ $adCommonFunctions = Join-Path `
     -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
 Import-Module -Name $adCommonFunctions
 
+<#
+    .SYNOPSIS
+        Returns the current state of the certificate that may need to be requested.
+
+    .PARAMETER DomainName
+        Provide the FQDN of the domain the Domain Controller is being added to.
+
+    .PARAMETER DomainAdministrationCredential
+        Provide the Domain Admin credentials to be able to promote a new Domain Controller. This is a PSCredential.
+
+    .PARAMETER SafemodeAdministratorPassword
+        Provide a password that will be used to set the DSRM password. This is a PSCredential.
+
+    .PARAMETER DatabasePath
+        Provide the path where the NTDS.dit will be created and stored.
+
+    .PARAMETER LogPath
+        Provide the path where the logs for the NTDS will be created and stored.
+
+    .PARAMETER SysvolPath
+        Provide the path where the Sysvol will be created and stored.
+
+    .PARAMETER SiteName
+        Provide the name of the site you want the Domain Controller to be added to.
+#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -17,7 +42,7 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        [String]$DomainName,
+        $DomainName,
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -89,6 +114,35 @@ function Get-TargetResource
     $returnValue
 }
 
+<#
+    .SYNOPSIS
+        Returns the current state of the certificate that may need to be requested.
+
+    .PARAMETER DomainName
+        Provide the FQDN of the domain the Domain Controller is being added to.
+
+    .PARAMETER DomainAdministrationCredential
+        Provide the Domain Admin credentials to be able to promote a new Domain Controller. This is a PSCredential.
+
+    .PARAMETER SafemodeAdministratorPassword
+        Provide a password that will be used to set the DSRM password. This is a PSCredential.
+
+    .PARAMETER DatabasePath
+        Provide the path where the NTDS.dit will be created and stored.
+
+    .PARAMETER LogPath
+        Provide the path where the logs for the NTDS will be created and stored.
+
+    .PARAMETER SysvolPath
+        Provide the path where the Sysvol will be created and stored.
+
+    .PARAMETER SiteName
+        Provide the name of the site you want the Domain Controller to be added to.
+
+    .PARAMETER InstallationMediaPath
+        Provide the path for the IFM folder that was created with ntdsutil.
+        This should not be on a share but locally to the Domain Controller being promoted.
+#>
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -96,7 +150,7 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        [String]$DomainName,
+        $DomainName,
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -123,13 +177,13 @@ function Set-TargetResource
         $SiteName,
 
         [Parameter()]
-        [ValidateScript( {Test-Path $_} )]
         [System.String]
         $InstallationMediaPath
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
-    $parameters = $PSBoundParameters.Remove("Debug");
+    $parameters = $PSBoundParameters.Remove("Debug")
+    $parameters = $PSBoundParameters.Remove('InstallationMediaPath')
     $targetResource = Get-TargetResource @PSBoundParameters
 
     if ($targetResource.Ensure -eq $false)
@@ -195,6 +249,35 @@ function Set-TargetResource
     }
 }
 
+<#
+    .SYNOPSIS
+        Returns the current state of the certificate that may need to be requested.
+
+    .PARAMETER DomainName
+        Provide the FQDN of the domain the Domain Controller is being added to.
+
+    .PARAMETER DomainAdministrationCredential
+        Provide the Domain Admin credentials to be able to promote a new Domain Controller. This is a PSCredential.
+
+    .PARAMETER SafemodeAdministratorPassword
+        Provide a password that will be used to set the DSRM password. This is a PSCredential.
+
+    .PARAMETER DatabasePath
+        Provide the path where the NTDS.dit will be created and stored.
+
+    .PARAMETER LogPath
+        Provide the path where the logs for the NTDS will be created and stored.
+
+    .PARAMETER SysvolPath
+        Provide the path where the Sysvol will be created and stored.
+
+    .PARAMETER SiteName
+        Provide the name of the site you want the Domain Controller to be added to.
+
+    .PARAMETER InstallationMediaPath
+        Provide the path for the IFM folder that was created with ntdsutil.
+        This should not be on a share but locally to the Domain Controller being promoted.
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -203,7 +286,7 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        [String]$DomainName,
+        $DomainName,
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
@@ -246,8 +329,8 @@ function Test-TargetResource
 
     try
     {
-        $parameters = $PSBoundParameters.Remove("Debug");
-
+        $parameters = $PSBoundParameters.Remove("Debug")
+        $parameters = $PSBoundParameters.Remove('InstallationMediaPath')
         $existingResource = Get-TargetResource @PSBoundParameters
         $isCompliant = $existingResource.Ensure
 

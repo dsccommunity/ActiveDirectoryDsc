@@ -82,10 +82,6 @@ try
 
         New-Item -Path Testdrive:\ -ItemType Directory -Name IFM
 
-        It 'Accepts InstallationMediaPath'{
-            $results = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallationMediaPath $correctInstallationMediaPath
-        }
-
         It 'Returns current "DatabasePath"' {
             $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
             $result.DatabasePath | Should Be $correctDatabasePath
