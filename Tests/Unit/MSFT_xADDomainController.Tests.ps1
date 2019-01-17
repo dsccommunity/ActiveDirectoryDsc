@@ -231,7 +231,7 @@ try
             } @commonMockParams
 
             Mock -CommandName Get-TargetResource -MockWith {
-                return $stubTargetResource = @{
+                @{
                     Ensure = $false
                 }
             } @commonMockParams
