@@ -165,15 +165,18 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * If not specified, no group membership changes are made.
   * If specified, all undefined group members will be removed the AD group.
   * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
+  * To use other domain's members, specify the distinguished name of the object.
 * **`[String[]]` MembersToInclude** _(Write)_: Specifies AD objects that must be in the group.
   * If not specified, no group membership changes are made.
   * If specified, only the specified members are added to the group.
   * If specified, no users are removed from the group using this parameter.
+  * To use other domain's members, specify the distinguished name of the object.
   * This property cannot be specified with the 'Members' parameter.
 * **`[String[]]` MembersToExclude** _(Write)_: Specifies AD objects that _must not_ be in the group.
   * If not specified, no group membership changes are made.
   * If specified, only those specified are removed from the group.
   * If specified, no users are added to the group using this parameter.
+  * To use other domain's members, specify the distinguished name of the object.
   * This property cannot be specified with the 'Members' parameter.
 * **`[String]` MembershipAttribute** _(Write)_: Defines the AD object attribute that is used to determine group membership.
   * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
