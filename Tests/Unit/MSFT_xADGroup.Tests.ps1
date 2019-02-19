@@ -44,6 +44,8 @@ try
 
         $testAbsentParams = $testPresentParams.Clone();
         $testAbsentParams['Ensure'] = 'Absent';
+        $testPresentParamsMultidomain = $testPresentParams.Clone()
+        $testPresentParamsMultidomain.MembershipAttribute = 'DistinguishedName'
 
         $fakeADGroup = @{
             Name = $testPresentParams.GroupName;
@@ -74,6 +76,12 @@ try
             ObjectGUID = 'a97cc867-0c9e-4928-8387-0dba0c883b90';
             SamAccountName = 'USER3';
             SID = 'S-1-5-21-1131554080-2861379300-292325817-1108'
+        }
+        $fakeADUser4 = [PSCustomObject] @{
+            DistinguishedName = 'CN=User 4,CN=Users,DC=sub,DC=contoso,DC=com';
+            ObjectGUID = 'ebafa34e-b020-40cd-8652-ee7286419869';
+            SamAccountName = 'USER4';
+            SID = 'S-1-5-21-1131554080-2861379300-292325817-1109'
         }
 
         $testDomainController = 'TESTDC';
@@ -403,6 +411,32 @@ try
                 Set-TargetResource @testPresentParams -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName);
 
                 Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
+            }
+
+            It "Tries to resolve the domain names for all groups in the same domain when the 'MembershipAttribute' property is set to distinguishedName" {
+                Mock -CommandName Get-ADGroup -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Add-ADCommonGroupMember
+                Mock -CommandName New-ADGroup -MockWith { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Get-ADDomainNameFromDistinguishedName
+
+                Set-TargetResource @testPresentParamsMultidomain -Members @($fakeADUser1.distinguishedName, $fakeADUser2.distinguishedName);
+
+                Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
+                Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
+            }
+
+            It "Tries to resolve the domain names for all groups in different domains when the 'MembershipAttribute' property is set to distinguishedName" {
+                Mock -CommandName Get-ADGroup -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Set-ADGroup
+                Mock -CommandName Add-ADCommonGroupMember
+                Mock -CommandName New-ADGroup -MockWith { return [PSCustomObject] $fakeADGroup; }
+                Mock -CommandName Get-ADDomainNameFromDistinguishedName
+
+                Set-TargetResource @testPresentParamsMultidomain -Members @($fakeADUser1.distinguishedName, $fakeADUser4.distinguishedName);
+
+                Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
+                Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
             }
 
             It "Adds group members when 'Ensure' is 'Present', the group exists and 'MembersToInclude' are specified" {
