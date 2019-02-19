@@ -402,6 +402,22 @@ function Set-TargetResource
 
     try
     {
+        if ($MembershipAttribute -eq 'DistinguishedName')
+        {
+            $AllMembers = $Members + $MembersToInclude + $MembersToExclude
+            $GroupMemberDomains = @();
+            foreach($member in $AllMembers)
+            {
+                $GroupMemberDomains += Get-ADDomainNameFromDistinguishedName -DN $member
+            }
+            $GroupMemberDomainCount = ($GroupMemberDomains | Select-Object -Unique).count
+            if( ($GroupMemberDomainCount -gt 1) -or ($GroupMemberDomains -ine (Get-DomainName)).count -gt 0  )
+            {
+                Write-Verbose ($LocalizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount);
+                $MembersInMultipleDomains = $true
+            }
+        }
+
         $adGroup = Get-ADGroup @adGroupParams -Property Name,GroupScope,GroupCategory,DistinguishedName,Description,DisplayName,ManagedBy,Info
 
         if ($Ensure -eq 'Present')
@@ -471,13 +487,13 @@ function Set-TargetResource
                         Remove-ADGroupMember @adGroupParams -Members $adGroupMembers -Confirm:$false
                     }
                     Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $Members.Count, $GroupName)
-                    Add-ADGroupMember @adGroupParams -Members $Members
+                    Add-ADCommonGroupMember -Parameter $adGroupParams -Members $Members -MembersInMultipleDomains:$MembersInMultipleDomains
                 }
                 if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
                 {
                     $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
                     Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
-                    Add-ADGroupMember @adGroupParams -Members $MembersToInclude
+                    Add-ADCommonGroupMember -Parameter $adGroupParams -Members $MembersToInclude -MembersInMultipleDomains:$MembersInMultipleDomains
                 }
                 if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [system.string]::IsNullOrEmpty($MembersToExclude))
                 {
@@ -518,7 +534,7 @@ function Set-TargetResource
             {
                 $adGroupParams['Path'] = $Path
             }
-            
+
             <#
                 Create group
                 Try to restore account first if it exists
@@ -554,13 +570,13 @@ function Set-TargetResource
             {
                 $Members = Remove-DuplicateMembers -Members $Members
                 Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $Members.Count, $GroupName)
-                Add-ADGroupMember @adGroupParams -Members $Members
+                Add-ADCommonGroupMember -Parameter $adGroupParams -Members $Members -MembersInMultipleDomains:$MembersInMultipleDomains
             }
             elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
             {
                 $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
                 Write-Verbose -Message ($LocalizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
-                Add-ADGroupMember @adGroupParams -Members $MembersToInclude
+                Add-ADCommonGroupMember -Parameter $adGroupParams -Members $MembersToInclude -MembersInMultipleDomains:$MembersInMultipleDomains
             }
 
         }

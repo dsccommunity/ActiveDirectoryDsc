@@ -10,6 +10,7 @@ data localizedString
         IncludeAndExcludeAreEmptyError = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters.
         ModeConversionError            = Converted mode {0} is not a {1}.
         RecycleBinRestoreFailed        = Restoring {0} ({1}) from the recycle bin failed. Error message: {2}.
+        EmptyDomainError               = No domain name retrieved for group member {0} in group {1}.
 
         CheckingMembers                = Checking for '{0}' members.
         MembershipCountMismatch        = Membership count is not correct. Expected '{0}' members, actual '{1}' members.
@@ -22,6 +23,8 @@ data localizedString
         FindInRecycleBin               = Finding objects in the recycle bin matching the filter {0}.
         FoundRestoreTargetInRecycleBin = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object.
         RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
+        GroupMembershipMultipleDomains = Group membership objects are in '{0}' different AD Domains.
+        AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'.
 '@
 }
 
@@ -55,7 +58,8 @@ function Assert-Module
 } #end function Assert-Module
 
 # Internal function to test whether computer is a member of a domain
-function Test-DomainMember {
+function Test-DomainMember
+{
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param ( )
@@ -65,7 +69,8 @@ function Test-DomainMember {
 
 
 # Internal function to get the domain name of the computer
-function Get-DomainName {
+function Get-DomainName
+{
     [CmdletBinding()]
     [OutputType([System.String])]
     param ( )
@@ -74,10 +79,11 @@ function Get-DomainName {
 } # function Get-DomainName
 
 # Internal function to build domain FQDN
-function Resolve-DomainFQDN {
+function Resolve-DomainFQDN
+{
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [OutputType([System.String])]
         [System.String] $DomainName,
 
@@ -99,7 +105,7 @@ function Test-ADDomain
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $DomainName,
 
         [Parameter()]
@@ -151,7 +157,7 @@ function Get-ADObjectParentDN
     [OutputType([System.String])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $DN
     )
@@ -169,18 +175,22 @@ function Assert-MemberParameters
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [ValidateNotNull()]
         [System.String[]]
         $Members,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.String[]]
         $MembersToInclude,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ModuleName = 'xActiveDirectory'
@@ -244,7 +254,9 @@ function Remove-DuplicateMembers
     [OutputType([System.String[]])]
     param
     (
-        [System.String[]] $Members
+        [Parameter()]
+        [System.String[]]
+        $Members
     )
 
     Set-StrictMode -Version Latest
@@ -289,21 +301,25 @@ function Test-Members
     param
     (
         ## Existing array members
+        [Parameter()]
         [AllowNull()]
         [System.String[]]
         $ExistingMembers,
 
         ## Explicit array members
+        [Parameter()]
         [AllowNull()]
         [System.String[]]
         $Members,
 
         ## Compulsory array members
+        [Parameter()]
         [AllowNull()]
         [System.String[]]
         $MembersToInclude,
 
         ## Excluded array members
+        [Parameter()]
         [AllowNull()]
         [System.String[]]
         $MembersToExclude
@@ -380,12 +396,12 @@ function ConvertTo-TimeSpan
     [OutputType([System.TimeSpan])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.UInt32]
         $TimeSpan,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Seconds','Minutes','Hours','Days')]
         [System.String]
         $TimeSpanType
@@ -419,12 +435,12 @@ function ConvertFrom-TimeSpan
     [OutputType([System.Int32])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.TimeSpan]
         $TimeSpan,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Seconds','Minutes','Hours','Days')]
         [System.String]
         $TimeSpanType
@@ -466,7 +482,7 @@ function Get-ADCommonParameters
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [Alias('UserName','GroupName','ComputerName')]
         [System.String]
@@ -542,12 +558,12 @@ function ThrowInvalidOperationError
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ErrorId,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ErrorMessage
@@ -564,12 +580,12 @@ function ThrowInvalidArgumentError
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ErrorId,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ErrorMessage
@@ -589,10 +605,10 @@ function Test-ADReplicationSite
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $SiteName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $DomainName,
 
         [Parameter()]
@@ -601,7 +617,7 @@ function Test-ADReplicationSite
     )
 
     Write-Verbose -Message ($localizedString.CheckingSite -f $SiteName);
-    
+
     $existingDC = "$((Get-ADDomainController -Discover -DomainName $DomainName -ForceDiscover).HostName)";
 
     try
@@ -635,6 +651,7 @@ function ConvertTo-DeploymentForestMode
             [System.Nullable``1[Microsoft.ActiveDirectory.Management.ADForestMode]]
         $Mode,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ModuleName = 'xActiveDirectory'
@@ -646,7 +663,7 @@ function ConvertTo-DeploymentForestMode
     {
         $convertedMode = $Mode -as [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
     }
-    
+
     if ($PSCmdlet.ParameterSetName -eq 'ById')
     {
         $convertedMode = $ModeId -as [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
@@ -679,18 +696,19 @@ function ConvertTo-DeploymentDomainMode
         [System.Nullable``1[Microsoft.ActiveDirectory.Management.ADDomainMode]]
         $Mode,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ModuleName = 'xActiveDirectory'
     )
-    
+
     $convertedMode = $null
 
     if ($PSCmdlet.ParameterSetName -eq 'ByName' -and $Mode)
     {
         $convertedMode = $Mode -as [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
     }
-    
+
     if ($PSCmdlet.ParameterSetName -eq 'ById')
     {
         $convertedMode = $ModeId -as [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
@@ -709,7 +727,7 @@ function Restore-ADCommonObject
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [Alias('UserName','GroupName','ComputerName')]
         [System.String]
@@ -771,4 +789,101 @@ function Restore-ADCommonObject
     }
 
     return $restoredObject
+}
+
+<#
+.Synopsis
+    Author: Robert D. Biddle (https://github.com/RobBiddle)
+    Created: December.20.2017
+.DESCRIPTION
+    Takes an Active Directory DistinguishedName as input, returns the domain FQDN
+.EXAMPLE
+    Get-ADDomainNameFromDistinguishedName 'CN=ExampleObject,OU=ExampleOU,DC=example,DC=com'
+#>
+function Get-ADDomainNameFromDistinguishedName
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $DN
+    )
+
+    if ($DN -notlike '*DC=*') { return }
+
+    $SplitDN = ($DN -split 'DC=')
+    $DomainDNSplitParts = $SplitDN[1..$SplitDN.Length]
+    $DomainDN = ""
+    foreach ($part in $DomainDNSplitParts)
+    {
+        $DomainDN += "DC=$part"
+    }
+
+    $DomainName = (($DomainDN -replace 'DC=', '') -replace ',', '.')
+    return $DomainName
+
+} #end function Get-ADDomainNameFromDistinguishedName
+
+<#
+.SYNOPSIS
+    Add group member from current or different domain
+.NOTES
+    Author:
+      Original code: Robert D. Biddle (https://github.com/RobBiddle)
+      Refactored code: Jan-Hendrik Peters (https://github.com/nyanhp)
+#>
+function Add-ADCommonGroupMember
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [string[]]
+        $Members,
+
+        [Parameter()]
+        [hashtable]
+        $Parameters,
+
+        [Parameter()]
+        [switch]
+        $MembersInMultipleDomains
+    )
+
+    Assert-Module -ModuleName ActiveDirectory
+
+    if ($MembersInMultipleDomains.IsPresent)
+    {
+        foreach($member in $Members)
+        {
+            $memberDomain = Get-ADDomainNameFromDistinguishedName -DN $member
+
+            if (-not $memberDomain)
+            {
+                ThrowInvalidArgumentError -ErrorId "$($member)_EmptyDomainError" -ErrorMessage $localizedString.EmptyDomainError
+            }
+
+            Write-Verbose -Message ($localizedString.AddingGroupMember -f $member, $memberDomain, $Parameters.GroupName)
+            $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass
+            if ($memberObjectClass -eq 'computer')
+            {
+                $memberObject = Get-ADComputer -Identity $member -Server $memberDomain
+            }
+            elseif ($memberObjectClass -eq 'group')
+            {
+                $memberObject = Get-ADGroup -Identity $member -Server $memberDomain
+            }
+            elseif ($memberObjectClass -eq 'user')
+            {
+                $memberObject = Get-ADUser -Identity $member -Server $memberDomain
+            }
+
+            Add-ADGroupMember @Parameters -Members $memberObject
+        }
+    }
+    else
+    {
+        Add-ADGroupMember @Parameters -Members $Members
+    }
 }
