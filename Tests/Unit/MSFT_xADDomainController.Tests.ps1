@@ -23,13 +23,14 @@ $TestEnvironment = Initialize-TestEnvironment `
 try
 {
     #region Pester Test Initialization
-    $correctDomainName   = 'present.com'
-    $testAdminCredential = [System.Management.Automation.PSCredential]::Empty
-    $correctDatabasePath = 'C:\Windows\NTDS'
-    $correctLogPath      = 'C:\Windows\NTDS'
-    $correctSysvolPath   = 'C:\Windows\SYSVOL'
-    $correctSiteName     = 'PresentSite'
-    $incorrectSiteName   = 'IncorrectSite'
+    $correctDomainName              = 'present.com'
+    $testAdminCredential            = [System.Management.Automation.PSCredential]::Empty
+    $correctDatabasePath            = 'C:\Windows\NTDS'
+    $correctLogPath                 = 'C:\Windows\NTDS'
+    $correctSysvolPath              = 'C:\Windows\SYSVOL'
+    $correctSiteName                = 'PresentSite'
+    $incorrectSiteName              = 'IncorrectSite'
+    $correctInstallationMediaPath   = 'Testdrive:\IFM'
 
     $testDefaultParams = @{
         DomainAdministratorCredential = $testAdminCredential
@@ -47,10 +48,42 @@ try
     }
 
     #Fake function because it is only available on Windows Server
-    function Install-ADDSDomainController {
-        param(
-            $DomainName, $SafeModeAdministratorPassword, $Credential, $NoRebootOnCompletion, $Force, $DatabasePath,
-            $LogPath, $SysvolPath, $SiteName
+    function Install-ADDSDomainController
+    {
+        [CmdletBinding()]
+        param
+        (
+            [Parameter()]
+            $DomainName,
+
+            [Parameter()]
+            [System.Management.Automation.PSCredential]
+            $SafeModeAdministratorPassword,
+
+            [Parameter()]
+            [System.Management.Automation.PSCredential]
+            $Credential,
+
+            [Parameter()]
+            $NoRebootOnCompletion,
+
+            [Parameter()]
+            $Force,
+
+            [Parameter()]
+            $DatabasePath,
+
+            [Parameter()]
+            $LogPath,
+
+            [Parameter()]
+            $SysvolPath,
+
+            [Parameter()]
+            $SiteName,
+
+            [Parameter()]
+            $InstallationMediaPath
         )
 
         throw [exception] 'Not Implemented'
@@ -79,6 +112,8 @@ try
             }
         } @commonMockParams
 
+        New-Item -Path Testdrive:\ -ItemType Directory -Name IFM
+
         It 'Returns current "DatabasePath"' {
             $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
             $result.DatabasePath | Should Be $correctDatabasePath
@@ -98,6 +133,8 @@ try
             $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
             $result.SiteName | Should Be $correctSiteName
         }
+
+
     }
     #endregion
 
@@ -185,6 +222,25 @@ try
             Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
             Assert-MockCalled -CommandName Install-ADDSDomainController -Times 1 -ParameterFilter { $SiteName -eq $correctSiteName } @commonAssertParams
+        }
+
+        New-Item -Path Testdrive:\ -ItemType Directory -Name IFM
+        It 'Calls "Install-ADDSDomainController" with InstallationMediaPath specified' {
+            Mock -CommandName Get-ADDomain -MockWith {
+                return $true
+            } @commonMockParams
+
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Ensure = $false
+                }
+            } @commonMockParams
+            Mock -CommandName Install-ADDSDomainController @commonMockParams -ParameterFilter {$InstallationMediaPath -eq $correctInstallationMediaPath}
+
+            Set-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallationMediaPath $correctInstallationMediaPath
+
+            Assert-MockCalled -CommandName Install-ADDSDomainController -Times 1 `
+                -ParameterFilter {$InstallationMediaPath -eq $correctInstallationMediaPath}  @commonAssertParams
         }
 
         It 'Calls "Move-ADDirectoryServer" when "SiteName" does not match' {
