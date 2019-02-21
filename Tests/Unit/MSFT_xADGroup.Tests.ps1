@@ -418,12 +418,15 @@ try
                 Mock -CommandName Set-ADGroup
                 Mock -CommandName Add-ADCommonGroupMember
                 Mock -CommandName New-ADGroup -MockWith { return [PSCustomObject] $fakeADGroup; }
-                Mock -CommandName Get-ADDomainNameFromDistinguishedName
+                Mock -CommandName Get-DomainName -MockWith { return 'contoso.com' }
+                Mock -CommandName Get-ADDomainNameFromDistinguishedName -MockWith { return 'contoso.com' }
+                Mock -CommandName Write-Verbose -ParameterFilter { $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'}
 
                 Set-TargetResource @testPresentParamsMultidomain -Members @($fakeADUser1.distinguishedName, $fakeADUser2.distinguishedName);
 
-                Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
                 Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
+                Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
+                Assert-MockCalled -CommandName Write-Verbose -ParameterFilter { $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'} -Exactly -Times 0
             }
 
             It "Tries to resolve the domain names for all groups in different domains when the 'MembershipAttribute' property is set to distinguishedName" {
@@ -431,12 +434,30 @@ try
                 Mock -CommandName Set-ADGroup
                 Mock -CommandName Add-ADCommonGroupMember
                 Mock -CommandName New-ADGroup -MockWith { return [PSCustomObject] $fakeADGroup; }
-                Mock -CommandName Get-ADDomainNameFromDistinguishedName
+                Mock -CommandName Get-DomainName -MockWith {return 'contoso.com'}
+                Mock -CommandName Get-ADDomainNameFromDistinguishedName -MockWith {
+                    param (
+                        [Parameter()]
+                        [string]
+                        $DN
+                    )
+
+                    if ($DN -match 'DC=sub')
+                    {
+                        return 'sub.contoso.com'
+                    }
+                    else
+                    {
+                        return 'contoso.com'
+                    }
+                }
+                Mock -CommandName Write-Verbose -ParameterFilter { $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'}
 
                 Set-TargetResource @testPresentParamsMultidomain -Members @($fakeADUser1.distinguishedName, $fakeADUser4.distinguishedName);
 
-                Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
                 Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
+                Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
+                Assert-MockCalled -CommandName Write-Verbose -ParameterFilter { $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'}
             }
 
             It "Adds group members when 'Ensure' is 'Present', the group exists and 'MembersToInclude' are specified" {
