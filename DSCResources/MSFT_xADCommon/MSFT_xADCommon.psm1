@@ -23,7 +23,6 @@ data localizedString
         FindInRecycleBin               = Finding objects in the recycle bin matching the filter {0}.
         FoundRestoreTargetInRecycleBin = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object.
         RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
-        GroupMembershipMultipleDomains = Group membership objects are in '{0}' different AD Domains.
         AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'.
 '@
 }

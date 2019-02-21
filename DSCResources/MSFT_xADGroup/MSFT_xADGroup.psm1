@@ -23,6 +23,7 @@ data LocalizedData
         GroupNotFound                  = AD Group '{0}' was not found
         NotDesiredPropertyState        = AD Group '{0}' is not correct. Expected '{1}', actual '{2}'
         UpdatingGroupProperty          = Updating AD Group property '{0}' to '{1}'
+        GroupMembershipMultipleDomains = Group membership objects are in '{0}' different AD Domains.
 '@
 }
 
@@ -413,7 +414,7 @@ function Set-TargetResource
             $GroupMemberDomainCount = ($GroupMemberDomains | Select-Object -Unique).count
             if( ($GroupMemberDomainCount -gt 1) -or ($GroupMemberDomains -ine (Get-DomainName)).count -gt 0  )
             {
-                Write-Verbose ($LocalizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount);
+                Write-Verbose -Message ($LocalizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount);
                 $MembersInMultipleDomains = $true
             }
         }
