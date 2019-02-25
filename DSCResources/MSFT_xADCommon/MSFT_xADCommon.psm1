@@ -791,13 +791,15 @@ function Restore-ADCommonObject
 }
 
 <#
-.Synopsis
-    Author: Robert D. Biddle (https://github.com/RobBiddle)
-    Created: December.20.2017
-.DESCRIPTION
-    Takes an Active Directory DistinguishedName as input, returns the domain FQDN
-.EXAMPLE
-    Get-ADDomainNameFromDistinguishedName 'CN=ExampleObject,OU=ExampleOU,DC=example,DC=com'
+    .SYNOPSIS
+        Author: Robert D. Biddle (https://github.com/RobBiddle)
+        Created: December.20.2017
+
+    .DESCRIPTION
+        Takes an Active Directory DistinguishedName as input, returns the domain FQDN
+
+    .EXAMPLE
+        Get-ADDomainNameFromDistinguishedName -DistinguishedName 'CN=ExampleObject,OU=ExampleOU,DC=example,DC=com'
 #>
 function Get-ADDomainNameFromDistinguishedName
 {
@@ -806,31 +808,34 @@ function Get-ADDomainNameFromDistinguishedName
     (
         [Parameter()]
         [System.String]
-        $DN
+        $DistinguishedName
     )
 
-    if ($DN -notlike '*DC=*') { return }
-
-    $SplitDN = ($DN -split 'DC=')
-    $DomainDNSplitParts = $SplitDN[1..$SplitDN.Length]
-    $DomainDN = ""
-    foreach ($part in $DomainDNSplitParts)
+    if ($DistinguishedName -notlike '*DC=*')
     {
-        $DomainDN += "DC=$part"
+        return
     }
 
-    $DomainName = (($DomainDN -replace 'DC=', '') -replace ',', '.')
-    return $DomainName
+    $splitDistinguishedName = ($DistinguishedName -split 'DC=')
+    $splitDistinguishedNameParts = $splitDistinguishedName[1..$splitDistinguishedName.Length]
+    $domainFqdn = ""
+    foreach ($part in $splitDistinguishedNameParts)
+    {
+        $domainFqdn += "DC=$part"
+    }
+
+    $domainName = $domainFqdn -replace 'DC=', '' -replace ',', '.'
+    return $domainName
 
 } #end function Get-ADDomainNameFromDistinguishedName
 
 <#
-.SYNOPSIS
-    Add group member from current or different domain
-.NOTES
-    Author:
-      Original code: Robert D. Biddle (https://github.com/RobBiddle)
-      Refactored code: Jan-Hendrik Peters (https://github.com/nyanhp)
+    .SYNOPSIS
+        Add group member from current or different domain
+
+    .NOTES
+        Author original code: Robert D. Biddle (https://github.com/RobBiddle)
+        Author refactored code: Jan-Hendrik Peters (https://github.com/nyanhp)
 #>
 function Add-ADCommonGroupMember
 {
@@ -856,11 +861,11 @@ function Add-ADCommonGroupMember
     {
         foreach($member in $Members)
         {
-            $memberDomain = Get-ADDomainNameFromDistinguishedName -DN $member
+            $memberDomain = Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
 
             if (-not $memberDomain)
             {
-                ThrowInvalidArgumentError -ErrorId "$($member)_EmptyDomainError" -ErrorMessage $localizedString.EmptyDomainError
+                ThrowInvalidArgumentError -ErrorId "$($member)_EmptyDomainError" -ErrorMessage ($localizedString.EmptyDomainError -f $member, $Parameters.GroupName)
             }
 
             Write-Verbose -Message ($localizedString.AddingGroupMember -f $member, $memberDomain, $Parameters.GroupName)

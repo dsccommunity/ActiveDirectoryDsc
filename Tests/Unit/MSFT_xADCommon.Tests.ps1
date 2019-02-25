@@ -719,7 +719,7 @@ try
                 foreach ($name in $validDistinguishedNames)
                 {
                     It "Should match domain $($name.Domain)" {
-                        Get-ADDomainNameFromDistinguishedName -DN $name.Dn | Should -Be $name.Domain
+                        Get-ADDomainNameFromDistinguishedName -DistinguishedName $name.Dn | Should -Be $name.Domain
                     }
                 }
             }
@@ -728,7 +728,7 @@ try
                 foreach ($name in $invalidDistinguishedNames)
                 {
                     It "Should return `$null for $name" {
-                        Get-ADDomainNameFromDistinguishedName -DN $name | Should -Be $null
+                        Get-ADDomainNameFromDistinguishedName -DistinguishedName $name | Should -Be $null
                     }
                 }
             }
@@ -794,7 +794,7 @@ try
                 foreach ($domainGroup in ($memberData | Group-Object -Property Domain))
                 {
                     $groupCount ++
-                    It "Should not throw an error when calling Add-ADCommonGroupMember" {
+                    It 'Should not throw an error when calling Add-ADCommonGroupMember' {
                         Add-ADCommonGroupMember -Members $domainGroup.Group.Name -Parameters $fakeParameters
                     }
                 }

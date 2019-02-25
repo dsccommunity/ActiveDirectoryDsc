@@ -409,10 +409,10 @@ function Set-TargetResource
             $GroupMemberDomains = @();
             foreach($member in $AllMembers)
             {
-                $GroupMemberDomains += Get-ADDomainNameFromDistinguishedName -DN $member
+                $GroupMemberDomains += Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
             }
             $GroupMemberDomainCount = ($GroupMemberDomains | Select-Object -Unique).count
-            if( ($GroupMemberDomainCount -gt 1) -or ($GroupMemberDomains -ine (Get-DomainName)).count -gt 0  )
+            if( $GroupMemberDomainCount -gt 1 -or ($GroupMemberDomains -ine (Get-DomainName)).Count -gt 0  )
             {
                 Write-Verbose -Message ($LocalizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount);
                 $MembersInMultipleDomains = $true

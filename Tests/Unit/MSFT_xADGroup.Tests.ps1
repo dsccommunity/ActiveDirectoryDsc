@@ -439,10 +439,10 @@ try
                     param (
                         [Parameter()]
                         [string]
-                        $DN
+                        $DistinguishedName
                     )
 
-                    if ($DN -match 'DC=sub')
+                    if ($DistinguishedName -match 'DC=sub')
                     {
                         return 'sub.contoso.com'
                     }
