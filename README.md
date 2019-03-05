@@ -366,6 +366,9 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
+* Added xADReplicationSiteLink
+  * New resource added to facilitate replication between AD sites
+
 ### 2.24.0.0
 
 * Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
@@ -383,8 +386,6 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 * Added default template files .gitattributes, and .gitignore, and
   .vscode folder.
 * Added xADForestProperties: New resource to manage User and Principal Name Suffixes for a Forest.
-* Added xADReplicationSiteLink
-  * New resource added to facilitate replication between AD sites
 
 ### 2.21.0.0
 

@@ -155,12 +155,16 @@ function Set-TargetResource
             if ($SitesExcluded)
             {
                 Write-Verbose -Message ($script:localizedData.RemovingSites -f $($SiteExcluded -join ', '), $Name)
+                # wrapped in $() as we were getting some weird results without it,
+                # results were not being added into Hashtable as strings
                 $sitesIncludedParameters.Add('Remove', $($SitesExcluded))
             }
 
             if ($SitesIncluded)
             {
                 Write-Verbose -Message ($script:localizedData.AddingSites -f $($SitesIncluded -join ', '), $Name)
+                # wrapped in $() as we were getting some weird results without it,
+                # results were not being added into Hashtable as strings
                 $sitesIncludedParameters.Add('Add', $($SitesIncluded))
             }
 

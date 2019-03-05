@@ -209,9 +209,10 @@ try
 
             Context 'Site Link is Present and Should be but not in a desired state' {
                 $addSitesParameters = @{
-                    Name          = 'TestSite'
-                    SitesIncluded = 'Site1'
-                    Ensure        = 'Present'
+                    Name                          = 'TestSite'
+                    SitesIncluded                 = 'Site1'
+                    Ensure                        = 'Present'
+                    ReplicationFrequencyInMinutes = 15
                 }
 
                 $removeSitesParameters = @{
@@ -231,7 +232,12 @@ try
 
                     Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
                     Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 1 -Exactly
-                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly
+                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly -ParameterFilter {
+                        $ReplicationFrequencyInMinutes -eq 15
+                        $Name -eq 'TestSite'
+                        $Ensure -eq 'Present'
+                        $SitesIncluded -eq 'Site1'
+                    }
                 }
 
                 It 'Should call Set-ADReplicationSiteLink with SitesIncluded-Remove when SitesExcluded is populated' {
