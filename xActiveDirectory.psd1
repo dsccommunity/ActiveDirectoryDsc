@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '2.22.0.0'
+moduleVersion = '2.24.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,11 +49,8 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Add PasswordNeverResets parameter to xADUser to facilitate user lifecycle management
-* Update appveyor.yml to use the default template.
-* Added default template files .gitattributes, and .gitignore, and
-  .vscode folder.
-* Added xADForestProperties: New resource to manage User and Principal Name Suffixes for a Forest.
+        ReleaseNotes = '* Added parameter to xADDomainController to support InstallationMediaPath ([issue 108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
+* Updated xADDomainController schema to be standard and provide Descriptions.
 
 '
 
@@ -61,6 +58,8 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
+
 
 
 
