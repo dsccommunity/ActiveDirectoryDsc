@@ -39,7 +39,7 @@ try
         $testAbsentParams['Ensure'] = 'Absent'
 
         $fakeADMSA = @{
-            Name = $testPresentParams.Name
+            Name = $testPresentParams.ServiceAccountName
             Identity = $testPresentParams.Name
             DistinguishedName = "CN=$($testPresentParams.Name),$($testPresentParams.Path)"
             Description = $testPresentParams.Description
@@ -78,10 +78,20 @@ try
             }
 
             Context -Name 'When the system is in the desired state' {
-                It "Should returns 'Ensure' is 'Present'" {
-                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
+                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
 
-                    (Get-TargetResource @testPresentParams).Ensure | Should Be 'Present'
+                $testCases = @()
+                foreach ($param in $testPresentParams.GetEnumerator()) {
+                    $testCases += @{ Parameter = $param.Name; Value = $param.Value }
+                }
+
+                It "Should return identical information for <Parameter>" -TestCases $testCases {
+                    param ($Parameter, $Value)
+
+                    $resource = Get-TargetResource @testPresentParams
+                    $resource.$Parameter | Should -BeExactly $Value
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount
                 }
             }
 
@@ -92,147 +102,169 @@ try
                     (Get-TargetResource @testPresentParams).Ensure | Should Be 'Absent'
                 }
 
+                $resource = Get-DscResource -Module xActiveDirectory -Name xADManagedServiceAccount
+                $requiredParameters = $resource.Parameters | Where-Object { $_.IsMandatory -eq $true }
+                $requiredParameters | ogv
+
+                It "Should return `$null values for <Name> when absent" -TestCases $requiredParameters {
+                    param ($Name)
+
+                    Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+
+                    $resource = Get-TargetResource @testPresentParams
+                    $resource.$Name | Should -BeNullOrEmpty
+                }
             }
         }
         #end region
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+        Describe -Name "$($Global:DSCResourceName)\Test-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
-            It "Should return $false when Managed Service Account does not exist and 'Ensure' is 'Present'" {
-                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
+            Context -Name 'When the system is in the desired state' {
+                It "Should pass when Managed Service Account exists, target matches and 'Ensure' is 'Present'" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-                Test-TargetResource @testPresentParams | Should Be $false
-            }
-
-            It "Should return $false when Managed Service Account exists, 'Ensure' is 'Present' but 'Path' is wrong" {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    $duffADMSA = $testPresentParams.Clone()
-                    $duffADMSA['Path'] = 'OU=WrongPath,DC=contoso,DC=com'
-                    return $duffADMSA
+                    Test-TargetResource @testPresentParams | Should Be $true
                 }
 
-                Test-TargetResource @testPresentParams | Should Be $false
+                It "Should pass when Managed Service Account does not exist and 'Ensure' is 'Absent'" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
+
+                    Test-TargetResource @testAbsentParams | Should Be $true
+                }
             }
 
-            It "Should return $false when Managed Service Account exists, 'Ensure' is 'Present' but 'Description' is wrong" {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    $duffADMSA = $testPresentParams.Clone()
-                    $duffADMSA['Description'] = 'Test AD MSA description is wrong'
-                    return $duffADMSA
+            Context -Name 'When the system is not in the desired state' {
+                It "Should return $false when Managed Service Account does not exist and 'Ensure' is 'Present'" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
+
+                    Test-TargetResource @testPresentParams | Should Be $false
                 }
 
-                Test-TargetResource @testPresentParams | Should Be $false
-            }
+                It "Should return $false when Managed Service Account exists and 'Ensure' is 'Absent'" {
+                    Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-            It "Should return $false when Managed Service Account exists, 'Ensure' is 'Present' but 'DisplayName' is wrong" {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    $duffADMSA = $testPresentParams.Clone()
-                    $duffADMSA['DisplayName'] = 'Wrong display name'
-                    return $duffADMSA
+                    Test-TargetResource @testAbsentParams | Should Be $false
                 }
 
-                Test-TargetResource @testPresentParams | Should Be $false
+                It "Should return $false when 'Path' is wrong" {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $duffADMSA = $testPresentParams.Clone()
+                        $duffADMSA['Path'] = 'OU=WrongPath,DC=contoso,DC=com'
+                        return $duffADMSA
+                    }
+
+                    Test-TargetResource @testPresentParams | Should Be $false
+                }
+
+                It "Should return $false when 'Description' is wrong" {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $duffADMSA = $testPresentParams.Clone()
+                        $duffADMSA['Description'] = 'Test AD MSA description is wrong'
+                        return $duffADMSA
+                    }
+
+                    Test-TargetResource @testPresentParams | Should Be $false
+                }
+
+                It "Should return $false when 'DisplayName' is wrong" {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $duffADMSA = $testPresentParams.Clone()
+                        $duffADMSA['DisplayName'] = 'Wrong display name'
+                        return $duffADMSA
+                    }
+
+                    Test-TargetResource @testPresentParams | Should Be $false
+                }
             }
-
-            It "Should return $false when Managed Service Account exists and 'Ensure' is 'Absent'" {
-                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
-
-                Test-TargetResource @testAbsentParams | Should Be $false
-            }
-
-            It "Should pass when Managed Service Account exists, target matches and 'Ensure' is 'Present'" {
-                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
-
-                Test-TargetResource @testPresentParams | Should Be $true
-            }
-
-            It "Should pass when Managed Service Account does not exist and 'Ensure' is 'Absent'" {
-                Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
-
-                Test-TargetResource @testAbsentParams | Should Be $true
-            }
-
         }
         #end region
 
         #region Function Set-TargetResource
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
-            It "Should call 'New-ADServiceAccount' when 'Ensure' is 'Present' and the Managed Service Account does not exist" {
-                Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                Mock -CommandName Set-ADServiceAccount
-                Mock -CommandName New-ADServiceAccount -MockWith { return [PSCustomObject] $fakeADMSA }
+            Context 'When the system is in the desired state' {
 
-                Set-TargetResource @testPresentParams
-
-                Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
             }
 
-            $testCases = @(
-                @{Property = 'Description'; Value = 'Test AD MSA description is wrong'},
-                @{Property = 'DisplayName'; Value = 'Test DisplayName'}
-            )
+            Context 'When the system is not in the desired state' {
+                It "Should call 'New-ADServiceAccount' when 'Ensure' is 'Present' and the Managed Service Account does not exist" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                    Mock -CommandName Set-ADServiceAccount
+                    Mock -CommandName New-ADServiceAccount -MockWith { return [PSCustomObject] $fakeADMSA }
 
-            It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and <Property> is specified" -TestCases $testCases {
-                param ($Property, $Value)
+                    Set-TargetResource @testPresentParams
 
-                Mock -CommandName Set-ADServiceAccount
-                Mock -CommandName Get-ADServiceAccount -MockWith {
-                    $duffADMSA = $fakeADMSA.Clone()
-                    $duffADMSA[$Property] = $Value
-                    return $duffADMSA
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
-                Set-TargetResource @testPresentParams
+                $testCases = @(
+                    @{Property = 'Description'; Value = 'Test AD MSA description is wrong'},
+                    @{Property = 'DisplayName'; Value = 'Test DisplayName'}
+                )
 
-                Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
-            }
+                It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and <Property> is specified" -TestCases $testCases {
+                    param ($Property, $Value)
 
-            It "Should remove Managed Service Account when 'Ensure' is 'Absent' and Managed Service Account exists" {
-                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
-                Mock -CommandName Remove-ADServiceAccount
+                    Mock -CommandName Set-ADServiceAccount
+                    Mock -CommandName Get-ADServiceAccount -MockWith {
+                        $duffADMSA = $fakeADMSA.Clone()
+                        $duffADMSA[$Property] = $Value
+                        return $duffADMSA
+                    }
 
-                Set-TargetResource @testAbsentParams
+                    Set-TargetResource @testPresentParams
 
-                Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
-            }
-
-            It "Should call 'Set-ADServiceAccount' with credentials when 'Ensure' is 'Present' and the Managed Service Account exists (#106)" {
-                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
-                Mock -CommandName New-ADServiceAccount -MockWith { return [PSCustomObject] $fakeADMSA }
-                Mock -CommandName Set-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials }
-
-                Set-TargetResource @testPresentParams -Credential $testCredentials
-
-                Assert-MockCalled -CommandName Set-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
-            }
-
-            It "Should call 'New-ADServiceAccount' with credentials when 'Ensure' is 'Present' and the Managed Service Account does not exist  (#106)" {
-                Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                Mock -CommandName New-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } { return [PSCustomObject] $fakeADMSA }
-
-                Set-TargetResource @testPresentParams -Credential $testCredentials
-
-                Assert-MockCalled -CommandName New-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
-            }
-
-            # Regression test for issue #106
-            It "Should call 'Move-ADObject' with credentials when specified" {
-                Mock -CommandName Set-ADServiceAccount
-                Mock -CommandName Move-ADObject -ParameterFilter { $Credential -eq $testCredentials }
-                Mock -CommandName Get-ADServiceAccount -MockWith {
-                    $duffADMSA = $fakeADMSA.Clone()
-                    $duffADMSA['DistinguishedName'] = "CN=$($testPresentParams.ServiceAccountName),OU=WrongPath,DC=contoso,DC=com"
-                    return $duffADMSA
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
-                Set-TargetResource @testPresentParams -Credential $testCredentials
+                It "Should remove Managed Service Account when 'Ensure' is 'Absent' and Managed Service Account exists" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
+                    Mock -CommandName Remove-ADServiceAccount
 
-                Assert-MockCalled -CommandName Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
+                    Set-TargetResource @testAbsentParams
+
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
+                }
+
+                # Regression test for issue #106
+                It "Should call 'Set-ADServiceAccount' with credentials when 'Ensure' is 'Present' and the Managed Service Account exists" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
+                    Mock -CommandName New-ADServiceAccount -MockWith { return [PSCustomObject] $fakeADMSA }
+                    Mock -CommandName Set-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials }
+
+                    Set-TargetResource @testPresentParams -Credential $testCredentials
+
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
+                }
+
+                # Regression test for issue #106
+                It "Should call 'New-ADServiceAccount' with credentials when 'Ensure' is 'Present' and the Managed Service Account does not exist" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                    Mock -CommandName New-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } { return [PSCustomObject] $fakeADMSA }
+
+                    Set-TargetResource @testPresentParams -Credential $testCredentials
+
+                    Assert-MockCalled -CommandName New-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
+                }
+
+                # Regression test for issue #106
+                It "Should call 'Move-ADObject' with credentials when specified" {
+                    Mock -CommandName Set-ADServiceAccount
+                    Mock -CommandName Move-ADObject -ParameterFilter { $Credential -eq $testCredentials }
+                    Mock -CommandName Get-ADServiceAccount -MockWith {
+                        $duffADMSA = $fakeADMSA.Clone()
+                        $duffADMSA['DistinguishedName'] = "CN=$($testPresentParams.ServiceAccountName),OU=WrongPath,DC=contoso,DC=com"
+                        return $duffADMSA
+                    }
+
+                    Set-TargetResource @testPresentParams -Credential $testCredentials
+
+                    Assert-MockCalled -CommandName Move-ADObject -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
+                }
             }
         }
         #end region
