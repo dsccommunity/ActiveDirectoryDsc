@@ -14,6 +14,10 @@ data LocalizedData
         ManagedServiceAccountNotFound         = AD Managed Service Account '{0}' was not found.
         NotDesiredPropertyState               = AD Managed Service Account '{0}' is not correct. Expected '{1}', actual '{2}'.
         UpdatingManagedServiceAccountProperty = Updating AD Managed Service Account property '{0}' to '{1}'.
+        AddingManagedServiceAccountError      = Error adding AD Managed Service Account '{0}'.
+        UpdatingManagedServiceAccountError    = Error updating AD Managed Service Account '{0}'.
+        MovingManagedServiceAccountError      = Error moving AD Managed Service Account '{0}'.
+        RemovingManagedServiceAccountError    = Error removing AD Managed Service Account '{0}'.
 '@
 }
 
@@ -288,45 +292,8 @@ function Set-TargetResource
     try
     {
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams -Property Name,DistinguishedName,Description,DisplayName
-
-        if ($Ensure -eq 'Present')
-        {
-            $setADServiceAccountParams = $adServiceAccountParams.Clone()
-            $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
-
-            # Update existing group properties
-            if ($Description -and ($Description -ne $adServiceAccount.Description))
-            {
-                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
-                $setADServiceAccountParams['Description'] = $Description
-            }
-
-            if ($DisplayName -and ($DisplayName -ne $adServiceAccount.DisplayName))
-            {
-                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
-                $setADServiceAccountParams['DisplayName'] = $DisplayName
-            }
-
-            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
-            Set-ADServiceAccount @setADServiceAccountParams
-
-            # Move service account if the path is not correct
-            if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName)))
-            {
-                Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                $moveADObjectParams = $adServiceAccountParams.Clone()
-                $moveADObjectParams['Identity'] = $adServiceAccount.DistinguishedName
-                Move-ADObject @moveADObjectParams -TargetPath $Path
-            }
-        }
-        elseif ($Ensure -eq 'Absent')
-        {
-            # Remove existing service account
-            Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
-            Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
-        }
     }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    catch
     {
         ## The service account doesn't exist
         if ($Ensure -eq 'Present')
@@ -351,9 +318,83 @@ function Set-TargetResource
             }
 
             ## Create service account
-            $adServiceAccount = New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
+            try
+            {
+                $adServiceAccount = New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
+            }
+            catch
+            {
+                Write-Error -Message ($LocalizedData.AddingManagedServiceAccountError -f $ServiceAccountName)
+                throw $_
+            }
+
+            return
         }
-    } #end catch
+    }
+
+    if ($Ensure -eq 'Present')
+    {
+        $setADServiceAccountParams = $adServiceAccountParams.Clone()
+        $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
+
+        # Update existing group properties
+        if ($Description -and ($Description -ne $adServiceAccount.Description))
+        {
+            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
+            $setADServiceAccountParams['Description'] = $Description
+        }
+
+        if ($DisplayName -and ($DisplayName -ne $adServiceAccount.DisplayName))
+        {
+            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
+            $setADServiceAccountParams['DisplayName'] = $DisplayName
+        }
+
+        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
+
+        try
+        {
+            Set-ADServiceAccount @setADServiceAccountParams
+        }
+        catch
+        {
+            Write-Error -Message ($LocalizedData.UpdatingManagedServiceAccountError -f $ServiceAccountName)
+            throw $_
+        }
+
+        # Move service account if the path is not correct
+        if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName)))
+        {
+            Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
+            $moveADObjectParams = $adServiceAccountParams.Clone()
+            $moveADObjectParams['Identity'] = $adServiceAccount.DistinguishedName
+
+            try
+            {
+                Move-ADObject @moveADObjectParams -TargetPath $Path
+            }
+            catch
+            {
+                Write-Error -Message ($LocalizedData.MovingManagedServiceAccountError -f $ServiceAccountName)
+                throw $_
+            }
+        }
+    }
+    elseif ($Ensure -eq 'Absent')
+    {
+        # Remove existing service account
+        Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
+
+        try
+        {
+            Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
+        }
+        catch
+        {
+            Write-Error -Message ($LocalizedData.RemovingManagedServiceAccountError -f $ServiceAccountName)
+            throw $_
+        }
+    }
 } #end function Set-TargetResource
 
 Export-ModuleMember -Function *-TargetResource
