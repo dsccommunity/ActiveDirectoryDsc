@@ -88,17 +88,23 @@ function Get-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
     $adServiceAccountParams = Get-ADCommonParameters @PSBoundParameters
 
+    $targetResource = @{
+        ServiceAccountName = $ServiceAccountName
+        Path = $null
+        Description = $null
+        DisplayName = $null
+        Ensure = 'Absent'
+        Credential = $Credential
+        DomainController = $DomainController
+    }
+
     try
     {
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams -Property Name,DistinguishedName,Description,DisplayName
 
-        $targetResource = @{
-            ServiceAccountName = $adServiceAccount.Name
-            Path = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
-            Description = $adServiceAccount.Description
-            DisplayName = $adServiceAccount.DisplayName
-            Ensure = 'Absent'
-        }
+        $targetResource['Path'] = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
+        $targetResource['Description'] = $adServiceAccount.Description
+        $targetResource['DisplayName'] = $adServiceAccount.DisplayName
 
         if ($adServiceAccount)
         {
@@ -108,13 +114,6 @@ function Get-TargetResource
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
         Write-Verbose ($LocalizedData.ManagedServiceAccountNotFound -f $ServiceAccountName)
-        $targetResource = @{
-            ServiceAccountName = $ServiceAccountName
-            Path = $Path
-            Description = $Description
-            DisplayName = $DisplayName
-            Ensure = 'Absent'
-        }
     }
     return $targetResource
 } #end function Get-TargetResource
