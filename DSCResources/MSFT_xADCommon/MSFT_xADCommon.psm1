@@ -728,7 +728,7 @@ function Restore-ADCommonObject
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName','GroupName','ComputerName')]
+        [Alias('UserName','GroupName','ComputerName','ServiceAccountName')]
         [System.String]
         $Identity,
 
