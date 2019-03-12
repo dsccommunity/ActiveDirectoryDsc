@@ -53,6 +53,7 @@ groups and OUs.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADRecycleBin** enables or disabled Active Directory Recycle Bin.
 * **xADReplicationSite** creates and deletes Active Directory replication sites.
+* **xADReplicationSiteLink** creates, deletes and modifies Active Directory replication site links.
 * **xADReplicationSubnet** add or removes Active Directory replication subnet.
 * **xADServicePrincipalName** adds or removes the SPN to a user or computer account.
 * **xADUser** modifies and removes Active Directory Users.
@@ -241,6 +242,16 @@ Domain Naming Master FSMO of the forest.
 * **`[String]` Ensure** _(Write)_: Specifies if the AD replication site should be added or remove. Default value is 'Present'. { *Present* | Absent }.
 * **`[Boolean]` RenameDefaultFirstSiteName** _(Write)_: Specify if the Default-First-Site-Name should be renamed, if it exists. Dafult value is 'false'.
 
+### **xADReplicationSiteLink**
+
+* **`[String]` Name** _(Key)_: Specifies the name of the AD replication site link.
+* **`[Sint32]` Cost** _(Write)_: Specifies the cost to be placed on the site link.
+* **`[String]` Description** _(Write)_: This parameter sets the value of the Description property for the object.
+* **`[Sint32]` ReplicationFrequencyInMinutes** _(Write)_: Species the frequency (in minutes) for which replication will occur where this site link is in use between sites.
+* **`[String[]]` SitesIncluded** _(Write)_: Specifies the list of sites included in the site link.
+* **`[String[]]` SitesExcluded** _(Write)_: Specifies the list of sites to excluded from the site link.
+* **`[String]` Ensure** _(Write)_: Specifies if the site link is created or deleted. Default value is empty.
+
 ### **xADReplicationSubnet**
 
 The xADReplicationSubnet DSC resource will manage replication subnets.
@@ -354,6 +365,9 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 ## Versions
 
 ### Unreleased
+
+* Added xADReplicationSiteLink
+  * New resource added to facilitate replication between AD sites
 
 ### 2.24.0.0
 
