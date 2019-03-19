@@ -202,7 +202,33 @@ try
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             Context 'When the system is in the desired state' {
+                It "Should not take any action when 'Ensure' is 'Present'" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { return [PSCustomObject] $fakeADMSA }
+                    Mock -CommandName New-ADServiceAccount
+                    Mock -CommandName Remove-ADServiceAccount
+                    Mock -CommandName Set-ADServiceAccount
 
+                    Set-TargetResource @testPresentParams -Verbose
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+
+                It "Should not take any action when 'Ensure' is 'Absent'" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                    Mock -CommandName New-ADServiceAccount
+                    Mock -CommandName Remove-ADServiceAccount
+                    Mock -CommandName Set-ADServiceAccount
+
+                    Set-TargetResource @testAbsentParams
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                }
             }
 
             Context 'When the system is not in the desired state' {
@@ -242,12 +268,13 @@ try
                     Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
-                It "Should remove Managed Service Account when 'Ensure' is 'Absent' and Managed Service Account exists" {
+                It "Should remove Managed Service Account when 'Ensure' is 'Absent'" {
                     Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
                     Mock -CommandName Remove-ADServiceAccount
 
-                    Set-TargetResource @testAbsentParams
+                    Set-TargetResource @testAbsentParams -Verbose
 
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
                     Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
