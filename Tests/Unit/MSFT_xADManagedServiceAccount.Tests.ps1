@@ -81,12 +81,19 @@ try
                 Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
 
                 $testCases = @()
-                foreach ($param in $testPresentParams.GetEnumerator()) {
+                foreach ($param in $testPresentParams.GetEnumerator())
+                {
                     $testCases += @{ Parameter = $param.Name; Value = $param.Value }
                 }
 
                 It "Should return identical information for <Parameter>" -TestCases $testCases {
-                    param ($Parameter, $Value)
+                    param (
+                        [Parameter()]
+                        $Parameter,
+
+                        [Parameter()]
+                        $Value
+                    )
 
                     $resource = Get-TargetResource @testPresentParams
                     $resource.$Parameter | Should -BeExactly $Value
@@ -104,10 +111,12 @@ try
 
                 $resource = Get-DscResource -Module xActiveDirectory -Name xADManagedServiceAccount
                 $requiredParameters = $resource.Parameters | Where-Object { $_.IsMandatory -eq $true }
-                $requiredParameters | ogv
 
                 It "Should return `$null values for <Name> when absent" -TestCases $requiredParameters {
-                    param ($Name)
+                    param (
+                        [Parameter()]
+                        $Name
+                    )
 
                     Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
@@ -207,7 +216,13 @@ try
                 )
 
                 It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and <Property> is specified" -TestCases $testCases {
-                    param ($Property, $Value)
+                    param (
+                        [Parameter()]
+                        $Property,
+
+                        [Parameter()]
+                        $Value
+                    )
 
                     Mock -CommandName Set-ADServiceAccount
                     Mock -CommandName Get-ADServiceAccount -MockWith {
