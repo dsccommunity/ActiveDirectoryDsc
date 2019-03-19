@@ -332,6 +332,10 @@ function Set-TargetResource
 
             return
         }
+        elseif ($Ensure -eq 'Absent')
+        {
+            return
+        }
     }
 
     if ($Ensure -eq 'Present')
@@ -339,29 +343,35 @@ function Set-TargetResource
         $setADServiceAccountParams = $adServiceAccountParams.Clone()
         $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
 
+        $targetResourceInCompliance = $true
+
         # Update existing group properties
         if ($Description -and ($Description -ne $adServiceAccount.Description))
         {
             Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
             $setADServiceAccountParams['Description'] = $Description
+            $targetResourceInCompliance = $false
         }
 
         if ($DisplayName -and ($DisplayName -ne $adServiceAccount.DisplayName))
         {
             Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
             $setADServiceAccountParams['DisplayName'] = $DisplayName
+            $targetResourceInCompliance = $false
         }
 
-        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
-
-        try
+        if (-not $targetResourceInCompliance)
         {
-            Set-ADServiceAccount @setADServiceAccountParams
-        }
-        catch
-        {
-            Write-Error -Message ($LocalizedData.UpdatingManagedServiceAccountError -f $ServiceAccountName)
-            throw $_
+            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
+            try
+            {
+                Set-ADServiceAccount @setADServiceAccountParams
+            }
+            catch
+            {
+                Write-Error -Message ($LocalizedData.UpdatingManagedServiceAccountError -f $ServiceAccountName)
+                throw $_
+            }
         }
 
         # Move service account if the path is not correct
