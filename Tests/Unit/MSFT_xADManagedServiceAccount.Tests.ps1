@@ -110,9 +110,14 @@ try
                 }
 
                 $resource = Get-DscResource -Module xActiveDirectory -Name xADManagedServiceAccount
-                $requiredParameters = $resource.Parameters | Where-Object { $_.IsMandatory -eq $true }
+                $requiredParameters = $resource.Properties | Where-Object { $_.IsMandatory -eq $true }
+                $requiredParameterCases = @()
+                foreach ($requiredParameter in $requiredParameters)
+                {
+                    $requiredParameterCases += @{ Name = $requiredParameter.Name }
+                }
 
-                It "Should return `$null values for <Name> when absent" -TestCases $requiredParameters {
+                It "Should return values for required parameter <Name> when absent" -TestCases $requiredParameterCases {
                     param (
                         [Parameter()]
                         $Name
@@ -121,7 +126,8 @@ try
                     Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
                     $resource = Get-TargetResource @testPresentParams
-                    $resource.$Name | Should -BeNullOrEmpty
+                    $resource.$Name | Should -Not -BeNullOrEmpty
+                    $resource.$Name | Should -BeExactly $testPresentParams.$Name
                 }
             }
         }
