@@ -293,11 +293,12 @@ function Set-TargetResource
 
     try
     {
+        # Get the service account
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams -Property Name,DistinguishedName,Description,DisplayName
     }
     catch
     {
-        ## The service account doesn't exist
+        # The service account doesn't exist
         if ($Ensure -eq 'Present')
         {
             Write-Verbose ($LocalizedData.AddingManagedServiceAccount -f $ServiceAccountName)
@@ -319,7 +320,7 @@ function Set-TargetResource
                 $adServiceAccountParams['Path'] = $Path
             }
 
-            ## Create service account
+            # Create service account
             try
             {
                 $adServiceAccount = New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
@@ -334,6 +335,7 @@ function Set-TargetResource
         }
         elseif ($Ensure -eq 'Absent')
         {
+            # Do nothing - account should be absent and is
             return
         }
     }
