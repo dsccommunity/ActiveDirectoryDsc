@@ -569,7 +569,7 @@ try
             It 'Throws no exception when a null value is passed' {
                 { ConvertTo-DeploymentForestMode -Mode $null } | Should Not Throw
             }
-            
+
             It 'Throws no exception when an invalid mode id is selected' {
                 { ConvertTo-DeploymentForestMode -ModeId 666 } | Should Not Throw
             }
@@ -609,7 +609,7 @@ try
             It 'Throws no exception when a null value is passed' {
                 { ConvertTo-DeploymentDomainMode -Mode $null } | Should Not Throw
             }
-            
+
             It 'Throws no exception when an invalid mode id is selected' {
                 { ConvertTo-DeploymentDomainMode -ModeId 666 } | Should Not Throw
             }
@@ -639,7 +639,7 @@ try
                 ObjectClass       = 'user'
                 ObjectGUID        = 'd3c8b8c1-c42b-4533-af7d-3aa73ecd2216'
             }
-            
+
             function Restore-ADObject { }
 
             $getAdCommonParameterReturnValue = @{Identity = 'something'}
@@ -675,7 +675,7 @@ try
                     {Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass} | Should -Throw -ExceptionType ([System.InvalidOperationException])
                 }
             }
-            
+
             Context 'When there are no objects in the recycle bin' {
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Get-ADCommonParameters -MockWith { return $getAdCommonParameterReturnValue}
@@ -683,11 +683,175 @@ try
 
                 It 'Should return $null' {
                     Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass | Should -Be $null
-                }                
+                }
 
                 It 'Should not call Restore-ADObject' {
                     Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass
                     Assert-MockCalled -CommandName Restore-ADObject -Exactly -Times 0 -Scope It
+                }
+            }
+        }
+        #endregion
+
+        #region Get-ADDomainNameFromDistinguishedName
+        Describe "$($Global:DSCResourceName)\Get-ADDomainNameFromDistinguishedName" {
+            $validDistinguishedNames = @(
+                @{
+                    DN     = 'CN=group1,OU=Group,OU=Wacken,DC=contoso,DC=com'
+                    Domain = 'contoso.com'
+                }
+                @{
+                    DN     = 'CN=group1,OU=Group,OU=Wacken,DC=sub,DC=contoso,DC=com'
+                    Domain = 'sub.contoso.com'
+                }
+                @{
+                    DN     = 'CN=group1,OU=Group,OU=Wacken,DC=child,DC=sub,DC=contoso,DC=com'
+                    Domain = 'child.sub.contoso.com'
+                }
+            )
+            $invalidDistinguishedNames = @(
+                'Group1'
+                'contoso\group1'
+                'user1@contoso.com'
+            )
+
+            Context 'The distinguished name is valid' {
+                foreach ($name in $validDistinguishedNames)
+                {
+                    It "Should match domain $($name.Domain)" {
+                        Get-ADDomainNameFromDistinguishedName -DistinguishedName $name.Dn | Should -Be $name.Domain
+                    }
+                }
+            }
+
+            Context 'The distinguished name is invalid' {
+                foreach ($name in $invalidDistinguishedNames)
+                {
+                    It "Should return `$null for $name" {
+                        Get-ADDomainNameFromDistinguishedName -DistinguishedName $name | Should -Be $null
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Add-AdCommonGroupMember
+        Describe "$($Global:DSCResourceName)\Add-ADCommonGroupMember" {
+            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+            $memberData = @(
+                [pscustomobject]@{
+                    Name = 'CN=Account1,DC=contoso,DC=com'
+                    Domain = 'contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Group1,DC=contoso,DC=com'
+                    Domain = 'contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Computer1,DC=contoso,DC=com'
+                    Domain = 'contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Account1,DC=a,DC=contoso,DC=com'
+                    Domain = 'a.contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Group1,DC=a,DC=contoso,DC=com'
+                    Domain = 'a.contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Computer1,DC=a,DC=contoso,DC=com'
+                    Domain = 'a.contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Account1,DC=b,DC=contoso,DC=com'
+                    Domain = 'b.contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Group1,DC=b,DC=contoso,DC=com'
+                    Domain = 'b.contoso.com'
+                }
+                [pscustomobject]@{
+                    Name = 'CN=Computer1,DC=b,DC=contoso,DC=com'
+                    Domain = 'b.contoso.com'
+                }
+            )
+
+            $invalidMemberData = @(
+                'contoso.com\group1'
+                'user1@contoso.com'
+                'computer1.contoso.com'
+            )
+
+            $fakeParameters = @{
+                Identity = 'SomeGroup'
+            }
+
+            Context 'When all members are in the same domain' {
+                Mock -CommandName Add-ADGroupMember
+                $groupCount = 0
+                foreach ($domainGroup in ($memberData | Group-Object -Property Domain))
+                {
+                    $groupCount ++
+                    It 'Should not throw an error when calling Add-ADCommonGroupMember' {
+                        Add-ADCommonGroupMember -Members $domainGroup.Group.Name -Parameters $fakeParameters
+                    }
+                }
+
+                It "Should have called Add-ADGroupMember $groupCount times" {
+                    Assert-MockCalled -CommandName Add-ADGroupMember -Exactly -Times $groupCount
+                }
+            }
+
+            Context 'When members are in different domains' {
+                Mock -CommandName Add-ADGroupMember
+                Mock -CommandName Get-ADObject -MockWith {
+                    param (
+                        [Parameter()]
+                        [string]
+                        $Identity,
+
+                        [Parameter()]
+                        [string]
+                        $Server,
+
+                        [Parameter()]
+                        [string[]]
+                        $Properties
+                    )
+
+                    $objectClass = switch ($Identity)
+                    {
+                        {$Identity -match 'Group'} { 'group' }
+                        {$Identity -match 'Account'} { 'user' }
+                        {$Identity -match 'Computer'} { 'computer' }
+                    }
+
+                    return ([PSCustomObject]@{
+                            objectClass = $objectClass
+                        })
+                }
+                # Mocks should return something that is used with Add-ADGroupMember
+                Mock -CommandName Get-ADComputer -MockWith { return 'placeholder' }
+                Mock -CommandName Get-ADGroup -MockWith { return 'placeholder' }
+                Mock -CommandName Get-ADUser -MockWith { return 'placeholder' }
+
+                It 'Should not throw an error' {
+                    {Add-ADCommonGroupMember -Members $memberData.Name -Parameters $fakeParameters -MembersInMultipleDomains} | Should -Not -Throw
+                }
+
+                It 'Should have called all mocked cmdlets' {
+                    Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times $memberData.Where( {$_.Name -like '*Computer*'}).Count
+                    Assert-MockCalled -CommandName Get-ADUser -Exactly -Times $memberData.Where( {$_.Name -like '*Account*'}).Count
+                    Assert-MockCalled -CommandName Get-ADGroup -Exactly -Times $memberData.Where( {$_.Name -like '*Group*'}).Count
+                    Assert-MockCalled -CommandName Add-ADGroupMember -Exactly -Times $memberData.Count
+                }
+            }
+
+            Context 'When the domain name cannot be determined' {
+                It 'Should throw an InvalidArgumentException' {
+                    {Add-ADCommonGroupMember -Members $invalidMemberData  -Parameters $fakeParameters -MembersInMultipleDomains} | Should -Throw -ExceptionType ([System.ArgumentException])
                 }
             }
         }

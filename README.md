@@ -53,6 +53,7 @@ groups and OUs.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADRecycleBin** enables or disabled Active Directory Recycle Bin.
 * **xADReplicationSite** creates and deletes Active Directory replication sites.
+* **xADReplicationSiteLink** creates, deletes and modifies Active Directory replication site links.
 * **xADReplicationSubnet** add or removes Active Directory replication subnet.
 * **xADServicePrincipalName** adds or removes the SPN to a user or computer account.
 * **xADUser** modifies and removes Active Directory Users.
@@ -165,15 +166,18 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * If not specified, no group membership changes are made.
   * If specified, all undefined group members will be removed the AD group.
   * This property cannot be specified with either 'MembersToInclude' or 'MembersToExclude'.
+  * To use other domain's members, specify the distinguished name of the object.
 * **`[String[]]` MembersToInclude** _(Write)_: Specifies AD objects that must be in the group.
   * If not specified, no group membership changes are made.
   * If specified, only the specified members are added to the group.
   * If specified, no users are removed from the group using this parameter.
+  * To use other domain's members, specify the distinguished name of the object.
   * This property cannot be specified with the 'Members' parameter.
 * **`[String[]]` MembersToExclude** _(Write)_: Specifies AD objects that _must not_ be in the group.
   * If not specified, no group membership changes are made.
   * If specified, only those specified are removed from the group.
   * If specified, no users are added to the group using this parameter.
+  * To use other domain's members, specify the distinguished name of the object.
   * This property cannot be specified with the 'Members' parameter.
 * **`[String]` MembershipAttribute** _(Write)_: Defines the AD object attribute that is used to determine group membership.
   * Valid values are 'SamAccountName', 'DistinguishedName', 'ObjectGUID' and 'SID'.
@@ -237,6 +241,16 @@ Domain Naming Master FSMO of the forest.
 * **`[String]` Name** _(Key)_: Specifies the name of the AD replication site.
 * **`[String]` Ensure** _(Write)_: Specifies if the AD replication site should be added or remove. Default value is 'Present'. { *Present* | Absent }.
 * **`[Boolean]` RenameDefaultFirstSiteName** _(Write)_: Specify if the Default-First-Site-Name should be renamed, if it exists. Dafult value is 'false'.
+
+### **xADReplicationSiteLink**
+
+* **`[String]` Name** _(Key)_: Specifies the name of the AD replication site link.
+* **`[Sint32]` Cost** _(Write)_: Specifies the cost to be placed on the site link.
+* **`[String]` Description** _(Write)_: This parameter sets the value of the Description property for the object.
+* **`[Sint32]` ReplicationFrequencyInMinutes** _(Write)_: Species the frequency (in minutes) for which replication will occur where this site link is in use between sites.
+* **`[String[]]` SitesIncluded** _(Write)_: Specifies the list of sites included in the site link.
+* **`[String[]]` SitesExcluded** _(Write)_: Specifies the list of sites to excluded from the site link.
+* **`[String]` Ensure** _(Write)_: Specifies if the site link is created or deleted. Default value is empty.
 
 ### **xADReplicationSubnet**
 
@@ -352,10 +366,14 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
+* Added xADReplicationSiteLink
+  * New resource added to facilitate replication between AD sites
+
 ### 2.24.0.0
 
 * Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
 * Updated xADDomainController schema to be standard and provide Descriptions.
+* Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.23.0.0
 
