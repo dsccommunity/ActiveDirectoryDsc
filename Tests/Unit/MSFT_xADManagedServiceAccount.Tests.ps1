@@ -272,15 +272,15 @@ try
                     Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
                     Mock -CommandName Remove-ADServiceAccount
 
-                    Set-TargetResource @testAbsentParams -Verbose
+                    Set-TargetResource @testAbsentParams
 
                     Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
                     Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
                 # Regression test for issue #106
-                It "Should call 'Set-ADServiceAccount' with credentials when 'Ensure' is 'Present' and the Managed Service Account exists" {
-                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
+                It "Should call 'Set-ADServiceAccount' with credentials when 'Ensure' is 'Present'" {
+                    Mock -CommandName Get-ADServiceAccount -MockWith { $fakeADMSA['DisplayName'] = 'FakeDisplayName'; return $fakeADMSA }
                     Mock -CommandName New-ADServiceAccount -MockWith { return [PSCustomObject] $fakeADMSA }
                     Mock -CommandName Set-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials }
 
