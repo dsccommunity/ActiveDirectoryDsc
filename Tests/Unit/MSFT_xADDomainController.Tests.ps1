@@ -17,6 +17,19 @@ $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $dscModuleName `
     -DSCResourceName $dscResourceName `
     -TestType Unit
+
+function Invoke-TestSetup
+{
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
+
+    # If one type does not exist, it's assumed the other ones does not exist either.
+    if (-not ('Microsoft.ActiveDirectory.Management.ADAuthType' -as [Type]))
+    {
+        $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
+        Add-Type -Path $adModuleStub
+    }
+}
+
 #endregion
 
 # Begin Testing
@@ -271,8 +284,10 @@ try
 
                 Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
+                # FYI: This test does not successfully run locally, since the AD RSAT module is loaded on the build server
                 Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 1 -ParameterFilter { $Site.ToString() -eq $correctSiteName } @commonAssertParams
             }
+
 
             It 'Does not call "Move-ADDirectoryServer" when "SiteName" matches' {
                 Mock -CommandName Get-TargetResource -MockWith {
