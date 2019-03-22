@@ -113,6 +113,8 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 
 ### **xADDomainController**
 
+The xADDomainController DSC resource will install and configure domain controllers in Active Directory.
+
 * **`[String]` DomainName** _(Key)_: The fully qualified domain name for the domain where the domain controller will be present.
 * **`[PSCredential]` DomainAdministratorCredential** _(Required)_: Specifies the credential for the account used to install the domain controller.
 * **`[PSCredential]` SafemodeAdministratorPassword** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.

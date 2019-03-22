@@ -26,7 +26,7 @@ try
 
         $dscModuleName = (Split-Path -Path (Split-Path -Path $PSScriptRoot)).Split('\')[-1]
         $dscResourceName = (Split-Path -Path $PSCommandPath -Leaf).Split('.')[0]
-        
+
         #Load the AD Module Stub, so we can mock the cmdlets, then load the AD types
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
 
@@ -36,7 +36,7 @@ try
             $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
             Add-Type -Path $adModuleStub
         }
-    
+
         #region Pester Test Variable Initialization
         $correctDomainName              = 'present.com'
         $testAdminCredential            = [System.Management.Automation.PSCredential]::Empty
@@ -140,7 +140,7 @@ try
             }
 
             Context 'Domain Controller Service not installed on host' {
-        
+
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-ADDomainController { throw "Cannot find directory server with identity: '$env:COMPUTERNAME'." }
 
@@ -243,7 +243,7 @@ try
             It 'Calls "Install-ADDSDomainController" with InstallationMediaPath specified' {
                 Mock -CommandName Get-ADDomain -MockWith {
                     return $true
-                } 
+                }
 
                 Mock -CommandName Get-TargetResource -MockWith {
                     @{
