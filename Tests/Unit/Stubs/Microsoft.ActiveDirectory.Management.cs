@@ -52,10 +52,8 @@ namespace Microsoft.ActiveDirectory.Management
     public class ADReplicationSite
     {
         string site;
-        public string siteReturn { get { return site; }}
-
         public ADReplicationSite(System.String s){ site = s; }
-        public string blah(){return site;}
+        public string PesterReturn(){return site;}
     }
 }
 
