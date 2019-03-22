@@ -17,6 +17,19 @@ $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $Script:DSCModuleName `
     -DSCResourceName $Script:DSCResourceName `
     -TestType Unit
+
+function Invoke-TestSetup
+{
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
+
+    # If one type does not exist, it's assumed the other ones does not exist either.
+    if (-not ('Microsoft.ActiveDirectory.Management.ADAuthType' -as [Type]))
+    {
+        $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
+        Add-Type -Path $adModuleStub
+    }
+}
+
 #endregion
 
 # Begin Testing
@@ -88,6 +101,8 @@ try
 
         throw [exception] 'Not Implemented'
     }
+
+    Invoke-TestSetup
     #endregion Pester Test Initialization
 
     #region Function Get-TargetResource
@@ -141,6 +156,7 @@ try
     #region Function Test-TargetResource
     Describe -Tag 'xADDomainController' "$($Script:DSCResourceName)\Test-TargetResource" {
         InModuleScope $Script:DSCResourceName {
+
             $correctSiteName = 'PresentSite'
             $incorrectSiteName = 'IncorrectSite'
             $correctDomainName = 'present.com'
@@ -251,12 +267,12 @@ try
                 }
             } @commonMockParams
 
-            Mock -CommandName Move-ADDirectoryServer -ParameterFilter { $Site.ToString() -eq $correctSiteName } @commonMockParams
+            Mock -CommandName Move-ADDirectoryServer -ParameterFilter { $Site.blah() -eq $correctSiteName } @commonMockParams
             Mock -CommandName Move-ADDirectoryServer @commonMockParams
 
             Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
-            Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 1 -ParameterFilter { $Site.ToString() -eq $correctSiteName } @commonAssertParams
+            Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 1 @commonAssertParams -ParameterFilter { $Site.blah() -eq $correctSiteName } 
         }
 
         It 'Does not call "Move-ADDirectoryServer" when "SiteName" matches' {
