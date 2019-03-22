@@ -25,4 +25,57 @@ namespace Microsoft.ActiveDirectory.Management
         Windows2016Forest,
         UnknownForest
     }
+
+    public class ADAuthType
+    {
+        public ADAuthType():base(){}
+    }
+
+    public class ADDomain
+    {
+        public ADDomain():base(){}
+        public ADDomain(System.String Identity):base(){}
+    }
+
+    public class ADDomainController
+    {
+        public ADDomainController():base(){}
+        public ADDomainController(System.String Identity):base(){}
+    }
+
+    public class ADDirectoryServer
+    {
+        public ADDirectoryServer():base(){}
+        public ADDirectoryServer(System.String Identity):base(){}
+    }
+
+    public class ADReplicationSite
+    {
+        string site;
+        public string siteReturn { get { return site; }}
+
+        public ADReplicationSite(System.String s){ site = s; }
+        public string blah(){return site;}
+    }
+}
+
+namespace Microsoft.ActiveDirectory.Management.Commands
+{
+    public enum ADCurrentDomainType
+    {
+        Foo,
+        Bar
+    }
+
+    public enum ADMinimumDirectoryServiceVersion
+    {
+        Foo,
+        Bar
+    }
+
+    public enum ADDiscoverableService
+    {
+        Foo,
+        Bar
+    }
 }
