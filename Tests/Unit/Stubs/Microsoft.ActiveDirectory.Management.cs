@@ -53,7 +53,6 @@ namespace Microsoft.ActiveDirectory.Management
     {
         string site;
         public ADReplicationSite(System.String s){ site = s; }
-        public string siteReturn { get { return site; }}
     }
 }
 
