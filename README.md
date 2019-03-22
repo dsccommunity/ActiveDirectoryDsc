@@ -121,6 +121,7 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 * **`[String]` SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
 * **`[String]` SiteName** _(Write)_: Specify the name of an existing site where new domain controller will be placed.
 * **`[String]` InstallationMediaPath** _(Write)_: Specify the path of the folder containg the Installation Media created in NTDSutil.
+* **`[String]` Ensure** _(Read)_: The state of the Domain Controller, returned with Get.
 
 ### **xADDomainDefaultPasswordPolicy**
 
@@ -368,6 +369,7 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 * Added xADReplicationSiteLink
   * New resource added to facilitate replication between AD sites
+* Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue #155](https://github.com/PowerShell/xActiveDirectory/issues/155)).
 
 ### 2.24.0.0
 
