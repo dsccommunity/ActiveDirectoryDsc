@@ -266,12 +266,12 @@ try
                     }
                 }
 
-                Mock -CommandName Move-ADDirectoryServer -ParameterFilter { $Site.PesterReturn() -eq $correctSiteName }
+                Mock -CommandName Move-ADDirectoryServer -ParameterFilter { $Site.ToString() -eq $correctSiteName }
                 Mock -CommandName Move-ADDirectoryServer
 
                 Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
-                Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 1 -ParameterFilter { $Site.PesterReturn() -eq $correctSiteName } @commonAssertParams
+                Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 1 -ParameterFilter { $Site.ToString() -eq $correctSiteName } @commonAssertParams
             }
 
             It 'Does not call "Move-ADDirectoryServer" when "SiteName" matches' {
