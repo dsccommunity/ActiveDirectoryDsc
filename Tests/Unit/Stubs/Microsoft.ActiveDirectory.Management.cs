@@ -61,21 +61,18 @@ namespace Microsoft.ActiveDirectory.Management
 
 namespace Microsoft.ActiveDirectory.Management.Commands
 {
-    public enum ADCurrentDomainType
+    public class ADCurrentDomainType
     {
-        Foo,
-        Bar
+        public ADCurrentDomainType():base(){}
     }
 
-    public enum ADMinimumDirectoryServiceVersion
+    public class ADMinimumDirectoryServiceVersion
     {
-        Foo,
-        Bar
+        public ADMinimumDirectoryServiceVersion():base(){}
     }
 
-    public enum ADDiscoverableService
+    public class ADDiscoverableService
     {
-        Foo,
-        Bar
+        public ADDiscoverableService():base(){}
     }
 }
