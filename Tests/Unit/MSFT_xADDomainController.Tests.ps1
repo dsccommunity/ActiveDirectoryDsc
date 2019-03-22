@@ -17,19 +17,6 @@ $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $dscModuleName `
     -DSCResourceName $dscResourceName `
     -TestType Unit
-
-function Invoke-TestSetup
-{
-    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
-
-    # If one type does not exist, it's assumed the other ones does not exist either.
-    if (-not ('Microsoft.ActiveDirectory.Management.ADAuthType' -as [Type]))
-    {
-        $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
-        Add-Type -Path $adModuleStub
-    }
-}
-
 #endregion
 
 # Begin Testing
@@ -39,7 +26,7 @@ try
 
         $dscModuleName = (Split-Path -Path (Split-Path -Path $PSScriptRoot)).Split('\')[-1]
         $dscResourceName = (Split-Path -Path $PSCommandPath -Leaf).Split('.')[0]
-
+        
         #Load the AD Module Stub, so we can mock the cmdlets, then load the AD types
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
 
@@ -49,7 +36,7 @@ try
             $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
             Add-Type -Path $adModuleStub
         }
-
+    
         #region Pester Test Variable Initialization
         $correctDomainName              = 'present.com'
         $testAdminCredential            = [System.Management.Automation.PSCredential]::Empty
@@ -153,7 +140,7 @@ try
             }
 
             Context 'Domain Controller Service not installed on host' {
-
+        
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-ADDomainController { throw "Cannot find directory server with identity: '$env:COMPUTERNAME'." }
 
@@ -256,7 +243,7 @@ try
             It 'Calls "Install-ADDSDomainController" with InstallationMediaPath specified' {
                 Mock -CommandName Get-ADDomain -MockWith {
                     return $true
-                }
+                } 
 
                 Mock -CommandName Get-TargetResource -MockWith {
                     @{
@@ -284,10 +271,9 @@ try
 
                 Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
-                # FYI: This test does not successfully run locally, since the AD RSAT module is loaded on the build server
+                # FYI: This test will fail when run locally, but should succeed on the build server
                 Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 1 -ParameterFilter { $Site.ToString() -eq $correctSiteName } @commonAssertParams
             }
-
 
             It 'Does not call "Move-ADDirectoryServer" when "SiteName" matches' {
                 Mock -CommandName Get-TargetResource -MockWith {
