@@ -368,6 +368,10 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 * Added xADReplicationSiteLink
   * New resource added to facilitate replication between AD sites
+* Changes to xADComputer
+  * Minor clean up of unit tests.
+* Changes to xADUser
+  * Minor clean up of unit tests.
 
 ### 2.24.0.0
 
