@@ -73,7 +73,7 @@ function Get-TargetResource
     }
 
     # Get the current acl
-    $acl = Get-Acl -Path "Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/$Path"
+    $acl = Get-Acl -Path "AD:$Path"
 
     foreach ($access in $acl.Access)
     {
@@ -187,7 +187,7 @@ function Set-TargetResource
     Import-Module -Name 'ActiveDirectory' -Verbose:$false
 
     # Get the current acl
-    $acl = Get-Acl -Path "Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/$Path"
+    $acl = Get-Acl -Path "AD:$Path"
 
     if ($Ensure -eq 'Present')
     {
@@ -229,7 +229,7 @@ function Set-TargetResource
     }
 
     # Set the updated acl to the object
-    $acl | Set-Acl -Path "Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/$Path"
+    $acl | Set-Acl -Path "AD:$Path"
 }
 
 <#
