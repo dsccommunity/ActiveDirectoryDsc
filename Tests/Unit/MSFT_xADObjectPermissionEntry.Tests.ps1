@@ -49,7 +49,7 @@ try
         }
         $mockGetAclPresent = {
             $mock = [PSCustomObject] @{
-                Path   = 'Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/CN=PC01,CN=Computers,DC=contoso,DC=com'
+                Path   = 'AD:CN=PC01,CN=Computers,DC=contoso,DC=com'
                 Owner  = 'BUILTIN\Administrators'
                 Access = @(
                     [PSCustomObject] @{
@@ -72,7 +72,7 @@ try
         }
         $mockGetAclAbsent = {
             $mock = [PSCustomObject] @{
-                Path   = 'Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/CN=PC,CN=Computers,DC=lab,DC=local'
+                Path   = 'AD:CN=PC,CN=Computers,DC=lab,DC=local'
                 Owner  = 'BUILTIN\Administrators'
                 Access = @()
             }
