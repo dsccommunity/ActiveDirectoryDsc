@@ -16,6 +16,8 @@ data LocalizedData
         ManagedServiceAccountNotFound         = AD Managed Service Account '{0}' was not found.
         RetrievingServiceAccount              = Retrieving AD Managed Service Account '{0}' ...
         NotDesiredPropertyState               = AD Managed Service Account '{0}' is not correct. Expected '{1}', actual '{2}'.
+        MSAInDesiredState                     = AD Managed Service Account '{0}' is in the desired state.
+        MSANotInDesiredState                  = AD Managed Service Account '{0}' is NOT in the desired state.
         UpdatingManagedServiceAccountProperty = Updating AD Managed Service Account property '{0}' to '{1}'.
         AddingManagedServiceAccountError      = Error adding AD Managed Service Account '{0}'.
         UpdatingManagedServiceAccountError    = Error updating AD Managed Service Account '{0}'.
@@ -30,6 +32,9 @@ data LocalizedData
 
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER Ensure
+        Specifies whether the user account is created or deleted.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
@@ -47,6 +52,11 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ServiceAccountName,
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure = 'Present',
 
         [Parameter()]
         [ValidateNotNull()]
@@ -168,31 +178,51 @@ function Test-TargetResource
     $getTargetResource = Get-TargetResource @PSBoundParameters
     $targetResourceInCompliance = $true
 
-    if ($Path -and ($getTargetResource.Path -ne $Path))
+    if ($Ensure -eq 'Absent')
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Path', $Path, $getTargetResource.Path)
-        $targetResourceInCompliance = $false
+        if ($getTargetResource.Ensure -eq 'Present')
+        {
+            Write-Verbose ($LocalizedData.NotDesiredPropertyState -f `
+                            'Ensure', $PSBoundParameters.Ensure, $getTargetResource.Ensure)
+            $targetResourceInCompliance = $false
+        }
+    }
+    else
+    {
+        # Add ensure as it may not explicitly be passed and we want to enumerate it
+        $PSBoundParameters['Ensure'] = $Ensure;
+
+        foreach ($parameter in $PSBoundParameters.Keys)
+        {
+            if ($getTargetResource.ContainsKey($parameter))
+            {
+                # This check is required to be able to explicitly remove values with an empty string, if required
+                if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and
+                    ([System.String]::IsNullOrEmpty($getTargetResource.$parameter)))
+                {
+                    # Both values are null/empty and therefore we are compliant
+                }
+                elseif ($PSBoundParameters.$parameter -ne $getTargetResource.$parameter)
+                {
+                    Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
+                                            $parameter, $PSBoundParameters.$parameter, $getTargetResource.$parameter);
+                    $targetResourceInCompliance = $false;
+                }
+            }
+        } #end foreach PSBoundParameter
+
     }
 
-    if ($Description -and ($getTargetResource.Description -ne $Description))
+    if ($targetResourceInCompliance)
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Description', $Description, $getTargetResource.Description)
-        $targetResourceInCompliance = $false
+        Write-Verbose -Message ($LocalizedData.MSAInDesiredState -f $ServiceAccountName)
+        return $true
     }
-
-    if ($DisplayName -and ($getTargetResource.DisplayName -ne $DisplayName))
+    else
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'DisplayName', $DisplayName, $getTargetResource.DisplayName)
-        $targetResourceInCompliance = $false
+        Write-Verbose -Message ($LocalizedData.MSANotInDesiredState -f $ServiceAccountName)
+        return $false
     }
-
-    if ($getTargetResource.Ensure -ne $Ensure)
-    {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f 'Ensure', $Ensure, $getTargetResource.Ensure)
-        $targetResourceInCompliance = $false
-    }
-
-    return $targetResourceInCompliance
 } #end function Test-TargetResource
 
 <#
