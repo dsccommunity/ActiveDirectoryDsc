@@ -68,7 +68,10 @@ try
             It 'Should call "Assert-Module" to check AD module is installed' {
                 Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSA }
 
-                $null = Get-TargetResource @testPresentParams
+                $getTargetResourceParameters = @{
+                    ServiceAccountName = $testPresentParams.ServiceAccountName
+                }
+                $null = Get-TargetResource @getTargetResourceParameters
 
                 Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It -Exactly -Times 1
             }
@@ -76,7 +79,11 @@ try
             It "Should call 'Get-ADServiceAccount' with 'Server' parameter when 'DomainController' specified" {
                 Mock -CommandName Get-ADServiceAccount -ParameterFilter { $Server -eq $testDomainController } -MockWith { return $fakeADMSA }
 
-                $null = Get-TargetResource @testPresentParams -DomainController $testDomainController
+                $getTargetResourceParameters = @{
+                    ServiceAccountName = $testPresentParams.ServiceAccountName
+                    DomainController   = $testDomainController
+                }
+                $null = Get-TargetResource  @getTargetResourceParameters
 
                 Assert-MockCalled -CommandName Get-ADServiceAccount -ParameterFilter { $Server -eq $testDomainController } -Scope It -Exactly -Times 1
             }
@@ -84,7 +91,11 @@ try
             It "Should call 'Get-ADServiceAccount' with 'Credential' parameter when specified" {
                 Mock -CommandName Get-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -MockWith { return $fakeADMSA }
 
-                $null = Get-TargetResource @testPresentParams -Credential $testCredentials
+                $getTargetResourceParameters = @{
+                    ServiceAccountName = $testPresentParams.ServiceAccountName
+                    Credential         = $testCredentials
+                }
+                $null = Get-TargetResource  @getTargetResourceParameters
 
                 Assert-MockCalled -CommandName Get-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
             }
@@ -107,7 +118,11 @@ try
                         $Value
                     )
 
-                    $resource = Get-TargetResource @testPresentParams
+                    $getTargetResourceParameters = @{
+                        ServiceAccountName = $testPresentParams.ServiceAccountName
+                    }
+
+                    $resource = Get-TargetResource @getTargetResourceParameters
                     $resource.$Parameter | Should -BeExactly $Value
 
                     Assert-MockCalled -CommandName Get-ADServiceAccount
@@ -118,7 +133,11 @@ try
                 It "Should return 'Ensure' is 'Absent'" {
                     Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
-                    (Get-TargetResource @testPresentParams).Ensure | Should Be 'Absent'
+                    $getTargetResourceParameters = @{
+                        ServiceAccountName = $testPresentParams.ServiceAccountName
+                    }
+
+                    (Get-TargetResource @getTargetResourceParameters).Ensure | Should Be 'Absent'
                 }
 
                 $resource = Get-DscResource -Module xActiveDirectory -Name xADManagedServiceAccount
@@ -137,7 +156,11 @@ try
 
                     Mock -CommandName Get-ADServiceAccount -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
-                    $resource = Get-TargetResource @testPresentParams
+                    $getTargetResourceParameters = @{
+                        ServiceAccountName = $testPresentParams.ServiceAccountName
+                    }
+
+                    $resource = Get-TargetResource @getTargetResourceParameters
                     $resource.$Name | Should -Not -BeNullOrEmpty
                     $resource.$Name | Should -BeExactly $testPresentParams.$Name
                 }
