@@ -30,18 +30,6 @@ data LocalizedData
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
 
-    .PARAMETER Path
-        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
-
-    .PARAMETER Ensure
-        Specifies whether the user account is created or deleted.
-
-    .PARAMETER Description
-        Specifies a description of the object (ldapDisplayName 'description').
-
-    .PARAMETER DisplayName
-        Specifies the display name of the object (ldapDisplayName 'displayName').
-
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
 
@@ -58,26 +46,6 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ServiceAccountName,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [ValidateSet('Present', 'Absent')]
-        [System.String]
-        $Ensure = 'Present',
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Description,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DisplayName,
 
         [Parameter()]
         [ValidateNotNull()]
