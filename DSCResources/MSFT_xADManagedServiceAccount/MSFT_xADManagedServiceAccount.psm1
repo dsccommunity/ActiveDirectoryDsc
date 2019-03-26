@@ -107,6 +107,7 @@ function Get-TargetResource
         Path = $null
         Description = $null
         DisplayName = $null
+        AccountType = 'Single'
         Ensure = 'Absent'
         Credential = $Credential
         DomainController = $DomainController
@@ -362,7 +363,7 @@ function Set-TargetResource
                 # Possible logic:
                 # Remove-ADServiceAccount
                 # Then New-ADServiceAccount
-                # This may mean pulling the code for a creating new account and making it a separate function
+                # This may mean pulling the code for a creating new account and making it a separate
             }
 
             # Update existing group properties
