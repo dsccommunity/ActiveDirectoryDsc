@@ -80,9 +80,12 @@ function Get-TargetResource
         $targetResource['Path'] = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
         $targetResource['Description'] = $adServiceAccount.Description
         $targetResource['DisplayName'] = $adServiceAccount.DisplayName
-        if ( $adServiceAccount.ObjectClass -eq 'msDS-ManagedServiceAccount' ) {
+        if ( $adServiceAccount.ObjectClass -eq 'msDS-ManagedServiceAccount' )
+        {
             $targetResource['AccountType'] = 'Single'
-        }elseif ( $adServiceAccount.ObjectClass -eq 'msDS-GroupManagedServiceAccount' ) {
+        }
+        elseif ( $adServiceAccount.ObjectClass -eq 'msDS-GroupManagedServiceAccount' )
+        {
             $targetResource['AccountType'] = 'Group'
         }
 
@@ -185,7 +188,8 @@ function Test-TargetResource
     }
 
     @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if( !$PSBoundParameters.ContainsKey($_) ) {
+        if( !$PSBoundParameters.ContainsKey($_) )
+        {
             $getTargetResourceParameters.Remove($_)
         }
     }
@@ -329,7 +333,8 @@ function Set-TargetResource
             $setADServiceAccountParams = $adServiceAccountParams.Clone()
             $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
 
-            if ( $PSBoundParameters.ContainsKey('AccountType') -and $AccountType -ne $adServiceAccount.AccountType) {
+            if ( $PSBoundParameters.ContainsKey('AccountType') -and $AccountType -ne $adServiceAccount.AccountType)
+            {
                 Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
                 # TODO: Need to recreate service account
                 # Possible logic:
@@ -394,9 +399,12 @@ function Set-TargetResource
             }
 
             # Create service account
-            if ( $AccountType -eq 'Single' ) {
+            if ( $AccountType -eq 'Single' )
+            {
                 New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
-            } elseif( $AccountType -eq 'Group' ) {
+            }
+            elseif( $AccountType -eq 'Group' )
+            {
                 # TODO: Create logic to create new group managed service account
             }
         }
