@@ -204,7 +204,7 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
 * **`[String]` Path** _(Write)_: Path in Active Directory to place the managed service account, specified as a Distinguished Name (DN).
 * **`[String]` Description** _(Write)_: Specifies a description of the managed service account object.
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of the managed service account object.
-* **`[String]` UserName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the user.
+* **`[String]` ServiceAccountName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the user.
   * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
   * Once created, the user's SamAccountName and CN cannot be changed.
 * **`[String]` Ensure** _(Write)_: Specifies whether the given managed service account is present or absent.
