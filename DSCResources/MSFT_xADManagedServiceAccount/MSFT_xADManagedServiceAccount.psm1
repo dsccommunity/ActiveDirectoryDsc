@@ -30,21 +30,6 @@ data LocalizedData
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
 
-    .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
-
-    .PARAMETER Path
-        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
-
-    .PARAMETER Ensure
-        Specifies whether the user account is created or deleted.
-
-    .PARAMETER Description
-        Specifies a description of the object (ldapDisplayName 'description').
-
-    .PARAMETER DisplayName
-        Specifies the display name of the object (ldapDisplayName 'displayName').
-
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
 
@@ -61,31 +46,6 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ServiceAccountName,
-
-        [Parameter()]
-        [ValidateSet('Group', 'Single')]
-        [System.String]
-        $AccountType = 'Single',
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [ValidateSet('Present', 'Absent')]
-        [System.String]
-        $Ensure = 'Present',
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Description,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DisplayName,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -107,8 +67,8 @@ function Get-TargetResource
         Path = $null
         Description = $null
         DisplayName = $null
-        AccountType = 'Single'
-        Ensure = 'Absent'
+        AccountType = $null
+        Ensure = $null
         Credential = $Credential
         DomainController = $DomainController
     }
@@ -218,7 +178,19 @@ function Test-TargetResource
         $DomainController
     )
 
-    $getTargetResource = Get-TargetResource @PSBoundParameters
+    $getTargetResourceParameters = @{
+        ServiceAccountName = $ServiceAccountName
+        Credential         = $Credential
+        DomainController   = $DomainController
+    }
+
+    @($getTargetResourceParameters.Keys) | ForEach-Object {
+        if( !$PSBoundParameters.ContainsKey($_) ) {
+            $getTargetResourceParameters.Remove($_)
+        }
+    }
+
+    $getTargetResource = Get-TargetResource @getTargetResourceParameters
     $targetResourceInCompliance = $true
 
     if ($Ensure -eq 'Absent')
