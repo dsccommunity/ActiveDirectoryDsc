@@ -33,8 +33,17 @@ data LocalizedData
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
 
+    .PARAMETER Path
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+
     .PARAMETER Ensure
         Specifies whether the user account is created or deleted.
+
+    .PARAMETER Description
+        Specifies a description of the object (ldapDisplayName 'description').
+
+    .PARAMETER DisplayName
+        Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
@@ -54,9 +63,24 @@ function Get-TargetResource
         $ServiceAccountName,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Path,
+
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Description,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DisplayName,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -299,8 +323,44 @@ function Set-TargetResource
     {
         # Get the service account
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams -Property Name,DistinguishedName,Description,DisplayName
+
+        if ($Ensure -eq 'Present')
+        {
+            $setADServiceAccountParams = $adServiceAccountParams.Clone()
+            $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
+
+            # Update existing group properties
+            if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $adServiceAccount.Description)
+            {
+                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
+                $setADServiceAccountParams['Description'] = $Description
+            }
+            if ($PSBoundParameters.ContainsKey('DisplayName') -and $DisplayName -ne $adServiceAccount.DisplayName)
+            {
+                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
+                $setADServiceAccountParams['DisplayName'] = $DisplayName
+            }
+
+            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
+            Set-ADServiceAccount @setADServiceAccountParams
+
+            # Move group if the path is not correct
+            if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName)))
+            {
+                Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
+                $moveADObjectParams = $adServiceAccountParams.Clone()
+                $moveADObjectParams['Identity'] = $adServiceAccount.DistinguishedName
+                Move-ADObject @moveADObjectParams -TargetPath $Path
+            }
+        }elseif ($Ensure -eq 'Absent')
+        {
+            # Remove existing service account
+            Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
+            Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
+        }
+
     }
-    catch
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
         # The service account doesn't exist
         if ($Ensure -eq 'Present')
@@ -325,17 +385,7 @@ function Set-TargetResource
             }
 
             # Create service account
-            try
-            {
-                $adServiceAccount = New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
-            }
-            catch
-            {
-                Write-Error -Message ($LocalizedData.AddingManagedServiceAccountError -f $ServiceAccountName)
-                throw $_
-            }
-
-            return
+            New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
         }
         elseif ($Ensure -eq 'Absent')
         {
@@ -343,75 +393,10 @@ function Set-TargetResource
             return
         }
     }
-
-    if ($Ensure -eq 'Present')
+    catch # Need to add some specific catch errors maybe
     {
-        $setADServiceAccountParams = $adServiceAccountParams.Clone()
-        $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
-
-        $targetResourceInCompliance = $true
-
-        # Update existing group properties
-        if ($Description -and ($Description -ne $adServiceAccount.Description))
-        {
-            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
-            $setADServiceAccountParams['Description'] = $Description
-            $targetResourceInCompliance = $false
-        }
-
-        if ($DisplayName -and ($DisplayName -ne $adServiceAccount.DisplayName))
-        {
-            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
-            $setADServiceAccountParams['DisplayName'] = $DisplayName
-            $targetResourceInCompliance = $false
-        }
-
-        if (-not $targetResourceInCompliance)
-        {
-            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
-            try
-            {
-                Set-ADServiceAccount @setADServiceAccountParams
-            }
-            catch
-            {
-                Write-Error -Message ($LocalizedData.UpdatingManagedServiceAccountError -f $ServiceAccountName)
-                throw $_
-            }
-        }
-
-        # Move service account if the path is not correct
-        if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName)))
-        {
-            Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-            $moveADObjectParams = $adServiceAccountParams.Clone()
-            $moveADObjectParams['Identity'] = $adServiceAccount.DistinguishedName
-
-            try
-            {
-                Move-ADObject @moveADObjectParams -TargetPath $Path
-            }
-            catch
-            {
-                Write-Error -Message ($LocalizedData.MovingManagedServiceAccountError -f $ServiceAccountName)
-                throw $_
-            }
-        }
-    }
-    elseif ($Ensure -eq 'Absent')
-    {
-        # Remove existing service account
-        Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
-
-        try
-        {
-            Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
-        }
-        catch
-        {
-            Write-Error -Message ($LocalizedData.RemovingManagedServiceAccountError -f $ServiceAccountName)
-            throw $_
-        }
+        Write-Error -Message ($LocalizedData.AddingManagedServiceAccountError -f $ServiceAccountName)
+        throw $_
     }
 } #end function Set-TargetResource
 
