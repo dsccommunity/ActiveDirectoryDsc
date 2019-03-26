@@ -14,6 +14,7 @@ data LocalizedData
         RemovingManagedServiceAccount         = Removing AD Managed Service Account '{0}'.
         MovingManagedServiceAccount           = Moving AD Managed Service Account '{0}' to '{1}'.
         ManagedServiceAccountNotFound         = AD Managed Service Account '{0}' was not found.
+        RetrievingServiceAccount              = Retrieving AD Managed Service Account '{0}' ...
         NotDesiredPropertyState               = AD Managed Service Account '{0}' is not correct. Expected '{1}', actual '{2}'.
         UpdatingManagedServiceAccountProperty = Updating AD Managed Service Account property '{0}' to '{1}'.
         AddingManagedServiceAccountError      = Error adding AD Managed Service Account '{0}'.
@@ -88,6 +89,11 @@ function Get-TargetResource
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
         Write-Verbose ($LocalizedData.ManagedServiceAccountNotFound -f $ServiceAccountName)
+    }
+    catch
+    {
+        Write-Error -Message ($LocalizedData.RetrievingServiceAccount -f $ServiceAccountName);
+        throw $_;
     }
     return $targetResource
 } #end function Get-TargetResource
