@@ -30,6 +30,9 @@ data LocalizedData
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
 
+    .PARAMETER AccountType
+        Specifies the type of managed service account, whether it should be a group or single computer service account
+
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
 
@@ -58,6 +61,11 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ServiceAccountName,
+
+        [Parameter()]
+        [ValidateSet('Group', 'Single')]
+        [System.String]
+        $AccountType = 'Single',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -111,6 +119,11 @@ function Get-TargetResource
         $targetResource['Path'] = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
         $targetResource['Description'] = $adServiceAccount.Description
         $targetResource['DisplayName'] = $adServiceAccount.DisplayName
+        if ( $adServiceAccount.ObjectClass -eq 'msDS-ManagedServiceAccount' ) {
+            $targetResource['AccountType'] = 'Single'
+        }elseif ( $adServiceAccount.ObjectClass -eq 'msDS-GroupManagedServiceAccount' ) {
+            $targetResource['AccountType'] = 'Group'
+        }
 
         if ($adServiceAccount)
         {
@@ -135,6 +148,9 @@ function Get-TargetResource
 
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER AccountType
+        Specifies the type of managed service account, whether it should be a group or single computer service account
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
@@ -163,6 +179,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ServiceAccountName,
+
+        [Parameter()]
+        [ValidateSet('Group', 'Single')]
+        [System.String]
+        $AccountType = 'Single',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -211,7 +232,8 @@ function Test-TargetResource
     else
     {
         # Add ensure as it may not explicitly be passed and we want to enumerate it
-        $PSBoundParameters['Ensure'] = $Ensure;
+        $PSBoundParameters['Ensure']      = $Ensure;
+        $PSBoundParameters['AccountType'] = $AccountType;
 
         foreach ($parameter in $PSBoundParameters.Keys)
         {
@@ -251,7 +273,10 @@ function Test-TargetResource
         Adds, removes, or updates the managed service account.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+       Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER AccountType
+        Specifies the type of managed service account, whether it should be a group or single computer service account
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
@@ -280,6 +305,11 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ServiceAccountName,
+
+        [Parameter()]
+        [ValidateSet('Group', 'Single')]
+        [System.String]
+        $AccountType = 'Single',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -325,6 +355,15 @@ function Set-TargetResource
         {
             $setADServiceAccountParams = $adServiceAccountParams.Clone()
             $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
+
+            if ( $PSBoundParameters.ContainsKey('AccountType') -and $AccountType -ne $adServiceAccount.AccountType) {
+                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
+                # TODO: Need to recreate service account
+                # Possible logic:
+                # Remove-ADServiceAccount
+                # Then New-ADServiceAccount
+                # This may mean pulling the code for a creating new account and making it a separate function
+            }
 
             # Update existing group properties
             if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $adServiceAccount.Description)
@@ -382,7 +421,11 @@ function Set-TargetResource
             }
 
             # Create service account
-            New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
+            if ( $AccountType -eq 'Single' ) {
+                New-ADServiceAccount @adServiceAccountParams -RestrictToSingleComputer -Enabled $true -PassThru
+            } elseif( $AccountType -eq 'Group' ) {
+                # TODO: Create logic to create new group managed service account
+            }
         }
         elseif ($Ensure -eq 'Absent')
         {
