@@ -67,8 +67,8 @@ function Get-TargetResource
         Path = $null
         Description = $null
         DisplayName = $null
-        AccountType = $null
-        Ensure = $null
+        AccountType = 'Single'
+        Ensure = 'Absent'
         Credential = $Credential
         DomainController = $DomainController
     }
