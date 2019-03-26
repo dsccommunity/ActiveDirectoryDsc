@@ -40,6 +40,7 @@ try
        #region Pester Test Initialization
         $testPresentParams = @{
             ServiceAccountName = 'TestMSA'
+            AccountType = 'Single'
             Path = 'OU=Fake,DC=contoso,DC=com'
             Description = 'Test MSA description'
             DisplayName = 'Test MSA display name'
