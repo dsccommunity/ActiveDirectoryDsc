@@ -397,6 +397,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 * Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
 
+* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
+
 ### 2.24.0.0
 
 * Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
