@@ -20,9 +20,6 @@ data LocalizedData
         MSANotInDesiredState                  = AD Managed Service Account '{0}' is NOT in the desired state.
         UpdatingManagedServiceAccountProperty = Updating AD Managed Service Account property '{0}' to '{1}'.
         AddingManagedServiceAccountError      = Error adding AD Managed Service Account '{0}'.
-        UpdatingManagedServiceAccountError    = Error updating AD Managed Service Account '{0}'.
-        MovingManagedServiceAccountError      = Error moving AD Managed Service Account '{0}'.
-        RemovingManagedServiceAccountError    = Error removing AD Managed Service Account '{0}'.
 '@
 }
 
