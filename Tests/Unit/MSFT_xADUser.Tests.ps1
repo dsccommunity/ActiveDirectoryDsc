@@ -46,12 +46,12 @@ try
         $testCredential = [System.Management.Automation.PSCredential]::Empty
 
         $testStringProperties = @(
-            'UserPrincipalName', 'DisplayName', 'Path',  'GivenName', 'Initials', 'Surname', 'Description', 'StreetAddress',
+            'UserPrincipalName', 'DisplayName', 'Path', 'GivenName', 'Initials', 'Surname', 'Description', 'StreetAddress',
             'POBox', 'City', 'State', 'PostalCode', 'Country', 'Department', 'Division', 'Company', 'Office', 'JobTitle',
             'EmailAddress', 'EmployeeID', 'EmployeeNumber', 'HomeDirectory', 'HomeDrive', 'HomePage', 'ProfilePath',
             'LogonScript', 'Notes', 'OfficePhone', 'MobilePhone', 'Fax', 'Pager', 'IPPhone', 'HomePhone','CommonName'
         )
-        $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword','Enabled')
+        $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword', 'TrustedForDelegation', 'Enabled');
 
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
@@ -517,6 +517,10 @@ try
 
             It "Throws when account is disabled and 'Password' is specified" {
                 { Assert-Parameters -Password $testCredential -Enabled $false } | Should Throw
+            }
+
+            It "Does not throw when 'TrustedForDelegation' is specified" {
+                { Assert-Parameters -TrustedForDelegation $true } | Should Not Throw
             }
         }
         #endregion
