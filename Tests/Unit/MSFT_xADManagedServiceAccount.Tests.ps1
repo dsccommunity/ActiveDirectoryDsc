@@ -248,7 +248,7 @@ try
                     Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
                     Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
                     Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
-                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
                 It "Should not take any action when 'Ensure' is 'Absent'" {
