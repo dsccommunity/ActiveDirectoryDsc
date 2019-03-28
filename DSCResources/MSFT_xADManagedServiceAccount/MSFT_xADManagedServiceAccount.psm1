@@ -439,7 +439,7 @@ function Set-TargetResource
                 {
                     Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
                     Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
-                    Create-ADServiceAccount @PSBoundParameters
+                    New-ADServiceAccountHelper @PSBoundParameters
                 }
 
                 # Update existing group properties
@@ -492,7 +492,7 @@ function Set-TargetResource
             }elseif ($targetResource.Ensure -eq 'Absent')
             {
                 # Account does not exist yet, let's create it
-                Create-ADServiceAccount @PSBoundParameters
+                New-ADServiceAccountHelper @PSBoundParameters
             }
         }elseif ($Ensure -eq 'Absent') {
             if ($targetResource.Ensure -eq 'Present')
@@ -552,7 +552,7 @@ function Set-TargetResource
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to use to perform the task.
 #>
-Function Create-ADServiceAccount
+Function New-ADServiceAccountHelper
 {
     [CmdletBinding()]
     param
@@ -652,6 +652,6 @@ Function Create-ADServiceAccount
 
         New-ADServiceAccount @adServiceAccountParams -PassThru
     }
-} #end function Create-ADServiceAccount
+} #end function New-ADServiceAccountHelper
 
 Export-ModuleMember -Function *-TargetResource
