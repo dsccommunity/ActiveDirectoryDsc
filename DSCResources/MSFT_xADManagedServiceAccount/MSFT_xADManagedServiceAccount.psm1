@@ -88,19 +88,14 @@ function Get-TargetResource
     try
     {
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams `
-                                -Property Name,DistinguishedName,Description,DisplayName,ObjectClass,Enabled,PrincipalsAllowedToRetrieveManagedPassword
+                                -Property Name,DistinguishedName,Description,DisplayName,ObjectClass,Enabled,PrincipalsAllowedToRetrieveManagedPassword, `
+                                            SamAccountName,DistinguishedName,SID,ObjectGUID
 
-        $targetResource['Ensure']      = 'Present'
-        $targetResource['Path']        = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
-        $targetResource['Description'] = $adServiceAccount.Description
-        $targetResource['DisplayName'] = $adServiceAccount.DisplayName
-        $targetResource['Enabled']     = $adServiceAccount.Enabled
-
-        Write-Verbose -Message ($LocalizedData.RetrievingPrincipalMembers -f $MembershipAttribute)
-        $adServiceAccount.PrincipalsAllowedToRetrieveManagedPassword | ForEach-Object {
-            $member = (Get-ADObject -Identity $_ -Property $MembershipAttribute).$MembershipAttribute
-            $targetResource['Members'] += $member
-        }
+        $targetResource['Ensure']            = 'Present'
+        $targetResource['Path']              = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
+        $targetResource['Description']       = $adServiceAccount.Description
+        $targetResource['DisplayName']       = $adServiceAccount.DisplayName
+        $targetResource['Enabled']           = [System.Boolean] $adServiceAccount.Enabled
 
         if ( $adServiceAccount.ObjectClass -eq 'msDS-ManagedServiceAccount' )
         {
@@ -108,6 +103,12 @@ function Get-TargetResource
         }
         elseif ( $adServiceAccount.ObjectClass -eq 'msDS-GroupManagedServiceAccount' )
         {
+            Write-Verbose -Message ($LocalizedData.RetrievingPrincipalMembers -f $MembershipAttribute)
+            $adServiceAccount.PrincipalsAllowedToRetrieveManagedPassword | ForEach-Object {
+                $member = (Get-ADObject -Identity $_ -Property $MembershipAttribute).$MembershipAttribute
+                $targetResource['Members'] += $member
+            }
+
             $targetResource['AccountType'] = 'Group'
         }
     }
@@ -250,6 +251,7 @@ function Test-TargetResource
         # Add ensure as it may not explicitly be passed and we want to enumerate it
         $PSBoundParameters['Ensure']      = $Ensure;
         $PSBoundParameters['AccountType'] = $AccountType;
+        $PSBoundParameters['Enabled']     = $Enabled;
 
         foreach ($parameter in $PSBoundParameters.Keys)
         {
@@ -263,17 +265,21 @@ function Test-TargetResource
                 }
                 elseif ($parameter -eq 'Members')
                 {
-                    $testMembersParams = @{
-                        ExistingMembers = $getTargetResource.Members -as [System.String[]];
-                        Members = $Members;
-                    }
-                    if (-not (Test-Members @testMembersParams))
+                    # Members is only for Group MSAs, if it's single computer, we can skip over this parameter
+                    if ($PSBoundParameters.AccountType -eq 'Group')
                     {
-                        $existingMembers = $testMembersParams['ExistingMembers'] -join ',';
-                        $desiredMembers = $Members -join ',';
-                        Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
-                                                'Members', $desiredMembers, $existingMembers);
-                        $targetResourceInCompliance = $false;
+                        $testMembersParams = @{
+                            ExistingMembers = $getTargetResource.Members -as [System.String[]];
+                            Members = $Members;
+                        }
+                        if (-not (Test-Members @testMembersParams))
+                        {
+                            $existingMembers = $testMembersParams['ExistingMembers'] -join ',';
+                            $desiredMembers = $Members -join ',';
+                            Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
+                                                    'Members', $desiredMembers, $existingMembers);
+                            $targetResourceInCompliance = $false;
+                        }
                     }
                 }
                 elseif ($PSBoundParameters.$parameter -ne $getTargetResource.$parameter)
@@ -397,77 +403,112 @@ function Set-TargetResource
         $DomainController
     )
 
-    Assert-Module -ModuleName 'ActiveDirectory'
     $adServiceAccountParams = Get-ADCommonParameters @PSBoundParameters
+    $setADServiceAccountParams = $adServiceAccountParams.Clone()
+
+    $getTargetResourceParameters = @{
+        ServiceAccountName  = $ServiceAccountName
+        Credential          = $Credential
+        DomainController    = $DomainController
+        MembershipAttribute = $MembershipAttribute
+    }
+
+    @($getTargetResourceParameters.Keys) | ForEach-Object {
+        if( !$PSBoundParameters.ContainsKey($_) )
+        {
+            $getTargetResourceParameters.Remove($_)
+        }
+    }
+
+    $targetResource = Get-TargetResource @getTargetResourceParameters
 
     try
     {
-        # Get the service account
-        $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams -Property Name,DistinguishedName,Description,DisplayName
-
         if ($Ensure -eq 'Present')
         {
-            $setADServiceAccountParams = $adServiceAccountParams.Clone()
-            $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
-
-            if ( $PSBoundParameters.ContainsKey('AccountType') -and $AccountType -ne $adServiceAccount.AccountType)
+            if ($targetResource.Ensure -eq 'Present')
             {
-                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
-                Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
+                # Need Distinguished Name
+                $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams -Property DistinguishedName
+                $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
+
+                # Account already exists, lets check if we need to update properties
+                $UpdateAccount = $false
+
+                if ($PSBoundParameters.ContainsKey('AccountType') -and $AccountType -ne $targetResource.AccountType)
+                {
+                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
+                    Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
+                    Create-ADServiceAccount @PSBoundParameters
+                }
+
+                # Update existing group properties
+                if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $targetResource.Description)
+                {
+                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
+                    $setADServiceAccountParams['Description'] = $Description
+                    $UpdateAccount = $true
+                }
+                if ($PSBoundParameters.ContainsKey('DisplayName') -and $DisplayName -ne $targetResource.DisplayName)
+                {
+                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
+                    $setADServiceAccountParams['DisplayName'] = $DisplayName
+                    $UpdateAccount = $true
+                }
+                if ($PSBoundParameters.ContainsKey('Enabled') -and $Enabled -ne $targetResource.Enabled)
+                {
+                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Enabled', $Enabled)
+                    $setADServiceAccountParams['Enabled'] = $Enabled
+                    $UpdateAccount = $true
+                }
+
+                if ($targetResource.AccountType -eq 'Group' -and $PSBoundParameters.ContainsKey('Members') -and (-not (Test-Members -ExistingMembers $targetResource.Members -Members $Members)) )
+                {
+                    if([system.string]::IsNullOrEmpty($Members))
+                    {
+                        $Members = @()
+                    }
+                    $ListMembers = $Members -join ','
+
+                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Members', $ListMembers)
+                    $setADServiceAccountParams['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
+                    $UpdateAccount = $true
+                }
+
+                if($UpdateAccount)
+                {
+                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
+                    Set-ADServiceAccount @setADServiceAccountParams
+                }
+
+                # Move group if the path is not correct
+                if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName)))
+                {
+                    Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
+                    $moveADObjectParams = $adServiceAccountParams.Clone()
+                    $moveADObjectParams['Identity'] = $adServiceAccount.DistinguishedName
+                    Move-ADObject @moveADObjectParams -TargetPath $Path
+                }
+            }elseif ($targetResource.Ensure -eq 'Absent')
+            {
+                # Account does not exist yet, let's create it
                 Create-ADServiceAccount @PSBoundParameters
             }
-
-            # Update existing group properties
-            if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $adServiceAccount.Description)
+        }elseif ($Ensure -eq 'Absent') {
+            if ($targetResource.Ensure -eq 'Present')
             {
-                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
-                $setADServiceAccountParams['Description'] = $Description
+                # Account currently exists, but we want to remove it
+                Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
+                Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
             }
-            if ($PSBoundParameters.ContainsKey('DisplayName') -and $DisplayName -ne $adServiceAccount.DisplayName)
+            elseif ($targetResource.Ensure -eq 'Absent')
             {
-                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
-                $setADServiceAccountParams['DisplayName'] = $DisplayName
+                # Do nothing - account should be absent and is
+                return
             }
-            if ($adServiceAccount.AccountType -eq 'Group' -and `
-                    $PSBoundParameters.ContainsKey('Members') -and $Members -ne $adServiceAccount.Members)
-            {
-                Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Members', $Members)
-                $setADServiceAccountParams['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
-            }
-
-            Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
-            Set-ADServiceAccount @setADServiceAccountParams
-
-            # Move group if the path is not correct
-            if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName)))
-            {
-                Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                $moveADObjectParams = $adServiceAccountParams.Clone()
-                $moveADObjectParams['Identity'] = $adServiceAccount.DistinguishedName
-                Move-ADObject @moveADObjectParams -TargetPath $Path
-            }
-        }elseif ($Ensure -eq 'Absent')
-        {
-            # Remove existing service account
-            Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
-            Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
-        }
-
-    }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
-    {
-        # The service account doesn't exist
-        if ($Ensure -eq 'Present')
-        {
-            Create-ADServiceAccount @PSBoundParameters
-        }
-        elseif ($Ensure -eq 'Absent')
-        {
-            # Do nothing - account should be absent and is
-            return
         }
     }
-    catch # Need to add some specific catch errors maybe
+    catch
     {
         Write-Error -Message ($LocalizedData.AddingManagedServiceAccountError -f $ServiceAccountName)
         throw $_
@@ -604,7 +645,6 @@ Function Create-ADServiceAccount
         {
             $adServiceAccountParams['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
         }
-
 
         $DomainName = Get-DomainName
         $DNSHostName = '{0}.{1}' -f $ServiceAccountName, $DomainName
