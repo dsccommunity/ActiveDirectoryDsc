@@ -204,7 +204,7 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
 * **`[String]` Path** _(Write)_: Path in Active Directory to place the managed service account, specified as a Distinguished Name (DN).
 * **`[String]` Description** _(Write)_: Specifies a description of the managed service account object.
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of the managed service account object.
-* **`[String]` UserName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the user.
+* **`[String]` ServiceAccountName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the user.
   * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
   * Once created, the user's SamAccountName and CN cannot be changed.
 * **`[String]` Ensure** _(Write)_: Specifies whether the given managed service account is present or absent.
@@ -356,6 +356,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 * **`[String]` PasswordAuthentication** _(Write)_: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 * **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).
+* **`[Boolean]` TrustedForDelegation** _(Write)_: Specifies whether an account is trusted for Kerberos delegation (default $false).
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
@@ -387,6 +388,14 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 * Added xADReplicationSiteLink
   * New resource added to facilitate replication between AD sites
+* Updated xADObjectPermissionEntry to use `AD:` which is more generic when using `Get-Acl` and `Set-Acl` than using `Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/`
+* Changes to xADComputer
+  * Minor clean up of unit tests.
+* Changes to xADUser
+  * Added TrustedForDelegation parameter to xADUser to support enabling/disabling Kerberos delegation
+  * Minor clean up of unit tests.
+
+* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
 
 * Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
 
