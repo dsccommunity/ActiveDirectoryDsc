@@ -72,16 +72,17 @@ function Get-TargetResource
     $adServiceAccountParams = Get-ADCommonParameters @PSBoundParameters
 
     $targetResource = @{
-        ServiceAccountName = $ServiceAccountName
-        Path = $null
-        Description = $null
-        DisplayName = $null
-        AccountType = $null
-        Ensure = $null
-        Enabled = $null
-        Members = @()
-        Credential = $Credential
-        DomainController = $DomainController
+        ServiceAccountName  = $ServiceAccountName
+        Path                = $null
+        Description         = $null
+        DisplayName         = $null
+        AccountType         = $null
+        Ensure              = $null
+        Enabled             = $null
+        Members             = @()
+        MembershipAttribute = $MembershipAttribute
+        Credential          = $Credential
+        DomainController    = $DomainController
     }
 
     try
@@ -89,11 +90,11 @@ function Get-TargetResource
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams `
                                 -Property Name,DistinguishedName,Description,DisplayName,ObjectClass,Enabled,PrincipalsAllowedToRetrieveManagedPassword
 
-        $targetResource['Ensure'] = 'Present'
-        $targetResource['Path'] = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
+        $targetResource['Ensure']      = 'Present'
+        $targetResource['Path']        = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
         $targetResource['Description'] = $adServiceAccount.Description
         $targetResource['DisplayName'] = $adServiceAccount.DisplayName
-        $targetResource['Enabled'] = $adServiceAccount.Enabled
+        $targetResource['Enabled']     = $adServiceAccount.Enabled
 
         Write-Verbose -Message ($LocalizedData.RetrievingPrincipalMembers -f $MembershipAttribute)
         $adServiceAccount.PrincipalsAllowedToRetrieveManagedPassword | ForEach-Object {

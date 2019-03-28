@@ -40,22 +40,22 @@ try
        #region Pester Test Initialization
         $testPresentParams = @{
             ServiceAccountName = 'TestMSA'
-            AccountType = 'Single'
-            Path = 'OU=Fake,DC=contoso,DC=com'
-            Description = 'Test MSA description'
-            DisplayName = 'Test MSA display name'
-            Ensure = 'Present'
+            AccountType        = 'Single'
+            Path               = 'OU=Fake,DC=contoso,DC=com'
+            Description        = 'Test MSA description'
+            DisplayName        = 'Test MSA display name'
+            Ensure             = 'Present'
         }
 
         $testAbsentParams = $testPresentParams.Clone()
         $testAbsentParams['Ensure'] = 'Absent'
 
         $fakeADMSA = @{
-            Name = $testPresentParams.ServiceAccountName
-            Identity = $testPresentParams.Name
+            Name              = $testPresentParams.ServiceAccountName
+            Identity          = $testPresentParams.Name
             DistinguishedName = "CN=$($testPresentParams.Name),$($testPresentParams.Path)"
-            Description = $testPresentParams.Description
-            DisplayName = $testPresentParams.DisplayName
+            Description       = $testPresentParams.Description
+            DisplayName       = $testPresentParams.DisplayName
         }
 
         $testDomainController = 'TESTDC'
