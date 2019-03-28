@@ -80,7 +80,7 @@ try
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         #region Function Get-TargetResource
-        Describe -Name "$DSCResourceName\Get-TargetResource" {
+        Describe -Name "$($script:DSCResourceName)\Get-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Should call "Assert-Module" to check AD module is installed' {
@@ -117,6 +117,17 @@ try
                 $null = Get-TargetResource  @getTargetResourceParameters
 
                 Assert-MockCalled -CommandName Get-ADServiceAccount -ParameterFilter { $Credential -eq $testCredentials } -Scope It -Exactly -Times 1
+            }
+
+            It "Should call 'Write-Error' when catching other errors" {
+                Mock -CommandName Get-ADServiceAccount -MockWith { throw 'Microsoft.ActiveDirectory.Management.ADServerDownException' }
+
+                $getTargetResourceParameters = @{
+                    ServiceAccountName = $testPresentParams.ServiceAccountName
+                }
+
+                { $null = Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should Throw
+
             }
 
             Context -Name 'When the system is in the desired state (Single)' {
@@ -440,17 +451,28 @@ try
                     Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
+                It "Should call 'New-ADServiceAccount' when 'Ensure' is 'Present' and AccountType is specified (Single)" {
+                    Mock -CommandName Set-ADServiceAccount
+                    Mock -CommandName Remove-ADServiceAccount
+                    Mock -CommandName New-ADServiceAccount
+                    Mock -CommandName Get-ADObject -MockWith { return $fakeADNode }
+                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSAGroup }
+
+                    Set-TargetResource @testPresentParams
+
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
+                }
+
                 It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and Members is specified (Group)" {
                     Mock -CommandName Set-ADServiceAccount
                     Mock -CommandName Test-Members -MockWith { return $false }
                     Mock -CommandName Get-ADObject -MockWith { return $fakeADNode }
-                    Mock -CommandName Get-ADServiceAccount -MockWith {
-                      $duffADMSA = $fakeADMSAGroup.Clone()
-                      $duffADMSA['PrincipalsAllowedToRetrieveManagedPassword'] = @('SomeOtherMember')
-                      return $duffADMSA
-                    }
+                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSAGroup }
 
-                    Set-TargetResource @testPresentParamsGroup
+                    $duffParams = $testPresentParamsGroup.Clone()
+                    $duffParams['Members'] = ''
+                    Set-TargetResource @duffParams
 
                     Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
                     Assert-MockCalled -CommandName Test-Members -Scope It -Exactly -Times 1
