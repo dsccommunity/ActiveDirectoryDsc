@@ -31,6 +31,9 @@ data LocalizedData
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
 
+    .PARAMETER MembershipAttribute
+        Specifies the Attribute to use to describe the Identity used for Members ("SamAccountName","DistinguishedName","ObjectGUID","SID")
+
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
 

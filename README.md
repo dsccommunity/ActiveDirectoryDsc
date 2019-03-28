@@ -356,6 +356,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
 * **`[String]` PasswordAuthentication** _(Write)_: Specifies the authentication context used when testing users' passwords.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 * **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).
+* **`[Boolean]` TrustedForDelegation** _(Write)_: Specifies whether an account is trusted for Kerberos delegation (default $false).
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
@@ -387,6 +388,14 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 * Added xADReplicationSiteLink
   * New resource added to facilitate replication between AD sites
+* Updated xADObjectPermissionEntry to use `AD:` which is more generic when using `Get-Acl` and `Set-Acl` than using `Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/`
+* Changes to xADComputer
+  * Minor clean up of unit tests.
+* Changes to xADUser
+  * Added TrustedForDelegation parameter to xADUser to support enabling/disabling Kerberos delegation
+  * Minor clean up of unit tests.
+
+* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
 
 * Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
 
