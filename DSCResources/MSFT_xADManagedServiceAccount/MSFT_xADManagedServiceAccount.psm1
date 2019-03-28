@@ -482,11 +482,11 @@ function Set-TargetResource
                 }
 
                 # Move group if the path is not correct
-                if ($Path -and ($Path -ne (Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName)))
+                if ($PSBoundParameters.ContainsKey('Path') -and $Path -ne $targetResource.Path)
                 {
                     Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
                     $moveADObjectParams = $adServiceAccountParams.Clone()
-                    $moveADObjectParams['Identity'] = $adServiceAccount.DistinguishedName
+                    $moveADObjectParams['Identity'] = $ServiceAccountName
                     Move-ADObject @moveADObjectParams -TargetPath $Path
                 }
             }elseif ($targetResource.Ensure -eq 'Absent')
