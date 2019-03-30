@@ -349,7 +349,7 @@ try
                     Mock -CommandName Remove-ADServiceAccount
                     Mock -CommandName Set-ADServiceAccount
 
-                    Set-TargetResource @testPresentParams -Verbose
+                    Set-TargetResource @testPresentParams
 
                     Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
                     Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
@@ -364,7 +364,7 @@ try
                   Mock -CommandName Remove-ADServiceAccount
                   Mock -CommandName Set-ADServiceAccount
 
-                  Set-TargetResource @testPresentParamsGroup -Verbose
+                  Set-TargetResource @testPresentParamsGroup
 
                   Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
                   Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
@@ -379,7 +379,7 @@ try
                     Mock -CommandName Remove-ADServiceAccount
                     Mock -CommandName Set-ADServiceAccount
 
-                    Set-TargetResource @testAbsentParams -Verbose
+                    Set-TargetResource @testAbsentParams
 
                     Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
                     Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
@@ -394,7 +394,7 @@ try
                   Mock -CommandName Remove-ADServiceAccount
                   Mock -CommandName Set-ADServiceAccount
 
-                  Set-TargetResource @testAbsentParamsGroup -Verbose
+                  Set-TargetResource @testAbsentParamsGroup
 
                   Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
                   Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
