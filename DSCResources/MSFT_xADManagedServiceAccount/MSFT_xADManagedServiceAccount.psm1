@@ -220,80 +220,30 @@ function Test-TargetResource
         $DomainController
     )
 
-    $getTargetResourceParameters = @{
-        ServiceAccountName  = $ServiceAccountName
-        Credential          = $Credential
-        DomainController    = $DomainController
-        MembershipAttribute = $MembershipAttribute
-    }
+    $outOfComplianceParams = Compare-TargetResourceX @PSBoundParameters
 
-    @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if( !$PSBoundParameters.ContainsKey($_) )
-        {
-            $getTargetResourceParameters.Remove($_)
-        }
-    }
-
-    $getTargetResource = Get-TargetResource @getTargetResourceParameters
-    $targetResourceInCompliance = $true
-
+    # Check if Absent, if so then we don't need to propagate any other parameters
     if ($Ensure -eq 'Absent')
     {
-        if ($getTargetResource.Ensure -eq 'Present')
+        if ($outOfComplianceParams.ContainsKey('Ensure') -eq 'Present')
         {
             Write-Verbose ($LocalizedData.NotDesiredPropertyState -f `
-                            'Ensure', $PSBoundParameters.Ensure, $getTargetResource.Ensure)
-            $targetResourceInCompliance = $false
+                            'Ensure', $outOfComplianceParams.Ensure.Expected, $outOfComplianceParams.Ensure.Actual)
         }
     }
     else
     {
-        # Add ensure as it may not explicitly be passed and we want to enumerate it
-        $PSBoundParameters['Ensure']      = $Ensure;
-        $PSBoundParameters['AccountType'] = $AccountType;
-        $PSBoundParameters['Enabled']     = $Enabled;
+        $outOfComplianceParams.GetEnumerator() | ForEach-Object {
+            $parameter = $_.name
+            $expected  = $_.value.Expected
+            $actual    = $_.value.Actual
 
-        foreach ($parameter in $PSBoundParameters.Keys)
-        {
-            if ($getTargetResource.ContainsKey($parameter))
-            {
-                # This check is required to be able to explicitly remove values with an empty string, if required
-                if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and
-                    ([System.String]::IsNullOrEmpty($getTargetResource.$parameter)))
-                {
-                    # Both values are null/empty and therefore we are compliant
-                }
-                elseif ($parameter -eq 'Members')
-                {
-                    # Members is only for Group MSAs, if it's single computer, we can skip over this parameter
-                    if ($PSBoundParameters.AccountType -eq 'Group')
-                    {
-                        $testMembersParams = @{
-                            ExistingMembers = $getTargetResource.Members -as [System.String[]];
-                            Members = $Members;
-                        }
-                        if (-not (Test-Members @testMembersParams))
-                        {
-                            $existingMembers = $testMembersParams['ExistingMembers'] -join ',';
-                            $desiredMembers = $Members -join ',';
-                            Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
-                                                    'Members', $desiredMembers, $existingMembers);
-                            $targetResourceInCompliance = $false;
-                        }
-                    }
-                }
-                elseif ($PSBoundParameters.$parameter -ne $getTargetResource.$parameter)
-                {
-                    Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
-                                            $parameter, $PSBoundParameters.$parameter, $getTargetResource.$parameter);
-                    $targetResourceInCompliance = $false;
-                }
-            }
-        } #end foreach PSBoundParameter
-
+            Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
+                    $parameter, $expected, $actual);
+        }
     }
 
-    if ($targetResourceInCompliance)
+    if ($outOfComplianceParams.Count -eq 0)
     {
         Write-Verbose -Message ($LocalizedData.MSAInDesiredState -f $ServiceAccountName)
         return $true
@@ -303,6 +253,7 @@ function Test-TargetResource
         Write-Verbose -Message ($LocalizedData.MSANotInDesiredState -f $ServiceAccountName)
         return $false
     }
+
 } #end function Test-TargetResource
 
 <#
@@ -406,105 +357,74 @@ function Set-TargetResource
     $adServiceAccountParams = Get-ADCommonParameters @PSBoundParameters
     $setADServiceAccountParams = $adServiceAccountParams.Clone()
 
-    $getTargetResourceParameters = @{
-        ServiceAccountName  = $ServiceAccountName
-        Credential          = $Credential
-        DomainController    = $DomainController
-        MembershipAttribute = $MembershipAttribute
-    }
-
-    @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if( !$PSBoundParameters.ContainsKey($_) )
-        {
-            $getTargetResourceParameters.Remove($_)
-        }
-    }
-
-    $targetResource = Get-TargetResource @getTargetResourceParameters
+    $getOutOfComplianceParams = Compare-TargetResourceX @PSBoundParameters
+    $outOfComplianceParams = $getOutOfComplianceParams.Clone()
 
     try
     {
-        if ($Ensure -eq 'Present')
+        if($Ensure -eq 'Present')
         {
-            if ($targetResource.Ensure -eq 'Present')
+            # We want the account to be present, but it currently does not exist
+            if($outOfComplianceParams.ContainsKey('Ensure'))
             {
-                # Need Distinguished Name
-                $adServiceAccount = Get-ADServiceAccount @adServiceAccountParams -Property DistinguishedName
-                $setADServiceAccountParams['Identity'] = $adServiceAccount.DistinguishedName
+                New-ADServiceAccountHelper @PSBoundParameters
+            }
+            else
+            {
+                $updateProperties = $false
+                # Account already exist, need to update parameters that are not in compliance
 
-                # Account already exists, lets check if we need to update properties
-                $UpdateAccount = $false
-
-                if ($PSBoundParameters.ContainsKey('AccountType') -and $AccountType -ne $targetResource.AccountType)
+                if($outOfComplianceParams.ContainsKey('AccountType'))
                 {
+                    # We need to recreate account first before we can update any properties
                     Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
                     Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
                     New-ADServiceAccountHelper @PSBoundParameters
+                    $outOfComplianceParams.Remove('AccountType')
                 }
 
-                # Update existing group properties
-                if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $targetResource.Description)
-                {
-                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Description', $Description)
-                    $setADServiceAccountParams['Description'] = $Description
-                    $UpdateAccount = $true
-                }
-                if ($PSBoundParameters.ContainsKey('DisplayName') -and $DisplayName -ne $targetResource.DisplayName)
-                {
-                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'DisplayName', $DisplayName)
-                    $setADServiceAccountParams['DisplayName'] = $DisplayName
-                    $UpdateAccount = $true
-                }
-                if ($PSBoundParameters.ContainsKey('Enabled') -and $Enabled -ne $targetResource.Enabled)
-                {
-                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Enabled', $Enabled)
-                    $setADServiceAccountParams['Enabled'] = $Enabled
-                    $UpdateAccount = $true
-                }
-
-                if ($targetResource.AccountType -eq 'Group' -and $PSBoundParameters.ContainsKey('Members') -and (-not (Test-Members -ExistingMembers $targetResource.Members -Members $Members)) )
-                {
-                    if([system.string]::IsNullOrEmpty($Members))
+                $outOfComplianceParams.Keys | ForEach-Object {
+                    $parameter = $_
+                    if ($parameter -eq 'Members' -and $AccountType -eq 'Group')
                     {
-                        $Members = @()
+                        if([system.string]::IsNullOrEmpty($Members))
+                        {
+                            $Members = @()
+                        }
+                        $ListMembers = $Members -join ','
+
+                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Members', $ListMembers)
+                        $setADServiceAccountParams['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
+                        $updateProperties = $true
                     }
-                    $ListMembers = $Members -join ','
+                    elseif ($parameter -eq 'Path')
+                    {
+                        Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
+                        $moveADObjectParams = $adServiceAccountParams.Clone()
+                        $moveADObjectParams['Identity'] = (Get-ADServiceAccount @adServiceAccountParams -Property DistinguishedName).DistinguishedName
+                        Move-ADObject @moveADObjectParams -TargetPath $Path
+                    }
+                    else
+                    {
+                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f $parameter, $PSBoundParameters.$parameter)
+                        $setADServiceAccountParams[$parameter] = $PSBoundParameters.$parameter
+                        $updateProperties = $true
+                    }
 
-                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Members', $ListMembers)
-                    $setADServiceAccountParams['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
-                    $UpdateAccount = $true
+                    if ($updateProperties)
+                    {
+                        Set-ADServiceAccount @setADServiceAccountParams
+                    }
                 }
-
-                if($UpdateAccount)
-                {
-                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccount -f $ServiceAccountName)
-                    Set-ADServiceAccount @setADServiceAccountParams
-                }
-
-                # Move group if the path is not correct
-                if ($PSBoundParameters.ContainsKey('Path') -and $Path -ne $targetResource.Path)
-                {
-                    Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                    $moveADObjectParams = $adServiceAccountParams.Clone()
-                    $moveADObjectParams['Identity'] = $ServiceAccountName
-                    Move-ADObject @moveADObjectParams -TargetPath $Path
-                }
-            }elseif ($targetResource.Ensure -eq 'Absent')
-            {
-                # Account does not exist yet, let's create it
-                New-ADServiceAccountHelper @PSBoundParameters
             }
-        }elseif ($Ensure -eq 'Absent') {
-            if ($targetResource.Ensure -eq 'Present')
+        }
+        elseif ($Ensure -eq 'Absent')
+        {
+            # We want the account to be Absent, but it is Present
+            if($outOfComplianceParams.ContainsKey('Ensure'))
             {
-                # Account currently exists, but we want to remove it
                 Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
                 Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
-            }
-            elseif ($targetResource.Ensure -eq 'Absent')
-            {
-                # Do nothing - account should be absent and is
-                return
             }
         }
     }
@@ -653,5 +573,169 @@ Function New-ADServiceAccountHelper
         New-ADServiceAccount @adServiceAccountParams -PassThru
     }
 } #end function New-ADServiceAccountHelper
+
+
+<#
+    .SYNOPSIS
+        Compares the state of the managed service account.
+
+    .PARAMETER ServiceAccountName
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER AccountType
+        Specifies the type of managed service account, whether it should be a group or single computer service account
+
+    .PARAMETER Path
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+
+    .PARAMETER Ensure
+        Specifies whether the user account is created or deleted.
+
+    .PARAMETER Enabled
+        Specifies whether the user account is enabled or disabled.
+
+    .PARAMETER Description
+        Specifies a description of the object (ldapDisplayName 'description').
+
+    .PARAMETER DisplayName
+        Specifies the display name of the object (ldapDisplayName 'displayName').
+
+    .PARAMETER Members
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword')
+
+    .PARAMETER MembershipAttribute
+        Specifies the Attribute to use to describe the Identity used for Members ("SamAccountName","DistinguishedName","ObjectGUID","SID")
+
+    .PARAMETER Credential
+        Specifies the user account credentials to use to perform this task.
+
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to use to perform the task.
+#>
+function Compare-TargetResourceX
+{
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ServiceAccountName,
+
+        [Parameter()]
+        [ValidateSet('Group', 'Single')]
+        [System.String]
+        $AccountType = 'Single',
+
+        [Parameter()]
+        [System.String]
+        $Path,
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure = 'Present',
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $Enabled = $true,
+
+        [Parameter()]
+        [System.String]
+        $Description,
+
+        [Parameter()]
+        [System.String]
+        $DisplayName,
+
+        [Parameter()]
+        [System.String[]]
+        $Members,
+
+        [Parameter()]
+        [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
+        [System.String]
+        $MembershipAttribute = 'SamAccountName',
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DomainController
+    )
+
+    $getTargetResourceParameters = @{
+        ServiceAccountName  = $ServiceAccountName
+        Credential          = $Credential
+        DomainController    = $DomainController
+        MembershipAttribute = $MembershipAttribute
+    }
+
+    @($getTargetResourceParameters.Keys) | ForEach-Object {
+        if(-not $PSBoundParameters.ContainsKey($_))
+        {
+            $getTargetResourceParameters.Remove($_)
+        }
+    }
+
+    $getTargetResource = Get-TargetResource @getTargetResourceParameters
+    $outOfComplianceParams = @{}
+
+    # Add ensure as it may not explicitly be passed and we want to enumerate it
+    $PSBoundParameters['Ensure']      = $Ensure;
+    $PSBoundParameters['AccountType'] = $AccountType;
+
+    foreach ($parameter in $PSBoundParameters.Keys)
+    {
+        if ($getTargetResource.ContainsKey($parameter))
+        {
+            # This check is required to be able to explicitly remove values with an empty string, if required
+            if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and
+                ([System.String]::IsNullOrEmpty($getTargetResource.$parameter)))
+            {
+                # Both values are null/empty and therefore we are compliant
+            }
+            elseif ($parameter -eq 'MembershipAttribute')
+            {
+                # Skip this parameter as it doesn't matter
+            }
+            elseif ($parameter -eq 'Members')
+            {
+                # Members is only for Group MSAs, if it's single computer, we can skip over this parameter
+                if ($PSBoundParameters.AccountType -eq 'Group')
+                {
+                    $testMembersParams = @{
+                        ExistingMembers = $getTargetResource.Members -as [System.String[]]
+                        Members = $Members
+                    }
+                    if (-not (Test-Members @testMembersParams))
+                    {
+                        $expectedMembers = $Members -join ','
+                        $actualMembers = $testMembersParams['ExistingMembers'] -join ','
+                        $outOfComplianceParams[$parameter] = @{
+                            'Expected' = $expectedMembers
+                            'Actual' = $actualMembers
+                        }
+                    }
+                }
+            }
+            elseif ($PSBoundParameters.$parameter -ne $getTargetResource.$parameter)
+            {
+                $outOfComplianceParams[$parameter] = @{
+                    'Expected' = $PSBoundParameters.$parameter
+                    'Actual' = $getTargetResource.$parameter
+                }
+            }
+        }
+    } #end foreach PSBoundParameter
+
+    return $outOfComplianceParams
+}
 
 Export-ModuleMember -Function *-TargetResource
