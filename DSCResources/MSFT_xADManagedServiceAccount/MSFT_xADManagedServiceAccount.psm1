@@ -399,7 +399,9 @@ function Set-TargetResource
                     elseif ($parameter -eq 'Path')
                     {
                         Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                        Move-ADObject @adServiceAccountParams -TargetPath $Path
+                        $moveADObjectParams = $adServiceAccountParams.Clone()
+                        $moveADObjectParams['Identity'] = (Get-ADServiceAccount @adServiceAccountParams -Property DistinguishedName).DistinguishedName
+                        Move-ADObject @moveADObjectParams -TargetPath $Path
                     }
                     else
                     {
