@@ -222,6 +222,7 @@ function Test-TargetResource
 
     $outOfComplianceParams = Compare-TargetResourceX @PSBoundParameters
 
+    # Check if Absent, if so then we don't need to propagate any other parameters
     if ($Ensure -eq 'Absent')
     {
         if ($outOfComplianceParams.ContainsKey('Ensure') -eq 'Present')
@@ -234,8 +235,8 @@ function Test-TargetResource
     {
         $outOfComplianceParams.GetEnumerator() | ForEach-Object {
             $parameter = $_.name
-            $expected = $_.value.Expected
-            $actual = $_.value.Actual
+            $expected  = $_.value.Expected
+            $actual    = $_.value.Actual
 
             Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
                     $parameter, $expected, $actual);
@@ -677,7 +678,7 @@ function Compare-TargetResourceX
     }
 
     @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if( !$PSBoundParameters.ContainsKey($_) )
+        if(-not $PSBoundParameters.ContainsKey($_))
         {
             $getTargetResourceParameters.Remove($_)
         }
