@@ -356,7 +356,8 @@ function Set-TargetResource
     $adServiceAccountParams = Get-ADCommonParameters @PSBoundParameters
     $setADServiceAccountParams = $adServiceAccountParams.Clone()
 
-    $outOfComplianceParams = Compare-TargetResourceX @PSBoundParameters
+    $getOutOfComplianceParams = Compare-TargetResourceX @PSBoundParameters
+    $outOfComplianceParams = $getOutOfComplianceParams.Clone()
 
     try
     {
@@ -371,15 +372,19 @@ function Set-TargetResource
             {
                 $updateProperties = $false
                 # Account already exist, need to update parameters that are not in compliance
+
+                if($outOfComplianceParams.ContainsKey('AccountType'))
+                {
+                    # We need to recreate account first before we can update any properties
+                    Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
+                    Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
+                    New-ADServiceAccountHelper @PSBoundParameters
+                    $outOfComplianceParams.Remove('AccountType')
+                }
+
                 $outOfComplianceParams.Keys | ForEach-Object {
                     $parameter = $_
-                    if ( $parameter -eq 'AccountType')
-                    {
-                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
-                        Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
-                        New-ADServiceAccountHelper @PSBoundParameters
-                    }
-                    elseif ($parameter -eq 'Members' -and $AccountType -eq 'Group')
+                    if ($parameter -eq 'Members' -and $AccountType -eq 'Group')
                     {
                         if([system.string]::IsNullOrEmpty($Members))
                         {
