@@ -219,39 +219,35 @@ function Test-TargetResource
         [System.String]
         $DomainController
     )
-
-    $outOfComplianceParams = Compare-TargetResourceX @PSBoundParameters
+    $getCompareTargetResourceFail = Compare-TargetResourceX @PSBoundParameters | Where-Object {$_.Pass -eq $false}
 
     # Check if Absent, if so then we don't need to propagate any other parameters
     if ($Ensure -eq 'Absent')
     {
-        if ($outOfComplianceParams.ContainsKey('Ensure') -eq 'Present')
+        $getEnsureTargetResourceFail = $getCompareTargetResourceFail | Where-Object {$_.Parameter -eq 'Ensure'}
+        if ($getEnsureTargetResourceFail -and $getEnsureTargetResourceFail.Actual -eq 'Present')
         {
             Write-Verbose ($LocalizedData.NotDesiredPropertyState -f `
-                            'Ensure', $outOfComplianceParams.Ensure.Expected, $outOfComplianceParams.Ensure.Actual)
+                            'Ensure', $getEnsureTargetResourceFail.Expected, $getEnsureTargetResourceFail.Actual)
         }
     }
     else
     {
-        $outOfComplianceParams.GetEnumerator() | ForEach-Object {
-            $parameter = $_.name
-            $expected  = $_.value.Expected
-            $actual    = $_.value.Actual
-
+        $getCompareTargetResourceFail | ForEach-Object {
             Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
-                    $parameter, $expected, $actual);
+                $_.Parameter, $_.Expected, $_.Actual);
         }
     }
 
-    if ($outOfComplianceParams.Count -eq 0)
-    {
-        Write-Verbose -Message ($LocalizedData.MSAInDesiredState -f $ServiceAccountName)
-        return $true
-    }
-    else
+    if ($getCompareTargetResourceFail)
     {
         Write-Verbose -Message ($LocalizedData.MSANotInDesiredState -f $ServiceAccountName)
         return $false
+    }
+    else
+    {
+        Write-Verbose -Message ($LocalizedData.MSAInDesiredState -f $ServiceAccountName)
+        return $true
     }
 
 } #end function Test-TargetResource
@@ -357,15 +353,15 @@ function Set-TargetResource
     $adServiceAccountParams = Get-ADCommonParameters @PSBoundParameters
     $setADServiceAccountParams = $adServiceAccountParams.Clone()
 
-    $getOutOfComplianceParams = Compare-TargetResourceX @PSBoundParameters
-    $outOfComplianceParams = $getOutOfComplianceParams.Clone()
+    $getCompareTargetResourceFail = Compare-TargetResourceX @PSBoundParameters | Where-Object {$_.Pass -eq $false}
 
     try
     {
         if($Ensure -eq 'Present')
         {
             # We want the account to be present, but it currently does not exist
-            if($outOfComplianceParams.ContainsKey('Ensure'))
+            $isEnsureNonCompliant = $getCompareTargetResourceFail | Where-Object {$_.Parameter -eq 'Ensure'}
+            if($isEnsureNonCompliant)
             {
                 New-ADServiceAccountHelper @PSBoundParameters
             }
@@ -374,17 +370,18 @@ function Set-TargetResource
                 $updateProperties = $false
                 # Account already exist, need to update parameters that are not in compliance
 
-                if($outOfComplianceParams.ContainsKey('AccountType'))
+                $isAccountNonCompliant = $getCompareTargetResourceFail | Where-Object {$_.Parameter -eq 'AccountType'}
+                if($isAccountNonCompliant)
                 {
                     # We need to recreate account first before we can update any properties
                     Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
                     Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
                     New-ADServiceAccountHelper @PSBoundParameters
-                    $outOfComplianceParams.Remove('AccountType')
+                    $getCompareTargetResourceFail = $getCompareTargetResourceFail | Where-Object {$_.Parameter -ne 'AccountType'}
                 }
 
-                $outOfComplianceParams.Keys | ForEach-Object {
-                    $parameter = $_
+                $getCompareTargetResourceFail | ForEach-Object {
+                    $parameter = $_.Parameter
                     if ($parameter -eq 'Members' -and $AccountType -eq 'Group')
                     {
                         if([system.string]::IsNullOrEmpty($Members))
@@ -421,7 +418,8 @@ function Set-TargetResource
         elseif ($Ensure -eq 'Absent')
         {
             # We want the account to be Absent, but it is Present
-            if($outOfComplianceParams.ContainsKey('Ensure'))
+            $getEnsureTargetResourceFail = $getCompareTargetResourceFail | Where-Object {$_.Parameter -eq 'Ensure'}
+            if($getEnsureTargetResourceFail)
             {
                 Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
                 Remove-ADServiceAccount @adServiceAccountParams -Confirm:$false
@@ -615,7 +613,7 @@ Function New-ADServiceAccountHelper
 function Compare-TargetResourceX
 {
     [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
+    [OutputType([System.Array])]
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -685,7 +683,7 @@ function Compare-TargetResourceX
     }
 
     $getTargetResource = Get-TargetResource @getTargetResourceParameters
-    $outOfComplianceParams = @{}
+    $compareTargetResource = @()
 
     # Add ensure as it may not explicitly be passed and we want to enumerate it
     $PSBoundParameters['Ensure']      = $Ensure;
@@ -695,11 +693,15 @@ function Compare-TargetResourceX
     {
         if ($getTargetResource.ContainsKey($parameter))
         {
-            # This check is required to be able to explicitly remove values with an empty string, if required
-            if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and
-                ([System.String]::IsNullOrEmpty($getTargetResource.$parameter)))
+            # Check if parameter is in compliance
+            if($PSBoundParameters.$parameter -eq $getTargetResource.$parameter)
             {
-                # Both values are null/empty and therefore we are compliant
+                $compareTargetResource += [pscustomobject] @{
+                    Parameter = $parameter
+                    Expected  = $PSBoundParameters.$parameter
+                    Actual    = $getTargetResource.$parameter
+                    Pass      = $true
+                }
             }
             elseif ($parameter -eq 'MembershipAttribute')
             {
@@ -718,24 +720,28 @@ function Compare-TargetResourceX
                     {
                         $expectedMembers = $Members -join ','
                         $actualMembers = $testMembersParams['ExistingMembers'] -join ','
-                        $outOfComplianceParams[$parameter] = @{
-                            'Expected' = $expectedMembers
-                            'Actual' = $actualMembers
+                        $compareTargetResource += [pscustomobject] @{
+                            Parameter = $parameter
+                            Expected  = $expectedMembers
+                            Actual    = $actualMembers
+                            Pass      = $false
                         }
                     }
                 }
             }
             elseif ($PSBoundParameters.$parameter -ne $getTargetResource.$parameter)
             {
-                $outOfComplianceParams[$parameter] = @{
-                    'Expected' = $PSBoundParameters.$parameter
-                    'Actual' = $getTargetResource.$parameter
+                $compareTargetResource += [pscustomobject] @{
+                    Parameter = $parameter
+                    Expected  = $PSBoundParameters.$parameter
+                    Actual    = $getTargetResource.$parameter
+                    Pass      = $false
                 }
             }
         }
     } #end foreach PSBoundParameter
 
-    return $outOfComplianceParams
+    return $compareTargetResource
 }
 
 Export-ModuleMember -Function *-TargetResource
