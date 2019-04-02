@@ -79,7 +79,194 @@ try
         $testDomainController = 'TESTDC'
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
-        #region Function Get-TargetResource
+        # region Function Compare-TargetResourceState
+        Describe -Name "$($script:DSCResourceName)\Compare-TargetResourceState" {
+            It 'Should call "Get-TargetResource"' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                $null = Compare-TargetResourceState @testPresentParams
+
+                Assert-MockCalled -CommandName Get-TargetResource
+            }
+
+            Context -Name 'When the system is in the desired state (Single)' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+
+                $resource = Compare-TargetResourceState @testPresentParams
+                $testCases = @()
+                $resource | ForEach-Object {
+                    $testCases += @{
+                        Parameter = $_.Parameter
+                        Expected  = $_.Expected
+                        Actual    = $_.Actual
+                        Pass      = $_.Pass
+                    }
+                }
+
+                It "Should return identical information for <Parameter>" -TestCases $testCases {
+                    param (
+                        [Parameter()]
+                        $Parameter,
+
+                        [Parameter()]
+                        $Expected,
+
+                        [Parameter()]
+                        $Actual,
+
+                        [Parameter()]
+                        $Pass
+                    )
+
+                    $Expected | Should -BeExactly $Actual
+                    $Pass | Should -BeTrue
+                }
+
+            }
+
+            Context -Name 'When the system is in the desired state (Group)' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParamsGroup }
+
+                $resource = Compare-TargetResourceState @testPresentParamsGroup
+                $testCases = @()
+                $resource | ForEach-Object {
+                    $testCases += @{
+                        Parameter = $_.Parameter
+                        Expected  = $_.Expected
+                        Actual    = $_.Actual
+                        Pass      = $_.Pass
+                    }
+                }
+
+                It "Should return identical information for <Parameter>" -TestCases $testCases {
+                    param (
+                        [Parameter()]
+                        $Parameter,
+
+                        [Parameter()]
+                        $Expected,
+
+                        [Parameter()]
+                        $Actual,
+
+                        [Parameter()]
+                        $Pass
+                    )
+
+                    $Expected | Should -BeExactly $Actual
+                    $Pass | Should -BeTrue
+                }
+
+            }
+
+            Context -Name 'When the system is not in the desired state (Single)' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                $duffTestParamsWrong = $testPresentParams.Clone()
+
+                $duffTestParams = @{
+                    AccountType         = 'Group'
+                    Path                = 'OU=FakeWrong,DC=contoso,DC=com'
+                    Description         = 'Test MSA description Wrong'
+                    DisplayName         = 'Test MSA display name Wrong'
+                    Ensure              = 'Absent'
+                }
+
+                $duffTestParams.GetEnumerator() | ForEach-Object {
+                    $duffTestParamsWrong[$_.Name] = $_.Value
+                }
+
+                $resource = Compare-TargetResourceState @duffTestParamsWrong
+
+                $testCases = @()
+                $duffTestParams.GetEnumerator() | ForEach-Object {
+                    $testParam = $_.Name
+                    $resourceParam = $resource | Where-Object {$_.Parameter -eq $testParam}
+
+                    $testCases += @{
+                        Parameter = $resourceParam.Parameter
+                        Expected  = $resourceParam.Expected
+                        Actual    = $resourceParam.Actual
+                        Pass      = $resourceParam.Pass
+                    }
+
+                }
+
+
+                It "Should return false for <Parameter>" -TestCases $testCases {
+                    param (
+                        [Parameter()]
+                        $Parameter,
+
+                        [Parameter()]
+                        $Expected,
+
+                        [Parameter()]
+                        $Actual,
+
+                        [Parameter()]
+                        $Pass
+                    )
+
+                    $Expected | Should -Not -Be $Actual
+                    $Pass | Should -BeFalse
+                }
+            }
+
+            Context -Name 'When the system is not in the desired state (Group)' {
+                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParamsGroup }
+                $duffTestParamsWrong = $testPresentParamsGroup.Clone()
+
+                $duffTestParams = @{
+                    AccountType         = 'Single'
+                    Path                = 'OU=FakeWrong,DC=contoso,DC=com'
+                    Description         = 'Test MSA description Wrong'
+                    DisplayName         = 'Test MSA display name Wrong'
+                    Ensure              = 'Absent'
+                }
+
+                $duffTestParams.GetEnumerator() | ForEach-Object {
+                    $duffTestParamsWrong[$_.Name] = $_.Value
+                }
+
+                $resource = Compare-TargetResourceState @duffTestParamsWrong
+
+                $testCases = @()
+                $duffTestParams.GetEnumerator() | ForEach-Object {
+                    $testParam = $_.Name
+                    $resourceParam = $resource | Where-Object {$_.Parameter -eq $testParam}
+
+                    $testCases += @{
+                        Parameter = $resourceParam.Parameter
+                        Expected  = $resourceParam.Expected
+                        Actual    = $resourceParam.Actual
+                        Pass      = $resourceParam.Pass
+                    }
+
+                }
+
+
+                It "Should return false for <Parameter>" -TestCases $testCases {
+                    param (
+                        [Parameter()]
+                        $Parameter,
+
+                        [Parameter()]
+                        $Expected,
+
+                        [Parameter()]
+                        $Actual,
+
+                        [Parameter()]
+                        $Pass
+                    )
+
+                    $Expected | Should -Not -Be $Actual
+                    $Pass | Should -BeFalse
+                }
+            }
+        }
+        # end region
+
+        # region Function Get-TargetResource
         Describe -Name "$($script:DSCResourceName)\Get-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
@@ -89,7 +276,6 @@ try
                 $getTargetResourceParameters = @{
                     ServiceAccountName = $testPresentParams.ServiceAccountName
                 }
-                $getTargetResourceParameters
                 $null = Get-TargetResource @getTargetResourceParameters
 
                 Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It -Exactly -Times 1
@@ -226,9 +412,9 @@ try
                 }
             }
         }
-        #end region
+        # end region
 
-        #region Function Test-TargetResource
+        # region Function Test-TargetResource
         Describe -Name "$($script:DSCResourceName)\Test-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
@@ -336,9 +522,9 @@ try
               }
           }
         }
-        #end region
+        # end region
 
-        #region Function Set-TargetResource
+        # region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
@@ -525,9 +711,9 @@ try
                 }
             }
         }
-        #end region
+        # end region
     }
-    #end region
+    # end region
 }
 finally
 {
