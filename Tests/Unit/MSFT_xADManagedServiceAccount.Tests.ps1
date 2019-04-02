@@ -80,7 +80,7 @@ try
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         # region Function Compare-TargetResourceState
-        Describe -Name "$($script:DSCResourceName)\Compare-TargetResourceState" {
+        Describe -Name "MSFT_xADManagedServiceAccount\Compare-TargetResourceState" {
             It 'Should call "Get-TargetResource"' {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 $null = Compare-TargetResourceState @testPresentParams
@@ -267,7 +267,7 @@ try
         # end region
 
         # region Function Get-TargetResource
-        Describe -Name "$($script:DSCResourceName)\Get-TargetResource" {
+        Describe -Name "MSFT_xADManagedServiceAccount\Get-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Should call "Assert-Module" to check AD module is installed' {
@@ -415,7 +415,7 @@ try
         # end region
 
         # region Function Test-TargetResource
-        Describe -Name "$($script:DSCResourceName)\Test-TargetResource" {
+        Describe -Name "MSFT_xADManagedServiceAccount\Test-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             Context -Name 'When the system is in the desired state (Single)' {
@@ -525,7 +525,7 @@ try
         # end region
 
         # region Function Set-TargetResource
-        Describe "$($script:DSCResourceName)\Set-TargetResource" {
+        Describe "MSFT_xADManagedServiceAccount\Set-TargetResource" {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             Context 'When the system is in the desired state' {

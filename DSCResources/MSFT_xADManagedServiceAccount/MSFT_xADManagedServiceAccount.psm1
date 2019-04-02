@@ -73,6 +73,7 @@ function Get-TargetResource
 
     $targetResource = @{
         ServiceAccountName  = $ServiceAccountName
+        DistinguishedName   = $null
         Path                = $null
         Description         = $null
         DisplayName         = $null
@@ -97,6 +98,7 @@ function Get-TargetResource
         $targetResource['Description']       = $adServiceAccount.Description
         $targetResource['DisplayName']       = $adServiceAccount.DisplayName
         $targetResource['Enabled']           = [System.Boolean] $adServiceAccount.Enabled
+        $targetResource['DistinguishedName'] = $adServiceAccount.DistinguishedName
 
         if ( $adServiceAccount.ObjectClass -eq 'msDS-ManagedServiceAccount' )
         {
@@ -362,12 +364,12 @@ function Set-TargetResource
     $PSBoundParameters['AccountType']         = $AccountType
     $PSBoundParameters['MembershipAttribute'] = $MembershipAttribute
 
-    $compareTargetResourceNonCompliant = Compare-TargetResourceState @PSBoundParameters | Where-Object {$_.Pass -eq $false}
+    $compareTargetResource = Compare-TargetResourceState @PSBoundParameters
+    $compareTargetResourceNonCompliant = $compareTargetResource | Where-Object {$_.Pass -eq $false}
 
     $adServiceAccountParameters = Get-ADCommonParameters @PSBoundParameters
     $setServiceAccountParameters = $adServiceAccountParameters.Clone()
     $moveADObjectParameters = $adServiceAccountParameters.Clone()
-
 
     try
     {
@@ -412,8 +414,8 @@ function Set-TargetResource
                     elseif ($parameter -eq 'Path')
                     {
                         Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                        # TODO: Possibly add DN to get-target
-                        $moveADObjectParameters['Identity'] = (Get-ADServiceAccount @moveADObjectParameters -Property DistinguishedName).DistinguishedName
+                        $dn = $compareTargetResource | Where-Object {$_.Parameter -eq 'DistinguishedName'}
+                        $moveADObjectParameters['Identity'] = $dn.Actual
                         Move-ADObject @moveADObjectParameters -TargetPath $Path
                     }
                     else
@@ -700,8 +702,9 @@ function Compare-TargetResourceState
     $compareTargetResource = @()
 
     # Add ensure as it may not explicitly be passed and we want to enumerate it
-    $PSBoundParameters['Ensure']      = $Ensure
-    $PSBoundParameters['AccountType'] = $AccountType
+    $PSBoundParameters['Ensure']            = $Ensure
+    $PSBoundParameters['AccountType']       = $AccountType
+    $PSBoundParameters['DistinguishedName'] = ''
 
     foreach ($parameter in $PSBoundParameters.Keys)
     {
@@ -719,7 +722,24 @@ function Compare-TargetResourceState
         {
             # This parameter is only used to add members to a gMSA
             # so it doesn't affect whether or not this resource is in compliance
-            Continue
+            # and we just return it as true
+            $compareTargetResource += [pscustomobject] @{
+                Parameter = $parameter
+                Expected  = $getTargetResource.$parameter
+                Actual    = $getTargetResource.$parameter
+                Pass      = $true
+            }
+        }
+        elseif($parameter -eq 'DistinguishedName')
+        {
+            # This parameter is only used for certain parts of the code
+            # and is read-only, so we just return it as true
+            $compareTargetResource += [pscustomobject] @{
+                Parameter = $parameter
+                Expected  = $getTargetResource.$parameter
+                Actual    = $getTargetResource.$parameter
+                Pass      = $true
+            }
         }
         elseif ($parameter -eq 'Members')
         {
