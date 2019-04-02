@@ -9,10 +9,12 @@ configuration Example
 
     Node localhost
     {
-        xADManagedServiceAccount ExampleMSA
+        xADManagedServiceAccount ExampleGroupMSA
         {
             Ensure             = 'Present'
             ServiceAccountName = 'Service01'
+            AccountType        = 'Group'
+            Path               = 'OU=ServiceAccounts,DC=contoso,DC=com'
         }
     }
 }

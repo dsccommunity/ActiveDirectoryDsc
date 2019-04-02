@@ -221,6 +221,8 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
   * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 * **`[String]` DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to.
   * This is only required if not executing the task on a domain controller.
+* **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name of the Service Account
+  * This is only used in the code and cannot be specified in the resource
 
 ### **xADObjectPermissionEntry**
 
