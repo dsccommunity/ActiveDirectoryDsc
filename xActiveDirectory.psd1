@@ -59,7 +59,7 @@ PrivateData = @{
   * Minor clean up of unit tests.
 * Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue 155](https://github.com/PowerShell/xActiveDirectory/issues/155)).
   * Updated readme and add release notes
-
+* Updated xADGroup to support group membership from multiple domains ([issue 152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 '
 
     } # End of PSData hashtable
