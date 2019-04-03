@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '2.24.0.0'
+moduleVersion = '2.25.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -49,8 +49,16 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Added parameter to xADDomainController to support InstallationMediaPath ([issue 108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
-* Updated xADDomainController schema to be standard and provide Descriptions.
+        ReleaseNotes = '* Added xADReplicationSiteLink
+  * New resource added to facilitate replication between AD sites
+* Updated xADObjectPermissionEntry to use `AD:` which is more generic when using `Get-Acl` and `Set-Acl` than using `Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/`
+* Changes to xADComputer
+  * Minor clean up of unit tests.
+* Changes to xADUser
+  * Added TrustedForDelegation parameter to xADUser to support enabling/disabling Kerberos delegation
+  * Minor clean up of unit tests.
+* Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue 155](https://github.com/PowerShell/xActiveDirectory/issues/155)).
+  * Updated readme and add release notes
 
 '
 
@@ -58,6 +66,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
