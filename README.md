@@ -114,6 +114,8 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 
 ### **xADDomainController**
 
+The xADDomainController DSC resource will install and configure domain controllers in Active Directory.
+
 * **`[String]` DomainName** _(Key)_: The fully qualified domain name for the domain where the domain controller will be present.
 * **`[PSCredential]` DomainAdministratorCredential** _(Required)_: Specifies the credential for the account used to install the domain controller.
 * **`[PSCredential]` SafemodeAdministratorPassword** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.
@@ -122,6 +124,7 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 * **`[String]` SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
 * **`[String]` SiteName** _(Write)_: Specify the name of an existing site where new domain controller will be placed.
 * **`[String]` InstallationMediaPath** _(Write)_: Specify the path of the folder containg the Installation Media created in NTDSutil.
+* **`[String]` Ensure** _(Read)_: The state of the Domain Controller, returned with Get.
 
 ### **xADDomainDefaultPasswordPolicy**
 
@@ -205,6 +208,8 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
   * Once created, the user's SamAccountName and CN cannot be changed.
 * **`[String]` AccountType** _(Write)_: Specifies whether the given managed service account is single or group.
   * If not specified, this vaule defaults to Single.
+* **`[String]` AccountTypeForce** _(Write)_: Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+  * If not specified, this value defaults to False.
 * **`[String]` Path** _(Write)_: Path in Active Directory to place the managed service account, specified as a Distinguished Name (DN).
 * **`[String]` Description** _(Write)_: Specifies a description of the managed service account object.
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of the managed service account object.
@@ -222,7 +227,7 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
 * **`[String]` DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to.
   * This is only required if not executing the task on a domain controller.
 * **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name of the Service Account
-  * This is only used in the code and cannot be specified in the resource
+  * Cannot be specified in the resource. Returned by Get and Compare.
 
 ### **xADObjectPermissionEntry**
 
@@ -396,6 +401,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
+### 2.25.0.0
+
 * Added xADReplicationSiteLink
   * New resource added to facilitate replication between AD sites
 * Updated xADObjectPermissionEntry to use `AD:` which is more generic when using `Get-Acl` and `Set-Acl` than using `Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/`
@@ -404,6 +411,9 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 * Changes to xADUser
   * Added TrustedForDelegation parameter to xADUser to support enabling/disabling Kerberos delegation
   * Minor clean up of unit tests.
+* Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue #155](https://github.com/PowerShell/xActiveDirectory/issues/155)).
+  * Updated readme and add release notes
+* Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 * Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
 
@@ -411,7 +421,6 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 * Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
 * Updated xADDomainController schema to be standard and provide Descriptions.
-* Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.23.0.0
 

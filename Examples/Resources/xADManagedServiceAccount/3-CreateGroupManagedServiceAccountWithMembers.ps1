@@ -9,7 +9,7 @@ configuration Example
 
     Node localhost
     {
-        xADManagedServiceAccount ExampleGroupMSA
+        xADManagedServiceAccount AddingMembersUsingSamAccountName
         {
             Ensure             = 'Present'
             ServiceAccountName = 'Service01'
@@ -17,14 +17,11 @@ configuration Example
             Path               = 'OU=ServiceAccounts,DC=contoso,DC=com'
             Members            = 'User01', 'Computer01$'
         }
-    }
 
-    Node localhost
-    {
-        xADManagedServiceAccount ExampleGroupMSA
+        xADManagedServiceAccount AddingMembersUsingDN
         {
             Ensure             = 'Present'
-            ServiceAccountName = 'Service01'
+            ServiceAccountName = 'Service02'
             AccountType        = 'Group'
             Path               = 'OU=ServiceAccounts,DC=contoso,DC=com'
             Members            = 'CN=User01,OU=Users,DC=contoso,DC=com', 'CN=Computer01,OU=Computers,DC=contoso,DC=com'

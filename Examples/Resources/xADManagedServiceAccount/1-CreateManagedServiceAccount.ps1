@@ -9,7 +9,7 @@ configuration Example
 
     Node localhost
     {
-        xADManagedServiceAccount ExampleMSA
+        xADManagedServiceAccount ExampleSingleMSA
         {
             Ensure             = 'Present'
             ServiceAccountName = 'Service01'
