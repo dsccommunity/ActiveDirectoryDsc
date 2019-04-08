@@ -205,6 +205,8 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
   * Once created, the user's SamAccountName and CN cannot be changed.
 * **`[String]` AccountType** _(Write)_: Specifies whether the given managed service account is single or group.
   * If not specified, this vaule defaults to Single.
+* **`[String]` AccountTypeForce** _(Write)_: Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+  * If not specified, this value defaults to False.
 * **`[String]` Path** _(Write)_: Path in Active Directory to place the managed service account, specified as a Distinguished Name (DN).
 * **`[String]` Description** _(Write)_: Specifies a description of the managed service account object.
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of the managed service account object.
@@ -222,7 +224,7 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
 * **`[String]` DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to.
   * This is only required if not executing the task on a domain controller.
 * **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name of the Service Account
-  * This is only used in the code and cannot be specified in the resource
+  * Cannot be specified in the resource. Returned by Get and Compare.
 
 ### **xADObjectPermissionEntry**
 

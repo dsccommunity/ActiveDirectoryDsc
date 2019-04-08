@@ -81,15 +81,15 @@ try
 
         # region Function Compare-TargetResourceState
         Describe -Name "MSFT_xADManagedServiceAccount\Compare-TargetResourceState" {
-            It 'Should call "Get-TargetResource"' {
-                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+            It 'Should call "Get-ADServiceAccount"' {
+                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSASingle }
                 $null = Compare-TargetResourceState @testPresentParams
 
-                Assert-MockCalled -CommandName Get-TargetResource
+                Assert-MockCalled -CommandName Get-ADServiceAccount
             }
 
             Context -Name 'When the system is in the desired state (Single)' {
-                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSASingle }
 
                 $resource = Compare-TargetResourceState @testPresentParams
                 $testCases = @()
@@ -124,7 +124,8 @@ try
             }
 
             Context -Name 'When the system is in the desired state (Group)' {
-                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParamsGroup }
+                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSAGroup }
+                Mock -CommandName Get-ADObject -MockWith { return $fakeADNode }
 
                 $resource = Compare-TargetResourceState @testPresentParamsGroup
                 $testCases = @()
@@ -159,7 +160,7 @@ try
             }
 
             Context -Name 'When the system is not in the desired state (Single)' {
-                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
+                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSASingle }
                 $duffTestParamsWrong = $testPresentParams.Clone()
 
                 $duffTestParams = @{
@@ -212,7 +213,9 @@ try
             }
 
             Context -Name 'When the system is not in the desired state (Group)' {
-                Mock -CommandName Get-TargetResource -MockWith { return $testPresentParamsGroup }
+                Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSAGroup }
+                Mock -CommandName Get-ADObject -MockWith { return $fakeADNode }
+
                 $duffTestParamsWrong = $testPresentParamsGroup.Clone()
 
                 $duffTestParams = @{
@@ -637,17 +640,32 @@ try
                     Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
                 }
 
-                It "Should call 'New-ADServiceAccount' when 'Ensure' is 'Present' and AccountType is specified (Single)" {
+                It "Should call 'New-ADServiceAccount' when 'Ensure' is 'Present' and AccountType is specified and AccountTypeForce is true (Single)" {
                     Mock -CommandName Set-ADServiceAccount
                     Mock -CommandName Remove-ADServiceAccount
                     Mock -CommandName New-ADServiceAccount
                     Mock -CommandName Get-ADObject -MockWith { return $fakeADNode }
                     Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSAGroup }
 
+                    $testPresentParams['AccountTypeForce'] = $true
                     Set-TargetResource @testPresentParams
 
                     Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
                     Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
+                }
+
+                It "Should not call 'New-ADServiceAccount' when 'Ensure' is 'Present' and AccountType is specified and AccountTypeForce is not true (Single)" {
+                    Mock -CommandName Set-ADServiceAccount
+                    Mock -CommandName Remove-ADServiceAccount
+                    Mock -CommandName New-ADServiceAccount
+                    Mock -CommandName Get-ADObject -MockWith { return $fakeADNode }
+                    Mock -CommandName Get-ADServiceAccount -MockWith { return $fakeADMSAGroup }
+
+                    $testPresentParams['AccountTypeForce'] = $false
+                    Set-TargetResource @testPresentParams
+
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
                 }
 
                 It "Should call 'Set-ADServiceAccount' when 'Ensure' is 'Present' and Members is specified (Group)" {
