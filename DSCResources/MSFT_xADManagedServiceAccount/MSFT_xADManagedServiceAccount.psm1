@@ -98,10 +98,19 @@ function Get-TargetResource
 
     try
     {
-        $adServiceAccount = Get-ADServiceAccount @adServiceAccountParameters `
-                                -Property Name,DistinguishedName,Description,DisplayName,ObjectClass,Enabled,`
-                                            PrincipalsAllowedToRetrieveManagedPassword, `
-                                            SamAccountName,DistinguishedName,SID,ObjectGUID
+        $adServiceAccount = Get-ADServiceAccount @adServiceAccountParameters -Property @(
+            'Name'
+            'DistinguishedName'
+            'Description'
+            'DisplayName'
+            'ObjectClass'
+            'Enabled'
+            'PrincipalsAllowedToRetrieveManagedPassword'
+            'SamAccountName'
+            'DistinguishedName'
+            'SID'
+            'ObjectGUID'
+        )
 
         $targetResource['Ensure']            = 'Present'
         $targetResource['Path']              = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
@@ -257,6 +266,11 @@ function Test-TargetResource
             Write-Verbose ($LocalizedData.NotDesiredPropertyState -f `
                             'Ensure', $ensureState.Expected, $ensureState.Actual)
         }
+        else
+        {
+            Write-Verbose -Message ($LocalizedData.MSAInDesiredState -f $ServiceAccountName)
+            return $true
+        }
     }
     else
     {
@@ -402,7 +416,7 @@ function Set-TargetResource
         if ($Ensure -eq 'Present')
         {
             $isEnsureNonCompliant = $false
-            if($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
+            if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
             {
                 $isEnsureNonCompliant = $true
             }
@@ -421,7 +435,7 @@ function Set-TargetResource
                 # Account already exist, need to update parameters that are not in compliance
                 if ($accountTypeState)
                 {
-                    if($AccountTypeForce)
+                    if ($AccountTypeForce)
                     {
                         # We need to recreate account first before we can update any properties
                         Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
@@ -441,7 +455,7 @@ function Set-TargetResource
 
                 #region Check if Path is compliant
                 $isPathNonCompliant = $false
-                if($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Path'})
+                if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Path'})
                 {
                     $isPathNonCompliant = $true
                 }
@@ -489,7 +503,7 @@ function Set-TargetResource
         elseif ($Ensure -eq 'Absent')
         {
             $isEnsureNonCompliant = $false
-            if($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
+            if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
             {
                 $isEnsureNonCompliant = $true
             }
@@ -633,7 +647,7 @@ function New-ADServiceAccountHelper
     {
         New-ADServiceAccount @adServiceAccountParameters -RestrictToSingleComputer -PassThru
     }
-    elseif( $AccountType -eq 'Group' )
+    elseif ( $AccountType -eq 'Group' )
     {
         if ($Members)
         {
@@ -796,10 +810,12 @@ function Compare-TargetResourceState
                     ExistingMembers = $getTargetResource.Members -as [System.String[]]
                     Members = $Members
                 }
+
+                $expectedMembers = ($Members | Sort) -join ','
+                $actualMembers   = ($testMembersParams['ExistingMembers'] | Sort) -join ','
+
                 if (-not (Test-Members @testMembersParams))
                 {
-                    $expectedMembers = $Members -join ','
-                    $actualMembers = $testMembersParams['ExistingMembers'] -join ','
                     $compareTargetResource += [pscustomobject] @{
                         Parameter = $parameter
                         Expected  = $expectedMembers
@@ -807,10 +823,19 @@ function Compare-TargetResourceState
                         Pass      = $false
                     }
                 }
+                else
+                {
+                    $compareTargetResource += [pscustomobject] @{
+                        Parameter = $parameter
+                        Expected  = $expectedMembers
+                        Actual    = $actualMembers
+                        Pass      = $true
+                    }
+                }
             }
         }
         # Need to check if parameter is part of schema, otherwise ignore all other parameters like verbose
-        elseif ($getTargetResource.$parameter)
+        elseif ($getTargetResource.ContainsKey($parameter))
         {
             # We are out of compliance if we get here
             # $PSBoundParameters.$parameter -ne $getTargetResource.$parameter
