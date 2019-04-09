@@ -761,6 +761,332 @@ try
         }
         #endregion Function Test-TargetResource
 
+        #region Function Set-TargetResource
+        Describe -Name "MSFT_xADManagedServiceAccount\Set-TargetResource" {
+            BeforeAll {
+                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+                Mock -CommandName New-ADServiceAccount
+                Mock -CommandName Remove-ADServiceAccount
+                Mock -CommandName Set-ADServiceAccount
+                Mock -CommandName Move-ADObject
+            }
+
+            Context -Name "When the system is in the desired state and 'Ensure' is 'Present' (sMSA)" {
+                Mock -CommandName Get-ADServiceAccount -ParameterFilter {
+                    $mockSingleServiceAccount.Name -eq $Identity
+                } -MockWith {
+                    return $mockSingleServiceAccount
+                }
+
+                $testResourceParametersSingle = @{
+                    ServiceAccountName = $mockSingleServiceAccount.Name
+                    AccountType        = 'Single'
+                    Path               = $mockPath
+                    Description        = $mockSingleServiceAccount.Description
+                    Ensure             = 'Present'
+                    DisplayName        = ''
+                }
+
+                It "Should not take any action when all parameters are correct" {
+                    Set-TargetResource @testResourceParametersSingle
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+            }
+
+            Context -Name "When the system is in the desired state and 'Ensure' is 'Present' (gMSA)" {
+                Mock -CommandName Get-ADServiceAccount -ParameterFilter {
+                    $mockGroupServiceAccount.Name -eq $Identity
+                } -MockWith {
+                    return $mockGroupServiceAccount
+                }
+
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $mockADComputer.DistinguishedName -eq $Identity
+                } -MockWith {
+                    return $mockADComputer
+                }
+
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $mockADUSer.DistinguishedName -eq $Identity
+                } -MockWith {
+                    return $mockADUser
+                }
+
+                $testResourceParametersGroup = @{
+                    ServiceAccountName  = $mockGroupServiceAccount.Name
+                    MembershipAttribute = 'SamAccountName'
+                    AccountType         = 'Group'
+                    Path                = $mockPath
+                    Description         = $mockGroupServiceAccount.Description
+                    Ensure              = 'Present'
+                    Members             = 'Node1$', 'User1'
+                    DisplayName         = ''
+                }
+
+                It "Should not take any action when all parameters are correct" {
+                    Set-TargetResource @testResourceParametersGroup
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Get-ADObject -Scope It -Exactly -Times 2
+                }
+            }
+
+            Context -Name "When the system is in the desired state and 'Ensure' is 'Absent' (Both)" {
+                Mock -CommandName Get-ADServiceAccount -MockWith {
+                    throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                }
+
+                $testResourceParametersSingle = @{
+                    ServiceAccountName = $mockSingleServiceAccount.Name
+                    Ensure             = 'Absent'
+                }
+
+                It "Should pass when 'Ensure' is set to 'Absent" {
+                    Set-TargetResource @testResourceParametersSingle
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+            }
+
+            Context -Name "When the system is NOT in the desired state and 'Ensure' is 'Present' (sMSA)" {
+                Mock -CommandName Get-ADServiceAccount -ParameterFilter {
+                    $mockSingleServiceAccount.Name -eq $Identity
+                } -MockWith {
+                    return $mockSingleServiceAccount
+                }
+
+                It "Should call 'Move-ADObject' when 'Path' is incorrect" {
+                    $testResourceParametersSingle = @{
+                        ServiceAccountName = $mockSingleServiceAccount.Name
+                        Path               = 'WrongPath'
+                    }
+
+                    Set-TargetResource @testResourceParametersSingle
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+
+                $testCases = @(
+                    @{Parameter = 'Description'; Value = 'WrongDescription'},
+                    @{Parameter = 'DisplayName'; Value = 'WrongDisplayName'}
+                )
+
+                It "Should call 'Set-ADServiceAccount' when '<Parameter>' is incorrect" -TestCases $testCases {
+                    param (
+                        [Parameter()]
+                        $Parameter,
+
+                        [Parameter()]
+                        $Value
+                    )
+
+                    $testResourceParametersSingle = @{
+                        ServiceAccountName = $mockSingleServiceAccount.Name
+                    }
+                    $testResourceParametersSingle[$Parameter] = $Value
+
+                    Set-TargetResource @testResourceParametersSingle
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+
+                It "Should NOT call 'Remove-ADServiceAccount, New-ADServiceAccount' when 'AccountType' is incorrect and 'AccountTypeForce' is false" {
+                    $testResourceParametersSingle = @{
+                        ServiceAccountName = $mockSingleServiceAccount.Name
+                        AccountType        = 'Group'
+                        AccountTypeForce   = $false
+                    }
+
+                    Set-TargetResource @testResourceParametersSingle
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+
+                It "Should call 'Remove-ADServiceAccount, New-ADServiceAccount' when 'AccountType' is incorrect and 'AccountTypeForce' is true" {
+                    $testResourceParametersSingle = @{
+                        ServiceAccountName = $mockSingleServiceAccount.Name
+                        AccountType        = 'Group'
+                        AccountTypeForce   = $true
+                    }
+
+                    Set-TargetResource @testResourceParametersSingle
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
+                }
+
+                It "Should call 'Remove-ADServiceAccount' when 'Ensure' is set to 'Absent'" {
+                    $testResourceParametersSingle = @{
+                        ServiceAccountName = $mockSingleServiceAccount.Name
+                        Ensure             = 'Absent'
+                    }
+
+                    Set-TargetResource @testResourceParametersSingle
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
+                }
+            }
+
+            Context -Name "When the system is NOT in the desired state and 'Ensure' is 'Present' (gMSA)" {
+                Mock -CommandName Get-ADServiceAccount -ParameterFilter {
+                    $mockGroupServiceAccount.Name -eq $Identity
+                } -MockWith {
+                    return $mockGroupServiceAccount
+                }
+
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $mockADComputer.DistinguishedName -eq $Identity
+                } -MockWith {
+                    return $mockADComputer
+                }
+
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $mockADUSer.DistinguishedName -eq $Identity
+                } -MockWith {
+                    return $mockADUser
+                }
+
+                It "Should call 'Move-ADObject' when 'Path' is incorrect" {
+                    $testResourceParametersGroup = @{
+                        ServiceAccountName = $mockGroupServiceAccount.Name
+                        AccountType        = 'Group'
+                        Path               = 'WrongPath'
+                    }
+
+                    Set-TargetResource @testResourceParametersGroup
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+
+                $testCases = @(
+                    @{Parameter = 'Description'; Value = 'WrongDescription'}
+                    @{Parameter = 'DisplayName'; Value = 'WrongDisplayName'}
+                    @{Parameter = 'Members'; Value = 'WrongUser'}
+                )
+
+                It "Should call 'Set-ADServiceAccount' when '<Parameter>' is incorrect" -TestCases $testCases {
+                    param (
+                        [Parameter()]
+                        $Parameter,
+
+                        [Parameter()]
+                        $Value
+                    )
+
+                    $testResourceParametersGroup = @{
+                        ServiceAccountName = $mockGroupServiceAccount.Name
+                        AccountType        = 'Group'
+                    }
+                    $testResourceParametersGroup[$Parameter] = $Value
+
+                    Set-TargetResource @testResourceParametersGroup
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+
+                It "Should NOT call 'Remove-ADServiceAccount, New-ADServiceAccount' when 'AccountType' is incorrect and 'AccountTypeForce' is false" {
+                    $testResourceParametersGroup = @{
+                        ServiceAccountName = $mockGroupServiceAccount.Name
+                        AccountType        = 'Single'
+                        AccountTypeForce   = $false
+                    }
+
+                    Set-TargetResource @testResourceParametersGroup
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+
+                It "Should call 'Remove-ADServiceAccount, New-ADServiceAccount' when 'AccountType' is incorrect and 'AccountTypeForce' is true" {
+                    $testResourceParametersGroup = @{
+                        ServiceAccountName = $mockGroupServiceAccount.Name
+                        AccountType        = 'Single'
+                        AccountTypeForce   = $true
+                    }
+
+                    Set-TargetResource @testResourceParametersGroup
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
+                }
+
+                It "Should call 'Remove-ADServiceAccount' when 'Ensure' is set to 'Absent'" {
+                    $testResourceParametersGroup = @{
+                        ServiceAccountName = $mockGroupServiceAccount.Name
+                        AccountType        = 'Group'
+                        Ensure             = 'Absent'
+                    }
+
+                    Set-TargetResource @testResourceParametersGroup
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 1
+                }
+            }
+
+            Context -Name "When the system is NOT in the desired state and 'Ensure' is 'Absent' (Both)" {
+                Mock -CommandName Get-ADServiceAccount -MockWith {
+                    throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                }
+
+                $testResourceParametersSingle = @{
+                    ServiceAccountName = $mockSingleServiceAccount.Name
+                    Ensure             = 'Present'
+                }
+
+                It "Should call 'New-AdServiceAccount' when 'Ensure' is set to 'Present" {
+                    Set-TargetResource @testResourceParametersSingle
+
+                    Assert-MockCalled -CommandName Get-ADServiceAccount -Scope It -Times 1
+                    Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Set-ADServiceAccount -Scope It -Exactly -Times 0
+                }
+            }
+
+        }
+        #endregion Function Set-TargetResource
     }
 }
 finally

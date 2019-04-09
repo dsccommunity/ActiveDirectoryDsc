@@ -369,12 +369,10 @@ function Set-TargetResource
         $Enabled = $true,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $Description,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $DisplayName,
 
@@ -591,12 +589,10 @@ function New-ADServiceAccountHelper
         $Enabled = $true,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $Description,
 
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $DisplayName,
 
