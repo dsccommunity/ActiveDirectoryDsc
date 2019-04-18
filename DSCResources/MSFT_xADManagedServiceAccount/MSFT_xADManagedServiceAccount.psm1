@@ -403,7 +403,7 @@ function Set-TargetResource
     $PSBoundParameters['MembershipAttribute'] = $MembershipAttribute
 
     $compareTargetResource = Compare-TargetResourceState @PSBoundParameters
-    $compareTargetResourceNonCompliant = $compareTargetResource | Where-Object {$_.Pass -eq $false}
+    $compareTargetResourceNonCompliant = @($compareTargetResource | Where-Object {$_.Pass -eq $false})
 
     $adServiceAccountParameters = Get-ADCommonParameters @PSBoundParameters
     $setServiceAccountParameters = $adServiceAccountParameters.Clone()
@@ -443,12 +443,11 @@ function Set-TargetResource
                     }
                     else
                     {
-                        Write-Verbose ($LocalizedData.AccountTypeForceNotTrue -f $accountTypeState.Actual, $accountTypeState.Expected)
+                        Write-Warning ($LocalizedData.AccountTypeForceNotTrue -f $accountTypeState.Actual, $accountTypeState.Expected)
                     }
                 }
                 # Remove AccountType since we don't want to enumerate down below
-                $compareTargetResourceNonCompliant = $compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'AccountType'}
-
+                $compareTargetResourceNonCompliant =  @($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'AccountType'})
                 #endregion Check if AccountType is compliant
 
                 #region Check if Path is compliant
@@ -465,7 +464,7 @@ function Set-TargetResource
                     $moveADObjectParameters['Identity'] = $dn.Actual
                     Move-ADObject @moveADObjectParameters -TargetPath $Path
                 }
-                $compareTargetResourceNonCompliant = $compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'Path'}
+                $compareTargetResourceNonCompliant =  @($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'Path'})
                 #endregion Check if Path is compliant
 
                 #region Check if other parameters are compliant
@@ -479,9 +478,9 @@ function Set-TargetResource
                         {
                             $Members = @()
                         }
-                        $ListMembers = $Members -join ','
+                        $listMembers = $Members -join ','
 
-                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Members', $ListMembers)
+                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Members', $listMembers)
                         $setServiceAccountParameters['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
                     }
                     else
@@ -491,7 +490,7 @@ function Set-TargetResource
                     }
                 }
 
-                if ($updateProperties)
+                if ($compareTargetResourceNonCompliant.Count -gt 0)
                 {
                     Set-ADServiceAccount @setServiceAccountParameters
                 }
@@ -807,8 +806,8 @@ function Compare-TargetResourceState
                     Members = $Members
                 }
 
-                $expectedMembers = ($Members | Sort) -join ','
-                $actualMembers   = ($testMembersParams['ExistingMembers'] | Sort) -join ','
+                $expectedMembers = ($Members | Sort-Object) -join ','
+                $actualMembers   = ($testMembersParams['ExistingMembers'] | Sort-Object) -join ','
 
                 if (-not (Test-Members @testMembersParams))
                 {
