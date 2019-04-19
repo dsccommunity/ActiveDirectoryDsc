@@ -49,6 +49,7 @@ groups and OUs.
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADForestProperties** manages User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
 * **xADGroup** modifies and removes Active Directory groups.
+* **xADManagedServiceAccount** modifies and removes Active Directory Managed Service Accounts (MSA).
 * **xADObjectPermissionEntry** modifies the access control list of an Active Directory object.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADRecycleBin** enables or disabled Active Directory Recycle Bin.
@@ -197,6 +198,36 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
+
+### **xADManagedServiceAccount**
+
+The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (MSAs) within Active Directory.
+
+* **`[String]` ServiceAccountName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the user.
+  * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
+  * Once created, the user's SamAccountName and CN cannot be changed.
+* **`[String]` AccountType** _(Write)_: Specifies whether the given managed service account is single or group.
+  * If not specified, this vaule defaults to Single.
+* **`[String]` AccountTypeForce** _(Write)_: Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+  * If not specified, this value defaults to False.
+* **`[String]` Path** _(Write)_: Path in Active Directory to place the managed service account, specified as a Distinguished Name (DN).
+* **`[String]` Description** _(Write)_: Specifies a description of the managed service account object.
+* **`[String]` DisplayName** _(Write)_: Specifies the display name of the managed service account object.
+* **`[String]` Ensure** _(Write)_: Specifies whether the given managed service account is present or absent.
+  * If not specified, this value defaults to Present.
+* **`[String]` Enabled** _(Write)_: Specifies whether the given managed service account enabled or disabled.
+  * If not specified, this value defaults to Enabled.
+* **`[String]` Members** _(Write)_: Specifies the membership policy for systems that can use a group-managed service account
+  * This is only required if AccountType is 'Group'
+* **`[String]` MembershipAttribute** _(Write)_: Active Directory attribute used to perform membership operations
+  * If not specified, this value defaults to SamAccountName
+  * This is only required if AccountType is 'Group'
+* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the task.
+  * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
+* **`[String]` DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to.
+  * This is only required if not executing the task on a domain controller.
+* **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name of the Service Account
+  * Cannot be specified in the resource. Returned by Get and Compare.
 
 ### **xADObjectPermissionEntry**
 
@@ -369,6 +400,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 ## Versions
 
 ### Unreleased
+
+* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [@awickham10](https://github.com/awickham10) and [@kungfu71186](https://github.com/kungfu71186)
 
 ### 2.25.0.0
 
