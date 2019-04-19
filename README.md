@@ -401,8 +401,6 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
-* Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-
 * Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
 
 ### 2.25.0.0
@@ -417,6 +415,7 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
   * Minor clean up of unit tests.
 * Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue #155](https://github.com/PowerShell/xActiveDirectory/issues/155)).
   * Updated readme and add release notes
+* Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ### 2.24.0.0
 
