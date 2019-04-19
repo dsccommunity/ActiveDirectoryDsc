@@ -401,7 +401,7 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
-* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Name/Alias (@awickham10)](https://github.com/awickham10)`
+* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [@awickham10](https://github.com/awickham10) and [@kungfu71186](https://github.com/kungfu71186)
 
 ### 2.25.0.0
 
