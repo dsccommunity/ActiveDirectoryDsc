@@ -18,6 +18,12 @@
     and [@kungfu71186](https://github.com/kungfu71186)
 - Changes to xADReplicationSiteLink
   - Make use of the new localization helper functions.
+- Changes to xAdDomainController
+  - Added new parameter to disable or enable the Global Catalog (GC)
+    ([issue #75](https://github.com/PowerShell/xActiveDirectory/issues/75)). [Eric Foskett @Merto410](https://github.com/Merto410)
+  - Fixed a bug with the parameter `InstallationMediaPath` that it would
+    not be added if it was specified in a configuration. Now the parameter
+    `InstallationMediaPath` is correctly passed to `Install-ADDSDomainController`.
 
 ## 2.25.0.0
 

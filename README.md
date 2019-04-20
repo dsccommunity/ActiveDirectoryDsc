@@ -128,6 +128,7 @@ The xADDomainController DSC resource will install and configure domain controlle
 * **`[String]` SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
 * **`[String]` SiteName** _(Write)_: Specify the name of an existing site where new domain controller will be placed.
 * **`[String]` InstallationMediaPath** _(Write)_: Specify the path of the folder containg the Installation Media created in NTDSutil.
+* **`[String]` IsGlobalCatalog** _(Write)_: Specifies if the domain controller will be a Global Catalog (GC).
 * **`[String]` Ensure** _(Read)_: The state of the Domain Controller, returned with Get.
 
 ### **xADDomainDefaultPasswordPolicy**
