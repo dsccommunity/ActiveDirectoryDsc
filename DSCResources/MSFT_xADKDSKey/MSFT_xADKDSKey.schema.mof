@@ -1,0 +1,11 @@
+[ClassVersion("1.0.1.0"), FriendlyName("xADKDSKey")]
+class MSFT_xKDSKey : OMI_BaseResource
+{
+    [Key, Description("Time at which key will become active")] String EffectiveTime;
+    [Write, Description("Should this resource be present or absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, Description("This option will allow you to create a KDS root key if EffectiveTime is set in the past")] Boolean UnsafeEffectiveTime;
+    [Write, Description("This option will allow you to remove a KDS root key if there is only one key left")] Boolean ForceRemove;
+    [Read, Description("Specifies the Distinguished Name of the KDS root key")] String DistinguishedName;
+    [Read, Description("Specifies the Creation date and time of the KDS root key")] DateTime CreationTime;
+    [Read, Description("Specifies the KeyID of the KDS root key")] String KeyId;
+};

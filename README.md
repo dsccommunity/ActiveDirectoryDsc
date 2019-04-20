@@ -199,6 +199,24 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * If not running on a domain controller, this is required.
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
 
+### **xADKDSKey**
+
+The xADKDSKey DSC resource will manage KDS Root Keys within Active Directory.
+
+* **`[String]` EffectiveTime** _(Key)_: Specifies the Effective time when a KDS root key can be used
+  * There is a 10 hour minimum from creation date to allow active directory to properly replicate across all domain controllers
+  * The input is a string, but will get converted to a DateTime object for comparison. This is to disallow things like `(Get-Date).AddHours(-10)`, otherwise we can't find the right KDS key since the effective date will always be changing
+* **`[String]` Ensure** _(Write)_: Specifies whether the given KDS Root Key is present or absent.
+  * If not specified, this value defaults to Present.
+* **`[Boolean]` UnsafeEffectiveTime** _(Write)_: Allows EffectiveTime date to set in the past and essentially override the 10 hour minimum for replication
+* **`[Boolean]` ForceRemove** _(Write)_: Allows a KDS Root Key to removed if there is only one key left
+* **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name of the KDS Root Key
+  * Cannot be specified in the resource. Returned by Get and Compare.
+* **`[DateTime]` CreationTime** _(Read)_: Specifies the Creation Time of the KDS Root Key
+  * Informational only
+* **`[String]` KeyId** _(Read)_: Specifies the KeyId of the KDS Root Key
+  * Informational only, but it is the common name within the distinguished name
+
 ### **xADManagedServiceAccount**
 
 The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (MSAs) within Active Directory.
@@ -402,6 +420,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 ### Unreleased
 
 * Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [@awickham10](https://github.com/awickham10) and [@kungfu71186](https://github.com/kungfu71186)
+
+* Added xADKDSKey resource to create KDS Root Keys for gMSAs. [@kungfu71186](https://github.com/kungfu71186)
 
 ### 2.25.0.0
 
