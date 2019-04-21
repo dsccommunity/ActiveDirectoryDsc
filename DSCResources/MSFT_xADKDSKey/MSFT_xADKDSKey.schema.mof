@@ -1,5 +1,5 @@
 [ClassVersion("1.0.1.0"), FriendlyName("xADKDSKey")]
-class MSFT_xKDSKey : OMI_BaseResource
+class MSFT_xADKDSKey : OMI_BaseResource
 {
     [Key, Description("Time at which key will become active")] String EffectiveTime;
     [Write, Description("Should this resource be present or absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
