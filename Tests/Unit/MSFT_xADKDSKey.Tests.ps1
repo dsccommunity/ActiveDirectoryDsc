@@ -71,8 +71,8 @@ try
         $mockKDSRootKeyFuture = [pscustomobject] @{
             AttributeOfWrongFormat = $null
             KeyValue               = $null #Byte[], not currently needed
-            EffectiveTime          = Get-Date '1/1/3000 13:00'
-            CreationTime           = Get-Date '1/1/3000 08:00'
+            EffectiveTime          = [DateTime]::Parse('1/1/3000 13:00')
+            CreationTime           = [DateTime]::Parse('1/1/3000 08:00')
             IsFormatValid          = $true
             DomainController       = 'CN=MockDC,{0}' -f $mockADDomain
             ServerConfiguration    = $mockKDSServerConfiguration
@@ -83,8 +83,8 @@ try
         $mockKDSRootKeyPast = [pscustomobject] @{
             AttributeOfWrongFormat = $null
             KeyValue               = $null #Byte[], not currently needed
-            EffectiveTime          = Get-Date '1/1/2000 13:00'
-            CreationTime           = Get-Date '1/1/2000 08:00'
+            EffectiveTime          = [DateTime]::Parse('1/1/2000 13:00')
+            CreationTime           = [DateTime]::Parse('1/1/2000 08:00')
             IsFormatValid          = $true
             DomainController       = 'CN=MockDC,{0}' -f $mockADDomain
             ServerConfiguration    = $mockKDSServerConfiguration
@@ -159,9 +159,11 @@ try
                     $ModuleName -eq 'ActiveDirectory'
                 }
 
-                Mock -CommandName Get-ADDomain -MockWith {
-                    return @{DistinguishedName = $mockADDomain}
+                Mock -CommandName Get-ADRootDomainDN -MockWith {
+                    return $mockADDomain
                 }
+
+                Mock -CommandName Assert-HasDomainAdminRights -MockWith { return $true }
             }
 
             Context -Name 'When the system uses specific parameters' {
@@ -220,7 +222,6 @@ try
 
                 Context -Name 'When system has two or more KDS keys with the same effective date' {
                     Mock -CommandName Write-Warning
-                    Mock -CommandName Write-Error
 
                     Mock -CommandName Get-KdsRootKey -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
@@ -234,10 +235,9 @@ try
                             EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                         }
 
-                        { Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
+                        { $null = Get-TargetResource @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw
 
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Times 1
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Times 1
                     }
                 }
             }
@@ -470,7 +470,6 @@ try
                 Mock -CommandName Add-KDSRootKey
                 Mock -CommandName Remove-ADObject
                 Mock -CommandName Write-Warning
-                Mock -CommandName Write-Error -MockWith { return }
             }
 
             Context -Name 'When the system is in the desired state' {
@@ -492,7 +491,6 @@ try
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 0
                     }
                 }
 
@@ -520,7 +518,6 @@ try
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 0
                     }
                 }
             }
@@ -557,7 +554,6 @@ try
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 1
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 0
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                     }
 
@@ -590,12 +586,11 @@ try
                     }
 
                     It "Should call NOT 'Remove-ADObject' when 'Ensure' is set to 'Present' and 'ForceRemove' is 'False'" {
-                        $null = Set-TargetResource @getTargetResourceParametersFuture
+                        { $null = Set-TargetResource @getTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } | Should -Throw
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                     }
 
@@ -611,7 +606,6 @@ try
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 1
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 1
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 0
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                     }
                 }
@@ -640,7 +634,6 @@ try
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 0
                     }
                 }
 
@@ -663,12 +656,11 @@ try
                     }
 
                     It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'UnsafeEffectiveTime' is 'False'" {
-                        Set-TargetResource @getTargetResourceParametersPast
+                        { $null = Set-TargetResource @getTargetResourceParametersPast -ErrorAction 'SilentlyContinue' } | Should -Throw
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 1
                     }
 
                     $getTargetResourceParametersPast = @{
@@ -683,9 +675,7 @@ try
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 1
-                        Assert-MockCalled -CommandName Write-Error -Scope It -Exactly -Times 0
                     }
-
                 }
             }
 

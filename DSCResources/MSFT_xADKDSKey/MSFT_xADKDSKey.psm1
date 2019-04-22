@@ -9,20 +9,27 @@ data LocalizedData
 {
     # culture='en-US'
     ConvertFrom-StringData @'
-        AddingKDSRootKey                   = Creating KDS Root key with the Effective date of '{0}'
-        AddingKDSRootKeyDateInPast         = Effective date is in the past and the 'UnsafeEffectiveTime' was set to True. Adding KDS Root key with the Effective date of '{0}', overriding 10 hour safety measure for domain controller replication
-        AddingKDSRootKeyError              = Effective date of '{0}' is in the past and 'UnsafeEffectiveTime' was not specified so the KDS root key will NOT be created!
-        KDSRootKeyErrorOther               = There was an error when trying to add or remove the KDS root key with the effective date of '{0}'
-        FoundKDSRootKeySameEffectiveTime   = Found more than one KDS root keys with the same effective time, please ensure that only one KDS key exists with the effective time of '{0}'
-        FoundKDSRootKeyMultiple            = Found more than one KDS root keys. This shouldn't be an issue, but having only one key per domain is recommended.
-        RetrievingKDSRootKey               = Retrieving KDS Root key with Effective date of '{0}' ...
-        NotEnoughKDSrootKeysPresent        = The KDS root key with effective date of '{0}' is the only key that exists. Please ensure a key exists if there are existing gMSAs present
-        NotEnoughKDSrootKeysPresentNoForce = There is only one KDS root key left and the 'ForceRemove' parameter no set; therefore, the KDS root key with Effective date of '{0}' will not be removed
-        RemovingKDSRootKey                 = Removing the KDS root key with effective date '{0}'
-        KDSRootKeyNotInDesiredState        = KDS Root key with the Effective date of '{0}' is NOT in the desired state.
-        KDSRootKeyInDesiredState           = KDS Root key with the Effective date of '{0}' is in the desired state.
-        NotDesiredPropertyState            = The parameter of '{0}' for the KDS Root Key with the Effective date of '{1}' is incorrect. Expected '{2}', actual '{3}'.
-        FoundKDSRootKey                    = Found KDS Root key with the Effective date of '{0}'
+        RetrievingKDSRootKey               = Retrieving KDS Root Key with effective date of '{0}'.
+        RetrievingKDSRootKeyError          = There was an error retrieving the KDS Root Key with effective date of '{0}'.
+        AddingKDSRootKey                   = Creating KDS Root Key with the effective date of '{0}'.
+        AddingKDSRootKeyDateInPast         = Effective date is in the past and the 'UnsafeEffectiveTime' is set to Enabled. Adding KDS Root Key with the effective date of '{0}', overriding 10 hour safety measure for domain controller replication.
+        AddingKDSRootKeyError              = Effective date of '{0}' is in the past and 'UnsafeEffectiveTime' was not specified so the KDS Root Key will NOT be created!
+        KDSRootKeyAddError                 = There was an error when trying to Add the KDS Root Key with the effective date of '{0}'.
+        KDSRootKeyRemoveError              = There was an error when trying to Remove the KDS Root Key with the effective date of '{0}'.
+        FoundKDSRootKeySameEffectiveTime   = Found more than one KDS Root Keys with the same effective time, please ensure that only one KDS key exists with the effective time of '{0}'.
+        FoundKDSRootKeyMultiple            = Found more than one KDS Root Keys. This shouldn't be an issue, but having only one key per domain is recommended.
+        FoundKDSRootKey                    = Found KDS Root Key with the effective date of '{0}'.
+        NotEnoughKDSRootKeysPresent        = The KDS Root Key with effective date of '{0}' is the only key that exists. Please ensure a key exists if there are existing 'Group Managed Service Accounts (gMSAs)' present.
+        NotEnoughKDSRootKeysPresentNoForce = There is only one KDS Root Key left and the 'ForceRemove' parameter no set; therefore, the KDS Root Key with effective date of '{0}' will not be removed.
+        RemovingKDSRootKey                 = Removing the KDS Root Key with effective date '{0}'.
+        KDSRootKeyNotInDesiredState        = KDS Root Key with the effective date of '{0}' is NOT in the desired state.
+        KDSRootKeyInDesiredState           = KDS Root Key with the effective date of '{0}' is in the desired state.
+        NotDesiredPropertyState            = The parameter of '{0}' for the KDS Root Key with the effective date of '{1}' is incorrect. Expected '{2}', actual '{3}'.
+        IncorrectPermissions               = The DSC resource is running under the context of '{0}' and doesn't have 'Domain Admin' permissions. This resource needs to run as a Domain Admin or on a Domain Controller.
+        EffectiveTimeInvalid               = The EffectiveTime of '{0}' is invalid. Please ensure that the date and time is parsable using DateTime.
+        CheckingDomainAdminUserRights      = Checking if the user '{0}' has valid Domain Admin permissions.
+        CheckingDomainAdminComputerRights  = Checking if the node '{0}' is a Domain Controller. The node has a product type of '{1}'. If the product type is 2, then it is a domain controller.
+        RetrievingRootDomainDN             = Retrieved the root domain distinguished name of '{0}'
 '@
 }
 
@@ -46,7 +53,6 @@ function Get-TargetResource
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
-    $EffectiveTime = Get-Date $EffectiveTime
 
     $targetResource = @{
         EffectiveTime     = $EffectiveTime
@@ -56,50 +62,69 @@ function Get-TargetResource
         DistinguishedName = $null
     }
 
+    Write-Verbose -Message ($LocalizedData.RetrievingKDSRootKey -f $EffectiveTime)
     try
     {
-        $kdsRootKeys = Get-KdsRootKey
-
-        $kdsRootKey = $null
-        if ($kdsRootKeys)
-        {
-            $kdsRootKey = ($kdsRootKeys).GetEnumerator() | Where-Object { $_.EffectiveTime -eq $EffectiveTime }
-        }
-
-        if (-not $kdsRootKey)
-        {
-            $targetResource['Ensure'] = 'Absent'
-        }
-        else
-        {
-            Write-Verbose -Message ($LocalizedData.FoundKDSRootKey -f $EffectiveTime)
-            if(($kdsRootKeys).Count -gt 1)
-            {
-                Write-Warning -Message ($LocalizedData.FoundKDSRootKeyMultiple -f $EffectiveTime)
-            }
-
-            if ($kdsRootKey.Count -gt 1)
-            {
-                Write-Error -Message ($LocalizedData.FoundKDSRootKeySameEffectiveTime -f $EffectiveTime) -ErrorAction Stop
-            }
-            elseif ($kdsRootKey)
-            {
-                $targetResource['Ensure']            = 'Present'
-                $targetResource['EffectiveTime']     = $kdsRootKey.EffectiveTime
-                $targetResource['CreationTime']      = $kdsRootKey.CreationTime
-                $targetResource['KeyId']             = $kdsRootKey.KeyId
-                $targetResource['DistinguishedName'] = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
-                                                            $kdsRootKey.KeyId, $((Get-ADDomain).DistinguishedName)
-            }
-        }
-
-        return $targetResource
+        $EffectiveTimeObject = [DateTime]::Parse($EffectiveTime)
     }
     catch
     {
-        Write-Error -Message ($LocalizedData.RetrievingKDSRootKey -f $EffectiveTime)
+        Write-Error -Message ($LocalizedData.EffectiveTimeInvalid -f $EffectiveTime)
         throw $_
     }
+
+    $currentUser = Get-CurrentUser
+    if (-not (Assert-HasDomainAdminRights -User $currentUser))
+    {
+        throw $LocalizedData.IncorrectPermissions -f $currentUser.Name
+    }
+
+    try
+    {
+        $kdsRootKeys = Get-KdsRootKey
+    }
+    catch
+    {
+        Write-Error -Message ($LocalizedData.RetrievingKDSRootKeyError)
+        throw $_
+    }
+
+    $kdsRootKey = $null
+    if ($kdsRootKeys)
+    {
+        $kdsRootKey = $kdsRootKeys.GetEnumerator() | Where-Object -FilterScript {
+            [DateTime]::Parse($_.EffectiveTime) -eq $EffectiveTimeObject
+        }
+    }
+
+    if (-not $kdsRootKey)
+    {
+        $targetResource['Ensure'] = 'Absent'
+    }
+    else
+    {
+        Write-Verbose -Message ($LocalizedData.FoundKDSRootKey -f $EffectiveTime)
+        if ($kdsRootKeys.Count -gt 1)
+        {
+            Write-Warning -Message ($LocalizedData.FoundKDSRootKeyMultiple)
+        }
+
+        if ($kdsRootKey.Count -gt 1)
+        {
+            throw $LocalizedData.FoundKDSRootKeySameEffectiveTime -f $EffectiveTime
+        }
+        elseif ($kdsRootKey)
+        {
+            $targetResource['Ensure']            = 'Present'
+            $targetResource['EffectiveTime']     = [DateTime]::Parse($kdsRootKey.EffectiveTime)
+            $targetResource['CreationTime']      = $kdsRootKey.CreationTime
+            $targetResource['KeyId']             = $kdsRootKey.KeyId
+            $targetResource['DistinguishedName'] = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
+                                                        $kdsRootKey.KeyId, (Get-ADRootDomainDN)
+        }
+    }
+
+    return $targetResource
 }
 
 <#
@@ -132,7 +157,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $UnsafeEffectiveTime = $false,
+        $UnsafeEffectiveTime,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -142,43 +167,22 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $ForceRemove = $false
+        $ForceRemove
     )
 
-    # Need to set these to compare if not specified since user is using defaults
-    $PSBoundParameters['Ensure'] = $Ensure
-
-    $compareTargetResourceNonCompliant = Compare-TargetResourceState @PSBoundParameters | Where-Object {$_.Pass -eq $false}
-
-    # Check if Absent, if so then we don't need to propagate any other parameters
-    if ($Ensure -eq 'Absent')
-    {
-        $ensureState = $compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'}
-        if ($ensureState)
-        {
-            Write-Verbose ($LocalizedData.NotDesiredPropertyState -f `
-                            'Ensure', $EffectiveTime, $ensureState.Expected, $ensureState.Actual)
-        }
-        else
-        {
-            Write-Verbose -Message ($LocalizedData.KDSRootKeyInDesiredState -f $EffectiveTime)
-            return $true
-        }
-    }
-    else
-    {
-        # Currently there are no other parameters that can be out of compliance
-        # this can change in the future and this code will take care of any other parameters
-        <#
-        $compareTargetResourceNonCompliant | ForEach-Object {
-            Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f
-                $_.Parameter, $EffectiveTime, $_.Expected, $_.Actual)
-        }
-        #>
+    $getTargetResourceParameters = @{
+        EffectiveTime = $EffectiveTime
+        Ensure        = $Ensure
     }
 
-    if ($compareTargetResourceNonCompliant)
+    $compareTargetResourceNonCompliant = Compare-TargetResourceState @getTargetResourceParameters | Where-Object {$_.Pass -eq $false}
+
+    $ensureState = $compareTargetResourceNonCompliant | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
+
+    if ($ensureState)
     {
+        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f
+                        'Ensure', $EffectiveTime, $ensureState.Expected, $ensureState.Actual)
         Write-Verbose -Message ($LocalizedData.KDSRootKeyNotInDesiredState -f $EffectiveTime)
         return $false
     }
@@ -236,91 +240,90 @@ function Set-TargetResource
         Ensure        = $Ensure
     }
 
-    @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if (-not $PSBoundParameters.ContainsKey($_))
-        {
-            $getTargetResourceParameters.Remove($_)
-        }
-    }
-
     $compareTargetResource = Compare-TargetResourceState @getTargetResourceParameters
-    $compareTargetResourceNonCompliant = @($compareTargetResource | Where-Object {$_.Pass -eq $false})
+    $ensureState = $compareTargetResource | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
 
-    try
+    # Ensure is not in proper state
+    if ($ensureState.Pass -eq $false)
     {
         if ($Ensure -eq 'Present')
         {
-            $isEnsureNonCompliant = $false
-            if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
+            try
             {
-                $isEnsureNonCompliant = $true
+                $EffectiveTimeObject = [DateTime]::Parse($EffectiveTime)
+            }
+            catch
+            {
+                Write-Error -Message ($LocalizedData.EffectiveTimeInvalid -f $EffectiveTime)
+                throw $_
             }
 
-            # We want the account to be present, but it currently does not exist
-            if ($isEnsureNonCompliant)
+            # We want the key to be present, but it currently does not exist
+            $currentDateTimeObject = [DateTime]::Parse($(Get-Date))
+
+            if ($EffectiveTimeObject -le $currentDateTimeObject -and $UnsafeEffectiveTime)
             {
-                $PSBoundParameters.Remove('Ensure')
+                Write-Warning -Message ($LocalizedData.AddingKDSRootKeyDateInPast -f $EffectiveTime)
+            }
+            elseif ($EffectiveTimeObject -le $currentDateTimeObject)
+            {
+                <#
+                 Effective time is in the past and we don't have UnsafeEffectiveTime set
+                 to enabled, so we exit with an error
+                #>
+                throw $LocalizedData.AddingKDSRootKeyError -f $EffectiveTime
+            }
+            else
+            {
+                Write-Verbose -Message ($LocalizedData.AddingKDSRootKey -f $EffectiveTime)
+            }
 
-                if ((Get-Date $EffectiveTime) -le (Get-Date) -and $UnsafeEffectiveTime)
-                {
-                    Write-Warning -Message ($LocalizedData.AddingKDSRootKeyDateInPast -f $EffectiveTime)
-                }
-                elseif ((Get-Date $EffectiveTime) -le (Get-Date))
-                {
-                    # Effective time is in the past we don't have unsafe effective time set
-                    # so we exit with an error
-                    Write-Error -Message ($LocalizedData.AddingKDSRootKeyError -f $EffectiveTime) -ErrorAction Stop
-                    return # Not sure how to mock this with pester
-                }
-                else
-                {
-                    Write-Verbose -Message ($LocalizedData.AddingKDSRootKey -f $EffectiveTime)
-                }
-
-                # EffectiveTime appears to expect a UTC datetime, so we are converting
-                # it to UTC before adding. Get-KDSRootKey will return the wrong time if we
-                # don't convert first
-                Add-KDSRootKey -EffectiveTime (Get-Date $EffectiveTime).ToUniversalTime()
+            <#
+             EffectiveTime appears to expect a UTC datetime, so we are converting
+             it to UTC before adding. Get-KDSRootKey will return the wrong time if we
+             don't convert first
+            #>
+            try
+            {
+                Add-KDSRootKey -EffectiveTime $EffectiveTimeObject.ToUniversalTime()
+            }
+            catch
+            {
+                Write-Error -Message ($LocalizedData.KDSRootKeyAddError -f $EffectiveTime)
+                throw $_
             }
         }
         elseif ($Ensure -eq 'Absent')
         {
-            $isEnsureNonCompliant = $false
-            if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
-            {
-                $isEnsureNonCompliant = $true
-            }
-
             # We want the account to be Absent, but it is Present
-            if ($isEnsureNonCompliant)
+            if((Get-KdsRootKey).Count -gt 1)
             {
-                if((Get-KdsRootKey).Count -gt 1)
+                Write-Verbose -Message ($LocalizedData.RemovingKDSRootKey -f $EffectiveTime)
+            }
+            else
+            {
+                if ($ForceRemove)
                 {
                     Write-Verbose -Message ($LocalizedData.RemovingKDSRootKey -f $EffectiveTime)
+                    Write-Warning -Message ($LocalizedData.NotEnoughKDSRootKeysPresent -f $EffectiveTime)
                 }
                 else
                 {
-                    if ($ForceRemove)
-                    {
-                        Write-Verbose -Message ($LocalizedData.RemovingKDSRootKey -f $EffectiveTime)
-                        Write-Warning -Message ($LocalizedData.NotEnoughKDSrootKeysPresent -f $EffectiveTime)
-                    }
-                    else
-                    {
-                        Write-Error -Message ($LocalizedData.NotEnoughKDSrootKeysPresentNoForce -f $EffectiveTime) -ErrorAction Stop
-                        return # Not sure how to mock this with pester
-                    }
+                    throw $LocalizedData.NotEnoughKDSRootKeysPresentNoForce -f $EffectiveTime
                 }
+            }
 
-                $dn = $compareTargetResource | Where-Object {$_.Parameter -eq 'DistinguishedName'}
+            $dn = $compareTargetResource | Where-Object -FilterScript {$_.Parameter -eq 'DistinguishedName'}
+            try
+            {
                 Remove-ADObject -Identity $dn.Actual -Confirm:$false
             }
+            catch
+            {
+                Write-Error -Message ($LocalizedData.KDSRootKeyRemoveError -f $EffectiveTime)
+                throw $_
+            }
         }
-    }
-    catch
-    {
-        Write-Error -Message ($LocalizedData.KDSRootKeyErrorOther -f $EffectiveTime)
-        throw $_
     }
 }
 
@@ -331,14 +334,8 @@ function Set-TargetResource
     .PARAMETER EffectiveTime
         Time at which key will become active, this is also the key identifier
 
-    .PARAMETER UnsafeEffectiveTime
-        Allows effective date to be set in the past
-
     .PARAMETER Ensure
         Specifies whether the KDS Root Key should exist or not
-
-    .PARAMETER ForceRemove
-        Removes the KDS root key with there is only one key left
 #>
 function Compare-TargetResourceState
 {
@@ -357,26 +354,17 @@ function Compare-TargetResourceState
     )
 
     $getTargetResourceParameters = @{
-        EffectiveTime  = $EffectiveTime
+        EffectiveTime  = [DateTime]::Parse($EffectiveTime)
     }
-
-    # Currently there are no other parameters to remove
-    # This code here will remove any parameters that are optional
-    # but don't need to be passed to Get-TargetResource
-    <#
-    @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if (-not $PSBoundParameters.ContainsKey($_))
-        {
-            $getTargetResourceParameters.Remove($_)
-        }
-    }
-    #>
 
     $getTargetResource = Get-TargetResource @getTargetResourceParameters
     $compareTargetResource = @()
 
     # Add DistinguishedName as it won't be passed as an argument, but we want to get the DN in Set
     $PSBoundParameters['DistinguishedName'] = $getTargetResource['DistinguishedName']
+
+    # Convert EffectiveTime to DateTime object for comparison
+    $PSBoundParameters['EffectiveTime']  = [DateTime]::Parse($EffectiveTime)
 
     foreach ($parameter in $PSBoundParameters.Keys)
     {
@@ -405,6 +393,69 @@ function Compare-TargetResourceState
     } #end foreach PSBoundParameter
 
     return $compareTargetResource
+}
+
+<#
+    .SYNOPSIS
+        Checks permissions to see if the user or computer has domain admin permissions
+
+    .PARAMETER User
+        The user to check permissions against
+#>
+function Assert-HasDomainAdminRights
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Security.Principal.WindowsIdentity]
+        $User
+    )
+
+    # Get-KdsRootKey will return $null instead of a permission error if it can't retrieve the keys
+    # so we need manually check
+
+    $windowsPrincipal = New-Object -TypeName System.Security.Principal.WindowsPrincipal($User)
+    $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
+
+    Write-Verbose -Message ($LocalizedData.CheckingDomainAdminUserRights -f $User.Name)
+    Write-Verbose -Message ($LocalizedData.CheckingDomainAdminComputerRights -f $osInfo.CSName, $osInfo.ProductType)
+
+    return $windowsPrincipal.IsInRole("Domain Admins") -or
+            $windowsPrincipal.IsInRole("Enterprise Admins") -or
+            $osInfo.ProductType -eq 2
+}
+
+<#
+    .SYNOPSIS
+        Returns a string with the Distinguished Name of the root domain.
+
+    .DESCRIPTION
+        If you have a domain with sub-domains, this will return the root domain name. For example,
+        if you had a domain contoso.com and a sub domain of fake.contoso.com, it would return
+        contoso.com
+#>
+function Get-ADRootDomainDN
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param()
+
+    $rootDomainDN = (New-Object -TypeName System.DirectoryServices.DirectoryEntry('LDAP://RootDSE')).Get('rootDomainNamingContext')
+    Write-Verbose -Message ($LocalizedData.RetrievingRootDomainDN -f $rootDomainDN)
+    return $rootDomainDN
+}
+
+<#
+    .SYNOPSIS
+        This is used to get the current user context when the resource script runs.
+        We are putting this in a function so we can mock it with pester
+#>
+function Get-CurrentUser
+{
+    return [System.Security.Principal.WindowsIdentity]::GetCurrent()
 }
 
 Export-ModuleMember *-TargetResource
