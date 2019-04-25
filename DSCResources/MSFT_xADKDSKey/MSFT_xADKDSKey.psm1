@@ -12,8 +12,8 @@ data LocalizedData
         RetrievingKDSRootKey               = Retrieving KDS Root Key with effective date of '{0}'.
         RetrievingKDSRootKeyError          = There was an error retrieving the KDS Root Key with effective date of '{0}'.
         AddingKDSRootKey                   = Creating KDS Root Key with the effective date of '{0}'.
-        AddingKDSRootKeyDateInPast         = Effective date is in the past and the 'UnsafeEffectiveTime' is set to Enabled. Adding KDS Root Key with the effective date of '{0}', overriding 10 hour safety measure for domain controller replication.
-        AddingKDSRootKeyError              = Effective date of '{0}' is in the past and 'UnsafeEffectiveTime' was not specified so the KDS Root Key will NOT be created!
+        AddingKDSRootKeyDateInPast         = Effective date is in the past and the 'AllowUnsafeEffectiveTime' is set to Enabled. Adding KDS Root Key with the effective date of '{0}', overriding 10 hour safety measure for domain controller replication.
+        AddingKDSRootKeyError              = Effective date of '{0}' is in the past and 'AllowUnsafeEffectiveTime' was not specified so the KDS Root Key will NOT be created!
         KDSRootKeyAddError                 = There was an error when trying to Add the KDS Root Key with the effective date of '{0}'.
         KDSRootKeyRemoveError              = There was an error when trying to Remove the KDS Root Key with the effective date of '{0}'.
         FoundKDSRootKeySameEffectiveTime   = Found more than one KDS Root Keys with the same effective time, please ensure that only one KDS key exists with the effective time of '{0}'.
@@ -29,7 +29,7 @@ data LocalizedData
         EffectiveTimeInvalid               = The EffectiveTime of '{0}' is invalid. Please ensure that the date and time is parsable using DateTime.
         CheckingDomainAdminUserRights      = Checking if the user '{0}' has valid Domain Admin permissions.
         CheckingDomainAdminComputerRights  = Checking if the node '{0}' is a Domain Controller. The node has a product type of '{1}'. If the product type is 2, then it is a domain controller.
-        RetrievingRootDomainDN             = Retrieved the root domain distinguished name of '{0}'
+        RetrievingRootDomainDN             = Retrieved the root domain distinguished name of '{0}'.
 '@
 }
 
@@ -38,7 +38,18 @@ data LocalizedData
         Gets the specified KDS root key
 
     .PARAMETER EffectiveTime
-        Time at which key will become active, this is also the key identifier
+        Specifies the Effective time when a KDS root key can be used.
+        There is a 10 hour minimum from creation date to allow active directory
+        to properly replicate across all domain controllers. For this reason,
+        the date must be set in the future for creation.While this parameter
+        accepts a string, it will be converted into a DateTime object.
+        This will also try to take into account cultural settings.
+
+        Example:
+        '05/01/1999 13:00' using default or 'en-US' culture would be May 1st,
+        but using 'de-DE' culture would be 5th of January. The culture is
+        automatically pulled from the operating system and this can be checked
+        using 'Get-Culture'
 #>
 function Get-TargetResource
 {
@@ -132,16 +143,35 @@ function Get-TargetResource
         Creates or deletes the KDS root Key
 
     .PARAMETER EffectiveTime
-        Time at which key will become active, this is also the key identifier
+        Specifies the Effective time when a KDS root key can be used.
+        There is a 10 hour minimum from creation date to allow active directory
+        to properly replicate across all domain controllers. For this reason,
+        the date must be set in the future for creation.While this parameter
+        accepts a string, it will be converted into a DateTime object.
+        This will also try to take into account cultural settings.
 
-    .PARAMETER UnsafeEffectiveTime
-        Allows effective date to be set in the past
+        Example:
+        '05/01/1999 13:00' using default or 'en-US' culture would be May 1st,
+        but using 'de-DE' culture would be 5th of January. The culture is
+        automatically pulled from the operating system and this can be checked
+        using 'Get-Culture'
+
+    .PARAMETER AllowUnsafeEffectiveTime
+        This option will allow you to create a KDS root key if EffectiveTime is set in the past.
+        This may cause issues if you are creating a Group Managed Service Account right
+        after you create the KDS Root Key. In order to get around this, you must create
+        the KDS Root Key using a date in the past. This should be used at your own risk
+        and should only be used in lab environments.
 
     .PARAMETER Ensure
-        Specifies whether the KDS Root Key should exist or not
+        Specifies if this KDS Root Key should be present or absent
 
     .PARAMETER ForceRemove
-        Removes the KDS root key with there is only one key left
+       This option will allow you to remove a KDS root key if there is only one key left.
+       It should not break your Group Managed Service Accounts (gMSAs), but if the gMSA
+       password expires and it needs to request a new password, it will not be able to
+       generate a new password until a new KDS Root Key is installed and ready for use.
+       Because of this, the last KDS Root Key will not be removed unless this option is specified
 #>
 function Test-TargetResource
 {
@@ -157,7 +187,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $UnsafeEffectiveTime,
+        $AllowUnsafeEffectiveTime,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -175,7 +205,8 @@ function Test-TargetResource
         Ensure        = $Ensure
     }
 
-    $compareTargetResourceNonCompliant = Compare-TargetResourceState @getTargetResourceParameters | Where-Object {$_.Pass -eq $false}
+    $compareTargetResourceNonCompliant = Compare-TargetResourceState @getTargetResourceParameters |
+                                            Where-Object -FilterScript {$_.Pass -eq $false}
 
     $ensureState = $compareTargetResourceNonCompliant | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
 
@@ -198,16 +229,35 @@ function Test-TargetResource
         Creates or deletes the KDS root Key
 
     .PARAMETER EffectiveTime
-        Time at which key will become active, this is also the key identifier
+        Specifies the Effective time when a KDS root key can be used.
+        There is a 10 hour minimum from creation date to allow active directory
+        to properly replicate across all domain controllers. For this reason,
+        the date must be set in the future for creation.While this parameter
+        accepts a string, it will be converted into a DateTime object.
+        This will also try to take into account cultural settings.
 
-    .PARAMETER UnsafeEffectiveTime
-        Allows effective date to be set in the past
+        Example:
+        '05/01/1999 13:00' using default or 'en-US' culture would be May 1st,
+        but using 'de-DE' culture would be 5th of January. The culture is
+        automatically pulled from the operating system and this can be checked
+        using 'Get-Culture'
+
+    .PARAMETER AllowUnsafeEffectiveTime
+        This option will allow you to create a KDS root key if EffectiveTime is set in the past.
+        This may cause issues if you are creating a Group Managed Service Account right
+        after you create the KDS Root Key. In order to get around this, you must create
+        the KDS Root Key using a date in the past. This should be used at your own risk
+        and should only be used in lab environments.
 
     .PARAMETER Ensure
-        Specifies whether the KDS Root Key should exist or not
+        Specifies if this KDS Root Key should be present or absent
 
     .PARAMETER ForceRemove
-        Removes the KDS root key with there is only one key left
+       This option will allow you to remove a KDS root key if there is only one key left.
+       It should not break your Group Managed Service Accounts (gMSAs), but if the gMSA
+       password expires and it needs to request a new password, it will not be able to
+       generate a new password until a new KDS Root Key is installed and ready for use.
+       Because of this, the last KDS Root Key will not be removed unless this option is specified
 #>
 function Set-TargetResource
 {
@@ -222,7 +272,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $UnsafeEffectiveTime = $false,
+        $AllowUnsafeEffectiveTime = $false,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -261,14 +311,14 @@ function Set-TargetResource
             # We want the key to be present, but it currently does not exist
             $currentDateTimeObject = [DateTime]::Parse($(Get-Date))
 
-            if ($EffectiveTimeObject -le $currentDateTimeObject -and $UnsafeEffectiveTime)
+            if ($EffectiveTimeObject -le $currentDateTimeObject -and $AllowUnsafeEffectiveTime)
             {
                 Write-Warning -Message ($LocalizedData.AddingKDSRootKeyDateInPast -f $EffectiveTime)
             }
             elseif ($EffectiveTimeObject -le $currentDateTimeObject)
             {
                 <#
-                 Effective time is in the past and we don't have UnsafeEffectiveTime set
+                 Effective time is in the past and we don't have AllowUnsafeEffectiveTime set
                  to enabled, so we exit with an error
                 #>
                 throw $LocalizedData.AddingKDSRootKeyError -f $EffectiveTime
@@ -296,7 +346,7 @@ function Set-TargetResource
         elseif ($Ensure -eq 'Absent')
         {
             # We want the account to be Absent, but it is Present
-            if((Get-KdsRootKey).Count -gt 1)
+            if ((Get-KdsRootKey).Count -gt 1)
             {
                 Write-Verbose -Message ($LocalizedData.RemovingKDSRootKey -f $EffectiveTime)
             }
@@ -313,10 +363,10 @@ function Set-TargetResource
                 }
             }
 
-            $dn = $compareTargetResource | Where-Object -FilterScript {$_.Parameter -eq 'DistinguishedName'}
+            $distinguishedName = $compareTargetResource | Where-Object -FilterScript {$_.Parameter -eq 'DistinguishedName'}
             try
             {
-                Remove-ADObject -Identity $dn.Actual -Confirm:$false
+                Remove-ADObject -Identity $distinguishedName.Actual -Confirm:$false
             }
             catch
             {
@@ -332,10 +382,22 @@ function Set-TargetResource
         Compares the state of the KDS root key
 
     .PARAMETER EffectiveTime
-        Time at which key will become active, this is also the key identifier
+        Specifies the Effective time when a KDS root key can be used.
+        There is a 10 hour minimum from creation date to allow active directory
+        to properly replicate across all domain controllers. For this reason,
+        the date must be set in the future for creation. While this parameter
+        accepts a string, it will be converted into a DateTime object.
+        This will also try to take into account cultural settings.
+
+        Example:
+        '05/01/1999 13:00' using default or 'en-US' culture would be May 1st,
+        but using 'de-DE' culture would be 5th of January. The culture is
+        automatically pulled from the operating system and this can be checked
+        using 'Get-Culture'
 
     .PARAMETER Ensure
-        Specifies whether the KDS Root Key should exist or not
+        Specifies if this KDS Root Key should be present or absent
+
 #>
 function Compare-TargetResourceState
 {
@@ -357,36 +419,38 @@ function Compare-TargetResourceState
         EffectiveTime  = [DateTime]::Parse($EffectiveTime)
     }
 
-    $getTargetResource = Get-TargetResource @getTargetResourceParameters
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
     $compareTargetResource = @()
 
     # Add DistinguishedName as it won't be passed as an argument, but we want to get the DN in Set
-    $PSBoundParameters['DistinguishedName'] = $getTargetResource['DistinguishedName']
+    $PSBoundParameters['DistinguishedName'] = $getTargetResourceResult['DistinguishedName']
 
     # Convert EffectiveTime to DateTime object for comparison
     $PSBoundParameters['EffectiveTime']  = [DateTime]::Parse($EffectiveTime)
 
     foreach ($parameter in $PSBoundParameters.Keys)
     {
-        if ($PSBoundParameters.$parameter -eq $getTargetResource.$parameter)
+        if ($PSBoundParameters.$parameter -eq $getTargetResourceResult.$parameter)
         {
             # Check if parameter is in compliance
             $compareTargetResource += [pscustomobject] @{
                 Parameter = $parameter
                 Expected  = $PSBoundParameters.$parameter
-                Actual    = $getTargetResource.$parameter
+                Actual    = $getTargetResourceResult.$parameter
                 Pass      = $true
             }
         }
         # Need to check if parameter is part of schema, otherwise ignore all other parameters like verbose
-        elseif ($getTargetResource.ContainsKey($parameter))
+        elseif ($getTargetResourceResult.ContainsKey($parameter))
         {
-            # We are out of compliance if we get here
-            # $PSBoundParameters.$parameter -ne $getTargetResource.$parameter
+            <#
+                We are out of compliance if we get here
+                $PSBoundParameters.$parameter -ne $getTargetResourceResult.$parameter
+            #>
             $compareTargetResource += [pscustomobject] @{
                 Parameter = $parameter
                 Expected  = $PSBoundParameters.$parameter
-                Actual    = $getTargetResource.$parameter
+                Actual    = $getTargetResourceResult.$parameter
                 Pass      = $false
             }
         }
@@ -397,7 +461,13 @@ function Compare-TargetResourceState
 
 <#
     .SYNOPSIS
-        Checks permissions to see if the user or computer has domain admin permissions
+        Checks permissions to see if the user or computer has domain admin permissions.
+
+    .DESCRIPTION
+        DSC Resources run under the SYSTEM user context and there is no Credential parameter
+        to pass to the KDSRootKey powershell commands. For this reason, we need to check
+        permissions manually, otherwise we get back empty results with no error. One must use
+        PsDscRunAsCredential or run this resource on the domain controller
 
     .PARAMETER User
         The user to check permissions against
@@ -435,7 +505,10 @@ function Assert-HasDomainAdminRights
     .DESCRIPTION
         If you have a domain with sub-domains, this will return the root domain name. For example,
         if you had a domain contoso.com and a sub domain of fake.contoso.com, it would return
-        contoso.com
+        contoso.com.
+
+        This is used to get the Forest level root domain name. The KDS Root Key is created at the forest
+        level and this is used to determine it's distinguished name
 #>
 function Get-ADRootDomainDN
 {

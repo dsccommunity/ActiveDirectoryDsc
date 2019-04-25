@@ -40,7 +40,8 @@ try
         # Need to do a deep copy of the Array of objects that compare returns
         function Copy-ArrayObjects
         {
-            param(
+            param
+            (
                 [Parameter(Mandatory = $true)]
                 [ValidateNotNullOrEmpty()]
                 [System.Array]
@@ -198,7 +199,6 @@ try
                 Mock -CommandName Get-KdsRootKey -ParameterFilter {
                     $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                 } -MockWith {
-                    Write-Verbose "Call Get-KdsRootKey with effective time of: $($mockKDSRootKeyFuture.EffectiveTime)"
                     return ,@($mockKDSRootKeyFuture)
                 }
 
@@ -226,7 +226,6 @@ try
                     Mock -CommandName Get-KdsRootKey -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Call Get-KdsRootKey with effective time of: $($mockKDSRootKeyFuture.EffectiveTime)"
                         return @($mockKDSRootKeyFuture,$mockKDSRootKeyFuture)
                     }
 
@@ -245,7 +244,6 @@ try
             Context -Name 'When the system is NOT in the desired state' {
                 Context -Name 'When no KDS root keys exists' {
                     Mock -CommandName Get-KdsRootKey -MockWith {
-                        Write-Verbose "Call Get-KdsRootKey with and no keys exist"
                         return $null
                     }
 
@@ -264,7 +262,6 @@ try
                     Mock -CommandName Get-KdsRootKey -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Call Get-KdsRootKey with effective time of: $($mockKDSRootKeyFuture.EffectiveTime)"
                         return ,@($mockKDSRootKeyPast)
                     }
 
@@ -290,7 +287,6 @@ try
                 Mock -CommandName Get-TargetResource -ParameterFilter {
                     $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                 } -MockWith {
-                    Write-Verbose "Calling Get-TargetResource with $($mockKDSRootKeyFuture.EffectiveTime)"
                     return $mockKDSRootKeyFutureGet
                 }
             }
@@ -384,7 +380,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                         return $mockKDSRootKeyFutureCompare
                     }
 
@@ -406,7 +401,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                         return $mockKDSRootKeyFutureCompareEnsureAbsent
                     }
 
@@ -439,7 +433,6 @@ try
                 Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                     $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                 } -MockWith {
-                    Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                     return $mockKDSRootKeyFutureCompareNotCompliant
                 }
 
@@ -477,7 +470,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                         return $mockKDSRootKeyFutureCompare
                     }
 
@@ -503,7 +495,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                         return $mockKDSRootKeyFutureCompareEnsureAbsent
                     }
 
@@ -527,7 +518,6 @@ try
                     Mock -CommandName Get-KdsRootKey -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Call Get-KdsRootKey with effective time of: $($mockKDSRootKeyFuture.EffectiveTime)"
                         return @($mockKDSRootKeyFuture, $mockKDSRootKeyPast)
                     }
 
@@ -539,7 +529,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                         return $mockKDSRootKeyFutureCompareEnsureAbsent
                     }
 
@@ -564,7 +553,6 @@ try
                     Mock -CommandName Get-KdsRootKey -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Call Get-KdsRootKey with effective time of: $($mockKDSRootKeyFuture.EffectiveTime)"
                         return ,@($mockKDSRootKeyFuture)
                     }
 
@@ -576,7 +564,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                         return $mockKDSRootKeyFutureCompareEnsureAbsent
                     }
 
@@ -619,7 +606,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                         return $mockKDSRootKeyFutureCompareEnsureAbsent
                     }
 
@@ -646,7 +632,6 @@ try
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyPast.EffectiveTime -eq $EffectiveTime
                     } -MockWith {
-                        Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyPast.EffectiveTime)"
                         return $mockKDSRootKeyPastCompareEnsureAbsent
                     }
 
@@ -655,7 +640,7 @@ try
                         Ensure        = 'Present'
                     }
 
-                    It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'UnsafeEffectiveTime' is 'False'" {
+                    It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'False'" {
                         { $null = Set-TargetResource @getTargetResourceParametersPast -ErrorAction 'SilentlyContinue' } | Should -Throw
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
@@ -664,12 +649,12 @@ try
                     }
 
                     $getTargetResourceParametersPast = @{
-                        EffectiveTime       = $mockKDSRootKeyPast.EffectiveTime
-                        Ensure              = 'Present'
-                        UnsafeEffectiveTime = $true
+                        EffectiveTime            = $mockKDSRootKeyPast.EffectiveTime
+                        Ensure                   = 'Present'
+                        AllowUnsafeEffectiveTime = $true
                     }
 
-                    It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'UnsafeEffectiveTime' is 'True'" {
+                    It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'True'" {
                         Set-TargetResource @getTargetResourceParametersPast
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
@@ -688,12 +673,10 @@ try
                 Mock -CommandName Compare-TargetResourceState -ParameterFilter {
                     $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
                 } -MockWith {
-                    Write-Verbose "Calling Compare-TargetResourceState with $($mockKDSRootKeyFuture.EffectiveTime)"
                     return $mockKDSRootKeyFutureCompareEnsureAbsent
                 }
 
                 Mock -CommandName Get-KdsRootKey -MockWith {
-                    Write-Verbose 'Get-KdsRootKey throws an error'
                     throw 'Microsoft.ActiveDirectory.Management.ADServerDownException'
                 }
 
