@@ -1,37 +1,25 @@
+
+$script:resourceModulePath = Split-Path `
+-Path (Split-Path -Path $PSScriptRoot -Parent) `
+-Parent
+
+$script:localizationModulePath = Join-Path `
+-Path $script:resourceModulePath `
+-ChildPath 'Modules\DscResource.LocalizationHelper'
+
+Import-Module -Name (
+Join-Path `
+    -Path $script:localizationModulePath `
+    -ChildPath 'DscResource.LocalizationHelper.psm1'
+)
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADKDSKey'
+
 ## Import the common AD functions
 $adCommonFunctions = Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
     -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
 Import-Module -Name $adCommonFunctions
-
-# Localized messages
-data LocalizedData
-{
-    # culture='en-US'
-    ConvertFrom-StringData @'
-        RetrievingKDSRootKey               = Retrieving KDS Root Key with effective date of '{0}'.
-        RetrievingKDSRootKeyError          = There was an error retrieving the KDS Root Key with effective date of '{0}'.
-        AddingKDSRootKey                   = Creating KDS Root Key with the effective date of '{0}'.
-        AddingKDSRootKeyDateInPast         = Effective date is in the past and the 'AllowUnsafeEffectiveTime' is set to Enabled. Adding KDS Root Key with the effective date of '{0}', overriding 10 hour safety measure for domain controller replication.
-        AddingKDSRootKeyError              = Effective date of '{0}' is in the past and 'AllowUnsafeEffectiveTime' was not specified so the KDS Root Key will NOT be created!
-        KDSRootKeyAddError                 = There was an error when trying to Add the KDS Root Key with the effective date of '{0}'.
-        KDSRootKeyRemoveError              = There was an error when trying to Remove the KDS Root Key with the effective date of '{0}'.
-        FoundKDSRootKeySameEffectiveTime   = Found more than one KDS Root Keys with the same effective time, please ensure that only one KDS key exists with the effective time of '{0}'.
-        FoundKDSRootKeyMultiple            = Found more than one KDS Root Keys. This shouldn't be an issue, but having only one key per domain is recommended.
-        FoundKDSRootKey                    = Found KDS Root Key with the effective date of '{0}'.
-        NotEnoughKDSRootKeysPresent        = The KDS Root Key with effective date of '{0}' is the only key that exists. Please ensure a key exists if there are existing 'Group Managed Service Accounts (gMSAs)' present.
-        NotEnoughKDSRootKeysPresentNoForce = There is only one KDS Root Key left and the 'ForceRemove' parameter no set; therefore, the KDS Root Key with effective date of '{0}' will not be removed.
-        RemovingKDSRootKey                 = Removing the KDS Root Key with effective date '{0}'.
-        KDSRootKeyNotInDesiredState        = KDS Root Key with the effective date of '{0}' is NOT in the desired state.
-        KDSRootKeyInDesiredState           = KDS Root Key with the effective date of '{0}' is in the desired state.
-        NotDesiredPropertyState            = The parameter of '{0}' for the KDS Root Key with the effective date of '{1}' is incorrect. Expected '{2}', actual '{3}'.
-        IncorrectPermissions               = The DSC resource is running under the context of '{0}' and doesn't have 'Domain Admin' permissions. This resource needs to run as a Domain Admin or on a Domain Controller.
-        EffectiveTimeInvalid               = The EffectiveTime of '{0}' is invalid. Please ensure that the date and time is parsable using DateTime.
-        CheckingDomainAdminUserRights      = Checking if the user '{0}' has valid Domain Admin permissions.
-        CheckingDomainAdminComputerRights  = Checking if the node '{0}' is a Domain Controller. The node has a product type of '{1}'. If the product type is 2, then it is a domain controller.
-        RetrievingRootDomainDN             = Retrieved the root domain distinguished name of '{0}'.
-'@
-}
 
 <#
     .SYNOPSIS
@@ -73,21 +61,23 @@ function Get-TargetResource
         DistinguishedName = $null
     }
 
-    Write-Verbose -Message ($LocalizedData.RetrievingKDSRootKey -f $EffectiveTime)
+    Write-Verbose -Message ($script:localizedData.RetrievingKDSRootKey -f $EffectiveTime)
+
     try
     {
         $EffectiveTimeObject = [DateTime]::Parse($EffectiveTime)
     }
     catch
     {
-        Write-Error -Message ($LocalizedData.EffectiveTimeInvalid -f $EffectiveTime)
-        throw $_
+        $errorMessage = $script:localizedData.EffectiveTimeInvalid -f $EffectiveTime
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
     $currentUser = Get-CurrentUser
     if (-not (Assert-HasDomainAdminRights -User $currentUser))
     {
-        throw $LocalizedData.IncorrectPermissions -f $currentUser.Name
+        $errorMessage = $script:localizedData.IncorrectPermissions -f $currentUser.Name
+        New-InvalidResultException -Message $errorMessage
     }
 
     try
@@ -96,8 +86,8 @@ function Get-TargetResource
     }
     catch
     {
-        Write-Error -Message ($LocalizedData.RetrievingKDSRootKeyError)
-        throw $_
+        $errorMessage = $script:localizedData.RetrievingKDSRootKeyError -f $EffectiveTime
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
     $kdsRootKey = $null
@@ -114,15 +104,16 @@ function Get-TargetResource
     }
     else
     {
-        Write-Verbose -Message ($LocalizedData.FoundKDSRootKey -f $EffectiveTime)
+        Write-Verbose -Message ($script:localizedData.FoundKDSRootKey -f $EffectiveTime)
         if ($kdsRootKeys.Count -gt 1)
         {
-            Write-Warning -Message ($LocalizedData.FoundKDSRootKeyMultiple)
+            Write-Warning -Message ($script:localizedData.FoundKDSRootKeyMultiple)
         }
 
         if ($kdsRootKey.Count -gt 1)
         {
-            throw $LocalizedData.FoundKDSRootKeySameEffectiveTime -f $EffectiveTime
+            $errorMessage = $script:localizedData.FoundKDSRootKeySameEffectiveTime -f $EffectiveTime
+            New-InvalidOperationException -Message $errorMessage
         }
         elseif ($kdsRootKey)
         {
@@ -212,14 +203,14 @@ function Test-TargetResource
 
     if ($ensureState)
     {
-        Write-Verbose ($LocalizedData.NotDesiredPropertyState -f
+        Write-Verbose ($script:localizedData.NotDesiredPropertyState -f
                         'Ensure', $EffectiveTime, $ensureState.Expected, $ensureState.Actual)
-        Write-Verbose -Message ($LocalizedData.KDSRootKeyNotInDesiredState -f $EffectiveTime)
+        Write-Verbose -Message ($script:localizedData.KDSRootKeyNotInDesiredState -f $EffectiveTime)
         return $false
     }
     else
     {
-        Write-Verbose -Message ($LocalizedData.KDSRootKeyInDesiredState -f $EffectiveTime)
+        Write-Verbose -Message ($script:localizedData.KDSRootKeyInDesiredState -f $EffectiveTime)
         return $true
     }
 }
@@ -304,16 +295,17 @@ function Set-TargetResource
             }
             catch
             {
-                Write-Error -Message ($LocalizedData.EffectiveTimeInvalid -f $EffectiveTime)
-                throw $_
+                $errorMessage = $script:localizedData.EffectiveTimeInvalid -f $EffectiveTime
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
 
             # We want the key to be present, but it currently does not exist
-            $currentDateTimeObject = [DateTime]::Parse($(Get-Date))
+            $currentDateTime = Get-Date
+            $currentDateTimeObject = [DateTime]::Parse($currentDateTime) # Pester doesn't see Get-Date called if we put inside Parse
 
             if ($EffectiveTimeObject -le $currentDateTimeObject -and $AllowUnsafeEffectiveTime)
             {
-                Write-Warning -Message ($LocalizedData.AddingKDSRootKeyDateInPast -f $EffectiveTime)
+                Write-Warning -Message ($script:localizedData.AddingKDSRootKeyDateInPast -f $EffectiveTime)
             }
             elseif ($EffectiveTimeObject -le $currentDateTimeObject)
             {
@@ -321,11 +313,12 @@ function Set-TargetResource
                  Effective time is in the past and we don't have AllowUnsafeEffectiveTime set
                  to enabled, so we exit with an error
                 #>
-                throw $LocalizedData.AddingKDSRootKeyError -f $EffectiveTime
+                $errorMessage = $script:localizedData.AddingKDSRootKeyError -f $EffectiveTime
+                New-InvalidOperationException -Message $errorMessage
             }
             else
             {
-                Write-Verbose -Message ($LocalizedData.AddingKDSRootKey -f $EffectiveTime)
+                Write-Verbose -Message ($script:localizedData.AddingKDSRootKey -f $EffectiveTime)
             }
 
             <#
@@ -339,8 +332,8 @@ function Set-TargetResource
             }
             catch
             {
-                Write-Error -Message ($LocalizedData.KDSRootKeyAddError -f $EffectiveTime)
-                throw $_
+                $errorMessage =$script:localizedData.KDSRootKeyAddError -f $EffectiveTime
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
         }
         elseif ($Ensure -eq 'Absent')
@@ -348,18 +341,19 @@ function Set-TargetResource
             # We want the account to be Absent, but it is Present
             if ((Get-KdsRootKey).Count -gt 1)
             {
-                Write-Verbose -Message ($LocalizedData.RemovingKDSRootKey -f $EffectiveTime)
+                Write-Verbose -Message ($script:localizedData.RemovingKDSRootKey -f $EffectiveTime)
             }
             else
             {
                 if ($ForceRemove)
                 {
-                    Write-Verbose -Message ($LocalizedData.RemovingKDSRootKey -f $EffectiveTime)
-                    Write-Warning -Message ($LocalizedData.NotEnoughKDSRootKeysPresent -f $EffectiveTime)
+                    Write-Verbose -Message ($script:localizedData.RemovingKDSRootKey -f $EffectiveTime)
+                    Write-Warning -Message ($script:localizedData.NotEnoughKDSRootKeysPresent -f $EffectiveTime)
                 }
                 else
                 {
-                    throw $LocalizedData.NotEnoughKDSRootKeysPresentNoForce -f $EffectiveTime
+                    $errorMessage = $script:localizedData.NotEnoughKDSRootKeysPresentNoForce -f $EffectiveTime
+                    New-InvalidOperationException -Message $errorMessage
                 }
             }
 
@@ -370,8 +364,8 @@ function Set-TargetResource
             }
             catch
             {
-                Write-Error -Message ($LocalizedData.KDSRootKeyRemoveError -f $EffectiveTime)
-                throw $_
+                $errorMessage = $script:localizedData.KDSRootKeyRemoveError -f $EffectiveTime
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
         }
     }
@@ -484,14 +478,15 @@ function Assert-HasDomainAdminRights
         $User
     )
 
+
     # Get-KdsRootKey will return $null instead of a permission error if it can't retrieve the keys
     # so we need manually check
 
     $windowsPrincipal = New-Object -TypeName System.Security.Principal.WindowsPrincipal($User)
     $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
 
-    Write-Verbose -Message ($LocalizedData.CheckingDomainAdminUserRights -f $User.Name)
-    Write-Verbose -Message ($LocalizedData.CheckingDomainAdminComputerRights -f $osInfo.CSName, $osInfo.ProductType)
+    Write-Verbose -Message ($script:localizedData.CheckingDomainAdminUserRights -f $User.Name)
+    Write-Verbose -Message ($script:localizedData.CheckingDomainAdminComputerRights -f $osInfo.CSName, $osInfo.ProductType)
 
     return $windowsPrincipal.IsInRole("Domain Admins") -or
             $windowsPrincipal.IsInRole("Enterprise Admins") -or
@@ -517,7 +512,7 @@ function Get-ADRootDomainDN
     param()
 
     $rootDomainDN = (New-Object -TypeName System.DirectoryServices.DirectoryEntry('LDAP://RootDSE')).Get('rootDomainNamingContext')
-    Write-Verbose -Message ($LocalizedData.RetrievingRootDomainDN -f $rootDomainDN)
+    Write-Verbose -Message ($script:localizedData.RetrievingRootDomainDN -f $rootDomainDN)
     return $rootDomainDN
 }
 

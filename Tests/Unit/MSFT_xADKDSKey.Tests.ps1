@@ -153,6 +153,112 @@ try
             }
         )
 
+        #region Function Assert-HasDomainAdminRights
+        Describe -Name 'MSFT_xADKDSKey\Assert-HasDomainAdminRights' {
+            Context 'When Assert-HasDomainAdminRights returns true' {
+                Context 'When the user has proper permissions' {
+                    BeforeAll {
+                        Mock -CommandName New-Object -MockWith {
+                            $object = New-MockObject -Type 'System.Security.Principal.WindowsPrincipal'
+                            $object | Add-Member -MemberType ScriptMethod -Name 'IsInRole' -Force -Value { return $true }
+                            return $object
+                        }
+
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0} }
+                    }
+
+                    It "Should Call 'New-Object' and 'Get-CimInstance'" {
+                        $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+                        Assert-HasDomainAdminRights -User $currentUser | Should -BeTrue
+
+                        Assert-MockCalled -CommandName New-Object -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-CimInstance -Scope It -Exactly -Times 1
+                    }
+                }
+
+                Context 'When the resource is run on a domain controller' {
+                    BeforeAll {
+                        Mock -CommandName New-Object -MockWith {
+                            $object = New-MockObject -Type 'System.Security.Principal.WindowsPrincipal'
+                            $object | Add-Member -MemberType ScriptMethod -Name 'IsInRole' -Force -Value { return $false }
+                            return $object
+                        }
+
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 2} }
+                    }
+
+                    It "Should Call 'New-Object' and 'Get-CimInstance'" {
+                        $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+
+                        Assert-HasDomainAdminRights -User $currentUser | Should -BeTrue
+
+                        Assert-MockCalled -CommandName New-Object -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-CimInstance -Scope It -Exactly -Times 1
+                    }
+                }
+            }
+
+            Context 'When Assert-HasDomainAdminRights returns false' {
+                Context 'When the user does NOT have proper permissions' {
+                    BeforeAll {
+                        Mock -CommandName New-Object -MockWith {
+                            $object = New-MockObject -Type 'System.Security.Principal.WindowsPrincipal'
+                            $object | Add-Member -MemberType ScriptMethod -Name 'IsInRole' -Force -Value { return $false }
+                            return $object
+                        }
+
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0} }
+                    }
+
+                    It "Should Call 'New-Object' and 'Get-CimInstance'" {
+                        $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+                        Assert-HasDomainAdminRights -User $currentUser | Should -BeFalse
+
+                        Assert-MockCalled -CommandName New-Object -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-CimInstance -Scope It -Exactly -Times 1
+                    }
+                }
+
+                Context 'When the resource is NOT run on a domain controller' {
+                    BeforeAll {
+                        Mock -CommandName New-Object -MockWith {
+                            $object = New-MockObject -Type 'System.Security.Principal.WindowsPrincipal'
+                            $object | Add-Member -MemberType ScriptMethod -Name 'IsInRole' -Force -Value { return $false }
+                            return $object
+                        }
+
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0} }
+                    }
+
+                    It "Should Call 'New-Object' and 'Get-CimInstance'" {
+                        $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+
+                        Assert-HasDomainAdminRights -User $currentUser | Should -BeFalse
+
+                        Assert-MockCalled -CommandName New-Object -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-CimInstance -Scope It -Exactly -Times 1
+                    }
+                }
+            }
+        }
+        #endregion Function Assert-HasDomainAdminRights
+
+        #region Function Get-ADRootDomainDN
+        Describe -Name 'MSFT_xADKDSKey\Get-ADRootDomainDN' {
+            BeforeAll {
+                Mock -CommandName New-Object -MockWith {
+                    $object = [PSCustomObject]@{}
+                    $object | Add-Member -MemberType ScriptMethod -Name 'Get' -Value { return $mockADDomain }
+                    return $object
+                }
+            }
+
+            It 'Should return domain distinguished name' {
+                Get-ADRootDomainDN | Should -Be $mockADDomain
+            }
+        }
+        #endregion Function Get-ADRootDomainDN
+
         #region Function Get-TargetResource
         Describe -Name 'MSFT_xADKDSKey\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
@@ -164,12 +270,14 @@ try
                     return $mockADDomain
                 }
 
-                Mock -CommandName Assert-HasDomainAdminRights -MockWith { return $true }
+                Mock -CommandName Assert-HasDomainAdminRights -MockWith {
+                    return $true
+                }
+
+                Mock -CommandName Get-KdsRootKey
             }
 
             Context -Name 'When the system uses specific parameters' {
-                Mock -CommandName Get-KdsRootKey
-
                 It 'Should call "Assert-Module" to check AD module is installed' {
                     $getTargetResourceParameters = @{
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
@@ -181,7 +289,37 @@ try
                 }
             }
 
-            Context -Name 'When system cannot connect to domain or other errors' {
+            Context -Name "When 'EffectiveTime' is not parsable by DateTime" {
+                It 'Should call throw an error if EffectiveTime cannot be parsed' {
+                    $getTargetResourceParameters = @{
+                        EffectiveTime = 'Useless Time'
+                    }
+
+                    { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw 'System.InvalidOperationException'
+                }
+
+                Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 0
+                Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 0
+            }
+
+            Context -Name "When the Current User does not have proper permissions" {
+                Mock -CommandName Assert-HasDomainAdminRights -MockWith { return $false }
+
+                It 'Should call throw an error if Context User does not have correct permissions' {
+                    $getTargetResourceParameters = @{
+                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                    }
+
+                    { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw 'System.Exception'
+
+                    Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 0
+                }
+            }
+
+            Context -Name "When 'Get-KdsRootKey' throws an error" {
                 Mock -CommandName Get-KdsRootKey -MockWith {
                     throw 'Microsoft.ActiveDirectory.Management.ADServerDownException'
                 }
@@ -191,14 +329,16 @@ try
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                     }
 
-                    { $null = Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw
+                    { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw 'System.InvalidOperationException'
+
+                    Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                 }
             }
 
             Context -Name 'When the system is in desired state' {
-                Mock -CommandName Get-KdsRootKey -ParameterFilter {
-                    $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                } -MockWith {
+                Mock -CommandName Get-KdsRootKey -MockWith {
                     return ,@($mockKDSRootKeyFuture)
                 }
 
@@ -218,14 +358,15 @@ try
                                 $mockKDSRootKeyFuture.KeyId, $mockADDomain
 
                     $getTargetResourceResult.DistinguishedName | Should -Be $dn
+
+                    Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                 }
 
                 Context -Name 'When system has two or more KDS keys with the same effective date' {
                     Mock -CommandName Write-Warning
 
-                    Mock -CommandName Get-KdsRootKey -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
+                    Mock -CommandName Get-KdsRootKey -MockWith {
                         return @($mockKDSRootKeyFuture,$mockKDSRootKeyFuture)
                     }
 
@@ -234,9 +375,12 @@ try
                             EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                         }
 
-                        { $null = Get-TargetResource @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw
+                        { Get-TargetResource @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
+                            Should -Throw 'System.InvalidOperationException'
 
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Times 1
+                        Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                     }
                 }
             }
@@ -255,13 +399,14 @@ try
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParametersFuture
 
                         $getTargetResourceResult.Ensure | Should Be 'Absent'
+
+                        Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                     }
                 }
 
                 Context -Name 'When the KDS root key does not exist' {
-                    Mock -CommandName Get-KdsRootKey -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
+                    Mock -CommandName Get-KdsRootKey -MockWith {
                         return ,@($mockKDSRootKeyPast)
                     }
 
@@ -271,8 +416,10 @@ try
                         }
 
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParametersFuture
-
                         $getTargetResourceResult.Ensure | Should Be 'Absent'
+
+                        Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
                     }
 
                 }
@@ -292,11 +439,11 @@ try
             }
 
             Context -Name 'When the system is in the desired state' {
-                $getTargetResourceParametersFuture = @{
+                $compareTargetResourceParametersFuture = @{
                     EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                 }
 
-                $getTargetResourceResult = Compare-TargetResourceState @getTargetResourceParametersFuture
+                $getTargetResourceResult = Compare-TargetResourceState @compareTargetResourceParametersFuture
                 $testCases = @()
                 $getTargetResourceResult | ForEach-Object {
                     $testCases += @{
@@ -328,20 +475,20 @@ try
             }
 
             Context -Name 'When the system is NOT in the desired state' {
-                $getTargetResourceParametersFuture = @{
+                $compareTargetResourceParametersFuture = @{
                     EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                     Ensure        = 'Absent'
                 }
 
-                $getTargetResourceResult = Compare-TargetResourceState @getTargetResourceParametersFuture
+                $compareTargetResourceResult = Compare-TargetResourceState @compareTargetResourceParametersFuture
                 $testCases = @()
                 # Need to remove parameters that will always be true
-                $getTargetResourceResult = $getTargetResourceResult | Where-Object {
+                $compareTargetResourceResult = $compareTargetResourceResult | Where-Object {
                     $_.Parameter -ne 'EffectiveTime' -and
                     $_.Parameter -ne 'DistinguishedName'
                 }
 
-                $getTargetResourceResult | ForEach-Object {
+                $compareTargetResourceResult | ForEach-Object {
                     $testCases += @{
                         Parameter = $_.Parameter
                         Expected  = $_.Expected
@@ -377,17 +524,19 @@ try
         Describe -Name 'MSFT_xADKDSKey\Test-TargetResource' -Tag 'Test' {
             Context -Name "When the system is in the desired state and 'Ensure' is 'Present'" {
                 It "Should pass when the Parameters are properly set" {
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
+                    Mock -CommandName Compare-TargetResourceState -MockWith {
                         return $mockKDSRootKeyFutureCompare
                     }
 
-                    $getTargetResourceParametersFuture = @{
+                    $testTargetResourceParametersFuture = @{
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                     }
 
-                    Test-TargetResource @getTargetResourceParametersFuture | Should -Be $true
+                    Test-TargetResource @testTargetResourceParametersFuture | Should -Be $true
+
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                    } -Scope It -Exactly -Times 1
                 }
             }
 
@@ -398,18 +547,20 @@ try
                     $objectEnsure.Actual = 'Absent'
                     $objectEnsure.Pass = $true
 
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
+                    Mock -CommandName Compare-TargetResourceState -MockWith {
                         return $mockKDSRootKeyFutureCompareEnsureAbsent
                     }
 
-                    $getTargetResourceParametersFuture = @{
+                    $testTargetResourceParametersFuture = @{
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                         Ensure        = 'Absent'
                     }
 
-                    Test-TargetResource @getTargetResourceParametersFuture | Should -Be $true
+                    Test-TargetResource @testTargetResourceParametersFuture | Should -Be $true
+
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                    } -Scope It -Exactly -Times 1
                 }
             }
 
@@ -430,9 +581,7 @@ try
                     $testCases += @{ Parameter = $incorrectParameter.Name; Value = $incorrectParameter.Value }
                 }
 
-                Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                    $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                } -MockWith {
+                Mock -CommandName Compare-TargetResourceState -MockWith {
                     return $mockKDSRootKeyFutureCompareNotCompliant
                 }
 
@@ -445,13 +594,18 @@ try
                         $Value
                     )
 
-                    $getTargetResourceParametersFuture = @{
+                    $testTargetResourceParametersFuture = @{
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                         Ensure        = 'Present'
                     }
 
-                    $getTargetResourceParametersFuture[$Parameter] = $value
-                    Test-TargetResource @getTargetResourceParametersFuture | Should Be $false
+                    $testTargetResourceParametersFuture[$Parameter] = $value
+                    Test-TargetResource @testTargetResourceParametersFuture | Should Be $false
+
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                    } -Scope It -Exactly -Times 1
+
                 }
             }
         }
@@ -465,228 +619,235 @@ try
                 Mock -CommandName Write-Warning
             }
 
-            Context -Name 'When the system is in the desired state' {
-                Context -Name 'When the KDS root key is Present' {
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
-                        return $mockKDSRootKeyFutureCompare
-                    }
-
-                    $getTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
-                    }
-
-                    It 'Should NOT take any action when all parameters are correct' {
-                        Set-TargetResource @getTargetResourceParametersFuture
-
-                        Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
-                        Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
-                        Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                    }
+            Context -Name 'When the system is in the desired state and KDS Root Key is Present' {
+                Mock -CommandName Compare-TargetResourceState -MockWith {
+                    return $mockKDSRootKeyFutureCompare
                 }
 
-                Context -Name 'When the KDS root key is Absent' {
-                    $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
-                    $objectEnsure.Expected = 'Absent'
-                    $objectEnsure.Pass = $false
+                $setTargetResourceParametersFuture = @{
+                    EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                }
 
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
+                It 'Should NOT take any action when all parameters are correct' {
+                    Set-TargetResource @setTargetResourceParametersFuture
+
+                    Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
+                    Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
+                    Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
-                        return $mockKDSRootKeyFutureCompareEnsureAbsent
-                    }
-
-                    $getTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
-                        Ensure = 'Present'
-                    }
-
-                    It 'Should NOT take any action when all parameters are correct' {
-                        Set-TargetResource @getTargetResourceParametersFuture
-
-                        Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
-                        Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
-                        Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                    }
+                    } -Scope It -Exactly -Times 1
                 }
             }
 
-            Context -Name 'When the system is NOT in the desired state' {
-                Context -Name 'When the KDS root key is Present and more than one KDS root key exists' {
-                    Mock -CommandName Get-KdsRootKey -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
-                        return @($mockKDSRootKeyFuture, $mockKDSRootKeyPast)
-                    }
+            Context -Name 'When the system is in the desired state and KDS Root Key is Absent' {
+                $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
+                $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
+                $objectEnsure.Expected = 'Absent'
+                $objectEnsure.Pass = $false
 
+                Mock -CommandName Compare-TargetResourceState -MockWith {
+                    return $mockKDSRootKeyFutureCompareEnsureAbsent
+                }
+
+                $setTargetResourceParametersFuture = @{
+                    EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                    Ensure = 'Present'
+                }
+
+                It 'Should NOT take any action when all parameters are correct' {
+                    Set-TargetResource @setTargetResourceParametersFuture
+
+                    Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
+                    Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
+                    Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                    } -Scope It -Exactly -Times 1
+                }
+            }
+
+            Context -Name 'When the system is NOT in the desired state and need to remove KDS Root Key' {
+                BeforeEach {
                     $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
                     $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
                     $objectEnsure.Actual = 'Present'
                     $objectEnsure.Pass = $false
 
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
+                    Mock -CommandName Compare-TargetResourceState -MockWith {
                         return $mockKDSRootKeyFutureCompareEnsureAbsent
                     }
 
-                    $getTargetResourceParametersFuture = @{
+                    $setTargetResourceParametersFuture = @{
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                         Ensure = 'Absent'
                     }
+                }
+
+                Context -Name 'When more than one KDS root key exists' {
+                    Mock -CommandName Get-KdsRootKey -MockWith {
+                        return @($mockKDSRootKeyFuture, $mockKDSRootKeyPast)
+                    }
 
                     It "Should call 'Remove-ADObject' when 'Ensure' is set to 'Present'" {
-                        Set-TargetResource @getTargetResourceParametersFuture
+                        Set-TargetResource @setTargetResourceParametersFuture
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 1
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                            $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                        } -Scope It -Exactly -Times 1
                     }
-
-
                 }
 
-                Context -Name 'When the KDS root key is Present and only one KDS root key exists' {
-                    Mock -CommandName Get-KdsRootKey -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
+                Context -Name 'When only one KDS root key exists' {
+                    Mock -CommandName Get-KdsRootKey -MockWith {
                         return ,@($mockKDSRootKeyFuture)
                     }
 
-                    $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
-                    $objectEnsure.Actual = 'Present'
-                    $objectEnsure.Pass = $false
-
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
-                        return $mockKDSRootKeyFutureCompareEnsureAbsent
-                    }
-
-                    $getTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
-                        Ensure = 'Absent'
-                    }
-
                     It "Should call NOT 'Remove-ADObject' when 'Ensure' is set to 'Present' and 'ForceRemove' is 'False'" {
-                        { $null = Set-TargetResource @getTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } | Should -Throw
+                        { Set-TargetResource @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
+                            Should -Throw 'System.InvalidOperationException'
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                            $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                        } -Scope It -Exactly -Times 1
                     }
 
-                    $getTargetResourceParametersFutureForce = @{
+                    $setTargetResourceParametersFutureForce = @{
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                         Ensure        = 'Absent'
                         ForceRemove   = $true
                     }
 
                     It "Should call 'Remove-ADObject' when 'Ensure' is set to 'Present' and 'ForceRemove' is 'True'" {
-                        $null = Set-TargetResource @getTargetResourceParametersFutureForce
+                        Set-TargetResource @setTargetResourceParametersFutureForce
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 1
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                            $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                        } -Scope It -Exactly -Times 1
                     }
                 }
 
-                Context -Name 'When the KDS root key is Absent' {
-                    $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
+                Context -Name 'When calling Remove-ADObject fails' {
+                    Mock -CommandName Get-KdsRootKey -MockWith {
+                        return @($mockKDSRootKeyFuture, $mockKDSRootKeyPast)
+                    }
+
+                    Mock -CommandName Remove-ADObject -MockWith {
+                        throw 'Microsoft.ActiveDirectory.Management.ADServerDownException'
+                    }
+
+                    It "Should call 'Remove-ADObject' and throw an error when catching any errors" {
+                        { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
+                            Should -Throw 'System.InvalidOperationException'
+
+                        Assert-MockCalled -CommandName Remove-ADObject -Scope It -Exactly -Times 1
+                    }
+                }
+            }
+
+            Context -Name 'When the system is NOT in the desired state and need to add KDS Root Key' {
+                BeforeEach {
+                    $mockKDSRootKeyCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
+                    $objectEnsure = $mockKDSRootKeyCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
                     $objectEnsure.Actual = 'Absent'
                     $objectEnsure.Pass = $false
 
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
-                        return $mockKDSRootKeyFutureCompareEnsureAbsent
+                    Mock -CommandName Compare-TargetResourceState -MockWith {
+                        return $mockKDSRootKeyCompareEnsureAbsent
                     }
+                }
 
-                    $getTargetResourceParametersFuture = @{
+                It "Should call 'Add-KDSRootKey' when 'Ensure' is set to 'Present'" {
+                    $setTargetResourceParametersFuture = @{
                         EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
                         Ensure = 'Present'
                     }
 
-                    It "Should call 'Add-KDSRootKey' when 'Ensure' is set to 'Present'" {
-                        Set-TargetResource @getTargetResourceParametersFuture
+                    Set-TargetResource @setTargetResourceParametersFuture
 
-                        Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
-                        Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
-                        Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                    }
+                    Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
+                    Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
+                    Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
+                    } -Scope It -Exactly -Times 1
                 }
 
-                Context -Name 'When the KDS root key is Absent and the EffectiveTime is before current date' {
-                    $mockKDSRootKeyPastCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyPastCompare
-                    $objectEnsure = $mockKDSRootKeyPastCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
-                    $objectEnsure.Actual = 'Absent'
-                    $objectEnsure.Pass = $false
-
-                    Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                        $mockKDSRootKeyPast.EffectiveTime -eq $EffectiveTime
-                    } -MockWith {
-                        return $mockKDSRootKeyPastCompareEnsureAbsent
-                    }
-
-                    $getTargetResourceParametersPast = @{
+                It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'False'" {
+                    $setTargetResourceParametersPast = @{
                         EffectiveTime = $mockKDSRootKeyPast.EffectiveTime
                         Ensure        = 'Present'
                     }
 
-                    It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'False'" {
-                        { $null = Set-TargetResource @getTargetResourceParametersPast -ErrorAction 'SilentlyContinue' } | Should -Throw
+                    { Set-TargetResource @setTargetResourceParametersPast -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw 'InvalidOperationException'
 
-                        Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
-                        Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
-                        Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
-                    }
+                    Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
+                    Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
+                    Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 0
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyPast.EffectiveTime
+                    } -Scope It -Exactly -Times 1
+                }
 
-                    $getTargetResourceParametersPast = @{
+                It "Should call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'True'" {
+                    $setTargetResourceParametersPast = @{
                         EffectiveTime            = $mockKDSRootKeyPast.EffectiveTime
                         Ensure                   = 'Present'
                         AllowUnsafeEffectiveTime = $true
                     }
 
-                    It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'True'" {
-                        Set-TargetResource @getTargetResourceParametersPast
+                    Set-TargetResource @setTargetResourceParametersPast
 
-                        Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
-                        Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
-                        Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 1
-                    }
-                }
-            }
-
-            Context -Name 'When system cannot connect to domain or other errors' {
-                $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
-                $objectEnsure.Actual = 'Present'
-                $objectEnsure.Pass = $false
-
-                Mock -CommandName Compare-TargetResourceState -ParameterFilter {
-                    $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
-                } -MockWith {
-                    return $mockKDSRootKeyFutureCompareEnsureAbsent
+                    Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 1
+                    Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
+                    Assert-MockCalled -CommandName Write-Warning -Scope It -Exactly -Times 1
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyPast.EffectiveTime
+                    } -Scope It -Exactly -Times 1
                 }
 
-                Mock -CommandName Get-KdsRootKey -MockWith {
-                    throw 'Microsoft.ActiveDirectory.Management.ADServerDownException'
-                }
-
-                It "Should call 'Get-KdsRootKey' and throw an error when catching any errors" {
-                    $getTargetResourceParameters = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
-                        Ensure = 'Absent'
+                It 'Should call throw an error if EffectiveTime cannot be parsed' {
+                    $setTargetResourceParametersFuture = @{
+                        EffectiveTime = 'Useless Time'
                     }
 
-                    { $null = Set-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw
+                    { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw 'System.InvalidOperationException'
+
+                    Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
+                        $mockKDSRootKeyFuture.EffectiveTime
+                    } -Scope It -Exactly -Times 1
+                }
+
+                Context -Name 'When calling Add-KDSRootKey fails' {
+                    Mock -CommandName Add-KDSRootKey -MockWith {
+                        throw 'Microsoft.ActiveDirectory.Management.ADServerDownException'
+                    }
+
+                    It "Should call 'Add-KdsRootKey' and throw an error when catching any errors" {
+                        $setTargetResourceParametersFuture = @{
+                            EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                            Ensure = 'Present'
+                        }
+
+                        { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
+                            Should -Throw 'System.InvalidOperationException'
+
+                        Assert-MockCalled -CommandName Add-KdsRootKey -Scope It -Exactly -Times 1
+                    }
                 }
             }
         }
