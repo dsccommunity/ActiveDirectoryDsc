@@ -410,7 +410,11 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
     `Test-DscParameterState`. The goal is that all resource common functions
     are moved to this module (functions that are or can be used by more
     than one resource) ([issue #257](https://github.com/PowerShell/xActiveDirectory/issues/257)).
-* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Andrew Wickham (@awickham10)](https://github.com/awickham10) and [@kungfu71186](https://github.com/kungfu71186)
+  * Added xADManagedServiceAccount resource to manage Managed Service
+    Accounts (MSAs). [Andrew Wickham (@awickham10)](https://github.com/awickham10)
+    and [@kungfu71186](https://github.com/kungfu71186)
+* Changes to xADReplicationSiteLink
+  * Make use of the new localization helper functions.
 
 ### 2.25.0.0
 
