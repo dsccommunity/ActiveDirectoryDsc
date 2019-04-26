@@ -39,8 +39,10 @@ try
 
     InModuleScope $script:DSCResourceName {
         # Need to do a deep copy of the Array of objects that compare returns
-        function Copy-ArrayObjects {
-            param(
+        function Copy-ArrayObjects
+        {
+            param
+            (
                 [Parameter(Mandatory = $true)]
                 [ValidateNotNullOrEmpty()]
                 [System.Array]
