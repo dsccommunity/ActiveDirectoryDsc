@@ -26,19 +26,25 @@ Import-Module -Name $adCommonFunctions
         Gets the specified managed service account.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName')
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER MembershipAttribute
-        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs)
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Credential
-        Specifies the user account credentials to use to perform this task
+        Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Controller instance to use to perform the task
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Get-TargetResource
 {
@@ -143,42 +149,52 @@ function Get-TargetResource
     return $targetResource
 } #end function Get-TargetResource
 
+
 <#
     .SYNOPSIS
         Tests the state of the managed service account.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName')
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
-        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
-        Specifies a description of the object (ldapDisplayName 'description')
+        Specifies a description of the object (ldapDisplayName 'description').
 
     .PARAMETER DisplayName
-        Specifies the display name of the object (ldapDisplayName 'displayName')
+        Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword'). Only used when 'Group' is selected for 'AccountType'
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs)
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
-        Specifies the user account credentials to use to perform this task
+        Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Controller instance to use to perform the task
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Test-TargetResource
 {
@@ -286,37 +302,46 @@ function Test-TargetResource
         Sets the state of the managed service account.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName')
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
-        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
-        Specifies a description of the object (ldapDisplayName 'description')
+        Specifies a description of the object (ldapDisplayName 'description').
 
     .PARAMETER DisplayName
-        Specifies the display name of the object (ldapDisplayName 'displayName')
+        Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword'). Only used when 'Group' is selected for 'AccountType'
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs)
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
-        Specifies the user account credentials to use to perform this task
+        Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Controller instance to use to perform the task
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Set-TargetResource
 {
@@ -505,37 +530,46 @@ function Set-TargetResource
         Adds the managed service account.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName')
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
-        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
-        Specifies a description of the object (ldapDisplayName 'description')
+        Specifies a description of the object (ldapDisplayName 'description').
 
     .PARAMETER DisplayName
-        Specifies the display name of the object (ldapDisplayName 'displayName')
+        Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword'). Only used when 'Group' is selected for 'AccountType'
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs)
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
-        Specifies the user account credentials to use to perform this task
+        Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Controller instance to use to perform the task
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function New-ADServiceAccountHelper
 {
@@ -636,37 +670,46 @@ function New-ADServiceAccountHelper
         Compares the state of the managed service account.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName')
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
-        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
-        Specifies a description of the object (ldapDisplayName 'description')
+        Specifies a description of the object (ldapDisplayName 'description').
 
     .PARAMETER DisplayName
-        Specifies the display name of the object (ldapDisplayName 'displayName')
+        Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword'). Only used when 'Group' is selected for 'AccountType'
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs)
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
-        Specifies the user account credentials to use to perform this task
+        Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Controller instance to use to perform the task
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Compare-TargetResourceState
 {
