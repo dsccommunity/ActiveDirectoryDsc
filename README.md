@@ -406,6 +406,8 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
     the helper functions `Get-LocalizedData`, `New-InvalidArgumentException`,
     `New-InvalidOperationException`, `New-ObjectNotFoundException`, and
     `New-InvalidResultException` ([issue #257](https://github.com/PowerShell/xActiveDirectory/issues/257)).
+    For more information around these helper functions and localization
+    in resource, see [Localization section in the Style Guideline](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#localization).
   * Added common module *DscResource.Common* containing the helper function
     `Test-DscParameterState`. The goal is that all resource common functions
     are moved to this module (functions that are or can be used by more
