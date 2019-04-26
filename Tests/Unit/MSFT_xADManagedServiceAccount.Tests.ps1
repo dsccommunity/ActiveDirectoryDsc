@@ -358,7 +358,7 @@ try
                         ServiceAccountName = $mockSingleServiceAccount.Name
                     }
 
-                    { $null = Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw
+                    { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw 'InvalidOperationException'
                 }
             }
 
@@ -1536,7 +1536,7 @@ try
                         ServiceAccountName = $mockSingleServiceAccount.Name
                         Path               = $objectPath.Expected
                     }
-                    { $null = Set-TargetResource  @testResourceParametersSingle -ErrorAction 'SilentlyContinue' } | Should -Throw
+                    { Set-TargetResource  @testResourceParametersSingle -ErrorAction 'SilentlyContinue' } | Should -Throw 'InvalidOperationException'
                 }
             }
         }
