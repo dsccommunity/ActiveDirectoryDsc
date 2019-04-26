@@ -401,7 +401,16 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
 
 ### Unreleased
 
-* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [@awickham10](https://github.com/awickham10) and [@kungfu71186](https://github.com/kungfu71186)
+* Changes to xActiveDirectory
+  * Added localization module *DscResource.LocalizationHelper* containing
+    the helper functions `Get-LocalizedData`, `New-InvalidArgumentException`,
+    `New-InvalidOperationException`, `New-ObjectNotFoundException`, and
+    `New-InvalidResultException` ([issue #257](https://github.com/PowerShell/xActiveDirectory/issues/257)).
+  * Added common module *DscResource.Common* containing the helper function
+    `Test-DscParameterState`. The goal is that all resource common functions
+    are moved to this module (functions that are or can be used by more
+    than one resource) ([issue #257](https://github.com/PowerShell/xActiveDirectory/issues/257)).
+* Added xADManagedServiceAccount resource to manage Managed Service Accounts (MSAs). [Andrew Wickham (@awickham10)](https://github.com/awickham10) and [@kungfu71186](https://github.com/kungfu71186)
 
 ### 2.25.0.0
 
