@@ -215,8 +215,7 @@ The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of the managed service account object.
 * **`[String]` Ensure** _(Write)_: Specifies whether the given managed service account is present or absent.
   * If not specified, this value defaults to Present.
-* **`[String]` Enabled** _(Write)_: Specifies whether the given managed service account enabled or disabled.
-  * If not specified, this value defaults to Enabled.
+* **`[String]` Enabled** _(Read)_: Specifies whether the given managed service account enabled or disabled.
 * **`[String]` Members** _(Write)_: Specifies the membership policy for systems that can use a group-managed service account
   * This is only required if AccountType is 'Group'
 * **`[String]` MembershipAttribute** _(Write)_: Active Directory attribute used to perform membership operations
