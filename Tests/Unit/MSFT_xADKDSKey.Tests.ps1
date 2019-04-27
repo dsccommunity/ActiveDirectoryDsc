@@ -94,7 +94,7 @@ try
         }
 
         $mockKDSRootKeyFutureGet = @{
-            EffectiveTime     = $mockKDSRootKeyFuture.EffectiveTime
+            EffectiveTime     = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
             CreationTime      = $mockKDSRootKeyFuture.CreationTime
             KeyId             = $mockKDSRootKeyFuture.KeyId
             Ensure            = 'Present'
@@ -103,7 +103,7 @@ try
         }
 
         $mockKDSRootKeyPastGet = @{
-            EffectiveTime     = $mockKDSRootKeyPast.EffectiveTime
+            EffectiveTime     = ($mockKDSRootKeyPast.EffectiveTime).ToString()
             CreationTime      = $mockKDSRootKeyPast.CreationTime
             KeyId             = $mockKDSRootKeyPast.KeyId
             Ensure            = 'Present'
@@ -280,7 +280,7 @@ try
             Context -Name 'When the system uses specific parameters' {
                 It 'Should call "Assert-Module" to check AD module is installed' {
                     $getTargetResourceParameters = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     }
 
                     { Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
@@ -296,7 +296,8 @@ try
                     }
 
                     { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
-                        Should -Throw 'System.InvalidOperationException'
+                        Should -Throw ($script:localizedData.EffectiveTimeInvalid -f
+                                            $getTargetResourceParameters.EffectiveTime)
                 }
 
                 Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 0
@@ -308,11 +309,13 @@ try
 
                 It 'Should call throw an error if Context User does not have correct permissions' {
                     $getTargetResourceParameters = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     }
 
+                    $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+
                     { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
-                        Should -Throw 'System.Exception'
+                        Should -Throw ($script:localizedData.IncorrectPermissions -f $currentUser.Name)
 
                     Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
                     Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 0
@@ -326,11 +329,12 @@ try
 
                 It "Should call 'Get-KdsRootKey' and throw an error when catching any errors" {
                     $getTargetResourceParameters = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     }
 
                     { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
-                        Should -Throw 'System.InvalidOperationException'
+                        Should -Throw ($script:localizedData.RetrievingKDSRootKeyError -f
+                                            $getTargetResourceParameters.EffectiveTime)
 
                     Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
                     Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
@@ -344,7 +348,7 @@ try
 
                 It 'Should mock call to Get-KdsRootKey and return identical information' {
                     $getTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     }
 
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParametersFuture
@@ -372,11 +376,12 @@ try
 
                     It 'Should return Warning that more than one key exists and Error that two keys exist with the same dates' {
                         $getTargetResourceParameters = @{
-                            EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                            EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         }
 
                         { Get-TargetResource @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
-                            Should -Throw 'System.InvalidOperationException'
+                            Should -Throw ($script:localizedData.FoundKDSRootKeySameEffectiveTime -f
+                                                $getTargetResourceParameters.EffectiveTime)
 
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Times 1
                         Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
@@ -393,7 +398,7 @@ try
 
                     It "Should return 'Ensure' is 'Absent'" {
                         $getTargetResourceParametersFuture = @{
-                            EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                            EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         }
 
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParametersFuture
@@ -412,7 +417,7 @@ try
 
                     It "Should return 'Ensure' is 'Absent'" {
                         $getTargetResourceParametersFuture = @{
-                            EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                            EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         }
 
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParametersFuture
@@ -440,12 +445,12 @@ try
 
             Context -Name 'When the system is in the desired state' {
                 $compareTargetResourceParametersFuture = @{
-                    EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                    EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                 }
 
-                $getTargetResourceResult = Compare-TargetResourceState @compareTargetResourceParametersFuture
+                $compareTargetResourceResult = Compare-TargetResourceState @compareTargetResourceParametersFuture
                 $testCases = @()
-                $getTargetResourceResult | ForEach-Object {
+                $compareTargetResourceResult | ForEach-Object {
                     $testCases += @{
                         Parameter = $_.Parameter
                         Expected  = $_.Expected
@@ -476,7 +481,7 @@ try
 
             Context -Name 'When the system is NOT in the desired state' {
                 $compareTargetResourceParametersFuture = @{
-                    EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                    EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     Ensure        = 'Absent'
                 }
 
@@ -529,7 +534,7 @@ try
                     }
 
                     $testTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     }
 
                     Test-TargetResource @testTargetResourceParametersFuture | Should -Be $true
@@ -552,7 +557,7 @@ try
                     }
 
                     $testTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         Ensure        = 'Absent'
                     }
 
@@ -595,7 +600,7 @@ try
                     )
 
                     $testTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         Ensure        = 'Present'
                     }
 
@@ -625,7 +630,7 @@ try
                 }
 
                 $setTargetResourceParametersFuture = @{
-                    EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                    EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                 }
 
                 It 'Should NOT take any action when all parameters are correct' {
@@ -651,7 +656,7 @@ try
                 }
 
                 $setTargetResourceParametersFuture = @{
-                    EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                    EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     Ensure = 'Present'
                 }
 
@@ -679,7 +684,7 @@ try
                     }
 
                     $setTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         Ensure = 'Absent'
                     }
                 }
@@ -709,7 +714,8 @@ try
 
                     It "Should call NOT 'Remove-ADObject' when 'Ensure' is set to 'Present' and 'ForceRemove' is 'False'" {
                         { Set-TargetResource @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
-                            Should -Throw 'System.InvalidOperationException'
+                            Should -Throw ($script:localizedData.NotEnoughKDSRootKeysPresentNoForce -f
+                                                $setTargetResourceParametersFuture.EffectiveTime)
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
@@ -721,7 +727,7 @@ try
                     }
 
                     $setTargetResourceParametersFutureForce = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         Ensure        = 'Absent'
                         ForceRemove   = $true
                     }
@@ -750,7 +756,8 @@ try
 
                     It "Should call 'Remove-ADObject' and throw an error when catching any errors" {
                         { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
-                            Should -Throw 'System.InvalidOperationException'
+                            Should -Throw ($script:localizedData.KDSRootKeyRemoveError -f
+                                                $setTargetResourceParametersFuture.EffectiveTime)
 
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Exactly -Times 1
                     }
@@ -771,7 +778,7 @@ try
 
                 It "Should call 'Add-KDSRootKey' when 'Ensure' is set to 'Present'" {
                     $setTargetResourceParametersFuture = @{
-                        EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                         Ensure = 'Present'
                     }
 
@@ -787,12 +794,13 @@ try
 
                 It "Should NOT call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'False'" {
                     $setTargetResourceParametersPast = @{
-                        EffectiveTime = $mockKDSRootKeyPast.EffectiveTime
+                        EffectiveTime = ($mockKDSRootKeyPast.EffectiveTime).ToString()
                         Ensure        = 'Present'
                     }
 
                     { Set-TargetResource @setTargetResourceParametersPast -ErrorAction 'SilentlyContinue' } |
-                        Should -Throw 'InvalidOperationException'
+                        Should -Throw ($script:localizedData.AddingKDSRootKeyError -f
+                                            $setTargetResourceParametersPast.EffectiveTime)
 
                     Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                     Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
@@ -804,7 +812,7 @@ try
 
                 It "Should call 'Add-KDSRootKey' when 'EffectiveTime' is past date and 'AllowUnsafeEffectiveTime' is 'True'" {
                     $setTargetResourceParametersPast = @{
-                        EffectiveTime            = $mockKDSRootKeyPast.EffectiveTime
+                        EffectiveTime            = ($mockKDSRootKeyPast.EffectiveTime).ToString()
                         Ensure                   = 'Present'
                         AllowUnsafeEffectiveTime = $true
                     }
@@ -825,7 +833,8 @@ try
                     }
 
                     { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
-                        Should -Throw 'System.InvalidOperationException'
+                        Should -Throw ($script:localizedData.EffectiveTimeInvalid -f
+                                            $setTargetResourceParametersFuture.EffectiveTime)
 
                     Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime
@@ -839,12 +848,13 @@ try
 
                     It "Should call 'Add-KdsRootKey' and throw an error when catching any errors" {
                         $setTargetResourceParametersFuture = @{
-                            EffectiveTime = $mockKDSRootKeyFuture.EffectiveTime
+                            EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                             Ensure = 'Present'
                         }
 
                         { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
-                            Should -Throw 'System.InvalidOperationException'
+                            Should -Throw ($script:localizedData.KDSRootKeyAddError -f
+                                                $setTargetResourceParametersFuture.EffectiveTime)
 
                         Assert-MockCalled -CommandName Add-KdsRootKey -Scope It -Exactly -Times 1
                     }

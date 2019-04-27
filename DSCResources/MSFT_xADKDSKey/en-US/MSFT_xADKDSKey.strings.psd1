@@ -21,5 +21,5 @@ ConvertFrom-StringData @'
     EffectiveTimeInvalid               = The EffectiveTime of '{0}' is invalid. Please ensure that the date and time is parsable using DateTime. (KDSK0018)
     CheckingDomainAdminUserRights      = Checking if the user '{0}' has valid Domain Admin permissions. (KDSK0019)
     CheckingDomainAdminComputerRights  = Checking if the node '{0}' is a Domain Controller. The node has a product type of '{1}'. If the product type is 2, then it is a domain controller. (KDSK0020)
-    RetrievingRootDomainDN             = Retrieved the root domain distinguished name of '{0}'. (KDSK0021)
+    RetrievedRootDomainDN             = Retrieved the root domain distinguished name of '{0}'. (KDSK0021)
 '@

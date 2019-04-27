@@ -65,7 +65,7 @@ function Get-TargetResource
 
     try
     {
-        $EffectiveTimeObject = [DateTime]::Parse($EffectiveTime)
+        $effectiveTimeObject = [DateTime]::Parse($EffectiveTime)
     }
     catch
     {
@@ -94,7 +94,7 @@ function Get-TargetResource
     if ($kdsRootKeys)
     {
         $kdsRootKey = $kdsRootKeys.GetEnumerator() | Where-Object -FilterScript {
-            [DateTime]::Parse($_.EffectiveTime) -eq $EffectiveTimeObject
+            [DateTime]::Parse($_.EffectiveTime) -eq $effectiveTimeObject
         }
     }
 
@@ -118,7 +118,7 @@ function Get-TargetResource
         elseif ($kdsRootKey)
         {
             $targetResource['Ensure']            = 'Present'
-            $targetResource['EffectiveTime']     = [DateTime]::Parse($kdsRootKey.EffectiveTime)
+            $targetResource['EffectiveTime']     = ([DateTime]::Parse($kdsRootKey.EffectiveTime)).ToString()
             $targetResource['CreationTime']      = $kdsRootKey.CreationTime
             $targetResource['KeyId']             = $kdsRootKey.KeyId
             $targetResource['DistinguishedName'] = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
@@ -203,7 +203,7 @@ function Test-TargetResource
 
     if ($ensureState)
     {
-        Write-Verbose ($script:localizedData.NotDesiredPropertyState -f
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
                         'Ensure', $EffectiveTime, $ensureState.Expected, $ensureState.Actual)
         Write-Verbose -Message ($script:localizedData.KDSRootKeyNotInDesiredState -f $EffectiveTime)
         return $false
@@ -263,7 +263,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $AllowUnsafeEffectiveTime = $false,
+        $AllowUnsafeEffectiveTime,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -273,7 +273,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $ForceRemove = $false
+        $ForceRemove
     )
 
     $getTargetResourceParameters = @{
@@ -291,7 +291,7 @@ function Set-TargetResource
         {
             try
             {
-                $EffectiveTimeObject = [DateTime]::Parse($EffectiveTime)
+                $effectiveTimeObject = [DateTime]::Parse($EffectiveTime)
             }
             catch
             {
@@ -299,15 +299,15 @@ function Set-TargetResource
                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
 
-            # We want the key to be present, but it currently does not exist
-            $currentDateTime = Get-Date
-            $currentDateTimeObject = [DateTime]::Parse($currentDateTime) # Pester doesn't see Get-Date called if we put inside Parse
+            $currentDateTimeObject = Get-Date
 
-            if ($EffectiveTimeObject -le $currentDateTimeObject -and $AllowUnsafeEffectiveTime)
+            # We want the key to be present, but it currently does not exist
+            if ($effectiveTimeObject -le $currentDateTimeObject -and
+                    $PSBoundParameters.ContainsKey('AllowUnsafeEffectiveTime') -and $AllowUnsafeEffectiveTime)
             {
                 Write-Warning -Message ($script:localizedData.AddingKDSRootKeyDateInPast -f $EffectiveTime)
             }
-            elseif ($EffectiveTimeObject -le $currentDateTimeObject)
+            elseif ($effectiveTimeObject -le $currentDateTimeObject)
             {
                 <#
                  Effective time is in the past and we don't have AllowUnsafeEffectiveTime set
@@ -328,11 +328,11 @@ function Set-TargetResource
             #>
             try
             {
-                Add-KDSRootKey -EffectiveTime $EffectiveTimeObject.ToUniversalTime()
+                Add-KDSRootKey -EffectiveTime $effectiveTimeObject.ToUniversalTime()
             }
             catch
             {
-                $errorMessage =$script:localizedData.KDSRootKeyAddError -f $EffectiveTime
+                $errorMessage = $script:localizedData.KDSRootKeyAddError -f $EffectiveTime
                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
         }
@@ -345,7 +345,7 @@ function Set-TargetResource
             }
             else
             {
-                if ($ForceRemove)
+                if ($PSBoundParameters.ContainsKey('ForceRemove') -and $ForceRemove)
                 {
                     Write-Verbose -Message ($script:localizedData.RemovingKDSRootKey -f $EffectiveTime)
                     Write-Warning -Message ($script:localizedData.NotEnoughKDSRootKeysPresent -f $EffectiveTime)
@@ -410,7 +410,7 @@ function Compare-TargetResourceState
     )
 
     $getTargetResourceParameters = @{
-        EffectiveTime  = [DateTime]::Parse($EffectiveTime)
+        EffectiveTime  = $EffectiveTime
     }
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
@@ -421,6 +421,7 @@ function Compare-TargetResourceState
 
     # Convert EffectiveTime to DateTime object for comparison
     $PSBoundParameters['EffectiveTime']  = [DateTime]::Parse($EffectiveTime)
+    $getTargetResourceResult['EffectiveTime'] = [DateTime]::Parse($getTargetResourceResult.EffectiveTime)
 
     foreach ($parameter in $PSBoundParameters.Keys)
     {
@@ -478,9 +479,11 @@ function Assert-HasDomainAdminRights
         $User
     )
 
+    <#
+     Get-KdsRootKey will return $null instead of a permission error if it can't retrieve the keys
+     so we need manually check
+    #>
 
-    # Get-KdsRootKey will return $null instead of a permission error if it can't retrieve the keys
-    # so we need manually check
 
     $windowsPrincipal = New-Object -TypeName System.Security.Principal.WindowsPrincipal($User)
     $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
@@ -512,7 +515,7 @@ function Get-ADRootDomainDN
     param()
 
     $rootDomainDN = (New-Object -TypeName System.DirectoryServices.DirectoryEntry('LDAP://RootDSE')).Get('rootDomainNamingContext')
-    Write-Verbose -Message ($script:localizedData.RetrievingRootDomainDN -f $rootDomainDN)
+    Write-Verbose -Message ($script:localizedData.RetrievedRootDomainDN -f $rootDomainDN)
     return $rootDomainDN
 }
 
