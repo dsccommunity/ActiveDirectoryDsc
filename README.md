@@ -32,6 +32,10 @@ and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
+## Change log
+
+A full list of changes in each version can be found in the [change log](https://github.com/PowerShell/xActiveDirectory/blob/dev/README.md)
+
 ## Description
 
 The **xActiveDirectory** module contains DSC resources for deployment and
