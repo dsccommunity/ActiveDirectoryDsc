@@ -13,4 +13,5 @@ ConvertFrom-StringData @'
     UpdatingManagedServiceAccountProperty = Updating AD Managed Service Account property '{0}' to '{1}'. (MSA0011)
     AddingManagedServiceAccountError      = Error adding AD Managed Service Account '{0}'. (MSA0012)
     RetrievingPrincipalMembers            = Retrieving Principals Allowed To Retrieve Managed Password based on '{0}' property. (MSA0013)
+    RetrievingServiceAccountError         = There was an error when retrieving the AD Managed Service Account '{0}'. (MSA0014)
 '@

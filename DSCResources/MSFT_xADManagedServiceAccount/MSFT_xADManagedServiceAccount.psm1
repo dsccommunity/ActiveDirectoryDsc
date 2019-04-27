@@ -100,6 +100,8 @@ function Get-TargetResource
 
     try
     {
+        Write-Verbose -Message ($script:localizedData.RetrievingServiceAccount -f $ServiceAccountName)
+
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParameters -Property @(
             'Name'
             'DistinguishedName'
@@ -138,12 +140,12 @@ function Get-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        Write-Verbose ($script:localizedData.ManagedServiceAccountNotFound -f $ServiceAccountName)
+        Write-Verbose -Message ($script:localizedData.ManagedServiceAccountNotFound -f $ServiceAccountName)
         $targetResource['Ensure'] = 'Absent'
     }
     catch
     {
-        $errorMessage = $script:localizedData.RetrievingServiceAccount -f $ServiceAccountName
+        $errorMessage = $script:localizedData.RetrievingServiceAccountError -f $ServiceAccountName
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
     return $targetResource
@@ -267,7 +269,7 @@ function Test-TargetResource
         $ensureState = $compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'}
         if ($ensureState)
         {
-            Write-Verbose ($script:localizedData.NotDesiredPropertyState -f `
+            Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f `
                             'Ensure', $ensureState.Expected, $ensureState.Actual)
         }
         else
@@ -441,14 +443,14 @@ function Set-TargetResource
                     if ($AccountTypeForce)
                     {
                         # We need to recreate account first before we can update any properties
-                        Write-Verbose ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
+                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
                         Remove-ADServiceAccount @adServiceAccountParameters -Confirm:$false
                         $PSBoundParameters.Remove('AccountTypeForce')
                         New-ADServiceAccountHelper @PSBoundParameters
                     }
                     else
                     {
-                        Write-Warning ($script:localizedData.AccountTypeForceNotTrue -f $accountTypeState.Actual, $accountTypeState.Expected)
+                        Write-Warning -Message ($script:localizedData.AccountTypeForceNotTrue -f $accountTypeState.Actual, $accountTypeState.Expected)
                     }
                 }
                 # Remove AccountType since we don't want to enumerate down below
@@ -464,9 +466,9 @@ function Set-TargetResource
 
                 if ($isPathNonCompliant)
                 {
-                    Write-Verbose ($script:localizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                    $dn = $compareTargetResource | Where-Object {$_.Parameter -eq 'DistinguishedName'}
-                    $moveADObjectParameters['Identity'] = $dn.Actual
+                    Write-Verbose -Message ($script:localizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
+                    $distinguishedNameObject = $compareTargetResource | Where-Object {$_.Parameter -eq 'DistinguishedName'}
+                    $moveADObjectParameters['Identity'] = $distinguishedNameObject.Actual
                     Move-ADObject @moveADObjectParameters -TargetPath $Path
                 }
                 $compareTargetResourceNonCompliant =  @($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'Path'})
@@ -485,12 +487,12 @@ function Set-TargetResource
                         }
                         $listMembers = $Members -join ','
 
-                        Write-Verbose ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'Members', $listMembers)
+                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'Members', $listMembers)
                         $setServiceAccountParameters['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
                     }
                     else
                     {
-                        Write-Verbose ($script:localizedData.UpdatingManagedServiceAccountProperty -f $parameter, $PSBoundParameters.$parameter)
+                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f $parameter, $PSBoundParameters.$parameter)
                         $setServiceAccountParameters[$parameter] = $PSBoundParameters.$parameter
                     }
                 }
@@ -513,7 +515,7 @@ function Set-TargetResource
             # We want the account to be Absent, but it is Present
             if ($isEnsureNonCompliant)
             {
-                Write-Verbose ($script:localizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
+                Write-Verbose -Message ($script:localizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
                 Remove-ADServiceAccount @adServiceAccountParameters -Confirm:$false
             }
         }
@@ -625,7 +627,7 @@ function New-ADServiceAccountHelper
         $DomainController
     )
 
-    Write-Verbose ($script:localizedData.AddingManagedServiceAccount -f $ServiceAccountName)
+    Write-Verbose -Message ($script:localizedData.AddingManagedServiceAccount -f $ServiceAccountName)
 
     $adServiceAccountParameters = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
 

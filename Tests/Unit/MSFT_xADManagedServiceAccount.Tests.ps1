@@ -358,7 +358,8 @@ try
                         ServiceAccountName = $mockSingleServiceAccount.Name
                     }
 
-                    { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw 'InvalidOperationException'
+                    { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw ($script:localizedData.RetrievingServiceAccountError -f $getTargetResourceParameters.ServiceAccountName)
                 }
             }
 
@@ -1536,7 +1537,8 @@ try
                         ServiceAccountName = $mockSingleServiceAccount.Name
                         Path               = $objectPath.Expected
                     }
-                    { Set-TargetResource  @testResourceParametersSingle -ErrorAction 'SilentlyContinue' } | Should -Throw 'InvalidOperationException'
+                    { Set-TargetResource  @testResourceParametersSingle -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw ($script:localizedData.AddingManagedServiceAccountError -f $testResourceParametersSingle.ServiceAccountName)
                 }
             }
         }
