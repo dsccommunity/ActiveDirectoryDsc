@@ -866,7 +866,7 @@ try
                 }
 
                 It 'Should return $null' {
-                    Get-DomainControllerObject | Should -BeNullOrEmpty
+                    Get-DomainControllerObject -Verbose | Should -BeNullOrEmpty
 
                     Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
                 }
@@ -884,7 +884,7 @@ try
                 }
 
                 It 'Should return $null' {
-                    $result = Get-DomainControllerObject
+                    $result = Get-DomainControllerObject -Verbose
                     $result.Site | Should -Be 'MySite'
                     $result.Domain | Should -Be 'contoso.com'
                     $result.IsGlobalCatalog | Should -BeTrue
@@ -901,7 +901,7 @@ try
                 }
 
                 It 'Should return $null' {
-                    { Get-DomainControllerObject } | Should -Throw $localizedString.FailedEvaluatingDomainController
+                    { Get-DomainControllerObject  -Verbose } | Should -Throw $localizedString.FailedEvaluatingDomainController
 
                     Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
                 }
