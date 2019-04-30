@@ -187,7 +187,7 @@
 ## 2.0.0.0
 
 - Updated release, which added the resource:
-  * xADDomainTrust
+  - xADDomainTrust
 
 ## 1.0.0.0
 
