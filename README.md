@@ -34,7 +34,7 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 ## Change log
 
-A full list of changes in each version can be found in the [change log](https://github.com/PowerShell/xActiveDirectory/blob/dev/README.md)
+A full list of changes in each version can be found in the [change log](CHANGELOG.md).
 
 ## Description
 
