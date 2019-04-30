@@ -857,6 +857,56 @@ try
         }
         #endregion
 
+        Describe "$($Global:DSCResourceName)\Get-DomainControllerObject" {
+            Context 'When current node is not a domain controller' {
+                BeforeAll {
+                    Mock -CommandName Get-ADDomainController -MockWith {
+                        throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                    }
+                }
+
+                It 'Should return $null' {
+                    Get-DomainControllerObject | Should -BeNullOrEmpty
+
+                    Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When current is a domain controller' {
+                BeforeAll {
+                    Mock -CommandName Get-ADDomainController -MockWith {
+                        return @{
+                            Site            = 'MySite'
+                            Domain          = 'contoso.com'
+                            IsGlobalCatalog = $true
+                        }
+                    }
+                }
+
+                It 'Should return $null' {
+                    $result = Get-DomainControllerObject
+                    $result.Site | Should -Be 'MySite'
+                    $result.Domain | Should -Be 'contoso.com'
+                    $result.IsGlobalCatalog | Should -BeTrue
+
+                    Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the evaluation throws an error' {
+                BeforeAll {
+                    Mock -CommandName Get-ADDomainController -MockWith {
+                        throw 'mocked error'
+                    }
+                }
+
+                It 'Should return $null' {
+                    { Get-DomainControllerObject } | Should -Throw $localizedString.FailedEvaluatingDomainController
+
+                    Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                }
+            }
+        }
     }
     #endregion
 }

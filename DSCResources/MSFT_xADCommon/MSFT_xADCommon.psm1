@@ -24,6 +24,9 @@ data localizedString
         FoundRestoreTargetInRecycleBin = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object.
         RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
         AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'.
+
+        ConcludeNotDomainController      = Could not evaluate that the node is a domain controller, assuming that the node is not a domain controller. (ADC0001)
+        FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller. (ADC0002)
 '@
 }
 
@@ -890,4 +893,67 @@ function Add-ADCommonGroupMember
     {
         Add-ADGroupMember @Parameters -Members $Members
     }
+}
+
+<#
+    .SYNOPSIS
+        Returns the domain controller object if the node is a domain controller,
+        otherwise it return $null.
+
+    .PARAMETER ComputerName
+        The name of the node to return the domain controller object for.
+        Defaults to $env:COMPUTERNAME.
+
+    .NOTES
+        Throws if the evaluation fails.
+#>
+function Get-DomainControllerObject
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $ComputerName = $env:COMPUTERNAME,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    <#
+        It is not possible to use `-ErrorAction 'SilentlyContinue` on the
+        cmdlet Get-ADDomainController since it will throw an error if the
+        node is not a domain controller regardless.
+    #>
+    try
+    {
+        $getADDomainControllerParameters = @{
+            Identity = $ComputerName
+        }
+
+        if ($PSBoundParameters.ContainsKey('Credential'))
+        {
+            $getADDomainControllerParameters['Credential'] = $Credential
+        }
+
+        $domainControllerObject = Get-ADDomainController @getADDomainControllerParameters
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        <#
+            Catches the error from Get-ADDomainController when the node
+            is not a domain controller.
+        #>
+        $domainControllerObject = $null
+
+        Write-Verbose -Message $localizedString.ConcludeNotDomainController
+    }
+    catch
+    {
+        $errorMessage = $localizedString.FailedEvaluatingDomainController
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+    }
+
+    return $domainControllerObject
 }

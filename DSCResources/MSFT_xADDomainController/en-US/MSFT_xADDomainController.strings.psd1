@@ -3,8 +3,6 @@ ConvertFrom-StringData @'
     DomainPresent = The domain '{0}' is present. Looking for domain controllers. (ADDC0002)
     FoundDomainController = Found the domain controller '{0}' in the domain '{1}'. (ADDC0003)
     AlreadyDomainController = The current node '{0}' is already a domain controller for the domain '{1}'. (ADDC0004)
-    ConcludeNotDomainController = The evaluation to determine if the node is a domain controller returned an error, assuming the error means that the node is not a domain controller. (ADDC0005) The error message returned: {0}
-    FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller.
     NotDomainController = The current node '{0}' is not a domain controller. (ADDC0006)
     IsDomainController = The current node '{0}' is a domain controller for the domain '{1}'. (ADDC0007)
     MissingDomain = Current node could not find the domain '{0}'. (ADDC0008)
@@ -16,4 +14,5 @@ ConvertFrom-StringData @'
     FailedToFindSite = The site '{0}' could not be found in the domain '{1}'. (ADDC0014)
     TestingConfiguration = Determine the state of the domain controller on the current node '{0}' in the domain '{1}'. (ADDC0015)
     WrongSite = The domain controller is in the site '{0}', but expected it to be in the site '{1}'. (ADDC0016)
+    ExpectedDomainController = Expected the node to be a domain controller, but did not get a domain controller object. (ADDC0017)
 '@

@@ -37,10 +37,28 @@ Configuration xADDomainController_AddDomainControllerToDomainUsingIFM_Config
 
     node localhost
     {
-        WindowsFeature RSAT
+        WindowsFeature 'InstallADDomainServicesFeature'
         {
-            Name   = 'RSAT-AD-PowerShell'
             Ensure = 'Present'
+            Name = 'AD-Domain-Services'
+        }
+
+        WindowsFeature 'RSATADPowerShell'
+        {
+            Ensure = 'Present'
+            Name   = 'RSAT-AD-PowerShell'
+
+            DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
+        }
+
+        xWaitForADDomain 'WaitForestAvailability'
+        {
+            DomainName = 'contoso.com'
+            DomainUserCredential = $DomainAdministratorCredential
+            RetryCount = 10
+            RetryIntervalSec = 120
+
+            DependsOn = '[WindowsFeature]RSATADPowerShell'
         }
 
         xADDomainController 'DomainControllerWithIFM'
@@ -49,6 +67,8 @@ Configuration xADDomainController_AddDomainControllerToDomainUsingIFM_Config
             DomainAdministratorCredential = $DomainAdministratorCredential
             SafemodeAdministratorPassword = $DomainAdministratorCredential
             InstallationMediaPath         = 'F:\IFM'
+
+            DependsOn = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
 }

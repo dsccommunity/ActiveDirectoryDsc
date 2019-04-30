@@ -37,10 +37,28 @@ Configuration xADDomainController_AddDomainControllerToDomainAllProperties_Confi
 
     node localhost
     {
-        WindowsFeature RSAT
+        WindowsFeature 'InstallADDomainServicesFeature'
         {
-            Name   = 'RSAT-AD-PowerShell'
             Ensure = 'Present'
+            Name = 'AD-Domain-Services'
+        }
+
+        WindowsFeature 'RSATADPowerShell'
+        {
+            Ensure = 'Present'
+            Name   = 'RSAT-AD-PowerShell'
+
+            DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
+        }
+
+        xWaitForADDomain 'WaitForestAvailability'
+        {
+            DomainName = 'contoso.com'
+            DomainUserCredential = $DomainAdministratorCredential
+            RetryCount = 10
+            RetryIntervalSec = 120
+
+            DependsOn = '[WindowsFeature]RSATADPowerShell'
         }
 
         xADDomainController 'DomainControllerAllProperties'
@@ -53,6 +71,8 @@ Configuration xADDomainController_AddDomainControllerToDomainAllProperties_Confi
             SysvolPath                    = 'C:\Windows\SYSVOL'
             SiteName                      = 'Europe'
             IsGlobalCatalog               = $true
+
+            DependsOn = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
 }

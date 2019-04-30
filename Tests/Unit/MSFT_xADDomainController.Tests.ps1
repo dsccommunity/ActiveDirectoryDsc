@@ -109,19 +109,21 @@ try
             Context 'Normal Operations' {
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-ADDomainController {
+                Mock -CommandName Get-DomainControllerObject {
                     return @{
                         Site            = $correctSiteName
                         Domain          = $correctDomainName
                         IsGlobalCatalog = $true
                     }
                 }
+
                 Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } -MockWith {
                     return @{
                         'Database log files path' = 'C:\Windows\NTDS'
                         'DSA Working Directory'   = 'C:\Windows\NTDS'
                     }
                 }
+
                 Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' } -MockWith {
                     return @{
                         'SysVol' = 'C:\Windows\SYSVOL\sysvol'
@@ -146,7 +148,9 @@ try
             Context 'Domain Controller Service not installed on host' {
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-ADDomainController { throw "Cannot find directory server with identity: '$env:COMPUTERNAME'." }
+                Mock -CommandName Get-DomainControllerObject -MockWith {
+                    return $null
+                }
 
                 $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
@@ -184,7 +188,7 @@ try
                 }
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-ADDomainController -MockWith { return $stubDomainController }
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
                 Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
 
@@ -201,7 +205,7 @@ try
                 }
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-ADDomainController -MockWith { return $stubDomainController }
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
                 Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
 
@@ -218,7 +222,7 @@ try
                 }
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-ADDomainController -MockWith { return $stubDomainController }
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Test-ADReplicationSite -MockWith { return $false }
 
                 {
@@ -238,7 +242,7 @@ try
                 }
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-ADDomainController -MockWith { return $stubDomainController }
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
                 Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
 
@@ -260,7 +264,7 @@ try
                 }
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-ADDomainController -MockWith { return $stubDomainController }
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
                 Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
 
@@ -361,7 +365,7 @@ try
             Context 'When specifying the parameter IsGlobalCatalog' {
                 BeforeAll {
                     Mock -CommandName Set-ADObject
-                    Mock -CommandName Get-ADDomainController {
+                    Mock -CommandName Get-DomainControllerObject {
                         return @{
                             Site                 = $correctSiteName
                             Domain               = $correctDomainName

@@ -100,53 +100,27 @@ function Get-TargetResource
         $script:localizedData.DomainPresent -f $DomainName
     )
 
-    <#
-        It is not possible to use `-ErrorAction 'SilentlyContinue` on the
-        cmdlet Get-ADDomainController since it will throw an error if the
-        node is not a domain controller regardless.
-    #>
-    try
-    {
-        $domainControllerObject = Get-ADDomainController -Identity $env:COMPUTERNAME -Credential $DomainAdministratorCredential
-    }
-    catch
-    {
-        <#
-            Catches the error from Get-ADDomainController when the node
-            is not a domain controller.
-
-            Writing out the error message, in case there is another unforseen
-            error.
-        #>
-        $domainControllerObject = $null
-
-        Write-Verbose -Message (
-            $script:localizedData.ConcludeNotDomainController -f $_.ToString()
-        )
-    }
-
+    $domainControllerObject = Get-DomainControllerObject -ComputerName $env:COMPUTERNAME -Credential $DomainAdministratorCredential
     if ($domainControllerObject)
     {
         Write-Verbose -Message (
             $script:localizedData.FoundDomainController -f $domainControllerObject.Name, $domainControllerObject.Domain
         )
 
-        if ($domainControllerObject.Domain -eq $DomainName)
-        {
-            Write-Verbose -Message (
-                $script:localizedData.AlreadyDomainController -f $domainControllerObject.Name, $domainControllerObject.Domain
-            )
+        Write-Verbose -Message (
+            $script:localizedData.AlreadyDomainController -f $domainControllerObject.Name, $domainControllerObject.Domain
+        )
 
-            $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
-            $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
+        $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
+        $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
 
-            $getTargetResourceResult.Ensure = $true
-            $getTargetResourceResult.DatabasePath = $serviceNTDS.'DSA Working Directory'
-            $getTargetResourceResult.LogPath = $serviceNTDS.'Database log files path'
-            $getTargetResourceResult.SysvolPath = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
-            $getTargetResourceResult.SiteName = $domainControllerObject.Site
-            $getTargetResourceResult.IsGlobalCatalog = $domainControllerObject.IsGlobalCatalog
-        }
+        $getTargetResourceResult.Ensure = $true
+        $getTargetResourceResult.DatabasePath = $serviceNTDS.'DSA Working Directory'
+        $getTargetResourceResult.LogPath = $serviceNTDS.'Database log files path'
+        $getTargetResourceResult.SysvolPath = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+        $getTargetResourceResult.SiteName = $domainControllerObject.Site
+        $getTargetResourceResult.IsGlobalCatalog = $domainControllerObject.IsGlobalCatalog
+        $getTargetResourceResult.DomainName = $domainControllerObject.Domain
     }
     else
     {
@@ -321,23 +295,17 @@ function Set-TargetResource
                 Write-Verbose -Message $script:localizedData.RemoveGlobalCatalog
             }
 
-            try
+            $domainControllerObject = Get-DomainControllerObject -ComputerName $env:COMPUTERNAME -Credential $DomainAdministratorCredential
+            if ($domainControllerObject)
             {
-                <#
-                    It is not possible to use `-ErrorAction 'SilentlyContinue` on the
-                    cmdlet Get-ADDomainController since it will throw an error if the
-                    node is not a domain controller regardless.
-                #>
-                $domainControllerObject = Get-ADDomainController -Identity $env:COMPUTERNAME -Credential $DomainAdministratorCredential -ErrorAction 'Stop'
+                Set-ADObject -Identity $domainControllerObject.NTDSSettingsObjectDN -replace @{
+                    options = $globalCatalogOptionValue
+                }
             }
-            catch
+            else
             {
-                $errorMessage = $script:localizedData.FailedEvaluatingDomainController
-                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-            }
-
-            Set-ADObject -Identity $domainControllerObject.NTDSSettingsObjectDN -replace @{
-                options = $globalCatalogOptionValue
+                $errorMessage = $script:localizedData.ExpectedDomainController
+                New-ObjectNotFoundException -Message $errorMessage
             }
         }
 
