@@ -34,7 +34,7 @@
     Change to [x] for each task in the task list that applies to your PR.
     For those task that don't apply to you PR, leave those as is.
 -->
-- [ ] Added an entry under the Unreleased section of the change log in the README.md.
+- [ ] Added an entry under the Unreleased section in the CHANGELOG.md.
       Entry should say what was changed, and how that affects users (if applicable).
 - [ ] Resource documentation added/updated in README.md.
 - [ ] Resource parameter descriptions added/updated in README.md, schema.mof
