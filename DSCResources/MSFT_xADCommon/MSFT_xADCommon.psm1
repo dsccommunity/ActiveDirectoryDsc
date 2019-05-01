@@ -31,7 +31,7 @@ data localizedString
         RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
         AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'.
 
-        ConcludeNotDomainController      = Could not evaluate that the node is a domain controller, assuming that the node is not a domain controller. (ADC0001)
+        WasExpectingDomainController     = The operating system product type code is 2 so was expecting this node to be a domain controller, but no domain controller object was returned. (ADC0001)
         FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller. (ADC0002)
 '@
 }
@@ -906,18 +906,28 @@ function Add-ADCommonGroupMember
         Returns the domain controller object if the node is a domain controller,
         otherwise it return $null.
 
+    .PARAMETER DomainName
+        The name of the domain that should contain the domain controller.
+
     .PARAMETER ComputerName
         The name of the node to return the domain controller object for.
         Defaults to $env:COMPUTERNAME.
 
+    .OUTPUTS
+        If the domain controller is not found, and empty object ($null) is returned.
     .NOTES
-        Throws if the evaluation fails.
+        Throws and Microsoft.ActiveDirectory.Management.ADServerDownException
+        if the domain could not be contacted.
 #>
 function Get-DomainControllerObject
 {
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+
         [Parameter()]
         [System.String]
         $ComputerName = $env:COMPUTERNAME,
@@ -929,13 +939,13 @@ function Get-DomainControllerObject
 
     <#
         It is not possible to use `-ErrorAction 'SilentlyContinue` on the
-        cmdlet Get-ADDomainController since it will throw an error if the
-        node is not a domain controller regardless.
+        cmdlet Get-ADDomainController, it will throw an error regardless.
     #>
     try
     {
         $getADDomainControllerParameters = @{
-            Identity = $ComputerName
+            Filter = 'Name -eq "{0}"' -f $ComputerName
+            Server = $DomainName
         }
 
         if ($PSBoundParameters.ContainsKey('Credential'))
@@ -944,16 +954,12 @@ function Get-DomainControllerObject
         }
 
         $domainControllerObject = Get-ADDomainController @getADDomainControllerParameters
-    }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
-    {
-        <#
-            Catches the error from Get-ADDomainController when the node
-            is not a domain controller.
-        #>
-        $domainControllerObject = $null
 
-        Write-Verbose -Message $localizedString.ConcludeNotDomainController
+        if (-not $domainControllerObject -and (Test-IsDomainController) -eq $true)
+        {
+            $errorMessage = $script:localizedData.WasExpectingDomainController
+            New-InvalidResultException -Message $errorMessage
+        }
     }
     catch
     {
@@ -962,4 +968,21 @@ function Get-DomainControllerObject
     }
 
     return $domainControllerObject
+}
+
+<#
+    .SYNOPSIS
+        Returns the domain controller object if the node is a domain controller,
+        otherwise it return $null.
+#>
+function Test-IsDomainController
+{
+    [CmdletBinding()]
+    param
+    (
+    )
+
+    $operatingSystemInformation = Get-CimInstance -ClassName 'Win32_OperatingSystem'
+
+    return $operatingSystemInformation.ProductType -eq 2
 }

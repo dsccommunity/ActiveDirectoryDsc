@@ -20,7 +20,8 @@ $TestEnvironment = Initialize-TestEnvironment `
     -TestType Unit
 #endregion
 
-function Invoke-TestSetup {
+function Invoke-TestSetup
+{
     # If one type does not exist, it's assumed the other ones does not exist either.
     if (-not ('Microsoft.DirectoryServices.Deployment.Types.ForestMode' -as [Type]))
     {
@@ -433,7 +434,8 @@ try
                 $result['Name'] | Should Be $testIdentity;
             }
 
-            foreach ($identityParam in @('UserName','GroupName','ComputerName')) {
+            foreach ($identityParam in @('UserName','GroupName','ComputerName'))
+            {
                 It "Returns 'Identity' key when '$identityParam' alias is specified" {
                     $testIdentity = 'contoso.com';
                     $getADCommonParameters = @{
@@ -858,15 +860,46 @@ try
         #endregion
 
         Describe "$($Global:DSCResourceName)\Get-DomainControllerObject" {
-            Context 'When current node is not a domain controller' {
+            Context 'When domain name cannot be reached' {
                 BeforeAll {
                     Mock -CommandName Get-ADDomainController -MockWith {
-                        throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                        throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADServerDownException'
+                    }
+                }
+
+                It 'Should throw the correct error' {
+                    { Get-DomainControllerObject -DomainName 'contoso.com' -Verbose } | Should -Throw $localizedString.FailedEvaluatingDomainController
+
+                    Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When current node is not a domain controller' {
+                BeforeAll {
+                    Mock -CommandName Get-ADDomainController
+                    Mock -CommandName Test-IsDomainController -MockWith {
+                        return $false
                     }
                 }
 
                 It 'Should return $null' {
-                    Get-DomainControllerObject -Verbose | Should -BeNullOrEmpty
+                    $getDomainControllerObjectResult = Get-DomainControllerObject -DomainName 'contoso.com' -Verbose
+                    $getDomainControllerObjectResult | Should -BeNullOrEmpty
+
+                    Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When current node is not a domain controller, but operating system information says it should be' {
+                BeforeAll {
+                    Mock -CommandName Get-ADDomainController
+                    Mock -CommandName Test-IsDomainController -MockWith {
+                        return $true
+                    }
+                }
+
+                It 'Should throw the correct error' {
+                    { Get-DomainControllerObject -DomainName 'contoso.com' -Verbose } | Should -Throw $script:localizedData.WasExpectingDomainController
 
                     Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
                 }
@@ -883,11 +916,12 @@ try
                     }
                 }
 
-                It 'Should return $null' {
-                    $result = Get-DomainControllerObject -Verbose
-                    $result.Site | Should -Be 'MySite'
-                    $result.Domain | Should -Be 'contoso.com'
-                    $result.IsGlobalCatalog | Should -BeTrue
+                It 'Should return the correct values for each property' {
+                    $getDomainControllerObjectResult = Get-DomainControllerObject -DomainName 'contoso.com' -Verbose
+
+                    $getDomainControllerObjectResult.Site | Should -Be 'MySite'
+                    $getDomainControllerObjectResult.Domain | Should -Be 'contoso.com'
+                    $getDomainControllerObjectResult.IsGlobalCatalog | Should -BeTrue
 
                     Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
                 }
@@ -905,32 +939,55 @@ try
 
                     $mockAdministratorUser = 'admin@contoso.com'
                     $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force
-                    $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @($mockSqlLoginUser, $mockSqlLoginPassword)
+                    $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @($mockAdministratorUser, $mockAdministratorPassword)
                 }
 
-                It 'Should return $null' {
-                    $result = Get-DomainControllerObject -Credential $mockAdministratorCredential -Verbose
-                    $result.Site | Should -Be 'MySite'
-                    $result.Domain | Should -Be 'contoso.com'
-                    $result.IsGlobalCatalog | Should -BeTrue
+                It 'Should return the correct values for each property' {
+                    $getDomainControllerObjectResult = Get-DomainControllerObject -DomainName 'contoso.com' -Credential $mockAdministratorCredential -Verbose
+
+                    $getDomainControllerObjectResult.Site | Should -Be 'MySite'
+                    $getDomainControllerObjectResult.Domain | Should -Be 'contoso.com'
+                    $getDomainControllerObjectResult.IsGlobalCatalog | Should -BeTrue
 
                     Assert-MockCalled -CommandName Get-ADDomainController -ParameterFilter {
                         $PSBoundParameters.ContainsKey('Credential') -eq $true
                     } -Exactly -Times 1 -Scope It
                 }
             }
+        }
 
-            Context 'When the evaluation throws an error' {
+        Describe "$($Global:DSCResourceName)\Test-IsDomainController" {
+            Context 'When operating system information says the node is a domain controller' {
                 BeforeAll {
-                    Mock -CommandName Get-ADDomainController -MockWith {
-                        throw 'mocked error'
+                    Mock -CommandName Get-CimInstance -MockWith {
+                        return @{
+                            ProductType = 2
+                        }
                     }
                 }
 
-                It 'Should return $null' {
-                    { Get-DomainControllerObject  -Verbose } | Should -Throw $localizedString.FailedEvaluatingDomainController
+                It 'Should return $true' {
+                    $testIsDomainControllerResult = Test-IsDomainController
+                    $testIsDomainControllerResult | Should -BeTrue
 
-                    Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Get-CimInstance -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When operating system information says the node is not a domain controller' {
+                BeforeAll {
+                    Mock -CommandName Get-CimInstance -MockWith {
+                        return @{
+                            ProductType = 3
+                        }
+                    }
+                }
+
+                It 'Should return $false' {
+                    $testIsDomainControllerResult = Test-IsDomainController
+                    $testIsDomainControllerResult | Should -BeFalse
+
+                    Assert-MockCalled -CommandName Get-CimInstance -Exactly -Times 1 -Scope It
                 }
             }
         }
@@ -943,4 +1000,3 @@ finally
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
-
