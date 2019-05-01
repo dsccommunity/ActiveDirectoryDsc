@@ -872,7 +872,7 @@ try
                 }
             }
 
-            Context 'When current is a domain controller' {
+            Context 'When current node is a domain controller' {
                 BeforeAll {
                     Mock -CommandName Get-ADDomainController -MockWith {
                         return @{
@@ -890,6 +890,33 @@ try
                     $result.IsGlobalCatalog | Should -BeTrue
 
                     Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When current node is a domain controller, and using specific credential' {
+                BeforeAll {
+                    Mock -CommandName Get-ADDomainController -MockWith {
+                        return @{
+                            Site            = 'MySite'
+                            Domain          = 'contoso.com'
+                            IsGlobalCatalog = $true
+                        }
+                    }
+
+                    $mockAdministratorUser = 'admin@contoso.com'
+                    $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force
+                    $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @($mockSqlLoginUser, $mockSqlLoginPassword)
+                }
+
+                It 'Should return $null' {
+                    $result = Get-DomainControllerObject -Credential $mockAdministratorCredential -Verbose
+                    $result.Site | Should -Be 'MySite'
+                    $result.Domain | Should -Be 'contoso.com'
+                    $result.IsGlobalCatalog | Should -BeTrue
+
+                    Assert-MockCalled -CommandName Get-ADDomainController -ParameterFilter {
+                        $PSBoundParameters.ContainsKey('Credential') -eq $true
+                    } -Exactly -Times 1 -Scope It
                 }
             }
 
