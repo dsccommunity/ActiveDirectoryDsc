@@ -298,7 +298,7 @@ function Set-TargetResource
             $domainControllerObject = Get-DomainControllerObject -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $DomainAdministratorCredential
             if ($domainControllerObject)
             {
-                Set-ADObject -Identity $domainControllerObject.NTDSSettingsObjectDN -replace @{
+                Set-ADObject -Identity $domainControllerObject.NTDSSettingsObjectDN -Replace @{
                     options = $globalCatalogOptionValue
                 }
             }
