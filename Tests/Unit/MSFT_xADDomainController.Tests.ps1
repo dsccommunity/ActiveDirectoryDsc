@@ -2,31 +2,43 @@
 param()
 
 #region HEADER
-$dscModuleName = (Split-Path -Path (Split-Path -Path $PSScriptRoot)).Split('\')[-1]
-$dscResourceName = (Split-Path -Path $PSCommandPath -Leaf).Split('.')[0]
-$moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADDomainController'
 
-# Download DSCResource.Tests if not found, import the tests helper, and init the test environment
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-    (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
+# TODO: Insert the correct <ModuleName> and <ResourceName> for your resource
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $dscModuleName `
-    -DSCResourceName $dscResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
-#endregion
+
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
-    InModuleScope $dscResourceName {
+    Invoke-TestSetup
 
-        $dscModuleName = (Split-Path -Path (Split-Path -Path $PSScriptRoot)).Split('\')[-1]
-        $dscResourceName = (Split-Path -Path $PSCommandPath -Leaf).Split('.')[0]
-
+    InModuleScope $script:dscResourceName {
         #Load the AD Module Stub, so we can mock the cmdlets, then load the AD types
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
 
@@ -45,19 +57,13 @@ try
         $correctSysvolPath = 'C:\Windows\SYSVOL'
         $correctSiteName = 'PresentSite'
         $incorrectSiteName = 'IncorrectSite'
-        $correctInstallationMediaPath = 'Testdrive:\IFM'
+        $correctInstallationMediaPath = 'TestDrive:\IFM'
         $mockNtdsSettingsObjectDn = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=PresentSite,CN=Sites,CN=Configuration,DC=present,DC=com'
 
         $testDefaultParams = @{
             DomainAdministratorCredential = $testAdminCredential
             SafemodeAdministratorPassword = $testAdminCredential
             Verbose                       = $true
-        }
-
-        $commonAssertParams = @{
-            ModuleName = $dscResourceName
-            Scope      = 'It'
-            Exactly    = $true
         }
 
         #Fake function because it is only available on Windows Server
@@ -96,7 +102,10 @@ try
                 $SiteName,
 
                 [Parameter()]
-                $InstallationMediaPath
+                $InstallationMediaPath,
+
+                [Parameter()]
+                $NoGlobalCatalog
             )
 
             throw [exception] 'Not Implemented'
@@ -104,10 +113,20 @@ try
         #endregion Pester Test Initialization
 
         #region Function Get-TargetResource
-        Describe -Tag $dscModuleName "$dscModuleName\$dscResourceName\Get-TargetResource" {
+        Describe 'xActiveDirectory\Get-TargetResource' -Tag 'Get' {
+            Context 'When the domain name is not available' {
+                BeforeAll {
+                    Mock -CommandName Get-ADDomain -MockWith {
+                        throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADServerDownException'
+                    }
+                }
+
+                It 'Should throw the correct error' {
+                    { Get-TargetResource @testDefaultParams -DomainName $correctDomainName } | Should -Throw ($script:localizedData.MissingDomain -f $correctDomainName)
+                }
+            }
 
             Context 'Normal Operations' {
-
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-DomainControllerObject {
                     return @{
@@ -169,8 +188,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe -Tag $dscModuleName "$dscModuleName\$dscResourceName\Test-TargetResource" {
-
+        Describe 'xActiveDirectory\Test-TargetResource' -Tag 'Test' {
             $testDefaultParams = @{
                 DomainAdministratorCredential = $testAdminCredential
                 SafemodeAdministratorPassword = $testAdminCredential
@@ -276,163 +294,270 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe -Tag $dscModuleName "$dscModuleName\$dscResourceName\Set-TargetResource" {
-
-            It 'Calls "Install-ADDSDomainController" with "Site", if specified' {
-                Mock -CommandName Get-ADDomain -MockWith {
-                    return $true
-                }
-
-                Mock -CommandName Get-TargetResource -MockWith {
-                    return $stubTargetResource = @{
-                        Ensure = $false
-                    }
-                }
-                Mock -CommandName Install-ADDSDomainController -ParameterFilter { $SiteName -eq $correctSiteName }
-
-                Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
-
-                Assert-MockCalled -CommandName Install-ADDSDomainController -Times 1 -ParameterFilter { $SiteName -eq $correctSiteName }
-            }
-
-            New-Item -Path 'TestDrive:\' -ItemType Directory -Name IFM
-
-            It 'Calls "Install-ADDSDomainController" with InstallationMediaPath specified' {
-                Mock -CommandName Get-ADDomain -MockWith {
-                    return $true
-                }
-
-                Mock -CommandName Get-TargetResource -MockWith {
-                    @{
-                        Ensure = $false
-                    }
-                }
-                Mock -CommandName Install-ADDSDomainController -ParameterFilter { $InstallationMediaPath -eq $correctInstallationMediaPath }
-
-                Set-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallationMediaPath $correctInstallationMediaPath
-
-                Assert-MockCalled -CommandName Install-ADDSDomainController -Times 1 `
-                    -ParameterFilter { $InstallationMediaPath -eq $correctInstallationMediaPath }  @commonAssertParams
-            }
-
-            It 'Calls "Move-ADDirectoryServer" when "SiteName" does not match' {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    return $stubTargetResource = @{
-                        Ensure   = $true
-                        SiteName = 'IncorrectSite'
-                    }
-                }
-
-                Mock -CommandName Move-ADDirectoryServer -ParameterFilter { $Site.ToString() -eq $correctSiteName }
-                Mock -CommandName Move-ADDirectoryServer
-
-                Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
-
-                # FYI: This test will fail when run locally, but should succeed on the build server
-                Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 1 -ParameterFilter { $Site.ToString() -eq $correctSiteName } @commonAssertParams
-            }
-
-            It 'Does not call "Move-ADDirectoryServer" when "SiteName" matches' {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    return $stubTargetResource = @{
-                        Ensure   = $true
-                        SiteName = 'PresentSite'
-                    }
-                }
-
-                Mock -CommandName Move-ADDirectoryServer
-
-                Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
-
-                Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 0 @commonAssertParams
-            }
-
-            It 'Does not call "Move-ADDirectoryServer" when "SiteName" is not specified' {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    return $stubTargetResource = @{
-                        Ensure   = $true
-                        SiteName = 'PresentSite'
-                    }
-                }
-
-                Mock -CommandName Move-ADDirectoryServer
-
-                Set-TargetResource @testDefaultParams -DomainName $correctDomainName
-
-                Assert-MockCalled -CommandName Move-ADDirectoryServer -Times 0 @commonAssertParams
-            }
-
-            Context 'When specifying the parameter IsGlobalCatalog' {
+        Describe 'xActiveDirectory\-TargetResource' -Tag 'Set' {
+            Context 'When the system is not in the desired state' {
                 BeforeAll {
-                    Mock -CommandName Set-ADObject
-                    Mock -CommandName Get-DomainControllerObject {
+                    Mock -CommandName Install-ADDSDomainController
+                    Mock -CommandName Get-ADDomain -MockWith {
+                        return $true
+                    }
+
+                    Mock -CommandName Get-TargetResource -MockWith {
                         return @{
-                            Site                 = $correctSiteName
-                            Domain               = $correctDomainName
-                            IsGlobalCatalog      = $true
-                            NTDSSettingsObjectDN = $mockNtdsSettingsObjectDn
+                            Ensure = $false
                         }
                     }
                 }
 
-                It 'Calls "Set-ADObject" when "IsGlobalCatalog" Should -Be "True" and does not match' {
-                    Mock -CommandName Get-TargetResource -MockWith {
-                        return $stubTargetResource = @{
-                            Ensure          = $true
-                            SiteName        = 'PresentSite'
-                            IsGlobalCatalog = $false
-                        }
+                Context 'When adding a domain controller to a specific site' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $SiteName -eq $correctSiteName
+                        } -Exactly -Times 1 -Scope It
                     }
-
-                    Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true
-
-                    Assert-MockCalled Set-ADObject -Times 1 -ParameterFilter {
-                        $Replace['options'] -eq 1
-                    } @commonAssertParams
                 }
 
-                It 'Calls "Set-ADObject" when "IsGlobalCatalog" Should -Be "False" and does not match' {
-                    Mock -CommandName Get-TargetResource -MockWith {
-                        return $stubTargetResource = @{
-                            Ensure          = $true
-                            SiteName        = 'PresentSite'
-                            IsGlobalCatalog = $true
-                        }
+                Context 'When adding a domain controller to a specific database path' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -DatabasePath $correctDatabasePath } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $DatabasePath -eq $correctDatabasePath
+                        } -Exactly -Times 1 -Scope It
                     }
-
-                    Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $false
-
-                    Assert-MockCalled Set-ADObject -Times 1 -ParameterFilter {
-                        $Replace['options'] -eq 0
-                    } @commonAssertParams
                 }
 
-                It 'Does not call "Set-ADObject" when "IsGlobalCatalog" matches' {
-                    Mock Get-TargetResource {
-                        return $TargetResource = @{
-                            Ensure          = $true
-                            SiteName        = 'PresentSite'
-                            IsGlobalCatalog = $true
-                        }
+                Context 'When adding a domain controller to a specific SysVol path' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SysVolPath $correctSysvolPath } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $SysVolPath -eq $correctSysvolPath
+                        } -Exactly -Times 1 -Scope It
                     }
-
-                    Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true
-
-                    Assert-MockCalled Set-ADObject -Times 0 @commonAssertParams
                 }
 
-                It 'Does not call "Set-ADObject" when "IsGlobalCatalog" is not specified' {
-                    Mock Get-TargetResource {
-                        return $TargetResource = @{
-                            Ensure          = $true
-                            SiteName        = 'PresentSite'
-                            IsGlobalCatalog = $false
+                Context 'When adding a domain controller to a specific log path' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -LogPath $correctLogPath } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $LogPath -eq $correctLogPath
+                        } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When adding a domain controller that should not be a Global Catalog' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $false } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $NoGlobalCatalog -eq $true
+                        } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When adding a domain controller using IFM' {
+                    BeforeAll {
+                        New-Item -Path $correctInstallationMediaPath -ItemType 'Directory' -Force
+                    }
+
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallationMediaPath $correctInstallationMediaPath  } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $InstallationMediaPath -eq $correctInstallationMediaPath
+                        } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When a domain controller is in the wrong site' {
+                    BeforeAll {
+                        Mock -CommandName Move-ADDirectoryServer
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure   = $true
+                                SiteName = 'IncorrectSite'
+                            }
                         }
                     }
 
-                    Set-TargetResource @testDefaultParams -DomainName $correctDomainName
+                    It 'Should call the correct mocks to move the domain controller to the correct site' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName  } | Should -Not -Throw
 
-                    Assert-MockCalled Set-ADObject -Times 0 @commonAssertParams
+                        # FYI: This test will fail when run locally, but should succeed on the build server
+                        Assert-MockCalled -CommandName Move-ADDirectoryServer -ParameterFilter {
+                            $Site.ToString() -eq $correctSiteName
+                        } -Exactly -Times 1 -Scope It
+                    }
+
+                    Context 'When the domain controller is in the wrong site, but SiteName is not specified' {
+                        It 'Should not move the domain controller' {
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Move-ADDirectoryServer  -Exactly -Times 0 -Scope It
+                        }
+                    }
+                }
+
+                Context 'When specifying the IsGlobalCatalog parameter' {
+                    BeforeAll {
+                        Mock -CommandName Set-ADObject
+                        Mock -CommandName Get-DomainControllerObject {
+                            return @{
+                                NTDSSettingsObjectDN = $mockNtdsSettingsObjectDn
+                            }
+                        }
+                    }
+
+                    Context 'When the domain controller should be a Global Catalog' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return $stubTargetResource = @{
+                                    Ensure          = $true
+                                    SiteName        = 'PresentSite'
+                                    IsGlobalCatalog = $false
+                                }
+                            }
+                        }
+
+                        It 'Should call the correct mocks' {
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true  } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Set-ADObject -ParameterFilter {
+                                $Replace['options'] -eq 1
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When the domain controller should not be a Global Catalog' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return $stubTargetResource = @{
+                                    Ensure          = $true
+                                    SiteName        = 'PresentSite'
+                                    IsGlobalCatalog = $true
+                                }
+                            }
+                        }
+
+                        It 'Should call the correct mocks' {
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $false  } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Set-ADObject -ParameterFilter {
+                                $Replace['options'] -eq 0
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When the domain controller should change state og Global Catalog, but fail to return a domain controller object' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return $stubTargetResource = @{
+                                    Ensure          = $true
+                                    SiteName        = 'PresentSite'
+                                    IsGlobalCatalog = $true
+                                }
+                            }
+
+                            Mock -CommandName Get-DomainControllerObject
+                        }
+
+                        It 'Should call the correct mocks' {
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $false  } | Should -Throw $script:localizedData.ExpectedDomainController
+
+                            Assert-MockCalled -CommandName Set-ADObject -Exactly -Times 0 -Scope It
+                        }
+                    }
+                }
+            }
+
+            Context 'When the system is in the desired state' {
+                Context 'When a domain controller is in the correct site' {
+                    BeforeAll {
+                        Mock -CommandName Move-ADDirectoryServer
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure   = $true
+                                SiteName = 'PresentSite'
+                            }
+                        }
+                    }
+
+                    It 'Should not move the domain controller' {
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName  } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Move-ADDirectoryServer -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When specifying the IsGlobalCatalog parameter' {
+                    BeforeAll {
+                        Mock -CommandName Set-ADObject
+                        Mock -CommandName Get-DomainControllerObject {
+                            return @{
+                                NTDSSettingsObjectDN = $mockNtdsSettingsObjectDn
+                            }
+                        }
+                    }
+
+                    Context 'When the domain controller should be a Global Catalog' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return $stubTargetResource = @{
+                                    Ensure          = $true
+                                    SiteName        = 'PresentSite'
+                                    IsGlobalCatalog = $false
+                                }
+                            }
+                        }
+
+                        It 'Should call the correct mocks' {
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true  } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Set-ADObject -ParameterFilter {
+                                $Replace['options'] -eq 1
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When the domain controller already is a Global Catalog' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return $stubTargetResource = @{
+                                    Ensure          = $true
+                                    SiteName        = 'PresentSite'
+                                    IsGlobalCatalog = $true
+                                }
+                            }
+                        }
+
+                        It 'Should not call the mock Set-ADObject' {
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true  } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Set-ADObject -Exactly -Times 0 -Scope It
+                        }
+                    }
+
+                    Context 'When the domain controller already are not a Global Catalog' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return $stubTargetResource = @{
+                                    Ensure          = $true
+                                    SiteName        = 'PresentSite'
+                                    IsGlobalCatalog = $false
+                                }
+                            }
+                        }
+
+                        It 'Should not call the mock Set-ADObject' {
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $false  } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Set-ADObject -Exactly -Times 0 -Scope It
+                        }
+                    }
                 }
             }
         }
@@ -441,10 +566,5 @@ try
 }
 finally
 {
-    #region FOOTER
-
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-
-    #endregion
+    Invoke-TestCleanup
 }
-

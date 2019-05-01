@@ -25,6 +25,9 @@
     not be added if it was specified in a configuration. Now the parameter
     `InstallationMediaPath` is correctly passed to `Install-ADDSDomainController`.
   - Refactored the resource with major code cleanup and localization.
+  - Updated unit tests to latest unit test template, and refactored the
+    tests for the function 'Set-TargetResource'.
+  - Improved test code coverage.
 
 ## 2.25.0.0
 

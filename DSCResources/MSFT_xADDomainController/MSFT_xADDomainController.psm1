@@ -100,7 +100,7 @@ function Get-TargetResource
         $script:localizedData.DomainPresent -f $DomainName
     )
 
-    $domainControllerObject = Get-DomainControllerObject -ComputerName $env:COMPUTERNAME -Credential $DomainAdministratorCredential
+    $domainControllerObject = Get-DomainControllerObject -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $DomainAdministratorCredential
     if ($domainControllerObject)
     {
         Write-Verbose -Message (
@@ -295,7 +295,7 @@ function Set-TargetResource
                 Write-Verbose -Message $script:localizedData.RemoveGlobalCatalog
             }
 
-            $domainControllerObject = Get-DomainControllerObject -ComputerName $env:COMPUTERNAME -Credential $DomainAdministratorCredential
+            $domainControllerObject = Get-DomainControllerObject -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $DomainAdministratorCredential
             if ($domainControllerObject)
             {
                 Set-ADObject -Identity $domainControllerObject.NTDSSettingsObjectDN -replace @{
