@@ -31,7 +31,7 @@ data localizedString
         RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
         AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'.
 
-        WasExpectingDomainController     = The operating system product type code is 2 so was expecting this node to be a domain controller, but no domain controller object was returned. (ADC0001)
+        WasExpectingDomainController     = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADC0001)
         FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller. (ADC0002)
 '@
 }
@@ -914,10 +914,11 @@ function Add-ADCommonGroupMember
         Defaults to $env:COMPUTERNAME.
 
     .OUTPUTS
-        If the domain controller is not found, and empty object ($null) is returned.
+        If the domain controller is not found, an empty object ($null) is returned.
+
     .NOTES
-        Throws and Microsoft.ActiveDirectory.Management.ADServerDownException
-        if the domain could not be contacted.
+        Throws an exception of Microsoft.ActiveDirectory.Management.ADServerDownException
+        if the domain cannot be contacted.
 #>
 function Get-DomainControllerObject
 {
@@ -972,8 +973,8 @@ function Get-DomainControllerObject
 
 <#
     .SYNOPSIS
-        Returns the domain controller object if the node is a domain controller,
-        otherwise it return $null.
+        Returns $true if the node is a domain controller, otherwise it returns
+        $false
 #>
 function Test-IsDomainController
 {

@@ -472,7 +472,7 @@ try
                         }
                     }
 
-                    Context 'When the domain controller should change state og Global Catalog, but fail to return a domain controller object' {
+                    Context 'When the domain controller should change state of Global Catalog, but fail to return a domain controller object' {
                         BeforeAll {
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return $stubTargetResource = @{
