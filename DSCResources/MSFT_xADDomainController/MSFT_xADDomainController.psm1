@@ -430,6 +430,19 @@ function Test-TargetResource
     ## Check Global Catalog Config
     if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and $existingResource.IsGlobalCatalog -ne $IsGlobalCatalog)
     {
+        if ($IsGlobalCatalog)
+        {
+            Write-Verbose -Message (
+                $script:localizedData.ExpectedGlobalCatalogEnabled -f $existingResource.SiteName, $SiteName
+            )
+        }
+        else
+        {
+            Write-Verbose -Message (
+                $script:localizedData.ExpectedGlobalCatalogDisabled -f $existingResource.SiteName, $SiteName
+            )
+        }
+
         $testTargetResourceReturnValue = $false
     }
 

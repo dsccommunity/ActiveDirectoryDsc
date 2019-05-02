@@ -267,7 +267,27 @@ try
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName -IsGlobalCatalog $true
 
                 $result | Should -Be $false
+            }
 
+            It 'Returns "False" when "IsGlobalCatalog" does not match' {
+                $stubDomain = @{
+                    DNSRoot = $correctDomainName
+                }
+
+                $stubDomainController = @{
+                    Site            = $correctSiteName
+                    Domain          = $correctDomainName
+                    IsGlobalCatalog = $true
+                }
+
+                Mock -CommandName Get-ADDomain -MockWith { return $true }
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
+                Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
+                Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
+
+                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName -IsGlobalCatalog $false
+
+                $result | Should -Be $false
             }
 
             It 'Returns "True" when "IsGlobalCatalog" matches' {
@@ -294,7 +314,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xActiveDirectory\-TargetResource' -Tag 'Set' {
+        Describe 'xActiveDirectory\Set-TargetResource' -Tag 'Set' {
             Context 'When the system is not in the desired state' {
                 BeforeAll {
                     Mock -CommandName Install-ADDSDomainController
