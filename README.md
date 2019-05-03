@@ -219,29 +219,29 @@ The xADGroup DSC resource will manage groups within Active Directory.
 
 The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (MSAs) within Active Directory.
 
-* **`[String]` ServiceAccountName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the user.
+* **`[String]` ServiceAccountName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
   * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
   * Once created, the user's SamAccountName and CN cannot be changed.
-* **`[String]` AccountType** _(Write)_: Specifies whether the given managed service account is single or group.
+* **`[String]` Ensure** _(Write)_: Specifies whether the user account is created or deleted.
+  * If not specified, this value defaults to Present.
+* **`[String]` AccountType** _(Write)_: The type of managed service account.
+  * Single will create a Single Managed Service Account (sMSA) and Group will create a Group Managed Service Account (gMSA).
   * If not specified, this vaule defaults to Single.
 * **`[String]` AccountTypeForce** _(Write)_: Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
   * If not specified, this value defaults to False.
-* **`[String]` Path** _(Write)_: Path in Active Directory to place the managed service account, specified as a Distinguished Name (DN).
-* **`[String]` Description** _(Write)_: Specifies a description of the managed service account object.
-* **`[String]` DisplayName** _(Write)_: Specifies the display name of the managed service account object.
-* **`[String]` Ensure** _(Write)_: Specifies whether the given managed service account is present or absent.
-  * If not specified, this value defaults to Present.
-* **`[String]` Enabled** _(Write)_: Specifies whether the given managed service account enabled or disabled.
-  * If not specified, this value defaults to Enabled.
-* **`[String]` Members** _(Write)_: Specifies the membership policy for systems that can use a group-managed service account
-  * This is only required if AccountType is 'Group'
-* **`[String]` MembershipAttribute** _(Write)_: Active Directory attribute used to perform membership operations
+* **`[String]` Path** _(Write)_: Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created. Specified as a Distinguished Name (DN).
+* **`[String]` Description** _(Write)_: Specifies a description of the object (ldapDisplayName 'description')
+* **`[String]` DisplayName** _(Write)_: Specifies the display name of the object (ldapDisplayName 'displayName')
+* **`[String]` Members** _(Write)_: Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+  * Only used when 'Group' is selected for 'AccountType'
+* **`[String]` MembershipAttribute** _(Write)_: Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs)
   * If not specified, this value defaults to SamAccountName
-  * This is only required if AccountType is 'Group'
-* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the task.
+  * Only used when 'Group' is selected for 'AccountType'
+* **`[PSCredential]` Credential** _(Write)_: Specifies the user account credentials to use to perform this task.
   * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
-* **`[String]` DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to.
+* **`[String]` DomainController** _(Write)_: Specifies the Active Directory Domain Controller instance to use to perform the task.
   * This is only required if not executing the task on a domain controller.
+* **`[String]` Enabled** _(Read)_: Specifies whether the user account is enabled or disabled.
 * **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name of the Service Account
   * Cannot be specified in the resource. Returned by Get and Compare.
 

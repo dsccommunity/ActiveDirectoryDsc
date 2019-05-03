@@ -39,8 +39,10 @@ try
 
     InModuleScope $script:DSCResourceName {
         # Need to do a deep copy of the Array of objects that compare returns
-        function Copy-ArrayObjects {
-            param(
+        function Copy-ArrayObjects
+        {
+            param
+            (
                 [Parameter(Mandatory = $true)]
                 [ValidateNotNullOrEmpty()]
                 [System.Array]
@@ -356,7 +358,8 @@ try
                         ServiceAccountName = $mockSingleServiceAccount.Name
                     }
 
-                    { $null = Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } | Should -Throw
+                    { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw ($script:localizedData.RetrievingServiceAccountError -f $getTargetResourceParameters.ServiceAccountName)
                 }
             }
 
@@ -1534,7 +1537,8 @@ try
                         ServiceAccountName = $mockSingleServiceAccount.Name
                         Path               = $objectPath.Expected
                     }
-                    { $null = Set-TargetResource  @testResourceParametersSingle -ErrorAction 'SilentlyContinue' } | Should -Throw
+                    { Set-TargetResource  @testResourceParametersSingle -ErrorAction 'SilentlyContinue' } |
+                        Should -Throw ($script:localizedData.AddingManagedServiceAccountError -f $testResourceParametersSingle.ServiceAccountName)
                 }
             }
         }

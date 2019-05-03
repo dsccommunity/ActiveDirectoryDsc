@@ -1,29 +1,25 @@
+$script:resourceModulePath = Split-Path `
+-Path (Split-Path -Path $PSScriptRoot -Parent) `
+-Parent
+
+$script:localizationModulePath = Join-Path `
+-Path $script:resourceModulePath `
+-ChildPath 'Modules\DscResource.LocalizationHelper'
+
+Import-Module -Name (
+Join-Path `
+    -Path $script:localizationModulePath `
+    -ChildPath 'DscResource.LocalizationHelper.psm1'
+)
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADManagedServiceAccount'
+
 ## Import the common AD functions
 $adCommonFunctions = Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
     -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
 Import-Module -Name $adCommonFunctions
 
-# Localized messages
-data LocalizedData
-{
-    # culture='en-US'
-    ConvertFrom-StringData @'
-        AddingManagedServiceAccount           = Adding AD Managed Service Account '{0}'.
-        UpdatingManagedServiceAccount         = Updating AD Managed Service Account '{0}'.
-        RemovingManagedServiceAccount         = Removing AD Managed Service Account '{0}'.
-        MovingManagedServiceAccount           = Moving AD Managed Service Account '{0}' to '{1}'.
-        ManagedServiceAccountNotFound         = AD Managed Service Account '{0}' was not found.
-        RetrievingServiceAccount              = Retrieving AD Managed Service Account '{0}' ...
-        AccountTypeForceNotTrue               = The 'AccountTypeForce' was either not specified or set to false. To convert from a '{0}' MSA to a '{1}' MSA, AccountTypeForce must be set to true.
-        NotDesiredPropertyState               = AD Managed Service Account '{0}' is not correct. Expected '{1}', actual '{2}'.
-        MSAInDesiredState                     = AD Managed Service Account '{0}' is in the desired state.
-        MSANotInDesiredState                  = AD Managed Service Account '{0}' is NOT in the desired state.
-        UpdatingManagedServiceAccountProperty = Updating AD Managed Service Account property '{0}' to '{1}'.
-        AddingManagedServiceAccountError      = Error adding AD Managed Service Account '{0}'.
-        RetrievingPrincipalMembers            = Retrieving Principals Allowed To Retrieve Managed Password based on '{0}' property.
-'@
-}
 
 <#
     .SYNOPSIS
@@ -31,18 +27,24 @@ data LocalizedData
 
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER MembershipAttribute
-        Specifies the Attribute to use to describe the Identity used for Members ("SamAccountName","DistinguishedName","ObjectGUID","SID")
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Services instance to use to perform the task.
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Get-TargetResource
 {
@@ -98,6 +100,8 @@ function Get-TargetResource
 
     try
     {
+        Write-Verbose -Message ($script:localizedData.RetrievingServiceAccount -f $ServiceAccountName)
+
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParameters -Property @(
             'Name'
             'DistinguishedName'
@@ -125,7 +129,7 @@ function Get-TargetResource
         }
         elseif ( $adServiceAccount.ObjectClass -eq 'msDS-GroupManagedServiceAccount' )
         {
-            Write-Verbose -Message ($LocalizedData.RetrievingPrincipalMembers -f $MembershipAttribute)
+            Write-Verbose -Message ($script:localizedData.RetrievingPrincipalMembers -f $MembershipAttribute)
             $adServiceAccount.PrincipalsAllowedToRetrieveManagedPassword | ForEach-Object {
                 $member = (Get-ADObject -Identity $_ -Property $MembershipAttribute).$MembershipAttribute
                 $targetResource['Members'] += $member
@@ -136,16 +140,17 @@ function Get-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        Write-Verbose ($LocalizedData.ManagedServiceAccountNotFound -f $ServiceAccountName)
+        Write-Verbose -Message ($script:localizedData.ManagedServiceAccountNotFound -f $ServiceAccountName)
         $targetResource['Ensure'] = 'Absent'
     }
     catch
     {
-        Write-Error -Message ($LocalizedData.RetrievingServiceAccount -f $ServiceAccountName)
-        throw $_
+        $errorMessage = $script:localizedData.RetrievingServiceAccountError -f $ServiceAccountName
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
     return $targetResource
 } #end function Get-TargetResource
+
 
 <#
     .SYNOPSIS
@@ -153,21 +158,23 @@ function Get-TargetResource
 
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted.
-
-    .PARAMETER Enabled
-        Specifies whether the user account is enabled or disabled.
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
         Specifies a description of the object (ldapDisplayName 'description').
@@ -176,16 +183,20 @@ function Get-TargetResource
         Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword')
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Specifies the Attribute to use to describe the Identity used for Members ("SamAccountName","DistinguishedName","ObjectGUID","SID")
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Services instance to use to perform the task.
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Test-TargetResource
 {
@@ -215,11 +226,6 @@ function Test-TargetResource
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
-
-        [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $Enabled = $true,
 
         [Parameter()]
         [System.String]
@@ -263,31 +269,31 @@ function Test-TargetResource
         $ensureState = $compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'}
         if ($ensureState)
         {
-            Write-Verbose ($LocalizedData.NotDesiredPropertyState -f `
+            Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f `
                             'Ensure', $ensureState.Expected, $ensureState.Actual)
         }
         else
         {
-            Write-Verbose -Message ($LocalizedData.MSAInDesiredState -f $ServiceAccountName)
+            Write-Verbose -Message ($script:localizedData.MSAInDesiredState -f $ServiceAccountName)
             return $true
         }
     }
     else
     {
         $compareTargetResourceNonCompliant | ForEach-Object {
-            Write-Verbose -Message ($LocalizedData.NotDesiredPropertyState -f `
+            Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f `
                 $_.Parameter, $_.Expected, $_.Actual)
         }
     }
 
     if ($compareTargetResourceNonCompliant)
     {
-        Write-Verbose -Message ($LocalizedData.MSANotInDesiredState -f $ServiceAccountName)
+        Write-Verbose -Message ($script:localizedData.MSANotInDesiredState -f $ServiceAccountName)
         return $false
     }
     else
     {
-        Write-Verbose -Message ($LocalizedData.MSAInDesiredState -f $ServiceAccountName)
+        Write-Verbose -Message ($script:localizedData.MSAInDesiredState -f $ServiceAccountName)
         return $true
     }
 
@@ -295,25 +301,27 @@ function Test-TargetResource
 
 <#
     .SYNOPSIS
-        Adds, removes, or updates the managed service account.
+        Sets the state of the managed service account.
 
     .PARAMETER ServiceAccountName
-       Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted.
-
-    .PARAMETER Enabled
-        Specifies whether the user account is enabled or disabled.
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
         Specifies a description of the object (ldapDisplayName 'description').
@@ -322,16 +330,20 @@ function Test-TargetResource
         Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword')
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Specifies the Attribute to use to describe the Identity used for Members ("SamAccountName","DistinguishedName","ObjectGUID","SID")
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Services instance to use to perform the task.
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Set-TargetResource
 {
@@ -362,11 +374,6 @@ function Set-TargetResource
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
-
-        [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $Enabled = $true,
 
         [Parameter()]
         [System.String]
@@ -436,14 +443,14 @@ function Set-TargetResource
                     if ($AccountTypeForce)
                     {
                         # We need to recreate account first before we can update any properties
-                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
+                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'AccountType', $AccountType)
                         Remove-ADServiceAccount @adServiceAccountParameters -Confirm:$false
                         $PSBoundParameters.Remove('AccountTypeForce')
                         New-ADServiceAccountHelper @PSBoundParameters
                     }
                     else
                     {
-                        Write-Warning ($LocalizedData.AccountTypeForceNotTrue -f $accountTypeState.Actual, $accountTypeState.Expected)
+                        Write-Warning -Message ($script:localizedData.AccountTypeForceNotTrue -f $accountTypeState.Actual, $accountTypeState.Expected)
                     }
                 }
                 # Remove AccountType since we don't want to enumerate down below
@@ -459,9 +466,9 @@ function Set-TargetResource
 
                 if ($isPathNonCompliant)
                 {
-                    Write-Verbose ($LocalizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                    $dn = $compareTargetResource | Where-Object {$_.Parameter -eq 'DistinguishedName'}
-                    $moveADObjectParameters['Identity'] = $dn.Actual
+                    Write-Verbose -Message ($script:localizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
+                    $distinguishedNameObject = $compareTargetResource | Where-Object {$_.Parameter -eq 'DistinguishedName'}
+                    $moveADObjectParameters['Identity'] = $distinguishedNameObject.Actual
                     Move-ADObject @moveADObjectParameters -TargetPath $Path
                 }
                 $compareTargetResourceNonCompliant =  @($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'Path'})
@@ -480,12 +487,12 @@ function Set-TargetResource
                         }
                         $listMembers = $Members -join ','
 
-                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f 'Members', $listMembers)
+                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'Members', $listMembers)
                         $setServiceAccountParameters['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
                     }
                     else
                     {
-                        Write-Verbose ($LocalizedData.UpdatingManagedServiceAccountProperty -f $parameter, $PSBoundParameters.$parameter)
+                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f $parameter, $PSBoundParameters.$parameter)
                         $setServiceAccountParameters[$parameter] = $PSBoundParameters.$parameter
                     }
                 }
@@ -508,15 +515,15 @@ function Set-TargetResource
             # We want the account to be Absent, but it is Present
             if ($isEnsureNonCompliant)
             {
-                Write-Verbose ($LocalizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
+                Write-Verbose -Message ($script:localizedData.RemovingManagedServiceAccount -f $ServiceAccountName)
                 Remove-ADServiceAccount @adServiceAccountParameters -Confirm:$false
             }
         }
     }
     catch
     {
-        Write-Error -Message ($LocalizedData.AddingManagedServiceAccountError -f $ServiceAccountName)
-        throw $_
+        $errorMessage = $script:localizedData.AddingManagedServiceAccountError -f $ServiceAccountName
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 } #end function Set-TargetResource
 
@@ -525,19 +532,24 @@ function Set-TargetResource
         Adds the managed service account.
 
     .PARAMETER ServiceAccountName
-       Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
+
+    .PARAMETER AccountTypeForce
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted.
-
-    .PARAMETER Enabled
-        Specifies whether the user account is enabled or disabled.
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
         Specifies a description of the object (ldapDisplayName 'description').
@@ -546,16 +558,20 @@ function Set-TargetResource
         Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword')
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Specifies the Attribute to use to describe the Identity used for Members ("SamAccountName","DistinguishedName","ObjectGUID","SID")
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Services instance to use to perform the task.
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function New-ADServiceAccountHelper
 {
@@ -581,11 +597,6 @@ function New-ADServiceAccountHelper
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
-
-        [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $Enabled = $true,
 
         [Parameter()]
         [System.String]
@@ -616,10 +627,9 @@ function New-ADServiceAccountHelper
         $DomainController
     )
 
-    Write-Verbose ($LocalizedData.AddingManagedServiceAccount -f $ServiceAccountName)
+    Write-Verbose -Message ($script:localizedData.AddingManagedServiceAccount -f $ServiceAccountName)
 
     $adServiceAccountParameters = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
-    $adServiceAccountParameters['Enabled'] = $Enabled
 
     if ($Description)
     {
@@ -663,21 +673,23 @@ function New-ADServiceAccountHelper
 
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+        To be compatible with older operating systems, create a SAM account name that is 20 characters or less. Once created,
+        the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
-        Specifies the type of managed service account, whether it should be a group or single computer service account
+        The type of managed service account. Single will create a Single Managed Service Account (sMSA) and Group will
+        create a Group Managed Service Account (gMSA). If not specified, this vaule defaults to Single.
 
     .PARAMETER AccountTypeForce
-        Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+        Specifies whether or not to remove the service account and recreate it when going from single MSA to
+        group MSA and vice-versa. If not specified, this value defaults to False.
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
+        Specified as a Distinguished Name (DN).
 
     .PARAMETER Ensure
-        Specifies whether the user account is created or deleted.
-
-    .PARAMETER Enabled
-        Specifies whether the user account is enabled or disabled.
+        Specifies whether the user account is created or deleted. If not specified, this value defaults to Present.
 
     .PARAMETER Description
         Specifies a description of the object (ldapDisplayName 'description').
@@ -686,16 +698,20 @@ function New-ADServiceAccountHelper
         Specifies the display name of the object (ldapDisplayName 'displayName').
 
     .PARAMETER Members
-        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword')
+        Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+        Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER MembershipAttribute
-        Specifies the Attribute to use to describe the Identity used for Members ("SamAccountName","DistinguishedName","ObjectGUID","SID")
+        Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs).
+        If not specified, this value defaults to SamAccountName. Only used when 'Group' is selected for 'AccountType'.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
+        This is only required if not executing the task on a domain controller or using the -DomainController parameter.
 
     .PARAMETER DomainController
-        Specifies the Active Directory Domain Services instance to use to perform the task.
+        Specifies the Active Directory Domain Controller instance to use to perform the task.
+        This is only required if not executing the task on a domain controller.
 #>
 function Compare-TargetResourceState
 {
@@ -725,11 +741,6 @@ function Compare-TargetResourceState
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure,
-
-        [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $Enabled,
 
         [Parameter()]
         [System.String]
