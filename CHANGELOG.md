@@ -28,6 +28,7 @@
   - Updated unit tests to latest unit test template and refactored the
     tests for the function 'Set-TargetResource'.
   - Improved test code coverage.
+- Added xADKDSKey resource to create KDS Root Keys for gMSAs. [@kungfu71186](https://github.com/kungfu71186)
 
 ## 2.25.0.0
 
