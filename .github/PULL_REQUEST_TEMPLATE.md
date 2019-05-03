@@ -21,8 +21,8 @@
     If this PR does not fix an open issue, replace this comment block with None.
     If this PR resolves one or more open issues, replace this comment block with
     a list the issues using a GitHub closing keyword, e.g.:
-    - Fixes #123
-    - Fixes #124
+- Fixes #123
+- Fixes #124
 -->
 
 #### Task list
@@ -34,7 +34,7 @@
     Change to [x] for each task in the task list that applies to your PR.
     For those task that don't apply to you PR, leave those as is.
 -->
-- [ ] Added an entry under the Unreleased section of the change log in the README.md.
+- [ ] Added an entry under the Unreleased section in the CHANGELOG.md.
       Entry should say what was changed, and how that affects users (if applicable).
 - [ ] Resource documentation added/updated in README.md.
 - [ ] Resource parameter descriptions added/updated in README.md, schema.mof
