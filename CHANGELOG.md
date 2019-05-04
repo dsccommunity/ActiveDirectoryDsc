@@ -28,6 +28,7 @@
   - Updated unit tests to latest unit test template and refactored the
     tests for the function 'Set-TargetResource'.
   - Improved test code coverage.
+  - Removing the Misc Folder, as it is no longer required.
 
 ## 2.25.0.0
 
