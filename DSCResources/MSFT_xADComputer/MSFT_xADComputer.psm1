@@ -138,7 +138,7 @@ function Get-TargetResource
 
     <#
         We have the deprecated message in Get-TargetResource so that it is
-        shown when both Test- and Set-TargetResource calls Get-TargetResource.
+        shown when using Get-DscConfiguration or Invoke-DscResource.
     #>
     if ($PSBoundParameters.ContainsKey('Enabled'))
     {
@@ -225,7 +225,66 @@ function Get-TargetResource
     return $getTargetResourceReturnValue
 }
 
+<#
+    .SYNOPSIS
+        Determines if the Active Directory computer account is in the desired state.
 
+    .PARAMETER ComputerName
+         Specifies the name of the Active Directory computer account to manage.
+         You can identify a computer by its distinguished name, GUID, security
+         identifier (SID) or Security Accounts Manager (SAM) account name.
+
+    .PARAMETER Ensure
+        Specifies whether the computer account is present or absent.
+        Valid values are 'Present' and 'Absent'. The defaults is 'Present'.
+
+    .PARAMETER UserPrincipalName
+        Specifies the UPN assigned to the computer account.
+
+    .PARAMETER DisplayName
+        Specifies the display name of the computer.
+
+    .PARAMETER Path
+        Specifies the X.500 path of the container where the computer is located.
+
+    .PARAMETER Location
+        Specifies the location of the computer, such as an office number.
+
+    .PARAMETER DnsHostName
+        Specifies the fully qualified domain name (FQDN) of the computer.
+
+    .PARAMETER ServicePrincipalNames
+        Specifies the service principal names for the computer account.
+
+    .PARAMETER Description
+        Specifies a description of the computer account.
+
+    .PARAMETER Manager
+        Specifies the user or group Distinguished Name that manages the computer
+        account. Valid values are the user's or group's DistinguishedName,
+        ObjectGUID, SID or SamAccountName.
+
+    .PARAMETER RequestFile
+        Specifies the full path to the Offline Domain Join Request file to create.
+
+    .PARAMETER Enabled
+        DEPRECATED - DO NOT USE.
+
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to connect to perform the task.
+
+    .PARAMETER DomainAdministratorCredential
+        Specifies the user account credentials to use to perform the task.
+
+    .PARAMETER RestoreFromRecycleBin
+        Indicates whether or not the computer object should first tried to be
+        restored from the recycle bin before creating a new computer object.
+
+    .PARAMETER EnabledOnCreation
+        Specifies if the computer account is created enabled or disabled.
+        By default the computer account will be created using the default
+        value of the cmdlet New-ADComputer.
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -277,7 +336,6 @@ function Test-TargetResource
         [System.String]
         $Description,
 
-        # Computer's manager specified as a Distinguished Name (DN)
         [Parameter()]
         [ValidateNotNull()]
         [System.String]
@@ -298,7 +356,6 @@ function Test-TargetResource
         [System.String]
         $DomainController,
 
-        # Ideally this should just be called 'Credential' but is here for backwards compatibility
         [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
@@ -315,6 +372,15 @@ function Test-TargetResource
         [System.Boolean]
         $EnabledOnCreation
     )
+
+    <#
+        We have the deprecated message in Test-TargetResource so that it is
+        shown when using Start-DscConfiguration or Invoke-DscResource.
+    #>
+    if ($PSBoundParameters.ContainsKey('Enabled'))
+    {
+        Write-Warning -Message $script:localizedData.EnabledDeprecatedMessage
+    }
 
     $targetResource = Get-TargetResource @PSBoundParameters
     $isCompliant = $true
@@ -379,15 +445,73 @@ function Test-TargetResource
         return $false
     }
 
-} #end function Test-TargetResource
+}
 
+<#
+    .SYNOPSIS
+        Creates. removes or modifies the Active Directory computer account.
 
+    .PARAMETER ComputerName
+         Specifies the name of the Active Directory computer account to manage.
+         You can identify a computer by its distinguished name, GUID, security
+         identifier (SID) or Security Accounts Manager (SAM) account name.
+
+    .PARAMETER Ensure
+        Specifies whether the computer account is present or absent.
+        Valid values are 'Present' and 'Absent'. The defaults is 'Present'.
+
+    .PARAMETER UserPrincipalName
+        Specifies the UPN assigned to the computer account.
+
+    .PARAMETER DisplayName
+        Specifies the display name of the computer.
+
+    .PARAMETER Path
+        Specifies the X.500 path of the container where the computer is located.
+
+    .PARAMETER Location
+        Specifies the location of the computer, such as an office number.
+
+    .PARAMETER DnsHostName
+        Specifies the fully qualified domain name (FQDN) of the computer.
+
+    .PARAMETER ServicePrincipalNames
+        Specifies the service principal names for the computer account.
+
+    .PARAMETER Description
+        Specifies a description of the computer account.
+
+    .PARAMETER Manager
+        Specifies the user or group Distinguished Name that manages the computer
+        account. Valid values are the user's or group's DistinguishedName,
+        ObjectGUID, SID or SamAccountName.
+
+    .PARAMETER RequestFile
+        Specifies the full path to the Offline Domain Join Request file to create.
+
+    .PARAMETER Enabled
+        DEPRECATED - DO NOT USE.
+
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to connect to perform the task.
+
+    .PARAMETER DomainAdministratorCredential
+        Specifies the user account credentials to use to perform the task.
+
+    .PARAMETER RestoreFromRecycleBin
+        Indicates whether or not the computer object should first tried to be
+        restored from the recycle bin before creating a new computer object.
+
+    .PARAMETER EnabledOnCreation
+        Specifies if the computer account is created enabled or disabled.
+        By default the computer account will be created using the default
+        value of the cmdlet New-ADComputer.
+#>
 function Set-TargetResource
 {
     [CmdletBinding()]
     param
     (
-        # Common Name
         [Parameter(Mandatory = $true)]
         [System.String]
         $ComputerName,
@@ -432,7 +556,6 @@ function Set-TargetResource
         [System.String]
         $Description,
 
-        # Computer's manager specified as a Distinguished Name (DN)
         [Parameter()]
         [ValidateNotNull()]
         [System.String]
@@ -453,7 +576,6 @@ function Set-TargetResource
         [System.String]
         $DomainController,
 
-        # Ideally this should just be called 'Credential' but is here for backwards compatibility
         [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
@@ -471,9 +593,18 @@ function Set-TargetResource
         $EnabledOnCreation
     )
 
+    <#
+        We have the deprecated message in Test-TargetResource so that it is
+        shown when using Start-DscConfiguration or Invoke-DscResource.
+    #>
+    if ($PSBoundParameters.ContainsKey('Enabled'))
+    {
+        Write-Warning -Message $script:localizedData.EnabledDeprecatedMessage
+    }
+
     $targetResource = Get-TargetResource @PSBoundParameters
 
-    ## Add ensure as they may not be explicitly passed and we want to enumerate them
+    # Add ensure as they may not be explicitly passed and we want to enumerate them
     $PSBoundParameters['Ensure'] = $Ensure
 
     if ($Ensure -eq 'Present')
@@ -545,7 +676,7 @@ function Set-TargetResource
             }
             else
             {
-                ## Create the computer account using New-ADComputer
+                # Create the computer account using New-ADComputer
                 $newADComputerParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
                 if ($PSBoundParameters.ContainsKey('Path'))
                 {
@@ -574,7 +705,7 @@ function Set-TargetResource
 
                 New-ADComputer @newADComputerParams
             } # if
-            ## Now retrieve the newly created computer
+            # Now retrieve the newly created computer
             $targetResource = Get-TargetResource @PSBoundParameters
         }
 
@@ -678,7 +809,7 @@ function Set-TargetResource
         #>
         if ($replaceComputerProperties.Count -gt 0 -or $removeComputerProperties.Count -gt 0 -or $setADComputerParams.Count -gt 1)
         {
-            ## Only pass -Remove and/or -Replace if we have something to set/change
+            # Only pass -Remove and/or -Replace if we have something to set/change
             if ($replaceComputerProperties.Count -gt 0)
             {
                 $setADComputerParams['Replace'] = $replaceComputerProperties

@@ -79,36 +79,50 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
   Directory computer account to manage. You can identify a computer by
   its distinguished name, GUID, security identifier (SID) or Security
   Accounts Manager (SAM) account name.
-* **`[String]` Location** _(Write)_: Specifies the location of the computer, such as an office number.
-* **`[String]` DnsHostName** _(Write)_: Specifies the fully qualified domain name (FQDN) of the computer.
-* **`[String]` ServicePrincipalNames** _(Write)_: Specifies the service principal names for the computer account.
-* **`[String]` UserPrincipalName** _(Write)_: Specifies the UPN assigned to the computer account.
-* **`[String]` DisplayName** _(Write)_: "Specifies the display name of the computer.
-* **`[String]` Path** _(Write)_: Specifies the X.500 path of the container where the computer is located.
-* **`[String]` Description** _(Write)_: Specifies a description of the computer account.
+* **`[String]` Location** _(Write)_: Specifies the location of the computer,
+  such as an office number.
+* **`[String]` DnsHostName** _(Write)_: Specifies the fully qualified
+  domain name (FQDN) of the computer.
+* **`[String]` ServicePrincipalNames** _(Write)_: Specifies the service
+  principal names for the computer account.
+* **`[String]` UserPrincipalName** _(Write)_: Specifies the UPN assigned
+  to the computer account.
+* **`[String]` DisplayName** _(Write)_: Specifies the display name of
+  the computer.
+* **`[String]` Path** _(Write)_: Specifies the X.500 path of the container
+  where the computer is located.
+* **`[String]` Description** _(Write)_: Specifies a description of the
+  computer account.
 * **`[Boolean]` Enabled** _(Write)_: **DEPRECATED - DO NOT USE**. Please
   see the parameter `EnabledOnCreation` in this resource, and the resource
-  [xADObjectEnabledState](#xadobjectenabledstate) on how to enforce the `Enabled` property.
-  _This parameter no longer sets nor enforce the Enabled property. If_
-  _this parameter is used a warning message will be outputted saying that_
-  _the `Enabled` parameter has been deprecated_.
+  [xADObjectEnabledState](#xadobjectenabledstate) on how to enforce the
+  `Enabled` property. _This parameter no longer sets nor enforce the_
+   _Enabled property. If this parameter is used a warning message will be_
+   _outputted saying that the `Enabled` parameter has been deprecated_.
 * **`[Boolean]` EnabledOnCreation** _(Write)_: Specifies if the computer
   account is created enabled or disabled. By default the computer account
   will be created using the default value of the cmdlet `New-ADComputer`.
-* **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished Name that manages the computer account.
-  * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
-* **`[String]`DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to perform the task.
-* **`[PSCredential]` DomainAdministratorCredential** _(Write)_: Specifies the user account credentials to use to perform the task.
-* **`[String]` RequestFile** _(Write)_: Specifies the full path to the Offline Domain Join Request file to create.
-* **`[String]` Ensure**: Specifies whether the computer account is present or absent.
-  * Valid values are 'Present' and 'Absent'.
-  * It not specified, it defaults to 'Present'.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer account should first tried to be restored from the recycle bin before creating a new computer account.
+* **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished
+  Name that manages the computer account. Valid values are the user's or
+  group's DistinguishedName, ObjectGUID, SID or SamAccountName.
+* **`[String]` DomainController** _(Write)_: Specifies the Active Directory
+  Domain Services instance to connect to perform the task.
+* **`[PSCredential]` DomainAdministratorCredential** _(Write)_: Specifies
+  the user account credentials to use to perform the task.
+* **`[String]` RequestFile** _(Write)_: Specifies the full path to the
+  Offline Domain Join Request file to create.
+* **`[String]` Ensure**: Specifies whether the computer account is present
+  or absent. Valid values are 'Present' and 'Absent'. The defaults is 'Present'.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or
+  not the computer account should first tried to be restored from the
+  recycle bin before creating a new computer account.
 
 #### Read-Only Properties from Get-TargetResource
 
-* **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of the computer account.
-* **`[String]` SID** _(Read)_: Returns the security identifier of the computer account.
+* **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of
+  the computer account.
+* **`[String]` SID** _(Read)_: Returns the security identifier of the
+  computer account.
 * **`[String]` SamAccountName** _(Read)_: Returns the computer account
   Security Accounts Manager (SAM) account name.
 
