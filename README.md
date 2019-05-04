@@ -215,6 +215,26 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * If not running on a domain controller, this is required.
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
 
+### **xADKDSKey**
+
+The xADKDSKey DSC resource will manage KDS Root Keys within Active Directory.
+
+* **`[String]` EffectiveTime** _(Key)_: Specifies the Effective time when a KDS root key can be used.
+  * There is a 10 hour minimum from creation date to allow active directory to properly replicate across all domain controllers. For this reason, the date must be set in the future for creation.
+  * While this parameter accepts a string, it will be converted into a DateTime object. This will also try to take into account cultural settings. This is to disallow things like `(Get-Date).AddHours(-10)`, otherwise we can't find the right KDS key since the effective date will always be changing
+    * Example: '05/01/1999 13:00 using default or 'en-US' culture would be May 1st, but using 'de-DE' culture would be 5th of January. The culture is automatically pulled from the operating system and this can be checked using 'Get-Culture'
+* **`[String]` Ensure** _(Write)_: Specifies if this KDS Root Key should be present or absent
+  * If not specified, this value defaults to Present.
+* **`[Boolean]` AllowUnsafeEffectiveTime** _(Write)_: This option will allow you to create a KDS root key if EffectiveTime is set in the past.
+  * This may cause issues if you are creating a Group Managed Service Account right after you create the KDS Root Key. In order to get around this, you must create the KDS Root Key using a date in the past. This should be used at your own risk and should only be used in lab environments.
+* **`[Boolean]` ForceRemove** _(Write)_: This option will allow you to remove a KDS root key if there is only one key left.
+  * It should not break your Group Managed Service Accounts (gMSAs), but if the gMSA password expires and it needs to request a new password, it will not be able to generate a new password until a new KDS Root Key is installed and ready for use. Because of this, the last KDS Root Key will not be removed unless this option is specified
+* **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name (DN) of the KDS root key.
+  * The KDS Root Key is stored in 'CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration' at the Forest level. This is also why replication needs 10 hours to occur before using the KDS Root Key as a safey measure.
+  * Cannot be specified in the resource. Returned by Get and Compare.
+* **`[DateTime]` CreationTime** _(Read)_: Specifies the Creation date and time of the KDS root key for informational purposes
+* **`[String]` KeyId** _(Read)_: Specifies the KeyID of the KDS root key. This is the Common Name (CN) within Active Directory and is required to build the Distinguished Name
+
 ### **xADManagedServiceAccount**
 
 The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (MSAs) within Active Directory.

@@ -16,6 +16,8 @@
   - Added xADManagedServiceAccount resource to manage Managed Service
     Accounts (MSAs). [Andrew Wickham (@awickham10)](https://github.com/awickham10)
     and [@kungfu71186](https://github.com/kungfu71186)
+  - Removing the Misc Folder, as it is no longer required.
+  - Added xADKDSKey resource to create KDS Root Keys for gMSAs. [@kungfu71186](https://github.com/kungfu71186)
 - Changes to xADReplicationSiteLink
   - Make use of the new localization helper functions.
 - Changes to xAdDomainController
@@ -28,7 +30,6 @@
   - Updated unit tests to latest unit test template and refactored the
     tests for the function 'Set-TargetResource'.
   - Improved test code coverage.
-  - Removing the Misc Folder, as it is no longer required.
 
 ## 2.25.0.0
 
