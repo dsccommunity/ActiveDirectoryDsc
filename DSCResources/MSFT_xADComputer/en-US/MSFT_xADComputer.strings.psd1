@@ -1,12 +1,14 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-    RoleNotFoundError                 = Please ensure that the PowerShell module for role '{0}' is installed.
-    RetrievingADComputerError         = Error looking up Active Directory computer '{0}'.
+    EnabledDeprecatedMessage = DEPRECATED parameter Enabled is being used in this configuration. The parameter Enabled no longer sets nor enforce the Enabled property. Please see more information at https://github.com/PowerShell/xActiveDirectory/blob/master/README.md#xadcomputer. (ADC0001)
+    RetrievingComputerAccount = Retrieving the information about the computer account '{0}' from Active Directory. (ADC0002)
+    ComputerAccountIsPresent = The computer account '{0}' is present in Active Directory. (ADC0003)
+    ComputerAccountIsAbsent = The computer account '{0}' is absent from Active Directory. (ADC0004)
+    FailedToRetrieveComputerAccount = Failed to retrieve the computer account '{0}' from Active Directory. (ADC0005)
 
-    RetrievingADComputer              = Retrieving Active Directory computer '{0}' ...
+    RoleNotFoundError                 = Please ensure that the PowerShell module for role '{0}' is installed.
+
     CreatingADDomainConnection        = Creating connection to Active Directory domain ...
-    ADComputerIsPresent               = Active Directory computer '{0}' is present.
-    ADComputerNotPresent              = Active Directory computer '{0}' was NOT present.
     ADComputerNotDesiredPropertyState = Computer '{0}' property is NOT in the desired state. Expected '{1}', actual '{2}'.
     ADComputerInDesiredState          = Active Directory computer '{0}' is in the desired state.
     ADComputerNotInDesiredState       = Active Directory computer '{0}' is NOT in the desired state.
@@ -21,7 +23,8 @@ ConvertFrom-StringData @'
     RenamingADComputer                = Renaming computer from '{0}' to '{1}'.
     RestoringADComputer               = Attempting to restore the computer object {0} from recycle bin.
 
-    ODJRequestStartMessage=Attempting to create the ODJ request file '{2}' for computer '{1}' in Domain '{0}'.
-    ODJRequestCompleteMessage=The ODJ request file '{2}' for computer '{1}' in Domain '{0}' has been provisioned successfully.
-    ODJRequestError=Error {0} occured provisioning the computer using ODJ- {1}.
+    ODJRequestStartMessage = Attempting to create the ODJ request file '{2}' for computer '{1}' in Domain '{0}'.
+    ODJRequestCompleteMessage = The ODJ request file '{2}' for computer '{1}' in Domain '{0}' has been provisioned successfully.
+    ODJRequestError = Error {0} occurred provisioning the computer using ODJ- {1}.
+
 '@

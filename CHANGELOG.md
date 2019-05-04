@@ -38,6 +38,7 @@
     there is more than one object with the same name in the recycle bin.
     Now it uses the object that was changed last using the property
     `whenChanged` ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+  - Refactor the resource and unit tests.
   - BREAKING CHANGE: Previously a computer account was always set to enabled
     regardless if the `Enabled` parameter was used in a configuration. Now if
     the `Enabled` parameter is left out of the configuration, the

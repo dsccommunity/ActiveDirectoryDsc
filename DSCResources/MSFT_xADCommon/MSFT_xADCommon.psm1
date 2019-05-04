@@ -992,3 +992,61 @@ function Test-IsDomainController
 
     return $operatingSystemInformation.ProductType -eq 2
 }
+
+<#
+    .SYNOPSIS
+        Converts a hashtable, containing the parameter to property mappings, to
+        an array of properties that can be used to call cmdlets that supports the
+        parameter Properties.
+
+    .PARAMETER PropertyMap
+        The property map, as an array of hashtable, to convert to an properties array.
+
+    .EXAMPLE
+        $computerObjectPropertyMap = @(
+            @{
+                ParameterName = 'ComputerName'
+                PropertyName  = 'cn'
+            },
+            @{
+                ParameterName = 'Location'
+            }
+        )
+
+        $computerObjectProperties = Convert-PropertyMapToObjectProperties $computerObjectPropertyMap
+         $getADComputerResult = Get-ADComputer -Identity 'APP01' -Properties $computerObjectProperties
+#>
+function Convert-PropertyMapToObjectProperties
+{
+    [CmdletBinding()]
+    [OutputType([System.Array])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Array]
+        $PropertyMap
+    )
+
+    $objectProperties = @()
+
+    # Create an array of the AD property names to retrieve from the property map
+    foreach ($property in $PropertyMap)
+    {
+        if ($property -isnot [System.Collections.Hashtable])
+        {
+            $errorMessage = 'An object in the property map array is not of the type [System.Collections.Hashtable].'
+            New-InvalidOperationException -Message $errorMessage
+        }
+
+        if ($property.ContainsKey('PropertyName'))
+        {
+            $objectProperties += @($property.PropertyName)
+        }
+        else
+        {
+            $objectProperties += $property.ParameterName
+        }
+    }
+
+    return $objectProperties
+}

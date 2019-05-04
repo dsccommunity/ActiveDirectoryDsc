@@ -1006,6 +1006,47 @@ try
                 }
             }
         }
+
+        Describe "$($Global:DSCResourceName)\Convert-PropertyMapToObjectProperties" {
+            Context 'When a property map should be converted to object properties' {
+                BeforeAll {
+                    $propertyMapValue = @(
+                        @{
+                            ParameterName = 'ComputerName'
+                            PropertyName = 'cn'
+                        },
+                        @{
+                            ParameterName = 'Location'
+                        }
+                    )
+                }
+
+                It 'Should return the correct values' {
+                    $convertPropertyMapToObjectPropertiesResult = Convert-PropertyMapToObjectProperties $propertyMapValue
+                    $convertPropertyMapToObjectPropertiesResult | Should -HaveCount 2
+                    $convertPropertyMapToObjectPropertiesResult[0] | Should -Be 'cn'
+                    $convertPropertyMapToObjectPropertiesResult[1] | Should -Be 'Location'
+                }
+            }
+
+            Context 'When a property map contain a wrong type' {
+                BeforeAll {
+                    $propertyMapValue = @(
+                        @{
+                            ParameterName = 'ComputerName'
+                            PropertyName = 'cn'
+                        },
+                        'Location'
+                    )
+                }
+
+                It 'Should throw the correct error' {
+                    {
+                        Convert-PropertyMapToObjectProperties $propertyMapValue
+                    } | Should -Throw 'An object in the property map array is not of the type [System.Collections.Hashtable].'
+                }
+            }
+        }
     }
     #endregion
 }

@@ -15,7 +15,7 @@
 .PRIVATEDATA 2016-Datacenter,2016-Datacenter-Server-Core
 #>
 
-#Requires -module ComputerManagementDsc
+#Requires -module xActiveDirectory
 
 <#
     .DESCRIPTION
@@ -70,3 +70,4 @@ Configuration xADDomainController_AddDomainControllerToDomainMinimal_Config
             DependsOn = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
+}

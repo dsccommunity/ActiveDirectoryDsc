@@ -1,9 +1,11 @@
 # xActiveDirectory
 
-The **xActiveDirectory** DSC resources allow you to configure and manage Active
-Directory.
-Note: these resources do not presently install the Remote Server Administration
-Tools (RSAT).
+The **xActiveDirectory** module contains DSC resources for deployment and
+configuration of Active Directory.
+
+These DSC resources allow you to configure new domains, child domains, and high
+availability domain controllers, establish cross-domain trusts and manage users,
+groups and OUs.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
@@ -36,17 +38,9 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 A full list of changes in each version can be found in the [change log](CHANGELOG.md).
 
-## Description
-
-The **xActiveDirectory** module contains DSC resources for deployment and
-configuration of Active Directory.
-These DSC resources allow you to configure new domains, child domains, and high
-availability domain controllers, establish cross-domain trusts and manage users,
-groups and OUs.
-
 ## Resources
 
-* **xADComputer** creates and manages Active Directory computer accounts.
+* [**xADComputer**](#xadcomputer) creates and manages Active Directory computer accounts.
 * **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
@@ -70,16 +64,38 @@ groups and OUs.
 
 The xADComputer DSC resource will manage computer accounts within Active Directory.
 
-* **`[String]` ComputerName** _(Key)_: Specifies the name of the computer to manage.
+>**Note:** An ODJ Request file will only be created when a computer account
+>is first created in the domain. Setting an ODJ Request file path for a
+>configuration that creates a computer account that already exists will
+>not cause the file to be created.
+
+#### Requirements
+
+* Target machine must be running Windows Server 2008 R2 or later.
+
+#### Parameters
+
+* **`[String]` ComputerName** _(Key)_: Specifies the name of the Active
+  Directory computer account to manage. You can identify a computer by
+  its distinguished name, GUID, security identifier (SID) or Security
+  Accounts Manager (SAM) account name.
 * **`[String]` Location** _(Write)_: Specifies the location of the computer, such as an office number.
 * **`[String]` DnsHostName** _(Write)_: Specifies the fully qualified domain name (FQDN) of the computer.
 * **`[String]` ServicePrincipalNames** _(Write)_: Specifies the service principal names for the computer account.
 * **`[String]` UserPrincipalName** _(Write)_: Specifies the UPN assigned to the computer account.
 * **`[String]` DisplayName** _(Write)_: "Specifies the display name of the computer.
 * **`[String]` Path** _(Write)_: Specifies the X.500 path of the container where the computer is located.
-* **`[String]` Description** _(Write)_: Specifies a description of the computer object.
-* **`[Boolean]` Enabled** _(Write)_: Specifies if the computer account is enabled.
-* **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished Name that manages the computer object.
+* **`[String]` Description** _(Write)_: Specifies a description of the computer account.
+* **`[Boolean]` Enabled** _(Write)_: **DEPRECATED - DO NOT USE**. Please
+  see the parameter `EnabledOnCreation` in this resource, and the resource
+  [xADObjectEnabledState](#xadobjectenabledstate) on how to enforce the `Enabled` property.
+  _This parameter no longer sets nor enforce the Enabled property. If_
+  _this parameter is used a warning message will be outputted saying that_
+  _the `Enabled` parameter has been deprecated_.
+* **`[Boolean]` EnabledOnCreation** _(Write)_: Specifies if the computer
+  account is created enabled or disabled. By default the computer account
+  will be created using the default value of the cmdlet `New-ADComputer`.
+* **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished Name that manages the computer account.
   * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
 * **`[String]`DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to perform the task.
 * **`[PSCredential]` DomainAdministratorCredential** _(Write)_: Specifies the user account credentials to use to perform the task.
@@ -87,12 +103,25 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[String]` Ensure**: Specifies whether the computer account is present or absent.
   * Valid values are 'Present' and 'Absent'.
   * It not specified, it defaults to 'Present'.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer object should first tried to be restored from the recycle bin before creating a new computer object.
-* **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of the computer object.
-* **`[String]` SID** _(Read)_: Returns the security identifier of the computer object.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer account should first tried to be restored from the recycle bin before creating a new computer account.
 
-Note: An ODJ Request file will only be created when a computer account is first created in the domain.
-Setting an ODJ Request file path for a configuration that creates a computer account that already exists will not cause the file to be created.
+#### Read-Only Properties from Get-TargetResource
+
+* **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of the computer account.
+* **`[String]` SID** _(Read)_: Returns the security identifier of the computer account.
+* **`[String]` SamAccountName** _(Read)_: Returns the computer account
+  Security Accounts Manager (SAM) account name.
+
+#### Examples
+
+* [Add a Active Directory computer account](/Examples/Resources/xADComputer/1-AddComputerAccount_Config.ps1)
+* [Add a Active Directory computer account disabled](/Examples/Resources/xADComputer/2-AddComputerAccountDisabled_Config.ps1)
+* [Add a Active Directory computer account in a organizational unit](/Examples/Resources/xADComputer/3-AddComputerAccountSpecificPath_Config.ps1)
+* [Add a Active Directory computer account and create an offline domain join (ODJ) request file](/Examples/Resources/xADComputer/4-AddComputerAccountAndCreateODJRequest_Config.ps1)
+
+#### Known issues
+
+All issues are not listed here, see [here for all open issues](https://github.com/PowerShell/xActiveDirectory/issues?q=is%3Aissue+is%3Aopen+in%3Atitle+xADComputer).
 
 ### **xADDomain**
 
@@ -976,110 +1005,6 @@ configuration Example_xADDomainDefaultPasswordPolicy
 Example_xADDomainDefaultPasswordPolicy -DomainName 'contoso.com' -ComplexityEnabled $true -MinPasswordLength 8
 
 Start-DscConfiguration -Path .\Example_xADDomainDefaultPasswordPolicy -Wait -Verbose
-```
-
-### Create an Active Directory Computer Account
-
-In this example, we create a 'NANO-001' computer account in the 'Server' OU of the 'example.com' Active Directory domain.
-
-```powershell
-configuration Example_xADComputerAccount
-{
-    Param
-    (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DomainController,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $DomainCredential,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ComputerName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Path
-    )
-
-    Import-DscResource -Module xActiveDirectory
-
-    Node $AllNodes.NodeName
-    {
-        xADComputer "$ComputerName"
-        {
-           DomainController = $DomainController
-           DomainAdministratorCredential = $DomainCredential
-           ComputerName = $ComputerName
-           Path = $Path
-        }
-    }
-}
-
-Example_xADComputerAccount -DomainController 'DC01' `
-    -DomainCredential (Get-Credential -Message "Domain Credentials") `
-    -ComputerName 'NANO-001' `
-    -Path 'ou=Servers,dc=example,dc=com' `
-    -ConfigurationData $ConfigurationData
-
-Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
-```
-
-### Create an Active Directory Computer Account and an ODJ Request File
-
-In this example, we create a 'NANO-200' computer account in the 'Nano' OU of the 'example.com' Active Directory domain as well as creating an Offline Domain Join Request file.
-
-```powershell
-configuration Example_xADComputerAccountODJ
-{
-    Param
-    (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DomainController,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $DomainCredential,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ComputerName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Path,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RequestFile
-    )
-
-    Import-DscResource -Module xActiveDirectory
-
-    Node $AllNodes.NodeName
-    {
-        xADComputer "$ComputerName"
-        {
-           DomainController = $DomainController
-           DomainAdministratorCredential = $DomainCredential
-           ComputerName = $ComputerName
-           Path = $Path
-           RequestFile = $RequestFile
-        }
-    }
-}
-
-Example_xADComputerAccountODJ -DomainController 'DC01' `
-    -DomainCredential (Get-Credential -Message "Domain Credentials") `
-    -ComputerName 'NANO-200' `
-    -Path 'ou=Nano,dc=example,dc=com' `
-    -RequestFile 'd:\ODJFiles\NANO-200.txt' `
-    -ConfigurationData $ConfigurationData
-
-Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
 ```
 
 ### Create User Principal Name (UPN) suffixes and Service Principal Name suffixes
