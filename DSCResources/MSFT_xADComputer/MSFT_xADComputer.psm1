@@ -373,6 +373,10 @@ function Test-TargetResource
         $EnabledOnCreation
     )
 
+    Write-Verbose -Message (
+        $script:localizedData.TestConfiguration -f $ComputerName
+    )
+
     <#
         We have the deprecated message in Test-TargetResource so that it is
         shown when using Start-DscConfiguration or Invoke-DscResource.
@@ -382,69 +386,115 @@ function Test-TargetResource
         Write-Warning -Message $script:localizedData.EnabledDeprecatedMessage
     }
 
-    $targetResource = Get-TargetResource @PSBoundParameters
-    $isCompliant = $true
+    $getTargetResourceParameters = @{
+        ComputerName                  = $ComputerName
+        RequestFile                   = $RequestFile
+        DomainController              = $DomainController
+        DomainAdministratorCredential = $DomainAdministratorCredential
+        RestoreFromRecycleBin         = $RestoreFromRecycleBin
+        EnabledOnCreation             = $EnabledOnCreation
+    }
+
+    # Need the @() around this to get a new array to enumerate.
+    @($getTargetResourceParameters.Keys) | ForEach-Object {
+        if (-not $PSBoundParameters.ContainsKey($_))
+        {
+            $getTargetResourceParameters.Remove($_)
+        }
+    }
+
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+
+    $testTargetResourceReturnValue = $true
 
     if ($Ensure -eq 'Absent')
     {
-        if ($targetResource.Ensure -eq 'Present')
+        if ($getTargetResourceResult.Ensure -eq 'Present')
         {
-            Write-Verbose -Message ($script:localizedData.ADComputerNotDesiredPropertyState -f `
-                    'Ensure', $PSBoundParameters.Ensure, $targetResource.Ensure)
-            $isCompliant = $false
+            Write-Verbose -Message (
+                $script:localizedData.ComputerAccountShouldBeAbsent -f $ComputerName
+            )
+
+            $testTargetResourceReturnValue = $false
         }
     }
     else
     {
-        # Add ensure as it may not be explicitly passed and we want to enumerate it.
-        $PSBoundParameters['Ensure'] = $Ensure
-
-        foreach ($parameter in $PSBoundParameters.Keys)
+        if ($getTargetResourceResult.Ensure -eq 'Absent')
         {
-            if ($targetResource.ContainsKey($parameter))
+            Write-Verbose -Message (
+                $script:localizedData.ComputerAccountShouldBePresent -f $ComputerName
+            )
+
+            $testTargetResourceReturnValue = $false
+        }
+        else
+        {
+            <#
+                Ignore to compare the parameter ServicePrincipalNames here.
+                It needs a special comparison so it is handled after.
+
+                Ignores the parameter Ensure since we have already evaluated
+                it to get here.
+
+                Ignores the Enabled property because it is DEPRECATED.
+            #>
+            $compareTargetResourceStateParameters = @{
+                CurrentValues    = $getTargetResourceResult
+                DesiredValues    = $PSBoundParameters
+                IgnoreProperties = @(
+                    'ServicePrincipalNames'
+                    'Enabled'
+                    'Ensure'
+                )
+            }
+
+            $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+            if ($false -in $compareTargetResourceStateResult.InDesiredState)
             {
-                # This check is required to be able to explicitly remove values with an empty string, if required
-                if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and
-                    ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
-                {
-                    # Both values are null/empty and therefore we are compliant
+                $testTargetResourceReturnValue = $false
+            }
+
+            if ($PSBoundParameters.ContainsKey('ServicePrincipalNames'))
+            {
+                $testMembersParameters = @{
+                    ExistingMembers = $getTargetResourceResult.ServicePrincipalNames -as [System.String[]]
+                    Members         = $ServicePrincipalNames
                 }
-                elseif ($parameter -eq 'ServicePrincipalNames')
+
+                if (-not (Test-Members @testMembersParameters))
                 {
-                    $testMembersParams = @{
-                        ExistingMembers = $targetResource.ServicePrincipalNames -as [System.String[]]
-                        Members         = $ServicePrincipalNames
-                    }
-                    if (-not (Test-Members @testMembersParams))
-                    {
-                        $existingSPNs = $testMembersParams['ExistingMembers'] -join ','
-                        $desiredSPNs = $ServicePrincipalNames -join ','
-                        Write-Verbose -Message ($script:localizedData.ADComputerNotDesiredPropertyState -f `
-                                'ServicePrincipalNames', $desiredSPNs, $existingSPNs)
-                        $isCompliant = $false
-                    }
+                    $existingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames -join ','
+                    $desiredServicePrincipalNames = $ServicePrincipalNames -join ','
+
+                    Write-Verbose -Message (
+                        $script:localizedData.ServicePrincipalNamesNotInDesiredState `
+                            -f $desiredServicePrincipalNames, $existingServicePrincipalNames
+                    )
+
+                    $testTargetResourceReturnValue = $false
                 }
-                elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
+                else
                 {
-                    Write-Verbose -Message ($script:localizedData.ADComputerNotDesiredPropertyState -f `
-                            $parameter, $PSBoundParameters.$parameter, $targetResource.$parameter)
-                    $isCompliant = $false
+                    Write-Verbose -Message (
+                        $script:localizedData.ServicePrincipalNamesInDesiredState
+                    )
                 }
             }
-        } #end foreach PSBoundParameter
+        }
+
     }
 
-    if ($isCompliant)
+    if ($testTargetResourceReturnValue)
     {
-        Write-Verbose -Message ($script:localizedData.ADComputerInDesiredState -f $ComputerName)
-        return $true
+        Write-Verbose -Message ($script:localizedData.ComputerAccountInDesiredState -f $ComputerName)
     }
     else
     {
-        Write-Verbose -Message ($script:localizedData.ADComputerNotInDesiredState -f $ComputerName)
-        return $false
+        Write-Verbose -Message ($script:localizedData.ComputerAccountNotInDesiredState -f $ComputerName)
     }
 
+    return $testTargetResourceReturnValue
 }
 
 <#

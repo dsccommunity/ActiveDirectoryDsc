@@ -5,13 +5,13 @@ ConvertFrom-StringData @'
     ComputerAccountIsPresent = The computer account '{0}' is present in Active Directory. (ADC0003)
     ComputerAccountIsAbsent = The computer account '{0}' is absent from Active Directory. (ADC0004)
     FailedToRetrieveComputerAccount = Failed to retrieve the computer account '{0}' from Active Directory. (ADC0005)
-
-    RoleNotFoundError                 = Please ensure that the PowerShell module for role '{0}' is installed.
-
-    CreatingADDomainConnection        = Creating connection to Active Directory domain ...
-    ADComputerNotDesiredPropertyState = Computer '{0}' property is NOT in the desired state. Expected '{1}', actual '{2}'.
-    ADComputerInDesiredState          = Active Directory computer '{0}' is in the desired state.
-    ADComputerNotInDesiredState       = Active Directory computer '{0}' is NOT in the desired state.
+    TestConfiguration = Determining the current state of the computer account '{0}'.
+    ComputerAccountShouldBeAbsent = The computer account '{0}' is present in Active Directory, but expected it to be absent.
+    ComputerAccountShouldBePresent = The computer account '{0}' is absent in Active Directory, but expected it to be present.
+    ServicePrincipalNamesInDesiredState = The service principal names was in desired state.
+    ServicePrincipalNamesNotInDesiredState = The service principal names was '{0}', but expected them to be '{1}'.
+    ComputerAccountInDesiredState = The computer account '{0}' is in the desired state.
+    ComputerAccountNotInDesiredState = The computer account '{0}' is not in the desired state.
 
     AddingADComputer                  = Adding Active Directory computer '{0}'.
     AddingADComputerAsDisabled        = Adding a disabled Active Directory computer account '{0}'.
