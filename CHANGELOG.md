@@ -38,16 +38,18 @@
     there is more than one object with the same name in the recycle bin.
     Now it uses the object that was changed last using the property
     `whenChanged` ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
-  - Refactor the resource and unit tests.
-  - BREAKING CHANGE: Previously a computer account was always set to enabled
-    regardless if the `Enabled` parameter was used in a configuration. Now if
-    the `Enabled` parameter is left out of the configuration, the
-    computer account will not be evaluated if it is enabled. So if a computer is
-    disabled, the resource will not enable it unless the `Enabled` parameter is
-    set to `$true` in the configuration.
-  - A computer account can now be created disabled by setting the parameter
-    `CreateDisabled` to `$true`. By default a computer account will be created
-    as enabled.
+  - Refactored the resource and the unit tests.
+  - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
+    longer set nor enforced with this resource. _If this parameter is_
+    _used in a configuration a warning message will be outputted saying_
+    _that the `Enabled` parameter has been deprecated_. The new resource
+    [xADObjectEnabledState](#xadobjectenabledstate) can be used to enforce
+    the `Enabled` property.
+  - BREAKING CHANGE: By default
+    the computer account will be created using the default value of the
+    cmdlet `New-ADComputer`.
+  - A new parameter was added called `EnabledOnCreation` that will control
+    if the computer account is created enabled or disabled.
 - Changes to xADGroup
   - Restoring a group from the recycle bin no longer fails if there is
     more than one object with the same name in the recycle bin. Now it

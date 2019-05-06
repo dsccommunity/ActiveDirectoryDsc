@@ -1098,7 +1098,7 @@ function Convert-PropertyMapToObjectProperties
         be compared. This parameter can be used to remove certain keys from
         the comparison.
 #>
-function Compare-TargetResourceState
+function Compare-ResourcePropertyState
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable[]])]

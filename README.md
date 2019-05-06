@@ -97,8 +97,9 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
   see the parameter `EnabledOnCreation` in this resource, and the resource
   [xADObjectEnabledState](#xadobjectenabledstate) on how to enforce the
   `Enabled` property. _This parameter no longer sets nor enforce the_
-   _Enabled property. If this parameter is used a warning message will be_
-   _outputted saying that the `Enabled` parameter has been deprecated_.
+   _Enabled property. If this parameter is used then a warning message_
+   _will be outputted saying that the `Enabled` parameter has been_
+   _deprecated_.
 * **`[Boolean]` EnabledOnCreation** _(Write)_: Specifies if the computer
   account is created enabled or disabled. By default the computer account
   will be created using the default value of the cmdlet `New-ADComputer`.

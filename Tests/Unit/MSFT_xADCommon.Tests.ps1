@@ -1193,7 +1193,7 @@ try
             Assert-VerifiableMock
         }
 
-        Describe "$($Global:DSCResourceName)\Compare-TargetResourceState" {
+        Describe "$($Global:DSCResourceName)\Compare-ResourcePropertyState" {
             Context 'When one property is in desired state' {
                 BeforeAll {
                     $mockCurrentValues = @{
@@ -1211,7 +1211,7 @@ try
                         DesiredValues = $mockDesiredValues
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
                     $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
@@ -1239,7 +1239,7 @@ try
                         DesiredValues = $mockDesiredValues
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 2
                     $compareTargetResourceStateResult[0].Parameter | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
@@ -1269,7 +1269,7 @@ try
                         DesiredValues = $mockDesiredValues
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
                     $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'APP01'
@@ -1297,7 +1297,7 @@ try
                         DesiredValues = $mockDesiredValues
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 2
                     $compareTargetResourceStateResult[0].Parameter | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
@@ -1328,7 +1328,7 @@ try
                         DesiredValues = $mockDesiredValues
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
                     $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
@@ -1359,7 +1359,7 @@ try
                         )
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
                     $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
@@ -1392,7 +1392,7 @@ try
                         )
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 2
                     $compareTargetResourceStateResult[0].Parameter | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
@@ -1432,7 +1432,7 @@ try
                         )
                     }
 
-                    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -BeNullOrEmpty
                 }
             }

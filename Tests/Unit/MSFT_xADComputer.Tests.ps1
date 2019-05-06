@@ -83,6 +83,25 @@ try
                 Mock -CommandName Assert-Module
             }
 
+            Context 'When the Get-ADComputer throws an unhandled error' {
+                BeforeAll {
+                    $errorMessage = 'Mocked error'
+                    Mock -CommandName Get-ADComputer -MockWith {
+                        throw $errorMessage
+                    }
+
+                    $getTargetResourceParameters = @{
+                        ComputerName                  = $mockComputerNamePresent
+                    }
+                }
+
+                It 'Should return the state as absent' {
+                    { Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
+
+                    Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
+                }
+            }
+
             Context 'When the system is in the desired state' {
                 Context 'When the computer account is absent in Active Directory' {
                     BeforeAll {
@@ -97,6 +116,7 @@ try
                             RequestFile                   = 'TestDrive:\ODJ.txt'
                             RestoreFromRecycleBin         = $false
                             EnabledOnCreation             = $false
+                            Verbose                       = $true
                         }
                     }
 
@@ -145,6 +165,7 @@ try
                             RequestFile                   = 'TestDrive:\ODJ.txt'
                             RestoreFromRecycleBin         = $false
                             EnabledOnCreation             = $false
+                            Verbose                       = $true
                         }
                     }
 
@@ -190,6 +211,7 @@ try
                         $getTargetResourceParameters = @{
                             ComputerName = $mockComputerNamePresent
                             Enabled      = $true
+                            Verbose      = $true
                         }
                     }
 
@@ -207,6 +229,7 @@ try
 
                         $getTargetResourceParameters = @{
                             ComputerName = $mockComputerNamePresent
+                            Verbose      = $true
                         }
                     }
 
@@ -229,6 +252,7 @@ try
                         $getTargetResourceParameters = @{
                             ComputerName     = $mockComputerNamePresent
                             DomainController = 'DC01'
+                            Verbose          = $true
                         }
                     }
 
@@ -251,6 +275,7 @@ try
                         $getTargetResourceParameters = @{
                             ComputerName                  = $mockComputerNamePresent
                             DomainAdministratorCredential = $mockCredential
+                            Verbose                       = $true
                         }
                     }
 
@@ -303,6 +328,7 @@ try
                         $testTargetResourceParameters = @{
                             Ensure       = 'Absent'
                             ComputerName = $mockComputerNamePresent
+                            Verbose      = $true
                         }
                     }
 
@@ -347,6 +373,48 @@ try
                             RequestFile                   = 'TestDrive:\ODJ.txt'
                             RestoreFromRecycleBin         = $false
                             EnabledOnCreation             = $false
+                            Verbose                       = $true
+                        }
+                    }
+
+                    It 'Should return $true' {
+                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
+                        $testTargetResourceResult | Should -BeTrue
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When service principal names are in desired state' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure                        = 'Present'
+                                ComputerName                  = $mockComputerNamePresent
+                                Location                      = $mockLocation
+                                DnsHostName                   = $mockDnsHostName
+                                ServicePrincipalNames         = $mockServicePrincipalNames
+                                UserPrincipalName             = $mockUserPrincipalName
+                                DisplayName                   = $mockDisplayName
+                                Path                          = $mockParentContainer
+                                Description                   = $mockDescription
+                                Enabled                       = $true
+                                Manager                       = $mockManagedBy
+                                DomainController              = 'DC01'
+                                DomainAdministratorCredential = $mockCredential
+                                RequestFile                   = 'TestDrive:\ODJ.txt'
+                                RestoreFromRecycleBin         = $false
+                                EnabledOnCreation             = $false
+                                DistinguishedName             = $mockDistinguishedName
+                                SID                           = $mockSID
+                                SamAccountName                = $mockSamAccountName
+                            }
+                        }
+
+                        $testTargetResourceParameters = @{
+                            ComputerName          = $mockComputerNamePresent
+                            ServicePrincipalNames = $mockServicePrincipalNames
+                            Verbose               = $true
                         }
                     }
 
@@ -362,7 +430,7 @@ try
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
-                                Ensure                        = 'Absent'
+                                Ensure = 'Absent'
                             }
                         }
 
@@ -371,6 +439,7 @@ try
                         $testTargetResourceParameters = @{
                             ComputerName = $mockComputerNamePresent
                             Enabled      = $true
+                            Verbose      = $true
                         }
                     }
 
@@ -383,359 +452,176 @@ try
             }
 
             Context 'When the system is not in the desired state' {
-                It 'Should ....test-description' {
-                    # test-code
+                Context 'When the computer account is absent in Active Directory' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure                        = 'Absent'
+                                ComputerName                  = $null
+                                Location                      = $null
+                                DnsHostName                   = $null
+                                ServicePrincipalNames         = $null
+                                UserPrincipalName             = $null
+                                DisplayName                   = $null
+                                Path                          = $null
+                                Description                   = $null
+                                Enabled                       = $false
+                                Manager                       = $null
+                                DomainController              = $null
+                                DomainAdministratorCredential = $null
+                                RequestFile                   = $null
+                                RestoreFromRecycleBin         = $false
+                                EnabledOnCreation             = $false
+                                DistinguishedName             = $null
+                                SID                           = $null
+                                SamAccountName                = $null
+                            }
+                        }
+
+                        $testTargetResourceParameters = @{
+                            Ensure       = 'Present'
+                            ComputerName = $mockComputerNamePresent
+                            Verbose      = $true
+                        }
+                    }
+
+                    It 'Should return $false' {
+                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
+                        $testTargetResourceResult | Should -BeFalse
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When the computer account is present in Active Directory' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure                        = 'Present'
+                                ComputerName                  = $mockComputerNamePresent
+                                Location                      = $mockLocation
+                                DnsHostName                   = $mockDnsHostName
+                                ServicePrincipalNames         = $mockServicePrincipalNames
+                                UserPrincipalName             = $mockUserPrincipalName
+                                DisplayName                   = $mockDisplayName
+                                Path                          = $mockParentContainer
+                                Description                   = $mockDescription
+                                Enabled                       = $true
+                                Manager                       = $mockManagedBy
+                                DomainController              = 'DC01'
+                                DomainAdministratorCredential = $mockCredential
+                                RequestFile                   = 'TestDrive:\ODJ.txt'
+                                RestoreFromRecycleBin         = $false
+                                EnabledOnCreation             = $false
+                                DistinguishedName             = $mockDistinguishedName
+                                SID                           = $mockSID
+                                SamAccountName                = $mockSamAccountName
+                            }
+                        }
+
+                        $testTargetResourceParameters = @{
+                            Ensure       = 'Absent'
+                            ComputerName = $mockComputerNamePresent
+                            Verbose      = $true
+                        }
+                    }
+
+                    It 'Should return $false' {
+                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
+                        $testTargetResourceResult | Should -BeFalse
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When a property is not in desired state' {
+                    BeforeAll {
+                        # Mock a specific desired state.
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure                        = 'Present'
+                                ComputerName                  = $mockComputerNamePresent
+                                Location                      = $mockLocation
+                                DnsHostName                   = $mockDnsHostName
+                                ServicePrincipalNames         = $mockServicePrincipalNames
+                                UserPrincipalName             = $mockUserPrincipalName
+                                DisplayName                   = $mockDisplayName
+                                Path                          = $mockParentContainer
+                                Description                   = $mockDescription
+                                Enabled                       = $true
+                                Manager                       = $mockManagedBy
+                                DomainController              = 'DC01'
+                                DomainAdministratorCredential = $mockCredential
+                                RequestFile                   = 'TestDrive:\ODJ.txt'
+                                RestoreFromRecycleBin         = $false
+                                EnabledOnCreation             = $false
+                                DistinguishedName             = $mockDistinguishedName
+                                SID                           = $mockSID
+                                SamAccountName                = $mockSamAccountName
+                            }
+                        }
+
+                        # One test case per property with a value that differs from the desired state.
+                        $testCases_Properties = @(
+                            @{
+                                PropertyName = 'Location'
+                                Value        = 'WrongLocation'
+                            },
+                            @{
+                                PropertyName = 'DnsHostName'
+                                Value        = 'wrong@contoso.com'
+                            },
+                            @{
+                                PropertyName = 'ServicePrincipalNames'
+                                Value        = @('spn/wrong')
+                            },
+                            @{
+                                PropertyName = 'UserPrincipalName'
+                                Value        = 'wrong@contoso.com'
+                            },
+                            @{
+                                PropertyName = 'DisplayName'
+                                Value        = 'Wrong'
+                            },
+                            @{
+                                PropertyName = 'Path'
+                                Value        = 'OU=Wrong,CN=Computers,DC=contoso,DC=com'
+                            },
+                            @{
+                                PropertyName = 'Description'
+                                Value        = 'Wrong description'
+                            },
+                            @{
+                                PropertyName = 'Manager'
+                                Value        = 'CN=WrongManager,CN=Users,DC=contoso,DC=com'
+                            }
+                        )
+                    }
+
+                    It 'Should return $false when property <PropertyName> is not in desired state' -TestCases $testCases_Properties {
+                        param
+                        (
+                            [Parameter()]
+                            $PropertyName,
+
+                            [Parameter()]
+                            $Value
+                        )
+
+                        $testTargetResourceParameters = @{
+                            ComputerName  = $mockComputerNamePresent
+                            $PropertyName = $Value
+                            Verbose       = $true
+                        }
+
+                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
+                        $testTargetResourceResult | Should -BeFalse
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    }
                 }
             }
         }
-
-        #region Function Test-TargetResource
-        # Describe 'xADComputer\Test-TargetResource' {
-
-        #     $testStringProperties = @(
-        #         'Location',
-        #         'DnsHostName',
-        #         'UserPrincipalName',
-        #         'DisplayName',
-        #         'Path',
-        #         'Description',
-        #         'Manager'
-        #     )
-        #     $testArrayProperties = @(
-        #         'ServicePrincipalNames'
-        #     )
-        #     $testBooleanProperties = @(
-        #         'Enabled'
-        #     )
-
-        #     It "Passes when computer account does not exist and 'Ensure' is 'Absent'" {
-        #         Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
-
-        #         Test-TargetResource @testAbsentParams | Should Be $true
-        #     }
-
-        #     It "Passes when computer account exists and 'Ensure' is 'Present'" {
-        #         Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
-
-        #         Test-TargetResource @testPresentParams | Should Be $true
-        #     }
-
-        #     It "Fails when computer account does not exist and 'Ensure' is 'Present'" {
-        #         Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
-
-        #         Test-TargetResource @testPresentParams | Should Be $false
-        #     }
-
-        #     It "Fails when computer account exists, and 'Ensure' is 'Absent'" {
-        #         Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
-
-        #         Test-TargetResource @testAbsentParams | Should Be $false
-        #     }
-
-        #     foreach ($testParameter in $testStringProperties)
-        #     {
-        #         It "Passes when computer account '$testParameter' matches AD account property" {
-        #             $testParameterValue = 'Test Parameter String Value'
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = $testParameterValue
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $true
-        #         }
-
-        #         It "Fails when computer account '$testParameter' does not match incorrect AD account property value" {
-        #             $testParameterValue = 'Test Parameter String Value'
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $invalidADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $invalidADComputer[$testParameter] = $testParameterValue.Substring(0, ([System.Int32] $testParameterValue.Length / 2))
-        #                 return $invalidADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #         It "Fails when computer account '$testParameter' does not match empty AD account property value" {
-        #             $testParameterValue = 'Test Parameter String Value'
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $invalidADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $invalidADComputer[$testParameter] = ''
-        #                 return $invalidADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #         It "Fails when computer account '$testParameter' does not match null AD account property value" {
-        #             $testParameterValue = 'Test Parameter String Value'
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $invalidADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $invalidADComputer[$testParameter] = $null
-        #                 return $invalidADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #         It "Passes when empty computer account '$testParameter' matches empty AD account property" {
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = ''
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $true
-        #         }
-
-        #         It "Passes when empty computer account '$testParameter' matches null AD account property" {
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = $null
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $true
-        #         }
-
-        #     } #end foreach test string property
-
-        #     foreach ($testParameter in $testArrayProperties)
-        #     {
-        #         It "Passes when computer account '$testParameter' matches empty AD account property" {
-        #             $testParameterValue = @()
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = $testParameterValue
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $true
-        #         }
-
-        #         It "Passes when computer account '$testParameter' matches single AD account property" {
-        #             $testParameterValue = @('Entry1')
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = $testParameterValue
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $true
-        #         }
-
-        #         It "Passes when computer account '$testParameter' matches multiple AD account property" {
-        #             $testParameterValue = @('Entry1', 'Entry2')
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = $testParameterValue
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $true
-        #         }
-
-        #         It "Fails when computer account '$testParameter' does not match AD account property count" {
-        #             $testParameterValue = @('Entry1', 'Entry2')
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = @('Entry1')
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #         It "Fails when computer account '$testParameter' does not match AD account property name" {
-        #             $testParameterValue = @('Entry1')
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = @('Entry2')
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #         It "Fails when computer account '$testParameter' does not match empty AD account property" {
-        #             $testParameterValue = @('Entry1')
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = @()
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #         It "Fails when empty computer account '$testParameter' does not match AD account property" {
-        #             $testParameterValue = @()
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = @('ExtraEntry1')
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #     } #end foreach test string property
-
-        #     foreach ($testParameter in $testBooleanProperties)
-        #     {
-        #         It "Passes when computer account '$testParameter' matches AD account property" {
-        #             $testParameterValue = $true
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $validADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $validADComputer[$testParameter] = $testParameterValue
-        #                 return $validADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $true
-        #         }
-
-        #         It "Fails when computer account '$testParameter' does not match AD account property value" {
-        #             $testParameterValue = $true
-        #             $testValidPresentParams = $testPresentParams.Clone()
-        #             $testValidPresentParams[$testParameter] = $testParameterValue
-        #             $invalidADComputer = $testPresentParams.Clone()
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $invalidADComputer[$testParameter] = -not $testParameterValue
-        #                 return $invalidADComputer
-        #             }
-
-        #             Test-TargetResource @testValidPresentParams | Should Be $false
-        #         }
-
-        #     } #end foreach test boolean property
-
-        #     Context 'When configuration is in desired state' {
-        #         BeforeAll {
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 return $fakeADComputer
-        #             }
-        #         }
-
-        #         Context 'When not specifying the parameter Enabled' {
-        #             It 'Should return the desired state as $true' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $true
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter Enabled with the value $true' {
-        #             It 'Should return the desired state as $true' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $true
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $true
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $false' {
-        #             It 'Should return the desired state as $true' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['CreateDisabled'] = $false
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $true
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $false and parameter Enabled with value $true' {
-        #             It 'Should return the desired state as $true' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $true
-        #                 $setTargetResourceParameters['CreateDisabled'] = $false
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $true
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $true' {
-        #             It 'Should return the desired state as $true' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['CreateDisabled'] = $true
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $true
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $true and parameter Enabled with value $true' {
-        #             It 'Should return the desired state as $true' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $true
-        #                 $setTargetResourceParameters['CreateDisabled'] = $true
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $true
-        #             }
-        #         }
-        #     }
-
-        #     Context 'When configuration is not in desired state' {
-        #         BeforeAll {
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 return $fakeADComputer
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter Enabled with the value $false' {
-        #             It 'Should return the desired state as $false' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $false
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $false
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $false and parameter Enabled with value $false' {
-        #             It 'Should return the desired state as $false' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $false
-        #                 $setTargetResourceParameters['CreateDisabled'] = $false
-
-        #                 $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
-        #                 $testTargetResourceResult | Should -Be $false
-        #             }
-        #         }
-        #     }
-        # }
-        # #endregion
 
         # #region Function Set-TargetResource
         # Describe 'xADComputer\Set-TargetResource' {

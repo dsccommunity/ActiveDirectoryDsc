@@ -431,25 +431,28 @@ function Test-TargetResource
         else
         {
             <#
-                Ignore to compare the parameter ServicePrincipalNames here.
-                It needs a special comparison so it is handled after.
-
-                Ignores the parameter Ensure since we have already evaluated
-                it to get here.
-
-                Ignores the Enabled property because it is DEPRECATED.
+                - Ignores the parameter Ensure since we have already evaluated
+                  it to get here.
+                - Ignores the parameter ComputerName because the value of
+                  the parameter Ensure is set depending on the existence of
+                  the ComputerName in Active Directory.
+                - Ignore to compare the parameter ServicePrincipalNames here
+                  because it needs a special comparison, so it is handled
+                  afterwards.
+                - Ignores the Enabled property because it is DEPRECATED.
             #>
             $compareTargetResourceStateParameters = @{
                 CurrentValues    = $getTargetResourceResult
                 DesiredValues    = $PSBoundParameters
                 IgnoreProperties = @(
+                    'Ensure'
+                    'ComputerName'
                     'ServicePrincipalNames'
                     'Enabled'
-                    'Ensure'
                 )
             }
 
-            $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+            $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
             if ($false -in $compareTargetResourceStateResult.InDesiredState)
             {
                 $testTargetResourceReturnValue = $false
