@@ -4,12 +4,12 @@ $script:resourceModulePath = Split-Path `
 
 $script:localizationModulePath = Join-Path `
 -Path $script:resourceModulePath `
--ChildPath 'Modules\DscResource.LocalizationHelper'
+-ChildPath 'Modules\xActiveDirectory.Common'
 
 Import-Module -Name (
 Join-Path `
     -Path $script:localizationModulePath `
-    -ChildPath 'DscResource.LocalizationHelper.psm1'
+    -ChildPath 'xActiveDirectory.Common.psm1'
 )
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADManagedServiceAccount'

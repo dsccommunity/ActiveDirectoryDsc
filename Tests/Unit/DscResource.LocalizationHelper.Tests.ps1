@@ -1,11 +1,11 @@
-# Import the DscResource.LocalizationHelper module to test
+# Import the xActiveDirectory.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\DscResource.LocalizationHelper'
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\xActiveDirectory.Common'
 
-Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'DscResource.LocalizationHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common.psm1') -Force
 
-InModuleScope 'DscResource.LocalizationHelper' {
-    Describe 'DscResource.LocalizationHelper\Get-LocalizedData' {
+InModuleScope 'xActiveDirectory.Common' {
+    Describe 'xActiveDirectory.Common\Get-LocalizedData' {
         $mockTestPath = {
             return $mockTestPathReturnValue
         }
@@ -99,7 +99,7 @@ InModuleScope 'DscResource.LocalizationHelper' {
         Assert-VerifiableMock
     }
 
-    Describe 'DscResource.LocalizationHelper\New-InvalidResultException' {
+    Describe 'xActiveDirectory.Common\New-InvalidResultException' {
         Context 'When calling with Message parameter only' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'
@@ -123,7 +123,7 @@ InModuleScope 'DscResource.LocalizationHelper' {
         Assert-VerifiableMock
     }
 
-    Describe 'DscResource.LocalizationHelper\New-ObjectNotFoundException' {
+    Describe 'xActiveDirectory.Common\New-ObjectNotFoundException' {
         Context 'When calling with Message parameter only' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'
@@ -147,7 +147,7 @@ InModuleScope 'DscResource.LocalizationHelper' {
         Assert-VerifiableMock
     }
 
-    Describe 'DscResource.LocalizationHelper\New-InvalidOperationException' {
+    Describe 'xActiveDirectory.Common\New-InvalidOperationException' {
         Context 'When calling with Message parameter only' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'
@@ -171,7 +171,7 @@ InModuleScope 'DscResource.LocalizationHelper' {
         Assert-VerifiableMock
     }
 
-    Describe 'DscResource.LocalizationHelper\New-InvalidArgumentException' {
+    Describe 'xActiveDirectory.Common\New-InvalidArgumentException' {
         Context 'When calling with both the Message and ArgumentName parameter' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'

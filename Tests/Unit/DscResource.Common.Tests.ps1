@@ -1,11 +1,11 @@
-# Import the DscResource.Common module to test
+# Import the xActiveDirectory.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\DscResource.Common'
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\xActiveDirectory.Common'
 
-Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'DscResource.Common.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.psm1') -Force
 
-InModuleScope 'DscResource.Common' {
-    Describe 'DscResource.Common\Test-DscParameterState' -Tag TestDscParameterState {
+InModuleScope 'xActiveDirectory.Common' {
+    Describe 'xActiveDirectory.Common\Test-DscParameterState' -Tag TestDscParameterState {
         Context -Name 'When passing values' -Fixture {
             It 'Should return true for two identical tables' {
                 $mockDesiredValues = @{ Example = 'test' }
@@ -92,7 +92,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return true when only a specified value matches, but other non-listed values do not' {
                 $mockCurrentValues = @{ Example = 'test'; SecondExample = 'true' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false'  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -105,7 +105,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when only specified values do not match, but other non-listed values do ' {
                 $mockCurrentValues = @{ Example = 'test'; SecondExample = 'true' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false'  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -118,7 +118,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when an empty hash table is used in the current values' {
                 $mockCurrentValues = @{ }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false'  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -129,17 +129,17 @@ InModuleScope 'DscResource.Common' {
             }
 
             It 'Should return true when evaluating a table against a CimInstance' {
-                $mockCurrentValues = @{ Handle = '0'; ProcessId = '1000'  }
+                $mockCurrentValues = @{ Handle = '0'; ProcessId = '1000' }
 
                 $mockWin32ProcessProperties = @{
-                    Handle = 0
+                    Handle    = 0
                     ProcessId = 1000
                 }
 
                 $mockNewCimInstanceParameters = @{
-                    ClassName = 'Win32_Process'
-                    Property = $mockWin32ProcessProperties
-                    Key = 'Handle'
+                    ClassName  = 'Win32_Process'
+                    Property   = $mockWin32ProcessProperties
+                    Key        = 'Handle'
                     ClientOnly = $true
                 }
 
@@ -148,24 +148,24 @@ InModuleScope 'DscResource.Common' {
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
                     DesiredValues = $mockDesiredValues
-                    ValuesToCheck = @('Handle','ProcessId')
+                    ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
                 Test-DscParameterState @testParameters | Should -Be $true
             }
 
             It 'Should return false when evaluating a table against a CimInstance and a value is wrong' {
-                $mockCurrentValues = @{ Handle = '1'; ProcessId = '1000'  }
+                $mockCurrentValues = @{ Handle = '1'; ProcessId = '1000' }
 
                 $mockWin32ProcessProperties = @{
-                    Handle = 0
+                    Handle    = 0
                     ProcessId = 1000
                 }
 
                 $mockNewCimInstanceParameters = @{
-                    ClassName = 'Win32_Process'
-                    Property = $mockWin32ProcessProperties
-                    Key = 'Handle'
+                    ClassName  = 'Win32_Process'
+                    Property   = $mockWin32ProcessProperties
+                    Key        = 'Handle'
                     ClientOnly = $true
                 }
 
@@ -174,15 +174,15 @@ InModuleScope 'DscResource.Common' {
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
                     DesiredValues = $mockDesiredValues
-                    ValuesToCheck = @('Handle','ProcessId')
+                    ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
                 Test-DscParameterState @testParameters | Should -Be $false
             }
 
             It 'Should return true when evaluating a hash table containing an array' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('1','2') }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('1', '2') }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -193,8 +193,8 @@ InModuleScope 'DscResource.Common' {
             }
 
             It 'Should return false when evaluating a hash table containing an array with wrong values' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('A','B') }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('A', 'B') }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -206,7 +206,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when evaluating a hash table containing an array, but the CurrentValues are missing an array' {
                 $mockCurrentValues = @{ Example = 'test' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -218,7 +218,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when evaluating a hash table containing an array, but the property i CurrentValues is $null' {
                 $mockCurrentValues = @{ Example = 'test'; SecondExample = $null }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -281,14 +281,14 @@ InModuleScope 'DscResource.Common' {
                 $mockCurrentValues = @{ Example = 'something' }
 
                 $mockWin32ProcessProperties = @{
-                    Handle = 0
+                    Handle    = 0
                     ProcessId = 1000
                 }
 
                 $mockNewCimInstanceParameters = @{
-                    ClassName = 'Win32_Process'
-                    Property = $mockWin32ProcessProperties
-                    Key = 'Handle'
+                    ClassName  = 'Win32_Process'
+                    Property   = $mockWin32ProcessProperties
+                    Key        = 'Handle'
                     ClientOnly = $true
                 }
 
