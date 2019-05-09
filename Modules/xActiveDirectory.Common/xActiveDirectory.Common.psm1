@@ -273,7 +273,7 @@ function Test-DscParameterState
         [System.Array]
         $ValuesToCheck
     )
-    Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
+    $script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
     $returnValue = $true
 
     if (($DesiredValues.GetType().Name -ne 'HashTable') `
