@@ -64,10 +64,11 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 
 The xADComputer DSC resource will manage computer accounts within Active Directory.
 
->**Note:** An ODJ Request file will only be created when a computer account
->is first created in the domain. Setting an ODJ Request file path for a
->configuration that creates a computer account that already exists will
->not cause the file to be created.
+>**Note:** An Offline Domain Join (ODJ) request file will only be created
+>when a computer account is first created in the domain. Setting an Offline
+>Domain Join (ODJ) Request file path for a configuration that updates a
+>computer account that already exists, or restore it from the recycle bin
+>will not cause the Offline Domain Join (ODJ) request file to be created.
 
 #### Requirements
 
@@ -103,6 +104,8 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[Boolean]` EnabledOnCreation** _(Write)_: Specifies if the computer
   account is created enabled or disabled. By default the computer account
   will be created using the default value of the cmdlet `New-ADComputer`.
+  This property is ignored if the parameter `RequestFile` is specified
+  in the same configuration.
 * **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished
   Name that manages the computer account. Valid values are the user's or
   group's DistinguishedName, ObjectGUID, SID or SamAccountName.

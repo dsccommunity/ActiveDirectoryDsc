@@ -39,9 +39,14 @@ try
 
     InModuleScope $script:dscResourceName {
         $mockComputerNamePresent = 'TEST01'
+        $mockDomain = 'contoso.com'
         $mockComputerNameAbsent = 'MISSING01'
         $mockLocation = 'Test location'
-        $mockDnsHostName = '{0}.contoso.com' -f $mockComputerNamePresent
+        $mockDnsHostName = '{0}.{1}' -f $mockComputerNamePresent, $mockDomain
+        $mockServicePrincipalNames_DefaultValues = @(
+            ('TERMSRV/{0}' -f $mockComputerNamePresent),
+            ('TERMSRV/{0}.{1}' -f $mockComputerNamePresent, $mockDomain)
+        )
         $mockServicePrincipalNames = @('spn/a', 'spn/b')
         $mockUserPrincipalName = '{0}@contoso.com' -f $mockComputerNamePresent
         $mockDisplayName = $mockComputerNamePresent
@@ -60,27 +65,27 @@ try
             $mockCredentialUserName, $mockCredentialPassword
         )
 
-        $mockGetADComputer = {
-            return @{
-                CN                    = $mockComputerNamePresent
-                Location              = $mockLocation
-                DnsHostName           = $mockDnsHostName
-                ServicePrincipalNames = $mockServicePrincipalNames
-                UserPrincipalName     = $mockUserPrincipalName
-                DisplayName           = $mockDisplayName
-                Description           = $mockDescription
-                Enabled               = $mockEnabled
-                ManagedBy             = $mockManagedBy
-                DistinguishedName     = $mockDistinguishedName
-                SamAccountName        = $mockSamAccountName
-                SID                   = $mockSID
-                ObjectClass           = $mockObjectClass
-            }
-        }
-
         Describe 'MSFT_xADComputer\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
                 Mock -CommandName Assert-Module
+
+                $mockGetADComputer = {
+                    return @{
+                        CN                    = $mockComputerNamePresent
+                        Location              = $mockLocation
+                        DnsHostName           = $mockDnsHostName
+                        ServicePrincipalNames = $mockServicePrincipalNames + $mockServicePrincipalNames_DefaultValues
+                        UserPrincipalName     = $mockUserPrincipalName
+                        DisplayName           = $mockDisplayName
+                        Description           = $mockDescription
+                        Enabled               = $mockEnabled
+                        ManagedBy             = $mockManagedBy
+                        DistinguishedName     = $mockDistinguishedName
+                        SamAccountName        = $mockSamAccountName
+                        SID                   = $mockSID
+                        ObjectClass           = $mockObjectClass
+                    }
+                }
             }
 
             Context 'When the Get-ADComputer throws an unhandled error' {
@@ -91,7 +96,7 @@ try
                     }
 
                     $getTargetResourceParameters = @{
-                        ComputerName                  = $mockComputerNamePresent
+                        ComputerName = $mockComputerNamePresent
                     }
                 }
 
@@ -99,6 +104,26 @@ try
                     { Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
 
                     Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the the parameter Enabled is used' {
+                BeforeAll {
+                    Mock -CommandName Get-ADComputer -MockWith $mockGetADComputer
+                    Mock -CommandName Write-Warning
+
+                    $getTargetResourceParameters = @{
+                        ComputerName = $mockComputerNamePresent
+                        Enabled      = $true
+                        Verbose      = $true
+                    }
+                }
+
+                It 'Should return the state as present, but write a warning message' {
+                    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
+
+                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
                 }
             }
 
@@ -190,7 +215,7 @@ try
                         $getTargetResourceResult.ComputerName | Should -Be $mockComputerNamePresent
                         $getTargetResourceResult.Location | Should -Be $mockLocation
                         $getTargetResourceResult.DnsHostName | Should -Be $mockDnsHostName
-                        $getTargetResourceResult.ServicePrincipalNames | Should -Be $mockServicePrincipalNames
+                        $getTargetResourceResult.ServicePrincipalNames | Should -Be ($mockServicePrincipalNames + $mockServicePrincipalNames_DefaultValues)
                         $getTargetResourceResult.UserPrincipalName | Should -Be $mockUserPrincipalName
                         $getTargetResourceResult.DisplayName | Should -Be $mockDisplayName
                         $getTargetResourceResult.Path | Should -Be $mockParentContainer
@@ -200,26 +225,6 @@ try
                         $getTargetResourceResult.DistinguishedName | Should -Be $mockDistinguishedName
                         $getTargetResourceResult.SID | Should -Be $mockSID
                         $getTargetResourceResult.SamAccountName | Should -Be $mockSamAccountName
-                    }
-                }
-
-                Context 'When the the parameter Enabled is used' {
-                    BeforeAll {
-                        Mock -CommandName Get-ADComputer -MockWith $mockGetADComputer
-                        Mock -CommandName Write-Warning
-
-                        $getTargetResourceParameters = @{
-                            ComputerName = $mockComputerNamePresent
-                            Enabled      = $true
-                            Verbose      = $true
-                        }
-                    }
-
-                    It 'Should return the state as present, but write a warning message' {
-                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                        $getTargetResourceResult.Ensure | Should -Be 'Present'
-
-                        Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
                     }
                 }
 
@@ -296,34 +301,60 @@ try
         Describe 'MSFT_xADComputer\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 Mock -CommandName Assert-Module
+
+                $mockGetTargetResource_Absent = {
+                    return @{
+                        Ensure                        = 'Absent'
+                        ComputerName                  = $null
+                        Location                      = $null
+                        DnsHostName                   = $null
+                        ServicePrincipalNames         = $null
+                        UserPrincipalName             = $null
+                        DisplayName                   = $null
+                        Path                          = $null
+                        Description                   = $null
+                        Enabled                       = $false
+                        Manager                       = $null
+                        DomainController              = $null
+                        DomainAdministratorCredential = $null
+                        RequestFile                   = $null
+                        RestoreFromRecycleBin         = $false
+                        EnabledOnCreation             = $false
+                        DistinguishedName             = $null
+                        SID                           = $null
+                        SamAccountName                = $null
+                    }
+                }
+
+                $mockGetTargetResource_Present = {
+                    return @{
+                        Ensure                        = 'Present'
+                        ComputerName                  = $mockComputerNamePresent
+                        Location                      = $mockLocation
+                        DnsHostName                   = $mockDnsHostName
+                        ServicePrincipalNames         = $mockServicePrincipalNames
+                        UserPrincipalName             = $mockUserPrincipalName
+                        DisplayName                   = $mockDisplayName
+                        Path                          = $mockParentContainer
+                        Description                   = $mockDescription
+                        Enabled                       = $true
+                        Manager                       = $mockManagedBy
+                        DomainController              = 'DC01'
+                        DomainAdministratorCredential = $mockCredential
+                        RequestFile                   = 'TestDrive:\ODJ.txt'
+                        RestoreFromRecycleBin         = $false
+                        EnabledOnCreation             = $false
+                        DistinguishedName             = $mockDistinguishedName
+                        SID                           = $mockSID
+                        SamAccountName                = $mockSamAccountName
+                    }
+                }
             }
 
             Context 'When the system is in the desired state' {
                 Context 'When the computer account is absent in Active Directory' {
                     BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                Ensure                        = 'Absent'
-                                ComputerName                  = $null
-                                Location                      = $null
-                                DnsHostName                   = $null
-                                ServicePrincipalNames         = $null
-                                UserPrincipalName             = $null
-                                DisplayName                   = $null
-                                Path                          = $null
-                                Description                   = $null
-                                Enabled                       = $false
-                                Manager                       = $null
-                                DomainController              = $null
-                                DomainAdministratorCredential = $null
-                                RequestFile                   = $null
-                                RestoreFromRecycleBin         = $false
-                                EnabledOnCreation             = $false
-                                DistinguishedName             = $null
-                                SID                           = $null
-                                SamAccountName                = $null
-                            }
-                        }
+                        Mock -CommandName Get-TargetResource $mockGetTargetResource_Absent
 
                         $testTargetResourceParameters = @{
                             Ensure       = 'Absent'
@@ -342,29 +373,7 @@ try
 
                 Context 'When the computer account is present in Active Directory' {
                     BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                Ensure                        = 'Present'
-                                ComputerName                  = $mockComputerNamePresent
-                                Location                      = $mockLocation
-                                DnsHostName                   = $mockDnsHostName
-                                ServicePrincipalNames         = $mockServicePrincipalNames
-                                UserPrincipalName             = $mockUserPrincipalName
-                                DisplayName                   = $mockDisplayName
-                                Path                          = $mockParentContainer
-                                Description                   = $mockDescription
-                                Enabled                       = $true
-                                Manager                       = $mockManagedBy
-                                DomainController              = 'DC01'
-                                DomainAdministratorCredential = $mockCredential
-                                RequestFile                   = 'TestDrive:\ODJ.txt'
-                                RestoreFromRecycleBin         = $false
-                                EnabledOnCreation             = $false
-                                DistinguishedName             = $mockDistinguishedName
-                                SID                           = $mockSID
-                                SamAccountName                = $mockSamAccountName
-                            }
-                        }
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
 
                         $testTargetResourceParameters = @{
                             ComputerName                  = $mockComputerNamePresent
@@ -387,29 +396,7 @@ try
 
                 Context 'When service principal names are in desired state' {
                     BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                Ensure                        = 'Present'
-                                ComputerName                  = $mockComputerNamePresent
-                                Location                      = $mockLocation
-                                DnsHostName                   = $mockDnsHostName
-                                ServicePrincipalNames         = $mockServicePrincipalNames
-                                UserPrincipalName             = $mockUserPrincipalName
-                                DisplayName                   = $mockDisplayName
-                                Path                          = $mockParentContainer
-                                Description                   = $mockDescription
-                                Enabled                       = $true
-                                Manager                       = $mockManagedBy
-                                DomainController              = 'DC01'
-                                DomainAdministratorCredential = $mockCredential
-                                RequestFile                   = 'TestDrive:\ODJ.txt'
-                                RestoreFromRecycleBin         = $false
-                                EnabledOnCreation             = $false
-                                DistinguishedName             = $mockDistinguishedName
-                                SID                           = $mockSID
-                                SamAccountName                = $mockSamAccountName
-                            }
-                        }
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
 
                         $testTargetResourceParameters = @{
                             ComputerName          = $mockComputerNamePresent
@@ -454,29 +441,7 @@ try
             Context 'When the system is not in the desired state' {
                 Context 'When the computer account is absent in Active Directory' {
                     BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                Ensure                        = 'Absent'
-                                ComputerName                  = $null
-                                Location                      = $null
-                                DnsHostName                   = $null
-                                ServicePrincipalNames         = $null
-                                UserPrincipalName             = $null
-                                DisplayName                   = $null
-                                Path                          = $null
-                                Description                   = $null
-                                Enabled                       = $false
-                                Manager                       = $null
-                                DomainController              = $null
-                                DomainAdministratorCredential = $null
-                                RequestFile                   = $null
-                                RestoreFromRecycleBin         = $false
-                                EnabledOnCreation             = $false
-                                DistinguishedName             = $null
-                                SID                           = $null
-                                SamAccountName                = $null
-                            }
-                        }
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Absent
 
                         $testTargetResourceParameters = @{
                             Ensure       = 'Present'
@@ -495,29 +460,7 @@ try
 
                 Context 'When the computer account is present in Active Directory' {
                     BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                Ensure                        = 'Present'
-                                ComputerName                  = $mockComputerNamePresent
-                                Location                      = $mockLocation
-                                DnsHostName                   = $mockDnsHostName
-                                ServicePrincipalNames         = $mockServicePrincipalNames
-                                UserPrincipalName             = $mockUserPrincipalName
-                                DisplayName                   = $mockDisplayName
-                                Path                          = $mockParentContainer
-                                Description                   = $mockDescription
-                                Enabled                       = $true
-                                Manager                       = $mockManagedBy
-                                DomainController              = 'DC01'
-                                DomainAdministratorCredential = $mockCredential
-                                RequestFile                   = 'TestDrive:\ODJ.txt'
-                                RestoreFromRecycleBin         = $false
-                                EnabledOnCreation             = $false
-                                DistinguishedName             = $mockDistinguishedName
-                                SID                           = $mockSID
-                                SamAccountName                = $mockSamAccountName
-                            }
-                        }
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
 
                         $testTargetResourceParameters = @{
                             Ensure       = 'Absent'
@@ -537,63 +480,41 @@ try
                 Context 'When a property is not in desired state' {
                     BeforeAll {
                         # Mock a specific desired state.
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                Ensure                        = 'Present'
-                                ComputerName                  = $mockComputerNamePresent
-                                Location                      = $mockLocation
-                                DnsHostName                   = $mockDnsHostName
-                                ServicePrincipalNames         = $mockServicePrincipalNames
-                                UserPrincipalName             = $mockUserPrincipalName
-                                DisplayName                   = $mockDisplayName
-                                Path                          = $mockParentContainer
-                                Description                   = $mockDescription
-                                Enabled                       = $true
-                                Manager                       = $mockManagedBy
-                                DomainController              = 'DC01'
-                                DomainAdministratorCredential = $mockCredential
-                                RequestFile                   = 'TestDrive:\ODJ.txt'
-                                RestoreFromRecycleBin         = $false
-                                EnabledOnCreation             = $false
-                                DistinguishedName             = $mockDistinguishedName
-                                SID                           = $mockSID
-                                SamAccountName                = $mockSamAccountName
-                            }
-                        }
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
 
                         # One test case per property with a value that differs from the desired state.
                         $testCases_Properties = @(
                             @{
                                 PropertyName = 'Location'
-                                Value        = 'WrongLocation'
+                                Value        = 'NewLocation'
                             },
                             @{
                                 PropertyName = 'DnsHostName'
-                                Value        = 'wrong@contoso.com'
+                                Value        = 'New@contoso.com'
                             },
                             @{
-                                PropertyName = 'ServicePrincipalNames'
-                                Value        = @('spn/wrong')
+                                PropertyName = 'ServicePrincipalName'
+                                Value        = @('spn/new')
                             },
                             @{
                                 PropertyName = 'UserPrincipalName'
-                                Value        = 'wrong@contoso.com'
+                                Value        = 'New@contoso.com'
                             },
                             @{
                                 PropertyName = 'DisplayName'
-                                Value        = 'Wrong'
+                                Value        = 'New'
                             },
                             @{
                                 PropertyName = 'Path'
-                                Value        = 'OU=Wrong,CN=Computers,DC=contoso,DC=com'
+                                Value        = 'OU=New,CN=Computers,DC=contoso,DC=com'
                             },
                             @{
                                 PropertyName = 'Description'
-                                Value        = 'Wrong description'
+                                Value        = 'New description'
                             },
                             @{
                                 PropertyName = 'Manager'
-                                Value        = 'CN=WrongManager,CN=Users,DC=contoso,DC=com'
+                                Value        = 'CN=NewManager,CN=Users,DC=contoso,DC=com'
                             }
                         )
                     }
@@ -618,6 +539,419 @@ try
                         $testTargetResourceResult | Should -BeFalse
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    }
+                }
+            }
+        }
+
+        Describe 'MSFT_xADComputer\Set-TargetResource' -Tag 'Set' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+
+                $mockGetTargetResource_Absent = {
+                    return @{
+                        Ensure                        = 'Absent'
+                        ComputerName                  = $null
+                        Location                      = $null
+                        DnsHostName                   = $null
+                        ServicePrincipalNames         = $null
+                        UserPrincipalName             = $null
+                        DisplayName                   = $null
+                        Path                          = $null
+                        Description                   = $null
+                        Enabled                       = $false
+                        Manager                       = $null
+                        DomainController              = $null
+                        DomainAdministratorCredential = $null
+                        RequestFile                   = $null
+                        RestoreFromRecycleBin         = $false
+                        EnabledOnCreation             = $false
+                        DistinguishedName             = $null
+                        SID                           = $null
+                        SamAccountName                = $null
+                    }
+                }
+
+                $mockGetTargetResource_Present = {
+                    return @{
+                        Ensure                        = 'Present'
+                        ComputerName                  = $mockComputerNamePresent
+                        Location                      = $mockLocation
+                        DnsHostName                   = $mockDnsHostName
+                        ServicePrincipalNames         = $mockServicePrincipalNames_DefaultValues
+                        UserPrincipalName             = $mockUserPrincipalName
+                        DisplayName                   = $mockDisplayName
+                        Path                          = $mockParentContainer
+                        Description                   = $mockDescription
+                        Enabled                       = $true
+                        Manager                       = $mockManagedBy
+                        DomainController              = 'DC01'
+                        DomainAdministratorCredential = $mockCredential
+                        RequestFile                   = 'TestDrive:\ODJ.txt'
+                        RestoreFromRecycleBin         = $false
+                        EnabledOnCreation             = $false
+                        DistinguishedName             = $mockDistinguishedName
+                        SID                           = $mockSID
+                        SamAccountName                = $mockSamAccountName
+                    }
+                }
+            }
+
+            Context 'When the the parameter Enabled is used' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Ensure = 'Absent'
+                        }
+                    }
+
+                    Mock -CommandName Write-Warning
+
+                    $setTargetResourceParameters = @{
+                        Ensure       = 'Absent'
+                        ComputerName = $mockComputerNamePresent
+                        Enabled      = $true
+                        Verbose      = $true
+                    }
+                }
+
+                It 'Should return the state as present, but write a warning message' {
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the system is in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Remove-ADComputer
+                    Mock -CommandName Set-DscADComputer
+                    Mock -CommandName New-ADComputer
+                    Mock -CommandName Move-ADObject
+                }
+
+                Context 'When the computer account is absent in Active Directory' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Absent
+
+                        $setTargetResourceParameters = @{
+                            Ensure       = 'Absent'
+                            ComputerName = $mockComputerNamePresent
+                            Verbose      = $true
+                        }
+                    }
+
+                    It 'Should not call any mocks that changes state' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When the computer account is present in Active Directory' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+
+                        $setTargetResourceParameters = @{
+                            ComputerName                  = $mockComputerNamePresent
+                            DomainController              = 'DC01'
+                            DomainAdministratorCredential = $mockCredential
+                            RequestFile                   = 'TestDrive:\ODJ.txt'
+                            RestoreFromRecycleBin         = $false
+                            EnabledOnCreation             = $false
+                            Verbose                       = $true
+                        }
+                    }
+
+                    It 'Should not call any mocks that changes state' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When service principal names are in desired state' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+
+                        $setTargetResourceParameters = @{
+                            ComputerName          = $mockComputerNamePresent
+                            ServicePrincipalNames = $mockServicePrincipalNames_DefaultValues
+                            Verbose               = $true
+                        }
+                    }
+
+                    It 'Should not call any mocks that changes state' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+            }
+
+            Context 'When the system is not in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Remove-ADComputer
+                    Mock -CommandName Set-DscADComputer
+                    Mock -CommandName Move-ADObject
+                    Mock -CommandName New-ADComputer -MockWith {
+                        $script:mockNewADComputerWasCalled = $true
+                    }
+
+                }
+
+                Context 'When the computer account is absent in Active Directory' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            if (-not $script:mockNewADComputerWasCalled)
+                            {
+                                # First call.
+                                $mockGetTargetResourceResult = & $mockGetTargetResource_Absent
+                            }
+                            else
+                            {
+                                # Second call - After New-ADComputer has been called.
+                                $mockGetTargetResourceResult = & $mockGetTargetResource_Present
+                            }
+
+                            return $mockGetTargetResourceResult
+                        }
+                    }
+
+                    BeforeEach {
+                        $script:mockNewADComputerWasCalled = $false
+                    }
+
+                    Context 'When the computer account is created on the default path' {
+                        BeforeAll {
+                            $setTargetResourceParameters = @{
+                                Ensure       = 'Present'
+                                ComputerName = $mockComputerNamePresent
+                                Verbose      = $true
+                            }
+                        }
+
+                        It 'Should call the correct mocks' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                        }
+                    }
+
+                    Context 'When the computer account is created on the specified path' {
+                        BeforeAll {
+                            $setTargetResourceParameters = @{
+                                Ensure       = 'Present'
+                                ComputerName = $mockComputerNamePresent
+                                Path         = $mockParentContainer
+                                Verbose      = $true
+                            }
+                        }
+
+                        It 'Should call the correct mocks' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                        }
+                    }
+                }
+
+                Context 'When the computer account is present in Active Directory' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+
+                        $setTargetResourceParameters = @{
+                            Ensure       = 'Absent'
+                            ComputerName = $mockComputerNamePresent
+                            Verbose      = $true
+                        }
+                    }
+
+                    It 'Should call the correct mocks' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When a property is not in desired state' {
+                    Context 'When a property should be replaced' {
+                        BeforeAll {
+                            # Mock a specific desired state.
+                            Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+
+                            # One test case per property with a value that differs from the desired state.
+                            $testCases_Properties = @(
+                                @{
+                                    PropertyName = 'Location'
+                                    Value        = 'NewLocation'
+                                },
+                                @{
+                                    PropertyName = 'DnsHostName'
+                                    Value        = 'New@contoso.com'
+                                },
+                                @{
+                                    ParameterName = 'ServicePrincipalNames'
+                                    PropertyName  = 'ServicePrincipalName'
+                                    Value         = @('spn/new')
+                                },
+                                @{
+                                    PropertyName = 'UserPrincipalName'
+                                    Value        = 'New@contoso.com'
+                                },
+                                @{
+                                    PropertyName = 'DisplayName'
+                                    Value        = 'New'
+                                },
+                                @{
+                                    PropertyName = 'Description'
+                                    Value        = 'New description'
+                                },
+                                @{
+                                    ParameterName = 'Manager'
+                                    PropertyName  = 'ManagedBy'
+                                    Value         = 'CN=NewManager,CN=Users,DC=contoso,DC=com'
+                                }
+                            )
+                        }
+
+                        It 'Should set the correct property when property <PropertyName> is not in desired state' -TestCases $testCases_Properties {
+                            param
+                            (
+                                [Parameter()]
+                                $PropertyName,
+
+                                [Parameter()]
+                                $ParameterName = $PropertyName,
+
+                                [Parameter()]
+                                $Value
+                            )
+
+                            $setTargetResourceParameters = @{
+                                ComputerName   = $mockComputerNamePresent
+                                $ParameterName = $Value
+                                Verbose        = $true
+                            }
+
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
+                                $Parameters.Replace.ContainsKey($PropertyName) -eq $true
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When a property should be removed' {
+                        BeforeAll {
+                            # Mock a specific desired state.
+                            Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+
+                            # One test case per property with a value that differs from the desired state.
+                            $testCases_Properties = @(
+                                @{
+                                    PropertyName = 'Location'
+                                    Value        = $null
+                                },
+                                @{
+                                    PropertyName = 'DnsHostName'
+                                    Value        = $null
+                                },
+                                @{
+                                    ParameterName = 'ServicePrincipalNames'
+                                    PropertyName  = 'ServicePrincipalName'
+                                    Value         = @()
+                                },
+                                @{
+                                    PropertyName = 'UserPrincipalName'
+                                    Value        = $null
+                                },
+                                @{
+                                    PropertyName = 'DisplayName'
+                                    Value        = $null
+                                },
+                                @{
+                                    PropertyName = 'Description'
+                                    Value        = $null
+                                },
+                                @{
+                                    ParameterName = 'Manager'
+                                    PropertyName  = 'ManagedBy'
+                                    Value         = $null
+                                }
+                            )
+                        }
+
+                        It 'Should set the correct property when property <PropertyName> is not in desired state' -TestCases $testCases_Properties {
+                            param
+                            (
+                                [Parameter()]
+                                $PropertyName,
+
+                                [Parameter()]
+                                $ParameterName = $PropertyName,
+
+                                [Parameter()]
+                                $Value
+                            )
+
+                            $setTargetResourceParameters = @{
+                                ComputerName   = $mockComputerNamePresent
+                                $ParameterName = $Value
+                                Verbose        = $true
+                            }
+
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
+                                $Parameters.Remove.ContainsKey($PropertyName) -eq $true
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When the computer account should be moved' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+
+                            $setTargetResourceParameters = @{
+                                ComputerName = $mockComputerNamePresent
+                                Path         = 'OU=New,CN=Computers,DC=contoso,DC=com'
+                                Verbose      = $true
+                            }
+                        }
+
+                        It 'Should call the correct mock to move the computer account' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 1 -Scope It
+                        }
                     }
                 }
             }

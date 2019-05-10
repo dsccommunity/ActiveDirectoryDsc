@@ -1213,7 +1213,7 @@ try
 
                     $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
-                    $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
                     $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
                     $compareTargetResourceStateResult.InDesiredState | Should -BeTrue
@@ -1241,11 +1241,11 @@ try
 
                     $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 2
-                    $compareTargetResourceStateResult[0].Parameter | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
                     $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
                     $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                    $compareTargetResourceStateResult[1].Parameter | Should -Be 'Location'
+                    $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
                     $compareTargetResourceStateResult[1].Expected | Should -Be 'Sweden'
                     $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
                     $compareTargetResourceStateResult[1].InDesiredState | Should -BeTrue
@@ -1271,7 +1271,7 @@ try
 
                     $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
-                    $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'APP01'
                     $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
                     $compareTargetResourceStateResult.InDesiredState | Should -BeFalse
@@ -1299,11 +1299,11 @@ try
 
                     $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 2
-                    $compareTargetResourceStateResult[0].Parameter | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
                     $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
                     $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                    $compareTargetResourceStateResult[1].Parameter | Should -Be 'Location'
+                    $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
                     $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
                     $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
                     $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
@@ -1330,7 +1330,7 @@ try
 
                     $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
-                    $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
                     $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
                     $compareTargetResourceStateResult.InDesiredState | Should -BeTrue
@@ -1361,7 +1361,7 @@ try
 
                     $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 1
-                    $compareTargetResourceStateResult.Parameter | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
                     $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
                     $compareTargetResourceStateResult.InDesiredState | Should -BeTrue
@@ -1394,11 +1394,11 @@ try
 
                     $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                     $compareTargetResourceStateResult | Should -HaveCount 2
-                    $compareTargetResourceStateResult[0].Parameter | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
                     $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
                     $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
                     $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                    $compareTargetResourceStateResult[1].Parameter | Should -Be 'Location'
+                    $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
                     $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
                     $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
                     $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse

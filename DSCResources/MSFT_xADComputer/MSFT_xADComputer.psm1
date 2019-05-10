@@ -26,6 +26,7 @@ $script:computerObjectPropertyMap = @(
     },
     @{
         ParameterName = 'ServicePrincipalNames'
+        PropertyName  = 'ServicePrincipalName'
     },
     @{
         ParameterName = 'UserPrincipalName'
@@ -177,8 +178,6 @@ function Get-TargetResource
 
     try
     {
-        $commonParameters = Get-ADCommonParameters @PSBoundParameters
-
         <#
             Create an array of the Active Directory Computer object property
             names to retrieve from the Computer object.
@@ -187,8 +186,11 @@ function Get-TargetResource
 
         Write-Verbose -Message ($script:localizedData.RetrievingComputerAccount -f $ComputerName)
 
+        $getADComputerParameters = Get-ADCommonParameters @PSBoundParameters
+        $getADComputerParameters['Properties'] = $computerObjectProperties
+
         # If the computer account is not found Get-ADComputer will throw an error.
-        $getADComputerResult = Get-ADComputer @commonParameters -Properties $computerObjectProperties
+        $getADComputerResult = Get-ADComputer @getADComputerParameters
 
         Write-Verbose -Message ($script:localizedData.ComputerAccountIsPresent -f $ComputerName)
 
@@ -284,6 +286,9 @@ function Get-TargetResource
         Specifies if the computer account is created enabled or disabled.
         By default the computer account will be created using the default
         value of the cmdlet New-ADComputer.
+        This property is ignored if the parameter `RequestFile` is specified
+        in the same configuration.
+
 #>
 function Test-TargetResource
 {
@@ -460,29 +465,12 @@ function Test-TargetResource
 
             if ($PSBoundParameters.ContainsKey('ServicePrincipalNames'))
             {
-                $testMembersParameters = @{
-                    ExistingMembers = $getTargetResourceResult.ServicePrincipalNames -as [System.String[]]
-                    Members         = $ServicePrincipalNames
+                $testServicePrincipalNamesParameters = @{
+                    ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames -as [System.String[]]
+                    ServicePrincipalNames         = $ServicePrincipalNames
                 }
 
-                if (-not (Test-Members @testMembersParameters))
-                {
-                    $existingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames -join ','
-                    $desiredServicePrincipalNames = $ServicePrincipalNames -join ','
-
-                    Write-Verbose -Message (
-                        $script:localizedData.ServicePrincipalNamesNotInDesiredState `
-                            -f $desiredServicePrincipalNames, $existingServicePrincipalNames
-                    )
-
-                    $testTargetResourceReturnValue = $false
-                }
-                else
-                {
-                    Write-Verbose -Message (
-                        $script:localizedData.ServicePrincipalNamesInDesiredState
-                    )
-                }
+                $testTargetResourceReturnValue = Test-ServicePrincipalNames @testServicePrincipalNamesParameters
             }
         }
 
@@ -559,6 +547,8 @@ function Test-TargetResource
         Specifies if the computer account is created enabled or disabled.
         By default the computer account will be created using the default
         value of the cmdlet New-ADComputer.
+        This property is ignored if the parameter `RequestFile` is specified
+        in the same configuration.
 #>
 function Set-TargetResource
 {
@@ -655,245 +645,325 @@ function Set-TargetResource
         Write-Warning -Message $script:localizedData.EnabledDeprecatedMessage
     }
 
-    $targetResource = Get-TargetResource @PSBoundParameters
+    $getTargetResourceParameters = @{
+        ComputerName                  = $ComputerName
+        RequestFile                   = $RequestFile
+        DomainController              = $DomainController
+        DomainAdministratorCredential = $DomainAdministratorCredential
+        RestoreFromRecycleBin         = $RestoreFromRecycleBin
+        EnabledOnCreation             = $EnabledOnCreation
+    }
 
-    # Add ensure as they may not be explicitly passed and we want to enumerate them
-    $PSBoundParameters['Ensure'] = $Ensure
+    # Need the @() around this to get a new array to enumerate.
+    @($getTargetResourceParameters.Keys) | ForEach-Object {
+        if (-not $PSBoundParameters.ContainsKey($_))
+        {
+            $getTargetResourceParameters.Remove($_)
+        }
+    }
+
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
     if ($Ensure -eq 'Present')
     {
-        if ($targetResource.Ensure -eq 'Absent')
+        if ($getTargetResourceResult.Ensure -eq 'Absent')
         {
-            # Try to restore account if it exists
+            $restorationSuccessful = $false
+
+            # Try to restore computer account from recycle bin if it exists.
             if ($RestoreFromRecycleBin)
             {
-                Write-Verbose -Message ($script:localizedData.RestoringADComputer -f $ComputerName)
-                $restoreParams = Get-ADCommonParameters @PSBoundParameters
-                $restorationSuccessful = Restore-ADCommonObject @restoreParams -ObjectClass Computer -ErrorAction Stop
+                Write-Verbose -Message (
+                    $script:localizedData.RestoringComputerAccount -f $ComputerName
+                )
+
+                $restoreADCommonObjectParameters = Get-ADCommonParameters @PSBoundParameters
+                $restoreADCommonObjectParameters['ObjectClass'] = 'Computer'
+                $restoreADCommonObjectParameters['ErrorAction'] = 'Stop'
+
+                $restorationSuccessful = Restore-ADCommonObject @restoreADCommonObjectParameters
             }
 
-            <#
-                Computer does not exist and needs creating
-                or account not present in recycle bin
-            #>
             if (-not $RestoreFromRecycleBin -or ($RestoreFromRecycleBin -and -not $restorationSuccessful))
             {
+                <#
+                    The computer account does not exist, or the computer account
+                    was not present in recycle bin, so the computer account needs
+                    to be created.
+                #>
+
                 if ($RequestFile)
                 {
-                    # Use DJOIN to create the computer account as well as the ODJ Request file.
-                    Write-Verbose -Message ($script:localizedData.ODJRequestStartMessage -f `
-                            $DomainName, $ComputerName, $RequestFile)
+                    <#
+                        Use DJOIN to create the computer account as well as the
+                        Offline Domain Join (ODJ) request file.
+                    #>
 
                     # This should only be performed on a Domain Member, so detect the Domain Name.
-                    $DomainName = Get-DomainName
-                    $DJoinParameters = @(
+                    $domainName = Get-DomainName
+
+                    Write-Verbose -Message (
+                        $script:localizedData.CreateOfflineDomainJoinRequest -f $RequestFile, $ComputerName, $domainName
+                    )
+
+                    $dJoinParameters = @(
                         '/PROVISION'
-                        '/DOMAIN', $DomainName
-                        '/MACHINE', $ComputerName )
+                        '/DOMAIN',
+                        $domainName
+                        '/MACHINE',
+                        $ComputerName
+                    )
+
                     if ($PSBoundParameters.ContainsKey('Path'))
                     {
-                        $DJoinParameters += @( '/MACHINEOU', $Path )
-                    } # if
+                        $dJoinParameters += @(
+                            '/MACHINEOU',
+                            $Path
+                        )
+                    }
 
                     if ($PSBoundParameters.ContainsKey('DomainController'))
                     {
-                        $DJoinParameters += @( '/DCNAME', $DomainController )
-                    } # if
-
-                    $DJoinParameters += @( '/SAVEFILE', $RequestFile )
-                    $Result = & djoin.exe @DjoinParameters
-
-                    if ($LASTEXITCODE -ne 0)
-                    {
-                        $errorId = 'ODJRequestError'
-                        $errorMessage = $($script:localizedData.ODJRequestError `
-                                -f $LASTEXITCODE, $Result)
-                        ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage
-                    } # if
-
-                    Write-Verbose -Message ($script:localizedData.ODJRequestCompleteMessage -f `
-                            $DomainName, $ComputerName, $RequestFile)
-                }
-                else
-                {
-                    # Create the computer account using New-ADComputer
-                    $newADComputerParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
-                    if ($PSBoundParameters.ContainsKey('Path'))
-                    {
-                        Write-Verbose -Message ($script:localizedData.UpdatingADComputerProperty -f 'Path', $Path)
-                        $newADComputerParams['Path'] = $Path
+                        $dJoinParameters += @(
+                            '/DCNAME',
+                            $DomainController
+                        )
                     }
-                    Write-Verbose -Message ($script:localizedData.AddingADComputer -f $ComputerName)
-                    New-ADComputer @newADComputerParams
-                } # if
-            }
-            else
-            {
-                # Create the computer account using New-ADComputer
-                $newADComputerParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
-                if ($PSBoundParameters.ContainsKey('Path'))
-                {
-                    Write-Verbose -Message ($script:localizedData.UpdatingADComputerProperty -f 'Path', $Path)
-                    $newADComputerParams['Path'] = $Path
-                }
 
-                <#
-                    If CreateDisabled is set to $true, or Enabled is set to $false,
-                    then create the computer account disabled.
-                    If not then create the computer account enabled.
-                #>
-                if (
-                    ($CreateDisabled -and -not $PSBoundParameters.ContainsKey('Enabled')) `
-                        -or ($PSBoundParameters.ContainsKey('Enabled') -and -not $Enabled)
-                )
-                {
-                    Write-Verbose -Message ($script:localizedData.AddingADComputerAsDisabled -f $ComputerName)
-                    $newADComputerParams['Enabled'] = $false
-                }
-                else
-                {
-                    Write-Verbose -Message ($script:localizedData.AddingADComputer -f $ComputerName)
-                    $newADComputerParams['Enabled'] = $true
-                }
+                    $dJoinParameters += @(
+                        '/SAVEFILE',
+                        $RequestFile
+                    )
 
-                New-ADComputer @newADComputerParams
-            } # if
-            # Now retrieve the newly created computer
-            $targetResource = Get-TargetResource @PSBoundParameters
-        }
+                    $dJoinResult = & djoin.exe @dJoinParameters
 
-        $setADComputerParams = Get-ADCommonParameters @PSBoundParameters
-        $replaceComputerProperties = @{ }
-        $removeComputerProperties = @{ }
-        foreach ($parameter in $PSBoundParameters.Keys)
-        {
-            # Only check/action properties specified/declared parameters that match one of the function's
-            # parameters. This will ignore common parameters such as -Verbose etc.
-            if ($targetResource.ContainsKey($parameter))
-            {
-                if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path))
-                {
-                    # Cannot move computers by updating the DistinguishedName property
-                    $commonParameters = Get-ADCommonParameters @PSBoundParameters
-                    # Using the SamAccountName for identity with Move-ADObject does not work, use the DN instead
-                    $commonParameters['Identity'] = $targetResource.DistinguishedName
-                    Write-Verbose -Message ($script:localizedData.MovingADComputer -f `
-                            $targetResource.Path, $PSBoundParameters.Path)
-                    Move-ADObject @commonParameters -TargetPath $PSBoundParameters.Path
-                }
-                elseif ($parameter -eq 'ServicePrincipalNames')
-                {
-                    Write-Verbose -Message ($script:localizedData.UpdatingADComputerProperty -f `
-                            'ServicePrincipalNames', ($ServicePrincipalNames -join ','))
-                    $replaceComputerProperties['ServicePrincipalName'] = $ServicePrincipalNames
-                }
-                elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
-                {
-                    Write-Verbose -Message ($script:localizedData.UpdatingADComputerProperty -f `
-                            $parameter, $PSBoundParameters.$parameter)
-
-                    <#
-                        The Enabled property cannot be set as a hash table value in the
-                        Remove or Replace parameter of the Set-ADComputer cmdlet. So
-                        adding it as a parameter to the Set-ADComputer cmdlet.
-                    #>
-                    $setADComputerParams['Enabled'] = $PSBoundParameters.$parameter
-                }
-                elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
-                {
-                    # Find the associated AD property
-                    $adProperty = $script:computerObjectPropertyMap | Where-Object { $_.Parameter -eq $parameter }
-
-                    if ([System.String]::IsNullOrEmpty($adProperty))
+                    $dJoinErrorCode = $LASTEXITCODE
+                    if ($dJoinErrorCode -ne 0)
                     {
-                        # We can't do anything with an empty AD property!
-                    }
-                    elseif ([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter))
-                    {
-                        # We are removing properties
-                        # Only remove if the existing value in not null or empty
-                        if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
-                        {
-                            Write-Verbose -Message ($script:localizedData.RemovingADComputerProperty -f `
-                                    $parameter, $PSBoundParameters.$parameter)
-                            if ($adProperty.UseCmdletParameter -eq $true)
-                            {
-                                # We need to pass the parameter explicitly to Set-ADComputer, not via -Remove
-                                $setADComputerParams[$adProperty.Parameter] = $PSBoundParameters.$parameter
-                            }
-                            elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
-                            {
-                                $removeComputerProperties[$adProperty.Parameter] = $targetResource.$parameter
-                            }
-                            else
-                            {
-                                $removeComputerProperties[$adProperty.ADProperty] = $targetResource.$parameter
-                            }
+                        $newObjectParameters = @{
+                            TypeName     = 'InvalidOperationException'
+                            ArgumentList = @(
+                                $dJoinResult
+                            )
                         }
-                    } #end if remove existing value
+
+                        $invalidOperationException = New-Object @newObjectParameters
+
+                        $newObjectParameters = @{
+                            TypeName     = 'System.Management.Automation.ErrorRecord'
+                            ArgumentList = @(
+                                $invalidOperationException.ToString(),
+                                'MachineStateIncorrect',
+                                'InvalidOperation',
+                                $null
+                            )
+                        }
+
+                        $errorRecord = New-Object @newObjectParameters
+
+                        $errorMessage = $script:localizedData.FailedToCreateOfflineDomainJoinRequest -f $ComputerName, $dJoinErrorCode
+                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $errorRecord
+                    }
                     else
                     {
-                        # We are replacing the existing value
-                        Write-Verbose -Message ($script:localizedData.UpdatingADComputerProperty -f `
-                                $parameter, $PSBoundParameters.$parameter)
-                        if ($adProperty.UseCmdletParameter -eq $true)
+                        Write-Verbose -Message (
+                            $script:localizedData.CreatedOfflineDomainJoinRequestFile -f $RequestFile
+                        )
+                    }
+                }
+                else
+                {
+                    $newADComputerParameters = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
+
+                    if ($PSBoundParameters.ContainsKey('Path'))
+                    {
+                        Write-Verbose -Message (
+                            $script:localizedData.CreateComputerAccountInPath -f $ComputerName, $Path
+                        )
+
+                        $newADComputerParameters['Path'] = $Path
+                    }
+                    else
+                    {
+                        Write-Verbose -Message (
+                            $script:localizedData.CreateComputerAccount -f $ComputerName
+                        )
+                    }
+
+                    <#
+                        If the parameter EnabledOnCreation is specified, then the
+                        property Enabled is set to that value.
+                    #>
+                    if ($PSBoundParameters.ContainsKey('EnabledOnCreation'))
+                    {
+                        if ($EnabledOnCreation)
                         {
-                            # We need to pass the parameter explicitly to Set-ADComputer, not via -Replace
-                            $setADComputerParams[$adProperty.Parameter] = $PSBoundParameters.$parameter
-                        }
-                        elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
-                        {
-                            $replaceComputerProperties[$adProperty.Parameter] = $PSBoundParameters.$parameter
+                            Write-Verbose -Message ($script:localizedData.EnabledComputerAccount -f $ComputerName)
                         }
                         else
                         {
-                            $replaceComputerProperties[$adProperty.ADProperty] = $PSBoundParameters.$parameter
+                            Write-Verbose -Message ($script:localizedData.DisabledComputerAccount -f $ComputerName)
                         }
-                    } #end if replace existing value
-                }
 
-            } #end if TargetResource parameter
-        } #end foreach PSBoundParameter
+                        $newADComputerParameters['Enabled'] = $EnabledOnCreation
+                    }
+
+                    New-ADComputer @newADComputerParameters
+                }
+            }
+
+            <#
+                Now retrieve the newly created computer account so the other
+                properties can be set if specified.
+            #>
+            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+        }
 
         <#
-            Set-ADComputer is only called if we have something to change, or
-            $setADComputerParams contains more than one value (ignoring parameter
-            'Identity' by itself).
+            - Ignores the parameter ComputerName since we are not supporting
+              renaming a computer account.
+            - Ignore to compare the parameter ServicePrincipalNames here
+              because it needs a special comparison, so it is handled
+              afterwards.
+            - Ignores the Enabled property because it is DEPRECATED.
         #>
-        if ($replaceComputerProperties.Count -gt 0 -or $removeComputerProperties.Count -gt 0 -or $setADComputerParams.Count -gt 1)
+        $compareTargetResourceStateParameters = @{
+            CurrentValues    = $getTargetResourceResult
+            DesiredValues    = $PSBoundParameters
+            # This gives an array of properties to compare.
+            Properties    = $script:computerObjectPropertyMap.ParameterName
+            # But these properties
+            IgnoreProperties = @(
+                'ComputerName'
+                'ServicePrincipalNames'
+                'Enabled'
+            )
+        }
+
+        $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+
+        if ($PSBoundParameters.ContainsKey('ServicePrincipalNames'))
         {
-            # Only pass -Remove and/or -Replace if we have something to set/change
+            $testServicePrincipalNamesParameters = @{
+                ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames -as [System.String[]]
+                ServicePrincipalNames         = $ServicePrincipalNames
+            }
+
+            $compareTargetResourceStateResult += @{
+                ParameterName  = 'ServicePrincipalNames'
+                Expected       = $testServicePrincipalNamesParameters.ServicePrincipalNames
+                Actual         = $testServicePrincipalNamesParameters.ExistingServicePrincipalNames
+                InDesiredState = Test-ServicePrincipalNames @testServicePrincipalNamesParameters
+            }
+        }
+
+        $commonParameters = Get-ADCommonParameters @PSBoundParameters
+
+        if ($compareTargetResourceStateResult.Where({$_.ParameterName -eq 'Path' -and -not $_.InDesiredState}))
+        {
+            <#
+                Must move the computer account since we can't simply
+                update the DistinguishedName property
+
+                It does not work moving the computer account using the
+                SamAccountName as the identity, so using the property
+                DistinguishedName instead.
+            #>
+            $moveADObjectParameters = $commonParameters.Clone()
+            $moveADObjectParameters['Identity'] = $getTargetResourceResult.DistinguishedName
+
+            Write-Verbose -Message (
+                $script:localizedData.MovingComputerAccount -f $ComputerName, $getTargetResourceResult.Path, $Path
+            )
+
+            Move-ADObject @moveADObjectParameters -TargetPath $Path
+        }
+
+        $replaceComputerProperties = @{}
+        $removeComputerProperties = @{}
+
+        # Get all properties, other than Path, that is not in desired state.
+        $propertiesNotInDesiredState = $compareTargetResourceStateResult | Where-Object -FilterScript {
+            $_.ParameterName -ne 'Path' -and -not $_.InDesiredState
+        }
+
+        foreach ($property in $propertiesNotInDesiredState)
+        {
+            $computerAccountPropertyName = ($script:computerObjectPropertyMap | Where-Object {
+                $_.ParameterName -eq $property.ParameterName
+            }).PropertyName
+
+            if (-not $computerAccountPropertyName)
+            {
+                $computerAccountPropertyName = $property.ParameterName
+            }
+
+            if ($property.Expected)
+            {
+                Write-Verbose -Message (
+                    $script:localizedData.UpdatingComputerAccountProperty -f $computerAccountPropertyName, ($property.Expected -join ',')
+                )
+
+                # Replace the current value.
+                $replaceComputerProperties[$computerAccountPropertyName] = $property.Expected
+            }
+            else
+            {
+                Write-Verbose -Message (
+                    $script:localizedData.RemovingComputerAccountProperty -f $property.ParameterName, ($property.Actual -join ',')
+                )
+
+                # Remove the current value since the desired value is empty or nothing.
+                $removeComputerProperties[$computerAccountPropertyName] = $property.Actual
+            }
+        }
+
+        $setADComputerParameters = $commonParameters.Clone()
+
+        # Set-ADComputer is only called if we have something to change.
+        if ($replaceComputerProperties.Count -gt 0 -or $removeComputerProperties.Count -gt 0)
+        {
             if ($replaceComputerProperties.Count -gt 0)
             {
-                $setADComputerParams['Replace'] = $replaceComputerProperties
+                $setADComputerParameters['Replace'] = $replaceComputerProperties
             }
             if ($removeComputerProperties.Count -gt 0)
             {
-                $setADComputerParams['Remove'] = $removeComputerProperties
+                $setADComputerParameters['Remove'] = $removeComputerProperties
             }
 
-            Write-Verbose -Message ($script:localizedData.UpdatingADComputer -f $ComputerName)
-            Set-DscADComputer -SetADComputerParameters $setADComputerParams
+            Set-DscADComputer -Parameters $setADComputerParameters
+
+            Write-Verbose -Message (
+                $script:localizedData.UpdatedComputerAccount -f $ComputerName
+            )
         }
     }
-    elseif (($Ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present'))
+    elseif ($Ensure -eq 'Absent' -and $getTargetResourceResult.Ensure -eq 'Present')
     {
         # User exists and needs removing
-        Write-Verbose ($script:localizedData.RemovingADComputer -f $ComputerName)
-        $commonParameters = Get-ADCommonParameters @PSBoundParameters
-        [ref] $null = Remove-ADComputer @commonParameters -Confirm:$false
-    }
+        Write-Verbose (
+            $script:localizedData.RemovingComputerAccount -f $ComputerName
+        )
 
-} #end function Set-TargetResource
+        $removeADComputerParameters = Get-ADCommonParameters @PSBoundParameters
+        $removeADComputerParameters['Confirm'] = $false
+
+        Remove-ADComputer @removeADComputerParameters | Out-Null
+    }
+}
 
 <#
     .SYNOPSIS
-        This is a wrapper for Set-ADComputer. This is needed because of
-        how Pester is unable to handle mocking this cmdlet.
+        This is a wrapper for Set-ADComputer.
 
-    .PARAMETER SetADComputerParameters
-        A hash table containing all parameters that will be pass trough to
+    .PARAMETER Parameters
+        A hash table containing all parameters that will be passed trough to
         Set-ADComputer.
+
+    .NOTES
+        This is needed because of how Pester is unable to handle mocking the
+        cmdlet Set-ADComputer.
 #>
 function Set-DscADComputer
 {
@@ -901,10 +971,65 @@ function Set-DscADComputer
     (
         [Parameter(Mandatory = $true)]
         [System.Collections.Hashtable]
-        $SetADComputerParameters
+        $Parameters
     )
 
-    [ref] $null = Set-ADComputer @SetADComputerParameters
+    Set-ADComputer @Parameters | Out-Null
+}
+
+<#
+    .SYNOPSIS
+        This is evaluates the service principal names current state against the
+        desired state.
+
+    .PARAMETER ExistingServicePrincipalNames
+        An array of existing service principal names that should be compared
+        against the array in parameter ServicePrincipalNames.
+
+    .PARAMETER ServicePrincipalNames
+        An array of the desired service principal names that should be compared
+        against the array in parameter ExistingServicePrincipalNames.
+#>
+function Test-ServicePrincipalNames
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.String[]]
+        $ExistingServicePrincipalNames,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.String[]]
+        $ServicePrincipalNames
+
+    )
+
+    $testServicePrincipalNamesReturnValue = $true
+
+    $testMembersParameters = @{
+        ExistingMembers = $ExistingServicePrincipalNames
+        Members         = $ServicePrincipalNames
+    }
+
+    if (-not (Test-Members @testMembersParameters))
+    {
+        Write-Verbose -Message (
+            $script:localizedData.ServicePrincipalNamesNotInDesiredState `
+                -f ($ExistingServicePrincipalNames -join ','), ($ServicePrincipalNames -join ',')
+        )
+
+        $testServicePrincipalNamesReturnValue = $false
+    }
+    else
+    {
+        Write-Verbose -Message (
+            $script:localizedData.ServicePrincipalNamesInDesiredState
+        )
+    }
+
+    return $testServicePrincipalNamesReturnValue
 }
 
 Export-ModuleMember -Function *-TargetResource
