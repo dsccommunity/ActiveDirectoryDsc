@@ -273,7 +273,6 @@ function Test-DscParameterState
         [System.Array]
         $ValuesToCheck
     )
-    $script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
     $returnValue = $true
 
     if (($DesiredValues.GetType().Name -ne 'HashTable') `
@@ -420,6 +419,7 @@ function Test-DscParameterState
 
     return $returnValue
 }
+$script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
 Export-ModuleMember -Function @(
     'New-InvalidArgumentException'
     'New-InvalidOperationException'
