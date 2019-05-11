@@ -706,7 +706,7 @@ function Set-TargetResource
                         $script:localizedData.CreateOfflineDomainJoinRequest -f $RequestFile, $ComputerName, $domainName
                     )
 
-                    $dJoinParameters = @(
+                    $dJoinArguments = @(
                         '/PROVISION'
                         '/DOMAIN',
                         $domainName
@@ -716,7 +716,7 @@ function Set-TargetResource
 
                     if ($PSBoundParameters.ContainsKey('Path'))
                     {
-                        $dJoinParameters += @(
+                        $dJoinArguments += @(
                             '/MACHINEOU',
                             $Path
                         )
@@ -724,45 +724,29 @@ function Set-TargetResource
 
                     if ($PSBoundParameters.ContainsKey('DomainController'))
                     {
-                        $dJoinParameters += @(
+                        $dJoinArguments += @(
                             '/DCNAME',
                             $DomainController
                         )
                     }
 
-                    $dJoinParameters += @(
+                    $dJoinArguments += @(
                         '/SAVEFILE',
                         $RequestFile
                     )
 
-                    $dJoinResult = & djoin.exe @dJoinParameters
+                    $startProcessParameters = @{
+                        FilePath     = 'djoin.exe'
+                        ArgumentList = $dJoinArguments
+                        Timeout = 300
+                    }
 
-                    $dJoinErrorCode = $LASTEXITCODE
-                    if ($dJoinErrorCode -ne 0)
+                    $dJoinProcessExitCode = Start-ProcessWithTimeout @startProcessParameters
+
+                    if ($dJoinProcessExitCode -ne 0)
                     {
-                        $newObjectParameters = @{
-                            TypeName     = 'InvalidOperationException'
-                            ArgumentList = @(
-                                $dJoinResult
-                            )
-                        }
-
-                        $invalidOperationException = New-Object @newObjectParameters
-
-                        $newObjectParameters = @{
-                            TypeName     = 'System.Management.Automation.ErrorRecord'
-                            ArgumentList = @(
-                                $invalidOperationException.ToString(),
-                                'MachineStateIncorrect',
-                                'InvalidOperation',
-                                $null
-                            )
-                        }
-
-                        $errorRecord = New-Object @newObjectParameters
-
-                        $errorMessage = $script:localizedData.FailedToCreateOfflineDomainJoinRequest -f $ComputerName, $dJoinErrorCode
-                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $errorRecord
+                        $errorMessage = $script:localizedData.FailedToCreateOfflineDomainJoinRequest -f $ComputerName, $dJoinProcessExitCode
+                        New-InvalidOperationException -Message $errorMessage
                     }
                     else
                     {
@@ -831,7 +815,7 @@ function Set-TargetResource
             CurrentValues    = $getTargetResourceResult
             DesiredValues    = $PSBoundParameters
             # This gives an array of properties to compare.
-            Properties    = $script:computerObjectPropertyMap.ParameterName
+            Properties       = $script:computerObjectPropertyMap.ParameterName
             # But these properties
             IgnoreProperties = @(
                 'ComputerName'
@@ -859,7 +843,7 @@ function Set-TargetResource
 
         $commonParameters = Get-ADCommonParameters @PSBoundParameters
 
-        if ($compareTargetResourceStateResult.Where({$_.ParameterName -eq 'Path' -and -not $_.InDesiredState}))
+        if ($compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'Path' -and -not $_.InDesiredState }))
         {
             <#
                 Must move the computer account since we can't simply
@@ -879,8 +863,8 @@ function Set-TargetResource
             Move-ADObject @moveADObjectParameters -TargetPath $Path
         }
 
-        $replaceComputerProperties = @{}
-        $removeComputerProperties = @{}
+        $replaceComputerProperties = @{ }
+        $removeComputerProperties = @{ }
 
         # Get all properties, other than Path, that is not in desired state.
         $propertiesNotInDesiredState = $compareTargetResourceStateResult | Where-Object -FilterScript {
@@ -890,8 +874,8 @@ function Set-TargetResource
         foreach ($property in $propertiesNotInDesiredState)
         {
             $computerAccountPropertyName = ($script:computerObjectPropertyMap | Where-Object {
-                $_.ParameterName -eq $property.ParameterName
-            }).PropertyName
+                    $_.ParameterName -eq $property.ParameterName
+                }).PropertyName
 
             if (-not $computerAccountPropertyName)
             {
@@ -1030,6 +1014,54 @@ function Test-ServicePrincipalNames
     }
 
     return $testServicePrincipalNamesReturnValue
+}
+
+<#
+    .SYNOPSIS
+        Starts the process to create the offline domain join request file.
+
+    .PARAMETER FilePath
+        String containing the path to setup.exe.
+
+    .PARAMETER ArgumentList
+        The arguments that should be passed to setup.exe.
+
+    .PARAMETER Timeout
+        The timeout in seconds to wait for the process to finish.
+
+#>
+function Start-ProcessWithTimeout
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $FilePath,
+
+        [Parameter()]
+        [System.String[]]
+        $ArgumentList,
+
+        [Parameter(Mandatory = $true)]
+        [System.UInt32]
+        $Timeout
+    )
+
+    $startProcessParameters = @{
+        FilePath = $FilePath
+        ArgumentList = $ArgumentList
+        PassThru     = $true
+        NoNewWindow  = $true
+        ErrorAction  = 'Stop'
+    }
+
+    $sqlSetupProcess = Start-Process @startProcessParameters
+
+    Write-Verbose -Message ($script:localizedData.StartProcess -f $sqlSetupProcess.Id, $startProcessParameters.FilePath, $Timeout) -Verbose
+
+    Wait-Process -InputObject $sqlSetupProcess -Timeout $Timeout -ErrorAction 'Stop'
+
+    return $sqlSetupProcess.ExitCode
 }
 
 Export-ModuleMember -Function *-TargetResource

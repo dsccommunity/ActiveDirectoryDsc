@@ -792,12 +792,148 @@ try
                     }
                 }
 
+                Context 'When the computer account should be force to be created enabled' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Absent
+
+                        $setTargetResourceParameters = @{
+                            ComputerName      = $mockComputerNamePresent
+                            EnabledOnCreation = $true
+                            Verbose           = $true
+                        }
+                    }
+
+                    It 'Should call the correct mocks' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
+                            $PSBoundParameters.ContainsKey('Enabled') -and $Enabled -eq $true
+                        } -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When the computer account should be force to be created disabled' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Absent
+
+                        $setTargetResourceParameters = @{
+                            ComputerName      = $mockComputerNamePresent
+                            EnabledOnCreation = $false
+                            Verbose           = $true
+                        }
+                    }
+
+                    It 'Should call the correct mocks' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
+                            $PSBoundParameters.ContainsKey('Enabled') -and $Enabled -eq $false
+                        } -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When the computer account should be created using offline domain join (ODJ) request file' {
+                    BeforeAll {
+                        Mock -CommandName Wait-Process
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            if (-not $script:mockSuccessDomainJoin)
+                            {
+                                # First call.
+                                $mockGetTargetResourceResult = & $mockGetTargetResource_Absent
+                            }
+                            else
+                            {
+                                <#
+                                    Second call - After Offline Domain Join request file has been
+                                    created and the computer account has been provisioned.
+                                #>
+                                $mockGetTargetResourceResult = & $mockGetTargetResource_Present
+                            }
+
+                            return $mockGetTargetResourceResult
+                        }
+
+                        Mock -CommandName Get-DomainName -MockWith {
+                            return $mockDomain
+                        }
+
+                        Mock -CommandName Start-ProcessWithTimeout -MockWith {
+                            $script:mockSuccessDomainJoin = $true
+
+                            return 0
+                        }
+
+                        $setTargetResourceParameters = @{
+                            ComputerName = $mockComputerNamePresent
+                            Path = $mockParentContainer
+                            DomainController = 'dc01.contoso.com'
+                            RequestFile  = 'c:\ODJTest.txt'
+                            Verbose      = $true
+                        }
+                    }
+
+                    BeforeEach {
+                        $script:mockSuccessDomainJoin = $false
+                    }
+
+                    It 'Should call the correct mocks' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+
+                        Assert-MockCalled -CommandName Start-ProcessWithTimeout -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When an offline domain join (ODJ) request file fails to be created' {
+                    BeforeAll {
+                        Mock -CommandName Wait-Process
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Absent
+                        Mock -CommandName Get-DomainName -MockWith {
+                            return $mockDomain
+                        }
+
+                        # ExitCode for 'The parameter is incorrect.'.
+                        $mockExitCode = 87
+
+                        Mock -CommandName Start-ProcessWithTimeout -MockWith {
+                            return $mockExitCode
+                        }
+
+                        $setTargetResourceParameters = @{
+                            ComputerName = $mockComputerNamePresent
+                            RequestFile  = 'c:\ODJTest.txt'
+                            Verbose      = $true
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Throw ($script:localizedData.FailedToCreateOfflineDomainJoinRequest -f $mockComputerNamePresent, $mockExitCode)
+
+                        Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
                 Context 'When a property is not in desired state' {
+                    BeforeAll {
+                        # Mock a specific desired state.
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+                    }
+
                     Context 'When a property should be replaced' {
                         BeforeAll {
-                            # Mock a specific desired state.
-                            Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
-
                             # One test case per property with a value that differs from the desired state.
                             $testCases_Properties = @(
                                 @{
@@ -865,9 +1001,6 @@ try
 
                     Context 'When a property should be removed' {
                         BeforeAll {
-                            # Mock a specific desired state.
-                            Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
-
                             # One test case per property with a value that differs from the desired state.
                             $testCases_Properties = @(
                                 @{
@@ -935,8 +1068,6 @@ try
 
                     Context 'When the computer account should be moved' {
                         BeforeAll {
-                            Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
-
                             $setTargetResourceParameters = @{
                                 ComputerName = $mockComputerNamePresent
                                 Path         = 'OU=New,CN=Computers,DC=contoso,DC=com'
@@ -954,474 +1085,117 @@ try
                         }
                     }
                 }
+
+                Context 'When RestoreFromRecycleBin is used' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            if (-not $script:mockRestoreADCommonObjectSuccessfullyRestoredObject)
+                            {
+                                # First call.
+                                $mockGetTargetResourceResult = & $mockGetTargetResource_Absent
+                            }
+                            else
+                            {
+                                # Second call - After Restore-ADCommonObject has been called.
+                                $mockGetTargetResourceResult = & $mockGetTargetResource_Present
+                            }
+
+                            return $mockGetTargetResourceResult
+                        }
+
+                        $setTargetResourceParameters = @{
+                            ComputerName          = $mockComputerNamePresent
+                            RestoreFromRecycleBin = $true
+                            Verbose               = $true
+                        }
+                    }
+
+                    BeforeEach {
+                        $script:mockRestoreADCommonObjectSuccessfullyRestoredObject = $false
+                    }
+
+                    Context 'When the computer object exist in the recycle bin' {
+                        BeforeAll {
+                            Mock -CommandName Restore-ADCommonObject -MockWith {
+                                return @{
+                                    ObjectClass = 'computer'
+                                }
+
+                                $script:mockRestoreADCommonObjectSuccessfullyRestoredObject = $true
+                            }
+                        }
+
+                        It 'Should call Restore-ADCommonObject and successfully restore the computer account' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName New-ADComputer -Times 0 -Exactly -Scope It
+                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        }
+                    }
+
+                    Context 'When the computer object does not exist in the recycle bin' {
+                        BeforeAll {
+                            Mock -CommandName Restore-ADCommonObject
+                        }
+
+                        It 'Should create a new computer account' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        }
+                    }
+
+                    Context 'When the cmdlet Restore-ADCommonObject throws an error' {
+                        BeforeAll {
+                            $errorMessage = 'Mocked error'
+
+                            Mock -CommandName Restore-ADCommonObject -MockWith {
+                                throw $errorMessage
+                            }
+                        }
+
+                        It 'Should throw the correct error' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Throw $errorMessage
+
+                            Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It -Exactly -Times 1
+                            Assert-MockCalled -CommandName New-ADComputer -Scope It -Exactly -Times 0
+                            Assert-MockCalled -CommandName Set-DscADComputer -Scope It -Exactly -Times 0
+                        }
+                    }
+                }
             }
         }
 
-        # #region Function Set-TargetResource
-        # Describe 'xADComputer\Set-TargetResource' {
-        #     $testStringProperties = @(
-        #         'Location',
-        #         'DnsHostName',
-        #         'UserPrincipalName',
-        #         'DisplayName',
-        #         'Description'
-        #         # Manager is translated to ManagedBy
-        #     )
-
-        #     $testArrayProperties = @(
-        #         'ServicePrincipalNames'
-        #     )
-        #     $testBooleanProperties = @(
-        #         'Enabled'
-        #     )
-
-        #     It "Calls 'New-ADComputer' when 'Ensure' is 'Present' and the account does not exist" {
-        #         $newComputerName = 'NEWCOMPUTER'
-        #         $newAbsentParams = $testAbsentParams.Clone()
-        #         $newAbsentParams['ComputerName'] = $newComputerName
-        #         $newPresentParams = $testPresentParams.Clone()
-        #         $newPresentParams['ComputerName'] = $newComputerName
-        #         Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName }
-        #         Mock -CommandName Set-ADComputer
-        #         Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams }
-
-        #         Set-TargetResource @newPresentParams
-
-        #         Assert-MockCalled -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -Scope It
-        #     }
-
-        #     It "Calls 'New-ADComputer' when 'Ensure' is 'Present' and the account does not exist, RequestFile is set, DJOIN OK" {
-        #         $newComputerName = 'NEWCOMPUTER'
-        #         $newAbsentParams = $testAbsentParams.Clone()
-        #         $newAbsentParams['ComputerName'] = $newComputerName
-        #         $newPresentParams = $testPresentParams.Clone()
-        #         $newPresentParams['ComputerName'] = $newComputerName
-        #         $newPresentParams['RequestFile'] = 'c:\ODJTest.txt'
-        #         Mock -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName }
-        #         Mock -CommandName djoin.exe -MockWith {
-        #             $LASTEXITCODE = 0
-        #             return 'OK'
-        #         }
-        #         Mock -CommandName Set-ADComputer
-        #         Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams }
-
-        #         Set-TargetResource @newPresentParams
-
-        #         Assert-MockCalled -CommandName New-ADComputer -ParameterFilter { $Name -eq $newComputerName } -Scope It -Exactly 0
-        #         Assert-MockCalled -CommandName djoin.exe -Exactly 1
-        #     }
-
-        #     It "Calls 'New-ADComputer' with 'Path' when specified" {
-        #         $newComputerName = 'NEWCOMPUTER'
-        #         $newAbsentParams = $testAbsentParams.Clone()
-        #         $newAbsentParams['ComputerName'] = $newComputerName
-        #         $newPresentParams = $testPresentParams.Clone()
-        #         $newPresentParams['ComputerName'] = $newComputerName
-        #         $targetPath = 'OU=Test,DC=contoso,DC=com'
-        #         Mock -CommandName New-ADComputer -ParameterFilter { $Path -eq $targetPath }
-        #         Mock -CommandName Set-ADComputer
-        #         Mock -CommandName Get-TargetResource -ParameterFilter { $ComputerName -eq $newComputerName } -MockWith { return $newAbsentParams }
-
-        #         Set-TargetResource @newPresentParams -Path $targetPath
-
-        #         Assert-MockCalled -CommandName New-ADComputer -ParameterFilter { $Path -eq $targetPath } -Scope It
-        #     }
-
-        #     It "Calls 'Move-ADObject' when 'Ensure' is 'Present', the computer account exists but Path is incorrect" {
-        #         $testTargetPath = 'OU=NewPath,DC=contoso,DC=com'
-        #         Mock -CommandName Set-ADComputer
-        #         Mock -CommandName Get-ADComputer -MockWith {
-        #             $duffADComputer = $fakeADComputer.Clone()
-        #             $duffADComputer['DistinguishedName'] = 'CN={0},OU=WrongPath,DC=contoso,DC=com' -f $testPresentParams.ComputerName
-        #             return $duffADComputer
-        #         }
-        #         Mock -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath }
-
-        #         Set-TargetResource @testPresentParams -Path $testTargetPath
-
-        #         Assert-MockCalled -CommandName Move-ADObject -ParameterFilter { $TargetPath -eq $testTargetPath } -Scope It
-        #     }
-
-        #     foreach ($testParameter in $testStringProperties)
-        #     {
-        #         It "Calls 'Set-ADComputer' with 'Remove' when '$testParameter' is `$null" {
-        #             Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer }
-        #             Mock -CommandName Set-ADComputer -ParameterFilter { $Remove.ContainsKey($testParameter) }
-
-        #             $setTargetResourceParams = $testPresentParams.Clone()
-        #             $setTargetResourceParams[$testParameter] = ''
-        #             Set-TargetResource @setTargetResourceParams
-
-        #             Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter { $Remove.ContainsKey($testParameter) } -Scope It -Exactly 1
-        #         }
-
-        #         It "Calls 'Set-ADComputer' with 'Replace' when existing '$testParameter' is not `$null" {
-        #             Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer }
-        #             Mock -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey($testParameter) }
-
-        #             $setTargetResourceParams = $testPresentParams.Clone()
-        #             $setTargetResourceParams[$testParameter] = 'NewStringValue'
-        #             Set-TargetResource @setTargetResourceParams
-
-        #             Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey($testParameter) } -Scope It -Exactly 1
-        #         }
-
-        #     } #end foreach string parameter
-
-        #     It "Calls 'Set-ADComputer' with 'Remove' when 'Manager' is `$null" {
-        #         ## Manager translates to AD attribute 'managedBy'
-        #         Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer }
-        #         Mock -CommandName Set-ADComputer -ParameterFilter { $Remove.ContainsKey('ManagedBy') }
-
-        #         $setTargetResourceParams = $testPresentParams.Clone()
-        #         $setTargetResourceParams['Manager'] = ''
-        #         Set-TargetResource @setTargetResourceParams
-
-        #         Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter { $Remove.ContainsKey('ManagedBy') } -Scope It -Exactly 1
-        #     }
-
-        #     It "Calls 'Set-ADComputer' with 'Replace' when existing 'Manager' is not `$null" {
-        #         ## Manager translates to AD attribute 'managedBy'
-        #         Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer }
-        #         Mock -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ManagedBy') }
-
-        #         $setTargetResourceParams = $testPresentParams.Clone()
-        #         $setTargetResourceParams['Manager'] = 'NewValue'
-        #         Set-TargetResource @setTargetResourceParams
-
-        #         Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ManagedBy') } -Scope It -Exactly 1
-        #     }
-
-        #     It "Calls 'Set-ADComputer' with 'Enabled' = 'True' by default" {
-        #         Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer }
-        #         Mock -CommandName Set-ADComputer -ParameterFilter { $Enabled -eq $true }
-
-        #         $setTargetResourceParams = $testPresentParams.Clone()
-        #         $setTargetResourceParams[$testParameter] = -not $fakeADComputer.$testParameter
-        #         Set-TargetResource @setTargetResourceParams
-
-        #         Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter { $Enabled -eq $true } -Scope It -Exactly 1
-        #     }
-
-        #     It "Calls 'Set-ADComputer' with 'ServicePrincipalNames' when specified" {
-        #         $testSPNs = @('spn/a', 'spn/b')
-        #         Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer }
-        #         Mock -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
-
-        #         Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
-
-        #         Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } -Scope It -Exactly 1
-        #     }
-
-        #     It "Calls 'Remove-ADComputer' when 'Ensure' is 'Absent' and computer account exists" {
-        #         Mock -CommandName Get-ADComputer -MockWith { return $fakeADComputer }
-        #         Mock -CommandName Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName }
-
-        #         Set-TargetResource @testAbsentParams
-
-        #         Assert-MockCalled -CommandName Remove-ADComputer -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.ComputerName } -Scope It
-        #     }
-
-        #     Context 'When RestoreFromRecycleBin is used' {
-        #         BeforeAll {
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 if ($script:mockCounter -gt 0)
-        #                 {
-        #                     return @{
-        #                         Ensure = 'Present'
-        #                     }
-        #                 }
-
-        #                 $script:mockCounter++
-
-        #                 return @{
-        #                     Ensure = 'Absent'
-        #                 }
-        #             }
-
-        #             Mock -CommandName New-ADComputer
-        #             # Had to overwrite parameter filter from an earlier test
-        #             Mock -CommandName Set-ADComputer -ParameterFilter {
-        #                 return $true
-        #             }
-        #         }
-
-        #         It 'Should call Restore-AdCommonObject' {
-        #             $restoreParam = $testPresentParams.Clone()
-        #             $restoreParam.RestoreFromRecycleBin = $true
-
-        #             $script:mockCounter = 0
-
-        #             Mock -CommandName Restore-ADCommonObject -MockWith {
-        #                 return [PSCustomObject]@{
-        #                     ObjectClass = 'computer'
-        #                 }
-        #             }
-
-        #             Set-TargetResource @restoreParam
-
-        #             Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
-        #             Assert-MockCalled -CommandName New-ADComputer -Times 0 -Exactly -Scope It
-        #             Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 1 -Scope It
-        #         }
-
-        #         It 'Should call New-ADComputer if no object was found in the recycle bin' {
-        #             $restoreParam = $testPresentParams.Clone()
-        #             $restoreParam.RestoreFromRecycleBin = $true
-        #             $script:mockCounter = 0
-
-        #             Mock -CommandName Restore-ADCommonObject
-
-        #             Set-TargetResource @restoreParam
-
-        #             Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
-        #             Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
-        #             Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 1 -Scope It
-        #         }
-
-        #         It 'Should throw the correct error when then object cannot be restored from recycle bin' {
-        #             $restoreParam = $testPresentParams.Clone()
-        #             $restoreParam.RestoreFromRecycleBin = $true
-        #             $script:mockCounter = 0
-
-
-        #             Mock -CommandName Restore-ADCommonObject -MockWith {
-        #                 throw (New-Object -TypeName System.InvalidOperationException)
-        #             }
-
-        #             { Set-TargetResource @restoreParam } | Should -Throw -ExceptionType ([System.InvalidOperationException])
-
-        #             Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It -Exactly -Times 1
-        #             Assert-MockCalled -CommandName New-ADComputer -Scope It -Exactly -Times 0
-        #             Assert-MockCalled -CommandName Set-ADComputer -Scope It -Exactly -Times 0
-        #         }
-        #     }
-
-        #     Context 'When a computer account that should be disabled' {
-        #         BeforeAll {
-        #             Mock -CommandName Set-ADComputer
-        #             Mock -CommandName Set-DscADComputer
-        #             Mock -CommandName New-ADComputer
-
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 return $fakeADComputer
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter Enabled with the value $false' {
-        #             It 'Should call Set-ADComputer to disable the computer account' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $false
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -Scope It -Exactly -Times 0
-        #                 Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
-        #                     $SetADComputerParameters.Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 1
-        #             }
-        #         }
-        #     }
-
-        #     Context 'When a computer account that should be enabled' {
-        #         BeforeAll {
-        #             Mock -CommandName Set-ADComputer
-        #             Mock -CommandName Set-DscADComputer
-        #             Mock -CommandName New-ADComputer
-
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 $disabledFakeADComputer = $fakeADComputer.Clone()
-        #                 $disabledFakeADComputer['Enabled'] = $false
-        #                 return $disabledFakeADComputer
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter Enabled with the value $true' {
-        #             It 'Should call Set-ADComputer to enable the computer account' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $true
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -Scope It -Exactly -Times 0
-        #                 Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
-        #                     $SetADComputerParameters.Enabled -eq $true
-        #                 } -Scope It -Exactly -Times 1
-        #             }
-        #         }
-        #     }
-
-        #     Context 'When creating a computer account that should be enabled' {
-        #         BeforeAll {
-        #             Mock -CommandName Set-ADComputer
-        #             Mock -CommandName New-ADComputer
-
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 return @{
-        #                     Ensure = 'Absent'
-        #                 }
-        #             }
-        #         }
-
-        #         Context 'When not specifying the parameter Enabled' {
-        #             It 'Should create a computer account that is enabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter Enabled with the value $true' {
-        #             It 'Should create a computer account that is enabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $true
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $false and parameter Enabled with value $true' {
-        #             It 'Should create a computer account that is enabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['CreateDisabled'] = $false
-        #                 $setTargetResourceParameters['Enabled'] = $true
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $true and parameter Enabled with value $true' {
-        #             It 'Should create a computer account that are enabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['CreateDisabled'] = $true
-        #                 $setTargetResourceParameters['Enabled'] = $true
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-        #     }
-
-        #     Context 'When creating a computer account that should be disabled' {
-        #         BeforeAll {
-        #             Mock -CommandName Set-ADComputer
-        #             Mock -CommandName New-ADComputer
-
-        #             Mock -CommandName Get-TargetResource -MockWith {
-        #                 return @{
-        #                     Ensure = 'Absent'
-
-        #                     # This is needed for the second call to Get-TargetResource.
-        #                     # Enabled = $true
-        #                 }
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter Enabled with the value $false' {
-        #             It 'Should create a computer account that is disabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['Enabled'] = $false
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $true' {
-        #             It 'Should create a computer account that is disabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['CreateDisabled'] = $true
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $false and Enabled with value $false' {
-        #             It 'Should create a computer account that is disabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['CreateDisabled'] = $false
-        #                 $setTargetResourceParameters['Enabled'] = $false
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-
-        #         Context 'When specifying the parameter CreateDisabled with the value $true and Enabled with value $false' {
-        #             It 'Should create a computer account that is disabled' {
-        #                 $setTargetResourceParameters = $testPresentParams.Clone()
-        #                 $setTargetResourceParameters['CreateDisabled'] = $true
-        #                 $setTargetResourceParameters['Enabled'] = $false
-
-        #                 Set-TargetResource @setTargetResourceParameters
-
-        #                 Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 1
-
-        #                 Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-        #                     $Enabled -eq $true -or $Enabled -eq $false
-        #                 } -Scope It -Exactly -Times 0
-        #             }
-        #         }
-        #     }
-        #}
-        #endregion
+        Describe 'DscResource.Common\Start-ProcessWithTimeout' -Tag 'Helper' {
+            Context 'When starting a process successfully' {
+                It 'Should return exit code 0' {
+                    $startProcessWithTimeoutParameters = @{
+                        FilePath = 'powershell.exe'
+                        ArgumentList = '-Command &{Start-Sleep -Seconds 2}'
+                        Timeout = 300
+                    }
+
+                    $processExitCode = Start-ProcessWithTimeout @startProcessWithTimeoutParameters
+                    $processExitCode | Should -BeExactly 0
+                }
+            }
+
+            Context 'When starting a process and the process does not finish before the timeout period' {
+                It 'Should throw an error message' {
+                    $startProcessWithTimeoutParameters = @{
+                        FilePath = 'powershell.exe'
+                        ArgumentList = '-Command &{Start-Sleep -Seconds 4}'
+                        Timeout = 2
+                    }
+
+                    { Start-ProcessWithTimeout @startProcessWithTimeoutParameters } | Should -Throw -ErrorId 'ProcessNotTerminated,Microsoft.PowerShell.Commands.WaitProcessCommand'
+                }
+            }
+        }
     }
-    #endregion
 }
 finally
 {
