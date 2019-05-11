@@ -437,16 +437,20 @@ function ConvertTo-TimeSpan
     switch ($TimeSpanType)
     {
         'Seconds'
-        { $newTimeSpanParams['Seconds'] = $TimeSpan
+        {
+            $newTimeSpanParams['Seconds'] = $TimeSpan
         }
         'Minutes'
-        { $newTimeSpanParams['Minutes'] = $TimeSpan
+        {
+            $newTimeSpanParams['Minutes'] = $TimeSpan
         }
         'Hours'
-        { $newTimeSpanParams['Hours'] = $TimeSpan
+        {
+            $newTimeSpanParams['Hours'] = $TimeSpan
         }
         'Days'
-        { $newTimeSpanParams['Days'] = $TimeSpan
+        {
+            $newTimeSpanParams['Days'] = $TimeSpan
         }
     }
     return (New-TimeSpan @newTimeSpanParams)

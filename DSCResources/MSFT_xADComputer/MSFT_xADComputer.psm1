@@ -78,8 +78,11 @@ $script:computerObjectPropertyMap = @(
 
     .PARAMETER EnabledOnCreation
         Specifies if the computer account is created enabled or disabled.
-        By default the computer account will be created using the default
-        value of the cmdlet New-ADComputer.
+        By default the Enabled property of the computer account will be set to
+        the default value of the cmdlet New-ADComputer. This property is ignored
+        if the parameter RequestFile is specified in the same configuration.
+        This parameter does not enforce the property `Enabled`. To enforce the
+        property `Enabled` see the resource xADObjectEnabledState.
 
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to connect to perform the task.
@@ -284,11 +287,11 @@ function Get-TargetResource
 
     .PARAMETER EnabledOnCreation
         Specifies if the computer account is created enabled or disabled.
-        By default the computer account will be created using the default
-        value of the cmdlet New-ADComputer.
-        This property is ignored if the parameter `RequestFile` is specified
-        in the same configuration.
-
+        By default the Enabled property of the computer account will be set to
+        the default value of the cmdlet New-ADComputer. This property is ignored
+        if the parameter RequestFile is specified in the same configuration.
+        This parameter does not enforce the property `Enabled`. To enforce the
+        property `Enabled` see the resource xADObjectEnabledState.
 #>
 function Test-TargetResource
 {
@@ -545,10 +548,11 @@ function Test-TargetResource
 
     .PARAMETER EnabledOnCreation
         Specifies if the computer account is created enabled or disabled.
-        By default the computer account will be created using the default
-        value of the cmdlet New-ADComputer.
-        This property is ignored if the parameter `RequestFile` is specified
-        in the same configuration.
+        By default the Enabled property of the computer account will be set to
+        the default value of the cmdlet New-ADComputer. This property is ignored
+        if the parameter RequestFile is specified in the same configuration.
+        This parameter does not enforce the property `Enabled`. To enforce the
+        property `Enabled` see the resource xADObjectEnabledState.
 #>
 function Set-TargetResource
 {
