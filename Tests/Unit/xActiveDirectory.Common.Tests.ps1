@@ -485,5 +485,32 @@ InModuleScope 'xActiveDirectory.Common' {
 
         Assert-VerifiableMock
     }
+
+    Describe 'DscResource.Common\Start-ProcessWithTimeout' {
+        Context 'When starting a process successfully' {
+            It 'Should return exit code 0' {
+                $startProcessWithTimeoutParameters = @{
+                    FilePath = 'powershell.exe'
+                    ArgumentList = '-Command &{Start-Sleep -Seconds 2}'
+                    Timeout = 300
+                }
+
+                $processExitCode = Start-ProcessWithTimeout @startProcessWithTimeoutParameters
+                $processExitCode | Should -BeExactly 0
+            }
+        }
+
+        Context 'When starting a process and the process does not finish before the timeout period' {
+            It 'Should throw an error message' {
+                $startProcessWithTimeoutParameters = @{
+                    FilePath = 'powershell.exe'
+                    ArgumentList = '-Command &{Start-Sleep -Seconds 4}'
+                    Timeout = 2
+                }
+
+                { Start-ProcessWithTimeout @startProcessWithTimeoutParameters } | Should -Throw -ErrorId 'ProcessNotTerminated,Microsoft.PowerShell.Commands.WaitProcessCommand'
+            }
+        }
+    }
 }
 
