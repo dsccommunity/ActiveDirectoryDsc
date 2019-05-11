@@ -4,6 +4,8 @@ param()
 $script:dscModuleName = 'xActiveDirectory'
 $script:dscResourceName = 'MSFT_xADComputer'
 
+#region HEADER
+
 # Unit Test Template Version: 1.2.4
 $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `

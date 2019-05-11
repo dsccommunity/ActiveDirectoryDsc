@@ -79,7 +79,10 @@ function Test-DomainMember
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param ( )
+    param
+    (
+    )
+
     $isDomainMember = [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain;
     return $isDomainMember;
 }
@@ -90,7 +93,10 @@ function Get-DomainName
 {
     [CmdletBinding()]
     [OutputType([System.String])]
-    param ( )
+    param
+    (
+    )
+
     $domainName = [System.String] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).Domain;
     return $domainName;
 } # function Get-DomainName
@@ -99,7 +105,8 @@ function Get-DomainName
 function Resolve-DomainFQDN
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [OutputType([System.String])]
         [System.String] $DomainName,
@@ -107,6 +114,7 @@ function Resolve-DomainFQDN
         [Parameter()] [AllowNull()]
         [System.String] $ParentDomainName
     )
+
     $domainFQDN = $DomainName
     if ($ParentDomainName)
     {
@@ -130,6 +138,7 @@ function Test-ADDomain
         [System.Management.Automation.CredentialAttribute()]
         $Credential
     )
+
     Write-Verbose -Message ($localizedString.CheckingDomain -f $DomainName);
     $ldapDomain = 'LDAP://{0}' -f $DomainName;
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -423,6 +432,7 @@ function ConvertTo-TimeSpan
         [System.String]
         $TimeSpanType
     )
+
     $newTimeSpanParams = @{ };
     switch ($TimeSpanType)
     {
@@ -445,10 +455,13 @@ function ConvertTo-TimeSpan
 <#
     .SYNOPSIS
         Converts a System.TimeSpan into the number of seconds, mintutes, hours or days.
+
     .PARAMETER TimeSpan
         TimeSpan to convert into an integer
+
     .PARAMETER TimeSpanType
         Convert timespan into the total number of seconds, minutes, hours or days.
+
     .EXAMPLE
         $Get-ADDefaultDomainPasswordPolicy
 
@@ -470,19 +483,24 @@ function ConvertFrom-TimeSpan
         [System.String]
         $TimeSpanType
     )
+
     switch ($TimeSpanType)
     {
         'Seconds'
-        { return $TimeSpan.TotalSeconds -as [System.UInt32]
+        {
+            return $TimeSpan.TotalSeconds -as [System.UInt32]
         }
         'Minutes'
-        { return $TimeSpan.TotalMinutes -as [System.UInt32]
+        {
+            return $TimeSpan.TotalMinutes -as [System.UInt32]
         }
         'Hours'
-        { return $TimeSpan.TotalHours -as [System.UInt32]
+        {
+            return $TimeSpan.TotalHours -as [System.UInt32]
         }
         'Days'
-        { return $TimeSpan.TotalDays -as [System.UInt32]
+        {
+            return $TimeSpan.TotalDays -as [System.UInt32]
         }
     }
 } #end function ConvertFrom-TimeSpan
