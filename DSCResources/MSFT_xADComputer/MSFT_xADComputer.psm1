@@ -241,7 +241,7 @@ function Get-TargetResource
 
     .PARAMETER Ensure
         Specifies whether the computer account is present or absent.
-        Valid values are 'Present' and 'Absent'. The defaults is 'Present'.
+        Valid values are 'Present' and 'Absent'. The default is 'Present'.
 
     .PARAMETER UserPrincipalName
         Specifies the UPN assigned to the computer account.
@@ -502,7 +502,7 @@ function Test-TargetResource
 
     .PARAMETER Ensure
         Specifies whether the computer account is present or absent.
-        Valid values are 'Present' and 'Absent'. The defaults is 'Present'.
+        Valid values are 'Present' and 'Absent'. The default is 'Present'.
 
     .PARAMETER UserPrincipalName
         Specifies the UPN assigned to the computer account.

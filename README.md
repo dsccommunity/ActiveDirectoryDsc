@@ -83,15 +83,15 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[String]` Location** _(Write)_: Specifies the location of the computer,
   such as an office number.
 * **`[String]` DnsHostName** _(Write)_: Specifies the fully qualified
-  domain name (FQDN) of the computer.
+  domain name (FQDN) of the computer account.
 * **`[String]` ServicePrincipalNames** _(Write)_: Specifies the service
   principal names for the computer account.
 * **`[String]` UserPrincipalName** _(Write)_: Specifies the UPN assigned
   to the computer account.
 * **`[String]` DisplayName** _(Write)_: Specifies the display name of
-  the computer.
-* **`[String]` Path** _(Write)_: Specifies the X.500 path of the container
-  where the computer is located.
+  the computer account.
+* **`[String]` Path** _(Write)_: Specifies the X.500 path of the
+  Organizational Unit (OU) or container where the computer is located.
 * **`[String]` Description** _(Write)_: Specifies a description of the
   computer account.
 * **`[Boolean]` Enabled** _(Write)_: **DEPRECATED - DO NOT USE**. Please
@@ -118,7 +118,7 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[String]` RequestFile** _(Write)_: Specifies the full path to the
   Offline Domain Join Request file to create.
 * **`[String]` Ensure**: Specifies whether the computer account is present
-  or absent. Valid values are 'Present' and 'Absent'. The defaults is 'Present'.
+  or absent. Valid values are 'Present' and 'Absent'. The default is 'Present'.
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or
   not the computer account should first tried to be restored from the
   recycle bin before creating a new computer account.
