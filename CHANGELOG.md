@@ -21,6 +21,11 @@
   - Removing the Misc Folder, as it is no longer required.
   - Added xADKDSKey resource to create KDS Root Keys for gMSAs. [@kungfu71186](https://github.com/kungfu71186)
   - Combined DscResource.LocalizationHelper and DscResource.Common Modules into xActiveDirectory.Common
+  - Added new helper functions in xADCommon, see each functions comment-based
+    help for more information.
+    - Convert-PropertyMapToObjectProperties
+    - Compare-ResourcePropertyState
+    - Test-DscPropertyState
 - Changes to xADReplicationSiteLink
   - Make use of the new localization helper functions.
 - Changes to xAdDomainController
@@ -50,6 +55,8 @@
     `New-ADComputer`.
   - A new parameter was added called `EnabledOnCreation` that will control
     if the computer account is created enabled or disabled.
+  - Moved examples from the README.md to separate example files in the
+    Examples folder.
 - Changes to xADGroup
   - Restoring a group from the recycle bin no longer fails if there is
     more than one object with the same name in the recycle bin. Now it
