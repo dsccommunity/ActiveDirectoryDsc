@@ -31,6 +31,26 @@
   - Updated unit tests to latest unit test template and refactored the
     tests for the function 'Set-TargetResource'.
   - Improved test code coverage.
+- Changes to xADComputer
+  - Restoring a computer account from the recycle bin no longer fails if
+    there are more than one object with the same name in the recycle bin.
+    Now it uses the object that was changed last using the property
+    `whenChanged` ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+- Changes to xADGroup
+  - Restoring a group from the recycle bin no longer fails if there are
+    more than one object with the same name in the recycle bin. Now it
+    uses the object that was changed last using the property `whenChanged`
+    ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+- Changes to xADOrganizationalUnit
+  - Restoring a organization unit from the recycle bin no longer fails if
+    there are more than one object with the same name in the recycle bin.
+    Now it uses the object that was changed last using the property `whenChanged`
+    ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+- Changes to xADUser
+  - Restoring a user from the recycle bin no longer fails if there are
+    more than one object with the same name in the recycle bin. Now it
+    uses the object that was changed last using the property `whenChanged`
+    ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
 
 ## 2.25.0.0
 
