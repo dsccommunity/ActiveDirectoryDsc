@@ -8,4 +8,5 @@ ConvertFrom-StringData @'
     PropertyThatDoesNotMatch = {0} - {1}
     ValueOfTypeDoesNotMatch = {0} value for property {1} does not match. Current state is '{2}' and desired state is '{3}'.
     UnableToCompareProperty = Unable to compare property {0} as the type {1} is not handled by the Test-DscParameterState cmdlet.
+    StartProcess = Started the process with id {0} using the path '{1}', and with a timeout value of {2} seconds.
 '@

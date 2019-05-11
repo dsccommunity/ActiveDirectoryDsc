@@ -25,7 +25,4 @@ ConvertFrom-StringData @'
     RemovingComputerAccountProperty = Removing the value(s) '{1}' from the computer account property '{0}'. (ADC0023)
     UpdatedComputerAccount = The computer account '{0}' was updated in Active Directory. (ADC0024)
     RemovingComputerAccount = Removing the computer account '{0}' from Active Directory. (ADC0025)
-
-    # TODO: Should be moved
-    StartProcess = Started the process with id {0} using the path '{1}', and with a timeout value of {2} seconds.
 '@
