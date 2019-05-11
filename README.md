@@ -105,7 +105,9 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
   account is created enabled or disabled. By default the computer account
   will be created using the default value of the cmdlet `New-ADComputer`.
   This property is ignored if the parameter `RequestFile` is specified
-  in the same configuration.
+  in the same configuration. _This parameter does not enforce the property_
+  _`Enabled`. To enforce the property `Enabled` see the resource_
+  _[xADObjectEnabledState](#xadobjectenabledstate)._
 * **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished
   Name that manages the computer account. Valid values are the user's or
   group's DistinguishedName, ObjectGUID, SID or SamAccountName.
