@@ -45,9 +45,9 @@
     _that the `Enabled` parameter has been deprecated_. The new resource
     [xADObjectEnabledState](https://github.com/PowerShell/xActiveDirectory#xadobjectenabledstate)
     can be used to enforce the `Enabled` property.
-  - BREAKING CHANGE: By default
-    the computer account will be created using the default value of the
-    cmdlet `New-ADComputer`.
+  - BREAKING CHANGE: The default value of the enabled property of the
+    computer account will be set to the default value of the cmdlet
+    `New-ADComputer`.
   - A new parameter was added called `EnabledOnCreation` that will control
     if the computer account is created enabled or disabled.
 - Changes to xADGroup
