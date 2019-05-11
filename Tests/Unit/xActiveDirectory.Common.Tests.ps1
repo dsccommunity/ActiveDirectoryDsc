@@ -1,11 +1,11 @@
-# Import the DscResource.Common module to test
+# Import the xActiveDirectory.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\DscResource.Common'
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\xActiveDirectory.Common'
 
-Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'DscResource.Common.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common.psm1') -Force
 
-InModuleScope 'DscResource.Common' {
-    Describe 'DscResource.Common\Test-DscParameterState' -Tag TestDscParameterState {
+InModuleScope 'xActiveDirectory.Common' {
+    Describe 'xActiveDirectory.Common\Test-DscParameterState' -Tag TestDscParameterState {
         Context -Name 'When passing values' -Fixture {
             It 'Should return true for two identical tables' {
                 $mockDesiredValues = @{ Example = 'test' }
@@ -92,7 +92,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return true when only a specified value matches, but other non-listed values do not' {
                 $mockCurrentValues = @{ Example = 'test'; SecondExample = 'true' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false'  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -105,7 +105,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when only specified values do not match, but other non-listed values do ' {
                 $mockCurrentValues = @{ Example = 'test'; SecondExample = 'true' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false'  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -118,7 +118,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when an empty hash table is used in the current values' {
                 $mockCurrentValues = @{ }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false'  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -129,17 +129,17 @@ InModuleScope 'DscResource.Common' {
             }
 
             It 'Should return true when evaluating a table against a CimInstance' {
-                $mockCurrentValues = @{ Handle = '0'; ProcessId = '1000'  }
+                $mockCurrentValues = @{ Handle = '0'; ProcessId = '1000' }
 
                 $mockWin32ProcessProperties = @{
-                    Handle = 0
+                    Handle    = 0
                     ProcessId = 1000
                 }
 
                 $mockNewCimInstanceParameters = @{
-                    ClassName = 'Win32_Process'
-                    Property = $mockWin32ProcessProperties
-                    Key = 'Handle'
+                    ClassName  = 'Win32_Process'
+                    Property   = $mockWin32ProcessProperties
+                    Key        = 'Handle'
                     ClientOnly = $true
                 }
 
@@ -148,24 +148,24 @@ InModuleScope 'DscResource.Common' {
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
                     DesiredValues = $mockDesiredValues
-                    ValuesToCheck = @('Handle','ProcessId')
+                    ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
                 Test-DscParameterState @testParameters | Should -Be $true
             }
 
             It 'Should return false when evaluating a table against a CimInstance and a value is wrong' {
-                $mockCurrentValues = @{ Handle = '1'; ProcessId = '1000'  }
+                $mockCurrentValues = @{ Handle = '1'; ProcessId = '1000' }
 
                 $mockWin32ProcessProperties = @{
-                    Handle = 0
+                    Handle    = 0
                     ProcessId = 1000
                 }
 
                 $mockNewCimInstanceParameters = @{
-                    ClassName = 'Win32_Process'
-                    Property = $mockWin32ProcessProperties
-                    Key = 'Handle'
+                    ClassName  = 'Win32_Process'
+                    Property   = $mockWin32ProcessProperties
+                    Key        = 'Handle'
                     ClientOnly = $true
                 }
 
@@ -174,15 +174,15 @@ InModuleScope 'DscResource.Common' {
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
                     DesiredValues = $mockDesiredValues
-                    ValuesToCheck = @('Handle','ProcessId')
+                    ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
                 Test-DscParameterState @testParameters | Should -Be $false
             }
 
             It 'Should return true when evaluating a hash table containing an array' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('1','2') }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('1', '2') }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -193,8 +193,8 @@ InModuleScope 'DscResource.Common' {
             }
 
             It 'Should return false when evaluating a hash table containing an array with wrong values' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('A','B') }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('A', 'B') }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -206,7 +206,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when evaluating a hash table containing an array, but the CurrentValues are missing an array' {
                 $mockCurrentValues = @{ Example = 'test' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -218,7 +218,7 @@ InModuleScope 'DscResource.Common' {
 
             It 'Should return false when evaluating a hash table containing an array, but the property i CurrentValues is $null' {
                 $mockCurrentValues = @{ Example = 'test'; SecondExample = $null }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1','2')  }
+                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -281,14 +281,14 @@ InModuleScope 'DscResource.Common' {
                 $mockCurrentValues = @{ Example = 'something' }
 
                 $mockWin32ProcessProperties = @{
-                    Handle = 0
+                    Handle    = 0
                     ProcessId = 1000
                 }
 
                 $mockNewCimInstanceParameters = @{
-                    ClassName = 'Win32_Process'
-                    Property = $mockWin32ProcessProperties
-                    Key = 'Handle'
+                    ClassName  = 'Win32_Process'
+                    Property   = $mockWin32ProcessProperties
+                    Key        = 'Handle'
                     ClientOnly = $true
                 }
 
@@ -302,6 +302,184 @@ InModuleScope 'DscResource.Common' {
 
                 $mockCorrectErrorMessage = $script:localizedData.PropertyTypeInvalidForValuesToCheck
                 { Test-DscParameterState @testParameters } | Should -Throw $mockCorrectErrorMessage
+            }
+        }
+
+        Assert-VerifiableMock
+    }
+    Describe 'xActiveDirectory.Common\Get-LocalizedData' {
+        $mockTestPath = {
+            return $mockTestPathReturnValue
+        }
+
+        $mockImportLocalizedData = {
+            $BaseDirectory | Should -Be $mockExpectedLanguagePath
+        }
+
+        BeforeEach {
+            Mock -CommandName Test-Path -MockWith $mockTestPath -Verifiable
+            Mock -CommandName Import-LocalizedData -MockWith $mockImportLocalizedData -Verifiable
+        }
+
+        Context 'When loading localized data for Swedish' {
+            $mockExpectedLanguagePath = 'sv-SE'
+            $mockTestPathReturnValue = $true
+
+            It 'Should call Import-LocalizedData with sv-SE language' {
+                Mock -CommandName Join-Path -MockWith {
+                    return 'sv-SE'
+                } -Verifiable
+
+                { Get-LocalizedData -ResourceName 'DummyResource' } | Should -Not -Throw
+
+                Assert-MockCalled -CommandName Join-Path -Exactly -Times 3 -Scope It
+                Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
+            }
+
+            $mockExpectedLanguagePath = 'en-US'
+            $mockTestPathReturnValue = $false
+
+            It 'Should call Import-LocalizedData and fallback to en-US if sv-SE language does not exist' {
+                Mock -CommandName Join-Path -MockWith {
+                    return $ChildPath
+                } -Verifiable
+
+                { Get-LocalizedData -ResourceName 'DummyResource' } | Should -Not -Throw
+
+                Assert-MockCalled -CommandName Join-Path -Exactly -Times 4 -Scope It
+                Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
+            }
+
+            Context 'When $ScriptRoot is set to a path' {
+                $mockExpectedLanguagePath = 'sv-SE'
+                $mockTestPathReturnValue = $true
+
+                It 'Should call Import-LocalizedData with sv-SE language' {
+                    Mock -CommandName Join-Path -MockWith {
+                        return 'sv-SE'
+                    } -Verifiable
+
+                    { Get-LocalizedData -ResourceName 'DummyResource' -ScriptRoot '.' } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Join-Path -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
+                }
+
+                $mockExpectedLanguagePath = 'en-US'
+                $mockTestPathReturnValue = $false
+
+                It 'Should call Import-LocalizedData and fallback to en-US if sv-SE language does not exist' {
+                    Mock -CommandName Join-Path -MockWith {
+                        return $ChildPath
+                    } -Verifiable
+
+                    { Get-LocalizedData -ResourceName 'DummyResource' -ScriptRoot '.' } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Join-Path -Exactly -Times 2 -Scope It
+                    Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+
+        Context 'When loading localized data for English' {
+            Mock -CommandName Join-Path -MockWith {
+                return 'en-US'
+            } -Verifiable
+
+            $mockExpectedLanguagePath = 'en-US'
+            $mockTestPathReturnValue = $true
+
+            It 'Should call Import-LocalizedData with en-US language' {
+                { Get-LocalizedData -ResourceName 'DummyResource' } | Should -Not -Throw
+            }
+        }
+
+        Assert-VerifiableMock
+    }
+
+    Describe 'xActiveDirectory.Common\New-InvalidResultException' {
+        Context 'When calling with Message parameter only' {
+            It 'Should throw the correct error' {
+                $mockErrorMessage = 'Mocked error'
+
+                { New-InvalidResultException -Message $mockErrorMessage } | Should -Throw $mockErrorMessage
+            }
+        }
+
+        Context 'When calling with both the Message and ErrorRecord parameter' {
+            It 'Should throw the correct error' {
+                $mockErrorMessage = 'Mocked error'
+                $mockExceptionErrorMessage = 'Mocked exception error message'
+
+                $mockException = New-Object -TypeName System.Exception -ArgumentList $mockExceptionErrorMessage
+                $mockErrorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $mockException, $null, 'InvalidResult', $null
+
+                { New-InvalidResultException -Message $mockErrorMessage -ErrorRecord $mockErrorRecord } | Should -Throw ('System.Exception: {0} ---> System.Exception: {1}' -f $mockErrorMessage, $mockExceptionErrorMessage)
+            }
+        }
+
+        Assert-VerifiableMock
+    }
+
+    Describe 'xActiveDirectory.Common\New-ObjectNotFoundException' {
+        Context 'When calling with Message parameter only' {
+            It 'Should throw the correct error' {
+                $mockErrorMessage = 'Mocked error'
+
+                { New-ObjectNotFoundException -Message $mockErrorMessage } | Should -Throw $mockErrorMessage
+            }
+        }
+
+        Context 'When calling with both the Message and ErrorRecord parameter' {
+            It 'Should throw the correct error' {
+                $mockErrorMessage = 'Mocked error'
+                $mockExceptionErrorMessage = 'Mocked exception error message'
+
+                $mockException = New-Object -TypeName System.Exception -ArgumentList $mockExceptionErrorMessage
+                $mockErrorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $mockException, $null, 'InvalidResult', $null
+
+                { New-ObjectNotFoundException -Message $mockErrorMessage -ErrorRecord $mockErrorRecord } | Should -Throw ('System.Exception: {0} ---> System.Exception: {1}' -f $mockErrorMessage, $mockExceptionErrorMessage)
+            }
+        }
+
+        Assert-VerifiableMock
+    }
+
+    Describe 'xActiveDirectory.Common\New-InvalidOperationException' {
+        Context 'When calling with Message parameter only' {
+            It 'Should throw the correct error' {
+                $mockErrorMessage = 'Mocked error'
+
+                { New-InvalidOperationException -Message $mockErrorMessage } | Should -Throw $mockErrorMessage
+            }
+        }
+
+        Context 'When calling with both the Message and ErrorRecord parameter' {
+            It 'Should throw the correct error' {
+                $mockErrorMessage = 'Mocked error'
+                $mockExceptionErrorMessage = 'Mocked exception error message'
+
+                $mockException = New-Object -TypeName System.Exception -ArgumentList $mockExceptionErrorMessage
+                $mockErrorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $mockException, $null, 'InvalidResult', $null
+
+                { New-InvalidOperationException -Message $mockErrorMessage -ErrorRecord $mockErrorRecord } | Should -Throw ('System.InvalidOperationException: {0} ---> System.Exception: {1}' -f $mockErrorMessage, $mockExceptionErrorMessage)
+            }
+        }
+
+        Assert-VerifiableMock
+    }
+
+    Describe 'xActiveDirectory.Common\New-InvalidArgumentException' {
+        Context 'When calling with both the Message and ArgumentName parameter' {
+            It 'Should throw the correct error' {
+                $mockErrorMessage = 'Mocked error'
+                $mockArgumentName = 'MockArgument'
+
+                { New-InvalidArgumentException -Message $mockErrorMessage -ArgumentName $mockArgumentName } | Should -Throw ('Parameter name: {0}' -f $mockArgumentName)
             }
         }
 

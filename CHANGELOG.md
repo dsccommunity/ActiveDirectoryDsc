@@ -18,6 +18,7 @@
     and [@kungfu71186](https://github.com/kungfu71186)
   - Removing the Misc Folder, as it is no longer required.
   - Added xADKDSKey resource to create KDS Root Keys for gMSAs. [@kungfu71186](https://github.com/kungfu71186)
+  - Combined DscResource.LocalizationHelper and DscResource.Common Modules into xActiveDirectory.Common
 - Changes to xADReplicationSiteLink
   - Make use of the new localization helper functions.
 - Changes to xAdDomainController

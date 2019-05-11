@@ -1,4 +1,4 @@
-# Localized resources for helper module DscResource.Common.
+# Localized resources for helper module xActiveDirectory.Common.
 
 ConvertFrom-StringData @'
     PropertyTypeInvalidForDesiredValues = Property 'DesiredValues' must be either a [System.Collections.Hashtable], [CimInstance] or [PSBoundParametersDictionary]. The type detected was {0}.
