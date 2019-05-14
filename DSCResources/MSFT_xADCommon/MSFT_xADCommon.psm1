@@ -761,7 +761,7 @@ function Restore-ADCommonObject
     )
 
     $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f $Identity, $ObjectClass
-    Write-Verbose -Message ($localizedString.FindInRecycleBin -f $restoreFilter)
+    Write-Verbose -Message ($localizedString.FindInRecycleBin -f $restoreFilter) -Verbose
 
     <#
         Using IsDeleted and IncludeDeletedObjects will mean that the cmdlet does not throw
@@ -772,13 +772,18 @@ function Restore-ADCommonObject
     $getAdObjectParams.Remove('Identity')
     $getAdObjectParams['Filter'] = $restoreFilter
     $getAdObjectParams['IncludeDeletedObjects'] = $true
+    $getAdObjectParams['Properties'] = @('whenChanged')
 
-    $restorableObject = Get-ADObject @getAdObjectParams
+    # If more than one object is returned, we pick the one that was changed last.
+    $restorableObject = Get-ADObject @getAdObjectParams |
+        Sort-Object -Descending -Property 'whenChanged' |
+        Select-Object -First 1
+
     $restoredObject = $null
 
     if ($restorableObject)
     {
-        Write-Verbose -Message ($localizedString.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName)
+        Write-Verbose -Message ($localizedString.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName) -Verbose
 
         try
         {
@@ -787,7 +792,7 @@ function Restore-ADCommonObject
             $restoreParams['ErrorAction'] = 'Stop'
             $restoreParams['Identity'] = $restorableObject.DistinguishedName
             $restoredObject = Restore-ADObject @restoreParams
-            Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass)
+            Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass) -Verbose
         }
         catch [Microsoft.ActiveDirectory.Management.ADException]
         {

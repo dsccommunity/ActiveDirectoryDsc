@@ -628,13 +628,26 @@ try
 
         #region Function Restore-ADCommonObject
         Describe "$($Global:DSCResourceName)\Restore-ADCommonObject" {
-            $getAdObjectReturnValue = [PSCustomObject]@{
-                Deleted           = $True
-                DistinguishedName = 'CN=a375347\0ADEL:d3c8b8c1-c42b-4533-af7d-3aa73ecd2216,CN=Deleted Objects,DC=contoso,DC=com'
-                Name              = 'a375347'
-                ObjectClass       = 'user'
-                ObjectGUID        = 'd3c8b8c1-c42b-4533-af7d-3aa73ecd2216'
-            }
+            $getAdObjectReturnValue = @(
+                [PSCustomObject] @{
+                    Deleted           = $true
+                    DistinguishedName = 'CN=a375347\0ADEL:f0e3f4fe-212b-43e7-83dd-c8f3b47ebb9c,CN=Deleted Objects,DC=contoso,DC=com'
+                    Name              = 'a375347'
+                    ObjectClass       = 'user'
+                    ObjectGUID        = 'f0e3f4fe-212b-43e7-83dd-c8f3b47ebb9c'
+                    # Make this one day older.
+                    whenChanged       = (Get-Date).AddDays(-1)
+                },
+                [PSCustomObject] @{
+                    Deleted           = $true
+                    DistinguishedName = 'CN=a375347\0ADEL:d3c8b8c1-c42b-4533-af7d-3aa73ecd2216,CN=Deleted Objects,DC=contoso,DC=com'
+                    Name              = 'a375347'
+                    ObjectClass       = 'user'
+                    ObjectGUID        = 'd3c8b8c1-c42b-4533-af7d-3aa73ecd2216'
+                    whenChanged       = Get-Date
+                }
+            )
+
             $restoreAdObjectReturnValue = [PSCustomObject]@{
                 DistinguishedName = 'CN=a375347,CN=Accounts,DC=contoso,DC=com'
                 Name              = 'a375347'
@@ -642,7 +655,9 @@ try
                 ObjectGUID        = 'd3c8b8c1-c42b-4533-af7d-3aa73ecd2216'
             }
 
-            function Restore-ADObject { }
+            function Restore-ADObject
+            {
+            }
 
             $getAdCommonParameterReturnValue = @{Identity = 'something'}
             $restoreIdentity = 'SomeObjectName'
@@ -650,8 +665,8 @@ try
             $restoreObjectWrongClass = 'wrong'
 
             Context 'When there are objects in the recycle bin' {
-                Mock -CommandName Get-ADObject -MockWith { return $getAdObjectReturnValue} -Verifiable
-                Mock -CommandName Get-ADCommonParameters -MockWith { return $getAdCommonParameterReturnValue}
+                Mock -CommandName Get-ADObject -MockWith { return $getAdObjectReturnValue } -Verifiable
+                Mock -CommandName Get-ADCommonParameters -MockWith { return $getAdCommonParameterReturnValue }
                 Mock -CommandName Restore-ADObject -Verifiable
 
                 It 'Should not throw when called with the correct parameters' {
