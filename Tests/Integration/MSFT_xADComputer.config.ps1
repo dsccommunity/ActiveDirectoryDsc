@@ -215,7 +215,7 @@ Configuration MSFT_xADComputer_CleanUp_Config
             ComputerName = $Node.ComputerName3
         }
 
-        xADOrganizationalUnit 'RemoveRegions'
+        xADOrganizationalUnit 'RemoveGlobal'
         {
             Ensure = 'Absent'
             Name   = $Node.OrganizationalUnitName
