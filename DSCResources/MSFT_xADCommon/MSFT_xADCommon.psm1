@@ -1241,6 +1241,7 @@ function Compare-ResourcePropertyState
 function Test-DscPropertyState
 {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]
