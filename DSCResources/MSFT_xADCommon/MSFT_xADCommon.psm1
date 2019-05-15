@@ -1,3 +1,9 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
 data localizedString
 {
     # culture="en-US"
@@ -24,6 +30,9 @@ data localizedString
         FoundRestoreTargetInRecycleBin = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object.
         RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
         AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'.
+
+        WasExpectingDomainController     = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADC0001)
+        FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller. (ADC0002)
 '@
 }
 
@@ -483,7 +492,7 @@ function Get-ADCommonParameters
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName','GroupName','ComputerName')]
+        [Alias('UserName','GroupName','ComputerName','ServiceAccountName')]
         [System.String]
         $Identity,
 
@@ -728,7 +737,7 @@ function Restore-ADCommonObject
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName','GroupName','ComputerName')]
+        [Alias('UserName','GroupName','ComputerName','ServiceAccountName')]
         [System.String]
         $Identity,
 
@@ -752,7 +761,7 @@ function Restore-ADCommonObject
     )
 
     $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f $Identity, $ObjectClass
-    Write-Verbose -Message ($localizedString.FindInRecycleBin -f $restoreFilter)
+    Write-Verbose -Message ($localizedString.FindInRecycleBin -f $restoreFilter) -Verbose
 
     <#
         Using IsDeleted and IncludeDeletedObjects will mean that the cmdlet does not throw
@@ -763,13 +772,18 @@ function Restore-ADCommonObject
     $getAdObjectParams.Remove('Identity')
     $getAdObjectParams['Filter'] = $restoreFilter
     $getAdObjectParams['IncludeDeletedObjects'] = $true
+    $getAdObjectParams['Properties'] = @('whenChanged')
 
-    $restorableObject = Get-ADObject @getAdObjectParams
+    # If more than one object is returned, we pick the one that was changed last.
+    $restorableObject = Get-ADObject @getAdObjectParams |
+        Sort-Object -Descending -Property 'whenChanged' |
+        Select-Object -First 1
+
     $restoredObject = $null
 
     if ($restorableObject)
     {
-        Write-Verbose -Message ($localizedString.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName)
+        Write-Verbose -Message ($localizedString.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName) -Verbose
 
         try
         {
@@ -778,7 +792,7 @@ function Restore-ADCommonObject
             $restoreParams['ErrorAction'] = 'Stop'
             $restoreParams['Identity'] = $restorableObject.DistinguishedName
             $restoredObject = Restore-ADObject @restoreParams
-            Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass)
+            Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass) -Verbose
         }
         catch [Microsoft.ActiveDirectory.Management.ADException]
         {
@@ -890,4 +904,91 @@ function Add-ADCommonGroupMember
     {
         Add-ADGroupMember @Parameters -Members $Members
     }
+}
+
+<#
+    .SYNOPSIS
+        Returns the domain controller object if the node is a domain controller,
+        otherwise it return $null.
+
+    .PARAMETER DomainName
+        The name of the domain that should contain the domain controller.
+
+    .PARAMETER ComputerName
+        The name of the node to return the domain controller object for.
+        Defaults to $env:COMPUTERNAME.
+
+    .OUTPUTS
+        If the domain controller is not found, an empty object ($null) is returned.
+
+    .NOTES
+        Throws an exception of Microsoft.ActiveDirectory.Management.ADServerDownException
+        if the domain cannot be contacted.
+#>
+function Get-DomainControllerObject
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+
+        [Parameter()]
+        [System.String]
+        $ComputerName = $env:COMPUTERNAME,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    <#
+        It is not possible to use `-ErrorAction 'SilentlyContinue` on the
+        cmdlet Get-ADDomainController, it will throw an error regardless.
+    #>
+    try
+    {
+        $getADDomainControllerParameters = @{
+            Filter = 'Name -eq "{0}"' -f $ComputerName
+            Server = $DomainName
+        }
+
+        if ($PSBoundParameters.ContainsKey('Credential'))
+        {
+            $getADDomainControllerParameters['Credential'] = $Credential
+        }
+
+        $domainControllerObject = Get-ADDomainController @getADDomainControllerParameters
+
+        if (-not $domainControllerObject -and (Test-IsDomainController) -eq $true)
+        {
+            $errorMessage = $script:localizedData.WasExpectingDomainController
+            New-InvalidResultException -Message $errorMessage
+        }
+    }
+    catch
+    {
+        $errorMessage = $localizedString.FailedEvaluatingDomainController
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+    }
+
+    return $domainControllerObject
+}
+
+<#
+    .SYNOPSIS
+        Returns $true if the node is a domain controller, otherwise it returns
+        $false
+#>
+function Test-IsDomainController
+{
+    [CmdletBinding()]
+    param
+    (
+    )
+
+    $operatingSystemInformation = Get-CimInstance -ClassName 'Win32_OperatingSystem'
+
+    return $operatingSystemInformation.ProductType -eq 2
 }

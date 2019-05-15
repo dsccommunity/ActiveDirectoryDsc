@@ -1,4 +1,9 @@
-Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot) -ChildPath CommonResourceHelper.psm1)
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADReplicationSiteLink'
 
 <#
@@ -26,7 +31,7 @@ function Get-TargetResource
         $SitesExcluded
     )
 
-    $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties Description -ErrorAction SilentlyContinue
+    $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties 'Description' -ErrorAction 'SilentlyContinue'
 
     if ($null -ne $siteLink)
     {
@@ -55,6 +60,7 @@ function Get-TargetResource
     else
     {
         Write-Verbose -Message ($script:localizedData.SiteLinkNotFound -f $Name)
+
         $returnValue = @{
             Name                          = $Name
             Cost                          = $null

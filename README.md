@@ -32,6 +32,10 @@ and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 Please check out common DSC Resource [contributing guidelines](https://github.com/PowerShell/DscResources/blob/master/CONTRIBUTING.md).
 
+## Change log
+
+A full list of changes in each version can be found in the [change log](CHANGELOG.md).
+
 ## Description
 
 The **xActiveDirectory** module contains DSC resources for deployment and
@@ -49,6 +53,7 @@ groups and OUs.
 * **xADDomainTrust** establishes cross-domain trusts.
 * **xADForestProperties** manages User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
 * **xADGroup** modifies and removes Active Directory groups.
+* **xADManagedServiceAccount** modifies and removes Active Directory Managed Service Accounts (MSA).
 * **xADObjectPermissionEntry** modifies the access control list of an Active Directory object.
 * **xADOrganizationalUnit** creates and deletes Active Directory OUs.
 * **xADRecycleBin** enables or disabled Active Directory Recycle Bin.
@@ -98,7 +103,6 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 * **`[String]` ParentDomainName** _(Write)_: Fully qualified name of the parent domain.
 * **`[PSCredential]` DomainAdministratorCredential** _(Required)_: Credentials used to query for domain existence.
   * _Note: These are NOT used during domain creation._ During an Active Directory deployment the local administrator credentials are used for the domain administrator.
-
 * **`[PSCredential]` SafemodeAdministratorPassword** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.
 * **`[PSCredential]` DnsDelegationCredential** _(Write)_: Credential used for creating DNS delegation.
 * **`[String]` DomainNetBIOSName** _(Write)_: Specifies the NetBIOS name for the new domain.
@@ -113,16 +117,29 @@ The xADDomain resource creates a new domain in a new forest or a child domain in
 
 ### **xADDomainController**
 
-The xADDomainController DSC resource will install and configure domain controllers in Active Directory.
+The xADDomainController DSC resource will install and configure domain
+controllers in Active Directory.
+
+>**Note:** If the account used for the parameter `DomainAdministratorCredential`
+>cannot connect to another domain controller, for example using a credential
+>without the domain name, then the cmdlet `Install-ADDSDomainController` will
+>seemingly halt (without reporting an error) when trying to replicate
+>information from another domain controller.
+>Make sure to use a correct domain account with the correct permission as
+>the account for the parameter `DomainAdministratorCredential`.
 
 * **`[String]` DomainName** _(Key)_: The fully qualified domain name for the domain where the domain controller will be present.
-* **`[PSCredential]` DomainAdministratorCredential** _(Required)_: Specifies the credential for the account used to install the domain controller.
+* **`[PSCredential]` DomainAdministratorCredential** _(Required)_: Specifies
+  the credential for the account used to install the domain controller.
+  This account must have permission to access the other domain controllers
+  in the domain to be able replicate domain information.
 * **`[PSCredential]` SafemodeAdministratorPassword** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.
 * **`[String]` DatabasePath** _(Write)_: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database.
 * **`[String]` LogPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
 * **`[String]` SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
 * **`[String]` SiteName** _(Write)_: Specify the name of an existing site where new domain controller will be placed.
 * **`[String]` InstallationMediaPath** _(Write)_: Specify the path of the folder containg the Installation Media created in NTDSutil.
+* **`[String]` IsGlobalCatalog** _(Write)_: Specifies if the domain controller will be a Global Catalog (GC).
 * **`[String]` Ensure** _(Read)_: The state of the Domain Controller, returned with Get.
 
 ### **xADDomainDefaultPasswordPolicy**
@@ -197,6 +214,56 @@ The xADGroup DSC resource will manage groups within Active Directory.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
 * **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
+
+### **xADKDSKey**
+
+The xADKDSKey DSC resource will manage KDS Root Keys within Active Directory.
+
+* **`[String]` EffectiveTime** _(Key)_: Specifies the Effective time when a KDS root key can be used.
+  * There is a 10 hour minimum from creation date to allow active directory to properly replicate across all domain controllers. For this reason, the date must be set in the future for creation.
+  * While this parameter accepts a string, it will be converted into a DateTime object. This will also try to take into account cultural settings. This is to disallow things like `(Get-Date).AddHours(-10)`, otherwise we can't find the right KDS key since the effective date will always be changing
+    * Example: '05/01/1999 13:00 using default or 'en-US' culture would be May 1st, but using 'de-DE' culture would be 5th of January. The culture is automatically pulled from the operating system and this can be checked using 'Get-Culture'
+* **`[String]` Ensure** _(Write)_: Specifies if this KDS Root Key should be present or absent
+  * If not specified, this value defaults to Present.
+* **`[Boolean]` AllowUnsafeEffectiveTime** _(Write)_: This option will allow you to create a KDS root key if EffectiveTime is set in the past.
+  * This may cause issues if you are creating a Group Managed Service Account right after you create the KDS Root Key. In order to get around this, you must create the KDS Root Key using a date in the past. This should be used at your own risk and should only be used in lab environments.
+* **`[Boolean]` ForceRemove** _(Write)_: This option will allow you to remove a KDS root key if there is only one key left.
+  * It should not break your Group Managed Service Accounts (gMSAs), but if the gMSA password expires and it needs to request a new password, it will not be able to generate a new password until a new KDS Root Key is installed and ready for use. Because of this, the last KDS Root Key will not be removed unless this option is specified
+* **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name (DN) of the KDS root key.
+  * The KDS Root Key is stored in 'CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration' at the Forest level. This is also why replication needs 10 hours to occur before using the KDS Root Key as a safey measure.
+  * Cannot be specified in the resource. Returned by Get and Compare.
+* **`[DateTime]` CreationTime** _(Read)_: Specifies the Creation date and time of the KDS root key for informational purposes
+* **`[String]` KeyId** _(Read)_: Specifies the KeyID of the KDS root key. This is the Common Name (CN) within Active Directory and is required to build the Distinguished Name
+
+### **xADManagedServiceAccount**
+
+The xADManagedServiceAccount DSC resource will manage Managed Service Accounts (MSAs) within Active Directory.
+
+* **`[String]` ServiceAccountName** _(Key)_: Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName 'sAMAccountName').
+  * To be compatible with older operating systems, create a SAM account name that is 20 characters or less.
+  * Once created, the user's SamAccountName and CN cannot be changed.
+* **`[String]` Ensure** _(Write)_: Specifies whether the user account is created or deleted.
+  * If not specified, this value defaults to Present.
+* **`[String]` AccountType** _(Write)_: The type of managed service account.
+  * Single will create a Single Managed Service Account (sMSA) and Group will create a Group Managed Service Account (gMSA).
+  * If not specified, this vaule defaults to Single.
+* **`[String]` AccountTypeForce** _(Write)_: Specifies whether or not to remove the service account and recreate it when going from single MSA to group MSA and vice-versa
+  * If not specified, this value defaults to False.
+* **`[String]` Path** _(Write)_: Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created. Specified as a Distinguished Name (DN).
+* **`[String]` Description** _(Write)_: Specifies a description of the object (ldapDisplayName 'description')
+* **`[String]` DisplayName** _(Write)_: Specifies the display name of the object (ldapDisplayName 'displayName')
+* **`[String]` Members** _(Write)_: Specifies the members of the object (ldapDisplayName 'PrincipalsAllowedToRetrieveManagedPassword').
+  * Only used when 'Group' is selected for 'AccountType'
+* **`[String]` MembershipAttribute** _(Write)_: Active Directory attribute used to perform membership operations for Group Managed Service Accounts (gMSAs)
+  * If not specified, this value defaults to SamAccountName
+  * Only used when 'Group' is selected for 'AccountType'
+* **`[PSCredential]` Credential** _(Write)_: Specifies the user account credentials to use to perform this task.
+  * This is only required if not executing the task on a domain controller or using the -DomainController parameter.
+* **`[String]` DomainController** _(Write)_: Specifies the Active Directory Domain Controller instance to use to perform the task.
+  * This is only required if not executing the task on a domain controller.
+* **`[String]` Enabled** _(Read)_: Specifies whether the user account is enabled or disabled.
+* **`[String]` DistinguishedName** _(Read)_: Specifies the Distinguished Name of the Service Account
+  * Cannot be specified in the resource. Returned by Get and Compare.
 
 ### **xADObjectPermissionEntry**
 
@@ -365,185 +432,6 @@ The xADForestProperties DSC resource will manage User Principal Name (UPN) suffi
     UPNs. Cannot be used with UserPrincipalNameSuffixToAdd or UserPrincipalNameSuffixToRemove.
 * **UserPrincipalNameSuffixToAdd**: (optional) The User Principal Name Suffix(es) to add in the forest. Cannot be used with UserPrincipalNameSuffix.
 * **UserPrincipalNameSuffixToRemove**: (optional) The User Principal Name Suffix(es) to remove in the forest. Cannot be used with UserPrincipalNameSuffix.
-
-## Versions
-
-### Unreleased
-
-### 2.25.0.0
-
-* Added xADReplicationSiteLink
-  * New resource added to facilitate replication between AD sites
-* Updated xADObjectPermissionEntry to use `AD:` which is more generic when using `Get-Acl` and `Set-Acl` than using `Microsoft.ActiveDirectory.Management\ActiveDirectory:://RootDSE/`
-* Changes to xADComputer
-  * Minor clean up of unit tests.
-* Changes to xADUser
-  * Added TrustedForDelegation parameter to xADUser to support enabling/disabling Kerberos delegation
-  * Minor clean up of unit tests.
-* Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue #155](https://github.com/PowerShell/xActiveDirectory/issues/155)).
-  * Updated readme and add release notes
-* Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-
-### 2.24.0.0
-
-* Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
-* Updated xADDomainController schema to be standard and provide Descriptions.
-
-### 2.23.0.0
-
-* Explicitly removed extra hidden files from release package
-
-### 2.22.0.0
-
-* Add PasswordNeverResets parameter to xADUser to facilitate user lifecycle management
-* Update appveyor.yml to use the default template.
-* Added default template files .gitattributes, and .gitignore, and
-  .vscode folder.
-* Added xADForestProperties: New resource to manage User and Principal Name Suffixes for a Forest.
-
-### 2.21.0.0
-
-* Added xADObjectPermissionEntry
-  * New resource added to control the AD object permissions entries [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
-* Changes to xADCommon
-  * Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-* Changes to xADDomain
-  * xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-* xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue #221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-
-### 2.20.0.0
-
-* Changes to xActiveDirectory
-  * Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/xActiveDirectory/issues/190)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
-  * Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/xActiveDirectory/issues/198)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
-  * xADDomain is now capable of setting the forest and domain functional level ([issue #187](https://github.com/PowerShell/xActiveDirectory/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-
-### 2.19.0.0
-
-* Changes to xActiveDirectory
-  * Activated the GitHub App Stale on the GitHub repository.
-  * The resources are now in alphabetical order in the README.md
-    ([issue #194](https://github.com/PowerShell/xActiveDirectory/issues/194)).
-  * Adding a Branches section to the README.md with Codecov badges for both
-    master and dev branch ([issue #192](https://github.com/PowerShell/xActiveDirectory/issues/192)).
-  * xADGroup no longer resets GroupScope and Category to default values ([issue #183](https://github.com/PowerShell/xActiveDirectory/issues/183)).
-  * The helper function script file MSFT_xADCommon.ps1 was renamed to
-    MSFT_xADCommon.psm1 to be a module script file instead. This makes it
-    possible to report code coverage for the helper functions ([issue #201](https://github.com/PowerShell/xActiveDirectory/issues/201)).
-
-### 2.18.0.0
-
-* xADReplicationSite: Resource added.
-* Added xADReplicationSubnet resource.
-* Fixed bug with group members in xADGroup
-
-### 2.17.0.0
-
-* Converted AppVeyor.yml to use DSCResource.tests shared code.
-* Opted-In to markdown rule validation.
-* Readme.md modified resolve markdown rule violations.
-* Added CodeCov.io support.
-* Added xADServicePrincipalName resource.
-
-### 2.16.0.0
-
-* xAdDomainController: Update to complete fix for SiteName being required field.
-* xADDomain: Added retry logic to prevent FaultException to crash in Get-TargetResource on subsequent reboots after a domain is created because the service is not yet running. This error is mostly occur when the resource is used with the DSCExtension on Azure.
-
-### 2.15.0.0
-
-* xAdDomainController: Fixes SiteName being required field.
-
-### 2.14.0.0
-
-* xADDomainController: Adds Site option.
-* xADDomainController: Populate values for DatabasePath, LogPath and SysvolPath during Get-TargetResource.
-
-### 2.13.0.0
-
-* Converted AppVeyor.yml to pull Pester from PSGallery instead of Chocolatey
-* xADUser: Adds 'PasswordAuthentication' option when testing user passwords to support NTLM authentication with Active Directory Certificate Services deployments
-* xADUser: Adds descriptions to user properties within the schema file.
-* xADGroup: Fixes bug when updating groups when alternate Credentials are specified.
-
-### 2.12.0.0
-
-* xADDomainController: Customer identified two cases of incorrect variables being called in Verbose output messages. Corrected.
-* xADComputer: New resource added.
-* xADComputer: Added RequestFile support.
-* Fixed PSScriptAnalyzer Errors with v1.6.0.
-
-### 2.11.0.0
-
-* xWaitForADDomain: Made explicit credentials optional and other various updates
-
-### 2.10.0.0
-
-* xADDomainDefaultPasswordPolicy: New resource added.
-* xWaitForADDomain: Updated to make it compatible with systems that don't have the ActiveDirectory module installed, and to allow it to function with domains/forests that don't have a domain controller with Active Directory Web Services running.
-* xADGroup: Fixed bug where specified credentials were not used to retrieve existing group membership.
-* xADDomain: Added check for Active Directory cmdlets.
-* xADDomain: Added additional error trapping, verbose and diagnostic information.
-* xADDomain: Added unit test coverage.
-* Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomin, xADGroup, xADOrganizationalUnit and xADUser resources.
-
-### 2.9.0.0
-
-* xADOrganizationalUnit: Merges xADOrganizationalUnit resource from the PowerShell gallery
-* xADGroup: Added Members, MembersToInclude, MembersToExclude and MembershipAttribute properties.
-* xADGroup: Added ManagedBy property.
-* xADGroup: Added Notes property.
-* xADUser: Adds additional property settings.
-* xADUser: Adds unit test coverage.
-
-### 2.8.0.0
-
-* Added new resource: xADGroup
-* Fixed issue with NewDomainNetbiosName parameter.
-
-### 2.7.0.0
-
-* Added DNS flush in retry loop
-* Bug fixes in xADDomain resource
-
-### 2.6.0.0
-
-* Removed xDscResourceDesigner tests (moved to common tests)
-
-### 2.5.0.0
-
-* Updated xADDomainTrust and xADRecycleBin tests
-
-### 2.4.0.0
-
-* Added xADRecycleBin resource
-* Minor fixes for xADUser resource
-
-### 2.3
-
-* Added xADRecycleBin.
-* Modified xADUser to include a write-verbose after user is removed when Absent.
-* Corrected xADUser to successfully create a disabled user without a password.
-
-### 2.2
-
-* Modified xAdDomain and xAdDomainController to support Ensure as Present / Absent, rather than True/False.
-  Note: this may cause issues for existing scripts.
-* Corrected return value to be a hashtable in both resources.
-
-### 2.1.0.0
-
-* Minor update: Get-TargetResource to use domain name instead of name.
-
-### 2.0.0.0
-
-* Updated release, which added the resource:
-  * xADDomainTrust
-
-### 1.0.0.0
-
-* Initial release with the following resources:
-  * xADDomain, xADDomainController, xADUser, and xWaitForDomain
 
 ## Examples
 
