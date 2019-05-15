@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.26.0.0
+
 - Changes to xActiveDirectory
   - Added localization module -DscResource.LocalizationHelper* containing
     the helper functions `Get-LocalizedData`, `New-InvalidArgumentException`,
