@@ -900,7 +900,7 @@ function Set-TargetResource
             if ($property.Expected)
             {
                 Write-Verbose -Message (
-                    $script:localizedData.UpdatingComputerAccountProperty -f $computerAccountPropertyName, ($property.Expected -join ',')
+                    $script:localizedData.UpdatingComputerAccountProperty -f $computerAccountPropertyName, ($property.Expected -join ''',''')
                 )
 
                 # Replace the current value.
@@ -909,7 +909,7 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message (
-                    $script:localizedData.RemovingComputerAccountProperty -f $property.ParameterName, ($property.Actual -join ',')
+                    $script:localizedData.RemovingComputerAccountProperty -f $property.ParameterName, ($property.Actual -join ''',''')
                 )
 
                 # Remove the current value since the desired value is empty or nothing.
