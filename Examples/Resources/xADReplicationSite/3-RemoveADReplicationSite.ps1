@@ -10,8 +10,8 @@ configuration Example_xADReplicationSite
     {
         xADReplicationSite 'CupertinoSite'
         {
-           Ensure = 'Absent'
-           Name   = 'Cupertino'
+            Ensure = 'Absent'
+            Name   = 'Cupertino'
         }
     }
 }
