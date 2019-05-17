@@ -12,9 +12,9 @@ configuration Example_xADReplicationSite
     {
         xADReplicationSite 'SeattleSite'
         {
-           Ensure                     = 'Present'
-           Name                       = 'Seattle'
-           RenameDefaultFirstSiteName = $true
+            Ensure                     = 'Present'
+            Name                       = 'Seattle'
+            RenameDefaultFirstSiteName = $true
         }
     }
 }
