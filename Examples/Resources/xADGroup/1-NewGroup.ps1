@@ -36,3 +36,7 @@ Param(
         }
     }
 }
+
+Example_xADGroup -GroupName 'TestGroup' -Scope 'DomainLocal' -Description 'Example test domain local security group' -ConfigurationData $ConfigurationData
+
+Start-DscConfiguration -Path .\Example_xADGroup -Wait -Verbose

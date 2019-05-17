@@ -10,8 +10,8 @@ configuration Example_xADReplicationSite
     {
         xADReplicationSite 'SeattleSite'
         {
-           Ensure = 'Present'
-           Name   = 'Seattle'
+            Ensure = 'Present'
+            Name   = 'Seattle'
         }
     }
 }
