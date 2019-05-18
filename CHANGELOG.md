@@ -1,6 +1,8 @@
 # Change log for xActiveDirectory
 
 ## Unreleased
+- Changes to xADUser
+  - Added ServicePrincipalNames Property
 
 - Changes to xActiveDirectory
   - Added new helper functions in xADCommon, see each functions comment-based
