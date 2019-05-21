@@ -16,7 +16,6 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
-# TODO: Insert the correct <ModuleName> and <ResourceName> for your resource
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dscResourceName `
@@ -711,7 +710,7 @@ try
 
                 }
 
-                Context 'When the computer account is absent in Active Directory' {
+                Context 'When the computer account is absent from Active Directory' {
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             if (-not $script:mockNewADComputerWasCalled)

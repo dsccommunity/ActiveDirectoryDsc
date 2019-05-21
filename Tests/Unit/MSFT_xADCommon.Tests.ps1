@@ -1043,13 +1043,13 @@ try
                 It 'Should throw the correct error' {
                     {
                         Convert-PropertyMapToObjectProperties $propertyMapValue
-                    } | Should -Throw 'An object in the property map array is not of the type [System.Collections.Hashtable].'
+                    } | Should -Throw $localizedString.PropertyMapArrayIsWrongType
                 }
             }
         }
 
         Describe 'DscResource.Common\Test-DscPropertyState' -Tag 'TestDscPropertyState' {
-            Context -Name 'When passing values' {
+            Context 'When comparing tables' {
                 It 'Should return true for two identical tables' {
                     $mockValues = @{
                         CurrentValue = 'Test'
@@ -1058,7 +1058,9 @@ try
 
                     Test-DscPropertyState -Values $mockValues | Should -Be $true
                 }
+            }
 
+            Context 'When comparing strings' {
                 It 'Should return false when a value is different for [System.String]' {
                     $mockValues = @{
                         CurrentValue = [System.String] 'something'
@@ -1068,6 +1070,17 @@ try
                     Test-DscPropertyState -Values $mockValues | Should -Be $false
                 }
 
+                It 'Should return false when a String value is missing' {
+                    $mockValues = @{
+                        CurrentValue = $null
+                        DesiredValue = [System.String] 'Something'
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+            }
+
+            Context 'When comparing integers' {
                 It 'Should return false when a value is different for [System.Int32]' {
                     $mockValues = @{
                         CurrentValue = [System.Int32] 1
@@ -1095,6 +1108,17 @@ try
                     Test-DscPropertyState -Values $mockValues | Should -Be $false
                 }
 
+                It 'Should return false when a Integer value is missing' {
+                    $mockValues = @{
+                        CurrentValue = $null
+                        DesiredValue = [System.Int32] 1
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+            }
+
+            Context 'When comparing booleans' {
                 It 'Should return false when a value is different for [Boolean]' {
                     $mockValues = @{
                         CurrentValue = [System.Boolean] $true
@@ -1112,25 +1136,9 @@ try
 
                     Test-DscPropertyState -Values $mockValues | Should -Be $false
                 }
+            }
 
-                It 'Should return false when a String value is missing' {
-                    $mockValues = @{
-                        CurrentValue = $null
-                        DesiredValue = [System.String] 'Something'
-                    }
-
-                    Test-DscPropertyState -Values $mockValues | Should -Be $false
-                }
-
-                It 'Should return false when a Integer value is missing' {
-                    $mockValues = @{
-                        CurrentValue = $null
-                        DesiredValue = [System.Int32] 1
-                    }
-
-                    Test-DscPropertyState -Values $mockValues | Should -Be $false
-                }
-
+            Context 'When comparing arrays' {
                 It 'Should return true when evaluating an array' {
                     $mockValues = @{
                         CurrentValue = @('1','2')
@@ -1278,7 +1286,7 @@ try
                 }
             }
 
-            Context 'When passing just two properties and one property is not in desired state' {
+            Context 'When passing two properties and one property is not in desired state' {
                 BeforeAll {
                     $mockCurrentValues = @{
                         ComputerName = 'DC01'
@@ -1310,7 +1318,7 @@ try
                 }
             }
 
-            Context 'When passing a common parameter in desired values' {
+            Context 'When passing a common parameter set to desired value' {
                 BeforeAll {
                     $mockCurrentValues = @{
                         ComputerName = 'DC01'

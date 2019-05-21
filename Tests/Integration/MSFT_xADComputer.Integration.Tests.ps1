@@ -1,6 +1,6 @@
 # Make sure this is run in the correct order.
 [Microsoft.DscResourceKit.IntegrationTest(OrderNumber = 2)]
-param()
+param ()
 
 if ($env:APPVEYOR -eq $true)
 {

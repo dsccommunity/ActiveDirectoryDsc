@@ -38,7 +38,7 @@ data localizedString
         FoundRestoreTargetInRecycleBin   = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object. (ADCOMMON0028)
         RecycleBinRestoreSuccessful      = Successfully restored object {0} ({1}) from the recycle bin. (ADCOMMON0029)
         AddingGroupMember                = Adding member '{0}' from domain '{1}' to AD group '{2}'. (ADCOMMON0030)
-        PropertyMapArrayIsWrongType      = An object in the property map array is not of the type [System.Collections.Hashtable].
+        PropertyMapArrayIsWrongType      = An object in the property map array is not of the type [System.Collections.Hashtable]. (ADCOMMON0031)
 '@
 }
 
