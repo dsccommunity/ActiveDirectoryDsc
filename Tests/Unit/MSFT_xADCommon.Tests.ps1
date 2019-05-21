@@ -1029,7 +1029,7 @@ try
                 }
             }
 
-            Context 'When a property map contain a wrong type' {
+            Context 'When a property map contains a wrong type' {
                 BeforeAll {
                     $propertyMapValue = @(
                         @{

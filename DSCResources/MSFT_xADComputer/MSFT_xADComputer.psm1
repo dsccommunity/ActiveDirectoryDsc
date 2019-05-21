@@ -95,8 +95,8 @@ $script:computerObjectPropertyMap = @(
         Used by Get-ADCommonParameters and is returned as a common parameter.
 
     .PARAMETER RestoreFromRecycleBin
-        Indicates whether or not the computer object should first tried to be
-        restored from the recycle bin before creating a new computer object.
+        Try to restore the organizational unit from the recycle bin before
+        creating a new one.
 #>
 function Get-TargetResource
 {
@@ -294,8 +294,8 @@ function Get-TargetResource
         Specifies the user account credentials to use to perform the task.
 
     .PARAMETER RestoreFromRecycleBin
-        Indicates whether or not the computer object should first tried to be
-        restored from the recycle bin before creating a new computer object.
+        Try to restore the organizational unit from the recycle bin before
+        creating a new one.
 
     .PARAMETER EnabledOnCreation
         Specifies if the computer account is created enabled or disabled.
@@ -472,6 +472,7 @@ function Test-TargetResource
             }
 
             $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+
             if ($false -in $compareTargetResourceStateResult.InDesiredState)
             {
                 $testTargetResourceReturnValue = $false
@@ -554,8 +555,8 @@ function Test-TargetResource
         Specifies the user account credentials to use to perform the task.
 
     .PARAMETER RestoreFromRecycleBin
-        Indicates whether or not the computer object should first tried to be
-        restored from the recycle bin before creating a new computer object.
+        Try to restore the organizational unit from the recycle bin before
+        creating a new one.
 
     .PARAMETER EnabledOnCreation
         Specifies if the computer account is created enabled or disabled.
@@ -888,7 +889,7 @@ function Set-TargetResource
 
         foreach ($property in $propertiesNotInDesiredState)
         {
-            $computerAccountPropertyName = ($script:computerObjectPropertyMap | Where-Object {
+            $computerAccountPropertyName = ($script:computerObjectPropertyMap | Where-Object -FilterScript {
                     $_.ParameterName -eq $property.ParameterName
                 }).PropertyName
 
@@ -941,7 +942,7 @@ function Set-TargetResource
     elseif ($Ensure -eq 'Absent' -and $getTargetResourceResult.Ensure -eq 'Present')
     {
         # User exists and needs removing
-        Write-Verbose (
+        Write-Verbose -Message (
             $script:localizedData.RemovingComputerAccount -f $ComputerName
         )
 
@@ -978,7 +979,7 @@ function Set-DscADComputer
 
 <#
     .SYNOPSIS
-        This is evaluates the service principal names current state against the
+        This evaluates the service principal names current state against the
         desired state.
 
     .PARAMETER ExistingServicePrincipalNames

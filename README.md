@@ -119,9 +119,8 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
   Offline Domain Join Request file to create.
 * **`[String]` Ensure**: Specifies whether the computer account is present
   or absent. Valid values are 'Present' and 'Absent'. The default is 'Present'.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or
-  not the computer account should first tried to be restored from the
-  recycle bin before creating a new computer account.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the
+  organizational unit from the recycle bin before creating a new one.
 
 #### Read-Only Properties from Get-TargetResource
 
@@ -262,7 +261,8 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * If not running on a domain controller, this is required.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the
+  organizational unit from the recycle bin before creating a new one.
 
 ### **xADKDSKey**
 
@@ -322,8 +322,8 @@ one permission and leave all others as they were. The resource can be used multi
 one ACL.
 
 * **Ensure**: Indicates if the access will be added (Present) or will be removed (Absent). Default is 'Present'.
-* **Path**: Active Directory path of the object, specified as a Distinguished Name.
-* **IdentityReference**: Indicates the identity of the principal for the ace. Use the notation DOMAIN\SamAccountName for the identity.
+* **Path**: Active Directory path of the object specified as a Distinguished Name.
+* **IdentityReference**: Indicates the identity of the principal for the ACE. Use the notation DOMAIN\SamAccountName for the identity.
 * **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values: { AccessSystemSecurity | CreateChild | Delete | DeleteChild | DeleteTree | ExtendedRight | GenericAll | GenericExecute | GenericRead | GenericWrite | ListChildren | ListObject | ReadControl | ReadProperty | Self | Synchronize | WriteDacl | WriteOwner | WriteProperty }
 * **AccessControlType**: Indicates whether to Allow or Deny access to the target object.
 * **ObjectType**: The schema GUID of the object to which the access rule applies. If the permission entry shouldn't be restricted to a specific object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
@@ -339,8 +339,8 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **`[String]` Description** _(Write)_: The OU description property.
 * **`[Boolean]` ProtectedFromAccidentalDeletion** _(Write)_: Valid values are $true and $false. If not specified, it defaults to $true.
 * **`[String]` Ensure** _(Write)_: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
-* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation. Note: _if not running on a domain controller, this is required_.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the organizational unit should first tried to be restored from the recycle bin before creating a new organizational unit.
+* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation. Note: _This is required if not running on a domain controller_.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the organizational unit from the recycle bin before creating a new one.
 
 ### **xADRecycleBin**
 
@@ -457,7 +457,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 * **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).
 * **`[Boolean]` TrustedForDelegation** _(Write)_: Specifies whether an account is trusted for Kerberos delegation (default $false).
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the organizational unit from the recycle bin before creating a new one.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
 ### **xWaitForADDomain**

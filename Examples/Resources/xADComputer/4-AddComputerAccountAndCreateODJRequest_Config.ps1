@@ -19,7 +19,7 @@
 
 <#
     .DESCRIPTION
-        This configuration will create a Active Directory computer account
+        This configuration will create an Active Directory computer account
         on the specified domain controller and in the specific organizational
         unit. After the account is create an Offline Domain Join Request file
         is created to the specified path.

@@ -11,7 +11,7 @@
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
-    longer set nor enforced with this resource. _If this parameter is_
+    longer set or enforces with this resource. _If this parameter is_
     _used in a configuration a warning message will be outputted saying_
     _that the `Enabled` parameter has been deprecated_. The new resource
     [xADObjectEnabledState](https://github.com/PowerShell/xActiveDirectory#xadobjectenabledstate)

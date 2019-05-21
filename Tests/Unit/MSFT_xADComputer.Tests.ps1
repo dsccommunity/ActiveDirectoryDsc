@@ -1,5 +1,5 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-param()
+param ()
 
 $script:dscModuleName = 'xActiveDirectory'
 $script:dscResourceName = 'MSFT_xADComputer'
