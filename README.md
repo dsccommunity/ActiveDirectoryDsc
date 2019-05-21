@@ -97,7 +97,7 @@ The xADComputer DSC resource will manage computer accounts within Active Directo
 * **`[Boolean]` Enabled** _(Write)_: **DEPRECATED - DO NOT USE**. Please
   see the parameter `EnabledOnCreation` in this resource, and the resource
   [xADObjectEnabledState](#xadobjectenabledstate) on how to enforce the
-  `Enabled` property. _This parameter no longer sets nor enforce the_
+  `Enabled` property. _This parameter no longer sets or enforces the_
    _Enabled property. If this parameter is used then a warning message_
    _will be outputted saying that the `Enabled` parameter has been_
    _deprecated_.
