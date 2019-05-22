@@ -5,7 +5,7 @@
 #>
 Configuration AssertHADC
 {
-   param
+    param
     (
         [Parameter(Mandatory)]
         [pscredential]$safemodeAdministratorCred,
@@ -17,61 +17,61 @@ Configuration AssertHADC
         [pscredential]$NewADUserCred
     )
     Import-DscResource -ModuleName xActiveDirectory
-    Node $AllNodes.Where{$_.Role -eq "Primary DC"}.Nodename
+    Node $AllNodes.Where{ $_.Role -eq "Primary DC" }.Nodename
     {
         WindowsFeature ADDSInstall
         {
             Ensure = "Present"
-            Name = "AD-Domain-Services"
+            Name   = "AD-Domain-Services"
         }
         xADDomain FirstDS
         {
-            DomainName = $Node.DomainName
+            DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred
             SafemodeAdministratorPassword = $safemodeAdministratorCred
-            DnsDelegationCredential = $DNSDelegationCred
-            DependsOn = "[WindowsFeature]ADDSInstall"
+            DnsDelegationCredential       = $DNSDelegationCred
+            DependsOn                     = "[WindowsFeature]ADDSInstall"
         }
         xWaitForADDomain DscForestWait
         {
-            DomainName = $Node.DomainName
+            DomainName           = $Node.DomainName
             DomainUserCredential = $domainCred
-            RetryCount = $Node.RetryCount
-            RetryIntervalSec = $Node.RetryIntervalSec
-            DependsOn = "[xADDomain]FirstDS"
+            RetryCount           = $Node.RetryCount
+            RetryIntervalSec     = $Node.RetryIntervalSec
+            DependsOn            = "[xADDomain]FirstDS"
         }
         xADUser FirstUser
         {
-            DomainName = $Node.DomainName
+            DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred
-            UserName = "dummy"
-            Password = $NewADUserCred
-            Ensure = "Present"
-            DependsOn = "[xWaitForADDomain]DscForestWait"
+            UserName                      = "dummy"
+            Password                      = $NewADUserCred
+            Ensure                        = "Present"
+            DependsOn                     = "[xWaitForADDomain]DscForestWait"
         }
     }
-    Node $AllNodes.Where{$_.Role -eq "Replica DC"}.Nodename
+    Node $AllNodes.Where{ $_.Role -eq "Replica DC" }.Nodename
     {
         WindowsFeature ADDSInstall
         {
             Ensure = "Present"
-            Name = "AD-Domain-Services"
+            Name   = "AD-Domain-Services"
         }
         xWaitForADDomain DscForestWait
         {
-            DomainName = $Node.DomainName
+            DomainName           = $Node.DomainName
             DomainUserCredential = $domainCred
-            RetryCount = $Node.RetryCount
-            RetryIntervalSec = $Node.RetryIntervalSec
-            DependsOn = "[WindowsFeature]ADDSInstall"
+            RetryCount           = $Node.RetryCount
+            RetryIntervalSec     = $Node.RetryIntervalSec
+            DependsOn            = "[WindowsFeature]ADDSInstall"
         }
         xADDomainController SecondDC
         {
-            DomainName = $Node.DomainName
+            DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred
             SafemodeAdministratorPassword = $safemodeAdministratorCred
-            DnsDelegationCredential = $DNSDelegationCred
-            DependsOn = "[xWaitForADDomain]DscForestWait"
+            DnsDelegationCredential       = $DNSDelegationCred
+            DependsOn                     = "[xWaitForADDomain]DscForestWait"
         }
     }
 }
@@ -79,21 +79,21 @@ Configuration AssertHADC
 $ConfigData = @{
     AllNodes = @(
         @{
-            Nodename = "dsc-testNode1"
-            Role = "Primary DC"
-            DomainName = "dsc-test.contoso.com"
-            CertificateFile = "C:\publicKeys\targetNode.cer"
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
-            RetryCount = 20
+            Nodename         = "dsc-testNode1"
+            Role             = "Primary DC"
+            DomainName       = "dsc-test.contoso.com"
+            CertificateFile  = "C:\publicKeys\targetNode.cer"
+            Thumbprint       = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount       = 20
             RetryIntervalSec = 30
         },
         @{
-            Nodename = "dsc-testNode2"
-            Role = "Replica DC"
-            DomainName = "dsc-test.contoso.com"
-            CertificateFile = "C:\publicKeys\targetNode.cer"
-            Thumbprint = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
-            RetryCount = 20
+            Nodename         = "dsc-testNode2"
+            Role             = "Replica DC"
+            DomainName       = "dsc-test.contoso.com"
+            CertificateFile  = "C:\publicKeys\targetNode.cer"
+            Thumbprint       = "AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8"
+            RetryCount       = 20
             RetryIntervalSec = 30
         }
     )
