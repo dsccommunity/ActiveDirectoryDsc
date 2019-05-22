@@ -457,7 +457,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 * **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).
 * **`[Boolean]` TrustedForDelegation** _(Write)_: Specifies whether an account is trusted for Kerberos delegation (default $false).
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the organizational unit from the recycle bin before creating a new one.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the user object from the recycle bin before creating a new one.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 * **`[String]` ServicePrincipalNames** _(Write)_: Specifies the service principal names for the user account.
 
