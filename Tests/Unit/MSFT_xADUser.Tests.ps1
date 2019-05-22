@@ -95,6 +95,12 @@ try
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
+            It "Checks that values returned for ServicePrincipalNames are correct" {
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
+
+                $adUser = Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential
+                $adUser.ServicePrincipalNames | Should -Be $fakeADUser.ServicePrincipalNames
+            }
         }
         #endregion
 
@@ -522,7 +528,7 @@ try
             It "Calls 'Set-ADUser' with 'ServicePrincipalNames' when specified" {
                 $testSPNs = @('spn/a', 'spn/b')
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
+                Mock -CommandName Set-ADUser
 
                 Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
 

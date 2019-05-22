@@ -373,13 +373,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
-        $RestoreFromRecycleBin,
-
-        # Specifies the service principal names registered on the user account
-        [Parameter()]
-        [ValidateNotNull()]
-        [System.String[]]
-        $ServicePrincipalNames
+        $RestoreFromRecycleBin
     )
 
     Assert-Module -ModuleName 'ActiveDirectory';
