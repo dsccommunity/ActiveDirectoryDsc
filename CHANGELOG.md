@@ -23,6 +23,16 @@
     if the computer account is created enabled or disabled.
   - Moved examples from the README.md to separate example files in the
     Examples folder.
+- Changes to xADGroup
+  - Change the description of the property RestoreFromRecycleBin.
+- Changes to xADObjectPermissionEntry
+  - Change the description of the property IdentityReference.
+- Changes to xADOrganizationalUnit
+  - Change the description of the property RestoreFromRecycleBin.
+- Changes to xADuser
+  - Change the description of the property RestoreFromRecycleBin.
+- Changes to xADDomainController
+  - Change the `#Requires` statement in the Examples to require the correct module.
 
 ## 2.26.0.0
 
