@@ -1006,6 +1006,445 @@ try
                 }
             }
         }
+
+        Describe "$($Global:DSCResourceName)\Convert-PropertyMapToObjectProperties" {
+            Context 'When a property map should be converted to object properties' {
+                BeforeAll {
+                    $propertyMapValue = @(
+                        @{
+                            ParameterName = 'ComputerName'
+                            PropertyName = 'cn'
+                        },
+                        @{
+                            ParameterName = 'Location'
+                        }
+                    )
+                }
+
+                It 'Should return the correct values' {
+                    $convertPropertyMapToObjectPropertiesResult = Convert-PropertyMapToObjectProperties $propertyMapValue
+                    $convertPropertyMapToObjectPropertiesResult | Should -HaveCount 2
+                    $convertPropertyMapToObjectPropertiesResult[0] | Should -Be 'cn'
+                    $convertPropertyMapToObjectPropertiesResult[1] | Should -Be 'Location'
+                }
+            }
+
+            Context 'When a property map contains a wrong type' {
+                BeforeAll {
+                    $propertyMapValue = @(
+                        @{
+                            ParameterName = 'ComputerName'
+                            PropertyName = 'cn'
+                        },
+                        'Location'
+                    )
+                }
+
+                It 'Should throw the correct error' {
+                    {
+                        Convert-PropertyMapToObjectProperties $propertyMapValue
+                    } | Should -Throw $localizedString.PropertyMapArrayIsWrongType
+                }
+            }
+        }
+
+        Describe 'DscResource.Common\Test-DscPropertyState' -Tag 'TestDscPropertyState' {
+            Context 'When comparing tables' {
+                It 'Should return true for two identical tables' {
+                    $mockValues = @{
+                        CurrentValue = 'Test'
+                        DesiredValue = 'Test'
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $true
+                }
+            }
+
+            Context 'When comparing strings' {
+                It 'Should return false when a value is different for [System.String]' {
+                    $mockValues = @{
+                        CurrentValue = [System.String] 'something'
+                        DesiredValue = [System.String] 'test'
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+
+                It 'Should return false when a String value is missing' {
+                    $mockValues = @{
+                        CurrentValue = $null
+                        DesiredValue = [System.String] 'Something'
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+            }
+
+            Context 'When comparing integers' {
+                It 'Should return false when a value is different for [System.Int32]' {
+                    $mockValues = @{
+                        CurrentValue = [System.Int32] 1
+                        DesiredValue = [System.Int32] 2
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+
+                It 'Should return false when a value is different for [Int16]' {
+                    $mockValues = @{
+                        CurrentValue = [System.Int16] 1
+                        DesiredValue = [System.Int16] 2
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+
+                It 'Should return false when a value is different for [UInt16]' {
+                    $mockValues = @{
+                        CurrentValue = [System.UInt16] 1
+                        DesiredValue = [System.UInt16] 2
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+
+                It 'Should return false when a Integer value is missing' {
+                    $mockValues = @{
+                        CurrentValue = $null
+                        DesiredValue = [System.Int32] 1
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+            }
+
+            Context 'When comparing booleans' {
+                It 'Should return false when a value is different for [Boolean]' {
+                    $mockValues = @{
+                        CurrentValue = [System.Boolean] $true
+                        DesiredValue = [System.Boolean] $false
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+
+                It 'Should return false when a Boolean value is missing' {
+                    $mockValues = @{
+                        CurrentValue = $null
+                        DesiredValue = [System.Boolean] $true
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+            }
+
+            Context 'When comparing arrays' {
+                It 'Should return true when evaluating an array' {
+                    $mockValues = @{
+                        CurrentValue = @('1','2')
+                        DesiredValue = @('1','2')
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $true
+                }
+
+                It 'Should return false when evaluating an array with wrong values' {
+                    $mockValues = @{
+                        CurrentValue = @('CurrentValueA','CurrentValueB')
+                        DesiredValue = @('DesiredValue1','DesiredValue2')
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+
+                It 'Should return false when evaluating an array, but the current value is $null' {
+                    $mockValues = @{
+                        CurrentValue = $null
+                        DesiredValue = @('1','2')
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+                }
+            }
+
+            Context -Name 'When passing invalid types for DesiredValue' {
+                It 'Should write a warning when DesiredValue contain an unsupported type' {
+                    Mock -CommandName Write-Warning -Verifiable
+
+                    # This is a dummy type to test with a type that could never be a correct one.
+                    class MockUnknownType
+                    {
+                        [ValidateNotNullOrEmpty()]
+                        [System.String]
+                        $Property1
+
+                        [ValidateNotNullOrEmpty()]
+                        [System.String]
+                        $Property2
+
+                        MockUnknownType()
+                        {
+                        }
+                    }
+
+                    $mockValues = @{
+                        CurrentValue = New-Object -TypeName MockUnknownType
+                        DesiredValue = New-Object -TypeName MockUnknownType
+                    }
+
+                    Test-DscPropertyState -Values $mockValues | Should -Be $false
+
+                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Assert-VerifiableMock
+        }
+
+        Describe "$($Global:DSCResourceName)\Compare-ResourcePropertyState" {
+            Context 'When one property is in desired state' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'DC01'
+                    }
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 1
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
+                    $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
+                    $compareTargetResourceStateResult.InDesiredState | Should -BeTrue
+                }
+            }
+
+            Context 'When two properties are in desired state' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Sweden'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Sweden'
+                    }
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 2
+                    $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
+                    $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
+                    $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
+                    $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
+                    $compareTargetResourceStateResult[1].Expected | Should -Be 'Sweden'
+                    $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
+                    $compareTargetResourceStateResult[1].InDesiredState | Should -BeTrue
+                }
+            }
+
+            Context 'When passing just one property and that property is not in desired state' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'APP01'
+                    }
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 1
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.Expected | Should -Be 'APP01'
+                    $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
+                    $compareTargetResourceStateResult.InDesiredState | Should -BeFalse
+                }
+            }
+
+            Context 'When passing two properties and one property is not in desired state' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Sweden'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Europe'
+                    }
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 2
+                    $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
+                    $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
+                    $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
+                    $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
+                    $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
+                    $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
+                    $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
+                }
+            }
+
+            Context 'When passing a common parameter set to desired value' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'DC01'
+                        Verbose = $true
+                    }
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 1
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
+                    $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
+                    $compareTargetResourceStateResult.InDesiredState | Should -BeTrue
+                }
+            }
+
+            Context 'When using parameter Properties to compare desired values' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Sweden'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Europe'
+                    }
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                        Properties = @(
+                            'ComputerName'
+                        )
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 1
+                    $compareTargetResourceStateResult.ParameterName | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult.Expected | Should -Be 'DC01'
+                    $compareTargetResourceStateResult.Actual | Should -Be 'DC01'
+                    $compareTargetResourceStateResult.InDesiredState | Should -BeTrue
+                }
+            }
+
+            Context 'When using parameter Properties and IgnoreProperties to compare desired values' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Sweden'
+                        Ensure = 'Present'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Europe'
+                        Ensure = 'Absent'
+                    }
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                        IgnoreProperties = @(
+                            'Ensure'
+                        )
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 2
+                    $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
+                    $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
+                    $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
+                    $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
+                    $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
+                    $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
+                    $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
+                    $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
+                }
+            }
+
+            Context 'When using parameter Properties and IgnoreProperties to compare desired values' {
+                BeforeAll {
+                    $mockCurrentValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Sweden'
+                        Ensure = 'Present'
+                    }
+
+                    $mockDesiredValues = @{
+                        ComputerName = 'DC01'
+                        Location = 'Europe'
+                        Ensure = 'Absent'
+                    }
+                }
+
+                It 'Should return and empty array' {
+                    $compareTargetResourceStateParameters = @{
+                        CurrentValues = $mockCurrentValues
+                        DesiredValues = $mockDesiredValues
+                        Properties = @(
+                            'ComputerName'
+                        )
+                        IgnoreProperties = @(
+                            'ComputerName'
+                        )
+                    }
+
+                    $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
+                    $compareTargetResourceStateResult | Should -BeNullOrEmpty
+                }
+            }
+        }
     }
     #endregion
 }

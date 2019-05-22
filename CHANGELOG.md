@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Changes to xActiveDirectory
+  - Added new helper functions in xADCommon, see each functions comment-based
+    help for more information.
+    - Convert-PropertyMapToObjectProperties
+    - Compare-ResourcePropertyState
+    - Test-DscPropertyState
+- Changes to xADComputer
+  - Refactored the resource and the unit tests.
+  - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
+    longer set or enforces with this resource. _If this parameter is_
+    _used in a configuration a warning message will be outputted saying_
+    _that the `Enabled` parameter has been deprecated_. The new resource
+    [xADObjectEnabledState](https://github.com/PowerShell/xActiveDirectory#xadobjectenabledstate)
+    can be used to enforce the `Enabled` property.
+  - BREAKING CHANGE: The default value of the enabled property of the
+    computer account will be set to the default value of the cmdlet
+    `New-ADComputer`.
+  - A new parameter was added called `EnabledOnCreation` that will control
+    if the computer account is created enabled or disabled.
+  - Moved examples from the README.md to separate example files in the
+    Examples folder.
+
 ## 2.26.0.0
 
 - Changes to xActiveDirectory

@@ -368,7 +368,7 @@ function Get-TargetResource
         [System.Boolean]
         $PasswordNeverResets = $false,
 
-        # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+        # Try to restore the organizational unit from the recycle bin before creating a new one.
         [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
@@ -734,7 +734,7 @@ function Test-TargetResource
         [System.Boolean]
         $PasswordNeverResets = $false,
 
-        # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+        # Try to restore the organizational unit from the recycle bin before creating a new one.
         [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
@@ -1087,7 +1087,7 @@ function Set-TargetResource
         [System.Boolean]
         $PasswordNeverResets = $false,
 
-        # Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+        # Try to restore the organizational unit from the recycle bin before creating a new one.
         [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]

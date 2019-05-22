@@ -1,9 +1,11 @@
 # xActiveDirectory
 
-The **xActiveDirectory** DSC resources allow you to configure and manage Active
-Directory.
-Note: these resources do not presently install the Remote Server Administration
-Tools (RSAT).
+The **xActiveDirectory** module contains DSC resources for deployment and
+configuration of Active Directory.
+
+These DSC resources allow you to configure new domains, child domains, and high
+availability domain controllers, establish cross-domain trusts and manage users,
+groups and OUs.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
@@ -36,17 +38,9 @@ Please check out common DSC Resource [contributing guidelines](https://github.co
 
 A full list of changes in each version can be found in the [change log](CHANGELOG.md).
 
-## Description
-
-The **xActiveDirectory** module contains DSC resources for deployment and
-configuration of Active Directory.
-These DSC resources allow you to configure new domains, child domains, and high
-availability domain controllers, establish cross-domain trusts and manage users,
-groups and OUs.
-
 ## Resources
 
-* **xADComputer** creates and manages Active Directory computer accounts.
+* [**xADComputer**](#xadcomputer) creates and manages Active Directory computer accounts.
 * **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
 * **xADDomainController** installs and configures domain controllers in Active Directory.
 * **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
@@ -70,29 +64,83 @@ groups and OUs.
 
 The xADComputer DSC resource will manage computer accounts within Active Directory.
 
-* **`[String]` ComputerName** _(Key)_: Specifies the name of the computer to manage.
-* **`[String]` Location** _(Write)_: Specifies the location of the computer, such as an office number.
-* **`[String]` DnsHostName** _(Write)_: Specifies the fully qualified domain name (FQDN) of the computer.
-* **`[String]` ServicePrincipalNames** _(Write)_: Specifies the service principal names for the computer account.
-* **`[String]` UserPrincipalName** _(Write)_: Specifies the UPN assigned to the computer account.
-* **`[String]` DisplayName** _(Write)_: "Specifies the display name of the computer.
-* **`[String]` Path** _(Write)_: Specifies the X.500 path of the container where the computer is located.
-* **`[String]` Description** _(Write)_: Specifies a description of the computer object.
-* **`[Boolean]` Enabled** _(Write)_: Specifies if the computer account is enabled.
-* **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished Name that manages the computer object.
-  * Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
-* **`[String]`DomainController** _(Write)_: Specifies the Active Directory Domain Services instance to connect to perform the task.
-* **`[PSCredential]` DomainAdministratorCredential** _(Write)_: Specifies the user account credentials to use to perform the task.
-* **`[String]` RequestFile** _(Write)_: Specifies the full path to the Offline Domain Join Request file to create.
-* **`[String]` Ensure**: Specifies whether the computer account is present or absent.
-  * Valid values are 'Present' and 'Absent'.
-  * It not specified, it defaults to 'Present'.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the computer object should first tried to be restored from the recycle bin before creating a new computer object.
-* **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of the computer object.
-* **`[String]` SID** _(Read)_: Returns the security identifier of the computer object.
+>**Note:** An Offline Domain Join (ODJ) request file will only be created
+>when a computer account is first created in the domain. Setting an Offline
+>Domain Join (ODJ) Request file path for a configuration that updates a
+>computer account that already exists, or restore it from the recycle bin
+>will not cause the Offline Domain Join (ODJ) request file to be created.
 
-Note: An ODJ Request file will only be created when a computer account is first created in the domain.
-Setting an ODJ Request file path for a configuration that creates a computer account that already exists will not cause the file to be created.
+#### Requirements
+
+* Target machine must be running Windows Server 2008 R2 or later.
+
+#### Parameters
+
+* **`[String]` ComputerName** _(Key)_: Specifies the name of the Active
+  Directory computer account to manage. You can identify a computer by
+  its distinguished name, GUID, security identifier (SID) or Security
+  Accounts Manager (SAM) account name.
+* **`[String]` Location** _(Write)_: Specifies the location of the computer,
+  such as an office number.
+* **`[String]` DnsHostName** _(Write)_: Specifies the fully qualified
+  domain name (FQDN) of the computer account.
+* **`[String]` ServicePrincipalNames** _(Write)_: Specifies the service
+  principal names for the computer account.
+* **`[String]` UserPrincipalName** _(Write)_: Specifies the UPN assigned
+  to the computer account.
+* **`[String]` DisplayName** _(Write)_: Specifies the display name of
+  the computer account.
+* **`[String]` Path** _(Write)_: Specifies the X.500 path of the
+  Organizational Unit (OU) or container where the computer is located.
+* **`[String]` Description** _(Write)_: Specifies a description of the
+  computer account.
+* **`[Boolean]` Enabled** _(Write)_: **DEPRECATED - DO NOT USE**. Please
+  see the parameter `EnabledOnCreation` in this resource, and the resource
+  [xADObjectEnabledState](#xadobjectenabledstate) on how to enforce the
+  `Enabled` property. _This parameter no longer sets or enforces the_
+   _Enabled property. If this parameter is used then a warning message_
+   _will be outputted saying that the `Enabled` parameter has been_
+   _deprecated_.
+* **`[Boolean]` EnabledOnCreation** _(Write)_: Specifies if the computer
+  account is created enabled or disabled. By default the Enabled property
+  of the computer account will be set to the default value of the cmdlet
+  `New-ADComputer`. This property is ignored if the parameter `RequestFile`
+  is specified in the same configuration. _This parameter does not enforce_
+  _the property `Enabled`. To enforce the property `Enabled` see the
+  _resource [xADObjectEnabledState](#xadobjectenabledstate)._
+* **`[String]` Manager** _(Write)_: Specifies the user or group Distinguished
+  Name that manages the computer account. Valid values are the user's or
+  group's DistinguishedName, ObjectGUID, SID or SamAccountName.
+* **`[String]` DomainController** _(Write)_: Specifies the Active Directory
+  Domain Services instance to connect to perform the task.
+* **`[PSCredential]` DomainAdministratorCredential** _(Write)_: Specifies
+  the user account credentials to use to perform the task.
+* **`[String]` RequestFile** _(Write)_: Specifies the full path to the
+  Offline Domain Join Request file to create.
+* **`[String]` Ensure**: Specifies whether the computer account is present
+  or absent. Valid values are 'Present' and 'Absent'. The default is 'Present'.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the
+  organizational unit from the recycle bin before creating a new one.
+
+#### Read-Only Properties from Get-TargetResource
+
+* **`[String]` DistinguishedName** _(Read)_: Returns the X.500 path of
+  the computer account.
+* **`[String]` SID** _(Read)_: Returns the security identifier of the
+  computer account.
+* **`[String]` SamAccountName** _(Read)_: Returns the computer account
+  Security Accounts Manager (SAM) account name.
+
+#### Examples
+
+* [Add a Active Directory computer account](/Examples/Resources/xADComputer/1-AddComputerAccount_Config.ps1)
+* [Add a Active Directory computer account disabled](/Examples/Resources/xADComputer/2-AddComputerAccountDisabled_Config.ps1)
+* [Add a Active Directory computer account in a organizational unit](/Examples/Resources/xADComputer/3-AddComputerAccountSpecificPath_Config.ps1)
+* [Add a Active Directory computer account and create an offline domain join (ODJ) request file](/Examples/Resources/xADComputer/4-AddComputerAccountAndCreateODJRequest_Config.ps1)
+
+#### Known issues
+
+All issues are not listed here, see [here for all open issues](https://github.com/PowerShell/xActiveDirectory/issues?q=is%3Aissue+is%3Aopen+in%3Atitle+xADComputer).
 
 ### **xADDomain**
 
@@ -213,7 +261,8 @@ The xADGroup DSC resource will manage groups within Active Directory.
   * If not running on a domain controller, this is required.
 * **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation.
   * If not running on a domain controller, this is required.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the group object should first tried to be restored from the recycle bin before creating a new group object.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the
+  organizational unit from the recycle bin before creating a new one.
 
 ### **xADKDSKey**
 
@@ -273,8 +322,8 @@ one permission and leave all others as they were. The resource can be used multi
 one ACL.
 
 * **Ensure**: Indicates if the access will be added (Present) or will be removed (Absent). Default is 'Present'.
-* **Path**: Active Directory path of the object, specified as a Distinguished Name.
-* **IdentityReference**: Indicates the identity of the principal for the ace. Use the notation DOMAIN\SamAccountName for the identity.
+* **Path**: Active Directory path of the object specified as a Distinguished Name.
+* **IdentityReference**: Indicates the identity of the principal for the ACE. Use the notation DOMAIN\SamAccountName for the identity.
 * **ActiveDirectoryRights**: A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'. Valid values: { AccessSystemSecurity | CreateChild | Delete | DeleteChild | DeleteTree | ExtendedRight | GenericAll | GenericExecute | GenericRead | GenericWrite | ListChildren | ListObject | ReadControl | ReadProperty | Self | Synchronize | WriteDacl | WriteOwner | WriteProperty }
 * **AccessControlType**: Indicates whether to Allow or Deny access to the target object.
 * **ObjectType**: The schema GUID of the object to which the access rule applies. If the permission entry shouldn't be restricted to a specific object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
@@ -290,8 +339,8 @@ The xADOrganizational Unit DSC resource will manage OUs within Active Directory.
 * **`[String]` Description** _(Write)_: The OU description property.
 * **`[Boolean]` ProtectedFromAccidentalDeletion** _(Write)_: Valid values are $true and $false. If not specified, it defaults to $true.
 * **`[String]` Ensure** _(Write)_: Specifies whether the OU is present or absent. Valid values are 'Present' and 'Absent'. It not specified, it defaults to 'Present'.
-* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation. Note: _if not running on a domain controller, this is required_.
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the organizational unit should first tried to be restored from the recycle bin before creating a new organizational unit.
+* **`[PSCredential]` Credential** _(Write)_: User account credentials used to perform the operation. Note: _This is required if not running on a domain controller_.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the organizational unit from the recycle bin before creating a new one.
 
 ### **xADRecycleBin**
 
@@ -408,7 +457,7 @@ The xADServicePrincipalName DSC resource will manage service principal names.
   * The 'Negotiate' option supports NTLM authentication - which may be required when testing users' passwords when Active Directory Certificate Services (ADCS) is deployed.
 * **`[Boolean]` PasswordNeverResets** _(Write)_: Specifies whether existing user's password should be reset (default $false).
 * **`[Boolean]` TrustedForDelegation** _(Write)_: Specifies whether an account is trusted for Kerberos delegation (default $false).
-* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Indicates whether or not the user object should first tried to be restored from the recycle bin before creating a new user object.
+* **`[Boolean]` RestoreFromRecycleBin** _(Write)_: Try to restore the organizational unit from the recycle bin before creating a new one.
 * **`[String]` DistinguishedName** _(Read)_: The user distinguished name, returned with Get.
 
 ### **xWaitForADDomain**
@@ -976,110 +1025,6 @@ configuration Example_xADDomainDefaultPasswordPolicy
 Example_xADDomainDefaultPasswordPolicy -DomainName 'contoso.com' -ComplexityEnabled $true -MinPasswordLength 8
 
 Start-DscConfiguration -Path .\Example_xADDomainDefaultPasswordPolicy -Wait -Verbose
-```
-
-### Create an Active Directory Computer Account
-
-In this example, we create a 'NANO-001' computer account in the 'Server' OU of the 'example.com' Active Directory domain.
-
-```powershell
-configuration Example_xADComputerAccount
-{
-    Param
-    (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DomainController,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $DomainCredential,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ComputerName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Path
-    )
-
-    Import-DscResource -Module xActiveDirectory
-
-    Node $AllNodes.NodeName
-    {
-        xADComputer "$ComputerName"
-        {
-           DomainController = $DomainController
-           DomainAdministratorCredential = $DomainCredential
-           ComputerName = $ComputerName
-           Path = $Path
-        }
-    }
-}
-
-Example_xADComputerAccount -DomainController 'DC01' `
-    -DomainCredential (Get-Credential -Message "Domain Credentials") `
-    -ComputerName 'NANO-001' `
-    -Path 'ou=Servers,dc=example,dc=com' `
-    -ConfigurationData $ConfigurationData
-
-Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
-```
-
-### Create an Active Directory Computer Account and an ODJ Request File
-
-In this example, we create a 'NANO-200' computer account in the 'Nano' OU of the 'example.com' Active Directory domain as well as creating an Offline Domain Join Request file.
-
-```powershell
-configuration Example_xADComputerAccountODJ
-{
-    Param
-    (
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $DomainController,
-
-        [parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $DomainCredential,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $ComputerName,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $Path,
-
-        [parameter(Mandatory = $true)]
-        [System.String]
-        $RequestFile
-    )
-
-    Import-DscResource -Module xActiveDirectory
-
-    Node $AllNodes.NodeName
-    {
-        xADComputer "$ComputerName"
-        {
-           DomainController = $DomainController
-           DomainAdministratorCredential = $DomainCredential
-           ComputerName = $ComputerName
-           Path = $Path
-           RequestFile = $RequestFile
-        }
-    }
-}
-
-Example_xADComputerAccountODJ -DomainController 'DC01' `
-    -DomainCredential (Get-Credential -Message "Domain Credentials") `
-    -ComputerName 'NANO-200' `
-    -Path 'ou=Nano,dc=example,dc=com' `
-    -RequestFile 'd:\ODJFiles\NANO-200.txt' `
-    -ConfigurationData $ConfigurationData
-
-Start-DscConfiguration -Path .\Example_xADComputerAccount -Wait -Verbose
 ```
 
 ### Create User Principal Name (UPN) suffixes and Service Principal Name suffixes

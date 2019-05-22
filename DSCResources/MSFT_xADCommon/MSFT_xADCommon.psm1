@@ -8,31 +8,37 @@ data localizedString
 {
     # culture="en-US"
     ConvertFrom-StringData @'
-        RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed
-        MembersAndIncludeExcludeError  = The '{0}' and '{1}' and/or '{2}' parameters conflict. The '{0}' parameter should not be used in any combination with the '{1}' and '{2}' parameters.
-        MembersIsNullError             = The Members parameter value is null. The '{0}' parameter must be provided if neither '{1}' nor '{2}' is provided.
-        MembersIsEmptyError            = The Members parameter is empty.  At least one group member must be provided.
-        IncludeAndExcludeConflictError = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values.
-        IncludeAndExcludeAreEmptyError = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters.
-        ModeConversionError            = Converted mode {0} is not a {1}.
-        RecycleBinRestoreFailed        = Restoring {0} ({1}) from the recycle bin failed. Error message: {2}.
-        EmptyDomainError               = No domain name retrieved for group member {0} in group {1}.
-
-        CheckingMembers                = Checking for '{0}' members.
-        MembershipCountMismatch        = Membership count is not correct. Expected '{0}' members, actual '{1}' members.
-        MemberNotInDesiredState        = Member '{0}' is not in the desired state.
-        RemovingDuplicateMember        = Removing duplicate member '{0}' definition.
-        MembershipInDesiredState       = Membership is in the desired state.
-        MembershipNotDesiredState      = Membership is NOT in the desired state.
-        CheckingDomain                 = Checking for domain '{0}'.
-        CheckingSite                   = Checking for site '{0}'.
-        FindInRecycleBin               = Finding objects in the recycle bin matching the filter {0}.
-        FoundRestoreTargetInRecycleBin = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object.
-        RecycleBinRestoreSuccessful    = Successfully restored object {0} ({1}) from the recycle bin.
-        AddingGroupMember              = Adding member '{0}' from domain '{1}' to AD group '{2}'.
-
-        WasExpectingDomainController     = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADC0001)
-        FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller. (ADC0002)
+        WasExpectingDomainController     = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADCOMMON0001)
+        FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller. (ADCOMMON0002)
+        EvaluatePropertyState            = Evaluating the state of the property '{0}'. (ADCOMMON0003)
+        PropertyInDesiredState           = The parameter '{0}' is in desired state. (ADCOMMON0004)
+        PropertyNotInDesiredState        = The parameter '{0}' is not in desired state. (ADCOMMON0005)
+        ArrayDoesNotMatch                = One or more values in an array does not match the desired state. Details of the changes are below. (ADCOMMON0006)
+        ArrayValueThatDoesNotMatch       = {0} - {1} (ADCOMMON0007)
+        PropertyValueOfTypeDoesNotMatch  = {0} value does not match. Current value is '{1}', but expected the value '{2}'. (ADCOMMON0008)
+        UnableToCompareType              = Unable to compare the type {0} as it is not handled by the Test-DscPropertyState cmdlet. (ADCOMMON0009)
+        RoleNotFoundError                = Please ensure that the PowerShell module for role '{0}' is installed. (ADCOMMON0010)
+        MembersAndIncludeExcludeError    = The '{0}' and '{1}' and/or '{2}' parameters conflict. The '{0}' parameter should not be used in any combination with the '{1}' and '{2}' parameters. (ADCOMMON0011)
+        MembersIsNullError               = The Members parameter value is null. The '{0}' parameter must be provided if neither '{1}' nor '{2}' is provided. (ADCOMMON0012)
+        MembersIsEmptyError              = The Members parameter is empty.  At least one group member must be provided. (ADCOMMON0013)
+        IncludeAndExcludeConflictError   = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values. (ADCOMMON0014)
+        IncludeAndExcludeAreEmptyError   = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters. (ADCOMMON0015)
+        ModeConversionError              = Converted mode {0} is not a {1}. (ADCOMMON0016)
+        RecycleBinRestoreFailed          = Restoring {0} ({1}) from the recycle bin failed. Error message: {2}. (ADCOMMON0017)
+        EmptyDomainError                 = No domain name retrieved for group member {0} in group {1}. (ADCOMMON0018)
+        CheckingMembers                  = Checking for '{0}' members. (ADCOMMON0019)
+        MembershipCountMismatch          = Membership count is not correct. Expected '{0}' members, actual '{1}' members. (ADCOMMON0020)
+        MemberNotInDesiredState          = Member '{0}' is not in the desired state. (ADCOMMON0021)
+        RemovingDuplicateMember          = Removing duplicate member '{0}' definition. (ADCOMMON0022)
+        MembershipInDesiredState         = Membership is in the desired state. (ADCOMMON0023)
+        MembershipNotDesiredState        = Membership is NOT in the desired state. (ADCOMMON0024)
+        CheckingDomain                   = Checking for domain '{0}'. (ADCOMMON0025)
+        CheckingSite                     = Checking for site '{0}'. (ADCOMMON0026)
+        FindInRecycleBin                 = Finding objects in the recycle bin matching the filter {0}. (ADCOMMON0027)
+        FoundRestoreTargetInRecycleBin   = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object. (ADCOMMON0028)
+        RecycleBinRestoreSuccessful      = Successfully restored object {0} ({1}) from the recycle bin. (ADCOMMON0029)
+        AddingGroupMember                = Adding member '{0}' from domain '{1}' to AD group '{2}'. (ADCOMMON0030)
+        PropertyMapArrayIsWrongType      = An object in the property map array is not of the type [System.Collections.Hashtable]. (ADCOMMON0031)
 '@
 }
 
@@ -70,7 +76,10 @@ function Test-DomainMember
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param ( )
+    param
+    (
+    )
+
     $isDomainMember = [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain;
     return $isDomainMember;
 }
@@ -81,7 +90,10 @@ function Get-DomainName
 {
     [CmdletBinding()]
     [OutputType([System.String])]
-    param ( )
+    param
+    (
+    )
+
     $domainName = [System.String] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).Domain;
     return $domainName;
 } # function Get-DomainName
@@ -90,7 +102,8 @@ function Get-DomainName
 function Resolve-DomainFQDN
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [OutputType([System.String])]
         [System.String] $DomainName,
@@ -98,6 +111,7 @@ function Resolve-DomainFQDN
         [Parameter()] [AllowNull()]
         [System.String] $ParentDomainName
     )
+
     $domainFQDN = $DomainName
     if ($ParentDomainName)
     {
@@ -121,6 +135,7 @@ function Test-ADDomain
         [System.Management.Automation.CredentialAttribute()]
         $Credential
     )
+
     Write-Verbose -Message ($localizedString.CheckingDomain -f $DomainName);
     $ldapDomain = 'LDAP://{0}' -f $DomainName;
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -172,7 +187,7 @@ function Get-ADObjectParentDN
 
     # https://www.uvm.edu/~gcd/2012/07/listing-parent-of-ad-object-in-powershell/
     $distinguishedNameParts = $DN -split '(?<![\\]),';
-    $distinguishedNameParts[1..$($distinguishedNameParts.Count-1)] -join ',';
+    $distinguishedNameParts[1..$($distinguishedNameParts.Count - 1)] -join ',';
 
 } #end function GetADObjectParentDN
 
@@ -204,20 +219,20 @@ function Assert-MemberParameters
         $ModuleName = 'xActiveDirectory'
     )
 
-    if($PSBoundParameters.ContainsKey('Members'))
+    if ($PSBoundParameters.ContainsKey('Members'))
     {
-        if($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
+        if ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
             # If Members are provided, Include and Exclude are not allowed.
             $errorId = '{0}_MembersPlusIncludeOrExcludeConflict' -f $ModuleName;
-            $errorMessage = $localizedString.MembersAndIncludeExcludeError -f 'Members','MembersToInclude','MembersToExclude';
+            $errorMessage = $localizedString.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude';
             ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
         }
 
         if ($Members.Length -eq 0) # )
         {
             $errorId = '{0}_MembersIsNull' -f $ModuleName;
-            $errorMessage = $localizedString.MembersIsNullError -f 'Members','MembersToInclude','MembersToExclude';
+            $errorMessage = $localizedString.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude';
             ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
         }
     }
@@ -270,12 +285,12 @@ function Remove-DuplicateMembers
     Set-StrictMode -Version Latest
 
     $destIndex = 0;
-    for([int] $sourceIndex = 0 ; $sourceIndex -lt $Members.Count; $sourceIndex++)
+    for ([int] $sourceIndex = 0 ; $sourceIndex -lt $Members.Count; $sourceIndex++)
     {
         $matchFound = $false;
-        for([int] $matchIndex = 0; $matchIndex -lt $destIndex; $matchIndex++)
+        for ([int] $matchIndex = 0; $matchIndex -lt $destIndex; $matchIndex++)
         {
-            if($Members[$sourceIndex] -eq $Members[$matchIndex])
+            if ($Members[$sourceIndex] -eq $Members[$matchIndex])
             {
                 # A duplicate is found. Discard the duplicate.
                 Write-Verbose -Message ($localizedString.RemovingDuplicateMember -f $Members[$sourceIndex]);
@@ -284,7 +299,7 @@ function Remove-DuplicateMembers
             }
         }
 
-        if(!$matchFound)
+        if (!$matchFound)
         {
             $Members[$destIndex++] = $Members[$sourceIndex].ToLowerInvariant();
         }
@@ -410,17 +425,30 @@ function ConvertTo-TimeSpan
         $TimeSpan,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Seconds','Minutes','Hours','Days')]
+        [ValidateSet('Seconds', 'Minutes', 'Hours', 'Days')]
         [System.String]
         $TimeSpanType
     )
+
     $newTimeSpanParams = @{ };
     switch ($TimeSpanType)
     {
-        'Seconds' { $newTimeSpanParams['Seconds'] = $TimeSpan }
-        'Minutes' { $newTimeSpanParams['Minutes'] = $TimeSpan }
-        'Hours' { $newTimeSpanParams['Hours'] = $TimeSpan }
-        'Days' { $newTimeSpanParams['Days'] = $TimeSpan }
+        'Seconds'
+        {
+            $newTimeSpanParams['Seconds'] = $TimeSpan
+        }
+        'Minutes'
+        {
+            $newTimeSpanParams['Minutes'] = $TimeSpan
+        }
+        'Hours'
+        {
+            $newTimeSpanParams['Hours'] = $TimeSpan
+        }
+        'Days'
+        {
+            $newTimeSpanParams['Days'] = $TimeSpan
+        }
     }
     return (New-TimeSpan @newTimeSpanParams)
 } #end function ConvertTo-TimeSpan
@@ -428,10 +456,13 @@ function ConvertTo-TimeSpan
 <#
     .SYNOPSIS
         Converts a System.TimeSpan into the number of seconds, mintutes, hours or days.
+
     .PARAMETER TimeSpan
         TimeSpan to convert into an integer
+
     .PARAMETER TimeSpanType
         Convert timespan into the total number of seconds, minutes, hours or days.
+
     .EXAMPLE
         $Get-ADDefaultDomainPasswordPolicy
 
@@ -449,16 +480,29 @@ function ConvertFrom-TimeSpan
         $TimeSpan,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Seconds','Minutes','Hours','Days')]
+        [ValidateSet('Seconds', 'Minutes', 'Hours', 'Days')]
         [System.String]
         $TimeSpanType
     )
+
     switch ($TimeSpanType)
     {
-        'Seconds' { return $TimeSpan.TotalSeconds -as [System.UInt32] }
-        'Minutes' { return $TimeSpan.TotalMinutes -as [System.UInt32] }
-        'Hours' { return $TimeSpan.TotalHours -as [System.UInt32] }
-        'Days' { return $TimeSpan.TotalDays -as [System.UInt32] }
+        'Seconds'
+        {
+            return $TimeSpan.TotalSeconds -as [System.UInt32]
+        }
+        'Minutes'
+        {
+            return $TimeSpan.TotalMinutes -as [System.UInt32]
+        }
+        'Hours'
+        {
+            return $TimeSpan.TotalHours -as [System.UInt32]
+        }
+        'Days'
+        {
+            return $TimeSpan.TotalDays -as [System.UInt32]
+        }
     }
 } #end function ConvertFrom-TimeSpan
 
@@ -492,7 +536,7 @@ function Get-ADCommonParameters
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName','GroupName','ComputerName','ServiceAccountName')]
+        [Alias('UserName', 'GroupName', 'ComputerName', 'ServiceAccountName')]
         [System.String]
         $Identity,
 
@@ -533,7 +577,8 @@ function Get-ADCommonParameters
         {
             $adConnectionParameters = @{ Name = $CommonName; }
         }
-        else {
+        else
+        {
             $adConnectionParameters = @{ Name = $Identity; }
         }
     }
@@ -543,7 +588,8 @@ function Get-ADCommonParameters
         {
             $adConnectionParameters = @{ Identity = $CommonName; }
         }
-        else {
+        else
+        {
             $adConnectionParameters = @{ Identity = $Identity; }
         }
     }
@@ -655,8 +701,8 @@ function ConvertTo-DeploymentForestMode
         [Parameter(
             Mandatory = $true,
             ParameterSetName = 'ByName')]
-            [AllowNull()]
-            [System.Nullable``1[Microsoft.ActiveDirectory.Management.ADForestMode]]
+        [AllowNull()]
+        [System.Nullable``1[Microsoft.ActiveDirectory.Management.ADForestMode]]
         $Mode,
 
         [Parameter()]
@@ -737,12 +783,12 @@ function Restore-ADCommonObject
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName','GroupName','ComputerName','ServiceAccountName')]
+        [Alias('UserName', 'GroupName', 'ComputerName', 'ServiceAccountName')]
         [System.String]
         $Identity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Computer','OrganizationalUnit','User','Group')]
+        [ValidateSet('Computer', 'OrganizationalUnit', 'User', 'Group')]
         [System.String]
         $ObjectClass,
 
@@ -873,7 +919,7 @@ function Add-ADCommonGroupMember
 
     if ($MembersInMultipleDomains.IsPresent)
     {
-        foreach($member in $Members)
+        foreach ($member in $Members)
         {
             $memberDomain = Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
 
@@ -991,4 +1037,275 @@ function Test-IsDomainController
     $operatingSystemInformation = Get-CimInstance -ClassName 'Win32_OperatingSystem'
 
     return $operatingSystemInformation.ProductType -eq 2
+}
+
+<#
+    .SYNOPSIS
+        Converts a hashtable containing the parameter to property mappings to
+        an array of properties that can be used to call cmdlets that supports the
+        parameter Properties.
+
+    .PARAMETER PropertyMap
+        The property map, as an array of hashtables, to convert to a properties array.
+
+    .EXAMPLE
+        $computerObjectPropertyMap = @(
+            @{
+                ParameterName = 'ComputerName'
+                PropertyName  = 'cn'
+            },
+            @{
+                ParameterName = 'Location'
+            }
+        )
+
+        $computerObjectProperties = Convert-PropertyMapToObjectProperties $computerObjectPropertyMap
+        $getADComputerResult = Get-ADComputer -Identity 'APP01' -Properties $computerObjectProperties
+#>
+function Convert-PropertyMapToObjectProperties
+{
+    [CmdletBinding()]
+    [OutputType([System.Array])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Array]
+        $PropertyMap
+    )
+
+    $objectProperties = @()
+
+    # Create an array of the AD property names to retrieve from the property map
+    foreach ($property in $PropertyMap)
+    {
+        if ($property -isnot [System.Collections.Hashtable])
+        {
+            $errorMessage = $localizedString.PropertyMapArrayIsWrongType
+            New-InvalidOperationException -Message $errorMessage
+        }
+
+        if ($property.ContainsKey('PropertyName'))
+        {
+            $objectProperties += @($property.PropertyName)
+        }
+        else
+        {
+            $objectProperties += $property.ParameterName
+        }
+    }
+
+    return $objectProperties
+}
+
+<#
+    .SYNOPSIS
+        This function is used to compare current and desired values for any DSC
+        resource, and return a hashtable with the result from the comparison.
+
+    .PARAMETER CurrentValues
+        The current values that should be compared to to desired values. Normally
+        the values returned from Get-TargetResource.
+
+    .PARAMETER DesiredValues
+        The values set in the configuration and is provided in the call to the
+        functions *-TargetResource, and that will be compared against current
+        values. Normally set to $PSBoundParameters.
+
+    .PARAMETER Properties
+        An array of property names to filter out from the keys provided in
+        DesiredValues. If left out, only those keys in the DesiredValues will
+        be compared. This parameter can be used to remove certain keys from
+        the comparison.
+#>
+function Compare-ResourcePropertyState
+{
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable[]])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $CurrentValues,
+
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $DesiredValues,
+
+        [Parameter()]
+        [System.String[]]
+        $Properties,
+
+        [Parameter()]
+        [System.String[]]
+        $IgnoreProperties
+    )
+
+    if ($PSBoundParameters.ContainsKey('Properties'))
+    {
+        # Filter out the parameters (keys) not specified in Properties
+        $desiredValuesToRemove = $DesiredValues.Keys | Where-Object -FilterScript {
+            $_ -notin $Properties
+        }
+
+        $desiredValuesToRemove | ForEach-Object -Process {
+            $DesiredValues.Remove($_)
+        }
+    }
+    else
+    {
+        <#
+            Remove any common parameters that might be part of DesiredValues,
+            if it $PSBoundParameters was used to pass the desired values.
+        #>
+        $commonParametersToRemove = $DesiredValues.Keys | Where-Object -FilterScript {
+            $_ -in [System.Management.Automation.PSCmdlet]::CommonParameters `
+                -or $_ -in [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+        }
+
+        $commonParametersToRemove | ForEach-Object -Process {
+            $DesiredValues.Remove($_)
+        }
+    }
+
+    # Remove any properties that should be ignored.
+    if ($PSBoundParameters.ContainsKey('IgnoreProperties'))
+    {
+        $IgnoreProperties | ForEach-Object -Process {
+            if ($DesiredValues.ContainsKey($_))
+            {
+                $DesiredValues.Remove($_)
+            }
+        }
+    }
+
+    $compareTargetResourceStateReturnValue = @()
+
+    foreach ($parameterName in $DesiredValues.Keys)
+    {
+        Write-Verbose -Message ($localizedString.EvaluatePropertyState -f $parameterName) -Verbose
+
+        $parameterState = @{
+            ParameterName = $parameterName
+            Expected      = $DesiredValues.$parameterName
+            Actual        = $CurrentValues.$parameterName
+        }
+
+        # Check if the parameter is in compliance.
+        $isPropertyInDesiredState = Test-DscPropertyState -Values @{
+            CurrentValue = $CurrentValues.$parameterName
+            DesiredValue = $DesiredValues.$parameterName
+        }
+
+        if ($isPropertyInDesiredState)
+        {
+            Write-Verbose -Message ($localizedString.PropertyInDesiredState -f $parameterName) -Verbose
+
+            $parameterState['InDesiredState'] = $true
+        }
+        else
+        {
+            Write-Verbose -Message ($localizedString.PropertyNotInDesiredState -f $parameterName) -Verbose
+
+            $parameterState['InDesiredState'] = $false
+        }
+
+        $compareTargetResourceStateReturnValue += $parameterState
+    }
+
+    return $compareTargetResourceStateReturnValue
+}
+
+<#
+    .SYNOPSIS
+        This function is used to compare the current and the desired value of a
+        property.
+
+    .PARAMETER Values
+        This is set to a hash table with the current value (the CurrentValue key)
+        and desired value (the DesiredValue key).
+
+    .EXAMPLE
+        Test-DscPropertyState -Values @{
+            CurrentValue = 'John'
+            DesiredValue = 'Alice'
+        }
+    .EXAMPLE
+        Test-DscPropertyState -Values @{
+            CurrentValue = 1
+            DesiredValue = 2
+        }
+#>
+function Test-DscPropertyState
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $Values
+    )
+
+    $returnValue = $true
+
+    if ($Values.CurrentValue -ne $Values.DesiredValue -or $Values.DesiredValue.GetType().IsArray)
+    {
+        $desiredType = $Values.DesiredValue.GetType()
+
+        if ($desiredType.IsArray -eq $true)
+        {
+            if ($Values.CurrentValue -and $Values.DesiredValue)
+            {
+                $compareObjectParameters = @{
+                    ReferenceObject  = $Values.CurrentValue
+                    DifferenceObject = $Values.DesiredValue
+                }
+
+                $arrayCompare = Compare-Object @compareObjectParameters
+
+                if ($null -ne $arrayCompare)
+                {
+                    Write-Verbose -Message $localizedString.ArrayDoesNotMatch -Verbose
+
+                    $arrayCompare | ForEach-Object -Process {
+                        Write-Verbose -Message ($localizedString.ArrayValueThatDoesNotMatch -f $_.InputObject, $_.SideIndicator) -Verbose
+                    }
+
+                    $returnValue = $false
+                }
+            }
+            else
+            {
+                $returnValue = $false
+            }
+        }
+        else
+        {
+            $returnValue = $false
+
+            $supportedTypes = @(
+                'String'
+                'Int32'
+                'Int16'
+                'UInt16'
+                'Single'
+                'Boolean'
+            )
+
+            if ($desiredType.Name -notin $supportedTypes)
+            {
+                Write-Warning -Message ($localizedString.UnableToCompareType `
+                        -f $fieldName, $desiredType.Name)
+            }
+            else
+            {
+                Write-Verbose -Message (
+                    $localizedString.PropertyValueOfTypeDoesNotMatch `
+                        -f $desiredType.Name, $Values.CurrentValue, $Values.DesiredValue
+                ) -Verbose
+            }
+        }
+    }
+
+    return $returnValue
 }

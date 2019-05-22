@@ -419,7 +419,57 @@ function Test-DscParameterState
 
     return $returnValue
 }
+
+<#
+    .SYNOPSIS
+        Starts a process with a timeout.
+
+    .PARAMETER FilePath
+        String containing the path to the executable to start.
+
+    .PARAMETER ArgumentList
+        The arguments that should be passed to the executable.
+
+    .PARAMETER Timeout
+        The timeout in seconds to wait for the process to finish.
+
+#>
+function Start-ProcessWithTimeout
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $FilePath,
+
+        [Parameter()]
+        [System.String[]]
+        $ArgumentList,
+
+        [Parameter(Mandatory = $true)]
+        [System.UInt32]
+        $Timeout
+    )
+
+    $startProcessParameters = @{
+        FilePath = $FilePath
+        ArgumentList = $ArgumentList
+        PassThru     = $true
+        NoNewWindow  = $true
+        ErrorAction  = 'Stop'
+    }
+
+    $sqlSetupProcess = Start-Process @startProcessParameters
+
+    Write-Verbose -Message ($script:localizedData.StartProcess -f $sqlSetupProcess.Id, $startProcessParameters.FilePath, $Timeout) -Verbose
+
+    Wait-Process -InputObject $sqlSetupProcess -Timeout $Timeout -ErrorAction 'Stop'
+
+    return $sqlSetupProcess.ExitCode
+}
+
 $script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
+
 Export-ModuleMember -Function @(
     'New-InvalidArgumentException'
     'New-InvalidOperationException'
@@ -427,4 +477,5 @@ Export-ModuleMember -Function @(
     'New-InvalidResultException'
     'Get-LocalizedData'
     'Test-DscParameterState'
+    'Start-ProcessWithTimeout'
 )
