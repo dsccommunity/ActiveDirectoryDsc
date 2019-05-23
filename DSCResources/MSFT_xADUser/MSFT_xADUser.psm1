@@ -438,6 +438,9 @@ function Get-TargetResource
                 $targetResource['Path'] = Get-ADObjectParentDN -DN $adUser.DistinguishedName;
             }
         }
+        elseif (($property.Parameter) -eq 'ServicePrincipalNames') {
+            $targetResource['ServicePrincipalNames'] = [System.String[]]$adUser.ServicePrincipalNames
+        }
         elseif ($property.ADProperty)
         {
             # The AD property name is different to the function parameter to use this

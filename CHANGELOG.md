@@ -34,7 +34,6 @@
   - Change the description of the property RestoreFromRecycleBin.
 - Changes to xADuser
   - Change the description of the property RestoreFromRecycleBin.
-  - Fix the description of the property RestoreFromRecycleBin.
 - Changes to xADDomainController
   - Change the `#Requires` statement in the Examples to require the correct module.
 

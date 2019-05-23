@@ -95,7 +95,7 @@ try
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
-            It "Checks that values returned for ServicePrincipalNames are correct" {
+            It "Should return correct ServicePrincipalNames" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
                 $adUser = Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential
@@ -528,7 +528,7 @@ try
             It "Calls 'Set-ADUser' with 'ServicePrincipalNames' when specified" {
                 $testSPNs = @('spn/a', 'spn/b')
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
+                Mock -CommandName Set-ADUser
 
                 Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
 
@@ -576,7 +576,7 @@ try
 
                     Mock -CommandName Restore-ADCommonObject -MockWith { return [PSCustomObject]@{
                             ObjectClass = 'user'
-                        }}
+                        } }
 
                     Set-TargetResource @restoreParam
 
@@ -605,7 +605,7 @@ try
 
                     $script:mockCounter = 0
 
-                    Mock -CommandName Restore-ADCommonObject -MockWith {throw (New-Object -TypeName System.InvalidOperationException)}
+                    Mock -CommandName Restore-ADCommonObject -MockWith { throw (New-Object -TypeName System.InvalidOperationException) }
 
                     { Set-TargetResource @restoreParam } | Should -Throw
 
