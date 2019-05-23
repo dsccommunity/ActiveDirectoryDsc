@@ -528,7 +528,7 @@ try
             It "Calls 'Set-ADUser' with 'ServicePrincipalNames' when specified" {
                 $testSPNs = @('spn/a', 'spn/b')
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
-                Mock -CommandName Set-ADUser
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
 
                 Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
 
