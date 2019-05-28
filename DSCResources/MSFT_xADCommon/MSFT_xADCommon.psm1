@@ -39,6 +39,8 @@ data localizedString
         RecycleBinRestoreSuccessful      = Successfully restored object {0} ({1}) from the recycle bin. (ADCOMMON0029)
         AddingGroupMember                = Adding member '{0}' from domain '{1}' to AD group '{2}'. (ADCOMMON0030)
         PropertyMapArrayIsWrongType      = An object in the property map array is not of the type [System.Collections.Hashtable]. (ADCOMMON0031)
+        CreatingNewADPSDrive             = Creating new AD: PSDrive. (ADCOMMON0032)
+        CreatingNewADPSDriveError        = Error creating AD: PS Drive. (ADCOMMON0033)
 '@
 }
 
@@ -1308,4 +1310,45 @@ function Test-DscPropertyState
     }
 
     return $returnValue
+}
+
+<#
+    .SYNOPSIS
+        Asserts if the AD PS Drive has been created, and creates one if not.
+
+    .PARAMETER Root
+        Specifies the AD path to which the drive is mapped.
+
+    .NOTES
+        Throws an exception if the PS Drive cannot be created.
+#>
+Function Assert-ADPSDrive
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [String]
+        $Root = '//RootDSE/'
+    )
+
+    Assert-Module -ModuleName 'ActiveDirectory' -ImportModule
+
+    Try
+    {
+        Get-PSDrive -Name AD -ErrorAction Stop | Out-Null
+    }
+    Catch
+    {
+        Write-Verbose -Message $script:localizedString.CreatingNewADPSDrive
+        Try
+        {
+            New-PSDrive -Name AD -PSProvider 'ActiveDirectory' -Root $Root -Scope Script -ErrorAction Stop | Out-Null
+        }
+        Catch
+        {
+            $errorMessage = $script:localizedString.CreatingNewADPSDriveError
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+        }
+    }
 }
