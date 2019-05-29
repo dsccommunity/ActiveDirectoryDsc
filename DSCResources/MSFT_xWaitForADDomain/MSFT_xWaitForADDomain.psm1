@@ -55,6 +55,17 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    <#
+        Suppressing this rule because $global:DSCMachineStatus is used to trigger
+        a reboot if the domain name cannot be found withing the timeout period.
+    #>
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
+    <#
+        Suppressing this rule because $global:DSCMachineStatus is only set,
+        never used (by design of Desired State Configuration).
+    #>
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope='Function', Target='DSCMachineStatus')]
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory)]

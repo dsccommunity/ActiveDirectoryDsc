@@ -29,10 +29,23 @@
   - Change the description of the property IdentityReference.
 - Changes to xADOrganizationalUnit
   - Change the description of the property RestoreFromRecycleBin.
-- Changes to xADuser
+- Changes to xADUser
   - Change the description of the property RestoreFromRecycleBin.
+  - Added ServicePrincipalNames property ([issue #153](https://github.com/PowerShell/xActiveDirectory/issues/153)).
 - Changes to xADDomainController
-  - Change the `#Requires` statement in the Examples to require the correct module.
+  - Change the `#Requires` statement in the Examples to require the correct
+    module.
+  - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
+    resource is using the `$global:DSCMachineStatus` variable to trigger
+    a reboot.
+- Changes to xADDomain
+  - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
+    resource is using the `$global:DSCMachineStatus` variable to trigger
+    a reboot.
+- Changes to xWaitForADDomain
+  - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
+    resource is using the `$global:DSCMachineStatus` variable to trigger
+    a reboot.
 - Changes to xActiveDirectory
   - Fix Script Analyzer rule failures
   - Opt-in to "Common Tests - Custom Script Analyzer Rules"
