@@ -1,23 +1,10 @@
-# Localized messages
-data LocalizedData
-{
-    # culture="en-US"
-    ConvertFrom-StringData @'
-MissingRoleMessage        = Please ensure that the {0} role is installed
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-CheckingTrustMessage      = Checking if Trust between {0} and {1} exists ...
-TestTrustMessage          = Trust is {0} between source and target domains and it should be {1}
-RemovingTrustMessage      = Removing trust between {0} and {1} domains ...
-DeleteTrustMessage        = Trust between specified domains is now absent
-AddingTrustMessage        = Adding domain trust between {0} and {1}  ...
-SetTrustMessage           = Trust between specified domains is now present
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
 
-CheckPropertyMessage      = Checking for {0} between domains ...
-DesiredPropertyMessage    = {0} between domains is set correctly
-NotDesiredPropertyMessage = {0} between domains is not correct. Expected {1}, actual {2}
-SetPropertyMessage        = {0} between domains is set
-'@
-}
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomainTrust'
 
 function Get-TargetResource
 {
@@ -57,7 +44,7 @@ function Get-TargetResource
     # If not found, means ADDS role is not installed
     catch
     {
-        $missingRoleMessage = $($LocalizedData.MissingRoleMessage) -f 'AD-Domain-Services'
+        $missingRoleMessage = $($script:localizedData.MissingRoleMessage) -f 'AD-Domain-Services'
         New-TerminatingError -errorId ActiveDirectoryRoleMissing -errorMessage $missingRoleMessage -errorCategory NotInstalled
     }
 
@@ -77,13 +64,16 @@ function Get-TargetResource
         $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext($DomainOrForest,$SourceDomainName)
         $srcDomain = ([type]"System.DirectoryServices.ActiveDirectory.$DomainOrForest")::"Get$DomainOrForest"($srcDirectoryContext)
 
-        # Find trust betwen source & destination.
+        # Find trust between source & destination.
+        Write-Verbose -Message ($script:localizedData.CheckingTrustMessage -f $SourceDomainName, $TargetDomainName)
         $trust = $srcDomain.GetTrustRelationship($trgDomain)
 
+        Write-Verbose -Message ($script:localizedData.TrustPresentMessage -f  $SourceDomainName, $TargetDomainName)
         $Ensure = 'Present'
     }
     catch
     {
+        Write-Verbose -Message ($script:localizedData.TrustAbsentMessage -f  $SourceDomainName, $TargetDomainName)
         $Ensure = 'Absent'
     }
 
@@ -108,6 +98,7 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseVerboseMessageInDSCResource", "")]
     [CmdletBinding()]
     param
     (
@@ -139,6 +130,7 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseVerboseMessageInDSCResource", "")]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -175,7 +167,7 @@ function Test-TargetResource
     # If not found, means ADDS role is not installed
     catch
     {
-        $missingRoleMessage = $($LocalizedData.MissingRoleMessage) -f 'AD-Domain-Services'
+        $missingRoleMessage = $($script:localizedData.MissingRoleMessage) -f 'AD-Domain-Services'
         New-TerminatingError -errorId ActiveDirectoryRoleMissing -errorMessage $missingRoleMessage -errorCategory NotInstalled
     }
 
@@ -219,7 +211,7 @@ function Confirm-ResourceProperties
 
     try
     {
-        $checkingTrustMessage = $($LocalizedData.CheckingTrustMessage) -f $SourceDomainName,$TargetDomainName
+        $checkingTrustMessage = $($script:localizedData.CheckingTrustMessage) -f $SourceDomainName,$TargetDomainName
         Write-Verbose -Message $checkingTrustMessage
 
         switch ($TrustType)
@@ -240,27 +232,27 @@ function Confirm-ResourceProperties
             # Find trust betwen source & destination.
             $trust = $srcDomain.GetTrustRelationship($TargetDomainName)
 
-            $TestTrustMessage = $($LocalizedData.TestTrustMessage) -f 'present',$Ensure
+            $TestTrustMessage = $($script:localizedData.TestTrustMessage) -f 'present',$Ensure
             Write-Verbose -Message $TestTrustMessage
 
             if($Ensure -eq 'Present')
             {
                 #region Test for trust direction
 
-                $CheckPropertyMessage = $($LocalizedData.CheckPropertyMessage) -f 'trust direction'
+                $CheckPropertyMessage = $($script:localizedData.CheckPropertyMessage) -f 'trust direction'
                 Write-Verbose -Message $CheckPropertyMessage
 
                 # Set the trust direction if not correct
                 if($trust.TrustDirection -ne $TrustDirection)
                 {
-                    $notDesiredPropertyMessage = $($LocalizedData.NotDesiredPropertyMessage) -f 'Trust direction',$TrustDirection,$trust.TrustDirection
+                    $notDesiredPropertyMessage = $($script:localizedData.NotDesiredPropertyMessage) -f 'Trust direction',$TrustDirection,$trust.TrustDirection
                     Write-Verbose -Message $notDesiredPropertyMessage
 
                     if($Apply)
                     {
                         $srcDomain.UpdateTrustRelationship($trgDomain,$TrustDirection)
 
-                        $setPropertyMessage = $($LocalizedData.SetPropertyMessage) -f 'Trust direction'
+                        $setPropertyMessage = $($script:localizedData.SetPropertyMessage) -f 'Trust direction'
                         Write-Verbose -Message $setPropertyMessage
                     }
                     else
@@ -272,20 +264,20 @@ function Confirm-ResourceProperties
                 # Trust direction is correct
                 else
                 {
-                    $desiredPropertyMessage = $($LocalizedData.DesiredPropertyMessage) -f 'Trust direction'
+                    $desiredPropertyMessage = $($script:localizedData.DesiredPropertyMessage) -f 'Trust direction'
                     Write-Verbose -Message $desiredPropertyMessage
                 }
                 #endregion trust direction
 
                 #region Test for trust type
 
-                $CheckPropertyMessage = $($LocalizedData.CheckPropertyMessage) -f 'trust type'
+                $CheckPropertyMessage = $($script:localizedData.CheckPropertyMessage) -f 'trust type'
                 Write-Verbose -Message $CheckPropertyMessage
 
                 # Set the trust type if not correct
                 if($trust.TrustType-ne $TrustType)
                 {
-                    $notDesiredPropertyMessage = $($LocalizedData.NotDesiredPropertyMessage) -f 'Trust type',$TrustType,$trust.TrustType
+                    $notDesiredPropertyMessage = $($script:localizedData.NotDesiredPropertyMessage) -f 'Trust type',$TrustType,$trust.TrustType
                     Write-Verbose -Message $notDesiredPropertyMessage
 
                     if($Apply)
@@ -295,7 +287,7 @@ function Confirm-ResourceProperties
                         $srcDomain.DeleteTrustRelationship($trgDomain)
                         $srcDomain.CreateTrustRelationship($trgDomain,$TrustDirection)
 
-                        $setPropertyMessage = $($LocalizedData.SetPropertyMessage) -f 'Trust type'
+                        $setPropertyMessage = $($script:localizedData.SetPropertyMessage) -f 'Trust type'
                         Write-Verbose -Message $setPropertyMessage
                     }
                     else
@@ -307,7 +299,7 @@ function Confirm-ResourceProperties
                 # Trust type is correct
                 else
                 {
-                    $desiredPropertyMessage = $($LocalizedData.DesiredPropertyMessage) -f 'Trust type'
+                    $desiredPropertyMessage = $($script:localizedData.DesiredPropertyMessage) -f 'Trust type'
                     Write-Verbose -Message $desiredPropertyMessage
                 }
 
@@ -325,12 +317,12 @@ function Confirm-ResourceProperties
             {
                 if($Apply)
                 {
-                    $removingTrustMessage = $($LocalizedData.RemovingTrustMessage) -f $SourceDomainName,$TargetDomainName
+                    $removingTrustMessage = $($script:localizedData.RemovingTrustMessage) -f $SourceDomainName,$TargetDomainName
                     Write-Verbose -Message $removingTrustMessage
 
                     $srcDomain.DeleteTrustRelationship($trgDomain)
 
-                    $deleteTrustMessage = $LocalizedData.DeleteTrustMessage
+                    $deleteTrustMessage = $script:localizedData.DeleteTrustMessage
                     Write-Verbose -Message $deleteTrustMessage
                 }
                 else
@@ -343,19 +335,19 @@ function Confirm-ResourceProperties
         # Trust does not exist between source and destination
         catch [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException]
         {
-            $TestTrustMessage = $($LocalizedData.TestTrustMessage) -f 'absent',$Ensure
+            $TestTrustMessage = $($script:localizedData.TestTrustMessage) -f 'absent',$Ensure
             Write-Verbose -Message $TestTrustMessage
 
             if($Ensure -eq 'Present')
             {
                 if($Apply)
                 {
-                    $addingTrustMessage = $($LocalizedData.AddingTrustMessage) -f $SourceDomainName,$TargetDomainName
+                    $addingTrustMessage = $($script:localizedData.AddingTrustMessage) -f $SourceDomainName,$TargetDomainName
                     Write-Verbose -Message $addingTrustMessage
 
                     $srcDomain.CreateTrustRelationship($trgDomain,$TrustDirection)
 
-                    $setTrustMessage = $LocalizedData.SetTrustMessage
+                    $setTrustMessage = $script:localizedData.SetTrustMessage
                     Write-Verbose -Message $setTrustMessage
                 }
                 else
