@@ -11,7 +11,7 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$DomainName,
 
         [Parameter()]
@@ -68,7 +68,7 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$DomainName,
 
         [Parameter()]
@@ -140,7 +140,7 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$DomainName,
 
         [Parameter()]
@@ -185,7 +185,7 @@ function Get-Domain
     [OutputType([PSObject])]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$DomainName,
 
         [Parameter()]
