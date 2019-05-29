@@ -3,12 +3,12 @@ data LocalizedData
 {
     # culture="en-US"
     ConvertFrom-StringData @'
-MissingRoleMessage        = Please ensure that the {0} role is installed 
+MissingRoleMessage        = Please ensure that the {0} role is installed
 
 CheckingTrustMessage      = Checking if Trust between {0} and {1} exists ...
-TestTrustMessage          = Trust is {0} between source and target domains and it should be {1} 
+TestTrustMessage          = Trust is {0} between source and target domains and it should be {1}
 RemovingTrustMessage      = Removing trust between {0} and {1} domains ...
-DeleteTrustMessage        = Trust between specified domains is now absent                          
+DeleteTrustMessage        = Trust between specified domains is now absent
 AddingTrustMessage        = Adding domain trust between {0} and {1}  ...
 SetTrustMessage           = Trust between specified domains is now present
 
@@ -25,20 +25,20 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
@@ -56,7 +56,7 @@ function Get-TargetResource
     # If not found, means ADDS role is not installed
     catch
     {
-        $missingRoleMessage = $($LocalizedData.MissingRoleMessage) -f 'AD-Domain-Services' 
+        $missingRoleMessage = $($LocalizedData.MissingRoleMessage) -f 'AD-Domain-Services'
         New-TerminatingError -errorId ActiveDirectoryRoleMissing -errorMessage $missingRoleMessage -errorCategory NotInstalled
     }
 
@@ -110,20 +110,20 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
@@ -132,7 +132,7 @@ function Set-TargetResource
     )
 
     if($PSBoundParameters.ContainsKey('Debug')){$null = $PSBoundParameters.Remove('Debug')}
-    Validate-ResourceProperties @PSBoundParameters -Apply
+    Confirm-ResourceProperties @PSBoundParameters -Apply
 }
 
 function Test-TargetResource
@@ -141,20 +141,20 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
@@ -172,36 +172,37 @@ function Test-TargetResource
     # If not found, means ADDS role is not installed
     catch
     {
-        $missingRoleMessage = $($LocalizedData.MissingRoleMessage) -f 'AD-Domain-Services' 
+        $missingRoleMessage = $($LocalizedData.MissingRoleMessage) -f 'AD-Domain-Services'
         New-TerminatingError -errorId ActiveDirectoryRoleMissing -errorMessage $missingRoleMessage -errorCategory NotInstalled
     }
 
 #endregion
 
     if($PSBoundParameters.ContainsKey('Debug')){$null = $PSBoundParameters.Remove('Debug')}
-    Validate-ResourceProperties @PSBoundParameters
+    Confirm-ResourceProperties @PSBoundParameters
 }
 
 #region Helper Functions
-function Validate-ResourceProperties
+function Confirm-ResourceProperties
 {
     [Cmdletbinding()]
+    [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
@@ -233,7 +234,7 @@ function Validate-ResourceProperties
         {
             # Find trust betwen source & destination.
             $trust = $srcDomain.GetTrustRelationship($TargetDomainName)
-        
+
             $TestTrustMessage = $($LocalizedData.TestTrustMessage) -f 'present',$Ensure
             Write-Verbose -Message $TestTrustMessage
 
@@ -243,7 +244,7 @@ function Validate-ResourceProperties
 
                 $CheckPropertyMessage = $($LocalizedData.CheckPropertyMessage) -f 'trust direction'
                 Write-Verbose -Message $CheckPropertyMessage
-             
+
                 # Set the trust direction if not correct
                 if($trust.TrustDirection -ne $TrustDirection)
                 {
@@ -262,7 +263,7 @@ function Validate-ResourceProperties
                         return $false
                     }
                 } # end trust direction is not correct
-            
+
                 # Trust direction is correct
                 else
                 {
@@ -270,12 +271,12 @@ function Validate-ResourceProperties
                     Write-Verbose -Message $desiredPropertyMessage
                 }
                 #endregion trust direction
-             
+
                 #region Test for trust type
 
                 $CheckPropertyMessage = $($LocalizedData.CheckPropertyMessage) -f 'trust type'
                 Write-Verbose -Message $CheckPropertyMessage
-             
+
                 # Set the trust type if not correct
                 if($trust.TrustType-ne $TrustType)
                 {
@@ -297,7 +298,7 @@ function Validate-ResourceProperties
                         return $false
                     }
                 } # end trust type is not correct
-            
+
                 # Trust type is correct
                 else
                 {
@@ -311,12 +312,12 @@ function Validate-ResourceProperties
                 if(-not $Apply)
                 {
                     return $true
-                }                
+                }
             } # end Ensure -eq present
- 
+
             # If the trust should be absent, remove the trust
             else
-            {                                                    
+            {
                 if($Apply)
                 {
                     $removingTrustMessage = $($LocalizedData.RemovingTrustMessage) -f $SourceDomainName,$TargetDomainName
@@ -346,7 +347,7 @@ function Validate-ResourceProperties
                 {
                     $addingTrustMessage = $($LocalizedData.AddingTrustMessage) -f $SourceDomainName,$TargetDomainName
                     Write-Verbose -Message $addingTrustMessage
-            
+
                     $srcDomain.CreateTrustRelationship($trgDomain,$TrustDirection)
 
                     $setTrustMessage = $LocalizedData.SetTrustMessage
@@ -378,17 +379,17 @@ function New-TerminatingError
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$errorId,
-        
-        [Parameter(Mandatory)]
+
+        [Parameter(Mandatory = $true)]
         [String]$errorMessage,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.ErrorCategory]$errorCategory
     )
-    
-    $exception = New-Object System.InvalidOperationException $errorMessage 
+
+    $exception = New-Object System.InvalidOperationException $errorMessage
     $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
     throw $errorRecord
 }
