@@ -333,5 +333,14 @@ function Test-TargetResource
         $returnValue = $returnValue -and $currentActiveDirectoryRights -eq $desiredActiveDirectoryRights
     }
 
+    if ($returnValue)
+    {
+        Write-Verbose -Message ("Object permission entry on object '{0}' is in the desired state." -f $Path)
+    }
+    else
+    {
+        Write-Verbose -Message ("Object permission entry on object '{0}' is not in the desired state." -f $Path)
+    }
+
     return $returnValue
 }
