@@ -153,6 +153,7 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String] $Path,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
