@@ -33,6 +33,11 @@
   - Change the description of the property RestoreFromRecycleBin.
 - Changes to xADDomainController
   - Change the `#Requires` statement in the Examples to require the correct module.
+- Changes to xActiveDirectory
+  - Fix Script Analyzer rule failures
+  - Opt-in to "Common Tests - Custom Script Analyzer Rules"
+  - Opt-in to "Common Tests - Required Script Analyzer Rules"
+  - Opt-in to "Common Tests - Flagged Script Analyzer Rules"
 
 ## 2.26.0.0
 
