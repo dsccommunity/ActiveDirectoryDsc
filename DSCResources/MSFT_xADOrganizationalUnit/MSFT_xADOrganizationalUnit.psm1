@@ -28,10 +28,10 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $Name,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $Path
     )
 
@@ -56,27 +56,32 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $Name,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $Path,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.String] $Description = '',
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $RestoreFromRecycleBin
@@ -89,12 +94,14 @@ function Test-TargetResource
         if ($Ensure -eq 'Present')
         {
             ## Organizational unit exists
-            if ([System.String]::IsNullOrEmpty($Description)) {
+            if ([System.String]::IsNullOrEmpty($Description))
+            {
                 $isCompliant = (($targetResource.Name -eq $Name) -and
                                     ($targetResource.Path -eq $Path) -and
                                         ($targetResource.ProtectedFromAccidentalDeletion -eq $ProtectedFromAccidentalDeletion))
             }
-            else {
+            else
+            {
                 $isCompliant = (($targetResource.Name -eq $Name) -and
                                     ($targetResource.Path -eq $Path) -and
                                         ($targetResource.ProtectedFromAccidentalDeletion -eq $ProtectedFromAccidentalDeletion) -and
@@ -140,27 +147,31 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $Name,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String] $Path,
 
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean] $ProtectedFromAccidentalDeletion = $true,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.String] $Description = '',
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $RestoreFromRecycleBin
@@ -242,7 +253,8 @@ function Set-TargetResource
                 Description = $Description
                 ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
             }
-            if ($Credential) {
+            if ($Credential)
+            {
                 $newADOrganizationalUnitParams['Credential'] = $Credential
             }
             New-ADOrganizationalUnit @newADOrganizationalUnitParams
