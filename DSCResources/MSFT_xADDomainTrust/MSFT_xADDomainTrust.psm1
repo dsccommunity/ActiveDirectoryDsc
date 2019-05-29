@@ -42,6 +42,7 @@ function Get-TargetResource
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present'
     )
@@ -127,6 +128,7 @@ function Set-TargetResource
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present'
     )
@@ -158,6 +160,7 @@ function Test-TargetResource
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present'
     )
@@ -206,9 +209,11 @@ function Confirm-ResourceProperties
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present',
 
+        [Parameter()]
         [Switch]$Apply
     )
 
