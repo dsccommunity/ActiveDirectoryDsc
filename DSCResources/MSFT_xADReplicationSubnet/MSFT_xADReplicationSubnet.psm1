@@ -134,7 +134,7 @@ function Set-TargetResource
         }
         if ($replicationSiteName -ne $Site)
         {
-            Write-Verbose -Messsage ($script:localizedData.SetReplicationSubnetSite -f $Name, $Site)
+            Write-Verbose -Message ($script:localizedData.SetReplicationSubnetSite -f $Name, $Site)
 
             Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Site $Site -PassThru
         }
