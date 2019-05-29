@@ -1,3 +1,11 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADReplicationSiteLink'
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -23,23 +31,29 @@ function Get-TargetResource
         $msDSEnabledFeature = Get-ADObject -Identity "CN=Partitions,$($RootDSE.configurationNamingContext)" -Property msDS-EnabledFeature -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential |
             Select-Object -ExpandProperty msDS-EnabledFeature
 
-        If ($msDSEnabledFeature -contains $RecycleBinPath) {
+        If ($msDSEnabledFeature -contains $RecycleBinPath)
+        {
+            Write-Verbose -Message $script:localizedData.RecycleBinEnabled
             $RecycleBinEnabled = $True
         } Else {
+            Write-Verbose -Message $script:localizedData.RecycleBinNotEnabled
             $RecycleBinEnabled = $False
         }
     }
 
-    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException] {
-        Write-Error -Message "Cannot contact forest $ForestFQDN. Check the spelling of the Forest FQDN and make sure that a domain contoller is available on the network."
+    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
+        Write-Error -Message ($script:localizedData.ForestNotFound -f $ForestFQDN)
         Throw $_
     }
-    Catch [System.Security.Authentication.AuthenticationException] {
-        Write-Error -Message "Credential error. Check the username and password used."
+    Catch [System.Security.Authentication.AuthenticationException]
+    {
+        Write-Error -Message $script:localizedData.CredentialError
         Throw $_
     }
-    Catch {
-        Write-Error -Message "Unhandled exception getting Recycle Bin status for forest $ForestFQDN."
+    Catch
+    {
+        Write-Error -Message ($script:localizedData.GetUnhandledException -f $ForestFQDN)
         Throw $_
     }
 
@@ -80,12 +94,14 @@ function Set-TargetResource
         $Forest = Get-ADForest -Identity $ForestFQDN -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
 
         # Check minimum forest level and throw if not
-        If (($Forest.ForestMode -as [int]) -lt 4) {
-            Write-Verbose -Message "Forest functionality level $($Forest.ForestMode) does not meet minimum requirement of Windows2008R2Forest or greater."
-            Throw "Forest functionality level $($Forest.ForestMode) does not meet minimum requirement of Windows2008R2Forest or greater."
+        If (($Forest.ForestMode -as [int]) -lt 4)
+        {
+            Write-Verbose -Message ($script:localizedData.ForestFunctionalLevelError -f $Forest.ForestMode)
+            Throw ($script:localizedData.ForestFunctionalLevelError -f $Forest.ForestMode)
         }
 
-        If ($PSCmdlet.ShouldProcess($Forest.RootDomain, "Enable Active Directory Recycle Bin")) {
+        If ($PSCmdlet.ShouldProcess($Forest.RootDomain, "Enable Active Directory Recycle Bin"))
+        {
             Enable-ADOptionalFeature 'Recycle Bin Feature' -Scope ForestOrConfigurationSet `
                 -Target $Forest.RootDomain -Server $Forest.DomainNamingMaster `
                 -Credential $EnterpriseAdministratorCredential `
@@ -93,20 +109,24 @@ function Set-TargetResource
         }
     }
 
-    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException] {
-        Write-Error -Message "Cannot contact forest $ForestFQDN. Check the spelling of the Forest FQDN and make sure that a domain contoller is available on the network."
+    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
+        Write-Error -Message ($script:localizedData.ForestNotFound -f $ForestFQDN)
         Throw $_
     }
-    Catch [System.Security.Authentication.AuthenticationException] {
-        Write-Error -Message "Credential error. Check the username and password used."
+    Catch [System.Security.Authentication.AuthenticationException]
+    {
+        Write-Error -Message $script:localizedData.CredentialError
         Throw $_
     }
-    Catch {
-        Write-Error -Message "Unhandled exception setting Recycle Bin status for forest $ForestFQDN."
+    Catch
+    {
+        Write-Error -Message ($script:localizedData.SetUnhandledException -f $ForestFQDN)
         Throw $_
     }
 
-    Finally {
+    Finally
+    {
         $ErrorActionPreference = 'Continue'
     }
 
@@ -128,7 +148,8 @@ function Test-TargetResource
         $EnterpriseAdministratorCredential
     )
 
-    Try {
+    Try
+    {
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
 
@@ -137,29 +158,34 @@ function Test-TargetResource
         $msDSEnabledFeature = Get-ADObject -Identity "CN=Partitions,$($RootDSE.configurationNamingContext)" -Property msDS-EnabledFeature -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential |
             Select-Object -ExpandProperty msDS-EnabledFeature
 
-        If ($msDSEnabledFeature -contains $RecycleBinPath) {
-            Write-Verbose "Active Directory Recycle Bin is enabled."
+        If ($msDSEnabledFeature -contains $RecycleBinPath)
+        {
+            Write-Verbose $script:localizedData.RecycleBinEnabled
             Return $True
         } Else {
-            Write-Verbose "Active Directory Recycle Bin is not enabled."
+            Write-Verbose $script:localizedData.RecycleBinNotEnabled
             Return $False
         }
     }
 
-    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException] {
-        Write-Error -Message "Cannot contact forest $ForestFQDN. Check the spelling of the Forest FQDN and make sure that a domain contoller is available on the network."
+    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
+        Write-Error -Message ($script:localizedData.ForestNotFound -f $ForestFQDN)
         Throw $_
     }
-    Catch [System.Security.Authentication.AuthenticationException] {
-        Write-Error -Message "Credential error. Check the username and password used."
+    Catch [System.Security.Authentication.AuthenticationException]
+    {
+        Write-Error -Message $script:localizedData.CredentialError
         Throw $_
     }
-    Catch {
-        Write-Error -Message "Unhandled exception testing Recycle Bin status for forest $ForestFQDN."
+    Catch
+    {
+        Write-Error -Message ($script:localizedData.TestUnhandledException -f $ForestFQDN)
         Throw $_
     }
 
-    Finally {
+    Finally
+    {
         $ErrorActionPreference = 'Continue'
     }
 
@@ -184,6 +210,3 @@ Get-TargetResource -ForestFQDN contoso.cm -EnterpriseAdministratorCredential $cr
 Test-TargetResource -ForestFQDN contoso.cm -EnterpriseAdministratorCredential $cred
 Set-TargetResource -ForestFQDN contoso.cm -EnterpriseAdministratorCredential $cred -WhatIf
 #>
-
-
-
