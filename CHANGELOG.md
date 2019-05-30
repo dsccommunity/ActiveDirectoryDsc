@@ -46,6 +46,8 @@
   - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
     resource is using the `$global:DSCMachineStatus` variable to trigger
     a reboot.
+- Changes to xADReplicationSiteLink
+  - Fix ADIdentityNotFoundException When Creating a New Site Link.
 
 ## 2.26.0.0
 
