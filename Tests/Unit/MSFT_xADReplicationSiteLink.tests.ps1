@@ -75,7 +75,7 @@ try
             }
 
             Context 'When AD Replication Sites do not exist' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { $null }
+                Mock -CommandName Get-ADReplicationSiteLink -MockWith { Throw }
 
                 It 'Ensure Should be Absent' {
                     $getResult = Get-TargetResource -Name HQSiteLink
