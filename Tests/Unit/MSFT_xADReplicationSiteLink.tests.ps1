@@ -75,7 +75,7 @@ try
             }
 
             Context 'When AD Replication Sites do not exist' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] }
+                Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException) }
 
                 It 'Ensure Should be Absent' {
                     $getResult = Get-TargetResource -Name HQSiteLink
@@ -89,6 +89,15 @@ try
                     $getResult.Ensure                        | Should -Be 'Absent'
                 }
             }
+
+            Context 'When Get-ADReplicationSiteLink throws an unexpected error' {
+                Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw }
+
+                It 'Should throw' {
+                    { Get-TargetResource -Name HQSiteLink } | Should -Throw
+                }
+            }
+
 
             Context 'When Sites are excluded' {
                 Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockADReplicationSiteLinkSitesExcluded }
