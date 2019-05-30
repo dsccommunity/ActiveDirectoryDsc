@@ -31,7 +31,30 @@ function Get-TargetResource
         $SitesExcluded
     )
 
-    $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties 'Description' -ErrorAction 'SilentlyContinue'
+    Try
+    {
+        $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties 'Description'
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        Write-Verbose -Message ($script:localizedData.SiteLinkNotFound -f $Name)
+
+        $returnValue = @{
+            Name                          = $Name
+            Cost                          = $null
+            Description                   = $null
+            ReplicationFrequencyInMinutes = $null
+            SitesIncluded                 = $null
+            SitesExcluded                 = $SitesExcluded
+            Ensure                        = 'Absent'
+        }
+        $siteLink = $Null
+    }
+    catch
+    {
+        $errorMessage = $script:localizedData.GetSiteLinkUnexpectedError -f $ComputerName
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+    }
 
     if ($null -ne $siteLink)
     {
@@ -44,7 +67,7 @@ function Get-TargetResource
             }
         }
 
-        $sitesExcludedEvaluated = $SitesExcluded | Where-Object -FilterScript {$_ -notin $siteCommonNames}
+        $sitesExcludedEvaluated = $SitesExcluded | Where-Object -FilterScript { $_ -notin $siteCommonNames }
 
         $returnValue = @{
             Name                          = $Name
@@ -54,21 +77,6 @@ function Get-TargetResource
             SitesIncluded                 = $siteCommonNames
             SitesExcluded                 = $sitesExcludedEvaluated
             Ensure                        = 'Present'
-        }
-
-    }
-    else
-    {
-        Write-Verbose -Message ($script:localizedData.SiteLinkNotFound -f $Name)
-
-        $returnValue = @{
-            Name                          = $Name
-            Cost                          = $null
-            Description                   = $null
-            ReplicationFrequencyInMinutes = $null
-            SitesIncluded                 = $null
-            SitesExcluded                 = $SitesExcluded
-            Ensure                        = 'Absent'
         }
     }
 
