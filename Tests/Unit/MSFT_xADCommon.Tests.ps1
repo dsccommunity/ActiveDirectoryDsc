@@ -8,7 +8,7 @@ $Global:DSCResourceName    = 'MSFT_xADCommon' # Example MSFT_xFirewall
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
 Write-Host $moduleRoot -ForegroundColor Green;
 if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+    (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
     & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
@@ -1445,6 +1445,74 @@ try
                 }
             }
         }
+        #region Function Assert-ADPSDrive
+        Describe "$($Global:DSCResourceName)\Assert-ADPSDrive" {
+            Mock -CommandName Assert-Module
+
+            Context 'When the AD PS Drive does not exist and the New-PSDrive function is successful' {
+                Mock -CommandName Get-PSDrive -MockWith { $null }
+                Mock -CommandName New-PSDrive
+
+                It 'Should not throw' {
+                    { Assert-ADPSDrive } | Should -Not -Throw
+                }
+
+                It 'Should have called Assert-Module' {
+                    Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1 -Scope Context
+                }
+
+                It 'Should have called Get-PSDrive only once' {
+                    Assert-MockCalled -CommandName Get-PSDrive -Exactly -Times 1 -Scope Context
+                }
+
+                It 'Should have called New-PSDrive only once' {
+                    Assert-MockCalled -CommandName New-PSDrive -Exactly -Times 1 -Scope Context
+                }
+            }
+
+            Context 'When the AD PS Drive does not exist and the New-PSDrive function is not successful' {
+                Mock -CommandName Get-PSDrive -MockWith { $null }
+                Mock -CommandName New-PSDrive -MockWith { throw }
+
+                It 'Should throw the correct error' {
+                    { Assert-ADPSDrive } | Should -Throw $script:localizedString.CreatingNewADPSDriveError
+                }
+
+                It 'Should call Assert-Module' {
+                    Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1 -Scope Context
+                }
+
+                It 'Should call Get-PSDrive once' {
+                    Assert-MockCalled -CommandName Get-PSDrive -Exactly -Times 1 -Scope Context
+                }
+
+                It 'Should call New-PSDrive once' {
+                    Assert-MockCalled -CommandName New-PSDrive -Exactly -Times 1 -Scope Context
+                }
+            }
+
+            Context 'When the AD PS Drive already exists' {
+                Mock -CommandName Get-PSDrive -MockWith { New-MockObject -Type System.Management.Automation.PSDriveInfo }
+                Mock -CommandName New-PSDrive
+
+                It 'Should not throw' {
+                  { Assert-ADPSDrive } | Should -Not -Throw
+                }
+
+                It 'Should call Assert-Module only once' {
+                    Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1 -Scope Context
+                }
+
+                It 'Should call Get-PSDrive only once' {
+                    Assert-MockCalled -CommandName Get-PSDrive -Exactly -Times 1 -Scope Context
+                }
+
+                It 'Should not call New-PSDrive' {
+                    Assert-MockCalled -CommandName New-PSDrive -Exactly -Times 0 -Scope Context
+                }
+            }
+        }
+        #endregion
     }
     #endregion
 }

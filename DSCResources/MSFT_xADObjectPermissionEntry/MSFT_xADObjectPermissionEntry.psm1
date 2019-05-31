@@ -1,7 +1,14 @@
+# Import the common AD functions
+$adCommonFunctions = Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
+Import-Module -Name $adCommonFunctions
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADObjectPermissionEntry'
 
 <#
     .SYNOPSIS
-        Get the current state of the object access entry.
+        Get the current state of the object permission entry.
 
     .PARAMETER Path
         Active Directory path of the target object to add or remove the
@@ -57,8 +64,7 @@ function Get-TargetResource
         $InheritedObjectType
     )
 
-    # Import the Active Directory module for the AD: drive
-    Import-Module -Name 'ActiveDirectory' -Verbose:$false
+    Assert-ADPSDrive
 
     # Return object, by default representing an absent ace
     $returnValue = @{
@@ -89,26 +95,24 @@ function Get-TargetResource
                 $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
                 $access.InheritedObjectType.Guid -eq $InheritedObjectType)
             {
-                Write-Verbose "Target ace has been found"
+                Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryFound -f $Path)
 
                 $returnValue['Ensure'] = 'Present'
                 $returnValue['ActiveDirectoryRights'] = [String[]] $access.ActiveDirectoryRights.ToString().Split(',').ForEach({ $_.Trim() })
 
                 return $returnValue
             }
-            else
-            {
-                Write-Verbose "Target ace has not been found"
-            }
         }
     }
+
+    Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryNotFound -f $Path)
 
     return $returnValue
 }
 
 <#
     .SYNOPSIS
-        Add or remove the object access entry.
+        Add or remove the object permission entry.
 
     .PARAMETER Ensure
         Indicates if the access will be added (Present) or will be removed
@@ -183,15 +187,14 @@ function Set-TargetResource
         $InheritedObjectType
     )
 
-    # Import the Active Directory module for the AD: drive
-    Import-Module -Name 'ActiveDirectory' -Verbose:$false
+    Assert-ADPSDrive
 
     # Get the current acl
     $acl = Get-Acl -Path "AD:$Path"
 
     if ($Ensure -eq 'Present')
     {
-        Write-Verbose "Add access rule to object $Path"
+        Write-Verbose -Message ($script:localizedData.AddingObjectPermissionEntry -f $Path)
 
         $ntAccount = New-Object -TypeName 'System.Security.Principal.NTAccount' -ArgumentList $IdentityReference
 
@@ -220,7 +223,7 @@ function Set-TargetResource
                     $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
                     $access.InheritedObjectType.Guid -eq $InheritedObjectType)
                 {
-                    Write-Verbose "Remove access rule on object $Path"
+                    Write-Verbose -Message ($script:localizedData.RemovingObjectPermissionEntry -f $Path)
 
                     $acl.RemoveAccessRule($access)
                 }
@@ -234,7 +237,7 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
-        Test the object access entry.
+        Test the object permission entry.
 
     .PARAMETER Ensure
         Indicates if the access will be added (Present) or will be removed
@@ -335,11 +338,11 @@ function Test-TargetResource
 
     if ($returnValue)
     {
-        Write-Verbose -Message ("Object permission entry on object '{0}' is in the desired state." -f $Path)
+        Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryInDesiredState -f $Path)
     }
     else
     {
-        Write-Verbose -Message ("Object permission entry on object '{0}' is not in the desired state." -f $Path)
+        Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryNotInDesiredState -f $Path)
     }
 
     return $returnValue
