@@ -1473,9 +1473,10 @@ try
             Context 'When the AD PS Drive does not exist and the New-PSDrive function is not successful' {
                 Mock -CommandName Get-PSDrive -MockWith { throw 'Error' }
                 Mock -CommandName New-PSDrive -MockWith { throw }
-                Mock -CommandName New-InvalidOperationException -MockWith { }
 
-                { Assert-ADPSDrive } | Should Not Throw
+                It 'Should throw the correct error' {
+                    { Assert-ADPSDrive } | Should -Throw $script:localizedString.CreatingNewADPSDriveError
+                }
 
                 It 'Should call Assert-Module' {
                     Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1 -Scope Context
@@ -1487,11 +1488,6 @@ try
 
                 It 'Should call New-PSDrive once' {
                     Assert-MockCalled -CommandName New-PSDrive -Exactly -Times 1 -Scope Context
-                }
-
-                It 'Should call New-InvalidOperationException once' {
-
-                    Assert-MockCalled -CommandName New-InvalidOperationException -Exactly -Times 1 -Scope Context
                 }
             }
 
