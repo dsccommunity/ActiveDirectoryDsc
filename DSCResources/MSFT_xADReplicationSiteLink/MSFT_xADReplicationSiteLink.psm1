@@ -52,7 +52,7 @@ function Get-TargetResource
     }
     catch
     {
-        $errorMessage = $script:localizedData.GetSiteLinkUnexpectedError -f $ComputerName
+        $errorMessage = $script:localizedData.GetSiteLinkUnexpectedError -f $Name
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
