@@ -1450,7 +1450,7 @@ try
             Mock -CommandName Assert-Module
 
             Context 'When the AD PS Drive does not exist and the New-PSDrive function is successful' {
-                Mock -CommandName Get-PSDrive -MockWith { throw 'Error' }
+                Mock -CommandName Get-PSDrive -MockWith { $null }
                 Mock -CommandName New-PSDrive
 
                 It 'Should not throw' {
@@ -1471,7 +1471,7 @@ try
             }
 
             Context 'When the AD PS Drive does not exist and the New-PSDrive function is not successful' {
-                Mock -CommandName Get-PSDrive -MockWith { throw 'Error' }
+                Mock -CommandName Get-PSDrive -MockWith { $null }
                 Mock -CommandName New-PSDrive -MockWith { throw }
 
                 It 'Should throw the correct error' {
@@ -1492,7 +1492,7 @@ try
             }
 
             Context 'When the AD PS Drive already exists' {
-                Mock -CommandName Get-PSDrive
+                Mock -CommandName Get-PSDrive -MockWith { New-MockObject -Type System.Management.Automation.PSDriveInfo }
                 Mock -CommandName New-PSDrive
 
                 It 'Should not throw' {
