@@ -9,6 +9,10 @@
     - Compare-ResourcePropertyState
     - Test-DscPropertyState
   - Move the examples in the README.md to Examples folder
+  - Fix Script Analyzer rule failures
+  - Opt-in to "Common Tests - Custom Script Analyzer Rules"
+  - Opt-in to "Common Tests - Required Script Analyzer Rules"
+  - Opt-in to "Common Tests - Flagged Script Analyzer Rules"
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
@@ -50,11 +54,6 @@
 - Changes to xADObjectPermissionEntry
   - Fix failure when applied in the same configuration as xADDomain
   - Localize and Improve verbose messaging
-- Changes to xActiveDirectory
-  - Fix Script Analyzer rule failures
-  - Opt-in to "Common Tests - Custom Script Analyzer Rules"
-  - Opt-in to "Common Tests - Required Script Analyzer Rules"
-  - Opt-in to "Common Tests - Flagged Script Analyzer Rules"
 
 ## 2.26.0.0
 
