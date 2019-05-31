@@ -8,6 +8,7 @@
     - Convert-PropertyMapToObjectProperties
     - Compare-ResourcePropertyState
     - Test-DscPropertyState
+  - Move the examples in the README.md to Examples folder
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
