@@ -1447,11 +1447,11 @@ try
         }
         #region Function Assert-ADPSDrive
         Describe "$($Global:DSCResourceName)\Assert-ADPSDrive" {
-            Mock -CommandName Assert-Module -MockWith { }
+            Mock -CommandName Assert-Module
 
             Context 'When the AD PS Drive does not exist and the New-PSDrive function is successful' {
                 Mock -CommandName Get-PSDrive -MockWith { Throw 'Error' }
-                Mock -CommandName New-PSDrive -MockWith { }
+                Mock -CommandName New-PSDrive
 
                 It 'Should not throw' {
                     { Assert-ADPSDrive } | Should -Not -Throw
@@ -1496,8 +1496,8 @@ try
             }
 
             Context 'When the AD PS Drive already exists' {
-                Mock -CommandName Get-PSDrive -MockWith { }
-                Mock -CommandName New-PSDrive -MockWith { }
+                Mock -CommandName Get-PSDrive
+                Mock -CommandName New-PSDrive
 
                 Assert-ADPSDrive
 
