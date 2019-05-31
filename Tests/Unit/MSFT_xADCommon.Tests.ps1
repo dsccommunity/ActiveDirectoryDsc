@@ -1495,7 +1495,9 @@ try
                 Mock -CommandName Get-PSDrive
                 Mock -CommandName New-PSDrive
 
-                Assert-ADPSDrive
+                It 'Should not throw' {
+                  { Assert-ADPSDrive } | Should -Not -Throw
+                }
 
                 It 'Should call Assert-Module only once' {
                     Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1 -Scope Context
