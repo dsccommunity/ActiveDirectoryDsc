@@ -47,6 +47,9 @@
   - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
     resource is using the `$global:DSCMachineStatus` variable to trigger
     a reboot.
+- Changes to xADObjectPermissionEntry
+  - Fix failure when applied in the same configuration as xADDomain
+  - Localize and Improve verbose messaging
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException When Creating a New Site Link.
 
