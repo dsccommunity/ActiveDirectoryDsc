@@ -1322,7 +1322,7 @@ function Test-DscPropertyState
     .NOTES
         Throws an exception if the PS Drive cannot be created.
 #>
-Function Assert-ADPSDrive
+function Assert-ADPSDrive
 {
     [CmdletBinding()]
     param
@@ -1341,11 +1341,11 @@ Function Assert-ADPSDrive
     Catch
     {
         Write-Verbose -Message $script:localizedString.CreatingNewADPSDrive
-        Try
+        try
         {
             New-PSDrive -Name AD -PSProvider 'ActiveDirectory' -Root $Root -Scope Script -ErrorAction Stop | Out-Null
         }
-        Catch
+        catch
         {
             $errorMessage = $script:localizedString.CreatingNewADPSDriveError
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
