@@ -1334,11 +1334,9 @@ function Assert-ADPSDrive
 
     Assert-Module -ModuleName 'ActiveDirectory' -ImportModule
 
-    Try
-    {
-        Get-PSDrive -Name AD -ErrorAction Stop | Out-Null
-    }
-    Catch
+    $activeDirectoryPSDrive = Get-PSDrive -Name AD -ErrorAction SilentlyContinue
+
+    if ($null -eq $activeDirectoryPSDrive)
     {
         Write-Verbose -Message $script:localizedString.CreatingNewADPSDrive
         try
