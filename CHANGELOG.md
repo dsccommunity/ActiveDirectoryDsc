@@ -8,6 +8,7 @@
     - Convert-PropertyMapToObjectProperties
     - Compare-ResourcePropertyState
     - Test-DscPropertyState
+  - Move the examples in the README.md to Examples folder
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
@@ -46,6 +47,9 @@
   - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
     resource is using the `$global:DSCMachineStatus` variable to trigger
     a reboot.
+- Changes to xADObjectPermissionEntry
+  - Fix failure when applied in the same configuration as xADDomain
+  - Localize and Improve verbose messaging
 
 ## 2.26.0.0
 

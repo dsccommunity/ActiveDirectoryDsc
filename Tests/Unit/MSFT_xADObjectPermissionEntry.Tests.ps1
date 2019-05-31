@@ -85,11 +85,16 @@ try
         #region Function Get-TargetResource
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
 
-            Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
+            Mock -CommandName 'Assert-ADPSDrive' -MockWith { }
 
             Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
+
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
 
                 It 'Should return a "System.Collections.Hashtable" object type' {
                     # Act
@@ -119,6 +124,11 @@ try
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
 
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
+
                 It 'Should return a valid result if the ace is absent' {
                     # Act
                     $targetResource = Get-TargetResource @testDefaultParameters -Verbose
@@ -140,9 +150,9 @@ try
         #region Function Test-TargetResource
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
 
-            Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
+            Mock -CommandName 'Assert-ADPSDrive' { }
 
-            Context 'When he desired ace is present' {
+            Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
 
@@ -197,12 +207,17 @@ try
         #region Function Set-TargetResource
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
 
-            Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
+            Mock -CommandName 'Assert-ADPSDrive' -MockWith { }
 
             Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
                 Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
+
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
 
                 It 'Should remove the ace from the existing acl' {
                     # Act
@@ -217,6 +232,11 @@ try
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
                 Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
+
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
 
                 It 'Should add the ace to the existing acl' {
                     # Act
