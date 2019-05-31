@@ -4,45 +4,7 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
 
-data localizedString
-{
-    # culture="en-US"
-    ConvertFrom-StringData @'
-        WasExpectingDomainController     = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADCOMMON0001)
-        FailedEvaluatingDomainController = Could not evaluate if the node is a domain controller. (ADCOMMON0002)
-        EvaluatePropertyState            = Evaluating the state of the property '{0}'. (ADCOMMON0003)
-        PropertyInDesiredState           = The parameter '{0}' is in desired state. (ADCOMMON0004)
-        PropertyNotInDesiredState        = The parameter '{0}' is not in desired state. (ADCOMMON0005)
-        ArrayDoesNotMatch                = One or more values in an array does not match the desired state. Details of the changes are below. (ADCOMMON0006)
-        ArrayValueThatDoesNotMatch       = {0} - {1} (ADCOMMON0007)
-        PropertyValueOfTypeDoesNotMatch  = {0} value does not match. Current value is '{1}', but expected the value '{2}'. (ADCOMMON0008)
-        UnableToCompareType              = Unable to compare the type {0} as it is not handled by the Test-DscPropertyState cmdlet. (ADCOMMON0009)
-        RoleNotFoundError                = Please ensure that the PowerShell module for role '{0}' is installed. (ADCOMMON0010)
-        MembersAndIncludeExcludeError    = The '{0}' and '{1}' and/or '{2}' parameters conflict. The '{0}' parameter should not be used in any combination with the '{1}' and '{2}' parameters. (ADCOMMON0011)
-        MembersIsNullError               = The Members parameter value is null. The '{0}' parameter must be provided if neither '{1}' nor '{2}' is provided. (ADCOMMON0012)
-        MembersIsEmptyError              = The Members parameter is empty.  At least one group member must be provided. (ADCOMMON0013)
-        IncludeAndExcludeConflictError   = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values. (ADCOMMON0014)
-        IncludeAndExcludeAreEmptyError   = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters. (ADCOMMON0015)
-        ModeConversionError              = Converted mode {0} is not a {1}. (ADCOMMON0016)
-        RecycleBinRestoreFailed          = Restoring {0} ({1}) from the recycle bin failed. Error message: {2}. (ADCOMMON0017)
-        EmptyDomainError                 = No domain name retrieved for group member {0} in group {1}. (ADCOMMON0018)
-        CheckingMembers                  = Checking for '{0}' members. (ADCOMMON0019)
-        MembershipCountMismatch          = Membership count is not correct. Expected '{0}' members, actual '{1}' members. (ADCOMMON0020)
-        MemberNotInDesiredState          = Member '{0}' is not in the desired state. (ADCOMMON0021)
-        RemovingDuplicateMember          = Removing duplicate member '{0}' definition. (ADCOMMON0022)
-        MembershipInDesiredState         = Membership is in the desired state. (ADCOMMON0023)
-        MembershipNotDesiredState        = Membership is NOT in the desired state. (ADCOMMON0024)
-        CheckingDomain                   = Checking for domain '{0}'. (ADCOMMON0025)
-        CheckingSite                     = Checking for site '{0}'. (ADCOMMON0026)
-        FindInRecycleBin                 = Finding objects in the recycle bin matching the filter {0}. (ADCOMMON0027)
-        FoundRestoreTargetInRecycleBin   = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object. (ADCOMMON0028)
-        RecycleBinRestoreSuccessful      = Successfully restored object {0} ({1}) from the recycle bin. (ADCOMMON0029)
-        AddingGroupMember                = Adding member '{0}' from domain '{1}' to AD group '{2}'. (ADCOMMON0030)
-        PropertyMapArrayIsWrongType      = An object in the property map array is not of the type [System.Collections.Hashtable]. (ADCOMMON0031)
-        CreatingNewADPSDrive             = Creating new AD: PSDrive. (ADCOMMON0032)
-        CreatingNewADPSDriveError        = Error creating AD: PS Drive. (ADCOMMON0033)
-'@
-}
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADCommon'
 
 # Internal function to assert if the role specific module is installed or not
 function Assert-Module
@@ -63,7 +25,7 @@ function Assert-Module
     if (-not (Get-Module -Name $ModuleName -ListAvailable))
     {
         $errorId = '{0}_ModuleNotFound' -f $ModuleName;
-        $errorMessage = $localizedString.RoleNotFoundError -f $moduleName;
+        $errorMessage = $script:localizedData.RoleNotFoundError -f $moduleName;
         ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage;
     }
 
@@ -138,7 +100,7 @@ function Test-ADDomain
         $Credential
     )
 
-    Write-Verbose -Message ($localizedString.CheckingDomain -f $DomainName);
+    Write-Verbose -Message ($script:localizedData.CheckingDomain -f $DomainName);
     $ldapDomain = 'LDAP://{0}' -f $DomainName;
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
@@ -227,14 +189,14 @@ function Assert-MemberParameters
         {
             # If Members are provided, Include and Exclude are not allowed.
             $errorId = '{0}_MembersPlusIncludeOrExcludeConflict' -f $ModuleName;
-            $errorMessage = $localizedString.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude';
+            $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude';
             ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
         }
 
         if ($Members.Length -eq 0) # )
         {
             $errorId = '{0}_MembersIsNull' -f $ModuleName;
-            $errorMessage = $localizedString.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude';
+            $errorMessage = $script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude';
             ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
         }
     }
@@ -254,7 +216,7 @@ function Assert-MemberParameters
         if (($MembersToInclude.Length -eq 0) -and ($MembersToExclude.Length -eq 0))
         {
             $errorId = '{0}_EmptyIncludeAndExclude' -f $ModuleName;
-            $errorMessage = $localizedString.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude';
+            $errorMessage = $script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude';
             ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
         }
 
@@ -264,7 +226,7 @@ function Assert-MemberParameters
             if ($member -in $MembersToExclude)
             {
                 $errorId = '{0}_IncludeAndExcludeConflict' -f $ModuleName;
-                $errorMessage = $localizedString.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude';
+                $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude';
                 ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
             }
         }
@@ -295,7 +257,7 @@ function Remove-DuplicateMembers
             if ($Members[$sourceIndex] -eq $Members[$matchIndex])
             {
                 # A duplicate is found. Discard the duplicate.
-                Write-Verbose -Message ($localizedString.RemovingDuplicateMember -f $Members[$sourceIndex]);
+                Write-Verbose -Message ($script:localizedData.RemovingDuplicateMember -f $Members[$sourceIndex]);
                 $matchFound = $true;
                 continue;
             }
@@ -356,11 +318,11 @@ function Test-Members
         {
             $Members = @();
         }
-        Write-Verbose ($localizedString.CheckingMembers -f 'Explicit');
+        Write-Verbose ($script:localizedData.CheckingMembers -f 'Explicit');
         $Members = [System.String[]] @(Remove-DuplicateMembers -Members $Members);
         if ($ExistingMembers.Count -ne $Members.Count)
         {
-            Write-Verbose -Message ($localizedString.MembershipCountMismatch -f $Members.Count, $ExistingMembers.Count);
+            Write-Verbose -Message ($script:localizedData.MembershipCountMismatch -f $Members.Count, $ExistingMembers.Count);
             return $false;
         }
 
@@ -368,7 +330,7 @@ function Test-Members
         {
             if ($member -notin $ExistingMembers)
             {
-                Write-Verbose -Message ($localizedString.MemberNotInDesiredState -f $member);
+                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member);
                 return $false;
             }
         }
@@ -380,13 +342,13 @@ function Test-Members
         {
             $MembersToInclude = @();
         }
-        Write-Verbose -Message ($localizedString.CheckingMembers -f 'Included');
+        Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Included');
         $MembersToInclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToInclude);
         foreach ($member in $MembersToInclude)
         {
             if ($member -notin $ExistingMembers)
             {
-                Write-Verbose -Message ($localizedString.MemberNotInDesiredState -f $member);
+                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member);
                 return $false;
             }
         }
@@ -398,19 +360,19 @@ function Test-Members
         {
             $MembersToExclude = @();
         }
-        Write-Verbose -Message ($localizedString.CheckingMembers -f 'Excluded');
+        Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Excluded');
         $MembersToExclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToExclude);
         foreach ($member in $MembersToExclude)
         {
             if ($member -in $ExistingMembers)
             {
-                Write-Verbose -Message ($localizedString.MemberNotInDesiredState -f $member);
+                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member);
                 return $false;
             }
         }
     } #end if $MembersToExclude
 
-    Write-Verbose -Message $localizedString.MembershipInDesiredState;
+    Write-Verbose -Message $script:localizedData.MembershipInDesiredState
     return $true;
 
 } #end function Test-Membership
@@ -672,7 +634,7 @@ function Test-ADReplicationSite
         $Credential
     )
 
-    Write-Verbose -Message ($localizedString.CheckingSite -f $SiteName);
+    Write-Verbose -Message ($script:localizedData.CheckingSite -f $SiteName);
 
     $existingDC = "$((Get-ADDomainController -Discover -DomainName $DomainName -ForceDiscover).HostName)";
 
@@ -809,7 +771,7 @@ function Restore-ADCommonObject
     )
 
     $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f $Identity, $ObjectClass
-    Write-Verbose -Message ($localizedString.FindInRecycleBin -f $restoreFilter) -Verbose
+    Write-Verbose -Message ($script:localizedData.FindInRecycleBin -f $restoreFilter) -Verbose
 
     <#
         Using IsDeleted and IncludeDeletedObjects will mean that the cmdlet does not throw
@@ -831,7 +793,7 @@ function Restore-ADCommonObject
 
     if ($restorableObject)
     {
-        Write-Verbose -Message ($localizedString.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName) -Verbose
+        Write-Verbose -Message ($script:localizedData.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName) -Verbose
 
         try
         {
@@ -840,12 +802,12 @@ function Restore-ADCommonObject
             $restoreParams['ErrorAction'] = 'Stop'
             $restoreParams['Identity'] = $restorableObject.DistinguishedName
             $restoredObject = Restore-ADObject @restoreParams
-            Write-Verbose -Message ($localizedString.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass) -Verbose
+            Write-Verbose -Message ($script:localizedData.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass) -Verbose
         }
         catch [Microsoft.ActiveDirectory.Management.ADException]
         {
             # After Get-TargetResource is through, only one error can occur here: Object parent does not exist
-            ThrowInvalidOperationError -ErrorId "$($Identity)_RecycleBinRestoreFailed" -ErrorMessage ($localizedString.RecycleBinRestoreFailed -f $Identity, $ObjectClass, $_.Exception.Message)
+            ThrowInvalidOperationError -ErrorId "$($Identity)_RecycleBinRestoreFailed" -ErrorMessage ($script:localizedData.RecycleBinRestoreFailed -f $Identity, $ObjectClass, $_.Exception.Message)
         }
     }
 
@@ -927,10 +889,10 @@ function Add-ADCommonGroupMember
 
             if (-not $memberDomain)
             {
-                ThrowInvalidArgumentError -ErrorId "$($member)_EmptyDomainError" -ErrorMessage ($localizedString.EmptyDomainError -f $member, $Parameters.GroupName)
+                ThrowInvalidArgumentError -ErrorId "$($member)_EmptyDomainError" -ErrorMessage ($script:localizedData.EmptyDomainError -f $member, $Parameters.GroupName)
             }
 
-            Write-Verbose -Message ($localizedString.AddingGroupMember -f $member, $memberDomain, $Parameters.GroupName)
+            Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.GroupName)
             $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass
             if ($memberObjectClass -eq 'computer')
             {
@@ -1017,7 +979,7 @@ function Get-DomainControllerObject
     }
     catch
     {
-        $errorMessage = $localizedString.FailedEvaluatingDomainController
+        $errorMessage = $script:localizedData.FailedEvaluatingDomainController
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
@@ -1082,7 +1044,7 @@ function Convert-PropertyMapToObjectProperties
     {
         if ($property -isnot [System.Collections.Hashtable])
         {
-            $errorMessage = $localizedString.PropertyMapArrayIsWrongType
+            $errorMessage = $script:localizedData.PropertyMapArrayIsWrongType
             New-InvalidOperationException -Message $errorMessage
         }
 
@@ -1184,7 +1146,7 @@ function Compare-ResourcePropertyState
 
     foreach ($parameterName in $DesiredValues.Keys)
     {
-        Write-Verbose -Message ($localizedString.EvaluatePropertyState -f $parameterName) -Verbose
+        Write-Verbose -Message ($script:localizedData.EvaluatePropertyState -f $parameterName) -Verbose
 
         $parameterState = @{
             ParameterName = $parameterName
@@ -1200,13 +1162,13 @@ function Compare-ResourcePropertyState
 
         if ($isPropertyInDesiredState)
         {
-            Write-Verbose -Message ($localizedString.PropertyInDesiredState -f $parameterName) -Verbose
+            Write-Verbose -Message ($script:localizedData.PropertyInDesiredState -f $parameterName) -Verbose
 
             $parameterState['InDesiredState'] = $true
         }
         else
         {
-            Write-Verbose -Message ($localizedString.PropertyNotInDesiredState -f $parameterName) -Verbose
+            Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameterName) -Verbose
 
             $parameterState['InDesiredState'] = $false
         }
@@ -1267,10 +1229,10 @@ function Test-DscPropertyState
 
                 if ($null -ne $arrayCompare)
                 {
-                    Write-Verbose -Message $localizedString.ArrayDoesNotMatch -Verbose
+                    Write-Verbose -Message $script:localizedData.ArrayDoesNotMatch -Verbose
 
                     $arrayCompare | ForEach-Object -Process {
-                        Write-Verbose -Message ($localizedString.ArrayValueThatDoesNotMatch -f $_.InputObject, $_.SideIndicator) -Verbose
+                        Write-Verbose -Message ($script:localizedData.ArrayValueThatDoesNotMatch -f $_.InputObject, $_.SideIndicator) -Verbose
                     }
 
                     $returnValue = $false
@@ -1296,13 +1258,13 @@ function Test-DscPropertyState
 
             if ($desiredType.Name -notin $supportedTypes)
             {
-                Write-Warning -Message ($localizedString.UnableToCompareType `
+                Write-Warning -Message ($script:localizedData.UnableToCompareType `
                         -f $fieldName, $desiredType.Name)
             }
             else
             {
                 Write-Verbose -Message (
-                    $localizedString.PropertyValueOfTypeDoesNotMatch `
+                    $script:localizedData.PropertyValueOfTypeDoesNotMatch `
                         -f $desiredType.Name, $Values.CurrentValue, $Values.DesiredValue
                 ) -Verbose
             }
@@ -1338,14 +1300,14 @@ function Assert-ADPSDrive
 
     if ($null -eq $activeDirectoryPSDrive)
     {
-        Write-Verbose -Message $script:localizedString.CreatingNewADPSDrive
+        Write-Verbose -Message $script:localizedData.CreatingNewADPSDrive
         try
         {
             New-PSDrive -Name AD -PSProvider 'ActiveDirectory' -Root $Root -Scope Script -ErrorAction Stop | Out-Null
         }
         catch
         {
-            $errorMessage = $script:localizedString.CreatingNewADPSDriveError
+            $errorMessage = $script:localizedData.CreatingNewADPSDriveError
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
     }
