@@ -31,7 +31,7 @@ function Get-TargetResource
         $SitesExcluded
     )
 
-    Try
+    try
     {
         $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties 'Description'
     }
@@ -48,7 +48,7 @@ function Get-TargetResource
             SitesExcluded                 = $SitesExcluded
             Ensure                        = 'Absent'
         }
-        $siteLink = $Null
+        $siteLink = $null
     }
     catch
     {
