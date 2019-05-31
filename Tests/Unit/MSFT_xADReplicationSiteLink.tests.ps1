@@ -94,7 +94,7 @@ try
                 Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw }
 
                 It 'Should throw the correct error' {
-                    { Get-TargetResource -Name HQSiteLink } | Should -Throw $script:localizedData.GetSiteLinkUnexpectedError
+                    { Get-TargetResource -Name HQSiteLink } | Should -Throw ($script:localizedData.GetSiteLinkUnexpectedError -f 'HQSiteLink')
                 }
             }
 
