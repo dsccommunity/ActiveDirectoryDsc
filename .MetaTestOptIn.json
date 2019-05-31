@@ -1,3 +1,8 @@
 [
-        "Common Tests - Validate Markdown Files"
+        "Common Tests - Validate Module Files",
+        "Common Tests - Validate Markdown Files",
+        "Common Tests - Validate Script Files",
+        "Common Tests - Relative Path Length",
+        "Common Tests - Validate Markdown Links",
+        "Common Tests - Spellcheck Markdown Files"
 ]
