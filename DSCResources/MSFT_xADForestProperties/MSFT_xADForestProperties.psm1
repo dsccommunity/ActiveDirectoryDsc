@@ -1,24 +1,13 @@
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
-#region LocalizedData
-$culture = 'en-us'
-if (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath $PSUICulture))
-{
-    $culture = $PSUICulture
-}
-$importLocalizedDataParams = @{
-    BindingVariable = 'LocalizedData'
-    Filename        = 'MSFT_xADForestProperties.strings.psd1'
-    BaseDirectory   = $moduleRoot
-    UICulture       = $culture
-}
-Import-LocalizedData @importLocalizedDataParams
-#endregion
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-# Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath (Join-Path -Path 'MSFT_xADCommon' -ChildPath 'MSFT_xADCommon.psm1')
-Import-Module -Name $adCommonFunctions
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
+$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
+Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADForestProperties'
 
 <#
 .SYNOPSIS
