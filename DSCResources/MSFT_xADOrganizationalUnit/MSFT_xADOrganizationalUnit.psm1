@@ -1,26 +1,13 @@
-## Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
-Import-Module -Name $adCommonFunctions
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-# Localized messages
-data LocalizedData
-{
-    # culture="en-US"
-    ConvertFrom-StringData @'
-        RoleNotFoundError        = Please ensure that the PowerShell module for role '{0}' is installed.
-        RetrievingOU             = Retrieving OU '{0}'.
-        UpdatingOU               = Updating OU '{0}'.
-        DeletingOU               = Deleting OU '{0}'.
-        CreatingOU               = Creating OU '{0}'.
-        RestoringOU              = Attempting to restore the organizational unit object {0} from the recycle bin.
-        OUInDesiredState         = OU '{0}' exists and is in the desired state.
-        OUNotInDesiredState      = OU '{0}' exists but is not in the desired state.
-        OUExistsButShouldNot     = OU '{0}' exists when it should not exist.
-        OUDoesNotExistButShould  = OU '{0}' does not exist when it should exist.
-'@
-}
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
+$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
+Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADOrganizationalUnit'
 
 function Get-TargetResource
 {
@@ -36,7 +23,7 @@ function Get-TargetResource
     )
 
     Assert-Module -ModuleName 'ActiveDirectory';
-    Write-Verbose ($LocalizedData.RetrievingOU -f $Name)
+    Write-Verbose ($script:localizedData.RetrievingOU -f $Name)
     $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
 
     $targetResource = @{
@@ -110,17 +97,17 @@ function Test-TargetResource
 
             if ($isCompliant)
             {
-                Write-Verbose ($LocalizedData.OUInDesiredState -f $targetResource.Name)
+                Write-Verbose ($script:localizedData.OUInDesiredState -f $targetResource.Name)
             }
             else
             {
-                Write-Verbose ($LocalizedData.OUNotInDesiredState -f $targetResource.Name)
+                Write-Verbose ($script:localizedData.OUNotInDesiredState -f $targetResource.Name)
             }
         }
         else
         {
             $isCompliant = $false
-            Write-Verbose ($LocalizedData.OUExistsButShouldNot -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.OUExistsButShouldNot -f $targetResource.Name)
         }
     }
     else
@@ -129,12 +116,12 @@ function Test-TargetResource
         if ($Ensure -eq 'Present')
         {
             $isCompliant = $false
-            Write-Verbose ($LocalizedData.OUDoesNotExistButShould -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.OUDoesNotExistButShould -f $targetResource.Name)
         }
         else
         {
             $isCompliant = $true
-            Write-Verbose ($LocalizedData.OUInDesiredState -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.OUInDesiredState -f $targetResource.Name)
         }
     }
 
@@ -186,7 +173,7 @@ function Set-TargetResource
         $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel
         if ($Ensure -eq 'Present')
         {
-            Write-Verbose ($LocalizedData.UpdatingOU -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.UpdatingOU -f $targetResource.Name)
             $setADOrganizationalUnitParams = @{
                 Identity = $ou
                 Description = $Description
@@ -200,7 +187,7 @@ function Set-TargetResource
         }
         else
         {
-            Write-Verbose ($LocalizedData.DeletingOU -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.DeletingOU -f $targetResource.Name)
             if ($targetResource.ProtectedFromAccidentalDeletion)
             {
                 $setADOrganizationalUnitParams = @{
@@ -230,7 +217,7 @@ function Set-TargetResource
     {
         if  ($RestoreFromRecycleBin)
         {
-            Write-Verbose -Message ($LocalizedData.RestoringOu -f $Name)
+            Write-Verbose -Message ($script:localizedData.RestoringOu -f $Name)
             $restoreParams = @{
                 Identity    = $Name
                 ObjectClass = 'OrganizationalUnit'
@@ -247,7 +234,7 @@ function Set-TargetResource
 
         if (-not $RestoreFromRecycleBin -or ($RestoreFromRecycleBin -and -not $restoreSuccessful))
         {
-            Write-Verbose ($LocalizedData.CreatingOU -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.CreatingOU -f $targetResource.Name)
             $newADOrganizationalUnitParams = @{
                 Name = $Name
                 Path = $Path

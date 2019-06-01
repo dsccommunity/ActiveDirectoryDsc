@@ -1,23 +1,13 @@
-## Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
-Import-Module -Name $adCommonFunctions
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-# Localized messages
-data localizedData
-{
-    # culture="en-US"
-    ConvertFrom-StringData @'
-        RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
-        QueryingDomainPasswordPolicy   = Querying Active Directory domain '{0}' default password policy.
-        UpdatingDomainPasswordPolicy   = Updating Active Directory domain '{0}' default password policy.
-        SettingPasswordPolicyValue     = Setting password policy '{0}' property to '{1}'.
-        ResourcePropertyValueIncorrect = Property '{0}' value is incorrect; expected '{1}', actual '{2}'.
-        ResourceInDesiredState         = Resource '{0}' is in the desired state.
-        ResourceNotInDesiredState      = Resource '{0}' is NOT in the desired state.
-'@
-}
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
+$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
+Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomainDefaultPasswordPolicy'
 
 ## List of changeable policy properties
 $mutablePropertyMap = @(
@@ -54,7 +44,7 @@ function Get-TargetResource
 
     $PSBoundParameters['Identity'] = $DomainName;
     $getADDefaultDomainPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters;
-    Write-Verbose -Message ($localizedData.QueryingDomainPasswordPolicy -f $DomainName);
+    Write-Verbose -Message ($script:localizedData.QueryingDomainPasswordPolicy -f $DomainName);
     $policy = Get-ADDefaultDomainPasswordPolicy @getADDefaultDomainPasswordPolicyParams;
     $targetResource = @{
         DomainName = $DomainName;
@@ -139,7 +129,7 @@ function Test-TargetResource
             $actualValue = $targetResource[$propertyName];
             if ($expectedValue -ne $actualValue)
             {
-                $valueIncorrectMessage = $localizedData.ResourcePropertyValueIncorrect -f $propertyName, $expectedValue, $actualValue;
+                $valueIncorrectMessage = $script:localizedData.ResourcePropertyValueIncorrect -f $propertyName, $expectedValue, $actualValue;
                 Write-Verbose -Message $valueIncorrectMessage;
                 $inDesiredState = $false;
             }
@@ -148,12 +138,12 @@ function Test-TargetResource
 
     if ($inDesiredState)
     {
-        Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $DomainName);
+        Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $DomainName);
         return $true;
     }
     else
     {
-        Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $DomainName);
+        Write-Verbose -Message ($script:localizedData.ResourceNotInDesiredState -f $DomainName);
         return $false;
     }
 } #end Test-TargetResource
@@ -217,11 +207,11 @@ function Set-TargetResource
                 $propertyValue = ConvertTo-TimeSpan -TimeSpan $propertyValue -TimeSpanType Minutes;
             }
             $setADDefaultDomainPasswordPolicyParams[$propertyName] = $propertyValue;
-            Write-Verbose -Message ($localizedData.SettingPasswordPolicyValue -f $propertyName, $propertyValue);
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f $propertyName, $propertyValue);
         }
     }
 
-    Write-Verbose -Message ($localizedData.UpdatingDomainPasswordPolicy -f $DomainName);
+    Write-Verbose -Message ($script:localizedData.UpdatingDomainPasswordPolicy -f $DomainName);
     [ref] $null = Set-ADDefaultDomainPasswordPolicy @setADDefaultDomainPasswordPolicyParams;
 } #end Set-TargetResource
 
