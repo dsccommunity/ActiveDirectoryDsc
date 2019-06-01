@@ -50,6 +50,8 @@
 - Changes to xADObjectPermissionEntry
   - Fix failure when applied in the same configuration as xADDomain
   - Localize and Improve verbose messaging
+- Changes to xADReplicationSiteLink
+  - Fix ADIdentityNotFoundException When Creating a New Site Link.
 
 ## 2.26.0.0
 
