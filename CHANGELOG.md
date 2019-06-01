@@ -9,6 +9,11 @@
     - Compare-ResourcePropertyState
     - Test-DscPropertyState
   - Move the examples in the README.md to Examples folder
+  - Opt-in to the following DSC Resource Common Meta Tests:
+    - Common Tests - Validate Module Files ([Issue #282](https://github.com/PowerShell/xActiveDirectory/issues/282))
+    - Common Tests - Validate Script Files ([Issue #283](https://github.com/PowerShell/xActiveDirectory/issues/283))
+    - Common Tests - Relative Path Length ([Issue #284](https://github.com/PowerShell/xActiveDirectory/issues/284))
+    - Common Tests - Validate Markdown Links ([Issue #280](https://github.com/PowerShell/xActiveDirectory/issues/280))
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
