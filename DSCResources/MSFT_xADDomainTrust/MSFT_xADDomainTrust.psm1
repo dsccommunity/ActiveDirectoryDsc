@@ -12,23 +12,24 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present'
     )
@@ -63,13 +64,16 @@ function Get-TargetResource
         $srcDirectoryContext = New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext($DomainOrForest,$SourceDomainName)
         $srcDomain = ([type]"System.DirectoryServices.ActiveDirectory.$DomainOrForest")::"Get$DomainOrForest"($srcDirectoryContext)
 
-        # Find trust betwen source & destination.
+        # Find trust between source & destination.
+        Write-Verbose -Message ($script:localizedData.CheckingTrustMessage -f $SourceDomainName, $TargetDomainName)
         $trust = $srcDomain.GetTrustRelationship($trgDomain)
 
+        Write-Verbose -Message ($script:localizedData.TrustPresentMessage -f  $SourceDomainName, $TargetDomainName)
         $Ensure = 'Present'
     }
     catch
     {
+        Write-Verbose -Message ($script:localizedData.TrustAbsentMessage -f  $SourceDomainName, $TargetDomainName)
         $Ensure = 'Absent'
     }
 
@@ -94,57 +98,63 @@ function Get-TargetResource
 
 function Set-TargetResource
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseVerboseMessageInDSCResource", "",
+        Justification = 'Verbose messaging in helper function')]
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present'
     )
 
     if($PSBoundParameters.ContainsKey('Debug')){$null = $PSBoundParameters.Remove('Debug')}
-    Validate-ResourceProperties @PSBoundParameters -Apply
+    Confirm-ResourceProperties @PSBoundParameters -Apply
 }
 
 function Test-TargetResource
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSDSCUseVerboseMessageInDSCResource", "",
+        Justification = 'Verbose messaging in helper function')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present'
     )
@@ -166,35 +176,38 @@ function Test-TargetResource
 #endregion
 
     if($PSBoundParameters.ContainsKey('Debug')){$null = $PSBoundParameters.Remove('Debug')}
-    Validate-ResourceProperties @PSBoundParameters
+    Confirm-ResourceProperties @PSBoundParameters
 }
 
 #region Helper Functions
-function Validate-ResourceProperties
+function Confirm-ResourceProperties
 {
     [Cmdletbinding()]
+    [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SourceDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$TargetDomainName,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$TargetDomainAdministratorCredential,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Forest")]
         [String]$TrustType,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("Bidirectional","Inbound","Outbound")]
         [String]$TrustDirection,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [String]$Ensure = 'Present',
 
+        [Parameter()]
         [Switch]$Apply
     )
 
@@ -365,13 +378,13 @@ function New-TerminatingError
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$errorId,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$errorMessage,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.ErrorCategory]$errorCategory
     )
 

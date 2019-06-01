@@ -11,4 +11,6 @@ CheckPropertyMessage      = Checking for {0} between domains ...
 DesiredPropertyMessage    = {0} between domains is set correctly
 NotDesiredPropertyMessage = {0} between domains is not correct. Expected {1}, actual {2}
 SetPropertyMessage        = {0} between domains is set
+TrustPresentMessage       = Trust between domains {0} and {1} is present
+TrustAbsentMessage        = Trust between domains {0} and {1} is absent
 '@
