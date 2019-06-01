@@ -7,4 +7,5 @@ ConvertFrom-StringData @'
     NewSiteLink = Creating AD Site Link {0}.
     RemoveSiteLink = Removing AD Site Link {0}.
     SiteLinkNotFound = Could not find {0} site link.
+    GetSiteLinkUnexpectedError = Unexpected error getting site link {0}.
 '@
