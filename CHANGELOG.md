@@ -10,9 +10,14 @@
     - Test-DscPropertyState
   - Move the examples in the README.md to Examples folder
   - Fix Script Analyzer rule failures
-  - Opt-in to "Common Tests - Custom Script Analyzer Rules"
-  - Opt-in to "Common Tests - Required Script Analyzer Rules"
-  - Opt-in to "Common Tests - Flagged Script Analyzer Rules"
+  - Opt-in to the following DSC Resource Common Meta Tests:
+    - Common Tests - Custom Script Analyzer Rules
+    - Common Tests - Required Script Analyzer Rules
+    - Common Tests - Flagged Script Analyzer Rules
+    - Common Tests - Validate Module Files ([Issue #282](https://github.com/PowerShell/xActiveDirectory/issues/282))
+    - Common Tests - Validate Script Files ([Issue #283](https://github.com/PowerShell/xActiveDirectory/issues/283))
+    - Common Tests - Relative Path Length ([Issue #284](https://github.com/PowerShell/xActiveDirectory/issues/284))
+    - Common Tests - Validate Markdown Links ([Issue #280](https://github.com/PowerShell/xActiveDirectory/issues/280))
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
