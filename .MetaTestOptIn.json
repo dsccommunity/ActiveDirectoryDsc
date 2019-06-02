@@ -10,4 +10,5 @@
         "Common Tests - Flagged Script Analyzer Rules",
         "Common Tests - Validate Markdown Files",
         "Common Tests - Validate Localization"
+        "Common Tests - Validate Example Files"
 ]
