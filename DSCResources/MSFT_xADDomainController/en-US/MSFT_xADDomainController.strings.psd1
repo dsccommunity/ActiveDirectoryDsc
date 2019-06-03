@@ -10,7 +10,7 @@ ConvertFrom-StringData @'
     Promoted                      = The current node '{0}' has been promoted to a domain controller for the domain '{1}'. (ADDC0010)
     AddGlobalCatalog              = Adding Global Catalog to the domain controller. (ADDC0011)
     RemoveGlobalCatalog           = Removing Global Catalog from the domain controller. (ADDC0012)
-#   MovingDomainController        = Moving Domain Controller from site '{0}' to site '{1}'. (ADDC0013)
+    MovingDomainController        = Moving Domain Controller from site '{0}' to site '{1}'. (ADDC0013)
     FailedToFindSite              = The site '{0}' could not be found in the domain '{1}'. (ADDC0014)
     TestingConfiguration          = Determine the state of the domain controller on the current node '{0}' in the domain '{1}'. (ADDC0015)
     WrongSite                     = The domain controller is in the site '{0}', but expected it to be in the site '{1}'. (ADDC0016)
