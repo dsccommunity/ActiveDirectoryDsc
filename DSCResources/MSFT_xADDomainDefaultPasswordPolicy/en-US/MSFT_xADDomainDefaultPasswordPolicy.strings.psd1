@@ -1,6 +1,5 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-#   RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
     QueryingDomainPasswordPolicy   = Querying Active Directory domain '{0}' default password policy.
     UpdatingDomainPasswordPolicy   = Updating Active Directory domain '{0}' default password policy.
     SettingPasswordPolicyValue     = Setting password policy '{0}' property to '{1}'.

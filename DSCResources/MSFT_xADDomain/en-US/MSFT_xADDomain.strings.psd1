@@ -1,7 +1,5 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-#   RoleNotFoundError                    = Please ensure that the PowerShell module for role '{0}' is installed.
-#   InvalidDomainError                   = Computer is a member of the wrong domain?!
     ExistingDomainMemberError            = Computer is already a domain member. Cannot create a new '{0}' domain?
     InvalidCredentialError               = Domain '{0}' is available, but invalid credentials were supplied.
     QueryDomainWithLocalCredential       = Computer is a domain member; querying domain '{0}' using local credential ...

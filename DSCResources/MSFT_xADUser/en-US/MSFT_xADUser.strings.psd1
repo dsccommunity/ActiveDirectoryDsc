@@ -1,6 +1,5 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-#   RoleNotFoundError              = Please ensure that the PowerShell module for role '{0}' is installed.
     RetrievingADUserError          = Error looking up Active Directory user '{0}' ({0}@{1}).
     PasswordParameterConflictError = Parameter '{0}' cannot be set to '{1}' when the '{2}' parameter is specified.
     RetrievingADUser               = Retrieving Active Directory user '{0}' ({0}@{1}) ...

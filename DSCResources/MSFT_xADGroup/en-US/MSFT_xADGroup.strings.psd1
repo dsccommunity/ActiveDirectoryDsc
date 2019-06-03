@@ -1,7 +1,6 @@
 # culture="en-US"
 ConvertFrom-StringData @'
     RetrievingGroupMembers         = Retrieving group membership based on '{0}' property.
-#   GroupMembershipInDesiredState  = Group membership is in the desired state.
     GroupMembershipNotDesiredState = Group membership is NOT in the desired state.
     AddingGroupMembers             = Adding '{0}' member(s) to AD group '{1}'.
     RemovingGroupMembers           = Removing '{0}' member(s) from AD group '{1}'.
