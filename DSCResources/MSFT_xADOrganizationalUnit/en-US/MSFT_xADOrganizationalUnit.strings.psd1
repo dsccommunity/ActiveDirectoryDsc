@@ -1,6 +1,5 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-#   RoleNotFoundError        = Please ensure that the PowerShell module for role '{0}' is installed.
     RetrievingOU             = Retrieving OU '{0}'.
     UpdatingOU               = Updating OU '{0}'.
     DeletingOU               = Deleting OU '{0}'.

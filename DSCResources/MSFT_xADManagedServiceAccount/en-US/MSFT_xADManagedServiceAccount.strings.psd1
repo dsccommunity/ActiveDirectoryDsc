@@ -1,7 +1,6 @@
 # culture='en-US'
 ConvertFrom-StringData @'
     AddingManagedServiceAccount           = Adding AD Managed Service Account '{0}'. (MSA0001)
-#   UpdatingManagedServiceAccount         = Updating AD Managed Service Account '{0}'. (MSA0002)
     RemovingManagedServiceAccount         = Removing AD Managed Service Account '{0}'. (MSA0003)
     MovingManagedServiceAccount           = Moving AD Managed Service Account '{0}' to '{1}'. (MSA0004)
     ManagedServiceAccountNotFound         = AD Managed Service Account '{0}' was not found. (MSA0005)
