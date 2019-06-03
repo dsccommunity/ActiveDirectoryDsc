@@ -5,6 +5,7 @@
 #>
 @{
     RemoveTestFramework = @{
+        Tags = 'RemoveTestFramework'
         DependencyType = 'Command'
         Source = '
             $testFrameWorkPath = Join-Path -Path $PWD -ChildPath ''DscResource.Tests''
@@ -16,7 +17,8 @@
         '
     }
 
-    'CloneTestFramework' = @{
+    CloneTestFramework = @{
+        Tags = 'CloneTestFramework'
         DependencyType = 'Git'
         Name = 'https://github.com/PowerShell/DscResource.Tests'
         Version = 'dev'
@@ -24,6 +26,7 @@
     }
 
     LoadDscResourceKitTypes = @{
+        Tags = 'LoadDscResourceKitTypes'
         DependencyType = 'Command'
         Source = '
             if (-not (''Microsoft.DscResourceKit.Test'' -as [Type]))

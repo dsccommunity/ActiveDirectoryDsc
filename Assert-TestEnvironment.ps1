@@ -7,15 +7,26 @@
         Assert that the test environment is properly setup and loaded into the
         PowerShell session.
 
+    .PARAMETER Tags
+        One or more tags to use for the cmdlet Invoke-PSDepend.
+
     .EXAMPLE
         .\Assert-testEnvironment.ps1
 
         Will assert that the current PowerShell session is ready to run tests.
+
+    .EXAMPLE
+        .\Assert-testEnvironment.ps1 -Tags 'LoadDscResourceKitTypes'
+
+        Will only assert that the current PowerShell session has the types loaded.
 #>
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param
 (
+    [Parameter()]
+    [System.String[]]
+    $Tags
 )
 
 #region Verify prerequisites Pester
@@ -100,4 +111,14 @@ else
     $invokePSDependConfirmation = $false
 }
 
-Invoke-PSDepend -Path $dependenciesPath -Confirm:$invokePSDependConfirmation
+$invokePSDependParameters = @{
+    Path = $dependenciesPath
+    Confirm = $invokePSDependConfirmation
+}
+
+if ($PSBoundParameters.ContainsKey('Tags'))
+{
+    $invokePSDependParameters['Tags'] = $Tags
+}
+
+Invoke-PSDepend @invokePSDependParameters
