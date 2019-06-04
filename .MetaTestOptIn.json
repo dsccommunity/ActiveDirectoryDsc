@@ -4,10 +4,9 @@
         "Common Tests - Validate Script Files",
         "Common Tests - Relative Path Length",
         "Common Tests - Validate Markdown Links",
-        "Common Tests - Validate Markdown Files",
         "Common Tests - Custom Script Analyzer Rules",
         "Common Tests - Required Script Analyzer Rules",
         "Common Tests - Flagged Script Analyzer Rules",
-        "Common Tests - Validate Localization"
+        "Common Tests - Validate Localization",
         "Common Tests - Validate Example Files"
 ]
