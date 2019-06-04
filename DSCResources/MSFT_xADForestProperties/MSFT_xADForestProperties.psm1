@@ -1,24 +1,13 @@
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
-#region LocalizedData
-$culture = 'en-us'
-if (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath $PSUICulture))
-{
-    $culture = $PSUICulture
-}
-$importLocalizedDataParams = @{
-    BindingVariable = 'LocalizedData'
-    Filename        = 'MSFT_xADForestProperties.strings.psd1'
-    BaseDirectory   = $moduleRoot
-    UICulture       = $culture
-}
-Import-LocalizedData @importLocalizedDataParams
-#endregion
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-# Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath (Join-Path -Path 'MSFT_xADCommon' -ChildPath 'MSFT_xADCommon.psm1')
-Import-Module -Name $adCommonFunctions
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
+$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
+Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADForestProperties'
 
 <#
 .SYNOPSIS
@@ -101,7 +90,7 @@ function Get-TargetResource
         $getADForestParameters['Credential'] = $Credential
     }
 
-    Write-Verbose -Message ($localizedData.GetForest -f $ForestName)
+    Write-Verbose -Message ($script:localizedData.GetForest -f $ForestName)
     $forest = Get-ADForest -Identity $ForestName
 
     $targetResource = @{
@@ -213,7 +202,7 @@ function Test-TargetResource
 
     if (-not ( Test-Members @assertMemberParameters -ExistingMembers ($forest.SpnSuffixes -split ',') ))
     {
-        Write-Verbose -Message $LocalizedData.ForestSpnSuffixNotInDesiredState
+        Write-Verbose -Message $script:localizedData.ForestSpnSuffixNotInDesiredState
         $inDesiredState = $false
     }
 
@@ -235,7 +224,7 @@ function Test-TargetResource
 
     if (-not ( Test-Members @assertMemberParameters -ExistingMembers ($forest.UpnSuffixes -split ',') ))
     {
-        Write-Verbose -Message $LocalizedData.ForestUpnSuffixNotInDesiredState
+        Write-Verbose -Message $script:localizedData.ForestUpnSuffixNotInDesiredState
         $inDesiredState = $false
     }
 
@@ -330,7 +319,7 @@ function Set-TargetResource
             replace = $($ServicePrincipalNameSuffix)
         }
 
-        Write-Verbose -Message ($localizedData.ReplaceSpnSuffix -f $replaceServicePrincipalNameSuffix)
+        Write-Verbose -Message ($script:localizedData.ReplaceSpnSuffix -f $replaceServicePrincipalNameSuffix)
     }
     if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffixToAdd') -and -not [system.string]::IsNullOrEmpty($ServicePrincipalNameSuffixToAdd))
     {
@@ -339,7 +328,7 @@ function Set-TargetResource
             add = $($ServicePrincipalNameSuffixToAdd)
         }
 
-        Write-Verbose -Message ($localizedData.AddSpnSuffix -f $addServicePrincipalNameSuffix)
+        Write-Verbose -Message ($script:localizedData.AddSpnSuffix -f $addServicePrincipalNameSuffix)
     }
     if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffixToRemove') -and -not [system.string]::IsNullOrEmpty($ServicePrincipalNameSuffixToRemove))
     {
@@ -355,7 +344,7 @@ function Set-TargetResource
             }
         }
 
-        Write-Verbose -Message ($localizedData.RemoveSpnSuffix -f $removeServicePrincipalNameSuffix)
+        Write-Verbose -Message ($script:localizedData.RemoveSpnSuffix -f $removeServicePrincipalNameSuffix)
     }
 
     # add UserPrincipalName parameter
@@ -366,7 +355,7 @@ function Set-TargetResource
             replace = $($UserPrincipalNameSuffix)
         }
 
-        Write-Verbose -Message ($localizedData.ReplaceUpnSuffix -f $replaceUserPrincipalNameSuffix)
+        Write-Verbose -Message ($script:localizedData.ReplaceUpnSuffix -f $replaceUserPrincipalNameSuffix)
     }
     if ($PSBoundParameters.ContainsKey('UserPrincipalNameSuffixToAdd') -and -not [system.string]::IsNullOrEmpty($UserPrincipalNameSuffixToAdd))
     {
@@ -375,7 +364,7 @@ function Set-TargetResource
             add = $($UserPrincipalNameSuffixToAdd)
         }
 
-        Write-Verbose -Message ($localizedData.AddUpnSuffix -f $addUserPrincipalNameSuffix)
+        Write-Verbose -Message ($script:localizedData.AddUpnSuffix -f $addUserPrincipalNameSuffix)
     }
     if ($PSBoundParameters.ContainsKey('UserPrincipalNameSuffixToRemove') -and -not [system.string]::IsNullOrEmpty($UserPrincipalNameSuffixToRemove))
     {
@@ -391,7 +380,7 @@ function Set-TargetResource
             }
         }
 
-        Write-Verbose -Message ($localizedData.RemoveUpnSuffix -f $removeUserPrincipalNameSuffix)
+        Write-Verbose -Message ($script:localizedData.RemoveUpnSuffix -f $removeUserPrincipalNameSuffix)
     }
 
     Set-ADForest @setADForestParameters

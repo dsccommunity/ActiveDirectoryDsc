@@ -1,3 +1,4 @@
+# culture="en-US"
 ConvertFrom-StringData @'
 MissingRoleMessage        = Please ensure that the {0} role is installed
 CheckingTrustMessage      = Checking if Trust between {0} and {1} exists ...

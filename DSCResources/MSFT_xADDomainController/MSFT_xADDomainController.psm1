@@ -327,6 +327,7 @@ function Set-TargetResource
             )
 
             # DC is not in correct site. Move it.
+            Write-Verbose -Message ($script:localizedData.MovingDomainController -f $targetResource.SiteName, $SiteName)
             Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $DomainAdministratorCredential
         }
     }
