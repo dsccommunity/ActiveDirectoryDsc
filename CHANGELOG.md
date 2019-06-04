@@ -64,6 +64,8 @@
   - Localize and Improve verbose messaging
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException When Creating a New Site Link.
+- Changes to README.md
+  - Added a link to each resource section ([issue #287](https://github.com/PowerShell/xActiveDirectory/issues/287))
 
 ## 2.26.0.0
 

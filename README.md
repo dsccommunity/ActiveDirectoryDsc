@@ -41,22 +41,22 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 ## Resources
 
 * [**xADComputer**](#xadcomputer) creates and manages Active Directory computer accounts.
-* **xADDomain** creates new Active Directory forest configurations and new Active Directory domain configurations.
-* **xADDomainController** installs and configures domain controllers in Active Directory.
-* **xADDomainDefaultPasswordPolicy** manages an Active Directory domain's default password policy.
-* **xADDomainTrust** establishes cross-domain trusts.
-* **xADForestProperties** manages User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
-* **xADGroup** modifies and removes Active Directory groups.
-* **xADManagedServiceAccount** modifies and removes Active Directory Managed Service Accounts (MSA).
-* **xADObjectPermissionEntry** modifies the access control list of an Active Directory object.
-* **xADOrganizationalUnit** creates and deletes Active Directory OUs.
-* **xADRecycleBin** enables or disabled Active Directory Recycle Bin.
-* **xADReplicationSite** creates and deletes Active Directory replication sites.
-* **xADReplicationSiteLink** creates, deletes and modifies Active Directory replication site links.
-* **xADReplicationSubnet** add or removes Active Directory replication subnet.
-* **xADServicePrincipalName** adds or removes the SPN to a user or computer account.
-* **xADUser** modifies and removes Active Directory Users.
-* **xWaitForDomain** waits for new, remote domain to setup.
+* [**xADDomain**](#xaddomain) creates new Active Directory forest configurations and new Active Directory domain configurations.
+* [**xADDomainController**](#xaddomaincontroller) installs and configures domain controllers in Active Directory.
+* [**xADDomainDefaultPasswordPolicy**](#xaddomaindefaultpasswordpolicy) manages an Active Directory domain's default password policy.
+* [**xADDomainTrust**](#xaddomaintrust) establishes cross-domain trusts.
+* [**xADForestProperties**](#xadforestproperties) manages User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
+* [**xADGroup**](#xadgroup) modifies and removes Active Directory groups.
+* [**xADManagedServiceAccount**](#xadmanagedserviceaccount) modifies and removes Active Directory Managed Service Accounts (MSA).
+* [**xADObjectPermissionEntry**](#xadobjectpermissionentry) modifies the access control list of an Active Directory object.
+* [**xADOrganizationalUnit**](#xadorganizationalunit) creates and deletes Active Directory OUs.
+* [**xADRecycleBin**](#xadrecyclebin) enables or disabled Active Directory Recycle Bin.
+* [**xADReplicationSite**](#xadreplicationsite) creates and deletes Active Directory replication sites.
+* [**xADReplicationSiteLink**](#xadreplicationsitelink) creates, deletes and modifies Active Directory replication site links.
+* [**xADReplicationSubnet**](#xadreplicationsubnet) add or removes Active Directory replication subnet.
+* [**xADServicePrincipalName**](#xadserviceprincipalname) adds or removes the SPN to a user or computer account.
+* [**xADUser**](#xaduser) modifies and removes Active Directory Users.
+* [**xWaitForDomain**](#xwaitfordomain) waits for new, remote domain to setup.
 
 (Note: the RSAT tools will not be installed when these resources are used to configure AD.)
 
