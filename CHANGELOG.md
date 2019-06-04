@@ -20,6 +20,7 @@
     - Common Tests - Validate Markdown Links ([Issue #280](https://github.com/PowerShell/xActiveDirectory/issues/280))
     - Common Tests - Validate Localization ([Issue #281](https://github.com/PowerShell/xActiveDirectory/issues/281))
     - Common Tests - Validate Example Files ([Issue #279](https://github.com/PowerShell/xActiveDirectory/issues/279))
+  - Move resource descriptions to Wiki using auto-documentation ([Issue #289](https://github.com/PowerShell/xActiveDirectory/issues/289))
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
