@@ -2,7 +2,7 @@
 .EXAMPLE
     This example creates a new domain-local group in contoso with three members.
 #>
-configuration Example
+configuration NewGroupWithMembers
 {
     Import-DscResource -ModuleName xActiveDirectory
 
@@ -10,9 +10,9 @@ configuration Example
     {
         xADGroup dl1
         {
-            GroupName = 'DL_APP_1'
+            GroupName  = 'DL_APP_1'
             GroupScope = 'DomainLocal'
-            Members = 'john','jim','sally'
+            Members    = 'john', 'jim', 'sally'
         }
     }
 }

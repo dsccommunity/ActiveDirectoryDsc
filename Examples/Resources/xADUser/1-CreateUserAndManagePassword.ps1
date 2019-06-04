@@ -4,7 +4,7 @@
         This might be used to manage the lifecycle of a service account.
 #>
 
-configuration Example
+configuration CreateUserAndManagePassword
 {
     param
     (
@@ -20,11 +20,11 @@ configuration Example
     {
         xADUser Contoso\ExampleUser
         {
-            Ensure      = 'Present'
-            UserName    = "ExampleUser"
-            Password    = $Password
-            DomainName  = "contoso.com"
-            Path        = "CN=Users,DC=contoso,DC=com"
+            Ensure     = 'Present'
+            UserName   = "ExampleUser"
+            Password   = $Password
+            DomainName = "contoso.com"
+            Path       = "CN=Users,DC=contoso,DC=com"
         }
     }
 }
