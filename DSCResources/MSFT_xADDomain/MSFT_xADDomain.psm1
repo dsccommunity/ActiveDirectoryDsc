@@ -1,35 +1,13 @@
-## Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
-Import-Module -Name $adCommonFunctions
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-# Localized messages
-data localizedData
-{
-    # culture="en-US"
-    ConvertFrom-StringData @'
-        RoleNotFoundError                    = Please ensure that the PowerShell module for role '{0}' is installed.
-        InvalidDomainError                   = Computer is a member of the wrong domain?!
-        ExistingDomainMemberError            = Computer is already a domain member. Cannot create a new '{0}' domain?
-        InvalidCredentialError               = Domain '{0}' is available, but invalid credentials were supplied.
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
 
-        QueryDomainWithLocalCredential       = Computer is a domain member; querying domain '{0}' using local credential ...
-        QueryDomainWithCredential            = Computer is a workgroup member; querying for domain '{0}' using supplied credential ...
-        DomainFound                          = Active Directory domain '{0}' found.
-        DomainNotFound                       = Active Directory domain '{0}' cannot be found.
-        CreatingChildDomain                  = Creating domain '{0}' as a child of domain '{1}' ...
-        CreatedChildDomain                   = Child domain '{0}' created.
-        CreatingForest                       = Creating AD forest '{0}' ...
-        CreatedForest                        = AD forest '{0}' created.
-        ResourcePropertyValueIncorrect       = Property '{0}' value is incorrect; expected '{1}', actual '{2}'.
-        ResourceInDesiredState               = Resource '{0}' is in the desired state.
-        ResourceNotInDesiredState            = Resource '{0}' is NOT in the desired state.
-        RetryingGetADDomain                  = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds.
-        UnhandledError                       = Unhandled error occured, detail here: {0}
-        FaultExceptionAndDomainShouldExist   = ServiceModel FaultException detected and domain should exist, performing retry...
-'@
-}
+$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
+Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomain'
 
 <#
     .SYNOPSIS
@@ -124,12 +102,12 @@ function Get-TargetResource
         if ($isDomainMember)
         {
             ## We're already a domain member, so take the credentials out of the equation
-            Write-Verbose ($localizedData.QueryDomainADWithLocalCredentials -f $domainFQDN);
+            Write-Verbose ($script:localizedData.QueryDomainWithLocalCredential -f $domainFQDN);
             $domain = Get-ADDomain -Identity $domainFQDN -ErrorAction Stop;
             $forest = Get-ADForest -Identity $domain.Forest -ErrorAction Stop
         }
         else {
-            Write-Verbose ($localizedData.QueryDomainWithCredential -f $domainFQDN);
+            Write-Verbose ($script:localizedData.QueryDomainWithCredential -f $domainFQDN);
             $domain = Get-ADDomain -Identity $domainFQDN -Credential $DomainAdministratorCredential -ErrorAction Stop
             $forest = Get-ADForest -Identity $domain.Forest -Credential $DomainAdministratorCredential -ErrorAction Stop
         }
@@ -137,7 +115,7 @@ function Get-TargetResource
         ## No need to check whether the node is actually a domain controller. If we don't throw an exception,
         ## the domain is already UP - and this resource shouldn't run. Domain controller functionality
         ## should be checked by the xADDomainController resource?
-        Write-Verbose ($localizedData.DomainFound -f $domain.DnsRoot);
+        Write-Verbose ($script:localizedData.DomainFound -f $domain.DnsRoot);
 
         $targetResource = @{
             DomainName = $domain.DnsRoot;
@@ -151,28 +129,28 @@ function Get-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        $errorMessage = $localizedData.ExistingDomainMemberError -f $DomainName;
+        $errorMessage = $script:localizedData.ExistingDomainMemberError -f $DomainName;
         ThrowInvalidOperationError -ErrorId 'xADDomain_DomainMember' -ErrorMessage $errorMessage;
     }
     catch [Microsoft.ActiveDirectory.Management.ADServerDownException]
     {
-        Write-Verbose ($localizedData.DomainNotFound -f $domainFQDN)
+        Write-Verbose ($script:localizedData.DomainNotFound -f $domainFQDN)
         $domain = @{ };
         # will fall into retry mechanism
     }
     catch [System.Security.Authentication.AuthenticationException]
     {
-        $errorMessage = $localizedData.InvalidCredentialError -f $DomainName;
+        $errorMessage = $script:localizedData.InvalidCredentialError -f $DomainName;
         ThrowInvalidOperationError -ErrorId 'xADDomain_InvalidCredential' -ErrorMessage $errorMessage;
     }
     catch
     {
-        $errorMessage = $localizedData.UnhandledError -f ($_.Exception | Format-List -Force | Out-String)
+        $errorMessage = $script:localizedData.UnhandledError -f ($_.Exception | Format-List -Force | Out-String)
         Write-Verbose $errorMessage
 
         if ($domainShouldExist -and ($_.Exception.InnerException -is [System.ServiceModel.FaultException]))
         {
-            Write-Verbose $localizedData.FaultExceptionAndDomainShouldExist
+            Write-Verbose $script:localizedData.FaultExceptionAndDomainShouldExist
             # will fall into retry mechanism
         } else {
             ## Not sure what's gone on here!
@@ -183,7 +161,7 @@ function Get-TargetResource
     if($domainShouldExist)
     {
         $retries++
-        Write-Verbose ($localizedData.RetryingGetADDomain -f $retries, $maxRetries, $retryIntervalInSeconds)
+        Write-Verbose ($script:localizedData.RetryingGetADDomain -f $retries, $maxRetries, $retryIntervalInSeconds)
         Start-Sleep -Seconds ($retries * $retryIntervalInSeconds)
     }
 
@@ -238,7 +216,7 @@ function Test-TargetResource
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
     if ($domainFQDN -ne $targetResource.DomainName)
     {
-        $message = $localizedData.ResourcePropertyValueIncorrect -f 'DomainName', $domainFQDN, $targetResource.DomainName;
+        $message = $script:localizedData.ResourcePropertyValueIncorrect -f 'DomainName', $domainFQDN, $targetResource.DomainName;
         Write-Verbose -Message $message;
         $isCompliant = $false;
     }
@@ -251,7 +229,7 @@ function Test-TargetResource
             $propertyValue = (Get-Variable -Name $propertyName).Value;
             if ($targetResource.$propertyName -ne $propertyValue)
             {
-                $message = $localizedData.ResourcePropertyValueIncorrect -f $propertyName, $propertyValue, $targetResource.$propertyName;
+                $message = $script:localizedData.ResourcePropertyValueIncorrect -f $propertyName, $propertyValue, $targetResource.$propertyName;
                 Write-Verbose -Message $message;
                 $isCompliant = $false;
             }
@@ -260,12 +238,12 @@ function Test-TargetResource
 
     if ($isCompliant)
     {
-        Write-Verbose -Message ($localizedData.ResourceInDesiredState -f $domainFQDN);
+        Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $domainFQDN);
         return $true;
     }
     else
     {
-        Write-Verbose -Message ($localizedData.ResourceNotInDesiredState -f $domainFQDN);
+        Write-Verbose -Message ($script:localizedData.ResourceNotInDesiredState -f $domainFQDN);
         return $false;
     }
 
@@ -356,7 +334,7 @@ function Set-TargetResource
 
     if ($PSBoundParameters.ContainsKey('ParentDomainName'))
     {
-        Write-Verbose -Message ($localizedData.CreatingChildDomain -f $DomainName, $ParentDomainName);
+        Write-Verbose -Message ($script:localizedData.CreatingChildDomain -f $DomainName, $ParentDomainName);
         $installADDSParams['Credential'] = $DomainAdministratorCredential
         $installADDSParams['NewDomainName'] = $DomainName
         $installADDSParams['ParentDomainName'] = $ParentDomainName
@@ -366,11 +344,11 @@ function Set-TargetResource
             $installADDSParams['NewDomainNetbiosName'] = $DomainNetBIOSName;
         }
         Install-ADDSDomain @installADDSParams;
-        Write-Verbose -Message ($localizedData.CreatedChildDomain);
+        Write-Verbose -Message ($script:localizedData.CreatedChildDomain);
     }
     else
     {
-        Write-Verbose -Message ($localizedData.CreatingForest -f $DomainName);
+        Write-Verbose -Message ($script:localizedData.CreatingForest -f $DomainName);
         $installADDSParams['DomainName'] = $DomainName;
         if ($PSBoundParameters.ContainsKey('DomainNetbiosName'))
         {
@@ -381,7 +359,7 @@ function Set-TargetResource
             $installADDSParams['ForestMode'] = $ForestMode
         }
         Install-ADDSForest @installADDSParams;
-        Write-Verbose -Message ($localizedData.CreatedForest -f $DomainName);
+        Write-Verbose -Message ($script:localizedData.CreatedForest -f $DomainName);
     }
 
     'Finished' | Out-File -FilePath (Get-TrackingFilename -DomainName $DomainName) -Force

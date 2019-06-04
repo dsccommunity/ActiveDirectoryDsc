@@ -1,25 +1,13 @@
-$script:resourceModulePath = Split-Path `
--Path (Split-Path -Path $PSScriptRoot -Parent) `
--Parent
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path `
--Path $script:resourceModulePath `
--ChildPath 'Modules\xActiveDirectory.Common'
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
 
-Import-Module -Name (
-Join-Path `
-    -Path $script:localizationModulePath `
-    -ChildPath 'xActiveDirectory.Common.psm1'
-)
+$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
+Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADManagedServiceAccount'
-
-## Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
-Import-Module -Name $adCommonFunctions
-
 
 <#
     .SYNOPSIS
