@@ -2,7 +2,7 @@
     .EXAMPLE
         In this example, we configure an Active Directory domain's default password policy to set the minimum password length and complexity.
 #>
-configuration Example_xADDomainDefaultPasswordPolicy
+configuration ConfigureDefaultPasswordPolicy
 {
     Param
     (
@@ -16,7 +16,7 @@ configuration Example_xADDomainDefaultPasswordPolicy
 
         [parameter(Mandatory = $true)]
         [System.Int32]
-        $MinPasswordLength,
+        $MinPasswordLength
     )
 
     Import-DscResource -Module xActiveDirectory
@@ -25,9 +25,9 @@ configuration Example_xADDomainDefaultPasswordPolicy
     {
         xADDomainDefaultPasswordPolicy 'DefaultPasswordPolicy'
         {
-           DomainName = $DomainName
-           ComplexityEnabled = $ComplexityEnabled
-           MinPasswordLength = $MinPasswordLength
+            DomainName        = $DomainName
+            ComplexityEnabled = $ComplexityEnabled
+            MinPasswordLength = $MinPasswordLength
         }
     }
 }

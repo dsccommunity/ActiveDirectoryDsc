@@ -5,7 +5,7 @@
         when retrieving the gMSA password. Use with caution
 #>
 
-configuration Example
+configuration CreateKDSRootKeyInPast
 {
     Import-DscResource -Module xActiveDirectory
 
@@ -13,9 +13,9 @@ configuration Example
     {
         xADKDSKey ExampleKDSRootKeyInPast
         {
-            Ensure              = 'Present'
-            EffectiveTime       = '1/1/1999 13:00'
-            UnsafeEffectiveTime = $true # Use with caution
+            Ensure                   = 'Present'
+            EffectiveTime            = '1/1/1999 13:00'
+            AllowUnsafeEffectiveTime = $true # Use with caution
         }
     }
 }

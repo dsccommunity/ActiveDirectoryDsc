@@ -4,7 +4,7 @@
     forest by adding and removing the desired suffixes.  This will not overwrite existing
     suffixes in the forest.
 #>
-configuration Example
+configuration AddRemoveForestProperties
 {
     Import-DscResource -ModuleName xActiveDirectory
 
@@ -12,11 +12,11 @@ configuration Example
     {
         xADForestProperties ContosoProperties
         {
-            ForestName                          = 'contoso.com'
-            ServicePrincipalNameSuffixToAdd     = 'test.net'
-            ServicePrincipalNameSuffixToRemove  = 'test.com'
-            UserPrincipalNameSuffixToAdd        = 'cloudapp.net', 'fabrikam.com'
-            UserPrincipalNameSuffixToRemove     = 'pester.net'
+            ForestName                         = 'contoso.com'
+            ServicePrincipalNameSuffixToAdd    = 'test.net'
+            ServicePrincipalNameSuffixToRemove = 'test.com'
+            UserPrincipalNameSuffixToAdd       = 'cloudapp.net', 'fabrikam.com'
+            UserPrincipalNameSuffixToRemove    = 'pester.net'
         }
     }
 }

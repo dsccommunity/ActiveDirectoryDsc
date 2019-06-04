@@ -22,7 +22,7 @@
         This configuration will add a domain controller to the domain
         contoso.com using the information from media.
 #>
-Configuration xADDomainController_AddDomainControllerToDomainUsingIFM_Config
+Configuration AddDomainControllerToDomainUsingIFM
 {
     param
     (
@@ -40,25 +40,25 @@ Configuration xADDomainController_AddDomainControllerToDomainUsingIFM_Config
         WindowsFeature 'InstallADDomainServicesFeature'
         {
             Ensure = 'Present'
-            Name = 'AD-Domain-Services'
+            Name   = 'AD-Domain-Services'
         }
 
         WindowsFeature 'RSATADPowerShell'
         {
-            Ensure = 'Present'
-            Name   = 'RSAT-AD-PowerShell'
+            Ensure    = 'Present'
+            Name      = 'RSAT-AD-PowerShell'
 
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
         xWaitForADDomain 'WaitForestAvailability'
         {
-            DomainName = 'contoso.com'
+            DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
-            RetryCount = 10
-            RetryIntervalSec = 120
+            RetryCount           = 10
+            RetryIntervalSec     = 120
 
-            DependsOn = '[WindowsFeature]RSATADPowerShell'
+            DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
         xADDomainController 'DomainControllerWithIFM'
@@ -68,7 +68,7 @@ Configuration xADDomainController_AddDomainControllerToDomainUsingIFM_Config
             SafemodeAdministratorPassword = $DomainAdministratorCredential
             InstallationMediaPath         = 'F:\IFM'
 
-            DependsOn = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
 }
