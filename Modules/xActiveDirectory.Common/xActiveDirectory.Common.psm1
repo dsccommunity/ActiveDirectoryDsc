@@ -626,7 +626,7 @@ function Assert-MemberParameters
             ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
         }
 
-        if ($Members.Length -eq 0) # )
+        if ($Members.Length -eq 0)
         {
             $errorId = '{0}_MembersIsNull' -f $ModuleName
             $errorMessage = $script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude'

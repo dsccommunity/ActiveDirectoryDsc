@@ -835,7 +835,7 @@ InModuleScope 'xActiveDirectory.Common' {
 
     Describe 'xActiveDirectory.Common\Assert-MemberParameters' {
         It "Throws if 'Members' is specified but is empty" {
-            { Assert-MemberParameters -Members @() } | Should Throw 'The Members parameter value is null'
+            { Assert-MemberParameters -Members @() } | Should -Throw ($script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude')
         }
 
         It "Throws if 'Members' and 'MembersToInclude' are specified" {
