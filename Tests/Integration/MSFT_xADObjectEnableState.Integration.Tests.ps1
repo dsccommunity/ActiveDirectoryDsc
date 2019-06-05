@@ -1,7 +1,3 @@
-# Make sure this is run in the correct order.
-[Microsoft.DscResourceKit.IntegrationTest(OrderNumber = 3)]
-param()
-
 if ($env:APPVEYOR -eq $true)
 {
     Write-Warning -Message 'Integration test is not supported in AppVeyor.'
