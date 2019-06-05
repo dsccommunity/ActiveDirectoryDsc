@@ -620,28 +620,45 @@ InModuleScope 'xActiveDirectory.Common' {
     }
 
     Describe 'xActiveDirectory.Common\Assert-Module' {
-        It 'Does not throw when module is installed' {
+        BeforeAll {
             $testModuleName = 'TestModule'
-            Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true }
-
-            { Assert-Module -ModuleName $testModuleName } | Should Not Throw
         }
 
-        It 'Should call Import-Module when the module is installed and ImportModule is specified' {
-            $testModuleName = 'TestModule'
-            Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true }
-            Mock -CommandName Import-Module -ParameterFilter { $Name -eq $testModuleName }
+        Context 'When module is not installed' {
+            BeforeAll {
+                Mock -CommandName Get-Module
+            }
 
-            Assert-Module -ModuleName $testModuleName -ImportModule
-
-            Assert-MockCalled -CommandName Import-Module
+            It 'Should throw the correct error' {
+                { Assert-Module -ModuleName $testModuleName } | Should -Throw ($script:localizedData.RoleNotFoundError -f $testModuleName)
+            }
         }
 
-        It 'Throws when module is not installed' {
-            $testModuleName = 'TestModule'
-            Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName }
+        Context 'When module is available' {
+            BeforeAll {
+                Mock -CommandName Import-Module
+                Mock -CommandName Get-Module -MockWith {
+                    return @{
+                        Name = $testModuleName
+                    }
+                }
+            }
 
-            { Assert-Module -ModuleName $testModuleName } | Should Throw
+            Context 'When module should not be imported' {
+                It 'Should not throw an error' {
+                    { Assert-Module -ModuleName $testModuleName } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Import-Module -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When module should be imported' {
+                It 'Should not throw an error' {
+                    { Assert-Module -ModuleName $testModuleName -ImportModule } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Import-Module -Exactly -Times 1 -Scope It
+                }
+            }
         }
     }
 
