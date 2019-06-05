@@ -6,7 +6,7 @@ Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'xActi
 
 InModuleScope 'xActiveDirectory.Common' {
     Describe 'xActiveDirectory.Common\Test-DscParameterState' -Tag TestDscParameterState {
-        Context -Name 'When passing values' -Fixture {
+        Context 'When passing values' {
             It 'Should return true for two identical tables' {
                 $mockDesiredValues = @{ Example = 'test' }
 
@@ -91,8 +91,15 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return true when only a specified value matches, but other non-listed values do not' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = 'true' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
+                $mockCurrentValues = @{
+                    Example = 'test'
+                    SecondExample = 'true'
+                }
+
+                $mockDesiredValues = @{
+                    Example = 'test'
+                    SecondExample = 'false'
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -104,8 +111,15 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return false when only specified values do not match, but other non-listed values do ' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = 'true' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
+                $mockCurrentValues = @{
+                    Example = 'test'
+                    SecondExample = 'true'
+                }
+
+                $mockDesiredValues = @{
+                    Example = 'test'
+                    SecondExample = 'false'
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -118,7 +132,10 @@ InModuleScope 'xActiveDirectory.Common' {
 
             It 'Should return false when an empty hash table is used in the current values' {
                 $mockCurrentValues = @{ }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = 'false' }
+                $mockDesiredValues = @{
+                    Example = 'test'
+                    SecondExample = 'false'
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -129,7 +146,10 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return true when evaluating a table against a CimInstance' {
-                $mockCurrentValues = @{ Handle = '0'; ProcessId = '1000' }
+                $mockCurrentValues = @{
+                    Handle = '0'
+                    ProcessId = '1000'
+                }
 
                 $mockWin32ProcessProperties = @{
                     Handle    = 0
@@ -155,7 +175,10 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return false when evaluating a table against a CimInstance and a value is wrong' {
-                $mockCurrentValues = @{ Handle = '1'; ProcessId = '1000' }
+                $mockCurrentValues = @{
+                    Handle = '1'
+                    ProcessId = '1000'
+                }
 
                 $mockWin32ProcessProperties = @{
                     Handle    = 0
@@ -181,8 +204,15 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return true when evaluating a hash table containing an array' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('1', '2') }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
+                $mockCurrentValues = @{
+                    Example = 'test'
+                    SecondExample = @('1', '2')
+                }
+
+                $mockDesiredValues = @{
+                    Example = 'test'
+                    SecondExample = @('1', '2')
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -193,8 +223,15 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return false when evaluating a hash table containing an array with wrong values' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = @('A', 'B') }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
+                $mockCurrentValues = @{
+                    Example = 'test'
+                    SecondExample = @('A', 'B')
+                }
+
+                $mockDesiredValues = @{
+                    Example = 'test'
+                    SecondExample = @('1', '2')
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -205,8 +242,14 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return false when evaluating a hash table containing an array, but the CurrentValues are missing an array' {
-                $mockCurrentValues = @{ Example = 'test' }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
+                $mockCurrentValues = @{
+                    Example = 'test'
+                }
+
+                $mockDesiredValues = @{
+                    Example = 'test'
+                    SecondExample = @('1', '2')
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -217,8 +260,15 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should return false when evaluating a hash table containing an array, but the property i CurrentValues is $null' {
-                $mockCurrentValues = @{ Example = 'test'; SecondExample = $null }
-                $mockDesiredValues = @{ Example = 'test'; SecondExample = @('1', '2') }
+                $mockCurrentValues = @{
+                    Example = 'test'
+                    SecondExample = $null
+                }
+
+                $mockDesiredValues = @{
+                    Example = 'test'
+                    SecondExample = @('1', '2')
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -229,7 +279,7 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         }
 
-        Context -Name 'When passing invalid types for DesiredValues' -Fixture {
+        Context 'When passing invalid types for DesiredValues' {
             It 'Should throw the correct error when DesiredValues is of wrong type' {
                 $mockCurrentValues = @{ Example = 'something' }
                 $mockDesiredValues = 'NotHashTable'
@@ -276,7 +326,7 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         }
 
-        Context -Name 'When passing an CimInstance as DesiredValue and ValuesToCheck is $null' -Fixture {
+        Context 'When passing an CimInstance as DesiredValue and ValuesToCheck is $null' {
             It 'Should throw the correct error' {
                 $mockCurrentValues = @{ Example = 'something' }
 
@@ -512,72 +562,74 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         }
     }
-    Describe "$($Global:DSCResourceName)\Resolve-DomainFQDN" {
 
+    Describe 'xActiveDirectory.Common\Resolve-DomainFQDN' {
         It 'Returns "DomainName" when "ParentDomainName" not supplied' {
-            $testDomainName = 'contoso.com';
-            $testParentDomainName = $null;
+            $testDomainName = 'contoso.com'
+            $testParentDomainName = $null
 
-            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDOmainName;
+            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
 
-            $result | Should Be $testDomainName;
+            $result | Should Be $testDomainName
         }
 
         It 'Returns compound "DomainName.ParentDomainName" when "ParentDomainName" supplied' {
-            $testDomainName = 'subdomain';
-            $testParentDomainName = 'contoso.com';
+            $testDomainName = 'subdomain'
+            $testParentDomainName = 'contoso.com'
 
-            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName;
+            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
 
-            $result | Should Be "$testDomainName.$testParentDomainName";
+            $result | Should Be ('{0}.{1}' -f $testDomainName, $testParentDomainName)
         }
-
     }
-    #endregion
 
-    #region Function TestDomainMember
-    Describe "$($Global:DSCResourceName)\Test-DomainMember" {
-
+    Describe 'xActiveDirectory.Common\Test-DomainMember' {
         It 'Returns "True" when domain member' {
-            Mock -CommandName Get-CimInstance -MockWith { return @{ Name = $env:COMPUTERNAME; PartOfDomain = $true; } }
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Name = $env:COMPUTERNAME
+                    PartOfDomain = $true
+                }
+            }
 
-            Test-DomainMember | Should Be $true;
+            Test-DomainMember | Should Be $true
         }
 
         It 'Returns "False" when workgroup member' {
-            Mock -CommandName Get-CimInstance -MockWith { return @{ Name = $env:COMPUTERNAME; } }
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Name = $env:COMPUTERNAME
+                }
+            }
 
-            Test-DomainMember | Should Be $false;
+            Test-DomainMember | Should Be $false
         }
-
     }
-    #endregion
 
-    #region Function Get-DomainName
-    Describe "$($Global:DSCResourceName)\Get-DomainName" {
+    Describe 'xActiveDirectory.Common\Get-DomainName' {
+        It 'Returns expected domain name' {
+            Mock -CommandName Get-CimInstance -MockWith {
+                return @{
+                    Name = $env:COMPUTERNAME
+                    Domain = 'contoso.com'
+                }
+            }
 
-        It 'Returns exepected domain name' {
-            Mock -CommandName Get-CimInstance -MockWith { return @{ Name = $env:COMPUTERNAME; Domain = 'contoso.com'; } }
-
-            Get-DomainName | Should Be 'contoso.com';
+            Get-DomainName | Should Be 'contoso.com'
         }
-
     }
-    #endregion
 
-    #region Function Assert-Module
-    Describe "$($Global:DSCResourceName)\Assert-Module" {
-
+    Describe 'xActiveDirectory.Common\Assert-Module' {
         It 'Does not throw when module is installed' {
-            $testModuleName = 'TestModule';
-            Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true; }
+            $testModuleName = 'TestModule'
+            Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true }
 
-            { Assert-Module -ModuleName $testModuleName } | Should Not Throw;
+            { Assert-Module -ModuleName $testModuleName } | Should Not Throw
         }
 
         It 'Should call Import-Module when the module is installed and ImportModule is specified' {
             $testModuleName = 'TestModule'
-            Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true; }
+            Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName } -MockWith { return $true }
             Mock -CommandName Import-Module -ParameterFilter { $Name -eq $testModuleName }
 
             Assert-Module -ModuleName $testModuleName -ImportModule
@@ -586,429 +638,427 @@ InModuleScope 'xActiveDirectory.Common' {
         }
 
         It 'Throws when module is not installed' {
-            $testModuleName = 'TestModule';
+            $testModuleName = 'TestModule'
             Mock -CommandName Get-Module -ParameterFilter { $Name -eq $testModuleName }
 
-            { Assert-Module -ModuleName $testModuleName } | Should Throw;
+            { Assert-Module -ModuleName $testModuleName } | Should Throw
         }
-
     }
-    #endregion
 
-    #region Function Assert-Module
-    Describe "$($Global:DSCResourceName)\Get-ADObjectParentDN" {
-
-        It "Returns CN object parent path" {
-            Get-ADObjectParentDN -DN 'CN=Administrator,CN=Users,DC=contoso,DC=com' | Should Be 'CN=Users,DC=contoso,DC=com';
+    Describe 'xActiveDirectory.Common\Get-ADObjectParentDN' {
+        It 'Returns CN object parent path' {
+            Get-ADObjectParentDN -DN 'CN=Administrator,CN=Users,DC=contoso,DC=com' | Should Be 'CN=Users,DC=contoso,DC=com'
         }
 
-        It "Returns OU object parent path" {
-            Get-ADObjectParentDN -DN 'CN=Administrator,OU=Custom Organizational Unit,DC=contoso,DC=com' | Should Be 'OU=Custom Organizational Unit,DC=contoso,DC=com';
+        It 'Returns OU object parent path' {
+            Get-ADObjectParentDN -DN 'CN=Administrator,OU=Custom Organizational Unit,DC=contoso,DC=com' | Should Be 'OU=Custom Organizational Unit,DC=contoso,DC=com'
         }
-
     }
-    #endregion
 
-    #region Function Remove-DuplicateMembers
-    Describe "$($Global:DSCResourceName)\Remove-DuplicateMembers" {
-
+    Describe 'xActiveDirectory.Common\Remove-DuplicateMembers' {
         It 'Removes one duplicate' {
-            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1';
+            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1'
 
-            $members.Count | Should Be 2;
-            $members -contains 'User1' | Should Be $true;
-            $members -contains 'User2' | Should Be $true;
+            $members.Count | Should Be 2
+            $members -contains 'User1' | Should Be $true
+            $members -contains 'User2' | Should Be $true
         }
 
         It 'Removes two duplicates' {
-            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1','USER2';
+            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1','USER2'
 
-            $members.Count | Should Be 2;
-            $members -contains 'User1' | Should Be $true;
-            $members -contains 'User2' | Should Be $true;
+            $members.Count | Should Be 2
+            $members -contains 'User1' | Should Be $true
+            $members -contains 'User2' | Should Be $true
         }
 
         It 'Removes double duplicates' {
-            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1','user1';
+            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1','user1'
 
-            $members.Count | Should Be 2;
-            $members -contains 'User1' | Should Be $true;
-            $members -contains 'User2' | Should Be $true;
+            $members.Count | Should Be 2
+            $members -contains 'User1' | Should Be $true
+            $members -contains 'User2' | Should Be $true
         }
-
     }
-    #endregion
 
-    #region Function Test-Members
-    Describe "$($Global:DSCResourceName)\Test-Members" {
-
+    Describe 'xActiveDirectory.Common\Test-Members' {
         It 'Passes when nothing is passed' {
-            Test-Members -ExistingMembers $null | Should Be $true;
+            Test-Members -ExistingMembers $null | Should Be $true
         }
 
         It 'Passes when there are existing members but members are required' {
-            $testExistingMembers = @('USER1', 'USER2');
+            $testExistingMembers = @('USER1', 'USER2')
 
-            Test-Members -ExistingMembers $testExistingMembers | Should Be $true;
+            Test-Members -ExistingMembers $testExistingMembers | Should Be $true
         }
 
         It 'Passes when existing members match required members' {
-            $testExistingMembers = @('USER1', 'USER2');
-            $testMembers = @('USER2', 'USER1');
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembers = @('USER2', 'USER1')
 
-            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should Be $true;
+            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should Be $true
         }
 
         It 'Fails when there are no existing members and members are required' {
-            $testExistingMembers = @('USER1', 'USER2');
-            $testMembers = @('USER1', 'USER3');
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembers = @('USER1', 'USER3')
 
-            Test-Members -ExistingMembers $null -Members $testMembers | Should Be $false;
+            Test-Members -ExistingMembers $null -Members $testMembers | Should Be $false
         }
 
         It 'Fails when there are more existing members than the members required' {
-            $testExistingMembers = @('USER1', 'USER2', 'USER3');
-            $testMembers = @('USER1', 'USER3');
+            $testExistingMembers = @('USER1', 'USER2', 'USER3')
+            $testMembers = @('USER1', 'USER3')
 
-            Test-Members -ExistingMembers $null -Members $testMembers | Should Be $false;
+            Test-Members -ExistingMembers $null -Members $testMembers | Should Be $false
         }
 
         It 'Fails when there are more existing members than the members required' {
-            $testExistingMembers = @('USER1', 'USER2');
-            $testMembers = @('USER1', 'USER3', 'USER2');
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembers = @('USER1', 'USER3', 'USER2')
 
-            Test-Members -ExistingMembers $null -Members $testMembers | Should Be $false;
+            Test-Members -ExistingMembers $null -Members $testMembers | Should Be $false
         }
 
         It 'Fails when existing members do not match required members' {
-            $testExistingMembers = @('USER1', 'USER2');
-            $testMembers = @('USER1', 'USER3');
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembers = @('USER1', 'USER3')
 
-            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should Be $false;
+            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should -BeFalse
         }
 
         It 'Passes when existing members include required member' {
-            $testExistingMembers = @('USER1', 'USER2');
-            $testMembersToInclude = @('USER2');
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToInclude = @('USER2')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should Be $true;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should -BeTrue
         }
 
         It 'Passes when existing members include required members' {
-            $testExistingMembers = @('USER1', 'USER2');
-            $testMembersToInclude = @('USER2', 'USER1');
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToInclude = @('USER2', 'USER1')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should Be $true;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should -BeTrue
         }
 
         It 'Fails when existing members is missing a required member' {
-            $testExistingMembers = @('USER1');
-            $testMembersToInclude = @('USER2');
+            $testExistingMembers = @('USER1')
+            $testMembersToInclude = @('USER2')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should Be $false;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should -BeFalse
         }
 
         It 'Fails when existing members is missing a required member' {
-            $testExistingMembers = @('USER1', 'USER3');
-            $testMembersToInclude = @('USER2');
+            $testExistingMembers = @('USER1', 'USER3')
+            $testMembersToInclude = @('USER2')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should Be $false;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should -BeFalse
         }
 
         It 'Fails when existing members is missing a required members' {
-            $testExistingMembers = @('USER3');
-            $testMembersToInclude = @('USER1', 'USER2');
+            $testExistingMembers = @('USER3')
+            $testMembersToInclude = @('USER1', 'USER2')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should Be $false;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should -BeFalse
         }
 
         It 'Passes when existing member does not include excluded member' {
-            $testExistingMembers = @('USER1');
-            $testMembersToExclude = @('USER2');
+            $testExistingMembers = @('USER1')
+            $testMembersToExclude = @('USER2')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToInclude | Should Be $true;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToExclude | Should -BeTrue
         }
 
         It 'Passes when existing member does not include excluded members' {
-            $testExistingMembers = @('USER1');
-            $testMembersToExclude = @('USER2', 'USER3');
+            $testExistingMembers = @('USER1')
+            $testMembersToExclude = @('USER2', 'USER3')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToInclude | Should Be $true;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToExclude | Should -BeTrue
         }
 
         It 'Passes when existing members does not include excluded member' {
-            $testExistingMembers = @('USER1', 'USER2');
-            $testMembersToExclude = @('USER3');
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToExclude = @('USER3')
 
-            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToInclude | Should Be $true;
+            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToExclude | Should -BeTrue
+        }
+
+        It 'Should fail when an existing members is include as an excluded member' {
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToExclude = @('USER2')
+
+            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToExclude | Should -BeFalse
+        }
+
+        It 'Should pass when MembersToExclude is set to $null' {
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToExclude = $null
+
+            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToExclude | Should -BeTrue
+        }
+
+        It 'Should pass when MembersToInclude is set to $null' {
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToInclude = $null
+
+            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude | Should -BeTrue
+        }
+
+        It 'Should fail when Members is set to $null' {
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembers = $null
+
+            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should -BeFalse
         }
     }
-    #endregion
 
-    #region Function Assert-MemberParameters
-    Describe "$($Global:DSCResourceName)\Assert-MemberParameters" {
-
+    Describe 'xActiveDirectory.Common\Assert-MemberParameters' {
         It "Throws if 'Members' is specified but is empty" {
-            { Assert-MemberParameters -Members @() } | Should Throw 'The Members parameter value is null';
+            { Assert-MemberParameters -Members @() } | Should Throw 'The Members parameter value is null'
         }
 
         It "Throws if 'Members' and 'MembersToInclude' are specified" {
-            { Assert-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should Throw 'parameters conflict';
+            { Assert-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should Throw 'parameters conflict'
         }
 
         It "Throws if 'Members' and 'MembersToExclude' are specified" {
-            { Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should Throw 'parameters conflict';
+            { Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should Throw 'parameters conflict'
         }
 
         It "Throws if 'MembersToInclude' and 'MembersToExclude' contain the same member" {
-            { Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should Throw 'member must not be included in both';
+            { Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should Throw 'member must not be included in both'
         }
 
         It "Throws if 'MembersToInclude' and 'MembersToExclude' are empty" {
-            { Assert-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should Throw 'At least one member must be specified';
+            { Assert-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should Throw 'At least one member must be specified'
         }
-
     }
-    #endregion
 
-    #region Function ConvertTo-Timespan
-    Describe "$($Global:DSCResourceName)\ConvertTo-Timespan" {
-
+    Describe 'xActiveDirectory.Common\ConvertTo-Timespan' {
         It "Returns 'System.TimeSpan' object type" {
-            $testIntTimeSpan = 60;
+            $testIntTimeSpan = 60
 
-            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Minutes;
+            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Minutes
 
-            $result -is [System.TimeSpan] | Should Be $true;
+            $result -is [System.TimeSpan] | Should Be $true
         }
 
-        It "Creates TimeSpan from seconds" {
-            $testIntTimeSpan = 60;
+        It 'Creates TimeSpan from seconds' {
+            $testIntTimeSpan = 60
 
-            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Seconds;
+            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Seconds
 
-            $result.TotalSeconds | Should Be $testIntTimeSpan;
+            $result.TotalSeconds | Should Be $testIntTimeSpan
         }
 
-        It "Creates TimeSpan from minutes" {
-            $testIntTimeSpan = 60;
+        It 'Creates TimeSpan from minutes' {
+            $testIntTimeSpan = 60
 
-            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Minutes;
+            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Minutes
 
-            $result.TotalMinutes | Should Be $testIntTimeSpan;
+            $result.TotalMinutes | Should Be $testIntTimeSpan
         }
 
-        It "Creates TimeSpan from hours" {
-            $testIntTimeSpan = 60;
+        It 'Creates TimeSpan from hours' {
+            $testIntTimeSpan = 60
 
-            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Hours;
+            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Hours
 
-            $result.TotalHours | Should Be $testIntTimeSpan;
+            $result.TotalHours | Should Be $testIntTimeSpan
         }
 
-        It "Creates TimeSpan from days" {
-            $testIntTimeSpan = 60;
+        It 'Creates TimeSpan from days' {
+            $testIntTimeSpan = 60
 
-            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Days;
+            $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Days
 
-            $result.TotalDays | Should Be $testIntTimeSpan;
+            $result.TotalDays | Should Be $testIntTimeSpan
         }
-
     }
-    #endregion
 
-    #region Function ConvertTo-Timespan
-    Describe "$($Global:DSCResourceName)\ConvertFrom-Timespan" {
-
+    Describe 'xActiveDirectory.Common\ConvertFrom-Timespan' {
         It "Returns 'System.UInt32' object type" {
-            $testIntTimeSpan = 60;
-            $testTimeSpan = New-TimeSpan -Seconds $testIntTimeSpan;
+            $testIntTimeSpan = 60
+            $testTimeSpan = New-TimeSpan -Seconds $testIntTimeSpan
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds;
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds
 
-            $result -is [System.UInt32] | Should Be $true;
+            $result -is [System.UInt32] | Should Be $true
         }
 
-        It "Converts TimeSpan to total seconds" {
-            $testIntTimeSpan = 60;
-            $testTimeSpan = New-TimeSpan -Seconds $testIntTimeSpan;
+        It 'Converts TimeSpan to total seconds' {
+            $testIntTimeSpan = 60
+            $testTimeSpan = New-TimeSpan -Seconds $testIntTimeSpan
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds;
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds
 
-            $result | Should Be $testTimeSpan.TotalSeconds;
+            $result | Should Be $testTimeSpan.TotalSeconds
         }
 
-        It "Converts TimeSpan to total minutes" {
-            $testIntTimeSpan = 60;
-            $testTimeSpan = New-TimeSpan -Minutes $testIntTimeSpan;
+        It 'Converts TimeSpan to total minutes' {
+            $testIntTimeSpan = 60
+            $testTimeSpan = New-TimeSpan -Minutes $testIntTimeSpan
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Minutes;
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Minutes
 
-            $result | Should Be $testTimeSpan.TotalMinutes;
+            $result | Should Be $testTimeSpan.TotalMinutes
         }
 
-        It "Converts TimeSpan to total hours" {
-            $testIntTimeSpan = 60;
-            $testTimeSpan = New-TimeSpan -Hours $testIntTimeSpan;
+        It 'Converts TimeSpan to total hours' {
+            $testIntTimeSpan = 60
+            $testTimeSpan = New-TimeSpan -Hours $testIntTimeSpan
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Hours;
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Hours
 
-            $result | Should Be $testTimeSpan.TotalHours;
+            $result | Should Be $testTimeSpan.TotalHours
         }
 
-        It "Converts TimeSpan to total days" {
-            $testIntTimeSpan = 60;
-            $testTimeSpan = New-TimeSpan -Days $testIntTimeSpan;
+        It 'Converts TimeSpan to total days' {
+            $testIntTimeSpan = 60
+            $testTimeSpan = New-TimeSpan -Days $testIntTimeSpan
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Days;
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Days
 
-            $result | Should Be $testTimeSpan.TotalDays;
+            $result | Should Be $testTimeSpan.TotalDays
         }
-
     }
-    #endregion
 
-    #region Function Get-ADCommonParameters
-    Describe "$($Global:DSCResourceName)\Get-ADCommonParameters" {
-
+    Describe 'xActiveDirectory.Common\Get-ADCommonParameters' {
         It "Returns 'System.Collections.Hashtable' object type" {
-            $testIdentity = 'contoso.com';
+            $testIdentity = 'contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity;
+            $result = Get-ADCommonParameters -Identity $testIdentity
 
-            $result -is [System.Collections.Hashtable] | Should Be $true;
+            $result -is [System.Collections.Hashtable] | Should Be $true
         }
 
         It "Returns 'Identity' key by default" {
-            $testIdentity = 'contoso.com';
+            $testIdentity = 'contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity;
+            $result = Get-ADCommonParameters -Identity $testIdentity
 
-            $result['Identity'] | Should Be $testIdentity;
+            $result['Identity'] | Should Be $testIdentity
         }
 
         It "Returns 'Name' key when 'UseNameParameter' is specified" {
-            $testIdentity = 'contoso.com';
+            $testIdentity = 'contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -UseNameParameter;
+            $result = Get-ADCommonParameters -Identity $testIdentity -UseNameParameter
 
-            $result['Name'] | Should Be $testIdentity;
+            $result['Name'] | Should Be $testIdentity
         }
 
         foreach ($identityParam in @('UserName','GroupName','ComputerName'))
         {
             It "Returns 'Identity' key when '$identityParam' alias is specified" {
-                $testIdentity = 'contoso.com';
+                $testIdentity = 'contoso.com'
                 $getADCommonParameters = @{
-                    $identityParam = $testIdentity;
+                    $identityParam = $testIdentity
                 }
 
-                $result = Get-ADCommonParameters @getADCommonParameters;
+                $result = Get-ADCommonParameters @getADCommonParameters
 
-                $result['Identity'] | Should Be $testIdentity;
+                $result['Identity'] | Should Be $testIdentity
             }
         }
 
         It "Returns 'Identity' key by default when 'Identity' and 'CommonName' are specified" {
-            $testIdentity = 'contoso.com';
-            $testCommonName = 'Test Common Name';
+            $testIdentity = 'contoso.com'
+            $testCommonName = 'Test Common Name'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -CommonName $testCommonName;
+            $result = Get-ADCommonParameters -Identity $testIdentity -CommonName $testCommonName
 
-            $result['Identity'] | Should Be $testIdentity;
+            $result['Identity'] | Should Be $testIdentity
         }
 
         It "Returns 'Identity' key with 'CommonName' when 'Identity', 'CommonName' and 'PreferCommonName' are specified" {
-            $testIdentity = 'contoso.com';
-            $testCommonName = 'Test Common Name';
+            $testIdentity = 'contoso.com'
+            $testCommonName = 'Test Common Name'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -CommonName $testCommonName -PreferCommonName;
+            $result = Get-ADCommonParameters -Identity $testIdentity -CommonName $testCommonName -PreferCommonName
 
-            $result['Identity'] | Should Be $testCommonName;
+            $result['Identity'] | Should Be $testCommonName
         }
 
         It "Returns 'Identity' key with 'Identity' when 'Identity' and 'PreferCommonName' are specified" {
-            $testIdentity = 'contoso.com';
+            $testIdentity = 'contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -PreferCommonName;
+            $result = Get-ADCommonParameters -Identity $testIdentity -PreferCommonName
 
-            $result['Identity'] | Should Be $testIdentity;
+            $result['Identity'] | Should Be $testIdentity
         }
 
         it "Returns 'Name' key when 'UseNameParameter' and 'PreferCommonName' are supplied" {
-            $testIdentity = 'contoso.com';
-            $testCommonName = 'Test Common Name';
+            $testIdentity = 'contoso.com'
+            $testCommonName = 'Test Common Name'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -UseNameParameter -CommonName $testCommonName -PreferCommonName;
+            $result = Get-ADCommonParameters -Identity $testIdentity -UseNameParameter -CommonName $testCommonName -PreferCommonName
 
-            $result['Name'] | Should Be $testCommonName;
+            $result['Name'] | Should Be $testCommonName
         }
 
         It "Does not return 'Credential' key by default" {
-            $testIdentity = 'contoso.com';
+            $testIdentity = 'contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity;
+            $result = Get-ADCommonParameters -Identity $testIdentity
 
-            $result.ContainsKey('Credential') | Should Be $false;
+            $result.ContainsKey('Credential') | Should Be $false
         }
 
         It "Returns 'Credential' key when specified" {
-            $testIdentity = 'contoso.com';
-            $testCredential = [System.Management.Automation.PSCredential]::Empty;
+            $testIdentity = 'contoso.com'
+            $testCredential = [System.Management.Automation.PSCredential]::Empty
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -Credential $testCredential;
+            $result = Get-ADCommonParameters -Identity $testIdentity -Credential $testCredential
 
-            $result['Credential'] | Should Be $testCredential;
+            $result['Credential'] | Should Be $testCredential
         }
 
         It "Does not return 'Server' key by default" {
-            $testIdentity = 'contoso.com';
+            $testIdentity = 'contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity;
+            $result = Get-ADCommonParameters -Identity $testIdentity
 
-            $result.ContainsKey('Server') | Should Be $false;
+            $result.ContainsKey('Server') | Should Be $false
         }
 
         It "Returns 'Server' key when specified" {
-            $testIdentity = 'contoso.com';
-            $testServer = 'testserver.contoso.com';
+            $testIdentity = 'contoso.com'
+            $testServer = 'testserver.contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -Server $testServer;
+            $result = Get-ADCommonParameters -Identity $testIdentity -Server $testServer
 
-            $result['Server'] | Should Be $testServer;
+            $result['Server'] | Should Be $testServer
         }
 
         It "Converts 'DomainAdministratorCredential' parameter to 'Credential' key" {
-            $testIdentity = 'contoso.com';
-            $testCredential = [System.Management.Automation.PSCredential]::Empty;
+            $testIdentity = 'contoso.com'
+            $testCredential = [System.Management.Automation.PSCredential]::Empty
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -DomainAdministratorCredential $testCredential;
+            $result = Get-ADCommonParameters -Identity $testIdentity -DomainAdministratorCredential $testCredential
 
-            $result['Credential'] | Should Be $testCredential;
+            $result['Credential'] | Should Be $testCredential
         }
 
         It "Converts 'DomainController' parameter to 'Server' key" {
-            $testIdentity = 'contoso.com';
-            $testServer = 'testserver.contoso.com';
+            $testIdentity = 'contoso.com'
+            $testServer = 'testserver.contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -DomainController $testServer;
+            $result = Get-ADCommonParameters -Identity $testIdentity -DomainController $testServer
 
-            $result['Server'] | Should Be $testServer;
+            $result['Server'] | Should Be $testServer
         }
 
         It 'Accepts remaining arguments' {
-            $testIdentity = 'contoso.com';
+            $testIdentity = 'contoso.com'
 
-            $result = Get-ADCommonParameters -Identity $testIdentity -UnexpectedParameter 42;
+            $result = Get-ADCommonParameters -Identity $testIdentity -UnexpectedParameter 42
 
-            $result['Identity'] | Should Be $testIdentity;
+            $result['Identity'] | Should Be $testIdentity
         }
-
     }
-    #endregion
 
-    #region Function ConvertTo-DeploymentForestMode
-    Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentForestMode" {
+    Describe 'xActiveDirectory.Common\ConvertTo-DeploymentForestMode' {
         It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
             ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
         }
@@ -1045,10 +1095,8 @@ InModuleScope 'xActiveDirectory.Common' {
             ConvertTo-DeploymentForestMode -ModeId 666 | Should Be $null
         }
     }
-    #endregion
 
-    #region Function ConvertTo-DeploymentDomainMode
-    Describe "$($Global:DSCResourceName)\ConvertTo-DeploymentDomainMode" {
+    Describe 'xActiveDirectory.Common\ConvertTo-DeploymentDomainMode' {
         It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
             ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
         }
@@ -1085,10 +1133,8 @@ InModuleScope 'xActiveDirectory.Common' {
             ConvertTo-DeploymentDomainMode -ModeId 666 | Should Be $null
         }
     }
-    #endregion
 
-    #region Function Restore-ADCommonObject
-    Describe "$($Global:DSCResourceName)\Restore-ADCommonObject" {
+    Describe 'xActiveDirectory.Common\Restore-ADCommonObject' {
         $getAdObjectReturnValue = @(
             [PSCustomObject] @{
                 Deleted           = $true
@@ -1169,10 +1215,8 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         }
     }
-    #endregion
 
-    #region Get-ADDomainNameFromDistinguishedName
-    Describe "$($Global:DSCResourceName)\Get-ADDomainNameFromDistinguishedName" {
+    Describe 'xActiveDirectory.Common\Get-ADDomainNameFromDistinguishedName' {
         $validDistinguishedNames = @(
             @{
                 DN     = 'CN=group1,OU=Group,OU=Wacken,DC=contoso,DC=com'
@@ -1187,6 +1231,7 @@ InModuleScope 'xActiveDirectory.Common' {
                 Domain = 'child.sub.contoso.com'
             }
         )
+
         $invalidDistinguishedNames = @(
             'Group1'
             'contoso\group1'
@@ -1211,10 +1256,8 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         }
     }
-    #endregion
 
-    #region Add-AdCommonGroupMember
-    Describe "$($Global:DSCResourceName)\Add-ADCommonGroupMember" {
+    Describe 'xActiveDirectory.Common\Add-ADCommonGroupMember' {
         Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
         $memberData = @(
@@ -1333,9 +1376,8 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         }
     }
-    #endregion
 
-    Describe "$($Global:DSCResourceName)\Get-DomainControllerObject" {
+    Describe 'xActiveDirectory.Common\Get-DomainControllerObject' {
         Context 'When domain name cannot be reached' {
             BeforeAll {
                 Mock -CommandName Get-ADDomainController -MockWith {
@@ -1432,7 +1474,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe "$($Global:DSCResourceName)\Test-IsDomainController" {
+    Describe 'xActiveDirectory.Common\Test-IsDomainController' {
         Context 'When operating system information says the node is a domain controller' {
             BeforeAll {
                 Mock -CommandName Get-CimInstance -MockWith {
@@ -1468,7 +1510,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe "$($Global:DSCResourceName)\Convert-PropertyMapToObjectProperties" {
+    Describe 'xActiveDirectory.Common\Convert-PropertyMapToObjectProperties' {
         Context 'When a property map should be converted to object properties' {
             BeforeAll {
                 $propertyMapValue = @(
@@ -1662,7 +1704,7 @@ InModuleScope 'xActiveDirectory.Common' {
         Assert-VerifiableMock
     }
 
-    Describe "$($Global:DSCResourceName)\Compare-ResourcePropertyState" {
+    Describe 'xActiveDirectory.Common\Compare-ResourcePropertyState' {
         Context 'When one property is in desired state' {
             BeforeAll {
                 $mockCurrentValues = @{
@@ -1906,8 +1948,8 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         }
     }
-    #region Function Assert-ADPSDrive
-    Describe "$($Global:DSCResourceName)\Assert-ADPSDrive" {
+
+    Describe 'xActiveDirectory.Common\Assert-ADPSDrive' {
         Mock -CommandName Assert-Module
 
         Context 'When the AD PS Drive does not exist and the New-PSDrive function is successful' {
@@ -1972,6 +2014,54 @@ InModuleScope 'xActiveDirectory.Common' {
                 Assert-MockCalled -CommandName New-PSDrive -Exactly -Times 0 -Scope Context
             }
         }
+
+    }
+
+    Describe 'xActiveDirectory.Common\Test-ADReplicationSite' {
+        BeforeAll {
+            function Get-ADDomainController
+            {
+            }
+
+            function Get-ADReplicationSite
+            {
+            }
+
+            Mock -CommandName Get-ADDomainController -MockWith {
+                return $env:COMPUTERNAME
+            }
+        }
+
+        Context 'When a replication site does not exist' {
+            BeforeAll {
+                Mock -CommandName Get-ADReplicationSite -MockWith {
+                    throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException'
+                }
+            }
+
+            It 'Should return $false' {
+                $testADReplicationSiteResult = Test-ADReplicationSite -SiteName 'TestSite' -DomainName 'contoso.com'
+                $testADReplicationSiteResult | Should -BeFalse
+
+                Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Get-ADReplicationSite -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When a replication site exist' {
+            BeforeAll {
+                Mock -CommandName Get-ADReplicationSite -MockWith {
+                    return 'site object'
+                }
+            }
+
+            It 'Should return $true' {
+                $testADReplicationSiteResult = Test-ADReplicationSite -SiteName 'TestSite' -DomainName 'contoso.com'
+                $testADReplicationSiteResult | Should -BeTrue
+
+                Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Get-ADReplicationSite -Exactly -Times 1 -Scope It
+            }
+        }
     }
 }
-

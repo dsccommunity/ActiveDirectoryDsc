@@ -4,9 +4,6 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
 
-$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
-Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
-
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADForestProperties'
 
 <#

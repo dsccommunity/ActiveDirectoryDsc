@@ -486,9 +486,9 @@ function Assert-Module
 
     if (-not (Get-Module -Name $ModuleName -ListAvailable))
     {
-        $errorId = '{0}_ModuleNotFound' -f $ModuleName;
-        $errorMessage = $script:localizedData.RoleNotFoundError -f $moduleName;
-        ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage;
+        $errorId = '{0}_ModuleNotFound' -f $ModuleName
+        $errorMessage = $script:localizedData.RoleNotFoundError -f $moduleName
+        ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage
     }
 
     if ($ImportModule)
@@ -506,8 +506,8 @@ function Test-DomainMember
     (
     )
 
-    $isDomainMember = [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain;
-    return $isDomainMember;
+    $isDomainMember = [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain
+    return $isDomainMember
 }
 
 
@@ -520,8 +520,8 @@ function Get-DomainName
     (
     )
 
-    $domainName = [System.String] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).Domain;
-    return $domainName;
+    $domainName = [System.String] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).Domain
+    return $domainName
 } # function Get-DomainName
 
 # Internal function to build domain FQDN
@@ -541,38 +541,9 @@ function Resolve-DomainFQDN
     $domainFQDN = $DomainName
     if ($ParentDomainName)
     {
-        $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName;
+        $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName
     }
     return $domainFQDN
-}
-
-## Internal function to test/ domain availability
-function Test-ADDomain
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String] $DomainName,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.CredentialAttribute()]
-        $Credential
-    )
-
-    Write-Verbose -Message ($script:localizedData.CheckingDomain -f $DomainName);
-    $ldapDomain = 'LDAP://{0}' -f $DomainName;
-    if ($PSBoundParameters.ContainsKey('Credential'))
-    {
-        $domain = New-Object DirectoryServices.DirectoryEntry($ldapDomain, $Credential.UserName, $Credential.GetNetworkCredential().Password);
-    }
-    else
-    {
-        $domain = New-Object DirectoryServices.DirectoryEntry($ldapDomain);
-    }
-    return ($null -ne $domain);
 }
 
 # Internal function to get an Active Directory object's parent Distinguished Name
@@ -612,8 +583,8 @@ function Get-ADObjectParentDN
     )
 
     # https://www.uvm.edu/~gcd/2012/07/listing-parent-of-ad-object-in-powershell/
-    $distinguishedNameParts = $DN -split '(?<![\\]),';
-    $distinguishedNameParts[1..$($distinguishedNameParts.Count - 1)] -join ',';
+    $distinguishedNameParts = $DN -split '(?<![\\]),'
+    $distinguishedNameParts[1..$($distinguishedNameParts.Count - 1)] -join ','
 
 } #end function GetADObjectParentDN
 
@@ -650,36 +621,36 @@ function Assert-MemberParameters
         if ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
             # If Members are provided, Include and Exclude are not allowed.
-            $errorId = '{0}_MembersPlusIncludeOrExcludeConflict' -f $ModuleName;
-            $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude';
-            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
+            $errorId = '{0}_MembersPlusIncludeOrExcludeConflict' -f $ModuleName
+            $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude'
+            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
         }
 
         if ($Members.Length -eq 0) # )
         {
-            $errorId = '{0}_MembersIsNull' -f $ModuleName;
-            $errorMessage = $script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude';
-            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
+            $errorId = '{0}_MembersIsNull' -f $ModuleName
+            $errorMessage = $script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude'
+            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
         }
     }
 
     if ($PSBoundParameters.ContainsKey('MembersToInclude'))
     {
-        $MembersToInclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToInclude);
+        $MembersToInclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToInclude)
     }
 
     if ($PSBoundParameters.ContainsKey('MembersToExclude'))
     {
-        $MembersToExclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToExclude);
+        $MembersToExclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToExclude)
     }
 
     if (($PSBoundParameters.ContainsKey('MembersToInclude')) -and ($PSBoundParameters.ContainsKey('MembersToExclude')))
     {
         if (($MembersToInclude.Length -eq 0) -and ($MembersToExclude.Length -eq 0))
         {
-            $errorId = '{0}_EmptyIncludeAndExclude' -f $ModuleName;
-            $errorMessage = $script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude';
-            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
+            $errorId = '{0}_EmptyIncludeAndExclude' -f $ModuleName
+            $errorMessage = $script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude'
+            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
         }
 
         # Both MembersToInclude and MembersToExlude were provided. Check if they have common principals.
@@ -687,9 +658,9 @@ function Assert-MemberParameters
         {
             if ($member -in $MembersToExclude)
             {
-                $errorId = '{0}_IncludeAndExcludeConflict' -f $ModuleName;
-                $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude';
-                ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage;
+                $errorId = '{0}_IncludeAndExcludeConflict' -f $ModuleName
+                $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude'
+                ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
             }
         }
     }
@@ -710,34 +681,34 @@ function Remove-DuplicateMembers
 
     Set-StrictMode -Version Latest
 
-    $destIndex = 0;
+    $destIndex = 0
     for ([int] $sourceIndex = 0 ; $sourceIndex -lt $Members.Count; $sourceIndex++)
     {
-        $matchFound = $false;
+        $matchFound = $false
         for ([int] $matchIndex = 0; $matchIndex -lt $destIndex; $matchIndex++)
         {
             if ($Members[$sourceIndex] -eq $Members[$matchIndex])
             {
                 # A duplicate is found. Discard the duplicate.
-                Write-Verbose -Message ($script:localizedData.RemovingDuplicateMember -f $Members[$sourceIndex]);
-                $matchFound = $true;
-                continue;
+                Write-Verbose -Message ($script:localizedData.RemovingDuplicateMember -f $Members[$sourceIndex])
+                $matchFound = $true
+                continue
             }
         }
 
         if (!$matchFound)
         {
-            $Members[$destIndex++] = $Members[$sourceIndex].ToLowerInvariant();
+            $Members[$destIndex++] = $Members[$sourceIndex].ToLowerInvariant()
         }
     }
 
     # Create the output array.
-    $destination = New-Object -TypeName System.String[] -ArgumentList $destIndex;
+    $destination = New-Object -TypeName System.String[] -ArgumentList $destIndex
 
     # Copy only distinct elements from the original array to the destination array.
-    [System.Array]::Copy($Members, $destination, $destIndex);
+    [System.Array]::Copy($Members, $destination, $destIndex)
 
-    return $destination;
+    return $destination
 
 } #end function RemoveDuplicateMembers
 
@@ -778,22 +749,22 @@ function Test-Members
     {
         if ($null -eq $Members -or (($Members.Count -eq 1) -and ($Members[0].Length -eq 0)))
         {
-            $Members = @();
+            $Members = @()
         }
-        Write-Verbose ($script:localizedData.CheckingMembers -f 'Explicit');
-        $Members = [System.String[]] @(Remove-DuplicateMembers -Members $Members);
+        Write-Verbose ($script:localizedData.CheckingMembers -f 'Explicit')
+        $Members = [System.String[]] @(Remove-DuplicateMembers -Members $Members)
         if ($ExistingMembers.Count -ne $Members.Count)
         {
-            Write-Verbose -Message ($script:localizedData.MembershipCountMismatch -f $Members.Count, $ExistingMembers.Count);
-            return $false;
+            Write-Verbose -Message ($script:localizedData.MembershipCountMismatch -f $Members.Count, $ExistingMembers.Count)
+            return $false
         }
 
         foreach ($member in $Members)
         {
             if ($member -notin $ExistingMembers)
             {
-                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member);
-                return $false;
+                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member)
+                return $false
             }
         }
     } #end if $Members
@@ -802,16 +773,16 @@ function Test-Members
     {
         if ($null -eq $MembersToInclude -or (($MembersToInclude.Count -eq 1) -and ($MembersToInclude[0].Length -eq 0)))
         {
-            $MembersToInclude = @();
+            $MembersToInclude = @()
         }
-        Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Included');
-        $MembersToInclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToInclude);
+        Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Included')
+        $MembersToInclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToInclude)
         foreach ($member in $MembersToInclude)
         {
             if ($member -notin $ExistingMembers)
             {
-                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member);
-                return $false;
+                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member)
+                return $false
             }
         }
     } #end if $MembersToInclude
@@ -820,22 +791,22 @@ function Test-Members
     {
         if ($null -eq $MembersToExclude -or (($MembersToExclude.Count -eq 1) -and ($MembersToExclude[0].Length -eq 0)))
         {
-            $MembersToExclude = @();
+            $MembersToExclude = @()
         }
-        Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Excluded');
-        $MembersToExclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToExclude);
+        Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Excluded')
+        $MembersToExclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToExclude)
         foreach ($member in $MembersToExclude)
         {
             if ($member -in $ExistingMembers)
             {
-                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member);
-                return $false;
+                Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member)
+                return $false
             }
         }
     } #end if $MembersToExclude
 
     Write-Verbose -Message $script:localizedData.MembershipInDesiredState
-    return $true;
+    return $true
 
 } #end function Test-Membership
 
@@ -856,7 +827,7 @@ function ConvertTo-TimeSpan
         $TimeSpanType
     )
 
-    $newTimeSpanParams = @{ };
+    $newTimeSpanParams = @{ }
     switch ($TimeSpanType)
     {
         'Seconds'
@@ -1001,36 +972,36 @@ function Get-ADCommonParameters
     {
         if ($PreferCommonName -and ($PSBoundParameters.ContainsKey('CommonName')))
         {
-            $adConnectionParameters = @{ Name = $CommonName; }
+            $adConnectionParameters = @{ Name = $CommonName }
         }
         else
         {
-            $adConnectionParameters = @{ Name = $Identity; }
+            $adConnectionParameters = @{ Name = $Identity }
         }
     }
     else
     {
         if ($PreferCommonName -and ($PSBoundParameters.ContainsKey('CommonName')))
         {
-            $adConnectionParameters = @{ Identity = $CommonName; }
+            $adConnectionParameters = @{ Identity = $CommonName }
         }
         else
         {
-            $adConnectionParameters = @{ Identity = $Identity; }
+            $adConnectionParameters = @{ Identity = $Identity }
         }
     }
 
     if ($Credential)
     {
-        $adConnectionParameters['Credential'] = $Credential;
+        $adConnectionParameters['Credential'] = $Credential
     }
 
     if ($Server)
     {
-        $adConnectionParameters['Server'] = $Server;
+        $adConnectionParameters['Server'] = $Server
     }
 
-    return $adConnectionParameters;
+    return $adConnectionParameters
 } #end function Get-ADCommonParameters
 
 function ThrowInvalidOperationError
@@ -1049,10 +1020,10 @@ function ThrowInvalidOperationError
         $ErrorMessage
     )
 
-    $exception = New-Object -TypeName System.InvalidOperationException -ArgumentList $ErrorMessage;
-    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null;
-    throw $errorRecord;
+    $exception = New-Object -TypeName System.InvalidOperationException -ArgumentList $ErrorMessage
+    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
+    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null
+    throw $errorRecord
 }
 
 function ThrowInvalidArgumentError
@@ -1071,10 +1042,10 @@ function ThrowInvalidArgumentError
         $ErrorMessage
     )
 
-    $exception = New-Object -TypeName System.ArgumentException -ArgumentList $ErrorMessage;
-    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument;
-    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null;
-    throw $errorRecord;
+    $exception = New-Object -TypeName System.ArgumentException -ArgumentList $ErrorMessage
+    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
+    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null
+    throw $errorRecord
 
 } #end function ThrowInvalidArgumentError
 
@@ -1086,30 +1057,32 @@ function Test-ADReplicationSite
     param
     (
         [Parameter(Mandatory = $true)]
-        [System.String] $SiteName,
+        [System.String]
+        $SiteName,
 
         [Parameter(Mandatory = $true)]
-        [System.String] $DomainName,
+        [System.String]
+        $DomainName,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $Credential
     )
 
-    Write-Verbose -Message ($script:localizedData.CheckingSite -f $SiteName);
+    Write-Verbose -Message ($script:localizedData.CheckingSite -f $SiteName)
 
-    $existingDC = "$((Get-ADDomainController -Discover -DomainName $DomainName -ForceDiscover).HostName)";
+    $existingDC = "$((Get-ADDomainController -Discover -DomainName $DomainName -ForceDiscover).HostName)"
 
     try
     {
-        $site = Get-ADReplicationSite -Identity $SiteName -Server $existingDC -Credential $Credential;
+        $site = Get-ADReplicationSite -Identity $SiteName -Server $existingDC -Credential $Credential
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        return $false;
+        return $false
     }
 
-    return ($null -ne $site);
+    return ($null -ne $site)
 }
 
 function ConvertTo-DeploymentForestMode
@@ -1790,7 +1763,6 @@ Export-ModuleMember -Function @(
     'Test-DomainMember'
     'Get-DomainName'
     'Resolve-DomainFQDN'
-    'Test-ADDomain'
     'Get-ADObjectParentDN'
     'Assert-MemberParameters'
     'Remove-DuplicateMembers'
