@@ -8,7 +8,7 @@ environment:
     secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
 
 install:
-    - git clone https://github.com/PowerShell/DscResource.Tests
+    - git clone https://github.com/X-Guardian/DscResource.Tests
     - ps: |
         Write-Verbose -Message "PowerShell version $($PSVersionTable.PSVersion)" -Verbose
         Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
@@ -25,9 +25,9 @@ build: false
 #      test configuration         #
 #---------------------------------#
 
-test_script:
-    - ps: |
-        Invoke-AppveyorTestScriptTask -CodeCoverage -CodeCovIo
+#test_script:
+#    - ps: |
+#        Invoke-AppveyorTestScriptTask -CodeCoverage -CodeCovIo
 
 # scripts to run before deployment
 after_test:
@@ -42,4 +42,4 @@ after_test:
 
 deploy_script:
   - ps: |
-        Invoke-AppVeyorDeployTask
+        Invoke-AppVeyorDeployTask -Optin 'PublishExample', 'PublishWikiContent'
