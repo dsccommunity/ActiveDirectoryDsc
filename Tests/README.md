@@ -90,7 +90,7 @@ memory (~32GB) and disk (~60GB) on the PC that will host the virtual machines.
    _than once will create more than one virtual switch with the same name._
    ```powershell
    $virtualSwitchName = 'DSCADLabPrivate'
-   if ( -not (Get-VMSwitch -Name $virtualSwitchName))
+   if (-not (Get-VMSwitch -Name $virtualSwitchName))
    {
        New-VMSwitch -Name $virtualSwitchName -SwitchType 'Private'
    }
