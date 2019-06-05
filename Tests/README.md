@@ -185,6 +185,8 @@ Internet.
        Copy-Item -ToSession $dc03Session -Path $sourceModulePath -Destination $destinationModulePath -Recurse -Force
    }
    ```
+1. **Important!** Change to folder to root of your local working repository
+   folder, e.g. cd 'c:\source\xActiveDirectory'.
 1. Create the configuration .mof and the metadata .mof file on the respective
    nodes.
    ```powershell
@@ -219,8 +221,6 @@ Internet.
        Get-DscConfigurationStatus
    }
    ```
-1. **Important!** Change to folder to root of your local working repository folder, e.g.
-   `cd 'c:\source\xActiveDirectory'`.
 1. Clone the latest test framework into the local repository folder. _**Note:**_
    _This requires `git`. The test framework will also be cloned when running_
    _a unit test._
@@ -240,10 +240,13 @@ domain can be run several times without reverting to the checkpoint. The
 resources that need a clean environment are the resources that configures
 the domain, e.g. `xADDomain` and `xADDomainController`.
 
-1. Copy resource module code to a local folder, e.g. `C:\source\xActiveDirectory`.
+1. **Important!** Change to folder to root of your local working repository
+   folder, e.g. cd 'c:\source\xActiveDirectory'.
+1. Copy resource module code to a local folder on each virtual machine,
+   e.g. `C:\source\xActiveDirectory`.
    _**NOTE:** Do not copy the resource being tested to a path that exist_
    _in `$env:PSModulePath`, that will generate an error that multiple_
-   _modules exist on the node._
+   _modules exist on the node when running the integration tests._
    ```powershell
    $sourceRepositoryPath = '.'
    $destinationRepositoryPath = 'C:\Source\xActiveDirectory'
