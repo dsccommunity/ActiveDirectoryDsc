@@ -834,7 +834,7 @@ function Test-Members
         }
     } #end if $MembersToExclude
 
-    Write-Verbose -Message $script:localizedData.MembershipInDesiredState;
+    Write-Verbose -Message $script:localizedData.MembershipInDesiredState
     return $true;
 
 } #end function Test-Membership
@@ -1774,6 +1774,7 @@ function Assert-ADPSDrive
         }
     }
 }
+
 
 $script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
 
