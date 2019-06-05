@@ -808,7 +808,28 @@ InModuleScope 'xActiveDirectory.Common' {
             $testExistingMembers = @('USER1', 'USER2')
             $testMembers = $null
 
-            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should -BeFalse
+            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers -Verbose | Should -BeFalse
+        }
+
+        It 'Should fail when multiple Members are the wrong members' {
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembers = @('USER3', 'USER4')
+
+            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers -Verbose | Should -BeFalse
+        }
+
+        It 'Should fail when multiple MembersToInclude are not present in existing members' {
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToInclude = @('USER3', 'USER4')
+
+            Test-Members -ExistingMembers $testExistingMembers -MembersToInclude $testMembersToInclude -Verbose | Should -BeFalse
+        }
+
+        It 'Should fail when multiple MembersToExclude are present in existing members' {
+            $testExistingMembers = @('USER1', 'USER2')
+            $testMembersToExclude = @('USER1', 'USER2')
+
+            Test-Members -ExistingMembers $testExistingMembers -MembersToExclude $testMembersToExclude -Verbose | Should -BeFalse
         }
     }
 

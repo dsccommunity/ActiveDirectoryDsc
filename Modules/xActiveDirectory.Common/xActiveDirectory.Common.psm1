@@ -751,21 +751,32 @@ function Test-Members
         {
             $Members = @()
         }
+
         Write-Verbose ($script:localizedData.CheckingMembers -f 'Explicit')
+
         $Members = [System.String[]] @(Remove-DuplicateMembers -Members $Members)
+
         if ($ExistingMembers.Count -ne $Members.Count)
         {
             Write-Verbose -Message ($script:localizedData.MembershipCountMismatch -f $Members.Count, $ExistingMembers.Count)
             return $false
         }
 
+        $isInDesiredState = $true
+
         foreach ($member in $Members)
         {
             if ($member -notin $ExistingMembers)
             {
                 Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member)
-                return $false
+                $isInDesiredState = $false
             }
+        }
+
+        if (-not $isInDesiredState)
+        {
+            Write-Verbose -Message ($script:localizedData.MembershipNotDesiredState -f $member)
+            return $false
         }
     } #end if $Members
 
@@ -775,15 +786,26 @@ function Test-Members
         {
             $MembersToInclude = @()
         }
+
         Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Included')
+
         $MembersToInclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToInclude)
+
+        $isInDesiredState = $true
+
         foreach ($member in $MembersToInclude)
         {
             if ($member -notin $ExistingMembers)
             {
                 Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member)
-                return $false
+                $isInDesiredState = $false
             }
+        }
+
+        if (-not $isInDesiredState)
+        {
+            Write-Verbose -Message ($script:localizedData.MembershipNotDesiredState -f $member)
+            return $false
         }
     } #end if $MembersToInclude
 
@@ -793,15 +815,26 @@ function Test-Members
         {
             $MembersToExclude = @()
         }
+
         Write-Verbose -Message ($script:localizedData.CheckingMembers -f 'Excluded')
+
         $MembersToExclude = [System.String[]] @(Remove-DuplicateMembers -Members $MembersToExclude)
+
+        $isInDesiredState = $true
+
         foreach ($member in $MembersToExclude)
         {
             if ($member -in $ExistingMembers)
             {
                 Write-Verbose -Message ($script:localizedData.MemberNotInDesiredState -f $member)
-                return $false
+                $isInDesiredState = $false
             }
+        }
+
+        if (-not $isInDesiredState)
+        {
+            Write-Verbose -Message ($script:localizedData.MembershipNotDesiredState -f $member)
+            return $false
         }
     } #end if $MembersToExclude
 
