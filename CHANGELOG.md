@@ -27,6 +27,7 @@
       helper function had design flaws too.
     - Now the helper function `Test-Members` outputs all the members that
       are not in desired state when verbose output is enabled.
+  - Update all unit tests to latest unit test template.
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
