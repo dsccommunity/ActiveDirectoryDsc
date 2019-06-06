@@ -4,6 +4,18 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 
 Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common.psm1') -Force
 
+# If one type does not exist, it's assumed the other ones does not exist either.
+if (-not ('Microsoft.DirectoryServices.Deployment.Types.ForestMode' -as [Type]))
+{
+    Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.DirectoryServices.Deployment.Types.cs')
+}
+
+# If one type does not exist, it's assumed the other ones does not exist either.
+if (-not ('Microsoft.ActiveDirectory.Management.ADForestMode' -as [Type]))
+{
+    Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.ActiveDirectory.Management.cs')
+}
+
 InModuleScope 'xActiveDirectory.Common' {
     Describe 'xActiveDirectory.Common\Test-DscParameterState' -Tag TestDscParameterState {
         Context 'When passing values' {
