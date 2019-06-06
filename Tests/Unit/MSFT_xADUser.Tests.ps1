@@ -1,28 +1,41 @@
-$Global:DSCModuleName = 'xActiveDirectory'
-$Global:DSCResourceName = 'MSFT_xADUser'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADUser'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-    (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
+
 #endregion HEADER
 
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
-    #region Pester Tests
+    Invoke-TestSetup
 
-    InModuleScope $Global:DSCResourceName {
+    InModuleScope $script:dscResourceName {
         $testPresentParams = @{
             DomainName = 'contoso.com'
             UserName   = 'TestUser'
@@ -54,8 +67,9 @@ try
         )
         $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword', 'TrustedForDelegation', 'Enabled');
         $testArrayProperties = @('ServicePrincipalNames')
+
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+        Describe 'xADUser\Get-TargetResource' {
             It "Returns a 'System.Collections.Hashtable' object type" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
@@ -105,7 +119,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+        Describe 'xADUser\Test-TargetResource' {
             It "Passes when user account does not exist and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
@@ -380,7 +394,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
+        Describe 'xADUser\Set-TargetResource' {
             It "Calls 'New-ADUser' when 'Ensure' is 'Present' and the account does not exist" {
                 $newUserName = 'NewUser'
                 $newAbsentParams = $testAbsentParams.Clone()
@@ -618,7 +632,7 @@ try
         #endregion
 
         #region Function Assert-TargetResource
-        Describe "$($Global:DSCResourceName)\Assert-Parameters" {
+        Describe 'xADUser\Assert-Parameters' {
             It "Does not throw when 'PasswordNeverExpires' and 'CannotChangePassword' are specified" {
                 { Assert-Parameters -PasswordNeverExpires $true -CannotChangePassword $true } | Should Not Throw
             }
@@ -633,13 +647,8 @@ try
         }
         #endregion
     }
-    #endregion
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
-
-

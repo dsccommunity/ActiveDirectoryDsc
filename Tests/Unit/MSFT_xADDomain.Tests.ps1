@@ -1,37 +1,47 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param()
 
-$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
-$Global:DSCResourceName    = 'MSFT_xADDomain' # Example MSFT_xFirewall
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADDomain'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green;
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
-    -TestType Unit
-#endregion
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
-function Invoke-TestSetup {
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType Unit
+
+#endregion HEADER
+
+function Invoke-TestSetup
+{
     # If one type does not exist, it's assumed the other ones does not exist either.
     if (-not ('Microsoft.DirectoryServices.Deployment.Types.ForestMode' -as [Type]))
     {
-        Add-Type -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'Tests') -ChildPath 'Unit') -ChildPath 'Stubs') -ChildPath 'Microsoft.DirectoryServices.Deployment.Types.cs')
+        Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.DirectoryServices.Deployment.Types.cs')
     }
 
     # If one type does not exist, it's assumed the other ones does not exist either.
     if (-not ('Microsoft.ActiveDirectory.Management.ADForestMode' -as [Type]))
     {
-        Add-Type -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'Tests') -ChildPath 'Unit') -ChildPath 'Stubs') -ChildPath 'Microsoft.ActiveDirectory.Management.cs')
+        Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.ActiveDirectory.Management.cs')
     }
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
 # Begin Testing
@@ -39,14 +49,7 @@ try
 {
     Invoke-TestSetup
 
-    #region Pester Tests
-
-    # The InModuleScope command allows you to perform white-box unit testing on the internal
-    # (non-exported) code of a Script Module.
-    InModuleScope $Global:DSCResourceName {
-
-        #region Pester Test Initialization
-
+    InModuleScope $script:dscResourceName {
         $correctDomainName = 'present.com';
         $incorrectDomainName = 'incorrect.com';
         $missingDomainName = 'missing.com';
@@ -62,15 +65,12 @@ try
             SafemodeAdministratorPassword = $testAdminCredential;
         }
 
-        #endregion
-
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-
+        Describe 'xADDomain\Get-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' }
 
             It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
-                Mock -CommandName Get-ADDomain -MockWith { 
+                Mock -CommandName Get-ADDomain -MockWith {
                     [psobject]@{
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
@@ -100,7 +100,7 @@ try
 
             It 'Calls "Get-ADDomain" without credentials if domain member' {
                 Mock -CommandName Test-DomainMember -MockWith { $true; }
-                Mock -CommandName Get-ADDomain -ParameterFilter { $Credential -eq $null } -MockWith { 
+                Mock -CommandName Get-ADDomain -ParameterFilter { $Credential -eq $null } -MockWith {
                     [psobject]@{
                         Forest = $correctDomainName
                         DomainMode = $mgmtDomainMode
@@ -114,7 +114,7 @@ try
 
             It 'Calls "Get-ADForest" without credentials if domain member' {
                 Mock -CommandName Test-DomainMember -MockWith { $true; }
-                Mock -CommandName Get-ADDomain -ParameterFilter { $Credential -eq $null } -MockWith { 
+                Mock -CommandName Get-ADDomain -ParameterFilter { $Credential -eq $null } -MockWith {
                     [psobject]@{
                         Forest = $correctDomainName
                         DomainMode = $mgmtDomainMode
@@ -153,19 +153,19 @@ try
             }
 
             It 'Returns the correct domain mode' {
-                Mock -CommandName Get-ADDomain -MockWith { 
+                Mock -CommandName Get-ADDomain -MockWith {
                     [psobject]@{
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
                 }
-                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }  
+                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
 
                 (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).DomainMode | Should Be $domainMode
             }
 
             It 'Returns the correct forest mode' {
-                Mock -CommandName Get-ADDomain -MockWith { 
+                Mock -CommandName Get-ADDomain -MockWith {
                     [psobject]@{
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
@@ -179,8 +179,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
-
+        Describe 'xADDomain\Test-TargetResource' {
             $correctDomainName = 'present.com';
             $correctChildDomainName = 'present';
             $correctDomainNetBIOSName = 'PRESENT';
@@ -257,16 +256,18 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
-            function Install-ADDSForest {
+        Describe 'xADDomain\Set-TargetResource' {
+            function Install-ADDSForest
+            {
                 param (
                      $DomainName, $SafeModeAdministratorPassword, $CreateDnsDelegation, $DatabasePath,
                      $DnsDelegationCredential, $InstallDns, $LogPath, $NoRebootOnCompletion, $SysvolPath,
                      $DomainNetbiosName, $ForestMode, $DomainMode
                  )
             }
-            function Install-ADDSDomain {
+
+            function Install-ADDSDomain
+            {
                 param (
                     $NewDomainName, $ParentDomainName, $SafeModeAdministratorPassword, $CreateDnsDelegation,
                     $Credential, $DatabasePath, $DnsDelegationCredential, $DomainType, $InstallDns, $LogPath,
@@ -505,8 +506,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
-
