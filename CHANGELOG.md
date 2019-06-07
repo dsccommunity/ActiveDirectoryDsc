@@ -97,6 +97,10 @@
     which were causing corruption in the Wiki documentation.
 - Changes to xWaitForADDomain
   - Added missing property schema descriptions ([issue #369](https://github.com/PowerShell/xActiveDirectory/issues/369)).
+- Changes to xADRecycleBin
+  - Cleanup of code
+  - It now set back the `$ErrorActionPreference` that was set prior to
+    setting it to `'Stop'`.
 
 ## 2.26.0.0
 
