@@ -87,6 +87,7 @@
     resource is using the `$global:DSCMachineStatus` variable to trigger
     a reboot.
   - Added missing property schema descriptions ([issue #369](https://github.com/PowerShell/xActiveDirectory/issues/369)).
+  - Code cleanup.
 - Changes to xADRecycleBin
   - Remove unneeded example and resource designer files.
   - Added missing property schema descriptions ([issue #368](https://github.com/PowerShell/xActiveDirectory/issues/368)).
@@ -102,8 +103,6 @@
   - Remove `{ *Present* | Absent }` from the property schema descriptions
     which were causing corruption in the Wiki documentation.
 - Changes to xADDomainDefaultPasswordPolicy
-  - Code cleanup.
-- Changes to xADDomainTrust
   - Code cleanup.
 - Changes to xADForestProperties
   - Minor style cleanup.
