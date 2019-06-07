@@ -106,6 +106,8 @@
   - Cleanup of code.
 - Changes to xADDomainTrust
   - Cleanup of code.
+- Changes to xADForestProperties
+  - Minor style cleanup.
 
 ## 2.26.0.0
 
