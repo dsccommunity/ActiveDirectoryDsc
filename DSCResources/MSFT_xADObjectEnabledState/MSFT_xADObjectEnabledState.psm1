@@ -4,9 +4,6 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
 
-$script:dscResourcePath = Split-Path -Path $PSScriptRoot -Parent
-Import-Module -Name (Join-Path -Path $script:dscResourcePath -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1')
-
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADObjectEnabledState'
 
 <#
@@ -385,28 +382,4 @@ function Compare-TargetResourceState
     }
 
     return Compare-ResourcePropertyState @compareTargetResourceStateParameters
-}
-
-<#
-    .SYNOPSIS
-        This is a wrapper for Set-ADComputer.
-
-    .PARAMETER Parameters
-        A hash table containing all parameters that will be passed trough to
-        Set-ADComputer.
-
-    .NOTES
-        This is needed because of how Pester is unable to handle mocking the
-        cmdlet Set-ADComputer.
-#>
-function Set-DscADComputer
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Collections.Hashtable]
-        $Parameters
-    )
-
-    Set-ADComputer @Parameters | Out-Null
 }
