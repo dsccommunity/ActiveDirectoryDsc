@@ -21,6 +21,13 @@
     - Common Tests - Validate Localization ([Issue #281](https://github.com/PowerShell/xActiveDirectory/issues/281))
     - Common Tests - Validate Example Files ([Issue #279](https://github.com/PowerShell/xActiveDirectory/issues/279))
   - Move resource descriptions to Wiki using auto-documentation ([Issue #289](https://github.com/PowerShell/xActiveDirectory/issues/289))
+  - Move helper functions from MSFT_xADCommon to the module
+    xActiveDirectory.Common ([issue #288](https://github.com/PowerShell/xActiveDirectory/issues/288))
+    - Removed helper function `Test-ADDomain` since it was not used. The
+      helper function had design flaws too.
+    - Now the helper function `Test-Members` outputs all the members that
+      are not in desired state when verbose output is enabled.
+  - Update all unit tests to latest unit test template.
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no

@@ -1,25 +1,32 @@
-$Global:DSCModuleName   = 'xActiveDirectory'
-$Global:DSCResourceName = 'MSFT_xADObjectPermissionEntry'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADObjectPermissionEntry'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green;
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
-#endregion
 
-function Invoke-TestSetup { }
+#endregion HEADER
 
-function Invoke-TestCleanup {
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
@@ -28,8 +35,7 @@ try
 {
     Invoke-TestSetup
 
-    InModuleScope $Global:DSCResourceName {
-
+    InModuleScope $script:dscResourceName {
         #region Pester Test Initialization
         $testDefaultParameters = @{
             Path                               = 'CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -39,14 +45,17 @@ try
             ActiveDirectorySecurityInheritance = 'None'
             InheritedObjectType                = '00000000-0000-0000-0000-000000000000'
         }
+
         $testPresentParameters = @{
             Ensure                             = 'Present'
             ActiveDirectoryRights              = 'GenericAll'
         }
+
         $testAbsentParameters = @{
             Ensure                             = 'Absent'
             ActiveDirectoryRights              = 'GenericAll'
         }
+
         $mockGetAclPresent = {
             $mock = [PSCustomObject] @{
                 Path   = 'AD:CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -70,6 +79,7 @@ try
             $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value {}
             return $mock
         }
+
         $mockGetAclAbsent = {
             $mock = [PSCustomObject] @{
                 Path   = 'AD:CN=PC,CN=Computers,DC=lab,DC=local'
@@ -83,8 +93,7 @@ try
         #endregion
 
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-
+        Describe 'xADObjectPermissionEntry\Get-TargetResource' {
             Mock -CommandName 'Assert-ADPSDrive' -MockWith { }
 
             Context 'When the desired ace is present' {
@@ -148,8 +157,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
-
+        Describe 'xADObjectPermissionEntry\Test-TargetResource' {
             Mock -CommandName 'Assert-ADPSDrive' { }
 
             Context 'When the desired ace is present' {
@@ -205,8 +213,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
+        Describe 'xADObjectPermissionEntry\Set-TargetResource' {
             Mock -CommandName 'Assert-ADPSDrive' -MockWith { }
 
             Context 'When the desired ace is present' {

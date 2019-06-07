@@ -1,35 +1,44 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param()
 
-$Global:DSCModuleName      = 'xActiveDirectory'
-$Global:DSCResourceName    = 'MSFT_xWaitForADDomain'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xWaitForADDomain'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
-#endregion
+
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
+    Invoke-TestSetup
 
-    #region Pester Tests
-
-    # The InModuleScope command allows you to perform white-box unit testing on the internal
-    # (non-exported) code of a Script Module.
-    InModuleScope $Global:DSCResourceName {
-
-        #region Pester Test Initialization
+    InModuleScope $script:dscResourceName {
         $password = 'Password' | ConvertTo-SecureString -AsPlainText -Force
         $DomainUserCredential = New-Object pscredential('Username', $password)
         $domainName = 'example.com'
@@ -49,11 +58,9 @@ try
         }
 
         $fakeDomainObject = @{Name = $domainName}
-        #endregion
-
 
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+        Describe 'xWaitForADDomain\Get-TargetResource' {
             It 'Returns a "System.Collections.Hashtable" object type' {
                 Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
                 $targetResource = Get-TargetResource @testParams
@@ -76,7 +83,7 @@ try
 
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+        Describe 'xWaitForADDomain\Test-TargetResource' {
             It 'Returns a "System.Boolean" object type' {
                 Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
                 $targetResource =  Test-TargetResource @testParams
@@ -97,7 +104,7 @@ try
 
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
+        Describe 'xWaitForADDomain\Set-TargetResource' {
             BeforeEach{
                 $global:DSCMachineStatus = $null
             }
@@ -169,8 +176,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
-

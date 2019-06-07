@@ -1,23 +1,41 @@
-$script:DSCModuleName = 'xActiveDirectory'
-$script:DSCResourceName = 'MSFT_xADRecycleBin'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADRecycleBin'
 
+#region HEADER
+
+# Unit Test Template Version: 1.2.4
 $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
 
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
+
+# Begin Testing
 try
 {
-    InModuleScope $script:DSCResourceName {
+    Invoke-TestSetup
 
+    InModuleScope $script:dscResourceName {
         $forestFQDN = 'contoso.com'
         $forestFunctionality = 'Windows2016Forest'
         $configurationNamingContext = 'CN=Configuration,DC=contoso,DC=com'
@@ -216,5 +234,5 @@ try
 }
 finally
 {
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+    Invoke-TestCleanup
 }

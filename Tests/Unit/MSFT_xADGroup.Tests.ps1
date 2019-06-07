@@ -1,35 +1,44 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param()
 
-$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
-$Global:DSCResourceName    = 'MSFT_xADGroup' # Example MSFT_xFirewall
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADGroup'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green;
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
-#endregion
+
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
-    #region Pester Tests
+    Invoke-TestSetup
 
-    # The InModuleScope command allows you to perform white-box unit testing on the internal
-    # (non-exported) code of a Script Module.
-    InModuleScope $Global:DSCResourceName {
-
-        #region Pester Test Initialization
+    InModuleScope $script:dscResourceName {
         $testPresentParams = @{
             GroupName = 'TestGroup'
             GroupScope = 'Global';
@@ -44,8 +53,8 @@ try
 
         $testAbsentParams = $testPresentParams.Clone();
         $testAbsentParams['Ensure'] = 'Absent';
-        $testPresentParamsMultidomain = $testPresentParams.Clone()
-        $testPresentParamsMultidomain.MembershipAttribute = 'DistinguishedName'
+        $testPresentParamsMultiDomain = $testPresentParams.Clone()
+        $testPresentParamsMultiDomain.MembershipAttribute = 'DistinguishedName'
 
         $fakeADGroup = @{
             Name = $testPresentParams.GroupName;
@@ -88,8 +97,7 @@ try
         $testCredentials = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
 
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-
+        Describe 'xADGroup\Get-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Calls "Assert-Module" to check AD module is installed' {
@@ -155,12 +163,11 @@ try
         #end region
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
-
+        Describe 'xADGroup\Test-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
-            foreach ($attribute in @('SamAccountName','DistinguishedName','ObjectGUID','SID')) {
-
+            foreach ($attribute in @('SamAccountName','DistinguishedName','ObjectGUID','SID'))
+            {
                 It "Passes when group 'Members' match using '$attribute'" {
                     Mock -CommandName Get-ADGroup { return $fakeADGroup; }
                     Mock -CommandName Get-ADGroupMember { return @($fakeADUser1, $fakeADUser2); }
@@ -324,8 +331,7 @@ try
         #end region
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
+        Describe 'xADGroup\Set-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It "Calls 'New-ADGroup' when 'Ensure' is 'Present' and the group does not exist" {
@@ -344,7 +350,8 @@ try
                 DisplayName = 'Test DisplayName';
             }
 
-            foreach ($property in $testProperties.Keys) {
+            foreach ($property in $testProperties.Keys)
+            {
                 It "Calls 'Set-ADGroup' when 'Ensure' is 'Present' and '$property' is specified" {
                     Mock -CommandName Set-ADGroup
                     Mock -CommandName Get-ADGroupMember
@@ -422,7 +429,7 @@ try
                 Mock -CommandName Get-ADDomainNameFromDistinguishedName -MockWith { return 'contoso.com' }
                 Mock -CommandName Write-Verbose -ParameterFilter { $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'}
 
-                Set-TargetResource @testPresentParamsMultidomain -Members @($fakeADUser1.distinguishedName, $fakeADUser2.distinguishedName);
+                Set-TargetResource @testPresentParamsMultiDomain -Members @($fakeADUser1.distinguishedName, $fakeADUser2.distinguishedName);
 
                 Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
                 Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
@@ -453,7 +460,7 @@ try
                 }
                 Mock -CommandName Write-Verbose -ParameterFilter { $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'}
 
-                Set-TargetResource @testPresentParamsMultidomain -Members @($fakeADUser1.distinguishedName, $fakeADUser4.distinguishedName);
+                Set-TargetResource @testPresentParamsMultiDomain -Members @($fakeADUser1.distinguishedName, $fakeADUser4.distinguishedName);
 
                 Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
                 Assert-MockCalled -CommandName Add-ADCommonGroupMember -Scope It
@@ -691,10 +698,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
-
-    # TODO: Other Optional Cleanup Code Goes Here...
+    Invoke-TestCleanup
 }
-
