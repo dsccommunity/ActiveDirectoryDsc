@@ -478,7 +478,7 @@ function Test-TargetResource
             if ($PSBoundParameters.ContainsKey('ServicePrincipalNames'))
             {
                 $testServicePrincipalNamesParameters = @{
-                    ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames -as [System.String[]]
+                    ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames
                     ServicePrincipalNames         = $ServicePrincipalNames
                 }
 
