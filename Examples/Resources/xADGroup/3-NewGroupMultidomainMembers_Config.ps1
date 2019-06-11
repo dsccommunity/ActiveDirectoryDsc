@@ -19,7 +19,7 @@
 
 <#
     .DESCRIPTION
-        This configuration creates a new domain-local group in contoso with
+        This configuration will create a new domain-local group in contoso with
         three members in different domains.
 #>
 

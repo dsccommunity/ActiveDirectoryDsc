@@ -19,7 +19,7 @@
 
 <#
     .DESCRIPTION
-        This configuration creates a new domain-local group
+        This configuration will create a new domain-local group
 #>
 
 Configuration NewGroup_Config

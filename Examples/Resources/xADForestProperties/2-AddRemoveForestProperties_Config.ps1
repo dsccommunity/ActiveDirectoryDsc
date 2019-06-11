@@ -19,7 +19,7 @@
 
 <#
     .DESCRIPTION
-    This configuration manages the Service and User Principal name suffixes in
+    This configuration will manage the Service and User Principal name suffixes in
     the forest by adding and removing the desired suffixes. This will not overwrite
     existing suffixes in the forest.
 #>

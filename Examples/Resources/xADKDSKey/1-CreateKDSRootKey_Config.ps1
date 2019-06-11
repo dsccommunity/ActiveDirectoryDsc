@@ -19,7 +19,7 @@
 
 <#
     .DESCRIPTION
-        This configuration creates a KDS root key. If the date is set to a time
+        This configuration will create a KDS root key. If the date is set to a time
         slightly ahead in the future, the key won't be usable for at least 10 hours
         from the creation time.
 #>

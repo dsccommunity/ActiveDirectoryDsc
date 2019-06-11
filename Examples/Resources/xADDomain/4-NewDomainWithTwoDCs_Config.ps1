@@ -19,7 +19,7 @@
 
 <#
     .DESCRIPTION
-        This configuration, will create a highly available domain by adding
+        This configuration will create a highly available domain by adding
         a second domain controller to the newly created domain.
         The xWaitForDomain resource is used to ensure that the domain is
         present before the second domain controller is added.

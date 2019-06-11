@@ -19,7 +19,7 @@
 
 <#
     .DESCRIPTION
-        This configuration create a KDS root key in the past. This will allow
+        This configuration will create a KDS root key in the past. This will allow
         the key to be used right away, but if all the domain controllers haven't
         replicated yet, there may be issues when retrieving the gMSA password.
         Use with caution
