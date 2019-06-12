@@ -75,6 +75,8 @@
 - Changes to xADObjectPermissionEntry
   - Fix failure when applied in the same configuration as xADDomain
   - Localize and Improve verbose messaging
+- Changes to xADRecycleBin
+  - Remove unneeded example and resource designer files.
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException When Creating a New Site Link.
 
