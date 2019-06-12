@@ -1,6 +1,6 @@
 <#PSScriptInfo
-.VERSION 1.0.0
-.GUID 6c3b8deb-2fdb-4d81-b74d-81dbfe86fcd7
+.VERSION 1.0
+.GUID b293f599-2660-424d-8200-61d399e44257
 .AUTHOR Microsoft Corporation
 .COMPANYNAME Microsoft Corporation
 .COPYRIGHT (c) Microsoft Corporation. All rights reserved.
@@ -11,36 +11,39 @@
 .EXTERNALMODULEDEPENDENCIES
 .REQUIREDSCRIPTS
 .EXTERNALSCRIPTDEPENDENCIES
-.RELEASENOTES First version.
-.PRIVATEDATA 2016-Datacenter,2016-Datacenter-Server-Core
+.RELEASENOTES
+.PRIVATEDATA
 #>
 
 #Requires -module xActiveDirectory
 
 <#
     .DESCRIPTION
-        This configuration will create an Active Directory computer account
-        disabled. The property Enabled will not be enforced.
+        This configuration will create a user with a managed password.
+        This might be used to manage the lifecycle of a service account.
 #>
 
-Configuration AddComputerAccountDisabled_Config
+Configuration CreateUserAndManagePassword_Config
 {
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential
+        $Password
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -Module xActiveDirectory
 
-    node localhost
+    Node $AllNodes.NodeName
     {
-        xADComputer 'CreateDisabled'
+        xADUser Contoso\ExampleUser
         {
-            ComputerName      = 'CLU_CNO01'
-            EnabledOnCreation = $false
+            Ensure     = 'Present'
+            UserName   = "ExampleUser"
+            Password   = $Password
+            DomainName = "contoso.com"
+            Path       = "CN=Users,DC=contoso,DC=com"
         }
     }
 }

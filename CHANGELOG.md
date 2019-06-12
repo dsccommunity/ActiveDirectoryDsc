@@ -20,6 +20,7 @@
     - Common Tests - Validate Markdown Links ([Issue #280](https://github.com/PowerShell/xActiveDirectory/issues/280))
     - Common Tests - Validate Localization ([Issue #281](https://github.com/PowerShell/xActiveDirectory/issues/281))
     - Common Tests - Validate Example Files ([Issue #279](https://github.com/PowerShell/xActiveDirectory/issues/279))
+    - Common Tests - Validate Example Files To Be Published ([Issue #311](https://github.com/PowerShell/xActiveDirectory/issues/311))
   - Move resource descriptions to Wiki using auto-documentation ([Issue #289](https://github.com/PowerShell/xActiveDirectory/issues/289))
   - Move helper functions from MSFT_xADCommon to the module
     xActiveDirectory.Common ([issue #288](https://github.com/PowerShell/xActiveDirectory/issues/288))
