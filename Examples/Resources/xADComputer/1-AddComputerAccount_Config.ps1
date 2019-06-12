@@ -22,6 +22,7 @@
         This configuration will create two Active Directory computer accounts
         enabled. The property Enabled will not be enforced in either case.
 #>
+
 Configuration AddComputerAccount_Config
 {
     param
