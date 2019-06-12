@@ -66,6 +66,8 @@
   - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
     resource is using the `$global:DSCMachineStatus` variable to trigger
     a reboot.
+- Changes to xADDomainTrust
+  - Replaced New-TerminatingError with Standard Function.
 - Changes to xWaitForADDomain
   - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
     resource is using the `$global:DSCMachineStatus` variable to trigger

@@ -45,7 +45,7 @@ function Get-TargetResource
     catch
     {
         $missingRoleMessage = $($script:localizedData.MissingRoleMessage) -f 'AD-Domain-Services'
-        New-TerminatingError -errorId ActiveDirectoryRoleMissing -errorMessage $missingRoleMessage -errorCategory NotInstalled
+        New-ObjectNotFoundException -Message $missingRoleMessage -ErrorRecord $_
     }
 
 #endregion
@@ -170,7 +170,7 @@ function Test-TargetResource
     catch
     {
         $missingRoleMessage = $($script:localizedData.MissingRoleMessage) -f 'AD-Domain-Services'
-        New-TerminatingError -errorId ActiveDirectoryRoleMissing -errorMessage $missingRoleMessage -errorCategory NotInstalled
+        New-ObjectNotFoundException -Message $missingRoleMessage -ErrorRecord $_
     }
 
 #endregion
@@ -371,28 +371,5 @@ function Confirm-ResourceProperties
         throw
     }
 }
-
-# Internal function to throw terminating error with specified errroCategory, errorId and errorMessage
-function New-TerminatingError
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]$errorId,
-
-        [Parameter(Mandatory = $true)]
-        [String]$errorMessage,
-
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.ErrorCategory]$errorCategory
-    )
-
-    $exception = New-Object System.InvalidOperationException $errorMessage
-    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-    throw $errorRecord
-}
-
-#endregion
 
 Export-ModuleMember -Function *-TargetResource
