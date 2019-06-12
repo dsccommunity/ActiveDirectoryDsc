@@ -45,6 +45,7 @@
   - Moved examples from the README.md to separate example files in the
     Examples folder.
   - Fix the RestoreFromRecycleBin Description
+  - Fix unnecessary cast in `Test-TargetResource` ([Issue #295](https://github.com/PowerShell/xActiveDirectory/issues/295))
 - Changes to xADGroup
   - Change the description of the property RestoreFromRecycleBin.
 - Changes to xADObjectPermissionEntry
