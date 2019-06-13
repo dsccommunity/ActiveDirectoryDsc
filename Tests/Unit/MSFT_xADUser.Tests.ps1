@@ -269,12 +269,11 @@ try
 
             foreach ($testParameter in $testBooleanProperties)
             {
-                It "Passes when user account '$testParameter' matches AD account property" {
+                It "Should Pass when user account '$testParameter' is true and matches AD account property" {
                     $testParameterValue = $true
                     $testValidPresentParams = $testPresentParams.Clone()
                     $testValidPresentParams[$testParameter] = $testParameterValue
                     $validADUser = $testPresentParams.Clone()
-                    $invalidADUser = $testPresentParams.Clone()
                     Mock -CommandName Get-TargetResource -MockWith {
                         $validADUser[$testParameter] = $testParameterValue
                         return $validADUser
@@ -283,11 +282,36 @@ try
                     Test-TargetResource @testValidPresentParams | Should Be $true
                 }
 
-                It "Fails when user account '$testParameter' does not match AD account property value" {
+                It "Should fail when user account '$testParameter' is true and does not match AD account property value" {
                     $testParameterValue = $true
                     $testValidPresentParams = $testPresentParams.Clone()
                     $testValidPresentParams[$testParameter] = $testParameterValue
+                    $invalidADUser = $testPresentParams.Clone()
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $invalidADUser[$testParameter] = -not $testParameterValue
+                        return $invalidADUser
+                    }
+
+                    Test-TargetResource @testValidPresentParams | Should Be $false
+                }
+
+                It "Should pass when user account '$testParameter' is false matches AD account property" {
+                    $testParameterValue = $false
+                    $testValidPresentParams = $testPresentParams.Clone()
+                    $testValidPresentParams[$testParameter] = $testParameterValue
                     $validADUser = $testPresentParams.Clone()
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $validADUser[$testParameter] = $testParameterValue
+                        return $validADUser
+                    }
+
+                    Test-TargetResource @testValidPresentParams | Should Be $true
+                }
+
+                It "Should fail when user account '$testParameter' is false and does not match AD account property value" {
+                    $testParameterValue = $false
+                    $testValidPresentParams = $testPresentParams.Clone()
+                    $testValidPresentParams[$testParameter] = $testParameterValue
                     $invalidADUser = $testPresentParams.Clone()
                     Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADUser[$testParameter] = -not $testParameterValue
