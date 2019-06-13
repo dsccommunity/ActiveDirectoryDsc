@@ -51,6 +51,7 @@ $adPropertyMap = @(
     @{ Parameter = 'Manager'; }
     @{ Parameter = 'PasswordNeverExpires'; UseCmdletParameter = $true; }
     @{ Parameter = 'CannotChangePassword'; UseCmdletParameter = $true; }
+    @{ Parameter = 'ChangePasswordAtLogon'; UseCmdletParameter = $true; }
     @{ Parameter = 'TrustedForDelegation'; UseCmdletParameter = $true; }
     @{ Parameter = 'ServicePrincipalNames'; }
 )
@@ -306,6 +307,12 @@ function Get-TargetResource
         [System.Boolean]
         $CannotChangePassword,
 
+        # Specifies whether the account password must be changed during the next logon attempt
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $ChangePasswordAtLogon,
+
         # Specifies whether the password of an account can expire
         [Parameter()]
         [ValidateNotNull()]
@@ -414,6 +421,15 @@ function Get-TargetResource
         }
         elseif (($property.Parameter) -eq 'ServicePrincipalNames') {
             $targetResource['ServicePrincipalNames'] = [System.String[]]$adUser.ServicePrincipalNames
+        }
+        elseif (($property.Parameter) -eq 'ChangePasswordAtLogon') {
+            if ($adUser.pwdlastset -eq 0)
+            {
+                $targetResource['ChangePasswordAtLogon'] = $true
+            }
+            else {
+                $targetResource['ChangePasswordAtLogon'] = $false
+            }
         }
         elseif ($property.ADProperty)
         {
@@ -680,6 +696,12 @@ function Test-TargetResource
         [ValidateNotNull()]
         [System.Boolean]
         $CannotChangePassword,
+
+        # Specifies whether the account password must be changed during the next logon attempt
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $ChangePasswordAtLogon,
 
         # Specifies whether the password of an account can expire
         [Parameter()]
@@ -1055,6 +1077,12 @@ function Set-TargetResource
         [System.Boolean]
         $CannotChangePassword,
 
+        # Specifies whether the account password must be changed during the next logon attempt
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $ChangePasswordAtLogon,
+
         # Specifies whether the password of an account can expire
         [Parameter()]
         [ValidateNotNull()]
@@ -1282,6 +1310,16 @@ function Assert-Parameters
         [System.Boolean]
         $Enabled = $true,
 
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $ChangePasswordAtLogon,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $PasswordNeverExpires,
+
         [Parameter(ValueFromRemainingArguments)]
         $IgnoredArguments
     )
@@ -1294,6 +1332,17 @@ function Assert-Parameters
             ErrorMessage = $script:localizedData.PasswordParameterConflictError -f 'Enabled', $false, 'Password';
         }
         ThrowInvalidArgumentError @throwInvalidArgumentErrorParams;
+    }
+
+    # ChangePasswordAtLogon cannot be set for an account that also has PasswordNeverExpires set
+    if ($PSBoundParameters.ContainsKey('ChangePasswordAtLogon') -and $PSBoundParameters['ChangePasswordAtLogon'] -eq $true -and
+        $PSBoundParameters.ContainsKey('PasswordNeverExpires') -and $PSBoundParameters['PasswordNeverExpires'] -eq $true)
+    {
+        $throwInvalidArgumentErrorParams = @{
+            ErrorId      = 'xADUser_ChangePasswordParameterConflict'
+            ErrorMessage = $script:localizedData.ChangePasswordParameterConflictError
+        }
+        ThrowInvalidArgumentError @throwInvalidArgumentErrorParams
     }
 
 } #end function Assert-Parameters

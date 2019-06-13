@@ -65,7 +65,7 @@ try
             'EmailAddress', 'EmployeeID', 'EmployeeNumber', 'HomeDirectory', 'HomeDrive', 'HomePage', 'ProfilePath',
             'LogonScript', 'Notes', 'OfficePhone', 'MobilePhone', 'Fax', 'Pager', 'IPPhone', 'HomePhone', 'CommonName'
         )
-        $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword', 'TrustedForDelegation', 'Enabled');
+        $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled');
         $testArrayProperties = @('ServicePrincipalNames')
 
         #region Function Get-TargetResource
@@ -643,6 +643,11 @@ try
 
             It "Does not throw when 'TrustedForDelegation' is specified" {
                 { Assert-Parameters -TrustedForDelegation $true } | Should Not Throw
+            }
+
+            It "Should throw the correct error when 'PasswordNeverExpires' and 'ChangePasswordAtLogon' are specified" {
+                { Assert-Parameters -PasswordNeverExpires $true -ChangePasswordAtLogon $true } | `
+                    Should -Throw $script:localizedData.ChangePasswordParameterConflictError
             }
         }
         #endregion
