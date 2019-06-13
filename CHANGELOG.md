@@ -65,6 +65,7 @@
   - Code cleanup.
 - Changes to xADOrganizationalUnit
   - Change the description of the property RestoreFromRecycleBin.
+  - Code cleanup.
 - Changes to xADUser
   - Change the description of the property RestoreFromRecycleBin.
   - Added ServicePrincipalNames property ([issue #153](https://github.com/PowerShell/xActiveDirectory/issues/153)).
@@ -97,6 +98,7 @@
     setting it to `'Stop'`.
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException when creating a new site link.
+  - Code cleanup.
 - Changes to xADReplicationSubnet
   - Remove `{ *Present* | Absent }` from the property schema descriptions
     which were causing corruption in the Wiki documentation.
@@ -107,10 +109,6 @@
   - Code cleanup.
 - Changes to xADForestProperties
   - Minor style cleanup.
-- Changes to xADOrganizationalUnit
-  - Code cleanup.
-- Changes to xADReplicationSiteLink
-  - Code cleanup.
 - Changes to xADReplicationSubnet
   - Code cleanup.
 - Changes to xADKDSKey
