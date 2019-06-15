@@ -53,7 +53,7 @@ try
             SamAccountName        = $testPresentParams.UserName
             Surname               = ''
             UserPrincipalName     = ''
-            ServicePrincipalNames = @('spn/a', 'spn/b')
+            ServicePrincipalName  = @('spn/a', 'spn/b')
         }
 
         $testDomainController = 'TESTDC'
@@ -70,7 +70,8 @@ try
             'PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled','AccountNotDelegated',
             'AllowReversiblePasswordEncryption', 'CompoundIdentitySupported', 'PasswordNotRequired', 'SmartcardLogonRequired'
             )
-        $testArrayProperties = @('ServicePrincipalNames')
+        $testArrayProperties = @('ServicePrincipalNames', 'ProxyAddresses')
+        $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled')
 
         #region Function Get-TargetResource
         Describe 'xADUser\Get-TargetResource' {
@@ -113,12 +114,11 @@ try
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
-
-            It "Should return correct ServicePrincipalNames" {
+            It "Should return the correct value for an Array property" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
-                $adUser = Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential
-                $adUser.ServicePrincipalNames | Should -Be $fakeADUser.ServicePrincipalNames
+                $adUser = Get-TargetResource @testPresentParams -Verbose
+                $adUser.ServicePrincipalName | Should -Be $fakeADUser.ServicePrincipalNames
             }
 
             It "Should return the correct value of 'ChangePassswordAtLogon' if it is true" {
@@ -507,7 +507,7 @@ try
                 Assert-MockCalled -CommandName Set-ADAccountPassword -Scope It -Times 0
             }
 
-            It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is null" {
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {
                 $testADPropertyName = 'Description'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
@@ -521,7 +521,7 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is empty" {
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD property is empty" {
                 $testADPropertyName = 'Description'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
@@ -535,18 +535,18 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Remove' when new matching AD property is empty" {
+            It "Should call 'Set-ADUser' with 'Clear' when new mismatched AD property is empty" {
                 $testADPropertyName = 'Description'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
                     $duffADUser[$testADPropertyName] = 'Incorrect parameter value'
                     return $duffADUser
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Clear -eq $testADPropertyName }
 
                 Set-TargetResource @testPresentParams -Description ''
 
-                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Clear -eq $testADPropertyName } -Scope It -Exactly 1
             }
 
             It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {
@@ -563,11 +563,11 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is empty" {
+            It "Should call 'Set-ADUser' with 'Replace' when new mismatched AD property is not empty" {
                 $testADPropertyName = 'Title'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
-                    $duffADUser[$testADPropertyName] = ''
+                    $duffADUser[$testADPropertyName] = 'Incorrect job title'
                     return $duffADUser
                 }
                 Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) }
@@ -577,21 +577,40 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Remove' when new mismatched AD property is empty" {
-                $testADPropertyName = 'Title'
-                Mock -CommandName Get-ADUser -MockWith {
-                    $duffADUser = $fakeADUser.Clone()
-                    $duffADUser[$testADPropertyName] = 'Incorrect job title'
-                    return $duffADUser
-                }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) }
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD array property is empty" {
+                $mockSPNs = @('spn/a', 'spn/b')
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser.Remove('ServicePrincipalName')
+                Mock -CommandName Get-ADUser -MockWith { return $mockADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
 
-                Set-TargetResource @testPresentParams -JobTitle ''
+                Set-TargetResource @testPresentParams -ServicePrincipalNames $mockSPNs
 
-                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } -Scope It -Exactly 1
             }
-            It "Calls 'Set-ADUser' with 'ServicePrincipalNames' when specified" {
-                $testSPNs = @('spn/a', 'spn/b')
+
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD array property is not empty" {
+                $testSPNs = @('spn/c', 'spn/d')
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
+
+                Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } -Scope It -Exactly 1
+            }
+
+            It "Should call 'Set-ADUser' with 'Clear' when new mismatched AD array property is empty" {
+                $testSPNs = ''
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Clear -eq 'ServicePrincipalName' }
+
+                Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Clear -eq 'ServicePrincipalName' } -Scope It -Exactly 1
+            }
+
+            It "Should call 'Set-ADUser' with 'Replace' when new mismatched AD array property is not empty" {
+                $testSPNs = @('spn/c', 'spn/d')
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
                 Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
 
