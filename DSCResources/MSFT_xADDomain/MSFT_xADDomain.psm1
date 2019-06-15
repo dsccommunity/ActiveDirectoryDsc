@@ -123,7 +123,8 @@ function Get-TargetResource
                 $domain = Get-ADDomain -Identity $domainFQDN -ErrorAction Stop
                 $forest = Get-ADForest -Identity $domain.Forest -ErrorAction Stop
             }
-            else {
+            else
+            {
                 Write-Verbose ($script:localizedData.QueryDomainWithCredential -f $domainFQDN)
                 $domain = Get-ADDomain -Identity $domainFQDN -Credential $DomainAdministratorCredential -ErrorAction Stop
                 $forest = Get-ADForest -Identity $domain.Forest -Credential $DomainAdministratorCredential -ErrorAction Stop

@@ -149,7 +149,6 @@ $adPropertyMap = @(
         UseCmdletParameter = $true
     }
     @{
-
         Parameter          = 'TrustedForDelegation'
         UseCmdletParameter = $true
     }
@@ -530,12 +529,14 @@ function Get-TargetResource
         {
             $targetResource['ServicePrincipalNames'] = [System.String[]]$adUser.ServicePrincipalNames
         }
-        elseif (($property.Parameter) -eq 'ChangePasswordAtLogon') {
+        elseif (($property.Parameter) -eq 'ChangePasswordAtLogon')
+        {
             if ($adUser.pwdlastset -eq 0)
             {
                 $targetResource['ChangePasswordAtLogon'] = $true
             }
-            else {
+            else
+            {
                 $targetResource['ChangePasswordAtLogon'] = $false
             }
         }
