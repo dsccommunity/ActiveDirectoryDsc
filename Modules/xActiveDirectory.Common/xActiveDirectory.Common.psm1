@@ -1781,6 +1781,29 @@ function Assert-ADPSDrive
     }
 }
 
+<#
+    .SYNOPSIS
+        This is a wrapper for Set-ADComputer.
+
+    .PARAMETER Parameters
+        A hash table containing all parameters that will be passed trough to
+        Set-ADComputer.
+
+    .NOTES
+        This is needed because of how Pester is unable to handle mocking the
+        cmdlet Set-ADComputer. Therefor there are no unit test for this function.
+#>
+function Set-DscADComputer
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $Parameters
+    )
+
+    Set-ADComputer @Parameters | Out-Null
+}
 
 $script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
 
@@ -1817,4 +1840,5 @@ Export-ModuleMember -Function @(
     'Compare-ResourcePropertyState'
     'Test-DscPropertyState'
     'Assert-ADPSDrive'
+    'Set-DscADComputer'
 )
