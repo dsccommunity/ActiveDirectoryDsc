@@ -60,6 +60,7 @@
 - Changes to xADUser
   - Change the description of the property RestoreFromRecycleBin.
   - Added ServicePrincipalNames property ([issue #153](https://github.com/PowerShell/xActiveDirectory/issues/153)).
+  - Added ChangePasswordAtLogon property ([issue #246](https://github.com/PowerShell/xActiveDirectory/issues/246)).
 - Changes to xADDomainController
   - Change the `#Requires` statement in the Examples to require the correct
     module.
