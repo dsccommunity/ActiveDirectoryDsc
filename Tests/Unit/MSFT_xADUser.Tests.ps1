@@ -292,7 +292,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
                 It "Should pass when user account '$testParameter' is false matches AD account property" {
@@ -305,7 +305,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
 
                 It "Should fail when user account '$testParameter' is false and does not match AD account property value" {
