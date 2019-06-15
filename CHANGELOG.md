@@ -82,8 +82,17 @@
   - Localize and Improve verbose messaging
 - Changes to xADRecycleBin
   - Remove unneeded example and resource designer files.
+  - Added missing property schema descriptions ([issue #368](https://github.com/PowerShell/xActiveDirectory/issues/368)).
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException When Creating a New Site Link.
+- Changes to xADReplicationSubnet
+  - Remove `{ *Present* | Absent }` from the property schema descriptions
+    which were causing corruption in the Wiki documentation.
+- Changes to xADServicePrincipalNames
+  - Remove `{ *Present* | Absent }` from the property schema descriptions
+    which were causing corruption in the Wiki documentation.
+- Changes to xWaitForADDomain
+  - Added missing property schema descriptions ([issue #369](https://github.com/PowerShell/xActiveDirectory/issues/369)).
 
 ## 2.26.0.0
 
