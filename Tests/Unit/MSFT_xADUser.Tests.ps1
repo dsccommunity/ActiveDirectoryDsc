@@ -67,7 +67,7 @@ try
             'Manager', 'LogonWorkstations', 'Organization', 'OtherName'
         )
         $testBooleanProperties = @(
-            'PasswordNeverExpires', 'CannotChangePassword', 'TrustedForDelegation', 'Enabled','AccountNotDelegated',
+            'PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled','AccountNotDelegated',
             'AllowReversiblePasswordEncryption', 'CompoundIdentitySupported', 'PasswordNotRequired', 'SmartcardLogonRequired'
             )
         $testArrayProperties = @('ServicePrincipalNames')
@@ -113,11 +113,34 @@ try
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
+
             It "Should return correct ServicePrincipalNames" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
                 $adUser = Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential
                 $adUser.ServicePrincipalNames | Should -Be $fakeADUser.ServicePrincipalNames
+            }
+
+            It "Should return the correct value of 'ChangePassswordAtLogon' if it is true" {
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser['pwdLastSet'] = 0
+                $mockPresentParams = $testPresentParams.Clone()
+                $mockPresentParams['ChangePasswordAtLogon'] = $true
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
+
+                $adUser = Get-TargetResource @mockPresentParams
+                $adUser.ChangePasswordAtLogon | Should -Be $true
+            }
+
+            It "Should return the correct value of 'ChangePassswordAtLogon' if it is false" {
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser['pwdLastSet'] = 12345678
+                $mockPresentParams = $testPresentParams.Clone()
+                $mockPresentParams['ChangePasswordAtLogon'] = $true
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
+
+                $adUser = Get-TargetResource @mockPresentParams
+                $adUser.ChangePasswordAtLogon | Should -Be $false
             }
         }
         #endregion
