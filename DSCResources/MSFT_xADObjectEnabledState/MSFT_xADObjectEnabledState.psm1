@@ -304,7 +304,8 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
-        Sets the property Enabled of the Active Directory object.
+        Compares the properties in the current state and the properties of the
+        desired state and returns a hashtable with the comaprison result.
 
     .PARAMETER Identity
         Specifies the identity of an object that has the object class specified
