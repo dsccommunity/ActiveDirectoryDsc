@@ -304,7 +304,7 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
-        Compares the properties in the current state and the properties of the
+        Compares the properties in the current state with the properties of the
         desired state and returns a hashtable with the comaprison result.
 
     .PARAMETER Identity
