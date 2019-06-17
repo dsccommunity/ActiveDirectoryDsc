@@ -611,7 +611,8 @@ function Get-TargetResource
                 $targetResource['Path'] = Get-ADObjectParentDN -DN $adUser.DistinguishedName
             }
         }
-        elseif (($property.Parameter) -eq 'ChangePasswordAtLogon') {
+        elseif (($property.Parameter) -eq 'ChangePasswordAtLogon')
+        {
             if ($adUser.pwdlastset -eq 0)
             {
                 $targetResource['ChangePasswordAtLogon'] = $true
