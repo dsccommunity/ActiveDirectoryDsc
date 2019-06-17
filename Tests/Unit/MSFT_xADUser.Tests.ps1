@@ -629,6 +629,36 @@ try
                 Assert-MockCalled -CommandName Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -Scope It
             }
 
+            It "Should call 'Set-ADUser' with the correct parameter when new AD boolean property is true and old property is false" {
+                $mockBoolParam = 'CannotChangePassword'
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser[$mockBoolParam] = $false
+                Mock -CommandName Get-ADUser -MockWith { return $mockADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
+
+                $mockSetTargetResourceParams = @{
+                    $mockBoolParam = $true
+                }
+                Set-TargetResource @testPresentParams @mockSetTargetResourceParams
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam } -Scope It -Exactly 1
+            }
+
+            It "Should call 'Set-ADUser' with the correct parameter when new AD boolean property is false and old property is true" {
+                $mockBoolParam = 'CannotChangePassword'
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser[$mockBoolParam] = $true
+                Mock -CommandName Get-ADUser -MockWith { return $mockADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
+
+                $mockSetTargetResourceParams = @{
+                    $mockBoolParam = $false
+                }
+                Set-TargetResource @testPresentParams @mockSetTargetResourceParams
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam } -Scope It -Exactly 1
+            }
+
             Context 'When RestoreFromRecycleBin is used' {
                 BeforeAll {
                     Mock -CommandName Get-TargetResource -MockWith {
