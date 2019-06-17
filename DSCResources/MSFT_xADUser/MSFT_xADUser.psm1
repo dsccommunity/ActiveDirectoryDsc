@@ -180,7 +180,8 @@ $adPropertyMap = @(
         UseCmdletParameter = $true
     }
     @{
-        Parameter = 'ServicePrincipalNames'
+        Parameter  = 'ServicePrincipalNames'
+        ADProperty = 'ServicePrincipalName'
     }
     @{
         Parameter = 'ProxyAddresses'
