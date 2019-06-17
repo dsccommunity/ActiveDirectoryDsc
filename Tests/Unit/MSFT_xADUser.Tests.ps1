@@ -580,7 +580,8 @@ try
             It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD array property is empty" {
                 $mockSPNs = @('spn/a', 'spn/b')
                 $mockADUser = $fakeADUser.Clone()
-                $mockADUser.Remove('ServicePrincipalName')
+                $mockADUser['ServicePrincipalName'] = ''
+
                 Mock -CommandName Get-ADUser -MockWith { return $mockADUser }
                 Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
 
