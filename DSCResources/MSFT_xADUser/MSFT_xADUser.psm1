@@ -182,10 +182,11 @@ $adPropertyMap = @(
     @{
         Parameter  = 'ServicePrincipalNames'
         ADProperty = 'ServicePrincipalName'
+        Type       = 'Array'
     }
     @{
         Parameter = 'ProxyAddresses'
-        Type = 'Array'
+        Type      = 'Array'
     }
 )
 
@@ -625,12 +626,26 @@ function Get-TargetResource
         elseif ($property.ADProperty)
         {
             # The AD property name is different to the function parameter to use this
-            $targetResource[$property.Parameter] = $adUser.($property.ADProperty)
+            if ($property.Type -eq 'Array')
+            {
+                $targetResource[$property.Parameter] = [System.String[]]$adUser.($property.ADProperty)
+            }
+            else
+            {
+                $targetResource[$property.Parameter] = $adUser.($property.ADProperty)
+            }
         }
         else
         {
             # The AD property name matches the function parameter
-            $targetResource[$property.Parameter] = $adUser.($property.Parameter)
+            if ($property.Type -eq 'Array')
+            {
+                $targetResource[$property.Parameter] = [System.String[]]$adUser.($property.Parameter)
+            }
+            else
+            {
+                $targetResource[$property.Parameter] = $adUser.($property.Parameter)
+            }
         }
     }
 
