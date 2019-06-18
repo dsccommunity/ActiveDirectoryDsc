@@ -71,7 +71,6 @@ try
             'AllowReversiblePasswordEncryption', 'CompoundIdentitySupported', 'PasswordNotRequired', 'SmartcardLogonRequired'
             )
         $testArrayProperties = @('ServicePrincipalNames', 'ProxyAddresses')
-        $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled')
 
         #region Function Get-TargetResource
         Describe 'xADUser\Get-TargetResource' {
