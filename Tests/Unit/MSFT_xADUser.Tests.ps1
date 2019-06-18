@@ -117,8 +117,8 @@ try
             It "Should return the correct value for an Array property" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
-                $adUser = Get-TargetResource @testPresentParams -Verbose
-                $adUser.ServicePrincipalName | Should -Be $fakeADUser.ServicePrincipalNames
+                $adUser = Get-TargetResource @testPresentParams -ServicePrincipalNames '' -Verbose
+                $adUser.ServicePrincipalNames | Should -Be $fakeADUser.ServicePrincipalName
             }
 
             It "Should return the correct value of 'ChangePassswordAtLogon' if it is true" {
