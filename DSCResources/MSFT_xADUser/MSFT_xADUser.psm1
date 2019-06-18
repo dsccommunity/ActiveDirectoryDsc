@@ -1493,7 +1493,7 @@ function Set-TargetResource
             # parameters. This will ignore common parameters such as -Verbose etc.
             if ($targetResource.ContainsKey($parameter))
             {
-                $adProperty = $adPropertyMap | Where-Object { $_.Parameter -eq $parameter }
+                $adProperty = $adPropertyMap | Where-Object -FilterScript { $_.Parameter -eq $parameter }
                 if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path))
                 {
                     # Cannot move users by updating the DistinguishedName property
@@ -1567,9 +1567,11 @@ function Set-TargetResource
                                 $clearUserProperties += $adProperty.ADProperty
                             }
                         } #end if clear existing value
-                        else {
+                        else
+                        {
                             # We are replacing the existing value
                             Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f $parameter, ($PSBoundParameters.$parameter -join ','))
+
                             if ($adProperty.UseCmdletParameter -eq $true)
                             {
                                 # We need to pass the parameter explicitly to Set-ADUser, not via -Replace
@@ -1590,11 +1592,12 @@ function Set-TargetResource
             } #end if TargetResource parameter
         } #end foreach PSBoundParameter
 
-        # Only pass -Remove and/or -Replace if we have something to set/change
+        # Only pass -Clear and/or -Replace if we have something to set/change
         if ($replaceUserProperties.Count -gt 0)
         {
             $setADUserParams['Replace'] = $replaceUserProperties
         }
+
         if ($clearUserProperties.Count -gt 0)
         {
             $setADUserParams['Clear'] = $clearUserProperties;
