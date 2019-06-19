@@ -29,7 +29,7 @@ Configuration NewGroupMultiDomainMembers_Config
 
     node localhost
     {
-        xADGroup0 'dl1'
+        xADGroup 'dl1'
         {
             GroupName           = 'DL_APP_1'
             GroupScope          = 'DomainLocal'
