@@ -180,7 +180,13 @@ $adPropertyMap = @(
         UseCmdletParameter = $true
     }
     @{
-        Parameter = 'ServicePrincipalNames'
+        Parameter  = 'ServicePrincipalNames'
+        ADProperty = 'ServicePrincipalName'
+        Type       = 'Array'
+    }
+    @{
+        Parameter = 'ProxyAddresses'
+        Type      = 'Array'
     }
 )
 
@@ -536,7 +542,13 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNull()]
         [System.String[]]
-        $ServicePrincipalNames
+        $ServicePrincipalNames,
+
+        # Specifies the Proxy Addresses registered on the user account
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String[]]
+        $ProxyAddresses
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
@@ -592,7 +604,8 @@ function Get-TargetResource
     # Retrieve each property from the ADPropertyMap and add to the hashtable
     foreach ($property in $adPropertyMap)
     {
-        if ($property.Parameter -eq 'Path')
+        $parameter = $property.Parameter
+        if ($parameter -eq 'Path')
         {
             # The path returned is not the parent container
             if (-not [System.String]::IsNullOrEmpty($adUser.DistinguishedName))
@@ -600,11 +613,7 @@ function Get-TargetResource
                 $targetResource['Path'] = Get-ADObjectParentDN -DN $adUser.DistinguishedName
             }
         }
-        elseif (($property.Parameter) -eq 'ServicePrincipalNames')
-        {
-            $targetResource['ServicePrincipalNames'] = [System.String[]]$adUser.ServicePrincipalNames
-        }
-        elseif (($property.Parameter) -eq 'ChangePasswordAtLogon')
+        elseif (($parameter) -eq 'ChangePasswordAtLogon')
         {
             if ($adUser.pwdlastset -eq 0)
             {
@@ -618,12 +627,27 @@ function Get-TargetResource
         elseif ($property.ADProperty)
         {
             # The AD property name is different to the function parameter to use this
-            $targetResource[$property.Parameter] = $adUser.($property.ADProperty)
+            $aDProperty = $property.ADProperty
+            if ($property.Type -eq 'Array')
+            {
+                $targetResource[$parameter] = [System.String[]] $adUser.$aDProperty
+            }
+            else
+            {
+                $targetResource[$parameter] = $adUser.$aDProperty
+            }
         }
         else
         {
             # The AD property name matches the function parameter
-            $targetResource[$property.Parameter] = $adUser.($property.Parameter)
+            if ($property.Type -eq 'Array')
+            {
+                $targetResource[$Parameter] = [System.String[]] $adUser.$parameter
+            }
+            else
+            {
+                $targetResource[$Parameter] = $adUser.$parameter
+            }
         }
     }
 
@@ -982,7 +1006,13 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNull()]
         [System.String[]]
-        $ServicePrincipalNames
+        $ServicePrincipalNames,
+
+        # Specifies the Proxy Addresses registered on the user account
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String[]]
+        $ProxyAddresses
     )
 
     Assert-Parameters @PSBoundParameters
@@ -1035,27 +1065,12 @@ function Test-TargetResource
                 {
                     # Both values are null/empty and therefore we are compliant
                 }
-                elseif ($parameter -eq 'ServicePrincipalNames')
+                elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
+                        ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
+                        (Compare-Object -ReferenceObject $PSBoundParameters.$parameter -DifferenceObject $targetResource.$parameter))
                 {
-                    $testMembersParams = @{
-                        ExistingMembers = $targetResource.ServicePrincipalNames -as [System.String[]]
-                        Members         = $ServicePrincipalNames
-                    }
-
-                    if (-not (Test-Members @testMembersParams))
-                    {
-                        $existingSPNs = $testMembersParams['ExistingMembers'] -join ','
-                        $desiredSPNs = $ServicePrincipalNames -join ','
-
-                        Write-Verbose -Message ($script:localizedData.ADUserNotDesiredPropertyState -f `
-                                'ServicePrincipalNames', $desiredSPNs, $existingSPNs)
-
-                        $isCompliant = $false
-                    }
-                }
-                elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
-                {
-                    Write-Verbose -Message ($script:localizedData.ADUserNotDesiredPropertyState -f $parameter, $PSBoundParameters.$parameter, $targetResource.$parameter)
+                    Write-Verbose -Message ($script:localizedData.ADUserNotDesiredPropertyState -f $parameter,
+                        ($PSBoundParameters.$parameter -join '; '), ($targetResource.$parameter -join '; '))
                     $isCompliant = $false
                 }
             }
@@ -1416,7 +1431,13 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNull()]
         [System.String[]]
-        $ServicePrincipalNames
+        $ServicePrincipalNames,
+
+        # Specifies the Proxy Addresses registered on the user account
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String[]]
+        $ProxyAddresses
     )
 
     Assert-Parameters @PSBoundParameters
@@ -1465,9 +1486,8 @@ function Set-TargetResource
         }
 
         $setADUserParams = Get-ADCommonParameters @PSBoundParameters
-
         $replaceUserProperties = @{ }
-        $removeUserProperties = @{ }
+        $clearUserProperties = @()
 
         foreach ($parameter in $PSBoundParameters.Keys)
         {
@@ -1475,6 +1495,7 @@ function Set-TargetResource
             # parameters. This will ignore common parameters such as -Verbose etc.
             if ($targetResource.ContainsKey($parameter))
             {
+                $adProperty = $adPropertyMap | Where-Object -FilterScript { $_.Parameter -eq $parameter }
                 if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path))
                 {
                     # Cannot move users by updating the DistinguishedName property
@@ -1515,13 +1536,10 @@ function Set-TargetResource
                     #>
                     Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f $parameter, $PSBoundParameters.$parameter)
                 }
-                elseif ($parameter -eq 'ServicePrincipalNames')
-                {
-                    Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f `
-                            'ServicePrincipalNames', ($ServicePrincipalNames -join ','))
-                    $replaceUserProperties['ServicePrincipalName'] = $ServicePrincipalNames
-                }
-                elseif ($PSBoundParameters.$parameter -ne $targetResource.$parameter)
+                # Use Compare-Object to allow comparison of string and array parameters
+                elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
+                        ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
+                        (Compare-Object -ReferenceObject $PSBoundParameters.$parameter -DifferenceObject $targetResource.$parameter))
                 {
                     # Find the associated AD property
                     $adProperty = $adPropertyMap |
@@ -1531,46 +1549,44 @@ function Set-TargetResource
                     {
                         # We can't do anything is an empty AD property!
                     }
-                    elseif ([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter))
+                    else
                     {
-                        # We are removing properties
-                        # Only remove if the existing value in not null or empty
-                        if (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
+                        if ([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter) -and (-not ([System.String]::IsNullOrEmpty($targetResource.$parameter))))
                         {
-                            Write-Verbose -Message ($script:localizedData.RemovingADUserProperty -f $parameter, $PSBoundParameters.$parameter)
-
+                            # We are clearing the existing value
+                            Write-Verbose -Message ($script:localizedData.ClearingADUserProperty -f $parameter)
                             if ($adProperty.UseCmdletParameter -eq $true)
                             {
-                                # We need to pass the parameter explicitly to Set-ADUser, not via -Remove
+                                # We need to pass the parameter explicitly to Set-ADUser, not via -Clear
                                 $setADUserParams[$adProperty.Parameter] = $PSBoundParameters.$parameter
                             }
                             elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
                             {
-                                $removeUserProperties[$adProperty.Parameter] = $targetResource.$parameter
+                                $clearUserProperties += $adProperty.Parameter
                             }
                             else
                             {
-                                $removeUserProperties[$adProperty.ADProperty] = $targetResource.$parameter
+                                $clearUserProperties += $adProperty.ADProperty
                             }
-                        }
-                    } #end if remove existing value
-                    else
-                    {
-                        # We are replacing the existing value
-                        Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f $parameter, $PSBoundParameters.$parameter)
-
-                        if ($adProperty.UseCmdletParameter -eq $true)
-                        {
-                            # We need to pass the parameter explicitly to Set-ADUser, not via -Replace
-                            $setADUserParams[$adProperty.Parameter] = $PSBoundParameters.$parameter
-                        }
-                        elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
-                        {
-                            $replaceUserProperties[$adProperty.Parameter] = $PSBoundParameters.$parameter
-                        }
+                        } #end if clear existing value
                         else
                         {
-                            $replaceUserProperties[$adProperty.ADProperty] = $PSBoundParameters.$parameter
+                            # We are replacing the existing value
+                            Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f $parameter, ($PSBoundParameters.$parameter -join ','))
+
+                            if ($adProperty.UseCmdletParameter -eq $true)
+                            {
+                                # We need to pass the parameter explicitly to Set-ADUser, not via -Replace
+                                $setADUserParams[$adProperty.Parameter] = $PSBoundParameters.$parameter
+                            }
+                            elseif ([System.String]::IsNullOrEmpty($adProperty.ADProperty))
+                            {
+                                $replaceUserProperties[$adProperty.Parameter] = $PSBoundParameters.$parameter
+                            }
+                            else
+                            {
+                                $replaceUserProperties[$adProperty.ADProperty] = $PSBoundParameters.$parameter
+                            }
                         }
                     } #end if replace existing value
                 }
@@ -1578,15 +1594,15 @@ function Set-TargetResource
             } #end if TargetResource parameter
         } #end foreach PSBoundParameter
 
-        # Only pass -Remove and/or -Replace if we have something to set/change
+        # Only pass -Clear and/or -Replace if we have something to set/change
         if ($replaceUserProperties.Count -gt 0)
         {
             $setADUserParams['Replace'] = $replaceUserProperties
         }
 
-        if ($removeUserProperties.Count -gt 0)
+        if ($clearUserProperties.Count -gt 0)
         {
-            $setADUserParams['Remove'] = $removeUserProperties
+            $setADUserParams['Clear'] = $clearUserProperties;
         }
 
         Write-Verbose -Message ($script:localizedData.UpdatingADUser -f $UserName)

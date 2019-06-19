@@ -14,7 +14,7 @@ ConvertFrom-StringData @'
     UpdatingADUser                       = Updating Active Directory user '{0}'.
     SettingADUserPassword                = Setting Active Directory user password.
     UpdatingADUserProperty               = Updating user property '{0}' with/to '{1}'.
-    RemovingADUserProperty               = Removing user property '{0}' with '{1}'.
+    ClearingADUserProperty               = Clearing user property '{0}'.
     MovingADUser                         = Moving user from '{0}' to '{1}'.
     RenamingADUser                       = Renaming user from '{0}' to '{1}'.
     RestoringUser                        = Attempting to restore the user object {0} from the recycle bin.

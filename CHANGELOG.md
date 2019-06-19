@@ -80,6 +80,7 @@
   - Added CompoundIdentitySupported property
   - Added PasswordNotRequired property
   - Added SmartcardLogonRequired property
+  - Added ProxyAddresses property ([Issue #254](https://github.com/PowerShell/xActiveDirectory/issues/254)).
 - Changes to xADDomainController
   - Change the `#Requires` statement in the Examples to require the correct
     module.
