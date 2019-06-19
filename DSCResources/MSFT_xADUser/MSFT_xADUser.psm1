@@ -604,7 +604,8 @@ function Get-TargetResource
     # Retrieve each property from the ADPropertyMap and add to the hashtable
     foreach ($property in $adPropertyMap)
     {
-        if ($property.Parameter -eq 'Path')
+        $parameter = $property.Parameter
+        if ($parameter -eq 'Path')
         {
             # The path returned is not the parent container
             if (-not [System.String]::IsNullOrEmpty($adUser.DistinguishedName))
@@ -612,7 +613,7 @@ function Get-TargetResource
                 $targetResource['Path'] = Get-ADObjectParentDN -DN $adUser.DistinguishedName
             }
         }
-        elseif (($property.Parameter) -eq 'ChangePasswordAtLogon')
+        elseif (($parameter) -eq 'ChangePasswordAtLogon')
         {
             if ($adUser.pwdlastset -eq 0)
             {
@@ -626,13 +627,14 @@ function Get-TargetResource
         elseif ($property.ADProperty)
         {
             # The AD property name is different to the function parameter to use this
+            $aDProperty = $property.ADProperty
             if ($property.Type -eq 'Array')
             {
-                $targetResource[$property.Parameter] = [System.String[]]$adUser.($property.ADProperty)
+                $targetResource[$parameter] = [System.String[]] $adUser.$aDProperty
             }
             else
             {
-                $targetResource[$property.Parameter] = $adUser.($property.ADProperty)
+                $targetResource[$parameter] = $adUser.$aDProperty
             }
         }
         else
@@ -640,11 +642,11 @@ function Get-TargetResource
             # The AD property name matches the function parameter
             if ($property.Type -eq 'Array')
             {
-                $targetResource[$property.Parameter] = [System.String[]]$adUser.($property.Parameter)
+                $targetResource[$Parameter] = [System.String[]] $adUser.$parameter
             }
             else
             {
-                $targetResource[$property.Parameter] = $adUser.($property.Parameter)
+                $targetResource[$Parameter] = $adUser.$parameter
             }
         }
     }
