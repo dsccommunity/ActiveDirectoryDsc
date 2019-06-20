@@ -41,11 +41,11 @@ Configuration CreateUserAndIgnorePasswordChanges_Config
         xADUser 'Contoso\ExampleUser'
         {
             Ensure              = 'Present'
-            UserName            = "ExampleUser"
+            UserName            = 'ExampleUser'
             Password            = $Password
             PasswordNeverResets = $true
-            DomainName          = "contoso.com"
-            Path                = "CN=Users,DC=contoso,DC=com"
+            DomainName          = 'contoso.com'
+            Path                = 'CN=Users,DC=contoso,DC=com'
         }
     }
 }

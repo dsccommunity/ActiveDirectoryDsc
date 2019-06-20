@@ -40,10 +40,10 @@ Configuration CreateUserAndManagePassword_Config
         xADUser 'Contoso\ExampleUser'
         {
             Ensure     = 'Present'
-            UserName   = "ExampleUser"
+            UserName   = 'ExampleUser'
             Password   = $Password
-            DomainName = "contoso.com"
-            Path       = "CN=Users,DC=contoso,DC=com"
+            DomainName = 'contoso.com'
+            Path       = 'CN=Users,DC=contoso,DC=com'
         }
     }
 }

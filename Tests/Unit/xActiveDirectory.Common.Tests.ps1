@@ -1378,7 +1378,8 @@ InModuleScope 'xActiveDirectory.Common' {
         Context 'When members are in different domains' {
             Mock -CommandName Add-ADGroupMember
             Mock -CommandName Get-ADObject -MockWith {
-                param (
+                param
+                (
                     [Parameter()]
                     [System.String]
                     $Identity,

@@ -154,7 +154,8 @@ function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]

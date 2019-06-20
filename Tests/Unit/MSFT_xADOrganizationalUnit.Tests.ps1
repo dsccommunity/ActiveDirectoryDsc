@@ -39,10 +39,40 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
-        function Get-ADOrganizationalUnit { param ($Name) }
-        function Set-ADOrganizationalUnit { param ($Identity, $Credential) }
-        function Remove-ADOrganizationalUnit { param ($Name, $Credential) }
-        function New-ADOrganizationalUnit { param ($Name, $Credential) }
+        function Get-ADOrganizationalUnit
+        {
+            param
+            (
+                $Name
+            )
+        }
+
+        function Set-ADOrganizationalUnit
+        {
+            param
+            (
+                $Identity,
+                $Credential
+            )
+        }
+
+        function Remove-ADOrganizationalUnit
+        {
+            param
+            (
+                $Name,
+                $Credential
+            )
+        }
+
+        function New-ADOrganizationalUnit
+        {
+            param
+            (
+                $Name,
+                $Credential
+            )
+        }
 
         $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
             'DummyUser',

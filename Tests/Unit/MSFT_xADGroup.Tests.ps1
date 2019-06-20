@@ -447,7 +447,8 @@ try
                 Mock -CommandName New-ADGroup -MockWith { return [PSCustomObject] $fakeADGroup }
                 Mock -CommandName Get-DomainName -MockWith {return 'contoso.com'}
                 Mock -CommandName Get-ADDomainNameFromDistinguishedName -MockWith {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         [System.String]
                         $DistinguishedName
