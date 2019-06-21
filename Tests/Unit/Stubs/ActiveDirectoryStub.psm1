@@ -5068,7 +5068,11 @@ function Remove-ADComputer
 
         [Parameter()]
         [string]
-        $Server
+        $Server,
+
+        [Parameter()]
+        [boolean]
+        $Confirm
     )
 
     throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
