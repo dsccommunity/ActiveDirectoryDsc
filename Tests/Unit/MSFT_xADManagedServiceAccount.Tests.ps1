@@ -488,7 +488,8 @@ try
                 }
 
                 It "Should return identical information for <Parameter>" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -569,7 +570,8 @@ try
                 }
 
                 It "Should return identical information for <Parameter>" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -679,7 +681,8 @@ try
                 }
 
                 It "Should return false for <Parameter>" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -765,7 +768,8 @@ try
                 }
 
                 It "Should return false for <Parameter>" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -946,7 +950,8 @@ try
                 }
 
                 It "Should return $false when <Parameter> is incorrect" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -998,7 +1003,8 @@ try
                 }
 
                 It "Should return $false when <Parameter> is incorrect" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -1222,7 +1228,8 @@ try
                 #endregion Incorrect parameter test setup
 
                 It "Should call 'Set-ADServiceAccount' when '<Parameter>' is incorrect" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -1385,7 +1392,8 @@ try
                 #endregion Incorrect parameter test setup
 
                 It "Should call 'Set-ADServiceAccount' when '<Parameter>' is incorrect" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 

@@ -270,19 +270,41 @@ try
         Describe 'xADDomain\Set-TargetResource' {
             function Install-ADDSForest
             {
-                param (
-                     $DomainName, $SafeModeAdministratorPassword, $CreateDnsDelegation, $DatabasePath,
-                     $DnsDelegationCredential, $InstallDns, $LogPath, $NoRebootOnCompletion, $SysvolPath,
-                     $DomainNetbiosName, $ForestMode, $DomainMode
+                param
+                (
+                     $DomainName,
+                     $SafeModeAdministratorPassword,
+                     $CreateDnsDelegation,
+                     $DatabasePath,
+                     $DnsDelegationCredential,
+                     $InstallDns,
+                     $LogPath,
+                     $NoRebootOnCompletion,
+                     $SysvolPath,
+                     $DomainNetbiosName,
+                     $ForestMode,
+                     $DomainMode
                  )
             }
 
             function Install-ADDSDomain
             {
-                param (
-                    $NewDomainName, $ParentDomainName, $SafeModeAdministratorPassword, $CreateDnsDelegation,
-                    $Credential, $DatabasePath, $DnsDelegationCredential, $DomainType, $InstallDns, $LogPath,
-                    $NewDomainNetbiosName, $NoRebootOnCompletion, $SysvolPath, $DomainMode
+                param
+                (
+                    $NewDomainName,
+                    $ParentDomainName,
+                    $SafeModeAdministratorPassword,
+                    $CreateDnsDelegation,
+                    $Credential,
+                    $DatabasePath,
+                    $DnsDelegationCredential,
+                    $DomainType,
+                    $InstallDns,
+                    $LogPath,
+                    $NewDomainNetbiosName,
+                    $NoRebootOnCompletion,
+                    $SysvolPath,
+                    $DomainMode
                 )
             }
 

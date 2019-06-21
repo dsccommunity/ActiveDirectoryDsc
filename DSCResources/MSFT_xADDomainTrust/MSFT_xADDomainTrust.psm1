@@ -13,30 +13,30 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $SourceDomainName,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $TargetDomainName,
 
         [Parameter(Mandatory = $true)]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         $TargetDomainAdministratorCredential,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('External', 'Forest')]
-        [String]
+        [System.String]
         $TrustType,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Bidirectional', 'Inbound', 'Outbound')]
-        [String]
+        [System.String]
         $TrustDirection,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present'
     )
 
@@ -92,8 +92,8 @@ function Get-TargetResource
     $CIMCredential = New-CimInstance -ClassName MSFT_Credential -ClientOnly `
         -Namespace 'root/microsoft/windows/desiredstateconfiguration' `
         -Property @{
-        UserName = [string] $TargetDomainAdministratorCredential.UserName
-        Password = [string] $null
+        UserName = [System.String] $TargetDomainAdministratorCredential.UserName
+        Password = [System.String] $null
     }
 
     return @{
@@ -114,30 +114,30 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $SourceDomainName,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $TargetDomainName,
 
         [Parameter(Mandatory = $true)]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         $TargetDomainAdministratorCredential,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('External', 'Forest')]
-        [String]
+        [System.String]
         $TrustType,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Bidirectional', 'Inbound', 'Outbound')]
-        [String]
+        [System.String]
         $TrustDirection,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present'
     )
 
@@ -158,30 +158,30 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $SourceDomainName,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $TargetDomainName,
 
         [Parameter(Mandatory = $true)]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         $TargetDomainAdministratorCredential,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('External', 'Forest')]
-        [String]
+        [System.String]
         $TrustType,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Bidirectional', 'Inbound', 'Outbound')]
-        [String]
+        [System.String]
         $TrustDirection,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present'
     )
 
@@ -216,34 +216,34 @@ function Confirm-ResourceProperties
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $SourceDomainName,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $TargetDomainName,
 
         [Parameter(Mandatory = $true)]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         $TargetDomainAdministratorCredential,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('External', 'Forest')]
-        [String]
+        [System.String]
         $TrustType,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Bidirectional', 'Inbound', 'Outbound')]
-        [String]
+        [System.String]
         $TrustDirection,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [Switch]
+        [System.Management.Automation.SwitchParameter]
         $Apply
     )
 

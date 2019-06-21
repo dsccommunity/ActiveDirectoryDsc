@@ -43,35 +43,35 @@ function Get-TargetResource
     param
     (
         [Parameter()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $ForestName,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffix,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffixToAdd,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffixToRemove,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffix,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffixToAdd,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffixToRemove
     )
 
@@ -93,12 +93,12 @@ function Get-TargetResource
     return @{
         Credential                         = ''
         ForestName                         = $forest.Name
-        ServicePrincipalNameSuffix         = [Array] $forest.SpnSuffixes
-        ServicePrincipalNameSuffixToAdd    = [Array] $ServicePrincipalNameSuffixToAdd
-        ServicePrincipalNameSuffixToRemove = [Array] $ServicePrincipalNameSuffixToRemove
-        UserPrincipalNameSuffix            = [Array] $forest.UpnSuffixes
-        UserPrincipalNameSuffixToAdd       = [Array] $UserPrincipalNameSuffixToAdd
-        UserPrincipalNameSuffixToRemove    = [Array] $UserPrincipalNameSuffixToRemove
+        ServicePrincipalNameSuffix         = [System.Array] $forest.SpnSuffixes
+        ServicePrincipalNameSuffixToAdd    = [System.Array] $ServicePrincipalNameSuffixToAdd
+        ServicePrincipalNameSuffixToRemove = [System.Array] $ServicePrincipalNameSuffixToRemove
+        UserPrincipalNameSuffix            = [System.Array] $forest.UpnSuffixes
+        UserPrincipalNameSuffixToAdd       = [System.Array] $UserPrincipalNameSuffixToAdd
+        UserPrincipalNameSuffixToRemove    = [System.Array] $UserPrincipalNameSuffixToRemove
     }
 }
 
@@ -139,35 +139,35 @@ function Test-TargetResource
     param
     (
         [Parameter()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $ForestName,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffix,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffixToAdd,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffixToRemove,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffix,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffixToAdd,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffixToRemove
     )
 
@@ -268,35 +268,35 @@ function Set-TargetResource
     param
     (
         [Parameter()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $ForestName,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffix,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffixToAdd,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $ServicePrincipalNameSuffixToRemove,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffix,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffixToAdd,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $UserPrincipalNameSuffixToRemove
     )
 

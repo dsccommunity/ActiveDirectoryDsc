@@ -98,7 +98,7 @@ function Get-TargetResource
                 Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryFound -f $Path)
 
                 $returnValue['Ensure'] = 'Present'
-                $returnValue['ActiveDirectoryRights'] = [String[]] $access.ActiveDirectoryRights.ToString().Split(',').ForEach( { $_.Trim() })
+                $returnValue['ActiveDirectoryRights'] = [System.String[]] $access.ActiveDirectoryRights.ToString().Split(',').ForEach( { $_.Trim() })
 
                 return $returnValue
             }
@@ -333,10 +333,10 @@ function Test-TargetResource
     if ($Ensure -eq 'Present')
     {
         # Convert to array to a string for easy compare
-        [String] $currentActiveDirectoryRights = ($currentState.ActiveDirectoryRights |
+        [System.String] $currentActiveDirectoryRights = ($currentState.ActiveDirectoryRights |
                 Sort-Object) -join ', '
 
-        [String] $desiredActiveDirectoryRights = ($ActiveDirectoryRights |
+        [System.String] $desiredActiveDirectoryRights = ($ActiveDirectoryRights |
                 Sort-Object) -join ', '
 
         $returnValue = $returnValue -and $currentActiveDirectoryRights -eq $desiredActiveDirectoryRights
