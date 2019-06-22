@@ -1,6 +1,9 @@
 # Description
 
 The xADComputer DSC resource will manage computer accounts within Active Directory.
+This resource can be used to provision a computer account before the computer is
+added to the domain. These pre-created computer objects can be used with offline
+domain join, unsecure domain Join and RODC domain join scenarios.
 
 >**Note:** An Offline Domain Join (ODJ) request file will only be created
 >when a computer account is first created in the domain. Setting an Offline
