@@ -26,9 +26,43 @@ namespace Microsoft.ActiveDirectory.Management
         UnknownForest
     }
 
+    public enum ADKerberosEncryptionType
+    {
+        AES128,
+        AES256,
+        DES,
+        None,
+        RC4
+    }
+
+    public enum ADSearchScope
+    {
+        Base,
+        OneLevel,
+        Subtree
+    }
+
+    public class ADAuthenticationPolicy
+    {
+        public ADAuthenticationPolicy():base(){}
+        public ADAuthenticationPolicy(System.String Identity):base(){}
+    }
+
+    public class ADAuthenticationPolicySilo
+    {
+        public ADAuthenticationPolicySilo():base(){}
+        public ADAuthenticationPolicySilo(System.String Identity):base(){}
+    }
+
     public class ADAuthType
     {
         public ADAuthType():base(){}
+    }
+
+    public class ADComputer
+    {
+        public ADComputer():base(){}
+        public ADComputer(System.String Identity):base(){}
     }
 
     public class ADDomain
@@ -47,6 +81,23 @@ namespace Microsoft.ActiveDirectory.Management
     {
         public ADDirectoryServer():base(){}
         public ADDirectoryServer(System.String Identity):base(){}
+    }
+
+    public class ADIdentityNotFoundException : System.Exception
+    {
+        public ADIdentityNotFoundException():base(){}
+    }
+
+    public class ADObject
+    {
+        public ADObject():base(){}
+        public ADObject(System.String Identity):base(){}
+    }
+
+    public class ADPrincipal
+    {
+        public ADPrincipal():base(){}
+        public ADPrincipal(System.String Identity):base(){}
     }
 
     public class ADReplicationSite
