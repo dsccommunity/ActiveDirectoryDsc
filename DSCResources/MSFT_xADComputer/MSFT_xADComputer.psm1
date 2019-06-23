@@ -980,6 +980,7 @@ function Test-ServicePrincipalNames
 
         [Parameter(Mandatory = $true)]
         [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [System.String[]]
         $ServicePrincipalNames
 
