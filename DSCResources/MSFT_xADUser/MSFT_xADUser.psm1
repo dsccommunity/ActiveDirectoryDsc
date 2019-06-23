@@ -1523,10 +1523,24 @@ function Set-TargetResource
                 elseif ($parameter -eq 'Password' -and $PasswordNeverResets -eq $false)
                 {
                     $adCommonParameters = Get-ADCommonParameters @PSBoundParameters
+                    $testPasswordParams = @{
+                        Username               = $UserName
+                        Password               = $Password
+                        DomainName             = $DomainName
+                        PasswordAuthentication = $PasswordAuthentication
+                    }
 
-                    Write-Verbose -Message ($script:localizedData.SettingADUserPassword -f $UserName)
+                    if ($DomainAdministratorCredential)
+                    {
+                        $testPasswordParams['DomainAdministratorCredential'] = $DomainAdministratorCredential
+                    }
 
-                    Set-ADAccountPassword @adCommonParameters -Reset -NewPassword $Password.Password
+                    if (-not (Test-Password @testPasswordParams))
+                    {
+                        Write-Verbose -Message ($script:localizedData.SettingADUserPassword -f $UserName)
+
+                        Set-ADAccountPassword @adCommonParameters -Reset -NewPassword $Password.Password
+                    }
                 }
                 elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
                 {
