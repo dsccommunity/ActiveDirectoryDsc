@@ -58,6 +58,7 @@
     Examples folder.
   - Fix the RestoreFromRecycleBin description.
   - Fix unnecessary cast in `Test-TargetResource` ([issue #295](https://github.com/PowerShell/xActiveDirectory/issues/295)).
+  - Fix `ServicePrincipalNames` Empty String Exception ([issue #382](https://github.com/PowerShell/xActiveDirectory/issues/382)).
 - Changes to xADGroup
   - Change the description of the property RestoreFromRecycleBin.
   - Code cleanup.
