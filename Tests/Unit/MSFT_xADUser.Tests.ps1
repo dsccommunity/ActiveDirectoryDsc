@@ -518,6 +518,17 @@ try
                 Assert-MockCalled -CommandName Set-ADAccountPassword -Scope It -Times 0
             }
 
+            It "Calls 'Test-Password' with the correct parameters when 'DomainAdministratorCredential' is specified" {
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
+                Mock -CommandName Set-ADUser
+                Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password }
+                Mock -CommandName Test-Password -ParameterFilter { $DomainAdministratorCredential -eq $testCredential } -MockWith { $true }
+
+                Set-TargetResource @testPresentParams -Password $testCredential -DomainAdministratorCredential $testCredential
+
+                Assert-MockCalled -CommandName Test-Password -ParameterFilter { $DomainAdministratorCredential -eq $testCredential } -Scope It -Exactly 1
+            }
+
             It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {
                 $testADPropertyName = 'Description'
                 Mock -CommandName Get-ADUser -MockWith {
