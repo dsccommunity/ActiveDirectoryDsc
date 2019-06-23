@@ -83,6 +83,8 @@
   - Added PasswordNotRequired property
   - Added SmartcardLogonRequired property
   - Added ProxyAddresses property ([Issue #254](https://github.com/PowerShell/xActiveDirectory/issues/254)).
+  - Fix Password property being updated whenever another property is changed
+    ([issue #384](https://github.com/PowerShell/xActiveDirectory/issues/384)).
 - Changes to xADDomainController
   - Change the `#Requires` statement in the Examples to require the correct
     module.
