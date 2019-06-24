@@ -46,18 +46,18 @@ function Get-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
     {
-        Write-Error -Message ($script:localizedData.ForestNotFound -f $ForestFQDN)
-        throw $_
+        $errorMessage = $script:localizedData.ForestNotFound -f $ForestFQDN
+        New-ObjectNotFoundException -Message $errorMessage -ErrorRecord $_
     }
     catch [System.Security.Authentication.AuthenticationException]
     {
-        Write-Error -Message $script:localizedData.CredentialError
-        throw $_
+        $errorMessage = $script:localizedData.CredentialError
+        New-InvalidArgumentException -Message $errorMessage -ErrorRecord $_
     }
     catch
     {
-        Write-Error -Message ($script:localizedData.GetUnhandledException -f $ForestFQDN)
-        throw $_
+        $errorMessage = $script:localizedData.GetUnhandledException -f $ForestFQDN
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
     finally
     {
@@ -112,18 +112,18 @@ function Set-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
     {
-        Write-Error -Message ($script:localizedData.ForestNotFound -f $ForestFQDN)
-        throw $_
+        $errorMessage = $script:localizedData.ForestNotFound -f $ForestFQDN
+        New-ObjectNotFoundException -Message $errorMessage -ErrorRecord $_
     }
     catch [System.Security.Authentication.AuthenticationException]
     {
-        Write-Error -Message $script:localizedData.CredentialError
-        throw $_
+        $errorMessage = $script:localizedData.CredentialError
+        New-InvalidArgumentException -Message $errorMessage -ErrorRecord $_
     }
     catch
     {
-        Write-Error -Message ($script:localizedData.SetUnhandledException -f $ForestFQDN)
-        throw $_
+        $errorMessage = $script:localizedData.SetUnhandledException -f $ForestFQDN
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
     finally
     {
@@ -171,18 +171,18 @@ function Test-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
     {
-        Write-Error -Message ($script:localizedData.ForestNotFound -f $ForestFQDN)
-        throw $_
+        $errorMessage = $script:localizedData.ForestNotFound -f $ForestFQDN
+        New-ObjectNotFoundException -Message $errorMessage -ErrorRecord $_
     }
     catch [System.Security.Authentication.AuthenticationException]
     {
-        Write-Error -Message $script:localizedData.CredentialError
-        throw $_
+        $errorMessage = $script:localizedData.CredentialError
+        New-InvalidArgumentException -Message $errorMessage -ErrorRecord $_
     }
     catch
     {
-        Write-Error -Message ($script:localizedData.TestUnhandledException -f $ForestFQDN)
-        throw $_
+        $errorMessage = $script:localizedData.SetUnhandledException -f $ForestFQDN
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
     finally
     {
