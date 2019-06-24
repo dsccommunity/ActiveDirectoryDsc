@@ -52,7 +52,7 @@ function Get-TargetResource
     catch [System.Security.Authentication.AuthenticationException]
     {
         $errorMessage = $script:localizedData.CredentialError
-        New-InvalidArgumentException -Message $errorMessage -ErrorRecord $_
+        New-InvalidArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
     }
     catch
     {
@@ -118,7 +118,7 @@ function Set-TargetResource
     catch [System.Security.Authentication.AuthenticationException]
     {
         $errorMessage = $script:localizedData.CredentialError
-        New-InvalidArgumentException -Message $errorMessage -ErrorRecord $_
+        New-InvalidArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
     }
     catch
     {
@@ -177,11 +177,11 @@ function Test-TargetResource
     catch [System.Security.Authentication.AuthenticationException]
     {
         $errorMessage = $script:localizedData.CredentialError
-        New-InvalidArgumentException -Message $errorMessage -ErrorRecord $_
+        New-InvalidArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
     }
     catch
     {
-        $errorMessage = $script:localizedData.SetUnhandledException -f $ForestFQDN
+        $errorMessage = $script:localizedData.TestUnhandledException -f $ForestFQDN
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
     finally
