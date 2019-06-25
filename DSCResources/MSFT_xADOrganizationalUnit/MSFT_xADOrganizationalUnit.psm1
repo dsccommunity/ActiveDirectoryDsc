@@ -133,7 +133,7 @@ function Test-TargetResource
         else
         {
             $isCompliant = $true
-            Write-Verbose ($script:localizedData.OUInDesiredState -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.OUDoesNotExistAndShouldNot -f $targetResource.Name)
         }
     }
 
