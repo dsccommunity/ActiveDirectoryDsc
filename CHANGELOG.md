@@ -71,6 +71,7 @@
 - Changes to xADOrganizationalUnit
   - Change the description of the property RestoreFromRecycleBin.
   - Code cleanup.
+  - Fix incorrect verbose message when this resource has Ensure set to Absent ([issue #276](https://github.com/PowerShell/xActiveDirectory/issues/276)).
 - Changes to xADUser
   - Change the description of the property RestoreFromRecycleBin.
   - Added ServicePrincipalNames property ([issue #153](https://github.com/PowerShell/xActiveDirectory/issues/153)).
