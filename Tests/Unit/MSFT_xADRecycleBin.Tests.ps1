@@ -141,7 +141,7 @@ try
                     Mock -CommandName Get-ADObject -MockWith {
                         throw Unhandled.Exception
                     }
-                    $expectedError = $script:localizedData.TestUnhandledException -f $ForestFQDN
+                    $expectedError = $script:localizedData.GetUnhandledException -f $ForestFQDN
                     { Get-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
             }
@@ -261,7 +261,7 @@ try
                     Mock -CommandName Get-ADForest -MockWith {
                         throw Unhandled.Exception
                     }
-                    $expectedError = $script:localizedData.TestUnhandledException -f $ForestFQDN
+                    $expectedError = $script:localizedData.SetUnhandledException -f $ForestFQDN
                     { Set-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
             }
