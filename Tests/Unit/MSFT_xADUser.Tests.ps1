@@ -69,7 +69,7 @@ try
         $testBooleanProperties = @(
             'PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled','AccountNotDelegated',
             'AllowReversiblePasswordEncryption', 'CompoundIdentitySupported', 'PasswordNotRequired', 'SmartcardLogonRequired'
-            )
+        )
         $testArrayProperties = @('ServicePrincipalNames', 'ProxyAddresses')
 
         #region Function Get-TargetResource
@@ -96,6 +96,13 @@ try
                 $adUser = Get-TargetResource @testPresentParams
 
                 $adUser.Ensure | Should -Be 'Absent'
+            }
+
+            It "Should throw the correct exception when Get-ADUser returns an unknown error" {
+                Mock -CommandName Get-ADUser -MockWith { throw }
+
+                $expectedError = $script:localizedData.RetrievingADUserError -f $testPresentParams.UserName, $testPresentParams.DomainName
+                { Get-TargetResource @testPresentParams } | Should -Throw $expectedError
             }
 
             It "Calls 'Get-ADUser' with 'Server' parameter when 'DomainController' specified" {
