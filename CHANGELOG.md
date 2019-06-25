@@ -115,7 +115,7 @@
   - Code cleanup.
   - It now sets back the `$ErrorActionPreference` that was set prior to
     setting it to `'Stop'`.
-  - Replace Write-Error with the correct helper function.
+  - Replace Write-Error with the correct helper function ([issue #327](https://github.com/PowerShell/xActiveDirectory/issues/327)).
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException when creating a new site link.
   - Code cleanup.
