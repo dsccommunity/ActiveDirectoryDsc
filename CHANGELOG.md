@@ -113,8 +113,9 @@
   - Remove unneeded example and resource designer files.
   - Added missing property schema descriptions ([issue #368](https://github.com/PowerShell/xActiveDirectory/issues/368)).
   - Code cleanup.
-  - It now set back the `$ErrorActionPreference` that was set prior to
+  - It now sets back the `$ErrorActionPreference` that was set prior to
     setting it to `'Stop'`.
+  - Replace Write-Error with the correct helper function ([issue #327](https://github.com/PowerShell/xActiveDirectory/issues/327)).
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException when creating a new site link.
   - Code cleanup.
