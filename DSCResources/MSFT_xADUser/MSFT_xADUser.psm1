@@ -588,8 +588,8 @@ function Get-TargetResource
     }
     catch
     {
-        Write-Error -Message ($script:localizedData.RetrievingADUserError -f $UserName, $DomainName)
-        throw $_
+        $errorMessage = $script:localizedData.RetrievingADUserError -f $UserName, $DomainName
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
     $targetResource = @{

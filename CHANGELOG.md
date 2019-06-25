@@ -87,6 +87,7 @@
   - Added ProxyAddresses property ([Issue #254](https://github.com/PowerShell/xActiveDirectory/issues/254)).
   - Fix Password property being updated whenever another property is changed
     ([issue #384](https://github.com/PowerShell/xActiveDirectory/issues/384)).
+  - Replace Write-Error with the correct helper function ([Issue #331](https://github.com/PowerShell/xActiveDirectory/issues/331)).
 - Changes to xADDomainController
   - Change the `#Requires` statement in the Examples to require the correct
     module.
