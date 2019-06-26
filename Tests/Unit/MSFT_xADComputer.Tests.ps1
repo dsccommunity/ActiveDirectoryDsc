@@ -39,6 +39,16 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
+        #Load the AD Module Stub, so we can mock the cmdlets, then load the AD types
+        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
+
+        # If one type does not exist, it's assumed the other ones does not exist either.
+        if (-not ('Microsoft.ActiveDirectory.Management.ADComputer' -as [Type]))
+        {
+            $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
+            Add-Type -Path $adModuleStub
+        }
+
         $mockComputerNamePresent = 'TEST01'
         $mockDomain = 'contoso.com'
         $mockComputerNameAbsent = 'MISSING01'
@@ -480,66 +490,135 @@ try
 
                 Context 'When a property is not in desired state' {
                     BeforeAll {
-                        # Mock a specific desired state.
-                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
-
-                        # One test case per property with a value that differs from the desired state.
-                        $testCases_Properties = @(
-                            @{
-                                ParameterName = 'Location'
-                                Value         = 'NewLocation'
-                            },
-                            @{
-                                ParameterName = 'DnsHostName'
-                                Value         = 'New@contoso.com'
-                            },
-                            @{
-                                ParameterName = 'ServicePrincipalNames'
-                                Value         = @('spn/new')
-                            },
-                            @{
-                                ParameterName = 'UserPrincipalName'
-                                Value         = 'New@contoso.com'
-                            },
-                            @{
-                                ParameterName = 'DisplayName'
-                                Value         = 'New'
-                            },
-                            @{
-                                ParameterName = 'Path'
-                                Value         = 'OU=New,CN=Computers,DC=contoso,DC=com'
-                            },
-                            @{
-                                ParameterName = 'Description'
-                                Value         = 'New description'
-                            },
-                            @{
-                                ParameterName = 'Manager'
-                                Value         = 'CN=NewManager,CN=Users,DC=contoso,DC=com'
-                            }
-                        )
+                    # Mock a specific desired state.
+                            Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
                     }
 
-                    It 'Should return $false when property <ParameterName> is not in desired state' -TestCases $testCases_Properties {
-                        param
-                        (
-                            [Parameter()]
-                            $ParameterName,
-
-                            [Parameter()]
-                            $Value
-                        )
-
-                        $testTargetResourceParameters = @{
-                            ComputerName   = $mockComputerNamePresent
-                            $ParameterName = $Value
-                            Verbose        = $true
+                    Context 'When a property should be set to a new non-empty value' {
+                        BeforeAll {
+                            # One test case per property with a value that differs from the desired state.
+                            $testCases_Properties = @(
+                                @{
+                                    ParameterName = 'Location'
+                                    Value         = 'NewLocation'
+                                },
+                                @{
+                                    ParameterName = 'DnsHostName'
+                                    Value         = 'New@contoso.com'
+                                },
+                                @{
+                                    ParameterName = 'ServicePrincipalNames'
+                                    Value         = @('spn/new')
+                                },
+                                @{
+                                    ParameterName = 'UserPrincipalName'
+                                    Value         = 'New@contoso.com'
+                                },
+                                @{
+                                    ParameterName = 'DisplayName'
+                                    Value         = 'New'
+                                },
+                                @{
+                                    ParameterName = 'Path'
+                                    Value         = 'OU=New,CN=Computers,DC=contoso,DC=com'
+                                },
+                                @{
+                                    ParameterName = 'Description'
+                                    Value         = 'New description'
+                                },
+                                @{
+                                    ParameterName = 'Manager'
+                                    Value         = 'CN=NewManager,CN=Users,DC=contoso,DC=com'
+                                }
+                            )
                         }
 
-                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                        $testTargetResourceResult | Should -BeFalse
+                        It 'Should return $false when non-empty property <ParameterName> is not in desired state' -TestCases $testCases_Properties {
+                            param
+                            (
+                                [Parameter()]
+                                $ParameterName,
 
-                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                [Parameter()]
+                                $Value
+                            )
+
+                            $testTargetResourceParameters = @{
+                                ComputerName   = $mockComputerNamePresent
+                                $ParameterName = $Value
+                            }
+
+                            $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
+                            $testTargetResourceResult | Should -BeFalse
+
+                            Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        }
+
+                    }
+
+                    Context 'When a property should be set to an empty value' {
+                        BeforeAll {
+                            $testCases_Properties = @(
+                                @{
+                                    ParameterName = 'Location'
+                                    Value         = ''
+                                },
+                                @{
+                                    ParameterName = 'DnsHostName'
+                                    Value         = ''
+                                },
+                                @{
+                                    ParameterName = 'ServicePrincipalNames'
+                                    Value         = ''
+                                },
+                                @{
+                                    ParameterName = 'ServicePrincipalNames'
+                                    Value         = @()
+                                },
+                                @{
+                                    ParameterName = 'UserPrincipalName'
+                                    Value         = ''
+                                },
+                                @{
+                                    ParameterName = 'DisplayName'
+                                    Value         = ''
+                                },
+                                @{
+                                    ParameterName = 'Path'
+                                    Value         = ''
+                                },
+                                @{
+                                    ParameterName = 'Description'
+                                    Value         = ''
+                                },
+                                @{
+                                    ParameterName = 'Manager'
+                                    Value         = ''
+                                }
+                            )
+                        }
+
+                        It 'Should return $false when empty property <ParameterName> is not in desired state' -TestCases $testCases_Properties {
+                            param
+                            (
+                                [Parameter()]
+                                $ParameterName,
+
+                                [Parameter()]
+                                $Value
+                            )
+
+                            $testTargetResourceParameters = @{
+                                ComputerName   = $mockComputerNamePresent
+                                $ParameterName = $Value
+                                Verbose        = $true
+                            }
+
+                            $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
+                            $testTargetResourceResult | Should -BeFalse
+
+                            Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        }
                     }
                 }
             }

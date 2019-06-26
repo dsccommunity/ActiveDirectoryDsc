@@ -258,7 +258,7 @@ function Set-TargetResource
             $installADDSDomainControllerParameters.Add('NoGlobalCatalog', $true)
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($InstallationMediaPath))
+        if (-not [System.String]::IsNullOrWhiteSpace($InstallationMediaPath))
         {
             $installADDSDomainControllerParameters.Add('InstallationMediaPath', $InstallationMediaPath)
         }
@@ -433,7 +433,7 @@ function Test-TargetResource
         $testTargetResourceReturnValue = $false
     }
 
-    ## Check Global Catalog Config
+    # Check Global Catalog Config
     if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and $existingResource.IsGlobalCatalog -ne $IsGlobalCatalog)
     {
         if ($IsGlobalCatalog)

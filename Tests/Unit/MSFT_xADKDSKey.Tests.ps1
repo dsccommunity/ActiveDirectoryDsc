@@ -49,8 +49,8 @@ try
                 $DeepCopyObject
             )
 
-            $memStream = New-Object IO.MemoryStream
-            $formatter = New-Object Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            $memStream = New-Object -TypeName 'IO.MemoryStream'
+            $formatter = New-Object -TypeName 'Runtime.Serialization.Formatters.Binary.BinaryFormatter'
             $formatter.Serialize($memStream,$DeepCopyObject)
             $memStream.Position = 0
             $formatter.Deserialize($memStream)
@@ -404,7 +404,7 @@ try
 
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParametersFuture
 
-                        $getTargetResourceResult.Ensure | Should Be 'Absent'
+                        $getTargetResourceResult.Ensure | Should -Be 'Absent'
 
                         Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
@@ -422,7 +422,7 @@ try
                         }
 
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParametersFuture
-                        $getTargetResourceResult.Ensure | Should Be 'Absent'
+                        $getTargetResourceResult.Ensure | Should -Be 'Absent'
 
                         Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
@@ -461,7 +461,8 @@ try
                 }
 
                 It "Should return identical information for <Parameter>" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -489,7 +490,7 @@ try
                 $compareTargetResourceResult = Compare-TargetResourceState @compareTargetResourceParametersFuture
                 $testCases = @()
                 # Need to remove parameters that will always be true
-                $compareTargetResourceResult = $compareTargetResourceResult | Where-Object {
+                $compareTargetResourceResult = $compareTargetResourceResult | Where-Object -FilterScript {
                     $_.Parameter -ne 'EffectiveTime' -and
                     $_.Parameter -ne 'DistinguishedName'
                 }
@@ -504,7 +505,8 @@ try
                 }
 
                 It "Should return false for <Parameter>" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -549,7 +551,7 @@ try
             Context -Name "When the system is in the desired state and 'Ensure' is 'Absent'" {
                 It "Should pass when 'Ensure' is set to 'Absent" {
                     $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
+                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
                     $objectEnsure.Actual = 'Absent'
                     $objectEnsure.Pass = $true
 
@@ -580,7 +582,7 @@ try
                 $testCases = @()
                 foreach($incorrectParameter in $testIncorrectParameters.GetEnumerator())
                 {
-                    $objectParameter = $mockKDSRootKeyFutureCompareNotCompliant | Where-Object { $_.Parameter -eq $incorrectParameter.Name }
+                    $objectParameter = $mockKDSRootKeyFutureCompareNotCompliant | Where-Object -FilterScript { $_.Parameter -eq $incorrectParameter.Name }
                     $objectParameter.Expected = $incorrectParameter.Value
                     $objectParameter.Pass = $false
 
@@ -592,7 +594,8 @@ try
                 }
 
                 It "Should return $false when <Parameter> is incorrect" -TestCases $testCases {
-                    param (
+                    param
+                    (
                         [Parameter()]
                         $Parameter,
 
@@ -606,7 +609,7 @@ try
                     }
 
                     $testTargetResourceParametersFuture[$Parameter] = $value
-                    Test-TargetResource @testTargetResourceParametersFuture | Should Be $false
+                    Test-TargetResource @testTargetResourceParametersFuture | Should -Be $false
 
                     Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
@@ -648,7 +651,7 @@ try
 
             Context -Name 'When the system is in the desired state and KDS Root Key is Absent' {
                 $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
+                $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
                 $objectEnsure.Expected = 'Absent'
                 $objectEnsure.Pass = $false
 
@@ -676,7 +679,7 @@ try
             Context -Name 'When the system is NOT in the desired state and need to remove KDS Root Key' {
                 BeforeEach {
                     $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
+                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
                     $objectEnsure.Actual = 'Present'
                     $objectEnsure.Pass = $false
 
@@ -768,7 +771,7 @@ try
             Context -Name 'When the system is NOT in the desired state and need to add KDS Root Key' {
                 BeforeEach {
                     $mockKDSRootKeyCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyCompareEnsureAbsent | Where-Object {$_.Parameter -eq 'Ensure'}
+                    $objectEnsure = $mockKDSRootKeyCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
                     $objectEnsure.Actual = 'Absent'
                     $objectEnsure.Pass = $false
 

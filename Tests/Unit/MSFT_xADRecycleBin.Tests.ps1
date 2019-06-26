@@ -114,23 +114,35 @@ try
                 Mock -CommandName Write-Error
 
                 It 'Should throw ADIdentityNotFoundException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException) }
-                    { Get-TargetResource @targetResourceParameters } | Should -Throw Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException)
+                    }
+                    $expectedError = $script:localizedData.ForestNotFound -f $ForestFQDN
+                    { Get-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw ADServerDownException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADServerDownException) }
-                    { Get-TargetResource @targetResourceParameters } | Should -Throw Microsoft.ActiveDirectory.Management.ADServerDownException
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADServerDownException)
+                    }
+                    $expectedError = $script:localizedData.ForestNotFound -f $ForestFQDN
+                    { Get-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw AuthenticationException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw (New-Object -TypeName System.Security.Authentication.AuthenticationException) }
-                    { Get-TargetResource @targetResourceParameters } | Should -Throw 'System error'
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw (New-Object -TypeName System.Security.Authentication.AuthenticationException)
+                    }
+                    $expectedError = $script:localizedData.CredentialError
+                    { Get-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw UnhandledException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw Unhandled.Exception }
-                    { Get-TargetResource @targetResourceParameters } | Should -Throw Unhandled.Exception
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw Unhandled.Exception
+                    }
+                    $expectedError = $script:localizedData.GetUnhandledException -f $ForestFQDN
+                    { Get-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
             }
         }
@@ -158,29 +170,41 @@ try
                 Mock -CommandName Write-Error
 
                 It 'Should throw ADIdentityNotFoundException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException) }
-                    { Test-TargetResource @targetResourceParameters } | Should -Throw Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException)
+                    }
+                    $expectedError = $script:localizedData.ForestNotFound -f $ForestFQDN
+                    { Test-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw ADServerDownException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADServerDownException) }
-                    { Test-TargetResource @targetResourceParameters } | Should -Throw Microsoft.ActiveDirectory.Management.ADServerDownException
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADServerDownException)
+                    }
+                    $expectedError = $script:localizedData.ForestNotFound -f $ForestFQDN
+                    { Test-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw AuthenticationException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw (New-Object -TypeName System.Security.Authentication.AuthenticationException) }
-                    { Test-TargetResource @targetResourceParameters } | Should -Throw 'System error'
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw (New-Object -TypeName System.Security.Authentication.AuthenticationException)
+                    }
+                    $expectedError = $script:localizedData.CredentialError
+                    { Test-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw UnhandledException' {
-                    Mock -CommandName Get-ADObject -MockWith { Throw Unhandled.Exception }
-                    { Test-TargetResource @targetResourceParameters } | Should -Throw Unhandled.Exception
+                    Mock -CommandName Get-ADObject -MockWith {
+                        throw Unhandled.Exception
+                    }
+                    $expectedError = $script:localizedData.TestUnhandledException -f $ForestFQDN
+                    { Test-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
             }
         }
 
         Describe 'MSFT_xADRecycleBin\Set-TargetResource' {
-            Mock -CommandName Enable-ADOptionalFeature -MockWith { }
+            Mock -CommandName Enable-ADOptionalFeature
 
             Context 'When minimum forest level is too low' {
                 Mock -CommandName Get-ADForest -MockWith { $mockADForestLevel3 }
@@ -210,23 +234,35 @@ try
                 Mock -CommandName Write-Error
 
                 It 'Should throw ADIdentityNotFoundException' {
-                    Mock -CommandName Get-ADForest -MockWith { Throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException) }
-                    { Set-TargetResource @targetResourceParameters } | Should -Throw Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                    Mock -CommandName Get-ADForest -MockWith {
+                        throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException)
+                    }
+                    $expectedError = $script:localizedData.ForestNotFound -f $ForestFQDN
+                    { Set-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw ADServerDownException' {
-                    Mock -CommandName Get-ADForest -MockWith { Throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADServerDownException) }
-                    { Set-TargetResource @targetResourceParameters } | Should -Throw Microsoft.ActiveDirectory.Management.ADServerDownException
+                    Mock -CommandName Get-ADForest -MockWith {
+                        throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADServerDownException)
+                    }
+                    $expectedError = $script:localizedData.ForestNotFound -f $ForestFQDN
+                    { Set-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw AuthenticationException' {
-                    Mock -CommandName Get-ADForest -MockWith { Throw (New-Object -TypeName System.Security.Authentication.AuthenticationException) }
-                    { Set-TargetResource @targetResourceParameters } | Should -Throw 'System error'
+                    Mock -CommandName Get-ADForest -MockWith {
+                        throw (New-Object -TypeName System.Security.Authentication.AuthenticationException)
+                    }
+                    $expectedError = $script:localizedData.CredentialError
+                    { Set-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
 
                 It 'Should throw UnhandledException' {
-                    Mock -CommandName Get-ADForest -MockWith { Throw Unhandled.Exception }
-                    { Set-TargetResource @targetResourceParameters } | Should -Throw Unhandled.Exception
+                    Mock -CommandName Get-ADForest -MockWith {
+                        throw Unhandled.Exception
+                    }
+                    $expectedError = $script:localizedData.SetUnhandledException -f $ForestFQDN
+                    { Set-TargetResource @targetResourceParameters } | Should -Throw $expectedError
                 }
             }
         }

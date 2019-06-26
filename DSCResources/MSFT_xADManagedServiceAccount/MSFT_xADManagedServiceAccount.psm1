@@ -43,7 +43,7 @@ function Get-TargetResource
         $ServiceAccountName,
 
         [Parameter()]
-        [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
+        [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
@@ -101,11 +101,11 @@ function Get-TargetResource
             'ObjectGUID'
         )
 
-        $targetResource['Ensure']            = 'Present'
-        $targetResource['Path']              = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
-        $targetResource['Description']       = $adServiceAccount.Description
-        $targetResource['DisplayName']       = $adServiceAccount.DisplayName
-        $targetResource['Enabled']           = [System.Boolean] $adServiceAccount.Enabled
+        $targetResource['Ensure'] = 'Present'
+        $targetResource['Path'] = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
+        $targetResource['Description'] = $adServiceAccount.Description
+        $targetResource['DisplayName'] = $adServiceAccount.DisplayName
+        $targetResource['Enabled'] = [System.Boolean] $adServiceAccount.Enabled
         $targetResource['DistinguishedName'] = $adServiceAccount.DistinguishedName
 
         if ( $adServiceAccount.ObjectClass -eq 'msDS-ManagedServiceAccount' )
@@ -115,10 +115,11 @@ function Get-TargetResource
         elseif ( $adServiceAccount.ObjectClass -eq 'msDS-GroupManagedServiceAccount' )
         {
             Write-Verbose -Message ($script:localizedData.RetrievingPrincipalMembers -f $MembershipAttribute)
-            $adServiceAccount.PrincipalsAllowedToRetrieveManagedPassword | ForEach-Object {
-                $member = (Get-ADObject -Identity $_ -Property $MembershipAttribute).$MembershipAttribute
-                $targetResource['Members'] += $member
-            }
+            $adServiceAccount.PrincipalsAllowedToRetrieveManagedPassword |
+                ForEach-Object {
+                    $member = (Get-ADObject -Identity $_ -Property $MembershipAttribute).$MembershipAttribute
+                    $targetResource['Members'] += $member
+                }
 
             $targetResource['AccountType'] = 'Group'
         }
@@ -133,6 +134,7 @@ function Get-TargetResource
         $errorMessage = $script:localizedData.RetrievingServiceAccountError -f $ServiceAccountName
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
+
     return $targetResource
 } #end function Get-TargetResource
 
@@ -187,7 +189,8 @@ function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -225,7 +228,7 @@ function Test-TargetResource
         $Members,
 
         [Parameter()]
-        [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
+        [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
@@ -242,20 +245,23 @@ function Test-TargetResource
     )
 
     # Need to set these parameters to compare if users are using the default parameter values
-    $PSBoundParameters['Ensure']              = $Ensure
-    $PSBoundParameters['AccountType']         = $AccountType
+    $PSBoundParameters['Ensure'] = $Ensure
+    $PSBoundParameters['AccountType'] = $AccountType
     $PSBoundParameters['MembershipAttribute'] = $MembershipAttribute
 
-    $compareTargetResourceNonCompliant = Compare-TargetResourceState @PSBoundParameters | Where-Object {$_.Pass -eq $false}
+    $compareTargetResourceNonCompliant = Compare-TargetResourceState @PSBoundParameters |
+        Where-Object -FilterScript { $_.Pass -eq $false }
 
     # Check if Absent, if so then we don't need to propagate any other parameters
     if ($Ensure -eq 'Absent')
     {
-        $ensureState = $compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'}
+        $ensureState = $compareTargetResourceNonCompliant |
+            Where-Object -FilterScript { $_.Parameter -eq 'Ensure' }
+
         if ($ensureState)
         {
             Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f `
-                            'Ensure', $ensureState.Expected, $ensureState.Actual)
+                    'Ensure', $ensureState.Expected, $ensureState.Actual)
         }
         else
         {
@@ -265,10 +271,11 @@ function Test-TargetResource
     }
     else
     {
-        $compareTargetResourceNonCompliant | ForEach-Object {
-            Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f `
-                $_.Parameter, $_.Expected, $_.Actual)
-        }
+        $compareTargetResourceNonCompliant |
+            ForEach-Object {
+                Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f `
+                        $_.Parameter, $_.Expected, $_.Actual)
+            }
     }
 
     if ($compareTargetResourceNonCompliant)
@@ -373,7 +380,7 @@ function Set-TargetResource
         $Members,
 
         [Parameter()]
-        [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
+        [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
@@ -390,12 +397,13 @@ function Set-TargetResource
     )
 
     # Need to set these to compare if not specified since user is using defaults
-    $PSBoundParameters['Ensure']              = $Ensure
-    $PSBoundParameters['AccountType']         = $AccountType
+    $PSBoundParameters['Ensure'] = $Ensure
+    $PSBoundParameters['AccountType'] = $AccountType
     $PSBoundParameters['MembershipAttribute'] = $MembershipAttribute
 
     $compareTargetResource = Compare-TargetResourceState @PSBoundParameters
-    $compareTargetResourceNonCompliant = @($compareTargetResource | Where-Object {$_.Pass -eq $false})
+    $compareTargetResourceNonCompliant = @($compareTargetResource |
+            Where-Object -FilterScript { $_.Pass -eq $false })
 
     $adServiceAccountParameters = Get-ADCommonParameters @PSBoundParameters
     $setServiceAccountParameters = $adServiceAccountParameters.Clone()
@@ -406,7 +414,9 @@ function Set-TargetResource
         if ($Ensure -eq 'Present')
         {
             $isEnsureNonCompliant = $false
-            if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
+
+            if ($compareTargetResourceNonCompliant |
+                    Where-Object -FilterScript { $_.Parameter -eq 'Ensure' })
             {
                 $isEnsureNonCompliant = $true
             }
@@ -420,7 +430,8 @@ function Set-TargetResource
             else
             {
                 #region Check if AccountType is compliant
-                $accountTypeState = $compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'AccountType'}
+                $accountTypeState = $compareTargetResourceNonCompliant |
+                    Where-Object -FilterScript { $_.Parameter -eq 'AccountType' }
 
                 # Account already exist, need to update parameters that are not in compliance
                 if ($accountTypeState)
@@ -438,13 +449,16 @@ function Set-TargetResource
                         Write-Warning -Message ($script:localizedData.AccountTypeForceNotTrue -f $accountTypeState.Actual, $accountTypeState.Expected)
                     }
                 }
+
                 # Remove AccountType since we don't want to enumerate down below
-                $compareTargetResourceNonCompliant =  @($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'AccountType'})
+                $compareTargetResourceNonCompliant = @($compareTargetResourceNonCompliant |
+                        Where-Object -FilterScript { $_.Parameter -ne 'AccountType' })
                 #endregion Check if AccountType is compliant
 
                 #region Check if Path is compliant
                 $isPathNonCompliant = $false
-                if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Path'})
+                if ($compareTargetResourceNonCompliant |
+                        Where-Object -FilterScript { $_.Parameter -eq 'Path' })
                 {
                     $isPathNonCompliant = $true
                 }
@@ -452,35 +466,41 @@ function Set-TargetResource
                 if ($isPathNonCompliant)
                 {
                     Write-Verbose -Message ($script:localizedData.MovingManagedServiceAccount -f $ServiceAccountName, $Path)
-                    $distinguishedNameObject = $compareTargetResource | Where-Object {$_.Parameter -eq 'DistinguishedName'}
+                    $distinguishedNameObject = $compareTargetResource |
+                        Where-Object -FilterScript { $_.Parameter -eq 'DistinguishedName' }
+
                     $moveADObjectParameters['Identity'] = $distinguishedNameObject.Actual
+
                     Move-ADObject @moveADObjectParameters -TargetPath $Path
                 }
-                $compareTargetResourceNonCompliant =  @($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -ne 'Path'})
+
+                $compareTargetResourceNonCompliant = @($compareTargetResourceNonCompliant |
+                        Where-Object -FilterScript { $_.Parameter -ne 'Path' })
                 #endregion Check if Path is compliant
 
                 #region Check if other parameters are compliant
                 $updateProperties = $false
-                $compareTargetResourceNonCompliant | ForEach-Object {
-                    $updateProperties = $true
-                    $parameter = $_.Parameter
-                    if ($parameter -eq 'Members' -and $AccountType -eq 'Group')
-                    {
-                        if ([system.string]::IsNullOrEmpty($Members))
+                $compareTargetResourceNonCompliant |
+                    ForEach-Object {
+                        $updateProperties = $true
+                        $parameter = $_.Parameter
+                        if ($parameter -eq 'Members' -and $AccountType -eq 'Group')
                         {
-                            $Members = @()
-                        }
-                        $listMembers = $Members -join ','
+                            if ([system.string]::IsNullOrEmpty($Members))
+                            {
+                                $Members = @()
+                            }
+                            $listMembers = $Members -join ','
 
-                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'Members', $listMembers)
-                        $setServiceAccountParameters['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
+                            Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f 'Members', $listMembers)
+                            $setServiceAccountParameters['PrincipalsAllowedToRetrieveManagedPassword'] = $Members
+                        }
+                        else
+                        {
+                            Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f $parameter, $PSBoundParameters.$parameter)
+                            $setServiceAccountParameters[$parameter] = $PSBoundParameters.$parameter
+                        }
                     }
-                    else
-                    {
-                        Write-Verbose -Message ($script:localizedData.UpdatingManagedServiceAccountProperty -f $parameter, $PSBoundParameters.$parameter)
-                        $setServiceAccountParameters[$parameter] = $PSBoundParameters.$parameter
-                    }
-                }
 
                 if ($compareTargetResourceNonCompliant.Count -gt 0)
                 {
@@ -492,7 +512,8 @@ function Set-TargetResource
         elseif ($Ensure -eq 'Absent')
         {
             $isEnsureNonCompliant = $false
-            if ($compareTargetResourceNonCompliant | Where-Object {$_.Parameter -eq 'Ensure'})
+            if ($compareTargetResourceNonCompliant |
+                    Where-Object -FilterScript { $_.Parameter -eq 'Ensure' })
             {
                 $isEnsureNonCompliant = $true
             }
@@ -596,7 +617,7 @@ function New-ADServiceAccountHelper
         $Members,
 
         [Parameter()]
-        [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
+        [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
         [System.String]
         $MembershipAttribute = 'SamAccountName',
 
@@ -651,7 +672,6 @@ function New-ADServiceAccountHelper
     }
 } #end function New-ADServiceAccountHelper
 
-
 <#
     .SYNOPSIS
         Compares the state of the managed service account.
@@ -702,7 +722,8 @@ function Compare-TargetResourceState
 {
     [CmdletBinding()]
     [OutputType([System.Array])]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -740,7 +761,7 @@ function Compare-TargetResourceState
         $Members,
 
         [Parameter()]
-        [ValidateSet('SamAccountName','DistinguishedName','SID','ObjectGUID')]
+        [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
         [System.String]
         $MembershipAttribute,
 
@@ -764,20 +785,25 @@ function Compare-TargetResourceState
         AccountTypeForce    = $AccountTypeForce
     }
 
-    @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if (-not $PSBoundParameters.ContainsKey($_))
-        {
-            $getTargetResourceParameters.Remove($_)
+    @($getTargetResourceParameters.Keys) |
+        ForEach-Object {
+            if (-not $PSBoundParameters.ContainsKey($_))
+            {
+                $getTargetResourceParameters.Remove($_)
+            }
         }
-    }
 
     $getTargetResource = Get-TargetResource @getTargetResourceParameters
     $compareTargetResource = @()
 
     # Add DistinguishedName as it won't be passed as an argument, but we want to get the DN in Set
     $PSBoundParameters['DistinguishedName'] = $getTargetResource['DistinguishedName']
-    # Set MembershipAttribute as it's not required to be compliant. It's only used when setting/getting members for gMSA
-    # and there is no way to check if it is in compliance since whatever is passed would be compliant itself
+
+    <#
+        Set MembershipAttribute as it's not required to be compliant. It's only
+        used when setting/getting members for gMSA and there is no way to check
+        if it is in compliance since whatever is passed would be compliant itself.
+    #>
     $PSBoundParameters['MembershipAttribute'] = $getTargetResource['MembershipAttribute']
 
     foreach ($parameter in $PSBoundParameters.Keys)
@@ -799,11 +825,14 @@ function Compare-TargetResourceState
             {
                 $testMembersParams = @{
                     ExistingMembers = $getTargetResource.Members -as [System.String[]]
-                    Members = $Members
+                    Members         = $Members
                 }
 
-                $expectedMembers = ($Members | Sort-Object) -join ','
-                $actualMembers   = ($testMembersParams['ExistingMembers'] | Sort-Object) -join ','
+                $expectedMembers = ($Members |
+                        Sort-Object) -join ','
+
+                $actualMembers = ($testMembersParams['ExistingMembers'] |
+                        Sort-Object) -join ','
 
                 if (-not (Test-Members @testMembersParams))
                 {
@@ -825,11 +854,14 @@ function Compare-TargetResourceState
                 }
             }
         }
+
         # Need to check if parameter is part of schema, otherwise ignore all other parameters like verbose
         elseif ($getTargetResource.ContainsKey($parameter))
         {
-            # We are out of compliance if we get here
-            # $PSBoundParameters.$parameter -ne $getTargetResource.$parameter
+            <#
+                We are out of compliance if we get here
+                $PSBoundParameters.$parameter -ne $getTargetResource.$parameter
+            #>
             $compareTargetResource += [pscustomobject] @{
                 Parameter = $parameter
                 Expected  = $PSBoundParameters.$parameter

@@ -12,7 +12,7 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 ## Documentation and Examples
 
-For a full list of resources in ActiveDirectoryCSDsc and examples on their use, check
+For a full list of resources in xActiveDirectory and examples on their use, check
 out the [xActiveDirectory wiki](https://github.com/PowerShell/xActiveDirectory/wiki).
 
 ## Branches

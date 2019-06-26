@@ -190,9 +190,10 @@ function Get-TargetResource
             written with Set-ADComputer the property name must be
             'ServicePrincipalName'. This difference is handled here.
         #>
-        $computerObjectProperties = @($computerObjectProperties | Where-Object -FilterScript {
-                $_ -ne 'ServicePrincipalName'
-            })
+        $computerObjectProperties = @($computerObjectProperties |
+                Where-Object -FilterScript {
+                    $_ -ne 'ServicePrincipalName'
+                })
 
         $computerObjectProperties += @('ServicePrincipalNames')
 
@@ -413,12 +414,13 @@ function Test-TargetResource
     }
 
     # Need the @() around this to get a new array to enumerate.
-    @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if (-not $PSBoundParameters.ContainsKey($_))
-        {
-            $getTargetResourceParameters.Remove($_)
+    @($getTargetResourceParameters.Keys) |
+        ForEach-Object {
+            if (-not $PSBoundParameters.ContainsKey($_))
+            {
+                $getTargetResourceParameters.Remove($_)
+            }
         }
-    }
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
@@ -478,7 +480,7 @@ function Test-TargetResource
             if ($PSBoundParameters.ContainsKey('ServicePrincipalNames'))
             {
                 $testServicePrincipalNamesParameters = @{
-                    ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames -as [System.String[]]
+                    ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames
                     ServicePrincipalNames         = $ServicePrincipalNames
                 }
 
@@ -668,12 +670,13 @@ function Set-TargetResource
     }
 
     # Need the @() around this to get a new array to enumerate.
-    @($getTargetResourceParameters.Keys) | ForEach-Object {
-        if (-not $PSBoundParameters.ContainsKey($_))
-        {
-            $getTargetResourceParameters.Remove($_)
+    @($getTargetResourceParameters.Keys) |
+        ForEach-Object {
+            if (-not $PSBoundParameters.ContainsKey($_))
+            {
+                $getTargetResourceParameters.Remove($_)
+            }
         }
-    }
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
@@ -842,7 +845,7 @@ function Set-TargetResource
         if ($PSBoundParameters.ContainsKey('ServicePrincipalNames'))
         {
             $testServicePrincipalNamesParameters = @{
-                ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames -as [System.String[]]
+                ExistingServicePrincipalNames = $getTargetResourceResult.ServicePrincipalNames
                 ServicePrincipalNames         = $ServicePrincipalNames
             }
 
@@ -880,15 +883,17 @@ function Set-TargetResource
         $removeComputerProperties = @{ }
 
         # Get all properties, other than Path, that is not in desired state.
-        $propertiesNotInDesiredState = $compareTargetResourceStateResult | Where-Object -FilterScript {
-            $_.ParameterName -ne 'Path' -and -not $_.InDesiredState
-        }
+        $propertiesNotInDesiredState = $compareTargetResourceStateResult |
+            Where-Object -FilterScript {
+                $_.ParameterName -ne 'Path' -and -not $_.InDesiredState
+            }
 
         foreach ($property in $propertiesNotInDesiredState)
         {
-            $computerAccountPropertyName = ($script:computerObjectPropertyMap | Where-Object -FilterScript {
-                    $_.ParameterName -eq $property.ParameterName
-                }).PropertyName
+            $computerAccountPropertyName = ($script:computerObjectPropertyMap |
+                    Where-Object -FilterScript {
+                        $_.ParameterName -eq $property.ParameterName
+                    }).PropertyName
 
             if (-not $computerAccountPropertyName)
             {
@@ -946,32 +951,9 @@ function Set-TargetResource
         $removeADComputerParameters = Get-ADCommonParameters @PSBoundParameters
         $removeADComputerParameters['Confirm'] = $false
 
-        Remove-ADComputer @removeADComputerParameters | Out-Null
+        Remove-ADComputer @removeADComputerParameters |
+            Out-Null
     }
-}
-
-<#
-    .SYNOPSIS
-        This is a wrapper for Set-ADComputer.
-
-    .PARAMETER Parameters
-        A hash table containing all parameters that will be passed trough to
-        Set-ADComputer.
-
-    .NOTES
-        This is needed because of how Pester is unable to handle mocking the
-        cmdlet Set-ADComputer.
-#>
-function Set-DscADComputer
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Collections.Hashtable]
-        $Parameters
-    )
-
-    Set-ADComputer @Parameters | Out-Null
 }
 
 <#
@@ -998,6 +980,7 @@ function Test-ServicePrincipalNames
 
         [Parameter(Mandatory = $true)]
         [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [System.String[]]
         $ServicePrincipalNames
 

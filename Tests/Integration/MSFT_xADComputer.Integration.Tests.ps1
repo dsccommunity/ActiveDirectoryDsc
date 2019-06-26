@@ -1,7 +1,3 @@
-# Make sure this is run in the correct order.
-[Microsoft.DscResourceKit.IntegrationTest(OrderNumber = 2)]
-param ()
-
 if ($env:APPVEYOR -eq $true)
 {
     Write-Warning -Message 'Integration test is not supported in AppVeyor.'
@@ -14,7 +10,7 @@ $script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
 
 #region HEADER
 # Integration Test Template Version: 1.3.3
-[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+[System.String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {

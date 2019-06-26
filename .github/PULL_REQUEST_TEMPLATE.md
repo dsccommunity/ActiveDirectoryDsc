@@ -36,8 +36,8 @@
 -->
 - [ ] Added an entry under the Unreleased section in the CHANGELOG.md.
       Entry should say what was changed, and how that affects users (if applicable).
-- [ ] Resource documentation added/updated in README.md.
-- [ ] Resource parameter descriptions added/updated in README.md, schema.mof
+- [ ] Resource documentation added/updated in resource directory README.md.
+- [ ] Resource parameter descriptions added/updated in schema.mof
       and comment-based help.
 - [ ] Comment-based help added/updated.
 - [ ] Localization strings added/updated in all localization files as appropriate.

@@ -53,7 +53,7 @@ try
             SamAccountName        = $testPresentParams.UserName
             Surname               = ''
             UserPrincipalName     = ''
-            ServicePrincipalNames = @('spn/a', 'spn/b')
+            ServicePrincipalName  = @('spn/a', 'spn/b')
         }
 
         $testDomainController = 'TESTDC'
@@ -63,10 +63,14 @@ try
             'UserPrincipalName', 'DisplayName', 'Path', 'GivenName', 'Initials', 'Surname', 'Description', 'StreetAddress',
             'POBox', 'City', 'State', 'PostalCode', 'Country', 'Department', 'Division', 'Company', 'Office', 'JobTitle',
             'EmailAddress', 'EmployeeID', 'EmployeeNumber', 'HomeDirectory', 'HomeDrive', 'HomePage', 'ProfilePath',
-            'LogonScript', 'Notes', 'OfficePhone', 'MobilePhone', 'Fax', 'Pager', 'IPPhone', 'HomePhone', 'CommonName'
+            'LogonScript', 'Notes', 'OfficePhone', 'MobilePhone', 'Fax', 'Pager', 'IPPhone', 'HomePhone', 'CommonName',
+            'Manager', 'LogonWorkstations', 'Organization', 'OtherName'
         )
-        $testBooleanProperties = @('PasswordNeverExpires', 'CannotChangePassword', 'TrustedForDelegation', 'Enabled');
-        $testArrayProperties = @('ServicePrincipalNames')
+        $testBooleanProperties = @(
+            'PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled','AccountNotDelegated',
+            'AllowReversiblePasswordEncryption', 'CompoundIdentitySupported', 'PasswordNotRequired', 'SmartcardLogonRequired'
+        )
+        $testArrayProperties = @('ServicePrincipalNames', 'ProxyAddresses')
 
         #region Function Get-TargetResource
         Describe 'xADUser\Get-TargetResource' {
@@ -75,7 +79,7 @@ try
 
                 $adUser = Get-TargetResource @testPresentParams
 
-                $adUser -is [System.Collections.Hashtable] | Should Be $true
+                $adUser -is [System.Collections.Hashtable] | Should -Be $true
             }
 
             It "Returns 'Ensure' is 'Present' when user account exists" {
@@ -83,7 +87,7 @@ try
 
                 $adUser = Get-TargetResource @testPresentParams
 
-                $adUser.Ensure | Should Be 'Present'
+                $adUser.Ensure | Should -Be 'Present'
             }
 
             It "Returns 'Ensure' is 'Absent' when user account does not exist" {
@@ -91,7 +95,14 @@ try
 
                 $adUser = Get-TargetResource @testPresentParams
 
-                $adUser.Ensure | Should Be 'Absent'
+                $adUser.Ensure | Should -Be 'Absent'
+            }
+
+            It "Should throw the correct exception when Get-ADUser returns an unknown error" {
+                Mock -CommandName Get-ADUser -MockWith { throw }
+
+                $expectedError = $script:localizedData.RetrievingADUserError -f $testPresentParams.UserName, $testPresentParams.DomainName
+                { Get-TargetResource @testPresentParams } | Should -Throw $expectedError
             }
 
             It "Calls 'Get-ADUser' with 'Server' parameter when 'DomainController' specified" {
@@ -109,11 +120,33 @@ try
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
-            It "Should return correct ServicePrincipalNames" {
+            It "Should return the correct value for an Array property" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
-                $adUser = Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential
-                $adUser.ServicePrincipalNames | Should -Be $fakeADUser.ServicePrincipalNames
+                $adUser = Get-TargetResource @testPresentParams -ServicePrincipalNames '' -Verbose
+                $adUser.ServicePrincipalNames | Should -Be $fakeADUser.ServicePrincipalName
+            }
+
+            It "Should return the correct value of 'ChangePassswordAtLogon' if it is true" {
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser['pwdLastSet'] = 0
+                $mockPresentParams = $testPresentParams.Clone()
+                $mockPresentParams['ChangePasswordAtLogon'] = $true
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
+
+                $adUser = Get-TargetResource @mockPresentParams
+                $adUser.ChangePasswordAtLogon | Should -Be $true
+            }
+
+            It "Should return the correct value of 'ChangePassswordAtLogon' if it is false" {
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser['pwdLastSet'] = 12345678
+                $mockPresentParams = $testPresentParams.Clone()
+                $mockPresentParams['ChangePasswordAtLogon'] = $true
+                Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
+
+                $adUser = Get-TargetResource @mockPresentParams
+                $adUser.ChangePasswordAtLogon | Should -Be $false
             }
         }
         #endregion
@@ -123,46 +156,46 @@ try
             It "Passes when user account does not exist and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
-                Test-TargetResource @testAbsentParams | Should Be $true
+                Test-TargetResource @testAbsentParams | Should -Be $true
             }
 
             It "Passes when user account exists and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-                Test-TargetResource @testPresentParams | Should Be $true
+                Test-TargetResource @testPresentParams | Should -Be $true
             }
 
             It "Passes when user account password matches, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $true }
 
-                Test-TargetResource @testPresentParams -Password $testCredential | Should Be $true
+                Test-TargetResource @testPresentParams -Password $testCredential | Should -Be $true
             }
 
             It "Passes when user account password does not match, 'Password' is specified and 'PasswordNeverResets' is True" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $false }
 
-                Test-TargetResource @testPresentParams -Password $testCredential -PasswordNeverResets $true | Should Be $true
+                Test-TargetResource @testPresentParams -Password $testCredential -PasswordNeverResets $true | Should -Be $true
             }
 
             It "Fails when user account does not exist and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
-                Test-TargetResource @testPresentParams | Should Be $false
+                Test-TargetResource @testPresentParams | Should -Be $false
             }
 
             It "Fails when user account exists, and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-                Test-TargetResource @testAbsentParams | Should Be $false
+                Test-TargetResource @testAbsentParams | Should -Be $false
             }
 
             It "Fails when user account password is incorrect, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $false }
 
-                Test-TargetResource @testPresentParams -Password $testCredential | Should Be $false
+                Test-TargetResource @testPresentParams -Password $testCredential | Should -Be $false
             }
 
             It "Calls 'Test-Password' with 'Default' PasswordAuthentication by default" {
@@ -196,7 +229,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
 
                 It "Fails when user account '$testParameter' does not match incorrect AD account property value" {
@@ -210,7 +243,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
                 It "Fails when user account '$testParameter' does not match empty AD account property value" {
@@ -224,7 +257,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
                 It "Fails when user account '$testParameter' does not match null AD account property value" {
@@ -238,7 +271,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
                 It "Passes when empty user account '$testParameter' matches empty AD account property" {
@@ -250,7 +283,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
 
                 It "Passes when empty user account '$testParameter' matches null AD account property" {
@@ -262,39 +295,63 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
 
             } #end foreach test string property
 
             foreach ($testParameter in $testBooleanProperties)
             {
-                It "Passes when user account '$testParameter' matches AD account property" {
+                It "Should Pass when user account '$testParameter' is true and matches AD account property" {
                     $testParameterValue = $true
                     $testValidPresentParams = $testPresentParams.Clone()
                     $testValidPresentParams[$testParameter] = $testParameterValue
                     $validADUser = $testPresentParams.Clone()
-                    $invalidADUser = $testPresentParams.Clone()
                     Mock -CommandName Get-TargetResource -MockWith {
                         $validADUser[$testParameter] = $testParameterValue
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
 
-                It "Fails when user account '$testParameter' does not match AD account property value" {
+                It "Should fail when user account '$testParameter' is true and does not match AD account property value" {
                     $testParameterValue = $true
                     $testValidPresentParams = $testPresentParams.Clone()
                     $testValidPresentParams[$testParameter] = $testParameterValue
-                    $validADUser = $testPresentParams.Clone()
                     $invalidADUser = $testPresentParams.Clone()
                     Mock -CommandName Get-TargetResource -MockWith {
                         $invalidADUser[$testParameter] = -not $testParameterValue
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                }
+
+                It "Should pass when user account '$testParameter' is false matches AD account property" {
+                    $testParameterValue = $false
+                    $testValidPresentParams = $testPresentParams.Clone()
+                    $testValidPresentParams[$testParameter] = $testParameterValue
+                    $validADUser = $testPresentParams.Clone()
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $validADUser[$testParameter] = $testParameterValue
+                        return $validADUser
+                    }
+
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                }
+
+                It "Should fail when user account '$testParameter' is false and does not match AD account property value" {
+                    $testParameterValue = $false
+                    $testValidPresentParams = $testPresentParams.Clone()
+                    $testValidPresentParams[$testParameter] = $testParameterValue
+                    $invalidADUser = $testPresentParams.Clone()
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $invalidADUser[$testParameter] = -not $testParameterValue
+                        return $invalidADUser
+                    }
+
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
             } #end foreach test boolean property
@@ -310,7 +367,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
 
                 It "Passes when user account '$testParameter' matches single AD account property" {
@@ -323,7 +380,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
                 It "Passes when user account '$testParameter' matches multiple AD account property" {
                     $testParameterValue = @('Entry1', 'Entry2')
@@ -335,7 +392,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $true
+                    Test-TargetResource @testValidPresentParams | Should -Be $true
                 }
                 It "Fails when user account '$testParameter' does not match AD account property count" {
                     $testParameterValue = @('Entry1', 'Entry2')
@@ -347,7 +404,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
                 It "Fails when user account '$testParameter' does not match AD account property name" {
@@ -360,7 +417,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
                 It "Fails when user account '$testParameter' does not match empty AD account property" {
@@ -373,7 +430,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
                 It "Fails when empty user account '$testParameter' does not match AD account property" {
@@ -386,7 +443,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should Be $false
+                    Test-TargetResource @testValidPresentParams | Should -Be $false
                 }
 
             }#end foreach test array property
@@ -440,6 +497,7 @@ try
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
                 Mock -CommandName Set-ADUser
                 Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password }
+                Mock -CommandName Test-Password -MockWith { $false }
 
                 Set-TargetResource @testPresentParams -Password $testCredential
 
@@ -456,7 +514,29 @@ try
                 Assert-MockCalled -CommandName Set-ADAccountPassword -Scope It -Times 0
             }
 
-            It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is null" {
+            It "Does not call 'Set-ADAccountPassword' when 'Password' parameter is specified and is in the desired state" {
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
+                Mock -CommandName Set-ADUser
+                Mock -CommandName Set-ADAccountPassword
+                Mock -CommandName Test-Password -MockWith { $true }
+
+                Set-TargetResource @testPresentParams -Password $testCredential
+
+                Assert-MockCalled -CommandName Set-ADAccountPassword -Scope It -Times 0
+            }
+
+            It "Calls 'Test-Password' with the correct parameters when 'DomainAdministratorCredential' is specified" {
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
+                Mock -CommandName Set-ADUser
+                Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password }
+                Mock -CommandName Test-Password -ParameterFilter { $DomainAdministratorCredential -eq $testCredential } -MockWith { $true }
+
+                Set-TargetResource @testPresentParams -Password $testCredential -DomainAdministratorCredential $testCredential
+
+                Assert-MockCalled -CommandName Test-Password -ParameterFilter { $DomainAdministratorCredential -eq $testCredential } -Scope It -Exactly 1
+            }
+
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {
                 $testADPropertyName = 'Description'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
@@ -470,7 +550,7 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Replace' when existing matching AD property is empty" {
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD property is empty" {
                 $testADPropertyName = 'Description'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
@@ -484,18 +564,18 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Remove' when new matching AD property is empty" {
+            It "Should call 'Set-ADUser' with 'Clear' when new mismatched AD property is empty" {
                 $testADPropertyName = 'Description'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
                     $duffADUser[$testADPropertyName] = 'Incorrect parameter value'
                     return $duffADUser
                 }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Clear -eq $testADPropertyName }
 
                 Set-TargetResource @testPresentParams -Description ''
 
-                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Clear -eq $testADPropertyName } -Scope It -Exactly 1
             }
 
             It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {
@@ -512,11 +592,11 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Replace' when existing mismatched AD property is empty" {
+            It "Should call 'Set-ADUser' with 'Replace' when new mismatched AD property is not empty" {
                 $testADPropertyName = 'Title'
                 Mock -CommandName Get-ADUser -MockWith {
                     $duffADUser = $fakeADUser.Clone()
-                    $duffADUser[$testADPropertyName] = ''
+                    $duffADUser[$testADPropertyName] = 'Incorrect job title'
                     return $duffADUser
                 }
                 Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) }
@@ -526,21 +606,41 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
             }
 
-            It "Calls 'Set-ADUser' with 'Remove' when new mismatched AD property is empty" {
-                $testADPropertyName = 'Title'
-                Mock -CommandName Get-ADUser -MockWith {
-                    $duffADUser = $fakeADUser.Clone()
-                    $duffADUser[$testADPropertyName] = 'Incorrect job title'
-                    return $duffADUser
-                }
-                Mock -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) }
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD array property is empty" {
+                $mockSPNs = @('spn/a', 'spn/b')
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser['ServicePrincipalName'] = ''
 
-                Set-TargetResource @testPresentParams -JobTitle ''
+                Mock -CommandName Get-ADUser -MockWith { return $mockADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
 
-                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Remove.ContainsKey($testADPropertyName) } -Scope It -Exactly 1
+                Set-TargetResource @testPresentParams -ServicePrincipalNames $mockSPNs
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } -Scope It -Exactly 1
             }
-            It "Calls 'Set-ADUser' with 'ServicePrincipalNames' when specified" {
-                $testSPNs = @('spn/a', 'spn/b')
+
+            It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD array property is not empty" {
+                $testSPNs = @('spn/c', 'spn/d')
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
+
+                Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') } -Scope It -Exactly 1
+            }
+
+            It "Should call 'Set-ADUser' with 'Clear' when new mismatched AD array property is empty" {
+                $testSPNs = ''
+                Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $Clear -eq 'ServicePrincipalName' }
+
+                Set-TargetResource @testPresentParams -ServicePrincipalNames $testSPNs
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $Clear -eq 'ServicePrincipalName' } -Scope It -Exactly 1
+            }
+
+            It "Should call 'Set-ADUser' with 'Replace' when new mismatched AD array property is not empty" {
+                $testSPNs = @('spn/c', 'spn/d')
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
                 Mock -CommandName Set-ADUser -ParameterFilter { $Replace.ContainsKey('ServicePrincipalName') }
 
@@ -556,6 +656,36 @@ try
                 Set-TargetResource @testAbsentParams
 
                 Assert-MockCalled -CommandName Remove-ADUser -ParameterFilter { $Identity.ToString() -eq $testAbsentParams.UserName } -Scope It
+            }
+
+            It "Should call 'Set-ADUser' with the correct parameter when new AD boolean property is true and old property is false" {
+                $mockBoolParam = 'CannotChangePassword'
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser[$mockBoolParam] = $false
+                Mock -CommandName Get-ADUser -MockWith { return $mockADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
+
+                $mockSetTargetResourceParams = @{
+                    $mockBoolParam = $true
+                }
+                Set-TargetResource @testPresentParams @mockSetTargetResourceParams
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam } -Scope It -Exactly 1
+            }
+
+            It "Should call 'Set-ADUser' with the correct parameter when new AD boolean property is false and old property is true" {
+                $mockBoolParam = 'CannotChangePassword'
+                $mockADUser = $fakeADUser.Clone()
+                $mockADUser[$mockBoolParam] = $true
+                Mock -CommandName Get-ADUser -MockWith { return $mockADUser }
+                Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
+
+                $mockSetTargetResourceParams = @{
+                    $mockBoolParam = $false
+                }
+                Set-TargetResource @testPresentParams @mockSetTargetResourceParams
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam } -Scope It -Exactly 1
             }
 
             Context 'When RestoreFromRecycleBin is used' {
@@ -634,15 +764,20 @@ try
         #region Function Assert-TargetResource
         Describe 'xADUser\Assert-Parameters' {
             It "Does not throw when 'PasswordNeverExpires' and 'CannotChangePassword' are specified" {
-                { Assert-Parameters -PasswordNeverExpires $true -CannotChangePassword $true } | Should Not Throw
+                { Assert-Parameters -PasswordNeverExpires $true -CannotChangePassword $true } | Should -Not -Throw
             }
 
             It "Throws when account is disabled and 'Password' is specified" {
-                { Assert-Parameters -Password $testCredential -Enabled $false } | Should Throw
+                { Assert-Parameters -Password $testCredential -Enabled $false } | Should -Throw
             }
 
             It "Does not throw when 'TrustedForDelegation' is specified" {
-                { Assert-Parameters -TrustedForDelegation $true } | Should Not Throw
+                { Assert-Parameters -TrustedForDelegation $true } | Should -Not -Throw
+            }
+
+            It "Should throw the correct error when 'PasswordNeverExpires' and 'ChangePasswordAtLogon' are specified" {
+                { Assert-Parameters -PasswordNeverExpires $true -ChangePasswordAtLogon $true } | `
+                    Should -Throw $script:localizedData.ChangePasswordParameterConflictError
             }
         }
         #endregion

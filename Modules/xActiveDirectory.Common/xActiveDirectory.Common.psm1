@@ -298,124 +298,126 @@ function Test-DscParameterState
         $keyList = $ValuesToCheck
     }
 
-    $keyList | ForEach-Object -Process {
-        if (($_ -ne 'Verbose'))
-        {
-            if (($CurrentValues.ContainsKey($_) -eq $false) `
-                    -or ($CurrentValues.$_ -ne $DesiredValues.$_) `
-                    -or (($DesiredValues.GetType().Name -ne 'CimInstance' -and $DesiredValues.ContainsKey($_) -eq $true) -and ($null -ne $DesiredValues.$_ -and $DesiredValues.$_.GetType().IsArray)))
+    $keyList |
+        ForEach-Object -Process {
+            if (($_ -ne 'Verbose'))
             {
-                if ($DesiredValues.GetType().Name -eq 'HashTable' -or `
-                        $DesiredValues.GetType().Name -eq 'PSBoundParametersDictionary')
+                if (($CurrentValues.ContainsKey($_) -eq $false) `
+                        -or ($CurrentValues.$_ -ne $DesiredValues.$_) `
+                        -or (($DesiredValues.GetType().Name -ne 'CimInstance' -and $DesiredValues.ContainsKey($_) -eq $true) -and ($null -ne $DesiredValues.$_ -and $DesiredValues.$_.GetType().IsArray)))
                 {
-                    $checkDesiredValue = $DesiredValues.ContainsKey($_)
-                }
-                else
-                {
-                    # If DesiredValue is a CimInstance.
-                    $checkDesiredValue = $false
-                    if (([System.Boolean]($DesiredValues.PSObject.Properties.Name -contains $_)) -eq $true)
+                    if ($DesiredValues.GetType().Name -eq 'HashTable' -or `
+                            $DesiredValues.GetType().Name -eq 'PSBoundParametersDictionary')
                     {
-                        if ($null -ne $DesiredValues.$_)
-                        {
-                            $checkDesiredValue = $true
-                        }
-                    }
-                }
-
-                if ($checkDesiredValue)
-                {
-                    $desiredType = $DesiredValues.$_.GetType()
-                    $fieldName = $_
-                    if ($desiredType.IsArray -eq $true)
-                    {
-                        if (($CurrentValues.ContainsKey($fieldName) -eq $false) `
-                                -or ($null -eq $CurrentValues.$fieldName))
-                        {
-                            Write-Verbose -Message ($script:localizedData.PropertyValidationError -f $fieldName) -Verbose
-
-                            $returnValue = $false
-                        }
-                        else
-                        {
-                            $arrayCompare = Compare-Object -ReferenceObject $CurrentValues.$fieldName `
-                                -DifferenceObject $DesiredValues.$fieldName
-                            if ($null -ne $arrayCompare)
-                            {
-                                Write-Verbose -Message ($script:localizedData.PropertiesDoesNotMatch -f $fieldName) -Verbose
-
-                                $arrayCompare | ForEach-Object -Process {
-                                    Write-Verbose -Message ($script:localizedData.PropertyThatDoesNotMatch -f $_.InputObject, $_.SideIndicator) -Verbose
-                                }
-
-                                $returnValue = $false
-                            }
-                        }
+                        $checkDesiredValue = $DesiredValues.ContainsKey($_)
                     }
                     else
                     {
-                        switch ($desiredType.Name)
+                        # If DesiredValue is a CimInstance.
+                        $checkDesiredValue = $false
+                        if (([System.Boolean]($DesiredValues.PSObject.Properties.Name -contains $_)) -eq $true)
                         {
-                            'String'
+                            if ($null -ne $DesiredValues.$_)
                             {
-                                if (-not [System.String]::IsNullOrEmpty($CurrentValues.$fieldName) -or `
-                                        -not [System.String]::IsNullOrEmpty($DesiredValues.$fieldName))
-                                {
-                                    Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
-                                            -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
-
-                                    $returnValue = $false
-                                }
+                                $checkDesiredValue = $true
                             }
+                        }
+                    }
 
-                            'Int32'
+                    if ($checkDesiredValue)
+                    {
+                        $desiredType = $DesiredValues.$_.GetType()
+                        $fieldName = $_
+                        if ($desiredType.IsArray -eq $true)
+                        {
+                            if (($CurrentValues.ContainsKey($fieldName) -eq $false) `
+                                    -or ($null -eq $CurrentValues.$fieldName))
                             {
-                                if (-not ($DesiredValues.$fieldName -eq 0) -or `
-                                        -not ($null -eq $CurrentValues.$fieldName))
-                                {
-                                    Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
-                                            -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
-
-                                    $returnValue = $false
-                                }
-                            }
-
-                            { $_ -eq 'Int16' -or $_ -eq 'UInt16' -or $_ -eq 'Single' }
-                            {
-                                if (-not ($DesiredValues.$fieldName -eq 0) -or `
-                                        -not ($null -eq $CurrentValues.$fieldName))
-                                {
-                                    Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
-                                            -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
-
-                                    $returnValue = $false
-                                }
-                            }
-
-                            'Boolean'
-                            {
-                                if ($CurrentValues.$fieldName -ne $DesiredValues.$fieldName)
-                                {
-                                    Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
-                                            -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
-
-                                    $returnValue = $false
-                                }
-                            }
-
-                            default
-                            {
-                                Write-Warning -Message ($script:localizedData.UnableToCompareProperty `
-                                        -f $fieldName, $desiredType.Name)
+                                Write-Verbose -Message ($script:localizedData.PropertyValidationError -f $fieldName) -Verbose
 
                                 $returnValue = $false
+                            }
+                            else
+                            {
+                                $arrayCompare = Compare-Object -ReferenceObject $CurrentValues.$fieldName `
+                                    -DifferenceObject $DesiredValues.$fieldName
+                                if ($null -ne $arrayCompare)
+                                {
+                                    Write-Verbose -Message ($script:localizedData.PropertiesDoesNotMatch -f $fieldName) -Verbose
+
+                                    $arrayCompare |
+                                        ForEach-Object -Process {
+                                            Write-Verbose -Message ($script:localizedData.PropertyThatDoesNotMatch -f $_.InputObject, $_.SideIndicator) -Verbose
+                                        }
+
+                                    $returnValue = $false
+                                }
+                            }
+                        }
+                        else
+                        {
+                            switch ($desiredType.Name)
+                            {
+                                'String'
+                                {
+                                    if (-not [System.String]::IsNullOrEmpty($CurrentValues.$fieldName) -or `
+                                            -not [System.String]::IsNullOrEmpty($DesiredValues.$fieldName))
+                                    {
+                                        Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
+                                                -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
+
+                                        $returnValue = $false
+                                    }
+                                }
+
+                                'Int32'
+                                {
+                                    if (-not ($DesiredValues.$fieldName -eq 0) -or `
+                                            -not ($null -eq $CurrentValues.$fieldName))
+                                    {
+                                        Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
+                                                -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
+
+                                        $returnValue = $false
+                                    }
+                                }
+
+                                { $_ -eq 'Int16' -or $_ -eq 'UInt16' -or $_ -eq 'Single' }
+                                {
+                                    if (-not ($DesiredValues.$fieldName -eq 0) -or `
+                                            -not ($null -eq $CurrentValues.$fieldName))
+                                    {
+                                        Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
+                                                -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
+
+                                        $returnValue = $false
+                                    }
+                                }
+
+                                'Boolean'
+                                {
+                                    if ($CurrentValues.$fieldName -ne $DesiredValues.$fieldName)
+                                    {
+                                        Write-Verbose -Message ($script:localizedData.ValueOfTypeDoesNotMatch `
+                                                -f $desiredType.Name, $fieldName, $($CurrentValues.$fieldName), $($DesiredValues.$fieldName)) -Verbose
+
+                                        $returnValue = $false
+                                    }
+                                }
+
+                                default
+                                {
+                                    Write-Warning -Message ($script:localizedData.UnableToCompareProperty `
+                                            -f $fieldName, $desiredType.Name)
+
+                                    $returnValue = $false
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 
     return $returnValue
 }
@@ -452,7 +454,7 @@ function Start-ProcessWithTimeout
     )
 
     $startProcessParameters = @{
-        FilePath = $FilePath
+        FilePath     = $FilePath
         ArgumentList = $ArgumentList
         PassThru     = $true
         NoNewWindow  = $true
@@ -480,7 +482,7 @@ function Assert-Module
         $ModuleName = 'ActiveDirectory',
 
         [Parameter()]
-        [switch]
+        [System.Management.Automation.SwitchParameter]
         $ImportModule
     )
 
@@ -667,7 +669,7 @@ function Assert-MemberParameters
 
 } #end function Assert-MemberParameters
 
-## Internal function to remove duplicate strings (members) from a string array
+# Internal function to remove duplicate strings (members) from a string array
 function Remove-DuplicateMembers
 {
     [CmdletBinding()]
@@ -703,7 +705,7 @@ function Remove-DuplicateMembers
     }
 
     # Create the output array.
-    $destination = New-Object -TypeName System.String[] -ArgumentList $destIndex
+    $destination = New-Object -TypeName 'System.String[]' -ArgumentList $destIndex
 
     # Copy only distinct elements from the original array to the destination array.
     [System.Array]::Copy($Members, $destination, $destIndex)
@@ -720,25 +722,25 @@ function Test-Members
     [OutputType([System.Boolean])]
     param
     (
-        ## Existing array members
+        # Existing array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
         $ExistingMembers,
 
-        ## Explicit array members
+        # Explicit array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
         $Members,
 
-        ## Compulsory array members
+        # Compulsory array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
         $MembersToInclude,
 
-        ## Excluded array members
+        # Excluded array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
@@ -996,7 +998,7 @@ function Get-ADCommonParameters
         [System.Management.Automation.SwitchParameter]
         $PreferCommonName,
 
-        ## Catch all to enable splatted $PSBoundParameters
+        # Catch all to enable splatted $PSBoundParameters
         [Parameter(ValueFromRemainingArguments)]
         $RemainingArguments
     )
@@ -1053,9 +1055,9 @@ function ThrowInvalidOperationError
         $ErrorMessage
     )
 
-    $exception = New-Object -TypeName System.InvalidOperationException -ArgumentList $ErrorMessage
+    $exception = New-Object -TypeName 'System.InvalidOperationException' -ArgumentList $ErrorMessage
     $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null
+    $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @($exception, $ErrorId, $errorCategory, $null)
     throw $errorRecord
 }
 
@@ -1075,14 +1077,14 @@ function ThrowInvalidArgumentError
         $ErrorMessage
     )
 
-    $exception = New-Object -TypeName System.ArgumentException -ArgumentList $ErrorMessage
+    $exception = New-Object -TypeName 'System.ArgumentException' -ArgumentList $ErrorMessage
     $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null
+    $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @($exception, $ErrorId, $errorCategory, $null)
     throw $errorRecord
 
 } #end function ThrowInvalidArgumentError
 
-## Internal function to test site availability
+# Internal function to test site availability
 function Test-ADReplicationSite
 {
     [CmdletBinding()]
@@ -1127,7 +1129,7 @@ function ConvertTo-DeploymentForestMode
         [Parameter(
             Mandatory = $true,
             ParameterSetName = 'ById')]
-        [UInt16]
+        [System.UInt16]
         $ModeId,
 
         [Parameter(
@@ -1172,7 +1174,7 @@ function ConvertTo-DeploymentDomainMode
         [Parameter(
             Mandatory = $true,
             ParameterSetName = 'ById')]
-        [UInt16]
+        [System.UInt16]
         $ModeId,
 
         [Parameter(
@@ -1255,7 +1257,7 @@ function Restore-ADCommonObject
     # If more than one object is returned, we pick the one that was changed last.
     $restorableObject = Get-ADObject @getAdObjectParams |
         Sort-Object -Descending -Property 'whenChanged' |
-        Select-Object -First 1
+            Select-Object -First 1
 
     $restoredObject = $null
 
@@ -1335,7 +1337,7 @@ function Add-ADCommonGroupMember
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $Members,
 
         [Parameter()]
@@ -1343,7 +1345,7 @@ function Add-ADCommonGroupMember
         $Parameters,
 
         [Parameter()]
-        [switch]
+        [System.Management.Automation.SwitchParameter]
         $MembersInMultipleDomains
     )
 
@@ -1575,13 +1577,15 @@ function Compare-ResourcePropertyState
     if ($PSBoundParameters.ContainsKey('Properties'))
     {
         # Filter out the parameters (keys) not specified in Properties
-        $desiredValuesToRemove = $DesiredValues.Keys | Where-Object -FilterScript {
-            $_ -notin $Properties
-        }
+        $desiredValuesToRemove = $DesiredValues.Keys |
+            Where-Object -FilterScript {
+                $_ -notin $Properties
+            }
 
-        $desiredValuesToRemove | ForEach-Object -Process {
-            $DesiredValues.Remove($_)
-        }
+        $desiredValuesToRemove |
+            ForEach-Object -Process {
+                $DesiredValues.Remove($_)
+            }
     }
     else
     {
@@ -1589,25 +1593,28 @@ function Compare-ResourcePropertyState
             Remove any common parameters that might be part of DesiredValues,
             if it $PSBoundParameters was used to pass the desired values.
         #>
-        $commonParametersToRemove = $DesiredValues.Keys | Where-Object -FilterScript {
-            $_ -in [System.Management.Automation.PSCmdlet]::CommonParameters `
-                -or $_ -in [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
-        }
+        $commonParametersToRemove = $DesiredValues.Keys |
+            Where-Object -FilterScript {
+                $_ -in [System.Management.Automation.PSCmdlet]::CommonParameters `
+                    -or $_ -in [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+            }
 
-        $commonParametersToRemove | ForEach-Object -Process {
-            $DesiredValues.Remove($_)
-        }
+        $commonParametersToRemove |
+            ForEach-Object -Process {
+                $DesiredValues.Remove($_)
+            }
     }
 
     # Remove any properties that should be ignored.
     if ($PSBoundParameters.ContainsKey('IgnoreProperties'))
     {
-        $IgnoreProperties | ForEach-Object -Process {
-            if ($DesiredValues.ContainsKey($_))
-            {
-                $DesiredValues.Remove($_)
+        $IgnoreProperties |
+            ForEach-Object -Process {
+                if ($DesiredValues.ContainsKey($_))
+                {
+                    $DesiredValues.Remove($_)
+                }
             }
-        }
     }
 
     $compareTargetResourceStateReturnValue = @()
@@ -1699,9 +1706,10 @@ function Test-DscPropertyState
                 {
                     Write-Verbose -Message $script:localizedData.ArrayDoesNotMatch -Verbose
 
-                    $arrayCompare | ForEach-Object -Process {
-                        Write-Verbose -Message ($script:localizedData.ArrayValueThatDoesNotMatch -f $_.InputObject, $_.SideIndicator) -Verbose
-                    }
+                    $arrayCompare |
+                        ForEach-Object -Process {
+                            Write-Verbose -Message ($script:localizedData.ArrayValueThatDoesNotMatch -f $_.InputObject, $_.SideIndicator) -Verbose
+                        }
 
                     $returnValue = $false
                 }
@@ -1758,7 +1766,7 @@ function Assert-ADPSDrive
     param
     (
         [Parameter()]
-        [String]
+        [System.String]
         $Root = '//RootDSE/'
     )
 
@@ -1771,7 +1779,8 @@ function Assert-ADPSDrive
         Write-Verbose -Message $script:localizedData.CreatingNewADPSDrive
         try
         {
-            New-PSDrive -Name AD -PSProvider 'ActiveDirectory' -Root $Root -Scope Script -ErrorAction Stop | Out-Null
+            New-PSDrive -Name AD -PSProvider 'ActiveDirectory' -Root $Root -Scope Script -ErrorAction 'Stop' |
+                Out-Null
         }
         catch
         {
@@ -1781,6 +1790,29 @@ function Assert-ADPSDrive
     }
 }
 
+<#
+    .SYNOPSIS
+        This is a wrapper for Set-ADComputer.
+
+    .PARAMETER Parameters
+        A hash table containing all parameters that will be passed trough to
+        Set-ADComputer.
+
+    .NOTES
+        This is needed because of how Pester is unable to handle mocking the
+        cmdlet Set-ADComputer. Therefor there are no unit test for this function.
+#>
+function Set-DscADComputer
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $Parameters
+    )
+
+    Set-ADComputer @Parameters | Out-Null
+}
 
 $script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
 
@@ -1817,4 +1849,5 @@ Export-ModuleMember -Function @(
     'Compare-ResourcePropertyState'
     'Test-DscPropertyState'
     'Assert-ADPSDrive'
+    'Set-DscADComputer'
 )
