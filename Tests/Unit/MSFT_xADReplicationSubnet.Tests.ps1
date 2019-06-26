@@ -1,32 +1,43 @@
-$Global:DSCModuleName   = 'xActiveDirectory'
-$Global:DSCResourceName = 'MSFT_xADReplicationSubnet'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADReplicationSubnet'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green;
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
-    -TestType Unit
-#endregion
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType Unit
+
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
-    #region Pester Tests
-    InModuleScope $Global:DSCResourceName {
+    Invoke-TestSetup
 
+    InModuleScope $script:dscResourceName {
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-
+        Describe 'xADReplicationSubnet\Get-TargetResource' {
             $testDefaultParameters = @{
                 Name = '10.0.0.0/8'
                 Site = 'Default-First-Site-Name'
@@ -40,10 +51,10 @@ try
 
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure   | Should Be 'Absent'
-                    $result.Name     | Should Be $testDefaultParameters.Name
-                    $result.Site     | Should Be ''
-                    $result.Location | Should Be ''
+                    $result.Ensure   | Should -Be 'Absent'
+                    $result.Name     | Should -Be $testDefaultParameters.Name
+                    $result.Site     | Should -Be ''
+                    $result.Location | Should -Be ''
                 }
             }
 
@@ -65,10 +76,10 @@ try
 
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure   | Should Be 'Present'
-                    $result.Name     | Should Be $testDefaultParameters.Name
-                    $result.Site     | Should Be 'Default-First-Site-Name'
-                    $result.Location | Should Be 'Seattle'
+                    $result.Ensure   | Should -Be 'Present'
+                    $result.Name     | Should -Be $testDefaultParameters.Name
+                    $result.Site     | Should -Be 'Default-First-Site-Name'
+                    $result.Location | Should -Be 'Seattle'
                 }
             }
 
@@ -87,17 +98,17 @@ try
 
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure   | Should Be 'Present'
-                    $result.Name     | Should Be $testDefaultParameters.Name
-                    $result.Site     | Should Be ''
-                    $result.Location | Should Be 'Seattle'
+                    $result.Ensure   | Should -Be 'Present'
+                    $result.Name     | Should -Be $testDefaultParameters.Name
+                    $result.Site     | Should -Be ''
+                    $result.Location | Should -Be 'Seattle'
                 }
             }
         }
         #endregion
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+        Describe 'xADReplicationSubnet\Test-TargetResource' {
 
             $testDefaultParameters = @{
                 Name     = '10.0.0.0/8'
@@ -112,13 +123,13 @@ try
                 It 'Should return false for present' {
 
                     $result = Test-TargetResource -Ensure 'Present' @testDefaultParameters
-                    $result | Should Be $false
+                    $result | Should -Be $false
                 }
 
                 It 'Should return true for absent' {
 
                     $result = Test-TargetResource -Ensure 'Absent' @testDefaultParameters
-                    $result | Should Be $true
+                    $result | Should -Be $true
                 }
             }
 
@@ -139,33 +150,32 @@ try
                 It 'Should return true for present' {
 
                     $result = Test-TargetResource -Ensure 'Present' @testDefaultParameters
-                    $result | Should Be $true
+                    $result | Should -Be $true
                 }
 
                 It 'Should return false for absent' {
 
                     $result = Test-TargetResource -Ensure 'Absent' @testDefaultParameters
-                    $result | Should Be $false
+                    $result | Should -Be $false
                 }
 
                 It 'Should return false for wrong site' {
 
                     $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site 'WrongSite' -Location $testDefaultParameters.Location
-                    $result | Should Be $false
+                    $result | Should -Be $false
                 }
 
                 It 'Should return false for wrong location' {
 
                     $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location 'WringLocation'
-                    $result | Should Be $false
+                    $result | Should -Be $false
                 }
             }
         }
         #endregion
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
+        Describe 'xADReplicationSubnet\Set-TargetResource' {
             $testPresentParameters = @{
                 Ensure   = 'Present'
                 Name     = '10.0.0.0/8'
@@ -269,8 +279,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
-

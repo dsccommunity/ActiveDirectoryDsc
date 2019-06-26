@@ -6,12 +6,6 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomainController'
 
-## Import the common AD functions
-$adCommonFunctions = Join-Path `
-    -Path (Split-Path -Path $PSScriptRoot -Parent) `
-    -ChildPath '\MSFT_xADCommon\MSFT_xADCommon.psm1'
-Import-Module -Name $adCommonFunctions
-
 <#
     .SYNOPSIS
         Returns the current state of the domain controller.
@@ -168,6 +162,17 @@ function Get-TargetResource
 #>
 function Set-TargetResource
 {
+    <#
+        Suppressing this rule because $global:DSCMachineStatus is used to
+        trigger a reboot for the one that was suppressed when calling
+        Install-ADDSDomainController.
+    #>
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
+    <#
+        Suppressing this rule because $global:DSCMachineStatus is only set,
+        never used (by design of Desired State Configuration).
+    #>
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope='Function', Target='DSCMachineStatus')]
     [CmdletBinding()]
     param
     (
@@ -253,7 +258,7 @@ function Set-TargetResource
             $installADDSDomainControllerParameters.Add('NoGlobalCatalog', $true)
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($InstallationMediaPath))
+        if (-not [System.String]::IsNullOrWhiteSpace($InstallationMediaPath))
         {
             $installADDSDomainControllerParameters.Add('InstallationMediaPath', $InstallationMediaPath)
         }
@@ -316,6 +321,7 @@ function Set-TargetResource
             )
 
             # DC is not in correct site. Move it.
+            Write-Verbose -Message ($script:localizedData.MovingDomainController -f $targetResource.SiteName, $SiteName)
             Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $DomainAdministratorCredential
         }
     }
@@ -427,7 +433,7 @@ function Test-TargetResource
         $testTargetResourceReturnValue = $false
     }
 
-    ## Check Global Catalog Config
+    # Check Global Catalog Config
     if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and $existingResource.IsGlobalCatalog -ne $IsGlobalCatalog)
     {
         if ($IsGlobalCatalog)

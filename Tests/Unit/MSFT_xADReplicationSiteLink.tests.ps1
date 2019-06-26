@@ -1,24 +1,29 @@
-$script:DSCModuleName = 'xActiveDirectory'
-$script:DSCResourceName = 'MSFT_xADReplicationSiteLink'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADReplicationSiteLink'
 
 #region HEADER
 
-# Unit Test Template Version: 1.2.1
+# Unit Test Template Version: 1.2.4
 $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if ((-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))))
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
 
 #endregion HEADER
+
+function Invoke-TestSetup
+{
+}
 
 function Invoke-TestCleanup
 {
@@ -28,7 +33,9 @@ function Invoke-TestCleanup
 # Begin Testing
 try
 {
-    InModuleScope $script:DSCResourceName {
+    Invoke-TestSetup
+
+    InModuleScope $script:dscResourceName {
         $mockGetADReplicationSiteLinkReturn = @{
             Name                          = 'HQSiteLink'
             Cost                          = 100
@@ -75,7 +82,7 @@ try
             }
 
             Context 'When AD Replication Sites do not exist' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { $null }
+                Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException) }
 
                 It 'Ensure Should be Absent' {
                     $getResult = Get-TargetResource -Name HQSiteLink
@@ -89,6 +96,15 @@ try
                     $getResult.Ensure                        | Should -Be 'Absent'
                 }
             }
+
+            Context 'When Get-ADReplicationSiteLink throws an unexpected error' {
+                Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw }
+
+                It 'Should throw the correct error' {
+                    { Get-TargetResource -Name HQSiteLink } | Should -Throw ($script:localizedData.GetSiteLinkUnexpectedError -f 'HQSiteLink')
+                }
+            }
+
 
             Context 'When Sites are excluded' {
                 Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockADReplicationSiteLinkSitesExcluded }

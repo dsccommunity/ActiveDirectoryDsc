@@ -1,30 +1,41 @@
-$Global:DSCModuleName      = 'xActiveDirectory'
-$Global:DSCResourceName    = 'MSFT_xADReplicationSite'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADReplicationSite'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
-#endregion
+
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
-    #region Pester Tests
+    Invoke-TestSetup
 
-    # The InModuleScope command allows you to perform white-box unit testing on
-    # the internal (non-exported) code of a Script Module.
-    InModuleScope $Global:DSCResourceName {
-
+    InModuleScope $script:dscResourceName {
         #region Pester Test Initialization
         $presentSiteName = 'DemoSite'
         $absentSiteName  = 'MissingSite'
@@ -65,8 +76,7 @@ try
         # #endregion
 
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-
+        Describe 'xADReplicationSite\Get-TargetResource' {
             It 'Should return a "System.Collections.Hashtable" object type' {
 
                 # Arrange
@@ -76,7 +86,7 @@ try
                 $targetResource = Get-TargetResource -Name $presentSiteName
 
                 # Assert
-                $targetResource -is [System.Collections.Hashtable] | Should Be $true
+                $targetResource -is [System.Collections.Hashtable] | Should -Be $true
             }
 
             It 'Should return present if the site exists' {
@@ -88,8 +98,8 @@ try
                 $targetResource = Get-TargetResource -Name $presentSiteName
 
                 # Assert
-                $targetResource.Ensure | Should Be 'Present'
-                $targetResource.Name   | Should Be $presentSiteName
+                $targetResource.Ensure | Should -Be 'Present'
+                $targetResource.Name   | Should -Be $presentSiteName
             }
 
             It 'Should return absent if the site does not exist' {
@@ -101,15 +111,14 @@ try
                 $targetResource = Get-TargetResource -Name $absentSiteName
 
                 # Assert
-                $targetResource.Ensure | Should Be 'Absent'
-                $targetResource.Name   | Should Be $absentSiteName
+                $targetResource.Ensure | Should -Be 'Absent'
+                $targetResource.Name   | Should -Be $absentSiteName
             }
         }
         #endregion
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
-
+        Describe 'xADReplicationSite\Test-TargetResource' {
             It 'Should return a "System.Boolean" object type' {
 
                 # Arrange
@@ -119,7 +128,7 @@ try
                 $targetResourceState = Test-TargetResource @presentSiteTestPresent
 
                 # Assert
-                $targetResourceState -is [System.Boolean] | Should Be $true
+                $targetResourceState -is [System.Boolean] | Should -Be $true
             }
 
             It 'Should return true if the site should exists and does exists' {
@@ -131,7 +140,7 @@ try
                 $targetResourceState = Test-TargetResource @presentSiteTestPresent
 
                 # Assert
-                $targetResourceState | Should Be $true
+                $targetResourceState | Should -Be $true
             }
 
             It 'Should return false if the site should exists but does not exists' {
@@ -143,7 +152,7 @@ try
                 $targetResourceState = Test-TargetResource @absentSiteTestPresent
 
                 # Assert
-                $targetResourceState | Should Be $false
+                $targetResourceState | Should -Be $false
             }
 
             It 'Should return false if the site should not exists but does exists' {
@@ -155,7 +164,7 @@ try
                 $targetResourceState = Test-TargetResource @presentSiteTestAbsent
 
                 # Assert
-                $targetResourceState | Should Be $false
+                $targetResourceState | Should -Be $false
             }
 
             It 'Should return true if the site should not exists and does not exists' {
@@ -167,15 +176,14 @@ try
                 $targetResourceState = Test-TargetResource @absentSiteTestAbsent
 
                 # Assert
-                $targetResourceState | Should Be $true
+                $targetResourceState | Should -Be $true
             }
         }
 
         #endregion
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
+        Describe 'xADReplicationSite\Set-TargetResource' {
             It 'Should add a new site' {
 
                 # Arrange
@@ -238,8 +246,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
-
