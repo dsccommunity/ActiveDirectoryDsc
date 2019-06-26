@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Changes to xActiveDirectory
+  - Added a Requirements section to every DSC resource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
+
 ## 3.0.0.0
 
 - Changes to xActiveDirectory
@@ -31,7 +34,6 @@
     - Now the helper function `Test-Members` outputs all the members that
       are not in desired state when verbose output is enabled.
   - Update all unit tests to latest unit test template.
-  - Added a Requirements section to every DSC resource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
   - Deleted the obsolete xActiveDirectory_TechNetDocumentation.html file.
   - Added new resource xADObjectEnabledState. This resource should be
     used to enforce the `Enabled` property of computer accounts. This
