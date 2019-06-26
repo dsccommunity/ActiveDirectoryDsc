@@ -10,3 +10,7 @@ controllers in Active Directory.
 >information from another domain controller.
 >Make sure to use a correct domain account with the correct permission as
 >the account for the parameter `DomainAdministratorCredential`.
+
+## Requirements
+
+* Target machine must be running Windows Server 2008 R2 or later.
