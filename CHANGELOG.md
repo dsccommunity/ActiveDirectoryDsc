@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.0.0.0
+
 - Changes to xActiveDirectory
   - Added new helper functions in xADCommon, see each functions comment-based
     help for more information.
