@@ -3,7 +3,6 @@
 ## Unreleased
 
 - Changes to xActiveDirectory
-  - Added a Requirements section to every DSCResource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later"
   - Added new helper functions in xADCommon, see each functions comment-based
     help for more information.
     - Convert-PropertyMapToObjectProperties
@@ -30,6 +29,7 @@
       are not in desired state when verbose output is enabled.
   - Update all unit tests to latest unit test template.
   - Deleted the obsolete xActiveDirectory_TechNetDocumentation.html file
+  - Added a Requirements section to every DSCResource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later"
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
