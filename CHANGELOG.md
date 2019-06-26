@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Changes to xActiveDirectory
+  - Added a Requirements section to every DSCResource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later".
   - Added new helper functions in xADCommon, see each functions comment-based
     help for more information.
     - Convert-PropertyMapToObjectProperties
