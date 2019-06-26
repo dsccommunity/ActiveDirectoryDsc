@@ -41,7 +41,8 @@
     - Use fully qualified type names for parameters and variables
       ([issue #374](https://github.com/PowerShell/xActiveDirectory/issues/374)).
   - Removed unused legacy test files from the root of the repository.
-  - Updated Example List README with missing resources
+  - Updated Example List README with missing resources.
+  - Added missing examples for xADReplicationSubnet, xADServicePrincipalName and xWaitForADDomain. ([issue #395](https://github.com/PowerShell/xActiveDirectory/issues/395)).
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
