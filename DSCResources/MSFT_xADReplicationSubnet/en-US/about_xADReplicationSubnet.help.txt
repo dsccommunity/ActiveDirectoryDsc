@@ -1,0 +1,48 @@
+﻿.NAME
+    xADReplicationSubnet
+
+# Description
+    
+    The xADReplicationSubnet DSC resource will manage replication subnets.
+    
+    ## Requirements
+    
+    * Target machine must be running Windows Server 2008 R2 or later.
+    
+.PARAMETER Ensure
+    Write - string
+    Allowed values: Present,  Absent
+    Specifies if the AD replication subnet should be added or remove. Default value is 'Present'.
+
+.PARAMETER Name
+    Key - string
+    The name of the AD replication subnet, e.g. 10.0.0.0/24.
+
+.PARAMETER Site
+    Required - string
+    The name of the assigned AD replication site, e.g. Default-First-Site-Name.
+
+.PARAMETER Location
+    Write - string
+    The location for the AD replication site. Default value is empty.
+
+.Example 1
+
+This configuration will create an AD Replication Subnet.
+
+Configuration CreateReplicationSubnet_Config
+{
+    Import-DscResource -Module xActiveDirectory
+
+    Node localhost
+    {
+        xADReplicationSubnet 'LondonSubnet'
+        {
+            Name     = '10.0.0.0/24'
+            Site     = 'London'
+            Location = 'Datacenter 3'
+        }
+    }
+}
+
+
