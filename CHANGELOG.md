@@ -6,6 +6,8 @@
   - Added a Requirements section to every DSC resource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
+- Changes to xADDomainController
+  - Added Read-Only Domain Controller (RODC) Creation Support.
 
 ## 3.0.0.0
 
@@ -104,7 +106,6 @@
     resource is using the `$global:DSCMachineStatus` variable to trigger
     a reboot.
   - Code cleanup.
-  - Added Read-Only Domain Controller (RODC) Creation Support.
 - Changes to xADDomain
   - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
     resource is using the `$global:DSCMachineStatus` variable to trigger
