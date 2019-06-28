@@ -219,9 +219,9 @@ try
                 SafemodeAdministratorPassword = $testAdminCredential
                 Verbose                       = $true
             }
-            $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+            #$stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
 
-            Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
+            #Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
             Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
                 return [PSCustomObject]@{
                     SamAccountName = $allowedAccount
@@ -328,7 +328,9 @@ try
             }
 
             It 'Returns "True" when AllowPasswordReplicationAccountName matches' {
+                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
 
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
                     return @(
                         [PSCustomObject]@{
@@ -402,7 +404,9 @@ try
             }
 
             It 'Returns "True" when DenyPasswordReplicationAccountName matches' {
+                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
 
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied.IsPresent } -MockWith {
                     return @(
                         [PSCustomObject]@{
@@ -701,8 +705,8 @@ try
                     It "Should call the correct mock to set AllowPasswordReplicationAccountName Attribute" {
                         { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName $allowedAccount } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Remove-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $AllowedList.SamAccountName -contains 'allowedAccount2' } -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Add-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $AllowedList.SamAccountName -eq $allowedAccount } -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-ADDomainControllerPasswordReplicationPolicy -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Add-ADDomainControllerPasswordReplicationPolicy  -Exactly -Times 1 -Scope It
                     }
                 }
                 Context 'When DenyPasswordReplicationAccountName is not compliant' {
@@ -720,8 +724,8 @@ try
                     It "Should call the correct mock to set DenyPasswordReplicationAccountName Attribute" {
                         { Set-TargetResource @testDefaultParams  -DomainName $correctDomainName -DenyPasswordReplicationAccountName $deniedAccount } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Remove-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $DeniedList.SamAccountName -contains 'deniedAccount2' } -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Add-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $DeniedList.SamAccountName -eq $deniedAccount } -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-ADDomainControllerPasswordReplicationPolicy -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Add-ADDomainControllerPasswordReplicationPolicy -Exactly -Times 1 -Scope It
                     }
                 }
             }
