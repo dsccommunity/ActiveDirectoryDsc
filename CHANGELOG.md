@@ -4,6 +4,7 @@
 
 - Changes to xActiveDirectory
   - Added a Requirements section to every DSC resource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
+  - Added 'about_\<DSCResource\>.help.txt' file to all resources ([issue #404](https://github.com/PowerShell/xActiveDirectory/pull/404)).
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
 
