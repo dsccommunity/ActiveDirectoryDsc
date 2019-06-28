@@ -105,8 +105,8 @@ function Get-TargetResource
             $script:localizedData.AlreadyDomainController -f $domainControllerObject.Name, $domainControllerObject.Domain
         )
 
-        $allowedPasswordReplicationAccountName = Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject | ForEach-Object sAMAccountName
-        $deniedPasswordReplicationAccountName = Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject | ForEach-Object sAMAccountName
+        $allowedPasswordReplicationAccountName = Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName
+        $deniedPasswordReplicationAccountName = Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName
         $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
         $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
 
@@ -187,7 +187,7 @@ function Set-TargetResource
     #>
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope='Function', Target='DSCMachineStatus')]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '',
-        Justification = 'RODC Creation support(AllowPasswordReplicationAccountName and DenyPasswordReplicationAccountName)')]
+        Justification = 'Read-Only Domain Controller (RODC) Creation support(AllowPasswordReplicationAccountName and DenyPasswordReplicationAccountName)')]
     [CmdletBinding()]
     param
     (
@@ -262,21 +262,23 @@ function Set-TargetResource
             NoRebootOnCompletion          = $true
             Force                         = $true
         }
-        if($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica -eq $true)
+
+        if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica -eq $true)
         {
-            if($PSBoundParameters.ContainsKey('SiteName') -eq $false)
+            if (-not $PSBoundParameters.ContainsKey('SiteName'))
             {
                 New-InvalidOperationException -Message $script:localizedData.RODCMissingSite
             }
+
             $installADDSDomainControllerParameters.Add('ReadOnlyReplica', $true)
         }
 
-        if($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
+        if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
         {
             $installADDSDomainControllerParameters.Add('AllowPasswordReplicationAccountName', $AllowPasswordReplicationAccountName)
         }
 
-        if($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
+        if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
         {
             $installADDSDomainControllerParameters.Add('DenyPasswordReplicationAccountName', $DenyPasswordReplicationAccountName)
         }
@@ -374,71 +376,105 @@ function Set-TargetResource
             Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $DomainAdministratorCredential
         }
 
-        if($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
+        if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
         {
-            $testMembersParams = @{
+            $testMembersParameters = @{
                 ExistingMembers = $targetResource.AllowPasswordReplicationAccountName
                 Members         = $AllowPasswordReplicationAccountName;
             }
-            if (-not (Test-Members @testMembersParams))
+
+            if (-not (Test-Members @testMembersParameters))
             {
-                $adPrincipalsToRemove = foreach ($accountName in $targetResource.AllowPasswordReplicationAccountName)
-                {
-                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
-                }
-                $removeADPasswordPolicy = @{
-                    Identity    = $domainControllerObject
-                    AllowedList = $adPrincipalsToRemove
-                }
-                $adPrincipalsToAdd = foreach ($accountName in $AllowPasswordReplicationAccountName)
-                {
-                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
-                }
-                $addADPasswordPolicy = @{
-                    Identity    = $domainControllerObject
-                    AllowedList = $adPrincipalsToAdd
-                }
                 Write-Verbose -Message (
                     $script:localizedData.AllowedSyncAccountsMismatch -f
                     ($targetResource.AllowPasswordReplicationAccountName -join ';'),
                     ($AllowPasswordReplicationAccountName -join ';')
                 )
+            }
+
+            $adPrincipalsToRemove = foreach ($accountName in $targetResource.AllowPasswordReplicationAccountName)
+            {
+                if ($accountName -notin $AllowPasswordReplicationAccountName)
+                {
+                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
+                }
+            }
+
+            if ($null -ne $adPrincipalsToRemove)
+            {
+                $removeADPasswordPolicy = @{
+                    Identity    = $domainControllerObject
+                    AllowedList = $adPrincipalsToRemove
+                }
                 Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordPolicy
+            }
+
+            $adPrincipalsToAdd = foreach ($accountName in $AllowPasswordReplicationAccountName)
+            {
+                if ($accountName -notin $targetResource.AllowPasswordReplicationAccountName)
+                {
+                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
+                }
+            }
+
+            if ($null -ne $adPrincipalsToAdd)
+            {
+                $addADPasswordPolicy = @{
+                    Identity    = $domainControllerObject
+                    AllowedList = $adPrincipalsToAdd
+                }
                 Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordPolicy
             }
         }
 
-        if($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
+        if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
         {
-            $testMembersParams = @{
+            $testMembersParameters = @{
                 ExistingMembers = $targetResource.DenyPasswordReplicationAccountName
                 Members         = $DenyPasswordReplicationAccountName;
             }
-            if (-not (Test-Members @testMembersParams))
+
+            if (-not (Test-Members @testMembersParameters))
             {
-                $adPrincipalsToRemove = foreach ($accountName in $targetResource.DenyPasswordReplicationAccountName)
+                Write-Verbose -Message (
+                    $script:localizedData.DenySyncAccountsMismatch -f
+                    ($targetResource.DenyPasswordReplicationAccountName -join ';'),
+                    ($DenyPasswordReplicationAccountName -join ';')
+                )
+            }
+
+            $adPrincipalsToRemove = foreach ($accountName in $targetResource.DenyPasswordReplicationAccountName)
+            {
+                if ($accountName -notin $DenyPasswordReplicationAccountName)
                 {
                     New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
                 }
+            }
+
+            if ($null -ne $adPrincipalsToRemove)
+            {
                 $removeADPasswordPolicy = @{
                     Identity    = $domainControllerObject
                     DeniedList  = $adPrincipalsToRemove
                 }
-                $adPrincipalsToAdd = foreach ($accountName in $DenyPasswordReplicationAccountName)
+            Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordPolicy
+            }
+
+            $adPrincipalsToAdd = foreach ($accountName in $DenyPasswordReplicationAccountName)
+            {
+                if ($accountName -notin $targetResource.DenyPasswordReplicationAccountName)
                 {
                     New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
                 }
+            }
+
+            if ($null -ne $adPrincipalsToAdd)
+            {
                 $addADPasswordPolicy = @{
                     Identity    = $domainControllerObject
                     DeniedList  = $adPrincipalsToAdd
                 }
-                Write-Verbose -Message (
-                    $script:localizedData.DenySyncAccountsMismatch -f
-                    ($existingResource.DenyPasswordReplicationAccountName -join ';'),
-                    ($DenyPasswordReplicationAccountName -join ';')
-                )
-                Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordPolicy
-                Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordPolicy
+            Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordPolicy
             }
         }
     }
@@ -490,7 +526,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "",
-        Justification = 'RODC Creation support($AllowPasswordReplicationAccountName and DenyPasswordReplicationAccountName)')]
+        Justification = 'Read-Only Domain Controller (RODC) Creation support($AllowPasswordReplicationAccountName and DenyPasswordReplicationAccountName)')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -575,8 +611,7 @@ function Test-TargetResource
 
         $testTargetResourceReturnValue = $false
     }
-    #Just trying to debug the AppVeyour faling tests - this line wiil go away
-    Write-Verbose -Message $existingResource.Values
+
     # Check Global Catalog Config
     if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and $existingResource.IsGlobalCatalog -ne $IsGlobalCatalog)
     {
@@ -596,32 +631,33 @@ function Test-TargetResource
         $testTargetResourceReturnValue = $false
     }
 
-    if($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName') -and
-    $null -ne $existingResource.AllowPasswordReplicationAccountName)
+    if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName') -and $null -ne $existingResource.AllowPasswordReplicationAccountName)
     {
-        $testMembersParams = @{
+        $testMembersParameters = @{
             ExistingMembers = $existingResource.AllowPasswordReplicationAccountName
-            Members         = $AllowPasswordReplicationAccountName;
+            Members         = $AllowPasswordReplicationAccountName
         }
-        if(-not (Test-Members @testMembersParams))
+
+        if (-not (Test-Members @testMembersParameters))
         {
             Write-Verbose -Message (
                 $script:localizedData.AllowedSyncAccountsMismatch -f
                 ($existingResource.AllowPasswordReplicationAccountName -join ';'),
                 ($AllowPasswordReplicationAccountName -join ';')
             )
+
             $testTargetResourceReturnValue = $false
         }
     }
 
-    if($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName') -and
-    $null -ne $existingResource.DenyPasswordReplicationAccountName)
+    if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName') -and $null -ne $existingResource.DenyPasswordReplicationAccountName)
     {
-        $testMembersParams = @{
+        $testMembersParameters = @{
             ExistingMembers = $existingResource.DenyPasswordReplicationAccountName
             Members         = $DenyPasswordReplicationAccountName;
         }
-        if(-not (Test-Members @testMembersParams))
+
+        if (-not (Test-Members @testMembersParameters))
         {
             Write-Verbose -Message (
                 $script:localizedData.DenySyncAccountsMismatch -f
