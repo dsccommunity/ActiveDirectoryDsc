@@ -1,7 +1,7 @@
 ﻿.NAME
     xADRecycleBin
 
-# Description
+.DESCRIPTION
     
     The xADRecycleBin DSC resource will enable the Active Directory Recycle Bin feature for the target forest.
     This resource first verifies that the forest mode is Windows Server 2008 R2 or greater.  If the forest mode

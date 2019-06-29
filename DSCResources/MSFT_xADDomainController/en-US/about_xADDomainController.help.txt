@@ -1,7 +1,7 @@
 ﻿.NAME
     xADDomainController
 
-# Description
+.DESCRIPTION
     
     The xADDomainController DSC resource will install and configure domain
     controllers in Active Directory.

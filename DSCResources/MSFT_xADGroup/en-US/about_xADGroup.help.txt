@@ -1,7 +1,7 @@
 ﻿.NAME
     xADGroup
 
-# Description
+.DESCRIPTION
     
     The xADGroup DSC resource will manage groups within Active Directory.
     

@@ -1,7 +1,7 @@
 ﻿.NAME
     xADObjectEnabledState
 
-# Description
+.DESCRIPTION
     
     This resource enforces the property `Enabled` on the object class *Computer*.
     

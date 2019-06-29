@@ -1,7 +1,7 @@
 ﻿.NAME
     xADReplicationSubnet
 
-# Description
+.DESCRIPTION
     
     The xADReplicationSubnet DSC resource will manage replication subnets.
     

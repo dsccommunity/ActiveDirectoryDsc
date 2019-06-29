@@ -1,7 +1,7 @@
 ﻿.NAME
     xADComputer
 
-# Description
+.DESCRIPTION
     
     The xADComputer DSC resource will manage computer accounts within Active Directory.
     This resource can be used to provision a computer account before the computer is

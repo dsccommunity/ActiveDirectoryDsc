@@ -1,7 +1,7 @@
 ﻿.NAME
     xADObjectPermissionEntry
 
-# Description
+.DESCRIPTION
     
     The xADObjectPermissionEntry DSC resource will manage access control lists on Active Directory objects. The resource is
     designed to to manage just one entry in the list of permissios (ACL) for one AD object. It will only interact with the
