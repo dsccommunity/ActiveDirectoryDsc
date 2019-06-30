@@ -295,7 +295,7 @@ try
                 $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                 $stubDomainController.Site = $correctSiteName
                 $stubDomainController.Domain = $correctDomainName
-                Add-Member -InputObject $stubDomainController -name 'IsGlobalCatalog' -Value $true -MemberType NoteProperty -Force
+                Add-Member -InputObject $stubDomainController -name 'IsGlobalCatalog' -Value $false -MemberType NoteProperty -Force
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
