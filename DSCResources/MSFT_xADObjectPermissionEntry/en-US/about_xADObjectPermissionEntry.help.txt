@@ -2,7 +2,6 @@
     xADObjectPermissionEntry
 
 .DESCRIPTION
-    
     The xADObjectPermissionEntry DSC resource will manage access control lists on Active Directory objects. The resource is
     designed to to manage just one entry in the list of permissios (ACL) for one AD object. It will only interact with the
     one permission and leave all others as they were. The resource can be used multiple times to add multiple entries into
@@ -48,7 +47,7 @@
     Key - String
     The schema GUID of the child object type that can inherit this access rule. If the permission entry shouldn't be restricted to a specific inherited object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will add full control (GenericAll) permissions to
 the virtual computer object (VCO) ROLE01 for a cluster name object (CNO)
@@ -75,7 +74,7 @@ Configuration DelegateFullControl_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will add a group permission to create and delete
 (CreateChild,DeleteChild) computer objects in an OU and any sub-OUs that
@@ -101,7 +100,7 @@ Configuration CreateDeleteComputerObject_Config
     }
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will add a group permission to allow read and write
 (ReadProperty, WriteProperty) of all properties of computer objects in

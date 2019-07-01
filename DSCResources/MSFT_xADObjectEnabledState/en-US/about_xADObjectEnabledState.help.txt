@@ -2,7 +2,6 @@
     xADObjectEnabledState
 
 .DESCRIPTION
-    
     This resource enforces the property `Enabled` on the object class *Computer*.
     
     >This resource could support other object classes like *msDS-ManagedServiceAccount*,
@@ -38,7 +37,7 @@
     Write - String
     Specifies the user account credentials to use to perform the task.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create a computer account disabled, and
 enforcing the account to be enabled.
@@ -66,7 +65,7 @@ Configuration EnabledComputerAccount_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will create a computer account disabled, configure
 a cluster using the disabled computer account, and enforcing the
@@ -113,7 +112,7 @@ Configuration CreateClusterComputerAccount_Config
     }
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will configure a cluster using a pre-staged computer
 account, and enforcing the pre-staged computer account to be enabled.

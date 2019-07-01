@@ -2,7 +2,6 @@
     xADReplicationSite
 
 .DESCRIPTION
-    
     The xADReplicationSite DSC resource will manage Replication Sites within Active Directory. Sites are used in Active Directory to either enable clients to discover network resources (published shares, domain controllers) close to the physical location of a client computer or to reduce network traffic over wide area network (WAN) links. Sites can also be used to optimize replication between domain controllers.
     
     ## Requirements
@@ -22,7 +21,7 @@
     Write - Boolean
     Specify if the Default-First-Site-Name should be renamed, if it exists. Dafult value is 'false'.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create an Active Directory replication site
 called 'Seattle'.
@@ -41,7 +40,7 @@ Configuration CreateADReplicationSite_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will create an Active Directory replication site called
 'Seattle'. If the 'Default-First-Site-Name' site exists, it will rename
@@ -62,7 +61,7 @@ Configuration CreateADReplicationSiteRenameDefault_Config
     }
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will remove the Active Directory replication site
 called 'Cupertino'.

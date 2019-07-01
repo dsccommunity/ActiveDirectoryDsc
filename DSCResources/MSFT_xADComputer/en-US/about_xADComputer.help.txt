@@ -2,7 +2,6 @@
     xADComputer
 
 .DESCRIPTION
-    
     The xADComputer DSC resource will manage computer accounts within Active Directory.
     This resource can be used to provision a computer account before the computer is
     added to the domain. These pre-created computer objects can be used with offline
@@ -95,7 +94,7 @@
     Read - String
     Returns the security identifier of the computer object
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create two Active Directory computer accounts
 enabled. The property Enabled will not be enforced in either case.
@@ -127,7 +126,7 @@ Configuration AddComputerAccount_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will create an Active Directory computer account
 disabled. The property Enabled will not be enforced.
@@ -154,7 +153,7 @@ Configuration AddComputerAccountDisabled_Config
     }
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will create an Active Directory computer account
 on the specified domain controller and in the specific organizational
@@ -184,7 +183,7 @@ Configuration AddComputerAccountSpecificPath_Config
     }
 }
 
-.Example 4
+.EXAMPLE 4
 
 This configuration will create an Active Directory computer account
 on the specified domain controller and in the specific organizational

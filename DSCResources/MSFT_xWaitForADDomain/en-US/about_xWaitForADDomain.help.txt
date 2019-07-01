@@ -2,7 +2,6 @@
     xWaitForADDomain
 
 .DESCRIPTION
-    
     The xWaitForADDomain resource is used to wait for Active Directory to become available.
     
     ## Requirements
@@ -29,7 +28,7 @@
     Write - uint32
     The number of times to reboot after failing and then restart retrying.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will wait for an AD Domain to respond before returning.
 

@@ -2,7 +2,6 @@
     xADOrganizationalUnit
 
 .DESCRIPTION
-    
     The xADOrganizational Unit DSC resource will manage Organizational Units (OUs) within Active Directory. An OU is a subdivision within an Active Directory into which you can place users, groups, computers, and other organizational units.
     
     ## Requirements
@@ -38,7 +37,7 @@
     Write - Boolean
     Try to restore the organizational unit from the recycle bin before creating a new one.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will add an Active Directory organizational unit to the
 domain.

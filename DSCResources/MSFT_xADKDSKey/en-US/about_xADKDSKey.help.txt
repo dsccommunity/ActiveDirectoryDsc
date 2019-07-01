@@ -2,7 +2,6 @@
     xADKDSKey
 
 .DESCRIPTION
-    
     The xADKDSKey DSC resource will manage KDS Root Keys within Active Directory. The KDS root keys are used to begin generating Group Managed Service Account (gMSA) passwords.
     
     ## Requirements
@@ -38,7 +37,7 @@
     Read - String
     Specifies the KeyID of the KDS root key. This is the Common Name (CN) within Active Directory and is required to build the Distinguished Name
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create a KDS root key. If the date is set to a time
 slightly ahead in the future, the key won't be usable for at least 10 hours
@@ -59,7 +58,7 @@ Configuration CreateKDSRootKey_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will create a KDS root key in the past. This will allow
 the key to be used right away, but if all the domain controllers haven't
@@ -81,7 +80,7 @@ Configuration CreateKDSRootKeyInPast_Config
     }
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will remove the last KDS root key. Use with caution.
 If gMSAs are installed on the network, they will not be able to reset

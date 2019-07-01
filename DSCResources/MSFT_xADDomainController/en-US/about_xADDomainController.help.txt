@@ -2,7 +2,6 @@
     xADDomainController
 
 .DESCRIPTION
-    
     The xADDomainController DSC resource will install and configure domain
     controllers in Active Directory.
     
@@ -58,7 +57,7 @@
     Read - String
     The state of the Domain Controller.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will add a domain controller to the domain
 contoso.com.
@@ -113,7 +112,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will add a domain controller to the domain
 contoso.com, specifying all properties of the resource.
@@ -173,7 +172,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
     }
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will add a domain controller to the domain
 contoso.com using the information from media.

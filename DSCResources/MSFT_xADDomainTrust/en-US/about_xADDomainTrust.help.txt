@@ -2,7 +2,6 @@
     xADDomainTrust
 
 .DESCRIPTION
-    
     The xADDomainTrust DSC resource will manage Domain Trusts within Active Directory. A trust is a relationship, which you establish between domains, that makes it possible for users in one domain to be authenticated by a domain controller in the other domain.
     
     ## Requirements
@@ -36,7 +35,7 @@
     Key - String
     Name of the AD domain that is requesting the trust
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create a new one way inbound trust between two
 domains.

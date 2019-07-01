@@ -2,7 +2,6 @@
     xADUser
 
 .DESCRIPTION
-    
     The xADUser DSC resource will manage Users within Active Directory.
     
     ## Requirements
@@ -251,7 +250,7 @@
     Read - String
     Returns the X.500 path of the object
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create a user with a managed password.
 This might be used to manage the lifecycle of a service account.
@@ -281,7 +280,7 @@ Configuration CreateUserAndManagePassword_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will create a user with a password and then ignore
 when the password has changed. This might be used with a traditional

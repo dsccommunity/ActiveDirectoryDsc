@@ -2,7 +2,6 @@
     xADForestProperties
 
 .DESCRIPTION
-    
     The xADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
     
     ## Requirements
@@ -41,7 +40,7 @@
     Write - String
     Specifies the User Principal Name (UPN) Suffix(es) to be removed from the forest. Cannot be used with UserPrincipalNameSuffix.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will manage the Service and User Principal name suffixes
 in the forest by replacing any existing suffixes with the ones specified
@@ -74,7 +73,7 @@ $ConfigurationData = @{
 }
 
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will manage the Service and User Principal name suffixes in
 the forest by adding and removing the desired suffixes. This will not overwrite

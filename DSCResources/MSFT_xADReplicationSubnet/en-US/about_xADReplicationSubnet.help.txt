@@ -2,7 +2,6 @@
     xADReplicationSubnet
 
 .DESCRIPTION
-    
     The xADReplicationSubnet DSC resource will manage replication subnets.
     
     ## Requirements
@@ -26,7 +25,7 @@
     Write - string
     The location for the AD replication site. Default value is empty.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create an AD Replication Subnet.
 

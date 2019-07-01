@@ -2,7 +2,6 @@
     xADGroup
 
 .DESCRIPTION
-    
     The xADGroup DSC resource will manage groups within Active Directory.
     
     ## Requirements
@@ -77,7 +76,7 @@
     Write - Boolean
     Try to restore the group from the recycle bin before creating a new one.
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create a new domain-local group
 
@@ -117,7 +116,7 @@ Configuration NewGroup_Config
     }
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will create a new domain-local group with three members.
 
@@ -136,7 +135,7 @@ Configuration NewGroupWithMembers_Config
     }
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will create a new domain-local group in contoso with
 three members in different domains.

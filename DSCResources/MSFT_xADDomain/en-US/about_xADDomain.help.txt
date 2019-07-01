@@ -2,7 +2,6 @@
     xADDomain
 
 .DESCRIPTION
-    
     The xADDomain resource creates a new domain in a new forest or a child domain in an existing forest. While it is possible to set the forest functional level and the domain functional level during deployment with this resource the common restrictions apply. For more information see [TechNet](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels).
     
     ## Requirements
@@ -55,7 +54,7 @@
     Allowed values: Win2008,  Win2008R2,  Win2012,  Win2012R2,  WinThreshold
     The Domain Functional Level for the entire domain
 
-.Example 1
+.EXAMPLE 1
 
 This configuration will create a new domain with a new forest and a forest
 functional level of Server 2016.
@@ -107,7 +106,7 @@ $ConfigurationData = @{
     )
 }
 
-.Example 2
+.EXAMPLE 2
 
 This configuration will create a new child domain in an existing forest with
 a Domain Functional Level of Windows Server 2012R2.
@@ -161,7 +160,7 @@ $ConfigurationData = @{
     )
 }
 
-.Example 3
+.EXAMPLE 3
 
 This configuration will create a domain, and then create a child domain on
 another node.
@@ -280,7 +279,7 @@ $ConfigurationData = @{
     )
 }
 
-.Example 4
+.EXAMPLE 4
 
 This configuration will create a highly available domain by adding
 a second domain controller to the newly created domain.
