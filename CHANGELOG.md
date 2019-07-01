@@ -66,6 +66,8 @@
   - Added integration tests ([issue #348](https://github.com/PowerShell/xActiveDirectory/issues/348)).
 - Changes to xWaitForADDomain
   - Added comment-based help ([issue #341](https://github.com/PowerShell/xActiveDirectory/issues/341))
+- Changes to xAdDomainController
+  - Add RODC Creation Support
 
 ## 3.0.0.0
 
