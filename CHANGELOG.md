@@ -7,6 +7,8 @@
   - Added 'about_\<DSCResource\>.help.txt' file to all resources ([issue #404](https://github.com/PowerShell/xActiveDirectory/pull/404)).
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
+- Changes to xADComputer
+  - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config. ([issue #410](https://github.com/PowerShell/xActiveDirectory/pull/410))
 
 ## 3.0.0.0
 
