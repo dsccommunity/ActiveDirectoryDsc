@@ -1626,6 +1626,9 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.MovingADUser -f $targetResource.Path, $PSBoundParameters.Path)
 
             Move-ADObject @adCommonParameters -TargetPath $PSBoundParameters.Path
+
+            # Set new target resource DN in case a rename is also required
+            $targetResource.DistinguishedName = "cn=$($targetResource.CommonName),$($PSBoundParameters.Path)"
         }
 
         if ($renameUserRequired)
@@ -1634,7 +1637,7 @@ function Set-TargetResource
             $adCommonParameters = Get-ADCommonParameters @PSBoundParameters
 
             # Using the SamAccountName for identity with Rename-ADObject does not work, use the DN instead
-            $adCommonParameters['Identity'] = "cn=$($targetResource.CommonName),$($PSBoundParameters.Path)"
+            $adCommonParameters['Identity'] = $targetResource.DistinguishedName
 
             Write-Verbose -Message ($script:localizedData.RenamingADUser -f $targetResource.CommonName, $PSBoundParameters.CommonName)
 
