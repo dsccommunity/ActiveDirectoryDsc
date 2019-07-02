@@ -1550,6 +1550,10 @@ function Set-TargetResource
                     #>
                     Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f $parameter, $PSBoundParameters.$parameter)
                 }
+                elseif (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
+                {
+                    # Both values are null/empty and therefore we are compliant
+                }
                 # Use Compare-Object to allow comparison of string and array parameters
                 elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
                         ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
