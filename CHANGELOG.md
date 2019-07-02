@@ -7,6 +7,9 @@
   - Added 'about_\<DSCResource\>.help.txt' file to all resources ([issue #404](https://github.com/PowerShell/xActiveDirectory/pull/404)).
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
+- Changes to xADUser
+  - Fixes exception when creating a user with an empty string property ([issue #407](https://github.com/PowerShell/xActiveDirectory/pull/407)).
+  - Fixes exception when updating `CommonName` and `Path` concurrently ([issue #402](https://github.com/PowerShell/xActiveDirectory/pull/402)).
 
 ## 3.0.0.0
 
