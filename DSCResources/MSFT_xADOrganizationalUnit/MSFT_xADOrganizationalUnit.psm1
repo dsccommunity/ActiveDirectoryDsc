@@ -25,7 +25,19 @@ function Get-TargetResource
 
     Write-Verbose ($script:localizedData.RetrievingOU -f $Name)
 
-    $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
+    try
+    {
+        $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        $errorMessage = $script:localizedData.PathNotFoundError -f $Path
+        New-ObjectNotFoundException -Message $errorMessage
+    }
+    catch
+    {
+        throw $_
+    }
 
     if ($null -eq $ou)
     {

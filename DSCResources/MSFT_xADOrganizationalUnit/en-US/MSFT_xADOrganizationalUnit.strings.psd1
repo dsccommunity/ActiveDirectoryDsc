@@ -1,6 +1,6 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-    RetrievingOU               = Retrieving OU '{0}'.
+    RetrievingOU               = Retrieving OU '{0}' from path '{1}'.
     UpdatingOU                 = Updating OU '{0}'.
     DeletingOU                 = Deleting OU '{0}'.
     CreatingOU                 = Creating OU '{0}'.
@@ -10,4 +10,5 @@ ConvertFrom-StringData @'
     OUExistsButShouldNot       = OU '{0}' exists when it should not exist.
     OUDoesNotExistButShould    = OU '{0}' does not exist when it should exist.
     OUDoesNotExistAndShouldNot = OU '{0}' does not exist and is in the desired state.
+    PathNotFoundError          = The Path '{0}' was not found.
 '@
