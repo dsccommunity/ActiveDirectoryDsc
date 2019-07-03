@@ -67,7 +67,7 @@ try
             'Manager', 'LogonWorkstations', 'Organization', 'OtherName'
         )
         $testBooleanProperties = @(
-            'PasswordNeverExpires', 'CannotChangePassword', 'ChangePasswordAtLogon', 'TrustedForDelegation', 'Enabled','AccountNotDelegated',
+            'PasswordNeverExpires', 'CannotChangePassword', 'TrustedForDelegation', 'Enabled','AccountNotDelegated',
             'AllowReversiblePasswordEncryption', 'CompoundIdentitySupported', 'PasswordNotRequired', 'SmartcardLogonRequired'
         )
         $testArrayProperties = @('ServicePrincipalNames', 'ProxyAddresses')
@@ -355,6 +355,80 @@ try
                 }
 
             } #end foreach test boolean property
+
+            It "Should pass when ChangePasswordAtLogon is false and matches the AD Account property" {
+                $testParameter = 'ChangePasswordAtLogon'
+                $testParameterValue = $false
+                $testValidPresentParams = $testPresentParams.Clone()
+                $testValidPresentParams[$testParameter] = $testParameterValue
+                $validADUser = $testPresentParams.Clone()
+                Mock -CommandName Get-TargetResource -MockWith {
+                    $validADUser[$testParameter] = $testParameterValue
+                    return $validADUser
+                }
+
+                Test-TargetResource @testValidPresentParams | Should -Be $true
+            }
+
+            It "Should fail when ChangePasswordAtLogon is false and does not match the AD Account property" {
+                $testParameter = 'ChangePasswordAtLogon'
+                $testParameterValue = $false
+                $testValidPresentParams = $testPresentParams.Clone()
+                $testValidPresentParams[$testParameter] = $testParameterValue
+                $invalidADUser = $testPresentParams.Clone()
+                Mock -CommandName Get-TargetResource -MockWith {
+                    $invalidADUser[$testParameter] = -not $testParameterValue
+                    return $invalidADUser
+                }
+
+                Test-TargetResource @testValidPresentParams | Should -Be $false
+            }
+
+            It "Should pass when ChangePasswordAtLogon is true and matches the AD Account property and the user already exists" {
+                $testParameter = 'ChangePasswordAtLogon'
+                $testParameterValue = $true
+                $testValidPresentParams = $testPresentParams.Clone()
+                $testValidPresentParams[$testParameter] = $testParameterValue
+                $validADUser = $testPresentParams.Clone()
+                $validADUser['Ensure'] = 'Present'
+                Mock -CommandName Get-TargetResource -MockWith {
+                    $validADUser[$testParameter] = $testParameterValue
+                    return $validADUser
+                }
+
+                Test-TargetResource @testValidPresentParams | Should -Be $true
+            }
+
+            It "Should pass when ChangePasswordAtLogon is true and does not match the AD Account property and the user already exists" {
+                $testParameter = 'ChangePasswordAtLogon'
+                $testParameterValue = $true
+                $testValidPresentParams = $testPresentParams.Clone()
+                $testValidPresentParams[$testParameter] = $testParameterValue
+                $invalidADUser = $testPresentParams.Clone()
+                $invalidADUser['Ensure'] = 'Present'
+                Mock -CommandName Get-TargetResource -MockWith {
+                    $invalidADUser[$testParameter] = -not $testParameterValue
+                    return $invalidADUser
+                }
+
+                Test-TargetResource @testValidPresentParams | Should -Be $true
+            }
+
+            It "Should fail when ChangePasswordAtLogon is true and does not match the AD Account property and the user does not exist" {
+                $testParameter = 'ChangePasswordAtLogon'
+                $testParameterValue = $true
+                $testValidPresentParams = $testPresentParams.Clone()
+                $testValidPresentParams[$testParameter] = $testParameterValue
+                $invalidADUser = $testPresentParams.Clone()
+                $invalidADUser['Ensure'] = 'Absent'
+                Mock -CommandName Get-TargetResource -MockWith {
+                    $invalidADUser[$testParameter] = -not $testParameterValue
+                    return $invalidADUser
+                }
+
+                Test-TargetResource @testValidPresentParams | Should -Be $false
+            }
+
             foreach ($testParameter in $testArrayProperties)
             {
                 It "Passes when user account '$testParameter' matches empty AD account property" {
