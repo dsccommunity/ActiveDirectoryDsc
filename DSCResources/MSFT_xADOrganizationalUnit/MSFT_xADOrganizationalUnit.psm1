@@ -23,7 +23,7 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    Write-Verbose ($script:localizedData.RetrievingOU -f $Name)
+    Write-Verbose ($script:localizedData.RetrievingOU -f $Name, $Path)
 
     try
     {
