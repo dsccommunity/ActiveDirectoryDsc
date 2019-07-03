@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 1.0.0
-.GUID a18e0a9-2a4b-4406-939e-ac2bb7b6e917
+.GUID 1a18e0a9-2a4b-4406-939e-ac2bb7b6e917
 .AUTHOR Microsoft Corporation
 .COMPANYNAME Microsoft Corporation
 .COPYRIGHT (c) Microsoft Corporation. All rights reserved.
