@@ -1064,6 +1064,7 @@ function Test-TargetResource
                 if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
                 {
                     # Both values are null/empty and therefore we are compliant
+                    # Must catch this scenario separately, as Compare-Object can't compare Null objects
                 }
                 elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
                         ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
@@ -1541,6 +1542,7 @@ function Set-TargetResource
                 elseif (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
                 {
                     # Both values are null/empty and therefore we are compliant
+                    # Must catch this scenario separately, as Compare-Object can't compare Null objects
                 }
                 # Use Compare-Object to allow comparison of string and array parameters
                 elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
