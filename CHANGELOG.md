@@ -11,6 +11,9 @@
   - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config. ([issue #410](https://github.com/PowerShell/xActiveDirectory/pull/410))
 - Changes to xADOrganizationalUnit
   - Catch exception when the path property specifies a non-existing path ([issue #408](https://github.com/PowerShell/xActiveDirectory/pull/408))
+- Changes to xADUser
+  - Fixes exception when creating a user with an empty string property ([issue #407](https://github.com/PowerShell/xActiveDirectory/pull/407)).
+  - Fixes exception when updating `CommonName` and `Path` concurrently ([issue #402](https://github.com/PowerShell/xActiveDirectory/pull/402)).
 
 ## 3.0.0.0
 

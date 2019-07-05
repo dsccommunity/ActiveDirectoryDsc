@@ -1063,7 +1063,10 @@ function Test-TargetResource
                 # This check is required to be able to explicitly remove values with an empty string, if required
                 if (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
                 {
-                    # Both values are null/empty and therefore we are compliant
+                    <#
+                        Both values are null/empty and therefore we are compliant
+                        Must catch this scenario separately, as Compare-Object can't compare Null objects
+                    #>
                 }
                 elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
                         ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
@@ -1488,6 +1491,8 @@ function Set-TargetResource
         $setADUserParams = Get-ADCommonParameters @PSBoundParameters
         $replaceUserProperties = @{ }
         $clearUserProperties = @()
+        $moveUserRequired = $false
+        $renameUserRequired = $false
 
         foreach ($parameter in $PSBoundParameters.Keys)
         {
@@ -1498,27 +1503,13 @@ function Set-TargetResource
                 $adProperty = $adPropertyMap | Where-Object -FilterScript { $_.Parameter -eq $parameter }
                 if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path))
                 {
-                    # Cannot move users by updating the DistinguishedName property
-                    $adCommonParameters = Get-ADCommonParameters @PSBoundParameters
-
-                    # Using the SamAccountName for identity with Move-ADObject does not work, use the DN instead
-                    $adCommonParameters['Identity'] = $targetResource.DistinguishedName
-
-                    Write-Verbose -Message ($script:localizedData.MovingADUser -f $targetResource.Path, $PSBoundParameters.Path)
-
-                    Move-ADObject @adCommonParameters -TargetPath $PSBoundParameters.Path
+                    # Move user after any property changes
+                    $moveUserRequired = $true
                 }
                 elseif ($parameter -eq 'CommonName' -and ($PSBoundParameters.CommonName -ne $targetResource.CommonName))
                 {
-                    # Cannot rename users by updating the CN property directly
-                    $adCommonParameters = Get-ADCommonParameters @PSBoundParameters
-
-                    # Using the SamAccountName for identity with Rename-ADObject does not work, use the DN instead
-                    $adCommonParameters['Identity'] = $targetResource.DistinguishedName
-
-                    Write-Verbose -Message ($script:localizedData.RenamingADUser -f $targetResource.CommonName, $PSBoundParameters.CommonName)
-
-                    Rename-ADObject @adCommonParameters -NewName $PSBoundParameters.CommonName
+                    # Rename user after any property changes
+                    $renameUserRequired = $true
                 }
                 elseif ($parameter -eq 'Password' -and $PasswordNeverResets -eq $false)
                 {
@@ -1549,6 +1540,13 @@ function Set-TargetResource
                         we will change this as it is out of compliance (it always gets set anyway).
                     #>
                     Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f $parameter, $PSBoundParameters.$parameter)
+                }
+                elseif (([System.String]::IsNullOrEmpty($PSBoundParameters.$parameter)) -and ([System.String]::IsNullOrEmpty($targetResource.$parameter)))
+                {
+                    <#
+                        Both values are null/empty and therefore we are compliant
+                        Must catch this scenario separately, as Compare-Object can't compare Null objects
+                    #>
                 }
                 # Use Compare-Object to allow comparison of string and array parameters
                 elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
@@ -1622,6 +1620,35 @@ function Set-TargetResource
         Write-Verbose -Message ($script:localizedData.UpdatingADUser -f $UserName)
 
         [ref] $null = Set-ADUser @setADUserParams -Enabled $Enabled
+
+        if ($moveUserRequired)
+        {
+            # Cannot move users by updating the DistinguishedName property
+            $moveAdObjectParameters = Get-ADCommonParameters @PSBoundParameters
+
+            # Using the SamAccountName for identity with Move-ADObject does not work, use the DN instead
+            $moveAdObjectParameters['Identity'] = $targetResource.DistinguishedName
+
+            Write-Verbose -Message ($script:localizedData.MovingADUser -f $targetResource.Path, $PSBoundParameters.Path)
+
+            Move-ADObject @moveAdObjectParameters -TargetPath $PSBoundParameters.Path
+
+            # Set new target resource DN in case a rename is also required
+            $targetResource.DistinguishedName = "cn=$($targetResource.CommonName),$($PSBoundParameters.Path)"
+        }
+
+        if ($renameUserRequired)
+        {
+            # Cannot rename users by updating the CN property directly
+            $renameAdObjectParameters = Get-ADCommonParameters @PSBoundParameters
+
+            # Using the SamAccountName for identity with Rename-ADObject does not work, use the DN instead
+            $renameAdObjectParameters['Identity'] = $targetResource.DistinguishedName
+
+            Write-Verbose -Message ($script:localizedData.RenamingADUser -f $targetResource.CommonName, $PSBoundParameters.CommonName)
+
+            Rename-ADObject @renameAdObjectParameters -NewName $PSBoundParameters.CommonName
+        }
     }
     elseif (($Ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present'))
     {
