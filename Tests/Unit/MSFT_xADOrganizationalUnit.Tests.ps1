@@ -154,6 +154,21 @@ try
                 $targetResource.Description | Should -BeNullOrEmpty
             }
 
+            It 'Should throw the correct error if the path does not exist' {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+
+                $errorMessage = $script:localizedData.PathNotFoundError -f $testPresentParams.Path
+                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $errorMessage
+            }
+
+            It 'Should throw the correct error if an unkwon error occurs' {
+                $error = 'Unknown Error'
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw $error }
+
+                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $error
+            }
         }
         #endregion
 

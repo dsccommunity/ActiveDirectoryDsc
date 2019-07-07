@@ -23,9 +23,21 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    Write-Verbose ($script:localizedData.RetrievingOU -f $Name)
+    Write-Verbose ($script:localizedData.RetrievingOU -f $Name, $Path)
 
-    $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
+    try
+    {
+        $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        $errorMessage = $script:localizedData.PathNotFoundError -f $Path
+        New-ObjectNotFoundException -Message $errorMessage
+    }
+    catch
+    {
+        throw $_
+    }
 
     if ($null -eq $ou)
     {
