@@ -762,6 +762,23 @@ try
                 Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam } -Scope It -Exactly 1
             }
 
+            It "Should call 'Set-ADUser' with the correct parameter when 'ChangePasswordAtLogon' is true and the user does exist" {
+                $mockBoolParam = 'ChangePasswordAtLogon'
+                $newPresentParams = $testPresentParams.Clone()
+                $newAbsentParams = $testAbsentParams.Clone()
+
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -ParameterFilter { $Username -eq $newPresentParams.UserName } `
+                        -MockWith { $newPresentParams }
+                    Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
+                }
+
+                Set-TargetResource @newPresentParams -Verbose
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam -eq $true } `
+                    -Scope It -Exactly 0
+            }
+
             Context 'When RestoreFromRecycleBin is used' {
                 BeforeAll {
                     Mock -CommandName Get-TargetResource -MockWith {

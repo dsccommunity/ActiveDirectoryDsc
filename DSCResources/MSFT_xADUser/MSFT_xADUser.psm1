@@ -1060,6 +1060,7 @@ function Test-TargetResource
             elseif ($parameter -eq 'ChangePasswordAtLogon' -and $PSBoundParameters.$parameter -eq $true -and $targetResource.Ensure -eq 'Present')
             {
                 # Only process the ChangePasswordAtLogon = $true parameter during new user creation
+                continue
             }
         # Only check properties that are returned by Get-TargetResource
             elseif ($targetResource.ContainsKey($parameter))
@@ -1543,6 +1544,8 @@ function Set-TargetResource
                 elseif ($parameter -eq 'ChangePasswordAtLogon' -and $PSBoundParameters.$parameter -eq $true -and $newADUser -eq $false)
                 {
                     # Only process the ChangePasswordAtLogon = $true parameter during new user creation
+                    Write-Verbose "Here"
+                    continue
                 }
                 elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
                 {
