@@ -1254,9 +1254,13 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should throw an InvalidOperationException when object parent does not exist' {
-                Mock -CommandName Restore-ADObject -MockWith { throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADException)}
+                Mock -CommandName Restore-ADObject -MockWith {
+                    throw New-Object -TypeName Microsoft.ActiveDirectory.Management.ADException
+                }
 
-                {Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass} | Should -Throw -ExceptionType ([System.InvalidOperationException])
+                {
+                    Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass
+                } | Should -Throw ($script:localizedData.RecycleBinRestoreFailed -f $restoreIdentity, $restoreObjectClass)
             }
         }
 
