@@ -1205,7 +1205,7 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         )
 
-        $restoreAdObjectReturnValue = [PSCustomObject]@{
+        $restoreAdObjectReturnValue = [PSCustomObject] @{
             DistinguishedName = 'CN=a375347,CN=Accounts,DC=contoso,DC=com'
             Name              = 'a375347'
             ObjectClass       = 'user'
@@ -1311,39 +1311,39 @@ InModuleScope 'xActiveDirectory.Common' {
         Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
         $memberData = @(
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Account1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Group1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Computer1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Account1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Group1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Computer1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Account1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Group1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Computer1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
@@ -1400,9 +1400,11 @@ InModuleScope 'xActiveDirectory.Common' {
                     {$Identity -match 'Computer'} { 'computer' }
                 }
 
-                return ([PSCustomObject]@{
+                return (
+                    [PSCustomObject] @{
                         objectClass = $objectClass
-                    })
+                    }
+                )
             }
             # Mocks should return something that is used with Add-ADGroupMember
             Mock -CommandName Get-ADComputer -MockWith { return 'placeholder' }

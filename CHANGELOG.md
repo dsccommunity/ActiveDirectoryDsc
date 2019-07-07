@@ -3,18 +3,32 @@
 ## Unreleased
 
 - Changes to xActiveDirectory
-  - Added a Requirements section to every DSC resource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
-  - Added 'about_\<DSCResource\>.help.txt' file to all resources ([issue #404](https://github.com/PowerShell/xActiveDirectory/issues/404)).
+  - Added a Requirements section to every DSC resource README with the
+    bullet point stating "Target machine must be running Windows Server
+    2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
+  - Added 'about_\<DSCResource\>.help.txt' file to all resources
+    ([issue #404](https://github.com/PowerShell/xActiveDirectory/issues/404)).
+  - Removed the helper function `ThrowInvalidOperationError` in favor of
+    [new helper functions for localization](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#helper-functions-for-localization)
+    ([issue #316](https://github.com/PowerShell/xActiveDirectory/issues/316)).
+  - Cleaned up some minor style violations in the code.
 - Changes to xADManagedServiceAccount
-  - Added a requirement to README stating "Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
+  - Added a requirement to README stating "Group Managed Service Accounts
+    need at least one Windows Server 2012 Domain Controller"
+    ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
 - Changes to xADComputer
-  - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config. ([issue #410](https://github.com/PowerShell/xActiveDirectory/issues/410)).
+  - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config
+    ([issue #410](https://github.com/PowerShell/xActiveDirectory/issues/410)).
 - Changes to xADOrganizationalUnit
-  - Catch exception when the path property specifies a non-existing path ([issue #408](https://github.com/PowerShell/xActiveDirectory/issues/408)).
+  - Catch exception when the path property specifies a non-existing path
+    ([issue #408](https://github.com/PowerShell/xActiveDirectory/issues/408))
 - Changes to xADUser
-  - Fixes exception when creating a user with an empty string property ([issue #407](https://github.com/PowerShell/xActiveDirectory/issues/407)).
-  - Fixes exception when updating `CommonName` and `Path` concurrently ([issue #402](https://github.com/PowerShell/xActiveDirectory/issues/402)).
-  - Fixes ChangePasswordAtLogon Property to be only set to `true` at User Creation ([issue #414](https://github.com/PowerShell/xActiveDirectory/issues/414)).
+  - Fixes exception when creating a user with an empty string property
+    ([issue #407](https://github.com/PowerShell/xActiveDirectory/issues/407)).
+  - Fixes exception when updating `CommonName` and `Path` concurrently
+    ([issue #402](https://github.com/PowerShell/xActiveDirectory/issues/402)).
+  - Fixes ChangePasswordAtLogon Property to be only set to `true` at User
+    Creation ([issue #414](https://github.com/PowerShell/xActiveDirectory/issues/414)).
 
 ## 3.0.0.0
 
@@ -58,7 +72,8 @@
       ([issue #374](https://github.com/PowerShell/xActiveDirectory/issues/374)).
   - Removed unused legacy test files from the root of the repository.
   - Updated Example List README with missing resources.
-  - Added missing examples for xADReplicationSubnet, xADServicePrincipalName and xWaitForADDomain. ([issue #395](https://github.com/PowerShell/xActiveDirectory/issues/395)).
+  - Added missing examples for xADReplicationSubnet, xADServicePrincipalName
+    and xWaitForADDomain. ([issue #395](https://github.com/PowerShell/xActiveDirectory/issues/395)).
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
@@ -88,7 +103,8 @@
 - Changes to xADOrganizationalUnit
   - Change the description of the property RestoreFromRecycleBin.
   - Code cleanup.
-  - Fix incorrect verbose message when this resource has Ensure set to Absent ([issue #276](https://github.com/PowerShell/xActiveDirectory/issues/276)).
+  - Fix incorrect verbose message when this resource has Ensure set to
+    Absent ([issue #276](https://github.com/PowerShell/xActiveDirectory/issues/276)).
 - Changes to xADUser
   - Change the description of the property RestoreFromRecycleBin.
   - Added ServicePrincipalNames property ([issue #153](https://github.com/PowerShell/xActiveDirectory/issues/153)).
@@ -174,12 +190,14 @@
     and [@kungfu71186](https://github.com/kungfu71186)
   - Removing the Misc Folder, as it is no longer required.
   - Added xADKDSKey resource to create KDS Root Keys for gMSAs. [@kungfu71186](https://github.com/kungfu71186)
-  - Combined DscResource.LocalizationHelper and DscResource.Common Modules into xActiveDirectory.Common
+  - Combined DscResource.LocalizationHelper and DscResource.Common Modules
+    into xActiveDirectory.Common
 - Changes to xADReplicationSiteLink
   - Make use of the new localization helper functions.
 - Changes to xAdDomainController
   - Added new parameter to disable or enable the Global Catalog (GC)
-    ([issue #75](https://github.com/PowerShell/xActiveDirectory/issues/75)). [Eric Foskett @Merto410](https://github.com/Merto410)
+    ([issue #75](https://github.com/PowerShell/xActiveDirectory/issues/75)).
+    [Eric Foskett @Merto410](https://github.com/Merto410)
   - Fixed a bug with the parameter `InstallationMediaPath` that it would
     not be added if it was specified in a configuration. Now the parameter
     `InstallationMediaPath` is correctly passed to `Install-ADDSDomainController`.

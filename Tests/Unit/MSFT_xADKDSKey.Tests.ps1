@@ -248,8 +248,9 @@ try
         Describe -Name 'MSFT_xADKDSKey\Get-ADRootDomainDN' {
             BeforeAll {
                 Mock -CommandName New-Object -MockWith {
-                    $object = [PSCustomObject]@{}
+                    $object = [PSCustomObject] @{}
                     $object | Add-Member -MemberType ScriptMethod -Name 'Get' -Value { return $mockADDomain }
+
                     return $object
                 }
             }

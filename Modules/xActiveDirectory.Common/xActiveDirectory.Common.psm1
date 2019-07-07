@@ -488,9 +488,8 @@ function Assert-Module
 
     if (-not (Get-Module -Name $ModuleName -ListAvailable))
     {
-        $errorId = '{0}_ModuleNotFound' -f $ModuleName
         $errorMessage = $script:localizedData.RoleNotFoundError -f $moduleName
-        ThrowInvalidOperationError -ErrorId $errorId -ErrorMessage $errorMessage
+        New-ObjectNotFoundException -Message $errorMessage
     }
 
     if ($ImportModule)
@@ -1039,28 +1038,6 @@ function Get-ADCommonParameters
     return $adConnectionParameters
 } #end function Get-ADCommonParameters
 
-function ThrowInvalidOperationError
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorId,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorMessage
-    )
-
-    $exception = New-Object -TypeName 'System.InvalidOperationException' -ArgumentList $ErrorMessage
-    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-    $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @($exception, $ErrorId, $errorCategory, $null)
-    throw $errorRecord
-}
-
 function ThrowInvalidArgumentError
 {
     [CmdletBinding()]
@@ -1277,7 +1254,8 @@ function Restore-ADCommonObject
         catch [Microsoft.ActiveDirectory.Management.ADException]
         {
             # After Get-TargetResource is through, only one error can occur here: Object parent does not exist
-            ThrowInvalidOperationError -ErrorId "$($Identity)_RecycleBinRestoreFailed" -ErrorMessage ($script:localizedData.RecycleBinRestoreFailed -f $Identity, $ObjectClass, $_.Exception.Message)
+            $errorMessage = $script:localizedData.RecycleBinRestoreFailed -f $Identity, $ObjectClass
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
     }
 
@@ -1835,7 +1813,6 @@ Export-ModuleMember -Function @(
     'ConvertTo-TimeSpan'
     'ConvertFrom-TimeSpan'
     'Get-ADCommonParameters'
-    'ThrowInvalidOperationError'
     'ThrowInvalidArgumentError'
     'Test-ADReplicationSite'
     'ConvertTo-DeploymentForestMode'

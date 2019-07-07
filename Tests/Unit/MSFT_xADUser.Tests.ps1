@@ -844,9 +844,11 @@ try
 
                     $script:mockCounter = 0
 
-                    Mock -CommandName Restore-ADCommonObject -MockWith { return [PSCustomObject]@{
+                    Mock -CommandName Restore-ADCommonObject -MockWith {
+                        return [PSCustomObject] @{
                             ObjectClass = 'user'
-                        } }
+                        }
+                    }
 
                     Set-TargetResource @restoreParam
 

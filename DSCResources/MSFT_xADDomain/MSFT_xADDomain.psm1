@@ -150,7 +150,7 @@ function Get-TargetResource
         catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
         {
             $errorMessage = $script:localizedData.ExistingDomainMemberError -f $DomainName
-            ThrowInvalidOperationError -ErrorId 'xADDomain_DomainMember' -ErrorMessage $errorMessage
+            New-ObjectNotFoundException -Message $errorMessage -ErrorRecord $_
         }
         catch [Microsoft.ActiveDirectory.Management.ADServerDownException]
         {
@@ -161,7 +161,7 @@ function Get-TargetResource
         catch [System.Security.Authentication.AuthenticationException]
         {
             $errorMessage = $script:localizedData.InvalidCredentialError -f $DomainName
-            ThrowInvalidOperationError -ErrorId 'xADDomain_InvalidCredential' -ErrorMessage $errorMessage
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
         catch
         {
