@@ -8,10 +8,15 @@
     2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
   - Added 'about_\<DSCResource\>.help.txt' file to all resources
     ([issue #404](https://github.com/PowerShell/xActiveDirectory/issues/404)).
-  - Removed the helper function `ThrowInvalidOperationError` in favor of
+  - Removed the helper function `ThrowInvalidOperationError` and
+    `ThrowInvalidArgumentError` in favor of the
     [new helper functions for localization](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#helper-functions-for-localization)
-    ([issue #316](https://github.com/PowerShell/xActiveDirectory/issues/316)).
+    ([issue #316](https://github.com/PowerShell/xActiveDirectory/issues/316),
+    [issue #317](https://github.com/PowerShell/xActiveDirectory/issues/317)).
   - Cleaned up some minor style violations in the code.
+  - Fixed an issue that the helper function `Add-ADCommonGroupMember` was
+    not outputting the correct group name in a verbose message and in an
+    error message.
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
@@ -341,7 +346,7 @@
 - xADDomain: Added check for Active Directory cmdlets.
 - xADDomain: Added additional error trapping, verbose and diagnostic information.
 - xADDomain: Added unit test coverage.
-- Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomin, xADGroup, xADOrganizationalUnit and xADUser resources.
+- Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomain, xADGroup, xADOrganizationalUnit and xADUser resources.
 
 ## 2.9.0.0
 

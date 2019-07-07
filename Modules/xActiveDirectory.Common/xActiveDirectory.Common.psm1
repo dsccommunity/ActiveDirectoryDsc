@@ -622,16 +622,14 @@ function Assert-MemberParameters
         if ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
             # If Members are provided, Include and Exclude are not allowed.
-            $errorId = '{0}_MembersPlusIncludeOrExcludeConflict' -f $ModuleName
             $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude'
-            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
+            New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
         }
 
         if ($Members.Length -eq 0)
         {
-            $errorId = '{0}_MembersIsNull' -f $ModuleName
             $errorMessage = $script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude'
-            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
+            New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
         }
     }
 
@@ -649,19 +647,17 @@ function Assert-MemberParameters
     {
         if (($MembersToInclude.Length -eq 0) -and ($MembersToExclude.Length -eq 0))
         {
-            $errorId = '{0}_EmptyIncludeAndExclude' -f $ModuleName
             $errorMessage = $script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude'
-            ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
+            New-InvalidArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
         }
 
-        # Both MembersToInclude and MembersToExlude were provided. Check if they have common principals.
+        # Both MembersToInclude and MembersToExclude were provided. Check if they have common principals.
         foreach ($member in $MembersToInclude)
         {
             if ($member -in $MembersToExclude)
             {
-                $errorId = '{0}_IncludeAndExcludeConflict' -f $ModuleName
                 $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude'
-                ThrowInvalidArgumentError -ErrorId $errorId -ErrorMessage $errorMessage
+                New-InvalidArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
             }
         }
     }
@@ -714,7 +710,7 @@ function Remove-DuplicateMembers
 } #end function RemoveDuplicateMembers
 
 # Internal function to test whether the existing array members match the defined explicit array
-# members, the included members are present and the exlcuded members are not present.
+# members, the included members are present and the excluded members are not present.
 function Test-Members
 {
     [CmdletBinding()]
@@ -886,7 +882,7 @@ function ConvertTo-TimeSpan
 
 <#
     .SYNOPSIS
-        Converts a System.TimeSpan into the number of seconds, mintutes, hours or days.
+        Converts a System.TimeSpan into the number of seconds, minutes, hours or days.
 
     .PARAMETER TimeSpan
         TimeSpan to convert into an integer
@@ -1037,29 +1033,6 @@ function Get-ADCommonParameters
 
     return $adConnectionParameters
 } #end function Get-ADCommonParameters
-
-function ThrowInvalidArgumentError
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorId,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorMessage
-    )
-
-    $exception = New-Object -TypeName 'System.ArgumentException' -ArgumentList $ErrorMessage
-    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-    $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @($exception, $ErrorId, $errorCategory, $null)
-    throw $errorRecord
-
-} #end function ThrowInvalidArgumentError
 
 # Internal function to test site availability
 function Test-ADReplicationSite
@@ -1337,11 +1310,14 @@ function Add-ADCommonGroupMember
 
             if (-not $memberDomain)
             {
-                ThrowInvalidArgumentError -ErrorId "$($member)_EmptyDomainError" -ErrorMessage ($script:localizedData.EmptyDomainError -f $member, $Parameters.GroupName)
+                $errorMessage = $script:localizedData.EmptyDomainError -f $member, $Parameters.Identity
+                New-InvalidOperationException -Message $errorMessage
             }
 
-            Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.GroupName)
+            Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.Identity)
+
             $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass
+
             if ($memberObjectClass -eq 'computer')
             {
                 $memberObject = Get-ADComputer -Identity $member -Server $memberDomain
@@ -1813,7 +1789,6 @@ Export-ModuleMember -Function @(
     'ConvertTo-TimeSpan'
     'ConvertFrom-TimeSpan'
     'Get-ADCommonParameters'
-    'ThrowInvalidArgumentError'
     'Test-ADReplicationSite'
     'ConvertTo-DeploymentForestMode'
     'ConvertTo-DeploymentDomainMode'

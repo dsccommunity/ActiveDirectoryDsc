@@ -863,24 +863,34 @@ InModuleScope 'xActiveDirectory.Common' {
     }
 
     Describe 'xActiveDirectory.Common\Assert-MemberParameters' {
-        It "Throws if 'Members' is specified but is empty" {
-            { Assert-MemberParameters -Members @() } | Should -Throw ($script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude')
+        It 'Should throw if parameter Members is specified but is empty' {
+            {
+                Assert-MemberParameters -Members @()
+            } | Should -Throw ($script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'Members' and 'MembersToInclude' are specified" {
-            { Assert-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should -Throw 'parameters conflict'
+        It 'Should throws if both parameters Members and MembersToInclude are specified' {
+            {
+                Assert-MemberParameters -Members @('User1') -MembersToInclude @('User2')
+            } | Should -Throw ($script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'Members' and 'MembersToExclude' are specified" {
-            { Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should -Throw 'parameters conflict'
+        It 'Should throw if both parameters Members and MembersToExclude are specified' {
+            {
+                Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2')
+            } | Should -Throw ($script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'MembersToInclude' and 'MembersToExclude' contain the same member" {
-            { Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should -Throw 'member must not be included in both'
+        It 'Should throws if the both parameters MembersToInclude and MembersToExclude contain the same member' {
+            {
+                Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1')
+            } | Should -Throw ($errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f 'user1', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'MembersToInclude' and 'MembersToExclude' are empty" {
-            { Assert-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should -Throw 'At least one member must be specified'
+        It 'Should throw if both parameters MembersToInclude and MembersToExclude contains no members (are empty)' {
+            {
+                Assert-MemberParameters -MembersToExclude @() -MembersToInclude @()
+            } | Should -Throw ($script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude')
         }
     }
 
@@ -1424,8 +1434,10 @@ InModuleScope 'xActiveDirectory.Common' {
         }
 
         Context 'When the domain name cannot be determined' {
-            It 'Should throw an InvalidArgumentException' {
-                {Add-ADCommonGroupMember -Members $invalidMemberData  -Parameters $fakeParameters -MembersInMultipleDomains} | Should -Throw -ExceptionType ([System.ArgumentException])
+            It 'Should throw the correct error' {
+                {
+                    Add-ADCommonGroupMember -Members $invalidMemberData -Parameters $fakeParameters -MembersInMultipleDomains
+                } | Should -Throw ($script:localizedData.EmptyDomainError -f $invalidMemberData[0], $fakeParameters.Identity)
             }
         }
     }
