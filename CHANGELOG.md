@@ -34,6 +34,11 @@
     ([issue #402](https://github.com/PowerShell/xActiveDirectory/issues/402)).
   - Fixes ChangePasswordAtLogon Property to be only set to `true` at User
     Creation ([issue #414](https://github.com/PowerShell/xActiveDirectory/issues/414)).
+- xADDomain
+  - Updated tests and replaced `Write-Error` with `throw`
+    ([issue #332](https://github.com/PowerShell/xActiveDirectory/pull/332)).
+- Changes to xADRecycleBin
+  - Updated tests and remove unnecessary mocks of `Write-Error`.
 
 ## 3.0.0.0
 
