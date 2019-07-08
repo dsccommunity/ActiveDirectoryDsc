@@ -779,6 +779,32 @@ try
                     -Scope It -Exactly 0
             }
 
+            It "Should call 'Set-ADUser' with the correct parameter when 'ChangePasswordAtLogon' is true and the user does not exist" {
+                $mockBoolParam = 'ChangePasswordAtLogon'
+                $preNewUserParams = $testAbsentParams.Clone()
+                $postNewUserParams = $testPresentParams.Clone()
+
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -ParameterFilter { $Username -eq $newPresentParams.UserName } `
+                        -MockWith {
+                            if ($script:newADUser)
+                            {
+                                $preNewUserParams
+                            }
+                            else
+                            {
+                                $postNewUserParams
+                            }
+                        }
+                    Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
+                }
+
+                Set-TargetResource @newPresentParams -Verbose
+
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam -eq $true } `
+                    -Scope It -Exactly 1
+            }
+
             Context 'When RestoreFromRecycleBin is used' {
                 BeforeAll {
                     Mock -CommandName Get-TargetResource -MockWith {

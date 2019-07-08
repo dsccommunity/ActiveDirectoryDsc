@@ -1455,7 +1455,7 @@ function Set-TargetResource
     # Add common name, ensure and enabled as they may not be explicitly passed
     $PSBoundParameters['Ensure'] = $Ensure
     $PSBoundParameters['Enabled'] = $Enabled
-    $newADUser = $false
+    $script:newADUser = $false
 
     if ($Ensure -eq 'Present')
     {
@@ -1492,7 +1492,7 @@ function Set-TargetResource
                 # Now retrieve the newly created user
                 $targetResource = Get-TargetResource @PSBoundParameters
 
-                $newADUser = $true
+                $script:newADUser = $true
             }
         }
 
@@ -1541,10 +1541,9 @@ function Set-TargetResource
                         Set-ADAccountPassword @adCommonParameters -Reset -NewPassword $Password.Password
                     }
                 }
-                elseif ($parameter -eq 'ChangePasswordAtLogon' -and $PSBoundParameters.$parameter -eq $true -and $newADUser -eq $false)
+                elseif ($parameter -eq 'ChangePasswordAtLogon' -and $PSBoundParameters.$parameter -eq $true -and $script:newADUser -eq $false)
                 {
                     # Only process the ChangePasswordAtLogon = $true parameter during new user creation
-                    Write-Verbose "Here"
                     continue
                 }
                 elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
