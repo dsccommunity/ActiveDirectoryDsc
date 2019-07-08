@@ -1,67 +1,108 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param()
 
-$Global:DSCModuleName      = 'xActiveDirectory' # Example xNetworking
-$Global:DSCResourceName    = 'MSFT_xADOrganizationalUnit' # Example MSFT_xFirewall
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADOrganizationalUnit'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green;
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
-#endregion
+
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
+    Invoke-TestSetup
 
-    #region Pester Tests
+    InModuleScope $script:dscResourceName {
+        function Get-ADOrganizationalUnit
+        {
+            param
+            (
+                $Name
+            )
+        }
 
-    # The InModuleScope command allows you to perform white-box unit testing on the internal
-    # (non-exported) code of a Script Module.
-    InModuleScope $Global:DSCResourceName {
+        function Set-ADOrganizationalUnit
+        {
+            param
+            (
+                $Identity,
+                $Credential
+            )
+        }
 
-        function Get-ADOrganizationalUnit { param ($Name) }
-        function Set-ADOrganizationalUnit { param ($Identity, $Credential) }
-        function Remove-ADOrganizationalUnit { param ($Name, $Credential) }
-        function New-ADOrganizationalUnit { param ($Name, $Credential) }
+        function Remove-ADOrganizationalUnit
+        {
+            param
+            (
+                $Name,
+                $Credential
+            )
+        }
 
-        $testCredential = New-Object System.Management.Automation.PSCredential 'DummyUser', (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force);
+        function New-ADOrganizationalUnit
+        {
+            param
+            (
+                $Name,
+                $Credential
+            )
+        }
+
+        $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+            'DummyUser',
+            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+        )
 
         $testPresentParams = @{
             Name = 'TestOU'
-            Path = 'OU=Fake,DC=contoso,DC=com';
-            Description = 'Test AD OU description';
-            Ensure = 'Present';
+            Path = 'OU=Fake,DC=contoso,DC=com'
+            Description = 'Test AD OU description'
+            Ensure = 'Present'
         }
 
-        $testAbsentParams = $testPresentParams.Clone();
-        $testAbsentParams['Ensure'] = 'Absent';
+        $testAbsentParams = $testPresentParams.Clone()
+        $testAbsentParams['Ensure'] = 'Absent'
 
         $protectedFakeAdOu = @{
-            Name = $testPresentParams.Name;
-            ProtectedFromAccidentalDeletion = $true;
-            Description = $testPresentParams.Description;
+            Name = $testPresentParams.Name
+            ProtectedFromAccidentalDeletion = $true
+            Description = $testPresentParams.Description
         }
 
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-
+        Describe 'xADOrganizationalUnit\Get-TargetResource' {
             It 'Returns a "System.Collections.Hashtable" object type' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
-                $targetResource -is [System.Collections.Hashtable] | Should Be $true
+                $targetResource -is [System.Collections.Hashtable] | Should -Be $true
             }
 
             It 'Returns "Ensure" = "Present" when OU exists' {
@@ -69,7 +110,7 @@ try
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
-                $targetResource.Ensure | Should Be 'Present'
+                $targetResource.Ensure | Should -Be 'Present'
             }
 
             It 'Returns "Ensure" = "Absent" when OU does not exist' {
@@ -77,7 +118,7 @@ try
                 Mock -CommandName Get-ADOrganizationalUnit
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
-                $targetResource.Ensure | Should Be 'Absent'
+                $targetResource.Ensure | Should -Be 'Absent'
             }
 
             It 'Returns "ProtectedFromAccidentalDeletion" = "$true" when OU is protected' {
@@ -85,60 +126,74 @@ try
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
-                $targetResource.ProtectedFromAccidentalDeletion | Should Be $true
+                $targetResource.ProtectedFromAccidentalDeletion | Should -Be $true
             }
 
             It 'Returns "ProtectedFromAccidentalDeletion" = "$false" when OU is not protected' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith {
-                    $unprotectedFakeAdOu = $protectedFakeAdOu.Clone();
-                    $unprotectedFakeAdOu['ProtectedFromAccidentalDeletion'] = $false;
+                    $unprotectedFakeAdOu = $protectedFakeAdOu.Clone()
+                    $unprotectedFakeAdOu['ProtectedFromAccidentalDeletion'] = $false
                     return [PSCustomObject] $unprotectedFakeAdOu
                 }
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
-                $targetResource.ProtectedFromAccidentalDeletion | Should Be $false
+                $targetResource.ProtectedFromAccidentalDeletion | Should -Be $false
             }
 
             It 'Returns an empty description' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith {
-                    $noDescriptionFakeAdOu = $protectedFakeAdOu.Clone();
-                    $noDescriptionFakeAdOu['Description'] = '';
+                    $noDescriptionFakeAdOu = $protectedFakeAdOu.Clone()
+                    $noDescriptionFakeAdOu['Description'] = ''
                     return [PSCustomObject] $noDescriptionFakeAdOu
                 }
 
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
 
-                $targetResource.Description | Should BeNullOrEmpty
+                $targetResource.Description | Should -BeNullOrEmpty
             }
 
+            It 'Should throw the correct error if the path does not exist' {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+
+                $errorMessage = $script:localizedData.PathNotFoundError -f $testPresentParams.Path
+                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $errorMessage
+            }
+
+            It 'Should throw the correct error if an unkwon error occurs' {
+                $error = 'Unknown Error'
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw $error }
+
+                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $error
+            }
         }
         #endregion
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
-
+        Describe 'xADOrganizationalUnit\Test-TargetResource' {
             It 'Returns a "System.Boolean" object type' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
                 $targetResource = Test-TargetResource @testPresentParams
 
-                $targetResource -is [System.Boolean] | Should Be $true
+                $targetResource -is [System.Boolean] | Should -Be $true
             }
 
             It 'Fails when OU does not exist and "Ensure" = "Present"' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit
 
-                Test-TargetResource @testPresentParams | Should Be $false
+                Test-TargetResource @testPresentParams | Should -Be $false
             }
 
             It 'Fails when OU does exist and "Ensure" = "Absent"' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
 
-                Test-TargetResource @testAbsentParams | Should Be $false
+                Test-TargetResource @testAbsentParams | Should -Be $false
             }
 
             It 'Fails when OU does exist but "Description" is incorrect' {
@@ -147,7 +202,7 @@ try
                 $testDescriptionParams = $testPresentParams.Clone()
                 $testDescriptionParams['Description'] = 'Wrong description'
 
-                Test-TargetResource @testDescriptionParams | Should Be $false
+                Test-TargetResource @testDescriptionParams | Should -Be $false
             }
 
             It 'Fails when OU does exist but "ProtectedFromAccidentalDeletion" is incorrect' {
@@ -156,21 +211,21 @@ try
                 $testProtectedFromAccidentalDeletionParams = $testPresentParams.Clone()
                 $testProtectedFromAccidentalDeletionParams['ProtectedFromAccidentalDeletion'] = $false
 
-                Test-TargetResource @testProtectedFromAccidentalDeletionParams | Should Be $false
+                Test-TargetResource @testProtectedFromAccidentalDeletionParams | Should -Be $false
             }
 
             It 'Passes when OU does exist, "Ensure" = "Present" and all properties are correct' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
 
-                Test-TargetResource @testPresentParams | Should Be $true
+                Test-TargetResource @testPresentParams | Should -Be $true
             }
 
             It 'Passes when OU does not exist and "Ensure" = "Absent"' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit
 
-                Test-TargetResource @testAbsentParams | Should Be $true
+                Test-TargetResource @testAbsentParams | Should -Be $true
             }
 
             It 'Passes when no OU description is specified with existing OU description' {
@@ -179,15 +234,14 @@ try
                 $testEmptyDescriptionParams = $testPresentParams.Clone()
                 $testEmptyDescriptionParams['Description'] = ''
 
-                Test-TargetResource @testEmptyDescriptionParams | Should Be $true
+                Test-TargetResource @testEmptyDescriptionParams | Should -Be $true
             }
 
         }
         #endregion
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
+        Describe 'xADOrganizationalUnit\Set-TargetResource' {
             It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and OU does not exist' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit
@@ -285,7 +339,7 @@ try
                 Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
                 Mock -CommandName Restore-ADCommonObject -MockWith { return [PSCustomObject] $protectedFakeAdOu }
 
-                Set-TargetResource @restoreParam;
+                Set-TargetResource @restoreParam
 
                 Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADOrganizationalUnit -Scope It -Exactly -Times 0
@@ -298,7 +352,7 @@ try
                 Mock -CommandName New-ADOrganizationalUnit
                 Mock -CommandName Restore-ADCommonObject
 
-                Set-TargetResource @restoreParam;
+                Set-TargetResource @restoreParam
 
                 Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADOrganizationalUnit -Scope It
@@ -318,14 +372,10 @@ try
             }
         }
         #endregion
-
     }
     #endregion
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
-

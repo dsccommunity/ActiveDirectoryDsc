@@ -1,25 +1,32 @@
-$Global:DSCModuleName   = 'xActiveDirectory'
-$Global:DSCResourceName = 'MSFT_xADObjectPermissionEntry'
+$script:dscModuleName = 'xActiveDirectory'
+$script:dscResourceName = 'MSFT_xADObjectPermissionEntry'
 
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-Write-Host $moduleRoot -ForegroundColor Green;
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.4
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
-#endregion
 
-function Invoke-TestSetup { }
+#endregion HEADER
 
-function Invoke-TestCleanup {
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
@@ -28,8 +35,7 @@ try
 {
     Invoke-TestSetup
 
-    InModuleScope $Global:DSCResourceName {
-
+    InModuleScope $script:dscResourceName {
         #region Pester Test Initialization
         $testDefaultParameters = @{
             Path                               = 'CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -39,14 +45,17 @@ try
             ActiveDirectorySecurityInheritance = 'None'
             InheritedObjectType                = '00000000-0000-0000-0000-000000000000'
         }
+
         $testPresentParameters = @{
             Ensure                             = 'Present'
             ActiveDirectoryRights              = 'GenericAll'
         }
+
         $testAbsentParameters = @{
             Ensure                             = 'Absent'
             ActiveDirectoryRights              = 'GenericAll'
         }
+
         $mockGetAclPresent = {
             $mock = [PSCustomObject] @{
                 Path   = 'AD:CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -70,6 +79,7 @@ try
             $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value {}
             return $mock
         }
+
         $mockGetAclAbsent = {
             $mock = [PSCustomObject] @{
                 Path   = 'AD:CN=PC,CN=Computers,DC=lab,DC=local'
@@ -83,20 +93,24 @@ try
         #endregion
 
         #region Function Get-TargetResource
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-
-            Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
+        Describe 'xADObjectPermissionEntry\Get-TargetResource' {
+            Mock -CommandName 'Assert-ADPSDrive'
 
             Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
+
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
 
                 It 'Should return a "System.Collections.Hashtable" object type' {
                     # Act
                     $targetResource = Get-TargetResource @testDefaultParameters -Verbose
 
                     # Assert
-                    $targetResource | Should BeOfType [System.Collections.Hashtable]
+                    $targetResource | Should -BeOfType [System.Collections.Hashtable]
                 }
 
                 It 'Should return a valid result if the ace is present' {
@@ -104,14 +118,14 @@ try
                     $targetResource = Get-TargetResource @testDefaultParameters -Verbose
 
                     # Assert
-                    $targetResource.Ensure                             | Should Be 'Present'
-                    $targetResource.Path                               | Should Be $testDefaultParameters.Path
-                    $targetResource.IdentityReference                  | Should Be $testDefaultParameters.IdentityReference
-                    $targetResource.ActiveDirectoryRights              | Should Be 'GenericAll'
-                    $targetResource.AccessControlType                  | Should Be $testDefaultParameters.AccessControlType
-                    $targetResource.ObjectType                         | Should Be $testDefaultParameters.ObjectType
-                    $targetResource.ActiveDirectorySecurityInheritance | Should Be $testDefaultParameters.ActiveDirectorySecurityInheritance
-                    $targetResource.InheritedObjectType                | Should Be $testDefaultParameters.InheritedObjectType
+                    $targetResource.Ensure                             | Should -Be 'Present'
+                    $targetResource.Path                               | Should -Be $testDefaultParameters.Path
+                    $targetResource.IdentityReference                  | Should -Be $testDefaultParameters.IdentityReference
+                    $targetResource.ActiveDirectoryRights              | Should -Be 'GenericAll'
+                    $targetResource.AccessControlType                  | Should -Be $testDefaultParameters.AccessControlType
+                    $targetResource.ObjectType                         | Should -Be $testDefaultParameters.ObjectType
+                    $targetResource.ActiveDirectorySecurityInheritance | Should -Be $testDefaultParameters.ActiveDirectorySecurityInheritance
+                    $targetResource.InheritedObjectType                | Should -Be $testDefaultParameters.InheritedObjectType
                 }
             }
 
@@ -119,30 +133,34 @@ try
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
 
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
+
                 It 'Should return a valid result if the ace is absent' {
                     # Act
                     $targetResource = Get-TargetResource @testDefaultParameters -Verbose
 
                     # Assert
-                    $targetResource.Ensure                             | Should Be 'Absent'
-                    $targetResource.Path                               | Should Be $testDefaultParameters.Path
-                    $targetResource.IdentityReference                  | Should Be $testDefaultParameters.IdentityReference
-                    $targetResource.ActiveDirectoryRights              | Should Be ''
-                    $targetResource.AccessControlType                  | Should Be $testDefaultParameters.AccessControlType
-                    $targetResource.ObjectType                         | Should Be $testDefaultParameters.ObjectType
-                    $targetResource.ActiveDirectorySecurityInheritance | Should Be $testDefaultParameters.ActiveDirectorySecurityInheritance
-                    $targetResource.InheritedObjectType                | Should Be $testDefaultParameters.InheritedObjectType
+                    $targetResource.Ensure                             | Should -Be 'Absent'
+                    $targetResource.Path                               | Should -Be $testDefaultParameters.Path
+                    $targetResource.IdentityReference                  | Should -Be $testDefaultParameters.IdentityReference
+                    $targetResource.ActiveDirectoryRights              | Should -Be ''
+                    $targetResource.AccessControlType                  | Should -Be $testDefaultParameters.AccessControlType
+                    $targetResource.ObjectType                         | Should -Be $testDefaultParameters.ObjectType
+                    $targetResource.ActiveDirectorySecurityInheritance | Should -Be $testDefaultParameters.ActiveDirectorySecurityInheritance
+                    $targetResource.InheritedObjectType                | Should -Be $testDefaultParameters.InheritedObjectType
                 }
             }
         }
         #endregion
 
         #region Function Test-TargetResource
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+        Describe 'xADObjectPermissionEntry\Test-TargetResource' {
+            Mock -CommandName 'Assert-ADPSDrive' { }
 
-            Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
-
-            Context 'When he desired ace is present' {
+            Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
 
@@ -151,7 +169,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters
 
                     # Assert
-                    $targetResource | Should BeOfType [System.Boolean]
+                    $targetResource | Should -BeOfType [System.Boolean]
                 }
 
                 It 'Should return $true if the ace desired state is present' {
@@ -159,7 +177,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters -Verbose
 
                     # Assert
-                    $targetResource | Should Be $true
+                    $targetResource | Should -Be $true
                 }
 
                 It 'Should return $false if the ace desired state is absent' {
@@ -167,7 +185,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testAbsentParameters
 
                     # Assert
-                    $targetResource | Should Be $false
+                    $targetResource | Should -Be $false
                 }
             }
 
@@ -180,7 +198,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters
 
                     # Assert
-                    $targetResource | Should Be $false
+                    $targetResource | Should -Be $false
                 }
 
                 It 'Should return $true if the ace desired state is absent' {
@@ -188,21 +206,25 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testAbsentParameters
 
                     # Assert
-                    $targetResource | Should Be $true
+                    $targetResource | Should -Be $true
                 }
             }
         }
         #endregion
 
         #region Function Set-TargetResource
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
-
-            Mock -CommandName 'Import-Module' -ParameterFilter { $Name -eq 'ActiveDirectory' } -MockWith { }
+        Describe 'xADObjectPermissionEntry\Set-TargetResource' {
+            Mock -CommandName 'Assert-ADPSDrive'
 
             Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
-                Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
+                Mock -CommandName 'Set-Acl' -Verifiable
+
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
 
                 It 'Should remove the ace from the existing acl' {
                     # Act
@@ -216,7 +238,12 @@ try
             Context 'When the desired ace is absent' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
-                Mock -CommandName 'Set-Acl' -MockWith { } -Verifiable
+                Mock -CommandName 'Set-Acl' -Verifiable
+
+                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                    $targetResource = Get-TargetResource @testDefaultParameters -Verbose
+                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+                }
 
                 It 'Should add the ace to the existing acl' {
                     # Act

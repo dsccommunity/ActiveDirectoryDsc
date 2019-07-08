@@ -1,3 +1,11 @@
+$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADReplicationSubnet'
+
 <#
     .SYNOPSIS
         Returns the current state of the replication subnet.
@@ -25,13 +33,19 @@ function Get-TargetResource
         $Site
     )
 
-    # Get the replication subnet filtered by it's name. If the subnet is not
-    # present, the command will return $null.
+    <#
+        Get the replication subnet filtered by it's name. If the subnet is not
+        present, the command will return $null.
+    #>
+    Write-Verbose -Message ($script:localizedData.GetReplicationSubnet -f $Name)
+
     $replicationSubnet = Get-ADReplicationSubnet -Filter { Name -eq $Name }
 
     if ($null -eq $replicationSubnet)
     {
         # Replication subnet not found, return absent.
+        Write-Verbose -Message ($script:localizedData.ReplicationSubnetAbsent -f $Name)
+
         $returnValue = @{
             Ensure   = 'Absent'
             Name     = $Name
@@ -43,17 +57,21 @@ function Get-TargetResource
     {
         # Get the name of the replication site, if it's not empty.
         $replicationSiteName = ''
+
         if ($null -ne $replicationSubnet.Site)
         {
-            $replicationSiteName = Get-ADObject -Identity $replicationSubnet.Site | Select-Object -ExpandProperty 'Name'
+            $replicationSiteName = Get-ADObject -Identity $replicationSubnet.Site |
+                Select-Object -ExpandProperty 'Name'
         }
 
-        # Replication subnet not found, return present.
+        # Replication subnet found, return present.
+        Write-Verbose -Message ($script:localizedData.ReplicationSubnetPresent -f $Name)
+
         $returnValue = @{
             Ensure   = 'Present'
             Name     = $Name
             Site     = $replicationSiteName
-            Location = [String] $replicationSubnet.Location
+            Location = [System.String] $replicationSubnet.Location
         }
     }
 
@@ -101,8 +119,10 @@ function Set-TargetResource
         $Location = ''
     )
 
-    # Get the replication subnet filtered by it's name. If the subnet is not
-    # present, the command will return $null.
+    <#
+        Get the replication subnet filtered by it's name. If the subnet is not
+        present, the command will return $null.
+    #>
     $replicationSubnet = Get-ADReplicationSubnet -Filter { Name -eq $Name }
 
     if ($Ensure -eq 'Present')
@@ -110,35 +130,42 @@ function Set-TargetResource
         # Add the replication subnet, if it does not exist.
         if ($null -eq $replicationSubnet)
         {
-            Write-Verbose "Create the replication subnet $Name"
+            Write-Verbose -Message ($script:localizedData.CreateReplicationSubnet -f $Name)
 
             $replicationSubnet = New-ADReplicationSubnet -Name $Name -Site $Site -PassThru
         }
 
-        # Get the name of the replication site, if it's not empty and update the
-        # site if it's not vaild.
+        <#
+            Get the name of the replication site, if it's not empty and update the
+            site if it's not vaild.
+        #>
         if ($null -ne $replicationSubnet.Site)
         {
-            $replicationSiteName = Get-ADObject -Identity $replicationSubnet.Site | Select-Object -ExpandProperty 'Name'
+            $replicationSiteName = Get-ADObject -Identity $replicationSubnet.Site |
+                Select-Object -ExpandProperty 'Name'
         }
+
         if ($replicationSiteName -ne $Site)
         {
-            Write-Verbose "Set on replication subnet $Name the site to $Site"
+            Write-Verbose -Message ($script:localizedData.SetReplicationSubnetSite -f $Name, $Site)
 
             Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Site $Site -PassThru
         }
 
-        # Update the location, if it's not valid. Ensure an empty location
-        # string is converted to $null, because the Set-ADReplicationSubnet does
-        # not accept an empty string for the location, but $null.
+        <#
+            Update the location, if it's not valid. Ensure an empty location
+            string is converted to $null, because the Set-ADReplicationSubnet
+            does not accept an empty string for the location, but $null.
+        #>
         $nullableLocation = $Location
-        if ([String]::IsNullOrEmpty($Location))
+        if ([System.String]::IsNullOrEmpty($Location))
         {
             $nullableLocation = $null
         }
+
         if ($replicationSubnet.Location -ne $nullableLocation)
         {
-            Write-Verbose "Set on replication subnet $Name the location to $nullableLocation"
+            Write-Verbose -Message ($script:localizedData.SetReplicationSubnetLocation -f $Name, $nullableLocation)
 
             Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Location $nullableLocation -PassThru
         }
@@ -149,7 +176,7 @@ function Set-TargetResource
         # Remove the replication subnet, if it exists.
         if ($null -ne $replicationSubnet)
         {
-            Write-Verbose "Remove the replication subnet $Name"
+            Write-Verbose -Message ($script:localizedData.RemoveReplicationSubnet -f $Name)
 
             Remove-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Confirm:$false
         }
@@ -205,8 +232,17 @@ function Test-TargetResource
     if ($Ensure -eq 'Present')
     {
         $desiredConfigurationMatch = $desiredConfigurationMatch -and
-                                     $currentConfiguration.Site -eq $Site -and
-                                     $currentConfiguration.Location -eq $Location
+        $currentConfiguration.Site -eq $Site -and
+        $currentConfiguration.Location -eq $Location
+    }
+
+    if ($desiredConfigurationMatch)
+    {
+        Write-Verbose -Message ($script:localizedData.ReplicationSubnetInDesiredState -f $Name)
+    }
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.ReplicationSubnetNotInDesiredState -f $Name)
     }
 
     return $desiredConfigurationMatch
