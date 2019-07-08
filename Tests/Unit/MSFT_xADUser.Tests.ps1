@@ -767,41 +767,50 @@ try
                 $newPresentParams = $testPresentParams.Clone()
                 $newAbsentParams = $testAbsentParams.Clone()
 
-                BeforeAll {
-                    Mock -CommandName Get-TargetResource -ParameterFilter { $Username -eq $newPresentParams.UserName } `
-                        -MockWith { $newPresentParams }
-                    Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
-                }
+                Mock -CommandName Get-TargetResource -ParameterFilter { $Username -eq $newPresentParams.UserName } `
+                    -MockWith { $newPresentParams }
+                Mock -CommandName Set-ADUser
 
-                Set-TargetResource @newPresentParams -Verbose
+                Set-TargetResource @newPresentParams
 
-                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam -eq $true } `
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $ChangePasswordAtLogon -eq $true } `
                     -Scope It -Exactly 0
             }
 
             It "Should call 'Set-ADUser' with the correct parameter when 'ChangePasswordAtLogon' is true and the user does not exist" {
-                $mockBoolParam = 'ChangePasswordAtLogon'
-                $preNewUserParams = $testAbsentParams.Clone()
-                $postNewUserParams = $testPresentParams.Clone()
-
-                BeforeAll {
-                    Mock -CommandName Get-TargetResource -ParameterFilter { $Username -eq $newPresentParams.UserName } `
-                        -MockWith {
-                            if ($script:newADUser)
-                            {
-                                $preNewUserParams
-                            }
-                            else
-                            {
-                                $postNewUserParams
-                            }
-                        }
-                    Mock -CommandName Set-ADUser -ParameterFilter { $mockBoolParam }
+                $mockNewADUser = @{
+                    DomainName            = 'contoso.com'
+                    UserName              = 'NewUser'
+                    ChangePasswordAtLogon = $true
+                    Ensure                = 'Present'
                 }
+                $mockBoolParam = 'ChangePasswordAtLogon'
+                $mockPreNewUserParams = $mockNewADUser.Clone()
+                $mockPreNewUserParams['Ensure'] = 'Absent'
+                $mockPreNewUserParams[$mockBoolParam] = $false
+                $mockPostNewUserParams = $mockNewADUser.Clone()
+                $mockPostNewUserParams[$mockBoolParam] = $false
 
-                Set-TargetResource @newPresentParams -Verbose
+                Mock -CommandName New-ADUser -MockWith {
+                    $script:mockNewADUserWasCalled = $true
+                }
+                Mock -CommandName Get-TargetResource `
+                    -MockWith {
+                        if (-not $script:mockNewADUserWasCalled)
+                        {
+                            $mockPreNewUserParams
+                        }
+                        else
+                        {
+                            $mockPostNewUserParams
+                        }
+                    }
+                Mock -CommandName Set-ADUser
 
-                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $mockBoolParam -eq $true } `
+                Set-TargetResource @mockNewADUser
+
+                Assert-MockCalled -CommandName Get-TargetResource -ParameterFilter { $Username -eq $mockPreNewUserParams.UserName }
+                Assert-MockCalled -CommandName Set-ADUser -ParameterFilter { $ChangePasswordAtLogon -eq $true } `
                     -Scope It -Exactly 1
             }
 
