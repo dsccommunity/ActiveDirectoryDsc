@@ -1057,7 +1057,12 @@ function Test-TargetResource
                     $isCompliant = $false
                 }
             }
-            # Only check properties that are returned by Get-TargetResource
+            elseif ($parameter -eq 'ChangePasswordAtLogon' -and $PSBoundParameters.$parameter -eq $true -and $targetResource.Ensure -eq 'Present')
+            {
+                # Only process the ChangePasswordAtLogon = $true parameter during new user creation
+                continue
+            }
+        # Only check properties that are returned by Get-TargetResource
             elseif ($targetResource.ContainsKey($parameter))
             {
                 # This check is required to be able to explicitly remove values with an empty string, if required
@@ -1450,6 +1455,7 @@ function Set-TargetResource
     # Add common name, ensure and enabled as they may not be explicitly passed
     $PSBoundParameters['Ensure'] = $Ensure
     $PSBoundParameters['Enabled'] = $Enabled
+    $newADUser = $false
 
     if ($Ensure -eq 'Present')
     {
@@ -1485,6 +1491,8 @@ function Set-TargetResource
 
                 # Now retrieve the newly created user
                 $targetResource = Get-TargetResource @PSBoundParameters
+
+                $newADUser = $true
             }
         }
 
@@ -1532,6 +1540,11 @@ function Set-TargetResource
 
                         Set-ADAccountPassword @adCommonParameters -Reset -NewPassword $Password.Password
                     }
+                }
+                elseif ($parameter -eq 'ChangePasswordAtLogon' -and $PSBoundParameters.$parameter -eq $true -and $newADUser -eq $false)
+                {
+                    # Only process the ChangePasswordAtLogon = $true parameter during new user creation
+                    continue
                 }
                 elseif ($parameter -eq 'Enabled' -and ($PSBoundParameters.$parameter -ne $targetResource.$parameter))
                 {

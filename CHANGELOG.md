@@ -3,17 +3,18 @@
 ## Unreleased
 
 - Changes to xActiveDirectory
-  - Added a Requirements section to every DSC resource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
-  - Added 'about_\<DSCResource\>.help.txt' file to all resources ([issue #404](https://github.com/PowerShell/xActiveDirectory/pull/404)).
+  - Added a Requirements section to every DSC resource README with the bullet point stating "Target machine must be running Windows Server 2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
+  - Added 'about_\<DSCResource\>.help.txt' file to all resources ([issue #404](https://github.com/PowerShell/xActiveDirectory/issues/404)).
 - Changes to xADManagedServiceAccount
-  - Added a requirement to README stating "Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller" ([issue #399](https://github.com/PowerShell/xActiveDirectory/pull/399)).
+  - Added a requirement to README stating "Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
 - Changes to xADComputer
-  - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config. ([issue #410](https://github.com/PowerShell/xActiveDirectory/pull/410))
+  - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config. ([issue #410](https://github.com/PowerShell/xActiveDirectory/issues/410)).
 - Changes to xADOrganizationalUnit
-  - Catch exception when the path property specifies a non-existing path ([issue #408](https://github.com/PowerShell/xActiveDirectory/pull/408))
+  - Catch exception when the path property specifies a non-existing path ([issue #408](https://github.com/PowerShell/xActiveDirectory/issues/408)).
 - Changes to xADUser
-  - Fixes exception when creating a user with an empty string property ([issue #407](https://github.com/PowerShell/xActiveDirectory/pull/407)).
-  - Fixes exception when updating `CommonName` and `Path` concurrently ([issue #402](https://github.com/PowerShell/xActiveDirectory/pull/402)).
+  - Fixes exception when creating a user with an empty string property ([issue #407](https://github.com/PowerShell/xActiveDirectory/issues/407)).
+  - Fixes exception when updating `CommonName` and `Path` concurrently ([issue #402](https://github.com/PowerShell/xActiveDirectory/issues/402)).
+  - Fixes ChangePasswordAtLogon Property to be only set to `true` at User Creation ([issue #414](https://github.com/PowerShell/xActiveDirectory/issues/414)).
 
 ## 3.0.0.0
 
