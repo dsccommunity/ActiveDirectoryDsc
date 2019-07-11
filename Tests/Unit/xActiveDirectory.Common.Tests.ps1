@@ -863,24 +863,34 @@ InModuleScope 'xActiveDirectory.Common' {
     }
 
     Describe 'xActiveDirectory.Common\Assert-MemberParameters' {
-        It "Throws if 'Members' is specified but is empty" {
-            { Assert-MemberParameters -Members @() } | Should -Throw ($script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude')
+        It 'Should throw if parameter Members is specified but is empty' {
+            {
+                Assert-MemberParameters -Members @()
+            } | Should -Throw ($script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'Members' and 'MembersToInclude' are specified" {
-            { Assert-MemberParameters -Members @('User1') -MembersToInclude @('User1') } | Should -Throw 'parameters conflict'
+        It 'Should throws if both parameters Members and MembersToInclude are specified' {
+            {
+                Assert-MemberParameters -Members @('User1') -MembersToInclude @('User2')
+            } | Should -Throw ($script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'Members' and 'MembersToExclude' are specified" {
-            { Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2') } | Should -Throw 'parameters conflict'
+        It 'Should throw if both parameters Members and MembersToExclude are specified' {
+            {
+                Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2')
+            } | Should -Throw ($script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'MembersToInclude' and 'MembersToExclude' contain the same member" {
-            { Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1') } | Should -Throw 'member must not be included in both'
+        It 'Should throws if the both parameters MembersToInclude and MembersToExclude contain the same member' {
+            {
+                Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1')
+            } | Should -Throw ($errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f 'user1', 'MembersToInclude', 'MembersToExclude')
         }
 
-        It "Throws if 'MembersToInclude' and 'MembersToExclude' are empty" {
-            { Assert-MemberParameters -MembersToExclude @() -MembersToInclude @() } | Should -Throw 'At least one member must be specified'
+        It 'Should throw if both parameters MembersToInclude and MembersToExclude contains no members (are empty)' {
+            {
+                Assert-MemberParameters -MembersToExclude @() -MembersToInclude @()
+            } | Should -Throw ($script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude')
         }
     }
 
@@ -1205,7 +1215,7 @@ InModuleScope 'xActiveDirectory.Common' {
             }
         )
 
-        $restoreAdObjectReturnValue = [PSCustomObject]@{
+        $restoreAdObjectReturnValue = [PSCustomObject] @{
             DistinguishedName = 'CN=a375347,CN=Accounts,DC=contoso,DC=com'
             Name              = 'a375347'
             ObjectClass       = 'user'
@@ -1244,9 +1254,13 @@ InModuleScope 'xActiveDirectory.Common' {
             }
 
             It 'Should throw an InvalidOperationException when object parent does not exist' {
-                Mock -CommandName Restore-ADObject -MockWith { throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADException)}
+                Mock -CommandName Restore-ADObject -MockWith {
+                    throw New-Object -TypeName Microsoft.ActiveDirectory.Management.ADException
+                }
 
-                {Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass} | Should -Throw -ExceptionType ([System.InvalidOperationException])
+                {
+                    Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass
+                } | Should -Throw ($script:localizedData.RecycleBinRestoreFailed -f $restoreIdentity, $restoreObjectClass)
             }
         }
 
@@ -1311,39 +1325,39 @@ InModuleScope 'xActiveDirectory.Common' {
         Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
         $memberData = @(
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Account1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Group1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Computer1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Account1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Group1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Computer1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Account1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Group1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
-            [pscustomobject]@{
+            [PSCustomObject] @{
                 Name = 'CN=Computer1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
@@ -1400,9 +1414,11 @@ InModuleScope 'xActiveDirectory.Common' {
                     {$Identity -match 'Computer'} { 'computer' }
                 }
 
-                return ([PSCustomObject]@{
+                return (
+                    [PSCustomObject] @{
                         objectClass = $objectClass
-                    })
+                    }
+                )
             }
             # Mocks should return something that is used with Add-ADGroupMember
             Mock -CommandName Get-ADComputer -MockWith { return 'placeholder' }
@@ -1422,8 +1438,10 @@ InModuleScope 'xActiveDirectory.Common' {
         }
 
         Context 'When the domain name cannot be determined' {
-            It 'Should throw an InvalidArgumentException' {
-                {Add-ADCommonGroupMember -Members $invalidMemberData  -Parameters $fakeParameters -MembersInMultipleDomains} | Should -Throw -ExceptionType ([System.ArgumentException])
+            It 'Should throw the correct error' {
+                {
+                    Add-ADCommonGroupMember -Members $invalidMemberData -Parameters $fakeParameters -MembersInMultipleDomains
+                } | Should -Throw ($script:localizedData.EmptyDomainError -f $invalidMemberData[0], $fakeParameters.Identity)
             }
         }
     }

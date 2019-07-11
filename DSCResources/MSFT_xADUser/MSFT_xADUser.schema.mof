@@ -45,7 +45,7 @@ class MSFT_xADUser : OMI_BaseResource
     [Write, Description("Specifies a name in addition to a user's given name and surname, such as the user's middle name. This parameter sets the OtherName property of a user object. The LDAP display name (ldapDisplayName) of this property is middleName.")] String OtherName;
     [Write, Description("Specifies if the account is enabled (default True)")] Boolean Enabled;
     [Write, Description("Specifies whether the account password can be changed")] Boolean CannotChangePassword;
-    [Write, Description("Specifies whether the account password must be changed during the next logon attempt. This cannot be set to true if the PasswordNeverExpires property is also set to true")] Boolean ChangePasswordAtLogon;
+    [Write, Description("Specifies whether the account password must be changed during the next logon attempt. This will only be set to 'true' once when the user is initially created. This cannot be set to true if the PasswordNeverExpires property is also set to true")] Boolean ChangePasswordAtLogon;
     [Write, Description("Specifies whether the password of an account can expire")] Boolean PasswordNeverExpires;
     [Write, Description("Specifies the Active Directory Domain Services instance to use to perform the task.")] String DomainController;
     [Write, Description("Specifies the user account credentials to use to perform this task"), EmbeddedInstance("MSFT_Credential")] String DomainAdministratorCredential;

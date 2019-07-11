@@ -103,7 +103,7 @@ function Get-TargetResource
         Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
         # Retrieve the current list of members, returning the specified membership attribute
-        [System.Array]$adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute
+        [System.Array] $adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute
 
         $targetResource = @{
             GroupName           = $adGroup.Name
