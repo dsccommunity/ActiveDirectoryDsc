@@ -1708,23 +1708,16 @@ function Assert-Parameters
     # We cannot test/set passwords on disabled AD accounts
     if (($PSBoundParameters.ContainsKey('Password')) -and ($Enabled -eq $false))
     {
-        $throwInvalidArgumentErrorParams = @{
-            ErrorId      = 'xADUser_DisabledAccountPasswordConflict'
-            ErrorMessage = $script:localizedData.PasswordParameterConflictError -f 'Enabled', $false, 'Password'
-        }
-
-        ThrowInvalidArgumentError @throwInvalidArgumentErrorParams
+        $errorMessage = $script:localizedData.PasswordParameterConflictError -f 'Enabled', $false, 'Password'
+        New-InvalidArgumentException -ArgumentName 'Password' -Message $errorMessage
     }
 
     # ChangePasswordAtLogon cannot be set for an account that also has PasswordNeverExpires set
     if ($PSBoundParameters.ContainsKey('ChangePasswordAtLogon') -and $PSBoundParameters['ChangePasswordAtLogon'] -eq $true -and
         $PSBoundParameters.ContainsKey('PasswordNeverExpires') -and $PSBoundParameters['PasswordNeverExpires'] -eq $true)
     {
-        $throwInvalidArgumentErrorParams = @{
-            ErrorId      = 'xADUser_ChangePasswordParameterConflict'
-            ErrorMessage = $script:localizedData.ChangePasswordParameterConflictError
-        }
-        ThrowInvalidArgumentError @throwInvalidArgumentErrorParams
+        $errorMessage = $script:localizedData.ChangePasswordParameterConflictError
+        New-InvalidArgumentException -ArgumentName 'ChangePasswordAtLogon, PasswordNeverExpires' -Message $errorMessage
     }
 
 } #end function Assert-Parameters

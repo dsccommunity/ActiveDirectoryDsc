@@ -111,8 +111,6 @@ try
             }
 
             Context 'When Get-AdObject throws an exception' {
-                Mock -CommandName Write-Error
-
                 It 'Should throw ADIdentityNotFoundException' {
                     Mock -CommandName Get-ADObject -MockWith {
                         throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException)
@@ -167,8 +165,6 @@ try
             }
 
             Context 'When Get-AdObject throws an exception' {
-                Mock -CommandName Write-Error
-
                 It 'Should throw ADIdentityNotFoundException' {
                     Mock -CommandName Get-ADObject -MockWith {
                         throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException)
@@ -231,8 +227,6 @@ try
             }
 
             Context 'When Get-AdForest throws an exception' {
-                Mock -CommandName Write-Error
-
                 It 'Should throw ADIdentityNotFoundException' {
                     Mock -CommandName Get-ADForest -MockWith {
                         throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException)

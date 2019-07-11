@@ -79,12 +79,17 @@ try
 
             It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
                 Mock -CommandName Get-ADDomain -MockWith {
-                    [psobject]@{
+                    [PSObject] @{
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
                 }
-                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
+
+                Mock -CommandName Get-ADForest -MockWith {
+                    [PSObject] @{
+                        ForestMode = $mgmtForestMode
+                    }
+                }
 
                 $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
@@ -93,13 +98,17 @@ try
 
             It 'Returns "System.Collections.Hashtable" object type' {
                 Mock -CommandName Get-ADDomain {
-                    [psobject]@{
+                    [PSObject] @{
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
                 }
 
-                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
+                Mock -CommandName Get-ADForest -MockWith {
+                    [PSObject] @{
+                        ForestMode = $mgmtForestMode
+                    }
+                }
 
                 $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
@@ -109,7 +118,7 @@ try
             It 'Calls "Get-ADDomain" without credentials if domain member' {
                 Mock -CommandName Test-DomainMember -MockWith { $true; }
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Credential -eq $null } -MockWith {
-                    [psobject]@{
+                    [PSObject] @{
                         Forest = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
@@ -123,12 +132,17 @@ try
             It 'Calls "Get-ADForest" without credentials if domain member' {
                 Mock -CommandName Test-DomainMember -MockWith { $true; }
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Credential -eq $null } -MockWith {
-                    [psobject]@{
+                    [PSObject] @{
                         Forest = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
                 }
-                Mock -CommandName Get-ADForest -ParameterFilter { $Credential -eq $null } -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
+
+                Mock -CommandName Get-ADForest -ParameterFilter { $Credential -eq $null } -MockWith {
+                    [PSObject] @{
+                        ForestMode = $mgmtForestMode
+                    }
+                }
 
                 $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
@@ -137,24 +151,24 @@ try
 
             It 'Throws "Invalid credentials" when domain is available but authentication fails' {
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Identity.ToString() -eq $incorrectDomainName } -MockWith {
-                    Write-Error -Exception (New-Object System.Security.Authentication.AuthenticationException)
+                    throw New-Object System.Security.Authentication.AuthenticationException
                 }
 
                 # Match operator is case-sensitive!
-                { Get-TargetResource @testDefaultParams -DomainName $incorrectDomainName } | Should -Throw 'invalid credentials'
+                { Get-TargetResource @testDefaultParams -DomainName $incorrectDomainName } | Should -Throw ($script:localizedData.InvalidCredentialError -f $incorrectDomainName)
             }
 
             It 'Throws "Computer is already a domain member" when is already a domain member' {
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Identity.ToString() -eq $incorrectDomainName } -MockWith {
-                    Write-Error -Exception (New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException)
+                    throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
                 }
 
-                { Get-TargetResource @testDefaultParams -DomainName $incorrectDomainName } | Should -Throw 'Computer is already a domain member'
+                { Get-TargetResource @testDefaultParams -DomainName $incorrectDomainName } | Should -Throw ($script:localizedData.ExistingDomainMemberError -f $incorrectDomainName)
             }
 
             It 'Does not throw when domain cannot be located' {
                 Mock -CommandName Get-ADDomain -ParameterFilter { $Identity.ToString() -eq $missingDomainName } -MockWith {
-                    Write-Error -Exception (New-Object Microsoft.ActiveDirectory.Management.ADServerDownException)
+                    throw New-Object Microsoft.ActiveDirectory.Management.ADServerDownException
                 }
 
                 { Get-TargetResource @testDefaultParams -DomainName $missingDomainName } | Should -Not -Throw
@@ -162,24 +176,34 @@ try
 
             It 'Returns the correct domain mode' {
                 Mock -CommandName Get-ADDomain -MockWith {
-                    [psobject]@{
+                    [PSObject] @{
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
                 }
-                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
+
+                Mock -CommandName Get-ADForest -MockWith {
+                    [PSObject] @{
+                        ForestMode = $mgmtForestMode
+                    }
+                }
 
                 (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).DomainMode | Should -Be $domainMode
             }
 
             It 'Returns the correct forest mode' {
                 Mock -CommandName Get-ADDomain -MockWith {
-                    [psobject]@{
+                    [PSObject] @{
                         Forest     = $correctDomainName
                         DomainMode = $mgmtDomainMode
                     }
                 }
-                Mock -CommandName Get-ADForest -MockWith { [psobject]@{ForestMode = $mgmtForestMode} }
+
+                Mock -CommandName Get-ADForest -MockWith {
+                    [PSObject] @{
+                        ForestMode = $mgmtForestMode
+                    }
+                }
 
                 (Get-TargetResource @testDefaultParams -DomainName $correctDomainName).ForestMode | Should -Be $forestMode
             }

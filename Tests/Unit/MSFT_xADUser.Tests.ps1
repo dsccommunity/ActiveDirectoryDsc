@@ -844,9 +844,11 @@ try
 
                     $script:mockCounter = 0
 
-                    Mock -CommandName Restore-ADCommonObject -MockWith { return [PSCustomObject]@{
+                    Mock -CommandName Restore-ADCommonObject -MockWith {
+                        return [PSCustomObject] @{
                             ObjectClass = 'user'
-                        } }
+                        }
+                    }
 
                     Set-TargetResource @restoreParam
 
@@ -889,21 +891,24 @@ try
 
         #region Function Assert-TargetResource
         Describe 'xADUser\Assert-Parameters' {
-            It "Does not throw when 'PasswordNeverExpires' and 'CannotChangePassword' are specified" {
+            It 'Should not throw when both parameters PasswordNeverExpires and CannotChangePassword are specified' {
                 { Assert-Parameters -PasswordNeverExpires $true -CannotChangePassword $true } | Should -Not -Throw
             }
 
-            It "Throws when account is disabled and 'Password' is specified" {
-                { Assert-Parameters -Password $testCredential -Enabled $false } | Should -Throw
+            It 'Should throws the correct error when the parameter Enabled is set to $false and the parameter Password is also specified' {
+                {
+                    Assert-Parameters -Password $testCredential -Enabled $false
+                } | Should -Throw ($script:localizedData.PasswordParameterConflictError -f 'Enabled', $false, 'Password')
             }
 
-            It "Does not throw when 'TrustedForDelegation' is specified" {
+            It 'Should not throw when the parameter TrustedForDelegation is specified' {
                 { Assert-Parameters -TrustedForDelegation $true } | Should -Not -Throw
             }
 
-            It "Should throw the correct error when 'PasswordNeverExpires' and 'ChangePasswordAtLogon' are specified" {
-                { Assert-Parameters -PasswordNeverExpires $true -ChangePasswordAtLogon $true } | `
-                    Should -Throw $script:localizedData.ChangePasswordParameterConflictError
+            It 'Should throw the correct error when both parameters PasswordNeverExpires and ChangePasswordAtLogon are specified' {
+                {
+                    Assert-Parameters -PasswordNeverExpires $true -ChangePasswordAtLogon $true
+                } | Should -Throw $script:localizedData.ChangePasswordParameterConflictError
             }
         }
         #endregion
