@@ -51,6 +51,9 @@
     ([issue #332](https://github.com/PowerShell/xActiveDirectory/pull/332)).
 - Changes to xADRecycleBin
   - Updated tests and remove unnecessary mocks of `Write-Error`.
+- Changes to xADServicePrincipalName
+  - Minor change to the unit tests that did not correct assert the localized
+    string when an account is not found.
 
 ## 3.0.0.0
 
