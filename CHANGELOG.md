@@ -27,7 +27,7 @@
     with 'Returns...' so it is more clear that the property cannot be
     assigned a value.
   - The default value on resource parameters are now reflected in the parameter
-    descriptions in the schema.mof (so that Wiki will be updated).
+    descriptions in the schema.mof (so that Wiki will be updated)
     ([issue #426](https://github.com/PowerShell/xActiveDirectory/issues/426)).
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
