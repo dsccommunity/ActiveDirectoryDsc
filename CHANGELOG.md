@@ -26,7 +26,7 @@
     ([issue #410](https://github.com/PowerShell/xActiveDirectory/issues/410)).
 - Changes to xADOrganizationalUnit
   - Catch exception when the path property specifies a non-existing path
-    ([issue #408](https://github.com/PowerShell/xActiveDirectory/issues/408))
+    ([issue #408](https://github.com/PowerShell/xActiveDirectory/issues/408)).
 - Changes to xADUser
   - Fixes exception when creating a user with an empty string property
     ([issue #407](https://github.com/PowerShell/xActiveDirectory/issues/407)).
@@ -83,7 +83,7 @@
   - Removed unused legacy test files from the root of the repository.
   - Updated Example List README with missing resources.
   - Added missing examples for xADReplicationSubnet, xADServicePrincipalName
-    and xWaitForADDomain. ([issue #395](https://github.com/PowerShell/xActiveDirectory/issues/395)).
+    and xWaitForADDomain ([issue #395](https://github.com/PowerShell/xActiveDirectory/issues/395)).
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
