@@ -10,67 +10,67 @@
     
 .PARAMETER GroupName
     Key - String
-    Name of the Active Directory group
+    Name of the Active Directory group.
 
 .PARAMETER GroupScope
     Write - String
     Allowed values: DomainLocal, Global, Universal
-    Active Directory group scope
+    Active Directory group scope. Default value is 'Group'.
 
 .PARAMETER Category
     Write - String
     Allowed values: Security, Distribution
-    Active Directory group category
+    Active Directory group category. Default value is 'Security'.
 
 .PARAMETER Path
     Write - String
-    Location of the group within Active Directory expressed as a Distinguished Name
+    Location of the group within Active Directory expressed as a Distinguished Name.
 
 .PARAMETER Ensure
     Write - String
     Allowed values: Present, Absent
-    Should this resource be present or absent
+    Specifies if this Active Directory group should be present or absent. Default value is 'Present'.
 
 .PARAMETER Description
     Write - String
-    Description of the Active Directory group
+    Description of the Active Directory group.
 
 .PARAMETER DisplayName
     Write - String
-    Display name of the Active Directory group
+    Display name of the Active Directory group.
 
 .PARAMETER Credential
     Write - String
-    Credentials used to enact the change upon
+    Credentials used to enact the change upon.
 
 .PARAMETER DomainController
     Write - String
-    Active Directory domain controller to enact the change upon
+    Active Directory domain controller to enact the change upon.
 
 .PARAMETER Members
     Write - String
-    Active Directory group membership should match membership exactly
+    Active Directory group membership should match membership exactly.
 
 .PARAMETER MembersToInclude
     Write - String
-    Active Directory group should include these members
+    Active Directory group should include these members.
 
 .PARAMETER MembersToExclude
     Write - String
-    Active Directory group should NOT include these members
+    Active Directory group should NOT include these members.
 
 .PARAMETER MembershipAttribute
     Write - String
     Allowed values: SamAccountName, DistinguishedName, ObjectGUID, SID
-    Active Directory attribute used to perform membership operations
+    Active Directory attribute used to perform membership operations. Default value is 'SamAccountName'.
 
 .PARAMETER ManagedBy
     Write - String
-    Active Directory managed by attribute specified as a DistinguishedName
+    Active Directory managed by attribute specified as a DistinguishedName.
 
 .PARAMETER Notes
     Write - String
-    Active Directory group notes field
+    Active Directory group notes field.
 
 .PARAMETER RestoreFromRecycleBin
     Write - Boolean

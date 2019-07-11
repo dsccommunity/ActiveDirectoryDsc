@@ -14,7 +14,7 @@ ConvertFrom-StringData @'
     FailedToFindSite              = The site '{0}' could not be found in the domain '{1}'. (ADDC0014)
     TestingConfiguration          = Determine the state of the domain controller on the current node '{0}' in the domain '{1}'. (ADDC0015)
     WrongSite                     = The domain controller is in the site '{0}', but expected it to be in the site '{1}'. (ADDC0016)
-    ExpectedGlobalCatalogEnabled  = The domain controller does not contain a Global Catalog, but it was expected to have a Global Catalog.
-    ExpectedGlobalCatalogDisabled = The domain controller have a Global Catalog, but it was expected to not have a Global Catalog.
     ExpectedDomainController      = Expected the node to be a domain controller, but did not get a domain controller object. (ADDC0017)
+    ExpectedGlobalCatalogEnabled  = The domain controller does not contain a Global Catalog, but it was expected to have a Global Catalog. (ADDC0018)
+    ExpectedGlobalCatalogDisabled = The domain controller have a Global Catalog, but it was expected to not have a Global Catalog. (ADDC0019)
 '@

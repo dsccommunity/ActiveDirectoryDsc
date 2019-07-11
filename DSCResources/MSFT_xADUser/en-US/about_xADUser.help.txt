@@ -10,160 +10,160 @@
     
 .PARAMETER DomainName
     Key - String
-    Name of the domain where the user account is located (only used if password is managed)
+    Name of the domain where the user account is located (only used if password is managed).
 
 .PARAMETER UserName
     Key - String
-    Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName')
+    Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
 
 .PARAMETER Password
     Write - String
-    Specifies a new password value for the account
+    Specifies a new password value for the account.
 
 .PARAMETER Ensure
     Write - String
     Allowed values: Present,  Absent
-    Specifies whether the user account is created or deleted
+    Specifies whether the user account should be present or absent. Default value is 'Present'.
 
 .PARAMETER CommonName
     Write - String
-    Specifies the common nane assigned to the user account (ldapDisplayName 'cn')
+    Specifies the common name assigned to the user account (ldapDisplayName 'cn'). If not specified the default value will be the same value provided in parameter UserName.
 
 .PARAMETER UserPrincipalName
     Write - String
-    Specifies the UPN assigned to the user account (ldapDisplayName 'userPrincipalName')
+    Specifies the User Principal Name (UPN) assigned to the user account (ldapDisplayName 'userPrincipalName').
 
 .PARAMETER DisplayName
     Write - String
-    Specifies the display name of the object (ldapDisplayName 'displayName')
+    Specifies the display name of the object (ldapDisplayName 'displayName').
 
 .PARAMETER Path
     Write - String
-    Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created
+    Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
 
 .PARAMETER GivenName
     Write - String
-    Specifies the user's given name (ldapDisplayName 'givenName')
+    Specifies the user's given name (ldapDisplayName 'givenName').
 
 .PARAMETER Initials
     Write - String
-    Specifies the initials that represent part of a user's name (ldapDisplayName 'initials')
+    Specifies the initials that represent part of a user's name (ldapDisplayName 'initials').
 
 .PARAMETER Surname
     Write - String
-    Specifies the user's last name or surname (ldapDisplayName 'sn')
+    Specifies the user's last name or surname (ldapDisplayName 'sn').
 
 .PARAMETER Description
     Write - String
-    Specifies a description of the object (ldapDisplayName 'description')
+    Specifies a description of the object (ldapDisplayName 'description').
 
 .PARAMETER StreetAddress
     Write - String
-    Specifies the user's street address (ldapDisplayName 'streetAddress')
+    Specifies the user's street address (ldapDisplayName 'streetAddress').
 
 .PARAMETER POBox
     Write - String
-    Specifies the user's post office box number (ldapDisplayName 'postOfficeBox')
+    Specifies the user's post office box number (ldapDisplayName 'postOfficeBox').
 
 .PARAMETER City
     Write - String
-    Specifies the user's town or city (ldapDisplayName 'l')
+    Specifies the user's town or city (ldapDisplayName 'l').
 
 .PARAMETER State
     Write - String
-    Specifies the user's or Organizational Unit's state or province (ldapDisplayName 'st')
+    Specifies the user's or Organizational Unit's state or province (ldapDisplayName 'st').
 
 .PARAMETER PostalCode
     Write - String
-    Specifies the user's postal code or zip code (ldapDisplayName 'postalCode')
+    Specifies the user's postal code or zip code (ldapDisplayName 'postalCode').
 
 .PARAMETER Country
     Write - String
-    Specifies the country or region code for the user's language of choice (ldapDisplayName 'c')
+    Specifies the country or region code for the user's language of choice (ldapDisplayName 'c').
 
 .PARAMETER Department
     Write - String
-    Specifies the user's department (ldapDisplayName 'department')
+    Specifies the user's department (ldapDisplayName 'department').
 
 .PARAMETER Division
     Write - String
-    Specifies the user's division (ldapDisplayName 'division')
+    Specifies the user's division (ldapDisplayName 'division').
 
 .PARAMETER Company
     Write - String
-    Specifies the user's company (ldapDisplayName 'company')
+    Specifies the user's company (ldapDisplayName 'company').
 
 .PARAMETER Office
     Write - String
-    Specifies the location of the user's office or place of business (ldapDisplayName 'physicalDeliveryOfficeName')
+    Specifies the location of the user's office or place of business (ldapDisplayName 'physicalDeliveryOfficeName').
 
 .PARAMETER JobTitle
     Write - String
-    Specifies the user's title (ldapDisplayName 'title')
+    Specifies the user's title (ldapDisplayName 'title').
 
 .PARAMETER EmailAddress
     Write - String
-    Specifies the user's e-mail address (ldapDisplayName 'mail')
+    Specifies the user's e-mail address (ldapDisplayName 'mail').
 
 .PARAMETER EmployeeID
     Write - String
-    Specifies the user's employee ID (ldapDisplayName 'employeeID')
+    Specifies the user's employee ID (ldapDisplayName 'employeeID').
 
 .PARAMETER EmployeeNumber
     Write - String
-    Specifies the user's employee number (ldapDisplayName 'employeeNumber')
+    Specifies the user's employee number (ldapDisplayName 'employeeNumber').
 
 .PARAMETER HomeDirectory
     Write - String
-    Specifies a user's home directory path (ldapDisplayName 'homeDirectory')
+    Specifies a user's home directory path (ldapDisplayName 'homeDirectory').
 
 .PARAMETER HomeDrive
     Write - String
-    Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (ldapDisplayName 'homeDrive')
+    Specifies a drive that is associated with the UNC path defined by the HomeDirectory property (ldapDisplayName 'homeDrive').
 
 .PARAMETER HomePage
     Write - String
-    Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage')
+    Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage').
 
 .PARAMETER ProfilePath
     Write - String
-    Specifies a path to the user's profile (ldapDisplayName 'profilePath')
+    Specifies a path to the user's profile (ldapDisplayName 'profilePath').
 
 .PARAMETER LogonScript
     Write - String
-    Specifies a path to the user's log on script (ldapDisplayName 'scriptPath')
+    Specifies a path to the user's log on script (ldapDisplayName 'scriptPath').
 
 .PARAMETER Notes
     Write - String
-    Specifies the notes attached to the user's accoutn (ldapDisplayName 'info')
+    Specifies the notes attached to the user's accoutn (ldapDisplayName 'info').
 
 .PARAMETER OfficePhone
     Write - String
-    Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber')
+    Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber').
 
 .PARAMETER MobilePhone
     Write - String
-    Specifies the user's mobile phone number (ldapDisplayName 'mobile')
+    Specifies the user's mobile phone number (ldapDisplayName 'mobile').
 
 .PARAMETER Fax
     Write - String
-    Specifies the user's fax phone number (ldapDisplayName 'facsimileTelephoneNumber')
+    Specifies the user's fax phone number (ldapDisplayName 'facsimileTelephoneNumber').
 
 .PARAMETER HomePhone
     Write - String
-    Specifies the user's home telephone number (ldapDisplayName 'homePhone')
+    Specifies the user's home telephone number (ldapDisplayName 'homePhone').
 
 .PARAMETER Pager
     Write - String
-    Specifies the user's pager number (ldapDisplayName 'pager')
+    Specifies the user's pager number (ldapDisplayName 'pager').
 
 .PARAMETER IPPhone
     Write - String
-    Specifies the user's IP telephony phone number (ldapDisplayName 'ipPhone')
+    Specifies the user's IP telephony phone number (ldapDisplayName 'ipPhone').
 
 .PARAMETER Manager
     Write - String
-    Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager')
+    Specifies the user's manager specified as a Distinguished Name (ldapDisplayName 'manager').
 
 .PARAMETER LogonWorkstations
     Write - String
@@ -171,27 +171,27 @@
 
 .PARAMETER Organization
     Write - String
-    Specifies the user's organization. This parameter sets the Organization property of a user object. The LDAP display name (ldapDisplayName) of this property is o.
+    Specifies the user's organization. This parameter sets the Organization property of a user object. The LDAP display name (ldapDisplayName) of this property is 'o'.
 
 .PARAMETER OtherName
     Write - String
-    Specifies a name in addition to a user's given name and surname, such as the user's middle name. This parameter sets the OtherName property of a user object. The LDAP display name (ldapDisplayName) of this property is middleName.
+    Specifies a name in addition to a user's given name and surname, such as the user's middle name. This parameter sets the OtherName property of a user object. The LDAP display name (ldapDisplayName) of this property is 'middleName'.
 
 .PARAMETER Enabled
     Write - Boolean
-    Specifies if the account is enabled (default True)
+    Specifies if the account is enabled. Default value is $true.
 
 .PARAMETER CannotChangePassword
     Write - Boolean
-    Specifies whether the account password can be changed
+    Specifies whether the account password can be changed.
 
 .PARAMETER ChangePasswordAtLogon
     Write - Boolean
-    Specifies whether the account password must be changed during the next logon attempt. This cannot be set to true if the PasswordNeverExpires property is also set to true
+    Specifies whether the account password must be changed during the next logon attempt. This will only be set to 'true' once when the user is initially created. This cannot be set to true if the PasswordNeverExpires property is also set to true.
 
 .PARAMETER PasswordNeverExpires
     Write - Boolean
-    Specifies whether the password of an account can expire
+    Specifies whether the password of an account can expire.
 
 .PARAMETER DomainController
     Write - String
@@ -199,20 +199,20 @@
 
 .PARAMETER DomainAdministratorCredential
     Write - String
-    Specifies the user account credentials to use to perform this task
+    Specifies the user account credentials to use to perform this task.
 
 .PARAMETER PasswordAuthentication
     Write - String
     Allowed values: Default, Negotiate
-    Specifies the authentication context type used when testing passwords
+    Specifies the authentication context type used when testing passwords. Default value is 'Default'.
 
 .PARAMETER PasswordNeverResets
     Write - Boolean
-    Specifies whether existing user's password should be reset (default $false)
+    Specifies whether existing user's password should be reset. Default value is $false.
 
 .PARAMETER TrustedForDelegation
     Write - Boolean
-    Specifies whether an account is trusted for Kerberos delegation (default $false)
+    Specifies whether an account is trusted for Kerberos delegation. Default value is $false.
 
 .PARAMETER RestoreFromRecycleBin
     Write - Boolean
@@ -248,7 +248,7 @@
 
 .PARAMETER DistinguishedName
     Read - String
-    Returns the X.500 path of the object
+    Returns the X.500 path of the object.
 
 .EXAMPLE 1
 

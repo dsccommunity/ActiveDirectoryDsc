@@ -13,7 +13,7 @@
     
 .PARAMETER ForestFQDN
     Key - String
-    The FQDN of the forest in which to change the Recycle Bin feature.
+    The fulle qualified domain name (FQDN) of the forest in which to change the Recycle Bin feature.
 
 .PARAMETER EnterpriseAdministratorCredential
     Required - String
@@ -21,11 +21,11 @@
 
 .PARAMETER RecycleBinEnabled
     Read - String
-    The state of the Recycle Bin feature.
+    Returns the state of the Recycle Bin feature.
 
 .PARAMETER ForestMode
     Read - String
-    The functional level of the forest.
+    Returns the functional level of the forest.
 
 .EXAMPLE 1
 

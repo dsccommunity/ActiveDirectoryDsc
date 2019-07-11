@@ -10,32 +10,32 @@
     
 .PARAMETER Name
     Key - String
-    Specifies the name of the site link
+    Specifies the name of the site link.
 
 .PARAMETER Cost
-    Write - Sint32
-    Specifies the cost to be placed on the site link
+    Write - SInt32
+    Specifies the cost to be placed on the site link.
 
 .PARAMETER Description
     Write - String
-    This parameter sets the value of the Description property for the object
+    This parameter sets the value of the Description property for the object.
 
 .PARAMETER ReplicationFrequencyInMinutes
     Write - Sint32
-    Species the frequency (in minutes) for which replication will occur where this site link is in use between sites
+    Species the frequency (in minutes) for which replication will occur where this site link is in use between sites.
 
 .PARAMETER SitesIncluded
     Write - String
-    Specifies the list of sites included in the site link
+    Specifies the list of sites included in the site link.
 
 .PARAMETER SitesExcluded
     Write - String
-    Specifies the list of sites to exclude from the site link
+    Specifies the list of sites to exclude from the site link.
 
 .PARAMETER Ensure
     Write - String
     Allowed values: Present, Absent
-    Specifies if the site link is created or deleted
+    Specifies if the site link should be present or absent. Default value is 'Present'.
 
 .EXAMPLE 1
 

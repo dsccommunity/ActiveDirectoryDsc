@@ -19,15 +19,15 @@
     
 .PARAMETER DomainName
     Key - String
-    The FQDN of the domain the Domain Controller will be joining.
+    The fully qualified domain name (FQDN) of the domain the Domain Controller will be joining.
 
 .PARAMETER DomainAdministratorCredential
     Required - String
-    The 'PSCredential' object containing Domain Administrator rights to add the Domain Controller to the domain.
+    The credentials (as a 'PSCredential' object) that has Domain Administrator rights to add the Domain Controller to the domain.
 
 .PARAMETER SafemodeAdministratorPassword
     Required - String
-    The 'PSCredential' object containing the password to use for DSRM.
+    The 'PSCredential' object containing the password to use for Directory Services Restore Mode (DSRM).
 
 .PARAMETER DatabasePath
     Write - String
@@ -55,7 +55,7 @@
 
 .PARAMETER Ensure
     Read - String
-    The state of the Domain Controller.
+    Returns the state of the Domain Controller.
 
 .EXAMPLE 1
 

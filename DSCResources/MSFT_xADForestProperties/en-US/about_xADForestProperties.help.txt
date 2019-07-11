@@ -18,7 +18,7 @@
 
 .PARAMETER ServicePrincipalNameSuffix
     Write - String
-    Specifies the Service Principal Name (SPN) Suffix(es) to be explicitly defined in the forest and replace existing SPNs. Cannot be used with ServicePrincipalNameSuffixToAdd or ServicePrincipalNameSuffixToRemove.
+    Specifies the Service Principal Name (SPN) Suffix(es) to be explicitly defined in the forest and replace existing Service Principal Names. Cannot be used with ServicePrincipalNameSuffixToAdd or ServicePrincipalNameSuffixToRemove.
 
 .PARAMETER ServicePrincipalNameSuffixToAdd
     Write - String
@@ -30,7 +30,7 @@
 
 .PARAMETER UserPrincipalNameSuffix
     Write - String
-    Specifies the User Principal Name (UPN) Suffix(es) to be explicitly defined in the forest and replace existing UPNs. Cannot be used with UserPrincipalNameSuffixToAdd or UserPrincipalNameSuffixToRemove.
+    Specifies the User Principal Name (UPN) Suffix(es) to be explicitly defined in the forest and replace existing User Principal Names. Cannot be used with UserPrincipalNameSuffixToAdd or UserPrincipalNameSuffixToRemove.
 
 .PARAMETER UserPrincipalNameSuffixToAdd
     Write - String

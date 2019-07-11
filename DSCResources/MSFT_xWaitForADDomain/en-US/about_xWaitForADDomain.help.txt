@@ -10,23 +10,23 @@
     
 .PARAMETER DomainName
     Key - String
-    The name of the AD Domain to wait for.
+    The name of the Active Directory domain to wait for.
 
 .PARAMETER DomainUserCredential
     Write - String
     The user account credentials to use to perform this task.
 
 .PARAMETER RetryIntervalSec
-    Write - uint64
-    The interval in seconds between retry attempts.
+    Write - UInt64
+    The interval in seconds between retry attempts. Default value is 60.
 
 .PARAMETER RetryCount
-    Write - uint32
-    The number of retries before failing.
+    Write - UInt32
+    The number of retries before failing. Default value is 10.
 
 .PARAMETER RebootRetryCount
-    Write - uint32
-    The number of times to reboot after failing and then restart retrying.
+    Write - UInt32
+    The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
 
 .EXAMPLE 1
 
