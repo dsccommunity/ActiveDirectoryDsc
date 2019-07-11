@@ -18,7 +18,7 @@
     error message.
   - Style guideline cleanup.
     - Cleaned up some minor style violations in the code.
-    - All localized strings in the resources now has a string ID suffix.
+    - All localized strings in the resources now has a string ID suffix
       ([issue #419](https://github.com/PowerShell/xActiveDirectory/issues/419)).
     - All schema properties description now ends with full stop (.)
       ([issue #420](https://github.com/PowerShell/xActiveDirectory/issues/420)).
