@@ -98,7 +98,7 @@ function Get-TargetResource
 
     try
     {
-        $adGroup = Get-ADGroup @adGroupParams -Property Name, GroupScope, GroupCategory, DistinguishedName, Description, DisplayName, ManagedBy, Info
+        $adGroup = Get-ADGroup @adGroupParams -Properties Name, GroupScope, GroupCategory, DistinguishedName, Description, DisplayName, ManagedBy, Info
 
         Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
@@ -433,7 +433,7 @@ function Set-TargetResource
             }
         }
 
-        $adGroup = Get-ADGroup @adGroupParams -Property Name, GroupScope, GroupCategory, DistinguishedName, Description, DisplayName, ManagedBy, Info
+        $adGroup = Get-ADGroup @adGroupParams -Properties Name, GroupScope, GroupCategory, DistinguishedName, Description, DisplayName, ManagedBy, Info
 
         if ($Ensure -eq 'Present')
         {
@@ -520,7 +520,7 @@ function Set-TargetResource
 
                     Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                    Add-ADCommonGroupMember -Parameter $adGroupParams -Members $Members -MembersInMultipleDomains:$MembersInMultipleDomains
+                    Add-ADCommonGroupMember -Parameters $adGroupParams -Members $Members -MembersInMultipleDomains:$MembersInMultipleDomains
                 }
 
                 if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [system.string]::IsNullOrEmpty($MembersToInclude))
@@ -529,7 +529,7 @@ function Set-TargetResource
 
                     Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                    Add-ADCommonGroupMember -Parameter $adGroupParams -Members $MembersToInclude -MembersInMultipleDomains:$MembersInMultipleDomains
+                    Add-ADCommonGroupMember -Parameters $adGroupParams -Members $MembersToInclude -MembersInMultipleDomains:$MembersInMultipleDomains
                 }
 
                 if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [system.string]::IsNullOrEmpty($MembersToExclude))
@@ -552,6 +552,22 @@ function Set-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
+        <#
+            Determine whether we're attempting to add a new group (continue on)
+            or attempting to add a nonexistent group member (throw). Issue #166
+
+            We retrieve the second group of the first match of the stack trace regex 
+            to get the cmdlet that failed. If it's 'Add-ADGroupMember', we throw,
+            because the member object to be added is not found in the domain, and the
+            add member opertion will fail.
+            This is probably the result of a typo in the configuration.
+        #>
+        $errorTrace = $PSItem.ScriptStackTrace | Select-String -Pattern '(at )(.*)(,)'
+        if ($errorTrace.Matches[0].Groups[2].Value -eq 'Add-ADGroupMember')
+        {
+            New-ObjectNotFoundException -Message $PSItem
+        }
+ 
         # The AD group doesn't exist
         if ($Ensure -eq 'Present')
         {

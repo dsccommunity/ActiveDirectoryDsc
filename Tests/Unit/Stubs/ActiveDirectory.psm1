@@ -224,8 +224,8 @@ function Add-ADGroupMember
         $Server
     )
 
-    throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
-}
+    throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+} #>
 
 <#
     .SYNOPSIS
@@ -3751,11 +3751,11 @@ function New-ADGroup
         $DisplayName,
 
         [Parameter()]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupCategory]]
+        [Microsoft.ActiveDirectory.Management.ADGroupCategory]
         $GroupCategory,
 
         [Parameter(Mandatory = $true)]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupScope]]
+        [Microsoft.ActiveDirectory.Management.ADGroupScope]
         $GroupScope,
 
         [Parameter()]
@@ -5282,7 +5282,11 @@ function Remove-ADGroup
 
         [Parameter()]
         [string]
-        $Server
+        $Server,
+        
+        [Parameter()]
+        [bool]
+        $Confirm
     )
 
     throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
@@ -5325,10 +5329,14 @@ function Remove-ADGroupMember
         [Parameter()]
         [switch]
         $PassThru,
-
+        
         [Parameter()]
         [string]
-        $Server
+        $Server,
+        
+        [Parameter()]
+        [bool]
+        $Confirm
     )
 
     throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
@@ -7508,11 +7516,11 @@ function Set-ADGroup
         $DisplayName,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupCategory]]
+        [Microsoft.ActiveDirectory.Management.ADGroupCategory]
         $GroupCategory,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupScope]]
+        [Microsoft.ActiveDirectory.Management.ADGroupScope]
         $GroupScope,
 
         [Parameter(ParameterSetName = 'Identity')]

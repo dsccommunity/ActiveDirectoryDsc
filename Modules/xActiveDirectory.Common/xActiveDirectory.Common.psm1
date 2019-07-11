@@ -486,7 +486,7 @@ function Assert-Module
         $ImportModule
     )
 
-    if (-not (Get-Module -Name $ModuleName -ListAvailable))
+    if ((-not (Get-Module -Name $ModuleName -ListAvailable)) -and (-not (Get-Module -Name $ModuleName)))
     {
         $errorId = '{0}_ModuleNotFound' -f $ModuleName
         $errorMessage = $script:localizedData.RoleNotFoundError -f $moduleName

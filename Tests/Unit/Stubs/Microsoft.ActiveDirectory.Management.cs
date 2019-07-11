@@ -105,6 +105,24 @@ namespace Microsoft.ActiveDirectory.Management
         string site;
         public ADReplicationSite(System.String s){ site = s; }
     }
+    
+    public class ADGroup
+    {
+        public ADGroup():base(){}
+        public ADGroup(System.String Identity):base(){}
+    }
+    
+    public class ADGroupCategory
+    {
+        string category;
+        public ADGroupCategory(System.String s){ category = s; }
+    }
+
+    public class ADGroupScope
+    {
+        string scope;
+        public ADGroupScope(System.String s){ scope = s; }
+    }
 }
 
 namespace Microsoft.ActiveDirectory.Management.Commands

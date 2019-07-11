@@ -4,6 +4,7 @@ ConvertFrom-StringData @'
     GroupMembershipNotDesiredState = Group membership is NOT in the desired state.
     AddingGroupMembers             = Adding '{0}' member(s) to AD group '{1}'.
     RemovingGroupMembers           = Removing '{0}' member(s) from AD group '{1}'.
+    GroupMemberNotFound            = Group member not found.
     AddingGroup                    = Adding AD Group '{0}'
     UpdatingGroup                  = Updating AD Group '{0}'
     RemovingGroup                  = Removing AD Group '{0}'

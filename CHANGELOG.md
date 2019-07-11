@@ -14,7 +14,8 @@
 - Changes to xADUser
   - Fixes exception when creating a user with an empty string property ([issue #407](https://github.com/PowerShell/xActiveDirectory/pull/407)).
   - Fixes exception when updating `CommonName` and `Path` concurrently ([issue #402](https://github.com/PowerShell/xActiveDirectory/pull/402)).
-
+- Changes to xADGroup
+  - Fixes wrong error message when attempting to add a non-existent object to a group ([issue #166](https://github.com/PowerShell/xActiveDirectory/issues/166)).
 ## 3.0.0.0
 
 - Changes to xActiveDirectory
