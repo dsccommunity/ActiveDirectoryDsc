@@ -616,6 +616,7 @@ function ConvertFrom-DirectoryContextType
 #>
 function Get-TrustTargetAndSourceObject
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '', Justification = 'PSScriptAnalyzer does not handle multiple output types.')]
     [CmdletBinding()]
     [OutputType(
         [System.DirectoryServices.ActiveDirectory.Domain],
