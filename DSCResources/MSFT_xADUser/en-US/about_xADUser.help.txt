@@ -3,11 +3,11 @@
 
 .DESCRIPTION
     The xADUser DSC resource will manage Users within Active Directory.
-    
+
     ## Requirements
-    
+
     * Target machine must be running Windows Server 2008 R2 or later.
-    
+
 .PARAMETER DomainName
     Key - String
     Name of the domain where the user account is located (only used if password is managed).

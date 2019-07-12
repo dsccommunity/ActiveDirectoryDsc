@@ -3,7 +3,7 @@
 
 .DESCRIPTION
     This resource enforces the property `Enabled` on the object class *Computer*.
-    
+
     >This resource could support other object classes like *msDS-ManagedServiceAccount*,
     >*msDS-GroupManagedServiceAccount*, and *User*. But these object classes
     >are not yet supported due to that other resources already enforces the
@@ -11,11 +11,11 @@
     >then it should be made so that only one resource enforces the enabled
     >property. This is to prevent a potential "ping-pong" behavior if both
     >resource would be used in a configuration.
-    
+
     ## Requirements
-    
+
     * Target machine must be running Windows Server 2008 R2 or later.
-    
+
 .PARAMETER Identity
     Key - String
     Specifies the identity of an object that has the object class specified in the parameter ObjectClass. When ObjectClass is set to 'Computer' then this property can be set to either distinguished name, GUID (objectGUID), security identifier (objectSid), or security Accounts Manager account name (sAMAccountName).
