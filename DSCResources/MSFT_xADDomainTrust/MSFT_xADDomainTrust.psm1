@@ -532,6 +532,8 @@ function Get-ActiveDirectoryForest
 #>
 function ConvertTo-DirectoryContextType
 {
+    [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -565,6 +567,8 @@ function ConvertTo-DirectoryContextType
 #>
 function ConvertFrom-DirectoryContextType
 {
+    [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -613,6 +617,9 @@ function ConvertFrom-DirectoryContextType
 function Get-TrustTargetAndSourceObject
 {
     [CmdletBinding()]
+    [OutputType(
+        [System.DirectoryServices.ActiveDirectory.Domain],
+        [System.DirectoryServices.ActiveDirectory.Forest])]
     param
     (
         [Parameter(Mandatory = $true)]
