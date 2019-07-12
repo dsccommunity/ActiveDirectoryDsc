@@ -10,49 +10,49 @@
     
 .PARAMETER DomainName
     Key - String
-    FQDN of the new domain
+    The fully qualified domain name (FQDN) of the new domain.
 
 .PARAMETER DomainAdministratorCredential
     Required - String
-    Credentials used to query for domain existence
+    Credentials used to query for domain existence.
 
 .PARAMETER SafemodeAdministratorPassword
     Required - String
-    Password for the administrator account when the computer is started in Safe Mode
+    Password for the administrator account when the computer is started in Safe Mode.
 
 .PARAMETER ParentDomainName
     Write - String
-    Fully qualified name of the parent domain
+    Fully qualified domain name (FQDN) of the parent domain.
 
 .PARAMETER DomainNetbiosName
     Write - String
-    NetBIOS name for the new domain
+    NetBIOS name for the new domain.
 
 .PARAMETER DnsDelegationCredential
     Write - String
-    Credential used for creating DNS delegation
+    Credential used for creating DNS delegation.
 
 .PARAMETER DatabasePath
     Write - String
-    Path to a directory that contains the domain database
+    Path to a directory that contains the domain database.
 
 .PARAMETER LogPath
     Write - String
-    Path to a directory for the log file that will be written
+    Path to a directory for the log file that will be written.
 
 .PARAMETER SysvolPath
     Write - String
-    Path to a directory where the Sysvol file will be written
+    Path to a directory where the Sysvol file will be written.
 
 .PARAMETER ForestMode
     Write - String
     Allowed values: Win2008,  Win2008R2,  Win2012,  Win2012R2,  WinThreshold
-    The Forest Functional Level for the entire forest
+    The Forest Functional Level for the entire forest.
 
 .PARAMETER DomainMode
     Write - String
     Allowed values: Win2008,  Win2008R2,  Win2012,  Win2012R2,  WinThreshold
-    The Domain Functional Level for the entire domain
+    The Domain Functional Level for the entire domain.
 
 .EXAMPLE 1
 

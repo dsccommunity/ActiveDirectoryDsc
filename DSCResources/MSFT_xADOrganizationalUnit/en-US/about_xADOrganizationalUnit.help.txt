@@ -9,33 +9,33 @@
     * Target machine must be running Windows Server 2008 R2 or later.
     
 .PARAMETER Name
-    Key - string
-    The name of OU
+    Key - String
+    The name of Organization Unit (OU).
 
 .PARAMETER Path
-    Key - string
-    Specifies the X500 path of the OU or container where the new object is created
+    Key - String
+    Specifies the X.500 path of the Organization Unit (OU) or container where the new object is created.
 
 .PARAMETER Ensure
-    Write - string
+    Write - String
     Allowed values: Present,  Absent
-    
+    Specifies whether the Organization Unit (OU) is present or absent. Default value is 'Present'.
 
 .PARAMETER Credential
-    Write - string
-    The credential to be used to perform the operation on Active Directory
+    Write - String
+    The credential to be used to perform the operation on Active Directory.
 
 .PARAMETER ProtectedFromAccidentalDeletion
-    Write - boolean
-    Defaults to True
+    Write - Boolean
+    Specifies if the Organization Unit (OU) container should be protected from deletion. Default value is $true.
 
 .PARAMETER Description
-    Write - string
-    The description of the OU
+    Write - String
+    The description of the Organization Unit (OU). Default value is empty ('') description.
 
 .PARAMETER RestoreFromRecycleBin
     Write - Boolean
-    Try to restore the organizational unit from the recycle bin before creating a new one.
+    Try to restore the Organization Unit (OU) from the recycle bin before creating a new one.
 
 .EXAMPLE 1
 

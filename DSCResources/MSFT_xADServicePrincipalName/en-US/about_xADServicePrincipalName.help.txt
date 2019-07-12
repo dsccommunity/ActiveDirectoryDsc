@@ -9,16 +9,16 @@
     * Target machine must be running Windows Server 2008 R2 or later.
     
 .PARAMETER Ensure
-    Write - string
+    Write - String
     Allowed values: Present,  Absent
     Specifies if the service principal name should be added or remove. Default value is 'Present'.
 
 .PARAMETER ServicePrincipalName
-    Key - string
+    Key - String
     The full SPN to add or remove, e.g. HOST/LON-DC1.
 
 .PARAMETER Account
-    Write - string
+    Write - String
     The user or computer account to add or remove the SPN, e.b. User1 or LON-DC1$. Default value is ''. If Ensure is set to Present, a value must be specified.
 
 .EXAMPLE 1

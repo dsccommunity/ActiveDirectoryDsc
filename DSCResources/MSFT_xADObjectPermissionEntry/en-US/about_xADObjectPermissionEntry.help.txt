@@ -14,7 +14,7 @@
 .PARAMETER Ensure
     Write - String
     Allowed values: Present,  Absent
-    Indicates if the access will be added (Present) or will be removed (Absent). Default is 'Present'.
+    Indicates if the access will be added (Present) or will be removed (Absent). Default value is 'Present'.
 
 .PARAMETER Path
     Key - String
@@ -27,7 +27,7 @@
 .PARAMETER ActiveDirectoryRights
     Write - String
     Allowed values: AccessSystemSecurity,  CreateChild,  Delete,  DeleteChild,  DeleteTree,  ExtendedRight,  GenericAll,  GenericExecute,  GenericRead,  GenericWrite,  ListChildren,  ListObject,  ReadControl,  ReadProperty,  Self,  Synchronize,  WriteDacl,  WriteOwner,  WriteProperty
-    A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default is 'GenericAll'.
+    A combination of one or more of the ActiveDirectoryRights enumeration values that specifies the rights of the access rule. Default value is 'GenericAll'.
 
 .PARAMETER AccessControlType
     Key - String
@@ -36,7 +36,7 @@
 
 .PARAMETER ObjectType
     Key - String
-    The schema GUID of the object to which the access rule applies. If the permission entry shouldn't be restricted to a specific object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
+    The schema GUID of the object to which the access rule applies. If the permission entry shouldn't be restricted to a specific object type, use the zero guid (00000000-0000-0000-0000-000000000000).
 
 .PARAMETER ActiveDirectorySecurityInheritance
     Key - String
@@ -45,7 +45,7 @@
 
 .PARAMETER InheritedObjectType
     Key - String
-    The schema GUID of the child object type that can inherit this access rule. If the permission entry shouldn't be restricted to a specific inherited object type, use the zero guid: 00000000-0000-0000-0000-000000000000.
+    The schema GUID of the child object type that can inherit this access rule. If the permission entry shouldn't be restricted to a specific inherited object type, use the zero guid (00000000-0000-0000-0000-000000000000).
 
 .EXAMPLE 1
 

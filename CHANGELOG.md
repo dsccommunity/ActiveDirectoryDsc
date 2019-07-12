@@ -13,10 +13,22 @@
     [new helper functions for localization](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#helper-functions-for-localization)
     ([issue #316](https://github.com/PowerShell/xActiveDirectory/issues/316),
     [issue #317](https://github.com/PowerShell/xActiveDirectory/issues/317)).
-  - Cleaned up some minor style violations in the code.
   - Fixed an issue that the helper function `Add-ADCommonGroupMember` was
     not outputting the correct group name in a verbose message and in an
     error message.
+  - Style guideline cleanup.
+    - Cleaned up some minor style violations in the code.
+    - All localized strings in the resources now has a string ID suffix
+      ([issue #419](https://github.com/PowerShell/xActiveDirectory/issues/419)).
+    - All schema properties description now ends with full stop (.)
+      ([issue #420](https://github.com/PowerShell/xActiveDirectory/issues/420)).
+    - Updated all types in the resources schema to use PascalCase.
+  - Updated all resource read-only parameters to start the description
+    with 'Returns...' so it is more clear that the property cannot be
+    assigned a value.
+  - The default value on resource parameters are now reflected in the parameter
+    descriptions in the schema.mof (so that Wiki will be updated)
+    ([issue #426](https://github.com/PowerShell/xActiveDirectory/issues/426)).
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
@@ -39,6 +51,9 @@
     ([issue #332](https://github.com/PowerShell/xActiveDirectory/pull/332)).
 - Changes to xADRecycleBin
   - Updated tests and remove unnecessary mocks of `Write-Error`.
+- Changes to xADServicePrincipalName
+  - Minor change to the unit tests that did not correct assert the localized
+    string when an account is not found.
 
 ## 3.0.0.0
 

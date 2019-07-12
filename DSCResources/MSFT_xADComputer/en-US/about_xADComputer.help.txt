@@ -35,7 +35,7 @@
 
 .PARAMETER UserPrincipalName
     Write - String
-    Specifies the UPN assigned to the computer account.
+    Specifies the User Principal Name (UPN) assigned to the computer account.
 
 .PARAMETER DisplayName
     Write - String
@@ -72,7 +72,7 @@
 .PARAMETER Ensure
     Write - String
     Allowed values: Present,  Absent
-    Specifies whether the computer account is present or absent. Valid values are 'Present' and 'Absent'. The default is 'Present'.
+    Specifies whether the computer account is present or absent. Default value is 'Present'.
 
 .PARAMETER RestoreFromRecycleBin
     Write - Boolean
@@ -84,15 +84,15 @@
 
 .PARAMETER DistinguishedName
     Read - String
-    Returns the X.500 path of the computer object
+    Returns the X.500 path of the computer object.
 
 .PARAMETER SID
     Read - String
-    Returns the security identifier of the computer object
+    Returns the security identifier of the computer object.
 
 .PARAMETER SamAccountName
     Read - String
-    Returns the security identifier of the computer object
+    Returns the security identifier of the computer object.
 
 .EXAMPLE 1
 
