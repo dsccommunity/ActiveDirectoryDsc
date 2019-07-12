@@ -40,7 +40,7 @@ else
                 SourceForest    = 'contoso.com'
                 TargetForest    = 'lab.local'
 
-                TargetUserName  = "LAB\Administrator"
+                TargetUserName  = 'LAB\Administrator'
                 TargetPassword  = 'P@ssw0rd1'
             }
         )
