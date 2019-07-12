@@ -1881,7 +1881,7 @@ function Add-TypeAssembly
         'ApplicationPartition', 'ConfigurationSet' or 'DirectoryServer'.
 
     .PARAMETER Name
-        An optional parameter for the  target of the directory context.
+        An optional parameter for the target of the directory context.
         For the correct format for this parameter depending on context type, see
         the article https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.directorycontext?view=netframework-4.8
 #>

@@ -17,6 +17,7 @@
 #>
 
 $configFile = [System.IO.Path]::ChangeExtension($MyInvocation.MyCommand.Path, 'json')
+
 if (Test-Path -Path $configFile)
 {
     <#

@@ -81,7 +81,7 @@ try
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
+                Test-DscConfiguration -Verbose | Should -BeTrue
             }
         }
 
@@ -132,7 +132,7 @@ try
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
+                Test-DscConfiguration -Verbose | Should -BeTrue
             }
         }
 
@@ -183,7 +183,7 @@ try
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
+                Test-DscConfiguration -Verbose | Should -BeTrue
             }
         }
 
@@ -234,7 +234,7 @@ try
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
+                Test-DscConfiguration -Verbose | Should -BeTrue
             }
         }
 
@@ -285,7 +285,7 @@ try
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
+                Test-DscConfiguration -Verbose | Should -BeTrue
             }
         }
 
@@ -336,7 +336,7 @@ try
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
+                Test-DscConfiguration -Verbose | Should -BeTrue
             }
         }
     }

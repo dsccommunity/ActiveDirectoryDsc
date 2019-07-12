@@ -18,16 +18,14 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomainTrust'
         Specifies the name of the Active Directory domain that is being trusted.
 
     .PARAMETER TargetDomainAdministratorCredential
-        Specifies the credentials to authenticate to the target domain..
+        Specifies the credentials to authenticate to the target domain.
 
     .PARAMETER TrustType
-        Specifies the type of trust. Valid values are 'External' or 'Forest'.
-        'External' means the context Domain, while 'Forest' means the context
-        'Forest'.
+        Specifies the type of trust. The value 'External' means the context Domain,
+        while the value 'Forest' means the context 'Forest'.
 
     .PARAMETER TrustDirection
-        Specifies the direction of the trust. Valid values are 'Bidirectional',
-        'Inbound', and 'Outbound'.
+        Specifies the direction of the trust.
 #>
 function Get-TargetResource
 {
@@ -67,41 +65,20 @@ function Get-TargetResource
         TargetDomainAdministratorCredential = $cimCredentialInstance
     }
 
-    $directoryContextType = ConvertTo-DirectoryContextType -TrustType $TrustType
-
-    # Create the target object.
-    $newADDirectoryContextParameters = @{
-        DirectoryContextType = $directoryContextType
-        Name                 = $TargetDomainName
-        Credential           = $TargetDomainAdministratorCredential
+    $getTrustTargetAndSourceObject = @{
+        SourceDomainName                    = $SourceDomainName
+        TargetDomainName                    = $TargetDomainName
+        TargetDomainAdministratorCredential = $TargetDomainAdministratorCredential
+        TrustType                           = $TrustType
     }
 
-    $targetDirectoryContext = Get-ADDirectoryContext @newADDirectoryContextParameters
-
-    # Create the source object.
-    $newADDirectoryContextParameters = @{
-        DirectoryContextType = $directoryContextType
-        Name                 = $SourceDomainName
-    }
-
-    $sourceDirectoryContext = Get-ADDirectoryContext @newADDirectoryContextParameters
-
-    if ($directoryContextType -eq 'Domain')
-    {
-        $trustSource = Get-ActiveDirectoryDomain -DirectoryContext $sourceDirectoryContext
-        $trustTarget = Get-ActiveDirectoryDomain -DirectoryContext $targetDirectoryContext
-    }
-    else
-    {
-        $trustSource = Get-ActiveDirectoryForest -DirectoryContext $sourceDirectoryContext
-        $trustTarget = Get-ActiveDirectoryForest -DirectoryContext $targetDirectoryContext
-    }
+    $trustSource, $trustTarget = Get-TrustTargetAndSourceObject @getTrustTargetAndSourceObject
 
     try
     {
         # Find trust between source & destination.
         Write-Verbose -Message (
-            $script:localizedData.CheckingTrustMessage -f $SourceDomainName, $TargetDomainName, $directoryContextType
+            $script:localizedData.CheckingTrustMessage -f $SourceDomainName, $TargetDomainName, $directoryContextTyp
         )
 
         $trust = $trustSource.GetTrustRelationship($trustTarget)
@@ -138,20 +115,18 @@ function Get-TargetResource
         Specifies the name of the Active Directory domain that is being trusted.
 
     .PARAMETER TargetDomainAdministratorCredential
-        Specifies the credentials to authenticate to the target domain..
+        Specifies the credentials to authenticate to the target domain.
 
     .PARAMETER TrustType
-        Specifies the type of trust. Valid values are 'External' or 'Forest'.
-        'External' means the context Domain, while 'Forest' means the context
-        'Forest'.
+        Specifies the type of trust. The value 'External' means the context Domain,
+        while the value 'Forest' means the context 'Forest'.
 
     .PARAMETER TrustDirection
-        Specifies the direction of the trust. Valid values are 'Bidirectional',
-        'Inbound', and 'Outbound'.
+        Specifies the direction of the trust.
 
     .PARAMETER Ensure
-        Specifies whether the computer account is present or absent. Valid values
-        are 'Present' and 'Absent'. The default is 'Present'.
+        Specifies whether the computer account is present or absent. Default
+        value is 'Present'.
 #>
 function Set-TargetResource
 {
@@ -186,43 +161,22 @@ function Set-TargetResource
         $Ensure = 'Present'
     )
 
-    $directoryContextType = ConvertTo-DirectoryContextType -TrustType $TrustType
-
-    # Create the target object.
-    $newADDirectoryContextParameters = @{
-        DirectoryContextType = $directoryContextType
-        Name                 = $TargetDomainName
-        Credential           = $TargetDomainAdministratorCredential
+    $getTrustTargetAndSourceObject = @{
+        SourceDomainName                    = $SourceDomainName
+        TargetDomainName                    = $TargetDomainName
+        TargetDomainAdministratorCredential = $TargetDomainAdministratorCredential
+        TrustType                           = $TrustType
     }
 
-    $targetDirectoryContext = Get-ADDirectoryContext @newADDirectoryContextParameters
-
-    # Create the source object.
-    $newADDirectoryContextParameters = @{
-        DirectoryContextType = $directoryContextType
-        Name                 = $SourceDomainName
-    }
-
-    $sourceDirectoryContext = Get-ADDirectoryContext @newADDirectoryContextParameters
-
-    if ($directoryContextType -eq 'Domain')
-    {
-        $trustSource = Get-ActiveDirectoryDomain -DirectoryContext $sourceDirectoryContext
-        $trustTarget = Get-ActiveDirectoryDomain -DirectoryContext $targetDirectoryContext
-    }
-    else
-    {
-        $trustSource = Get-ActiveDirectoryForest -DirectoryContext $sourceDirectoryContext
-        $trustTarget = Get-ActiveDirectoryForest -DirectoryContext $targetDirectoryContext
-    }
+    $trustSource, $trustTarget = Get-TrustTargetAndSourceObject @getTrustTargetAndSourceObject
 
     $compareTargetResourceStateResult = Compare-TargetResourceState @PSBoundParameters
 
     # Get all properties that are not in desired state.
     $propertiesNotInDesiredState = $compareTargetResourceStateResult |
-    Where-Object -FilterScript {
-        -not $_.InDesiredState
-    }
+        Where-Object -FilterScript {
+            -not $_.InDesiredState
+        }
 
     if ($propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'Ensure' }))
     {
@@ -264,6 +218,7 @@ function Set-TargetResource
 
             # Check properties.
             $trustTypeProperty = $propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'TrustType' })
+
             if ($trustTypeProperty)
             {
                 Write-Verbose -Message (
@@ -292,7 +247,7 @@ function Set-TargetResource
 
             <#
                 In case the trust direction property should be wrong, there
-                are no need to update that property twice since it was set
+                is no need to update that property twice since it was set
                 to the correct value when the trust was recreated.
             #>
             if (-not $trustRecreated)
@@ -330,20 +285,18 @@ function Set-TargetResource
         Specifies the name of the Active Directory domain that is being trusted.
 
     .PARAMETER TargetDomainAdministratorCredential
-        Specifies the credentials to authenticate to the target domain..
+        Specifies the credentials to authenticate to the target domain.
 
     .PARAMETER TrustType
-        Specifies the type of trust. Valid values are 'External' or 'Forest'.
-        'External' means the context Domain, while 'Forest' means the context
-        'Forest'.
+        Specifies the type of trust. The value 'External' means the context Domain,
+        while the value 'Forest' means the context 'Forest'.
 
     .PARAMETER TrustDirection
-        Specifies the direction of the trust. Valid values are 'Bidirectional',
-        'Inbound', and 'Outbound'.
+        Specifies the direction of the trust.
 
     .PARAMETER Ensure
-        Specifies whether the computer account is present or absent. Valid values
-        are 'Present' and 'Absent'. The default is 'Present'.
+        Specifies whether the computer account is present or absent. Default
+        value is 'Present'.
 #>
 function Test-TargetResource
 {
@@ -418,20 +371,18 @@ function Test-TargetResource
         Specifies the name of the Active Directory domain that is being trusted.
 
     .PARAMETER TargetDomainAdministratorCredential
-        Specifies the credentials to authenticate to the target domain..
+        Specifies the credentials to authenticate to the target domain.
 
     .PARAMETER TrustType
-        Specifies the type of trust. Valid values are 'External' or 'Forest'.
-        'External' means the context Domain, while 'Forest' means the context
-        'Forest'.
+        Specifies the type of trust. The value 'External' means the context Domain,
+        while the value 'Forest' means the context 'Forest'.
 
     .PARAMETER TrustDirection
-        Specifies the direction of the trust. Valid values are 'Bidirectional',
-        'Inbound', and 'Outbound'.
+        Specifies the direction of the trust.
 
     .PARAMETER Ensure
-        Specifies whether the computer account is present or absent. Valid values
-        are 'Present' and 'Absent'. The default is 'Present'.
+        Specifies whether the computer account is present or absent. Default
+        value is 'Present'.
 #>
 function Compare-TargetResourceState
 {
@@ -498,20 +449,20 @@ function Compare-TargetResourceState
 
     <#
         If the user did not specify Ensure property, then it is not part of
-        the $PSBoundParameters, but it still need to be compared.
+        the $PSBoundParameters, but it still needs to be compared.
         Copy the hashtable $PSBoundParameters and add 'Ensure' property to make
         sure it is part of the DesiredValues.
     #>
     $desiredValues = @{ } + $PSBoundParameters
     $desiredValues['Ensure'] = $Ensure
 
-    $compareTargetResourceStateParameters = @{
+    $compareResourcePropertyStateParameters = @{
         CurrentValues = $getTargetResourceResult
         DesiredValues = $desiredValues
         Properties    = $propertiesToEvaluate
     }
 
-    return Compare-ResourcePropertyState @compareTargetResourceStateParameters
+    return Compare-ResourcePropertyState @compareResourcePropertyStateParameters
 }
 
 <#
@@ -525,7 +476,7 @@ function Compare-TargetResourceState
         this parameter.
 
     .NOTES
-        This is a wrapper for enable unit testing of this resource.
+        This is a wrapper to enable unit testing of this resource.
         see issue https://github.com/PowerShell/xActiveDirectory/issues/324
         for more information.
 #>
@@ -554,7 +505,7 @@ function Get-ActiveDirectoryDomain
         this parameter.
 
     .NOTES
-        This is a wrapper for enable unit testing of this resource.
+        This is a wrapper to enable unit testing of this resource.
         see issue https://github.com/PowerShell/xActiveDirectory/issues/324
         for more information.
 #>
@@ -636,6 +587,81 @@ function ConvertFrom-DirectoryContextType
     }
 
     return $trustType
+}
+
+<#
+    .SYNOPSIS
+        Compares the properties in the current state with the properties of the
+        desired state and returns a hashtable with the comaprison result.
+
+    .PARAMETER SourceDomainName
+        Specifies the name of the Active Directory domain that is requesting the
+        trust.
+
+    .PARAMETER TargetDomainName
+        Specifies the name of the Active Directory domain that is being trusted.
+
+    .PARAMETER TargetDomainAdministratorCredential
+        Specifies the credentials to authenticate to the target domain.
+
+    .PARAMETER TrustType
+        Specifies the type of trust. The value 'External' means the context Domain,
+        while the value 'Forest' means the context 'Forest'.
+#>
+function Get-TrustTargetAndSourceObject
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $SourceDomainName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $TargetDomainName,
+
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $TargetDomainAdministratorCredential,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('External', 'Forest')]
+        [System.String]
+        $TrustType
+    )
+
+    $directoryContextType = ConvertTo-DirectoryContextType -TrustType $TrustType
+
+    # Create the target object.
+    $getADDirectoryContextParameters = @{
+        DirectoryContextType = $directoryContextType
+        Name                 = $TargetDomainName
+        Credential           = $TargetDomainAdministratorCredential
+    }
+
+    $targetDirectoryContext = Get-ADDirectoryContext @getADDirectoryContextParameters
+
+    # Create the source object.
+    $getADDirectoryContextParameters = @{
+        DirectoryContextType = $directoryContextType
+        Name                 = $SourceDomainName
+    }
+
+    $sourceDirectoryContext = Get-ADDirectoryContext @getADDirectoryContextParameters
+
+    if ($directoryContextType -eq 'Domain')
+    {
+        $trustSource = Get-ActiveDirectoryDomain -DirectoryContext $sourceDirectoryContext
+        $trustTarget = Get-ActiveDirectoryDomain -DirectoryContext $targetDirectoryContext
+    }
+    else
+    {
+        $trustSource = Get-ActiveDirectoryForest -DirectoryContext $sourceDirectoryContext
+        $trustTarget = Get-ActiveDirectoryForest -DirectoryContext $targetDirectoryContext
+    }
+
+    return $trustSource, $trustTarget
 }
 
 Export-ModuleMember -Function *-TargetResource

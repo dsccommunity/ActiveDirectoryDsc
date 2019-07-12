@@ -1,6 +1,6 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-CheckingTrustMessage      = Determining if the trust between the '{0}' and the '{1}' with the context type '{2}' exists. (ADDT0001)
+CheckingTrustMessage      = Determining if the trust between domains '{0}' and '{1}' with the context type '{2}' exists. (ADDT0001)
 RemovedTrust              = Trust between between domains '{0}' and '{1}' with the context type '{2}' has been removed. (ADDT0002)
 AddedTrust                = Created the trust between domains '{0}' and '{1}' with the context type '{2}' and direction '{3}'. (ADDT0003)
 SetTrustDirection         = The trust direction has been changed to '{0}'. (ADDT0004)

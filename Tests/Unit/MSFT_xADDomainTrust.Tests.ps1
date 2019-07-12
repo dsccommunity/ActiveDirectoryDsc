@@ -50,11 +50,6 @@ try
 
         Describe 'MSFT_xADDomainTrust\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
-                Mock -CommandName Get-ADDirectoryContext -MockWith {
-                    # This should work on any client, domain joined or not.
-                    return [System.DirectoryServices.ActiveDirectory.DirectoryContext]::new('Domain')
-                }
-
                 $mockDefaultParameters = @{
                     SourceDomainName                    = $mockSourceDomainName
                     TargetDomainName                    = $mockTargetDomainName
@@ -68,8 +63,8 @@ try
                 Context 'When the domain trust is present in Active Directory' {
                     Context 'When the called with the TrustType ''External''' {
                         BeforeAll {
-                            Mock -CommandName Get-ActiveDirectoryDomain -MockWith {
-                                return New-Object -TypeName Object |
+                            Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                                $mockTrustSource = New-Object -TypeName Object |
                                     Add-Member -MemberType ScriptMethod -Name 'GetTrustRelationship' -Value {
                                         $script:getTrustRelationshipMethodCallCount += 1
 
@@ -78,6 +73,10 @@ try
                                             TrustDirection = 'Outbound'
                                         }
                                     } -PassThru -Force
+
+                                $mockTrustTarget = New-Object -TypeName Object
+
+                                return $mockTrustSource, $mockTrustTarget
                             }
                         }
 
@@ -91,7 +90,7 @@ try
                         AfterEach {
                             $script:getTrustRelationshipMethodCallCount | Should -Be 1
 
-                            Assert-MockCalled -CommandName Get-ActiveDirectoryDomain -Exactly -Times 2 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                         }
 
                         It 'Should return the state as present' {
@@ -115,8 +114,8 @@ try
 
                     Context 'When the called with the TrustType ''Forest''' {
                         BeforeAll {
-                            Mock -CommandName Get-ActiveDirectoryForest -MockWith {
-                                return New-Object -TypeName Object |
+                            Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                                $mockTrustSource = New-Object -TypeName Object |
                                     Add-Member -MemberType ScriptMethod -Name 'GetTrustRelationship' -Value {
                                         $script:getTrustRelationshipMethodCallCount += 1
 
@@ -125,6 +124,10 @@ try
                                             TrustDirection = 'Outbound'
                                         }
                                     } -PassThru -Force
+
+                                $mockTrustTarget = New-Object -TypeName Object
+
+                                return $mockTrustSource, $mockTrustTarget
                             }
                         }
 
@@ -138,7 +141,7 @@ try
                         AfterEach {
                             $script:getTrustRelationshipMethodCallCount | Should -Be 1
 
-                            Assert-MockCalled -CommandName Get-ActiveDirectoryForest -Exactly -Times 2 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                         }
 
                         It 'Should return the state as present' {
@@ -163,13 +166,17 @@ try
 
                 Context 'When the domain trust is absent from Active Directory' {
                     BeforeAll {
-                        Mock -CommandName Get-ActiveDirectoryForest -MockWith {
-                            return New-Object -TypeName Object |
+                        Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                            $mockTrustSource = New-Object -TypeName Object |
                                 Add-Member -MemberType ScriptMethod -Name 'GetTrustRelationship' -Value {
-                                    $script:GetTrustRelationshipMethodCallCount += 1
+                                    $script:getTrustRelationshipMethodCallCount += 1
 
                                     throw
                                 } -PassThru -Force
+
+                            $mockTrustTarget = New-Object -TypeName Object
+
+                            return $mockTrustSource, $mockTrustTarget
                         }
                     }
 
@@ -183,7 +190,7 @@ try
                     AfterEach {
                         $script:getTrustRelationshipMethodCallCount | Should -Be 1
 
-                        Assert-MockCalled -CommandName Get-ActiveDirectoryForest -Exactly -Times 2 -Scope It
+                        Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                     }
 
                     It 'Should return the state as absent' {
@@ -559,13 +566,8 @@ try
 
          Describe 'MSFT_xADDomainTrust\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
-                Mock -CommandName Get-ADDirectoryContext -MockWith {
-                    # This should work on any client, domain joined or not.
-                    return [System.DirectoryServices.ActiveDirectory.DirectoryContext]::new('Domain')
-                }
-
-                $mockGetActiveDirectoryDomainOrForest = {
-                    return New-Object -TypeName Object |
+                Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                    $mockTrustSource = New-Object -TypeName Object |
                         Add-Member -MemberType ScriptMethod -Name 'CreateTrustRelationship' -Value {
                             $script:createTrustRelationshipMethodCallCount += 1
                         } -PassThru |
@@ -575,12 +577,13 @@ try
                         Add-Member -MemberType ScriptMethod -Name 'UpdateTrustRelationship' -Value {
                             $script:updateTrustRelationshipMethodCallCount += 1
                         } -PassThru -Force
+
+                    $mockTrustTarget = New-Object -TypeName Object
+
+                    return $mockTrustSource, $mockTrustTarget
                 }
 
-                Mock -CommandName Get-ActiveDirectoryDomain -MockWith $mockGetActiveDirectoryDomainOrForest
-                Mock -CommandName Get-ActiveDirectoryForest -MockWith $mockGetActiveDirectoryDomainOrForest
-
-                $mockDefaultParameters = @{
+                  $mockDefaultParameters = @{
                     SourceDomainName                    = $mockSourceDomainName
                     TargetDomainName                    = $mockTargetDomainName
                     TargetDomainAdministratorCredential = $mockCredential
@@ -627,7 +630,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-ActiveDirectoryDomain -Exactly -Times 2 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                         }
                     }
 
@@ -667,7 +670,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-ActiveDirectoryForest -Exactly -Times 2 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -702,7 +705,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-ActiveDirectoryDomain -Exactly -Times 2 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -745,7 +748,7 @@ try
                         $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                         $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                        Assert-MockCalled -CommandName Get-ActiveDirectoryDomain -Exactly -Times 2 -Scope It
+                        Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                     }
                 }
 
@@ -786,7 +789,7 @@ try
                         $script:deleteTrustRelationshipMethodCallCount | Should -Be 1
                         $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                        Assert-MockCalled -CommandName Get-ActiveDirectoryDomain -Exactly -Times 2 -Scope It
+                        Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                     }
                 }
 
@@ -834,7 +837,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 1
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-ActiveDirectoryForest -Exactly -Times 2 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                         }
                     }
 
@@ -881,7 +884,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 1
 
-                            Assert-MockCalled -CommandName Get-ActiveDirectoryDomain -Exactly -Times 2 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -928,6 +931,54 @@ try
 
                 $convertFromDirectoryContextTypeResult = ConvertFrom-DirectoryContextType -DirectoryContextType $DirectoryContextTypeValue
                 $convertFromDirectoryContextTypeResult | Should -Be $TrustTypeValue
+            }
+        }
+
+        Describe 'MSFT_xADDomainTrust\Get-TrustTargetAndSourceObject' -Tag 'Helper' {
+            BeforeAll {
+                Mock -CommandName Get-ADDirectoryContext -MockWith {
+                    # This should work on any client, domain joined or not.
+                    return [System.DirectoryServices.ActiveDirectory.DirectoryContext]::new('Domain')
+                }
+
+                Mock -CommandName Get-ActiveDirectoryDomain
+                Mock -CommandName Get-ActiveDirectoryForest
+
+                $testCases = @(
+                    @{
+                        TrustType = 'External'
+                    },
+                    @{
+                        TrustType = 'Forest'
+                    }
+                )
+            }
+
+            It 'Should not throw and call the correct mocks when called with the trust type value ''<TrustType>''' -TestCases $testCases {
+                param
+                (
+                    [Parameter()]
+                    $TrustType
+                )
+
+                $testParameters = @{
+                    SourceDomainName                    = $mockSourceDomainName
+                    TargetDomainName                    = $mockTargetDomainName
+                    TargetDomainAdministratorCredential = $mockCredential
+                    TrustType                           = $TrustType
+                    Verbose                             = $true
+                }
+
+                { Get-TrustTargetAndSourceObject @testParameters } | Should -Not -Throw
+
+                if ($TrustType -eq 'External')
+                {
+                    Assert-MockCalled -CommandName Get-ActiveDirectoryDomain -Exactly -Times 2 -Scope It
+                }
+                else
+                {
+                    Assert-MockCalled -CommandName Get-ActiveDirectoryForest -Exactly -Times 2 -Scope It
+                }
             }
         }
     }

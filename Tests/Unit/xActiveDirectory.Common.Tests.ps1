@@ -2134,7 +2134,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.CommonNew-CimCredentialInstance' {
+    Describe 'xActiveDirectory.Common\New-CimCredentialInstance' {
         Context 'When creating a new MSFT_Credential CIM instance credential object' {
             BeforeAll {
                 $mockAdministratorUser = 'admin@contoso.com'
