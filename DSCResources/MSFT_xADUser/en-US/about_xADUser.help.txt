@@ -187,7 +187,7 @@
 
 .PARAMETER ChangePasswordAtLogon
     Write - Boolean
-    Specifies whether the account password must be changed during the next logon attempt. This will only be set to 'true' once when the user is initially created. This cannot be set to true if the PasswordNeverExpires property is also set to true.
+    Specifies whether the account password must be changed during the next logon attempt. This will only be enabled when the user is initially created. This parameter cannot be set to $true if the parameter PasswordNeverExpires is also set to $true.
 
 .PARAMETER PasswordNeverExpires
     Write - Boolean

@@ -23,7 +23,7 @@
 
 .PARAMETER DomainAdministratorCredential
     Required - String
-    The credentials (as a 'PSCredential' object) that has Domain Administrator rights to add the Domain Controller to the domain.
+    The credentials (as a 'PSCredential' object) of a user that has Domain Administrator rights to add the Domain Controller to the domain.
 
 .PARAMETER SafemodeAdministratorPassword
     Required - String

@@ -11,7 +11,7 @@
 .PARAMETER Ensure
     Write - String
     Allowed values: Present,  Absent
-    Specifies if the Active Directory replication site should be present or absent. Default value is `'Present'`.
+    Specifies if the Active Directory replication site should be present or absent. Default value is 'Present'.
 
 .PARAMETER Name
     Key - String
@@ -19,7 +19,7 @@
 
 .PARAMETER RenameDefaultFirstSiteName
     Write - Boolean
-    Specifies if the Default-First-Site-Name should be renamed if it exists. Default value is `$false`.
+    Specifies if the Default-First-Site-Name should be renamed if it exists. Default value is $false.
 
 .EXAMPLE 1
 
