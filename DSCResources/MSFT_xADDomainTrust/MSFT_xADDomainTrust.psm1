@@ -193,7 +193,6 @@ function Set-TargetResource
                     $TrustDirection
                 )
             )
-
         }
         else
         {
