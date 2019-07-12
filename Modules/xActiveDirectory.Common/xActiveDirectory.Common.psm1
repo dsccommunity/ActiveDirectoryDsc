@@ -1850,7 +1850,7 @@ function Add-TypeAssembly
         {
             Write-Verbose -Message ($script:localizedData.TypeAlreadyExistInSession -f $TypeName) -Verbose
 
-            # The type already exist so no need to load the type again.
+            # The type already exists so no need to load the type again.
             return
         }
         else
