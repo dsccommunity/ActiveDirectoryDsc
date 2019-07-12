@@ -361,7 +361,7 @@ function Test-TargetResource
 <#
     .SYNOPSIS
         Compares the properties in the current state with the properties of the
-        desired state and returns a hashtable with the comaprison result.
+        desired state and returns a hashtable with the comparison result.
 
     .PARAMETER SourceDomainName
         Specifies the name of the Active Directory domain that is requesting the
@@ -591,8 +591,11 @@ function ConvertFrom-DirectoryContextType
 
 <#
     .SYNOPSIS
-        Compares the properties in the current state with the properties of the
-        desired state and returns a hashtable with the comaprison result.
+        Returns two objects where the first object is for the source domain and
+        the second object is for the target domain. The type returned is either
+        System.DirectoryServices.ActiveDirectory.Domain or
+        System.DirectoryServices.ActiveDirectory.Forest for both objects
+        (always returns the same type for both objects).
 
     .PARAMETER SourceDomainName
         Specifies the name of the Active Directory domain that is requesting the
