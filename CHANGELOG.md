@@ -29,6 +29,10 @@
   - The default value on resource parameters are now reflected in the parameter
     descriptions in the schema.mof (so that Wiki will be updated)
     ([issue #426](https://github.com/PowerShell/xActiveDirectory/issues/426)).
+  - Added new helper functions in xActiveDirectory.Common.
+    - New-CimCredentialInstance
+    - Add-TypeAssembly
+    - New-ADDirectoryContext
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
@@ -54,6 +58,12 @@
 - Changes to xADServicePrincipalName
   - Minor change to the unit tests that did not correct assert the localized
     string when an account is not found.
+- Changes to xADDomainTrust
+  - Refactored the resource to enable unit tests, and at the same time changed
+    it to use the same code pattern as the resource xADObjectEnabledState.
+  - Added unit tests ([issue #324](https://github.com/PowerShell/xActiveDirectory/issues/324)).
+  - Added comment-based help ([issue #337](https://github.com/PowerShell/xActiveDirectory/issues/337)).
+  - Added integration tests ([issue #348](https://github.com/PowerShell/xActiveDirectory/issues/348)).
 
 ## 3.0.0.0
 

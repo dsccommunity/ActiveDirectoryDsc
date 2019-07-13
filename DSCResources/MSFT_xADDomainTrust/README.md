@@ -1,6 +1,6 @@
 # Description
 
-The xADDomainTrust DSC resource will manage Domain Trusts within Active Directory. A trust is a relationship, which you establish between domains, that makes it possible for users in one domain to be authenticated by a domain controller in the other domain.
+The xADDomainTrust DSC resource will manage Domain Trusts within Active Directory. A trust is a relationship, which you establish between domains or forests. To understand more about trusts in Active Directory, please see the article [Forest Design Models](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/forest-design-models) for more information.
 
 ## Requirements
 
