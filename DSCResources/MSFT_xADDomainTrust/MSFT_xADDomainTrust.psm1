@@ -72,7 +72,7 @@ function Get-TargetResource
         TrustType                           = $TrustType
     }
 
-    $trustSource, $trustTarget = Get-TrustTargetAndSourceObject @getTrustTargetAndSourceObject
+    $trustSource, $trustTarget = Get-TrustSourceAndTargetObject @getTrustTargetAndSourceObject
 
     try
     {
@@ -168,7 +168,7 @@ function Set-TargetResource
         TrustType                           = $TrustType
     }
 
-    $trustSource, $trustTarget = Get-TrustTargetAndSourceObject @getTrustTargetAndSourceObject
+    $trustSource, $trustTarget = Get-TrustSourceAndTargetObject @getTrustTargetAndSourceObject
 
     $compareTargetResourceStateResult = Compare-TargetResourceState @PSBoundParameters
 
@@ -595,10 +595,7 @@ function ConvertFrom-DirectoryContextType
 <#
     .SYNOPSIS
         Returns two objects where the first object is for the source domain and
-        the second object is for the target domain. The type returned is either
-        System.DirectoryServices.ActiveDirectory.Domain or
-        System.DirectoryServices.ActiveDirectory.Forest for both objects
-        (always returns the same type for both objects).
+        the second object is for the target domain.
 
     .PARAMETER SourceDomainName
         Specifies the name of the Active Directory domain that is requesting the
@@ -613,8 +610,13 @@ function ConvertFrom-DirectoryContextType
     .PARAMETER TrustType
         Specifies the type of trust. The value 'External' means the context Domain,
         while the value 'Forest' means the context 'Forest'.
+
+    .OUTPUTS
+        For both objects the type returned is either of the type
+        System.DirectoryServices.ActiveDirectory.Domain or of the type
+        System.DirectoryServices.ActiveDirectory.Forest.
 #>
-function Get-TrustTargetAndSourceObject
+function Get-TrustSourceAndTargetObject
 {
     [CmdletBinding()]
     [OutputType([System.Object[]])]

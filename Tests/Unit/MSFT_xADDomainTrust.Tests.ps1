@@ -63,7 +63,7 @@ try
                 Context 'When the domain trust is present in Active Directory' {
                     Context 'When the called with the TrustType ''External''' {
                         BeforeAll {
-                            Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                            Mock -CommandName Get-TrustSourceAndTargetObject -MockWith {
                                 $mockTrustSource = New-Object -TypeName Object |
                                     Add-Member -MemberType ScriptMethod -Name 'GetTrustRelationship' -Value {
                                         $script:getTrustRelationshipMethodCallCount += 1
@@ -90,7 +90,7 @@ try
                         AfterEach {
                             $script:getTrustRelationshipMethodCallCount | Should -Be 1
 
-                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                         }
 
                         It 'Should return the state as present' {
@@ -114,7 +114,7 @@ try
 
                     Context 'When the called with the TrustType ''Forest''' {
                         BeforeAll {
-                            Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                            Mock -CommandName Get-TrustSourceAndTargetObject -MockWith {
                                 $mockTrustSource = New-Object -TypeName Object |
                                     Add-Member -MemberType ScriptMethod -Name 'GetTrustRelationship' -Value {
                                         $script:getTrustRelationshipMethodCallCount += 1
@@ -141,7 +141,7 @@ try
                         AfterEach {
                             $script:getTrustRelationshipMethodCallCount | Should -Be 1
 
-                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                         }
 
                         It 'Should return the state as present' {
@@ -166,7 +166,7 @@ try
 
                 Context 'When the domain trust is absent from Active Directory' {
                     BeforeAll {
-                        Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                        Mock -CommandName Get-TrustSourceAndTargetObject -MockWith {
                             $mockTrustSource = New-Object -TypeName Object |
                                 Add-Member -MemberType ScriptMethod -Name 'GetTrustRelationship' -Value {
                                     $script:getTrustRelationshipMethodCallCount += 1
@@ -190,7 +190,7 @@ try
                     AfterEach {
                         $script:getTrustRelationshipMethodCallCount | Should -Be 1
 
-                        Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                     }
 
                     It 'Should return the state as absent' {
@@ -566,7 +566,7 @@ try
 
          Describe 'MSFT_xADDomainTrust\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
-                Mock -CommandName Get-TrustTargetAndSourceObject -MockWith {
+                Mock -CommandName Get-TrustSourceAndTargetObject -MockWith {
                     $mockTrustSource = New-Object -TypeName Object |
                         Add-Member -MemberType ScriptMethod -Name 'CreateTrustRelationship' -Value {
                             $script:createTrustRelationshipMethodCallCount += 1
@@ -630,7 +630,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                         }
                     }
 
@@ -670,7 +670,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -705,7 +705,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -748,7 +748,7 @@ try
                         $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                         $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                        Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                     }
                 }
 
@@ -789,7 +789,7 @@ try
                         $script:deleteTrustRelationshipMethodCallCount | Should -Be 1
                         $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                        Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                     }
                 }
 
@@ -837,7 +837,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 1
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 0
 
-                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                         }
                     }
 
@@ -884,7 +884,7 @@ try
                             $script:deleteTrustRelationshipMethodCallCount | Should -Be 0
                             $script:updateTrustRelationshipMethodCallCount | Should -Be 1
 
-                            Assert-MockCalled -CommandName Get-TrustTargetAndSourceObject -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -934,7 +934,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADDomainTrust\Get-TrustTargetAndSourceObject' -Tag 'Helper' {
+        Describe 'MSFT_xADDomainTrust\Get-TrustSourceAndTargetObject' -Tag 'Helper' {
             BeforeAll {
                 Mock -CommandName Get-ADDirectoryContext -MockWith {
                     # This should work on any client, domain joined or not.
@@ -969,7 +969,7 @@ try
                     Verbose                             = $true
                 }
 
-                { Get-TrustTargetAndSourceObject @testParameters } | Should -Not -Throw
+                { Get-TrustSourceAndTargetObject @testParameters } | Should -Not -Throw
 
                 if ($TrustType -eq 'External')
                 {
