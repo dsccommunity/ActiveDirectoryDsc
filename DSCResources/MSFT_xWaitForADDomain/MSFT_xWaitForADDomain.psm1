@@ -8,7 +8,8 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWaitForADDomain'
 
 <#
     .SYNOPSIS
-        Gets the current state of the specified Active Directory to see if it is available.
+        Gets the current state of the specified Active Directory to see if it
+        is available.
 
     .PARAMETER DomainName
         The name of the Active Directory domain to wait for.
@@ -23,7 +24,8 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWaitForADDomain'
         The number of retries before failing. Default value is 10.
 
     .PARAMETER RebootRetryCount
-        The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
+        The number of times to reboot after failing and then restart retrying.
+        Default value is 0 (zero).
 #>
 function Get-TargetResource
 {
@@ -31,27 +33,22 @@ function Get-TargetResource
     param
     (
 
-        # The name of the Active Directory domain to wait for.
         [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
-        # The user account credentials to use to perform this task.
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $DomainUserCredential,
 
-        # The interval in seconds between retry attempts. Default value is 60.
         [Parameter()]
         [System.UInt64]
         $RetryIntervalSec = 60,
 
-        # The number of retries before failing. Default value is 10.
         [Parameter()]
         [System.UInt32]
         $RetryCount = 10,
 
-        # The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
         [Parameter()]
         [System.UInt32]
         $RebootRetryCount = 0
@@ -84,7 +81,8 @@ function Get-TargetResource
 
 <#
     .SYNOPSIS
-        Sets the current state of the specified Active Directory to see if a reboot is required.
+        Sets the current state of the specified Active Directory to see if a
+        reboot is required.
 
     .PARAMETER DomainName
         The name of the Active Directory domain to wait for.
@@ -99,7 +97,8 @@ function Get-TargetResource
         The number of retries before failing. Default value is 10.
 
     .PARAMETER RebootRetryCount
-        The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
+        The number of times to reboot after failing and then restart retrying.
+        Default value is 0 (zero).
 #>
 function Set-TargetResource
 {
@@ -193,7 +192,8 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
-        Tests the current state of the specified Active Directory to see if it is available.
+        Tests the current state of the specified Active Directory to see if it
+        is available.
 
     .PARAMETER DomainName
         The name of the Active Directory domain to wait for.
@@ -208,7 +208,8 @@ function Set-TargetResource
         The number of retries before failing. Default value is 10.
 
     .PARAMETER RebootRetryCount
-        The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
+        The number of times to reboot after failing and then restart retrying.
+        Default value is 0 (zero).
 #>
 function Test-TargetResource
 {
