@@ -64,6 +64,8 @@
   - Added unit tests ([issue #324](https://github.com/PowerShell/xActiveDirectory/issues/324)).
   - Added comment-based help ([issue #337](https://github.com/PowerShell/xActiveDirectory/issues/337)).
   - Added integration tests ([issue #348](https://github.com/PowerShell/xActiveDirectory/issues/348)).
+- Changes to xWaitForADDomain
+  - Added comment-based help ([issue #341](https://github.com/PowerShell/xActiveDirectory/issues/341))
 
 ## 3.0.0.0
 
