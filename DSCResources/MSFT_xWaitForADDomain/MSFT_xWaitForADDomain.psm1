@@ -116,27 +116,22 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        # The name of the Active Directory domain to wait for.
         [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
-        # The user account credentials to use to perform this task.
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $DomainUserCredential,
 
-        # The interval in seconds between retry attempts. Default value is 60.
         [Parameter()]
         [System.UInt64]
         $RetryIntervalSec = 60,
 
-        # The number of retries before failing. Default value is 10.
         [Parameter()]
         [System.UInt32]
         $RetryCount = 10,
 
-        # The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
         [Parameter()]
         [System.UInt32]
         $RebootRetryCount = 0
@@ -220,27 +215,22 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        # The name of the Active Directory domain to wait for.
         [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
-        # The user account credentials to use to perform this task.
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $DomainUserCredential,
 
-        # The interval in seconds between retry attempts. Default value is 60.
         [Parameter()]
         [System.UInt64]
         $RetryIntervalSec = 60,
 
-        # The number of retries before failing. Default value is 10.
         [Parameter()]
         [System.UInt32]
         $RetryCount = 10,
 
-        # The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
         [Parameter()]
         [System.UInt32]
         $RebootRetryCount = 0
@@ -284,12 +274,10 @@ function Get-Domain
     [OutputType([PSObject])]
     param
     (
-        # The name of the Active Directory domain to get.
         [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
-        # The user account credentials to use to perform this task.
         [Parameter()]
         [System.Management.Automation.PSCredential]
         $DomainUserCredential
