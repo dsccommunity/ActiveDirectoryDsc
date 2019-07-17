@@ -230,10 +230,6 @@ try
         #region Function Test-TargetResource
         Describe 'xActiveDirectory\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $correctSiteName
-
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
                     return [PSCustomObject]@{
                         SamAccountName = $allowedAccount
@@ -304,7 +300,7 @@ try
                 $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                 $stubDomainController.Site = $correctSiteName
                 $stubDomainController.Domain = $correctDomainName
-                $stubDomainController.IsGlobalCatalog = $false
+                Add-Member -InputObject $stubDomainController -name 'IsGlobalCatalog' -Value $false -MemberType NoteProperty -Force
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
@@ -324,7 +320,7 @@ try
                 $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                 $stubDomainController.Site = $correctSiteName
                 $stubDomainController.Domain = $correctDomainName
-                $stubDomainController.IsGlobalCatalog = $true
+                Add-Member -InputObject $stubDomainController -name 'IsGlobalCatalog' -Value $true -MemberType NoteProperty -Force
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
@@ -343,6 +339,10 @@ try
             }
 
             It 'Returns "True" when AllowPasswordReplicationAccountName matches' {
+                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                $stubDomainController.Site = $correctSiteName
+
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
                     return @(
                         [PSCustomObject]@{
@@ -411,6 +411,10 @@ try
             }
 
             It 'Returns "True" when DenyPasswordReplicationAccountName matches' {
+                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                $stubDomainController.Site = $correctSiteName
+
+                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied.IsPresent } -MockWith {
                     return @(
                         [PSCustomObject]@{
