@@ -262,7 +262,6 @@ try
                 $result | Should -Be $false
             }
 
-
             It 'Returns "True" when "SiteName" matches' {
                 $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                 $stubDomainController.Site = $correctSiteName
@@ -571,7 +570,7 @@ try
                     It 'Throws the correct exception' {
                         {
                             Set-TargetResource @testDefaultParams -DomainName $correctDomainName -ReadOnlyReplica $true
-                        } | Should -Throw ($script:localizedData.RODCMissingSite)
+                        } | Should -Throw $script:localizedData.RODCMissingSite
                     }
                 }
 

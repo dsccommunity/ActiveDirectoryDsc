@@ -380,7 +380,7 @@ function Set-TargetResource
         {
             $testMembersParameters = @{
                 ExistingMembers = $targetResource.AllowPasswordReplicationAccountName
-                Members         = $AllowPasswordReplicationAccountName;
+                Members         = $AllowPasswordReplicationAccountName
             }
 
             if (-not (Test-Members @testMembersParameters))
