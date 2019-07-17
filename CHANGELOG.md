@@ -69,6 +69,7 @@
 - Changes to xAdDomainController
   - Add support for creating Read-Only Domain Controller (RODC)
     ([issue #40](https://github.com/PowerShell/xActiveDirectory/issues/40)).
+    [Svilen @SSvilen](https://github.com/SSvilen)
   - Refactored unit tests for Test-TargetResource.
 
 ## 3.0.0.0
