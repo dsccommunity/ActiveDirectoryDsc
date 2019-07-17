@@ -103,6 +103,11 @@ namespace Microsoft.ActiveDirectory.Management
         public ADPrincipal():base(){}
         public ADPrincipal(System.String Identity):base(){ SamAccountName = Identity; }
         public string SamAccountName { get; set; }
+
+        public override string ToString()
+        {
+            return this.SamAccountName;
+        }
     }
 
     public class ADReplicationSite
