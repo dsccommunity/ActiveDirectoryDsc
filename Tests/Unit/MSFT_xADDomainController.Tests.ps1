@@ -1023,7 +1023,7 @@ try
                             $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers $null
                             $result.MembersToAdd | Should -HaveCount 1
                             $result.MembersToAdd[0].ToString() | Should -Be 'Member1'
-                            $result.MembersToRemove | Should -HaveCount 0
+                            $result.MembersToRemove | Should -BeNullOrEmpty
                         }
                     }
 
@@ -1032,7 +1032,7 @@ try
                             $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @()
                             $result.MembersToAdd | Should -HaveCount 1
                             $result.MembersToAdd[0].ToString() | Should -Be 'Member1'
-                            $result.MembersToRemove | Should -HaveCount 0
+                            $result.MembersToRemove | Should -BeNullOrEmpty
                         }
                     }
                 }
@@ -1074,16 +1074,16 @@ try
                     Context 'When proving a $null value for DesiredMembers and CurrentMembers' {
                         It 'Should return the correct values' {
                             $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers $null
-                            $result.MembersToAdd | Should -HaveCount 0
-                            $result.MembersToRemove | Should -HaveCount 0
+                            $result.MembersToAdd | Should -BeNullOrEmpty
+                            $result.MembersToRemove | Should -BeNullOrEmpty
                         }
                     }
 
                     Context 'When proving an empty collection for DesiredMembers and CurrentMembers' {
                         It 'Should return the correct values' {
                             $result = Get-MembersToAddAndRemove -DesiredMembers @() -CurrentMembers @()
-                            $result.MembersToAdd | Should -HaveCount 0
-                            $result.MembersToRemove | Should -HaveCount 0
+                            $result.MembersToAdd | Should -BeNullOrEmpty
+                            $result.MembersToRemove | Should -BeNullOrEmpty
                         }
                     }
                 }
@@ -1092,14 +1092,14 @@ try
                     It 'Should return the correct values' {
                         Context 'When proving a collection for CurrentMembers' {
                             $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers @('OldMember')
-                            $result.MembersToAdd | Should -HaveCount 0
+                            $result.MembersToAdd | Should -BeNullOrEmpty
                             $result.MembersToRemove | Should -HaveCount 1
                             $result.MembersToRemove[0].ToString() | Should -Be 'OldMember'
                         }
 
                         Context 'When proving a string value for CurrentMembers' {
                             $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers 'OldMember'
-                            $result.MembersToAdd | Should -HaveCount 0
+                            $result.MembersToAdd | Should -BeNullOrEmpty
                             $result.MembersToRemove | Should -HaveCount 1
                             $result.MembersToRemove[0].ToString() | Should -Be 'OldMember'
                         }
@@ -1109,7 +1109,7 @@ try
                 Context 'When there more than one current member' {
                     It 'Should return the correct values' {
                         $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers @('OldMember1','OldMember2')
-                        $result.MembersToAdd | Should -HaveCount 0
+                        $result.MembersToAdd | Should -BeNullOrEmpty
                         $result.MembersToRemove | Should -HaveCount 2
                         $result.MembersToRemove[0].ToString() | Should -Be 'OldMember1'
                         $result.MembersToRemove[1].ToString() | Should -Be 'OldMember2'
@@ -1120,14 +1120,14 @@ try
             Context 'When the same members are present in desired members and current members' {
                 Context 'When proving a collection for CurrentMembers' {
                     $result = Get-MembersToAddAndRemove -DesiredMembers @('Member1') -CurrentMembers @('Member1')
-                    $result.MembersToAdd | Should -HaveCount 0
-                    $result.MembersToRemove | Should -HaveCount 0
+                    $result.MembersToAdd | Should -BeNullOrEmpty
+                    $result.MembersToRemove | Should -BeNullOrEmpty
                 }
 
                 Context 'When proving a string value for CurrentMembers' {
                     $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers 'Member1'
-                    $result.MembersToAdd | Should -HaveCount 0
-                    $result.MembersToRemove | Should -HaveCount 0
+                    $result.MembersToAdd | Should -BeNullOrEmpty
+                    $result.MembersToRemove | Should -BeNullOrEmpty
                 }
             }
 
@@ -1136,14 +1136,14 @@ try
                     $result = Get-MembersToAddAndRemove -DesiredMembers @('Member1','Member2') -CurrentMembers @('Member1')
                     $result.MembersToAdd | Should -HaveCount 1
                     $result.MembersToAdd[0].ToString() | Should -Be 'Member2'
-                    $result.MembersToRemove | Should -HaveCount 0
+                    $result.MembersToRemove | Should -BeNullOrEmpty
                 }
             }
 
             Context 'When the there are fewer desired members than current members' {
                 Context 'When proving a string value for CurrentMembers' {
                     $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('Member1','Member2')
-                    $result.MembersToAdd | Should -HaveCount 0
+                    $result.MembersToAdd | Should -BeNullOrEmpty
                     $result.MembersToRemove | Should -HaveCount 1
                     $result.MembersToRemove[0].ToString() | Should -Be 'Member2'
                 }

@@ -731,8 +731,8 @@ function Get-MembersToAddAndRemove
     }
 
     return @{
-        MembersToAdd = $principalsToAdd
-        MembersToRemove =  $principalsToRemove
+        MembersToAdd = [Microsoft.ActiveDirectory.Management.ADPrincipal[]] $principalsToAdd
+        MembersToRemove =  [Microsoft.ActiveDirectory.Management.ADPrincipal[]] $principalsToRemove
     }
 }
 
