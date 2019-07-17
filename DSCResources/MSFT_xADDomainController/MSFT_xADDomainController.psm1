@@ -71,12 +71,14 @@ function Get-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
 
     $getTargetResourceResult = @{
-        DomainName           = $DomainName
-        Ensure               = $false
-        IsGlobalCatalog      = $false
-        ReadOnlyReplica      = $false
+        DomainName                          = $DomainName
+        DomainAdministratorCredential       = $DomainAdministratorCredential
+        SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
+        Ensure                              = $false
+        IsGlobalCatalog                     = $false
+        ReadOnlyReplica                     = $false
         AllowPasswordReplicationAccountName = $null
-        DenyPasswordReplicationAccountName = $null
+        DenyPasswordReplicationAccountName  = $null
     }
 
     Write-Verbose -Message (
@@ -356,16 +358,8 @@ function Set-TargetResource
                 Write-Verbose -Message $script:localizedData.RemoveGlobalCatalog
             }
 
-            if ($domainControllerObject)
-            {
-                Set-ADObject -Identity $domainControllerObject.NTDSSettingsObjectDN -Replace @{
-                    options = $globalCatalogOptionValue
-                }
-            }
-            else
-            {
-                $errorMessage = $script:localizedData.ExpectedDomainController
-                New-ObjectNotFoundException -Message $errorMessage
+            Set-ADObject -Identity $domainControllerObject.NTDSSettingsObjectDN -Replace @{
+                options = $globalCatalogOptionValue
             }
         }
 
@@ -596,8 +590,7 @@ function Test-TargetResource
         }
     }
 
-
-    if ($PSBoundParameters.SiteName)
+    if ($PSBoundParameters.ContainsKey('SiteName'))
     {
         if (-not (Test-ADReplicationSite -SiteName $SiteName -DomainName $DomainName -Credential $DomainAdministratorCredential))
         {
@@ -615,6 +608,14 @@ function Test-TargetResource
     $existingResource = Get-TargetResource @getTargetResourceParameters
 
     $testTargetResourceReturnValue = $existingResource.Ensure
+
+    # if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica)
+    # {
+    #     if ($testTargetResourceReturnValue -and -not $testTargetResourceReturnValue.ReadOnlyReplica)
+    #     {
+    #         New-InvalidOperationException -Message $script:localizedData.CannotConvertToRODC
+    #     }
+    # }
 
     if ($PSBoundParameters.ContainsKey('SiteName') -and $existingResource.SiteName -ne $SiteName)
     {

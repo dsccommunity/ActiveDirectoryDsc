@@ -8,7 +8,7 @@ $script:dscResourceName = 'MSFT_xADDomainController'
 # Unit Test Template Version: 1.2.4
 $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
     & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
@@ -301,244 +301,295 @@ try
                 }
             }
 
-            It 'Returns "False" when "SiteName" does not match' {
-                $stubDomain = @{
-                    DNSRoot = $correctDomainName
+            Context 'When the system is in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            DomainName                          = $correctDomainName
+                            SiteName                            = $correctSiteName
+                            IsGlobalCatalog                     = $true
+                            AllowPasswordReplicationAccountName = @($allowedAccount)
+                            DenyPasswordReplicationAccountName  = @($deniedAccount)
+                            Ensure                              = $true
+                        }
+                    }
+
+                    Mock -CommandName Test-ADReplicationSite -MockWith {
+                        return $true
+                    }
                 }
 
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $incorrectSiteName
-                $stubDomainController.Domain = $correctDomainName
+                Context 'When creating a domain controller with only mandatory parameters' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName
+                        $result | Should -Be $true
 
-                Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
-                Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
-                Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
-
-                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns "True" when "SiteName" matches' {
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $correctSiteName
-                $stubDomainController.Domain = $correctDomainName
-
-                Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
-                Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
-                Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
-
-                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
-
-                $result | Should -Be $true
-            }
-
-            It 'Throws if "SiteName" is wrong' {
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $correctSiteName
-                $stubDomainController.Domain = $correctDomainName
-
-                Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
-                Mock -CommandName Test-ADReplicationSite -MockWith { return $false }
-
-                {
-                    Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $incorrectSiteName
-                } | Should -Throw ($script:localizedData.FailedToFindSite -f $incorrectSiteName, $correctDomainName)
-            }
-
-            It 'Returns "False" when "IsGlobalCatalog" does not match' {
-                $stubDomain = @{
-                    DNSRoot = $correctDomainName
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                    }
                 }
 
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $correctSiteName
-                $stubDomainController.Domain = $correctDomainName
-                Add-Member -InputObject $stubDomainController -name 'IsGlobalCatalog' -Value $false -MemberType NoteProperty -Force
+                Context 'When property SiteName is in desired state' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
+                        $result | Should -Be $true
 
-                Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
-                Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
-                Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
-
-                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName -IsGlobalCatalog $true
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns "True" when "IsGlobalCatalog" matches' {
-                $stubDomain = @{
-                    DNSRoot = $correctDomainName
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1 -Scope It
+                    }
                 }
 
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $correctSiteName
-                $stubDomainController.Domain = $correctDomainName
-                Add-Member -InputObject $stubDomainController -name 'IsGlobalCatalog' -Value $true -MemberType NoteProperty -Force
+                Context 'When property IsGlobalCatalog is in desired state' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true
+                        $result | Should -Be $true
 
-                Mock -CommandName Get-ADDomain -MockWith { return $true }
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
-                Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
-                Mock -CommandName Get-ItemProperty -MockWith { return @{ } }
-
-                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName -IsGlobalCatalog $true
-
-                $result | Should -Be $true
-            }
-
-            It 'Throws if "ReadOnlyReplica" is specified without Site' {
-                {
-                    Test-TargetResource @testDefaultParams -DomainName $correctDomainName -ReadOnlyReplica $true
-                } | Should -Throw $script:localizedData.RODCMissingSite
-            }
-
-            It 'Returns "True" when AllowPasswordReplicationAccountName matches' {
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $correctSiteName
-
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount1'
-                        }
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount2'
-                        }
-                    )
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                    }
                 }
 
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -AllowPasswordReplicationAccountName 'allowedAccount1', 'allowedAccount2'
+                Context 'When property AllowPasswordReplicationAccountName is in desired state' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount)
+                        $result | Should -Be $true
 
-                $result | Should -Be $true
-            }
-
-            It 'Returns "False" when AllowPasswordReplicationAccountName contains more accounts than expected' {
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount1'
-                        }
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount2'
-                        }
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount3'
-                        }
-                    )
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                    }
                 }
 
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -AllowPasswordReplicationAccountName 'allowedAccount1', 'allowedAccount2'
+                Context 'When property DenyPasswordReplicationAccountName is in desired state' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($deniedAccount)
+                        $result | Should -Be $true
 
-                $result | Should -Be $false
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                    }
+                }
             }
 
-            It 'Returns "False" when AllowPasswordReplicationAccountName contains less accounts than expected' {
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount1'
-                        }
-                    )
+            Context 'When the system is not in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Test-ADReplicationSite -MockWith {
+                        return $true
+                    }
                 }
 
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -AllowPasswordReplicationAccountName 'allowedAccount1', 'allowedAccount2'
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns "False" when AllowPasswordReplicationAccountName contains different accounts than expected' {
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount3'
+                Context 'When creating a domain controller with only mandatory parameters' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                          = 'WrongDomainName'
+                                Ensure                              = $false
+                            }
                         }
-                        [PSCustomObject]@{
-                            SamAccountName = 'allowedAccount4'
-                        }
-                    )
+                    }
+
+                    It 'Should return $false' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName 'WrongDomainName'
+                        $result | Should -Be $false
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                    }
                 }
 
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -AllowPasswordReplicationAccountName 'allowedAccount1', 'allowedAccount2'
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns "True" when DenyPasswordReplicationAccountName matches' {
-                $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
-                $stubDomainController.Site = $correctSiteName
-
-                Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount1'
+                Context 'When properties are not in desired state' {
+                    Context 'When property SiteName is not in desired state' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return @{
+                                    DomainName                          = $correctDomainName
+                                    SiteName                            = $correctSiteName
+                                    Ensure                              = $true
+                                }
+                            }
                         }
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount2'
+
+                        It 'Should return $false' {
+                            $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName 'NewSiteName'
+                            $result | Should -Be $false
+
+                            Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1 -Scope It
                         }
-                    )
+                    }
+
+                    Context 'When property IsGlobalCatalog is not in desired state' {
+                        Context 'When Domain Controller should be a Global Catalog' {
+                            BeforeAll {
+                                Mock -CommandName Get-TargetResource -MockWith {
+                                    return @{
+                                        DomainName                          = $correctDomainName
+                                        IsGlobalCatalog                     = $false
+                                        Ensure                              = $true
+                                    }
+                                }
+                            }
+
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+
+                        Context 'When Domain Controller should not be a Global Catalog' {
+                            BeforeAll {
+                                Mock -CommandName Get-TargetResource -MockWith {
+                                    return @{
+                                        DomainName                          = $correctDomainName
+                                        IsGlobalCatalog                     = $true
+                                        Ensure                              = $true
+                                    }
+                                }
+                            }
+
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $false
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+                    }
+
+                    Context 'When property AllowPasswordReplicationAccountName is not in desired state' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return @{
+                                    DomainName                          = $correctDomainName
+                                    AllowPasswordReplicationAccountName = @($allowedAccount,'Member2')
+                                    Ensure                              = $true
+                                }
+                            }
+                        }
+
+                        Context 'When there are different members than the desired state' {
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @('NewMember1','NewMember2')
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+
+                        Context 'When there exist less members than the desired state' {
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount,'Member2','NewMember')
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+
+                        Context 'When there exist more members that the desired state' {
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount)
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+                    }
+
+                    Context 'When property DenyPasswordReplicationAccountName is not in desired state' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return @{
+                                    DomainName                          = $correctDomainName
+                                    DenyPasswordReplicationAccountName  = @($deniedAccount,'Member2')
+                                    Ensure                              = $true
+                                }
+                            }
+                        }
+
+                        Context 'When there are different members than the desired state' {
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @('NewMember1','NewMember2')
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+
+                        Context 'When there exist less members than the desired state' {
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($allowedAccount,'Member2','NewMember')
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+
+                        Context 'When there exist more members that the desired state' {
+                            It 'Should return $false' {
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($allowedAccount)
+                                $result | Should -Be $false
+
+                                Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
+                            }
+                        }
+                    }
                 }
 
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -DenyPasswordReplicationAccountName 'deniedAccount1', 'deniedAccount2'
+                Context 'When a specified site does not exist in the Active Directory' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                          = $correctDomainName
+                                SiteName                            = $correctSiteName
+                                Ensure                              = $true
+                            }
+                        }
 
-                $result | Should -Be $true
-            }
+                        Mock -CommandName Test-ADReplicationSite -MockWith {
+                            return $false
+                        }
+                    }
 
-            It 'Returns "False" when DenyPasswordReplicationAccountName contains more accounts than expected' {
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount1'
-                        }
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount2'
-                        }
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount3'
-                        }
-                    )
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
+                        } | Should -Throw ($script:localizedData.FailedToFindSite -f $correctSiteName, $correctDomainName)
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1 -Scope It
+                    }
                 }
 
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -DenyPasswordReplicationAccountName 'deniedAccount1', 'deniedAccount2'
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns "False" when DenyPasswordReplicationAccountName contains less accounts than expected' {
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount1'
+                Context 'When providing parameter ReadOnlyReplica with a value of $true, but do not specify parameter SiteName' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                          = $correctDomainName
+                                SiteName                            = $null
+                                ReadOnlyReplica                     = $false
+                                Ensure                              = $false
+                            }
                         }
-                    )
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName -ReadOnlyReplica $true
+                        } | Should -Throw $script:localizedData.RODCMissingSite
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
+                    }
                 }
-
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -DenyPasswordReplicationAccountName 'deniedAccount1', 'deniedAccount2'
-
-                $result | Should -Be $false
             }
-
-            It 'Returns "False" when DenyPasswordReplicationAccountName contains different accounts than expected' {
-                Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied.IsPresent } -MockWith {
-                    return @(
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount3'
-                        }
-                        [PSCustomObject]@{
-                            SamAccountName = 'deniedAccount4'
-                        }
-                    )
-                }
-
-                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -DenyPasswordReplicationAccountName 'deniedAccount1', 'deniedAccount2'
-
-                $result | Should -Be $false
-            }
-
         }
         #endregion
 
