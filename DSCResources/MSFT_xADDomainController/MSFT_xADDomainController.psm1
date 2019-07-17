@@ -74,6 +74,9 @@ function Get-TargetResource
         DomainName           = $DomainName
         Ensure               = $false
         IsGlobalCatalog      = $false
+        ReadOnlyReplica      = $false
+        AllowPasswordReplicationAccountName = $null
+        DenyPasswordReplicationAccountName = $null
     }
 
     Write-Verbose -Message (
@@ -105,8 +108,8 @@ function Get-TargetResource
             $script:localizedData.AlreadyDomainController -f $domainControllerObject.Name, $domainControllerObject.Domain
         )
 
-        $allowedPasswordReplicationAccountName = Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName
-        $deniedPasswordReplicationAccountName = Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName
+        $allowedPasswordReplicationAccountName = [System.String[]] (Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName)
+        $deniedPasswordReplicationAccountName = [System.String[]] (Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName)
         $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
         $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
 
@@ -117,6 +120,7 @@ function Get-TargetResource
         $getTargetResourceResult.SiteName = $domainControllerObject.Site
         $getTargetResourceResult.IsGlobalCatalog = $domainControllerObject.IsGlobalCatalog
         $getTargetResourceResult.DomainName = $domainControllerObject.Domain
+        $getTargetResourceResult.ReadOnlyReplica = $domainControllerObject.IsReadOnly
         $getTargetResourceResult.AllowPasswordReplicationAccountName = $allowedPasswordReplicationAccountName
         $getTargetResourceResult.DenyPasswordReplicationAccountName = $deniedPasswordReplicationAccountName
     }
@@ -170,7 +174,7 @@ function Get-TargetResource
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
 
-    .PARAMETER AllowPasswordReplicationAccountName
+    .PARAMETER DenyPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication denied list.
 #>
 function Set-TargetResource
@@ -520,7 +524,7 @@ function Set-TargetResource
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
 
-    .PARAMETER AllowPasswordReplicationAccountName
+    .PARAMETER DenyPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication denied list.
 #>
 function Test-TargetResource

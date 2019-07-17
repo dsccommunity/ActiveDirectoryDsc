@@ -78,6 +78,7 @@ namespace Microsoft.ActiveDirectory.Management
         public string Site;
         public string Domain;
         public bool IsGlobalCatalog;
+        public bool IsReadOnly;
     }
 
     public class ADDirectoryServer

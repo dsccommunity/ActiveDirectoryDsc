@@ -156,6 +156,59 @@ try
                             $domainControllerObject.Site = $correctSiteName
                             $domainControllerObject.Domain = $correctDomainName
                             $domainControllerObject.IsGlobalCatalog = $true
+                            $domainControllerObject.IsReadOnly = $false
+                            return $domainControllerObject
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } -MockWith {
+                            return @{
+                                'Database log files path' = 'C:\Windows\NTDS'
+                                'DSA Working Directory'   = 'C:\Windows\NTDS'
+                            }
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' } -MockWith {
+                            return @{
+                                'SysVol' = 'C:\Windows\SYSVOL\sysvol'
+                            }
+                        }
+
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
+                            return $null
+                        }
+
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied.IsPresent } -MockWith {
+                            return $null
+                        }
+
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name IFM
+                    }
+
+                    It 'Returns current Domain Controller properties' {
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+
+                        $result.DomainName | Should -Be $correctDomainName
+                        $result.DatabasePath | Should -Be $correctDatabasePath
+                        $result.LogPath | Should -Be $correctLogPath
+                        $result.SysvolPath | Should -Be $correctSysvolPath
+                        $result.SiteName | Should -Be $correctSiteName
+                        $result.Ensure | Should -Be $true
+                        $result.IsGlobalCatalog | Should -Be $true
+                        $result.ReadOnlyReplica | Should -Be $false
+                        $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
+                        $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
+                    }
+                }
+
+                Context 'When the node is a Read-Only Domain Controller' {
+                    BeforeAll {
+                        Mock -CommandName Get-ADDomain -MockWith { return $true }
+                        Mock -CommandName Get-DomainControllerObject {
+                            $domainControllerObject = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $domainControllerObject.Site = $correctSiteName
+                            $domainControllerObject.Domain = $correctDomainName
+                            $domainControllerObject.IsGlobalCatalog = $true
+                            $domainControllerObject.IsReadOnly = $true
                             return $domainControllerObject
                         }
 
@@ -197,6 +250,8 @@ try
                         $result.SiteName | Should -Be $correctSiteName
                         $result.Ensure | Should -Be $true
                         $result.IsGlobalCatalog | Should -Be $true
+                        $result.ReadOnlyReplica | Should -Be $true
+                        $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
                     }
@@ -221,6 +276,9 @@ try
                         $result.Ensure | Should -Be $false
                         $result.IsGlobalCatalog | Should -Be $false
                         $result.NtdsSettingsObjectDn | Should -BeNullOrEmpty
+                        $result.ReadOnlyReplica | Should -Be $false
+                        $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
+                        $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                     }
                 }
             }
