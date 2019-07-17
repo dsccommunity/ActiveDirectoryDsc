@@ -406,7 +406,7 @@ function Set-TargetResource
                         AllowedList = $adPrincipalsToRemove
                     }
 
-                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy
+                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy -Confirm:$false
                 }
 
                 if ($null -ne $adPrincipalsToAdd)
@@ -453,7 +453,7 @@ function Set-TargetResource
                         DeniedList  = $adPrincipalsToRemove
                     }
 
-                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy
+                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy -Confirm:$false
                 }
 
                 if ($null -ne $adPrincipalsToAdd)
