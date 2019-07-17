@@ -108,6 +108,20 @@ namespace Microsoft.ActiveDirectory.Management
     {
         string site;
         public ADReplicationSite(System.String s){ site = s; }
+
+        // Added so that MSFT_xADDomainController unit test works
+        // 'When a domain controller is in the wrong site'
+        //     'Should call the correct mocks to move the domain controller to the correct site'
+
+        // The cmdlet Move-ADDirectoryServer accepts a string for the parameter
+        // Site, but that string get converted to a ADReplicationSite object.
+        // The ADReplicationSite object is what Pester sees and this method is
+        // the only one exposed in the real ADReplicationSite object to return
+        // the site name.
+        public override string ToString()
+        {
+            return this.site;
+        }
     }
 }
 

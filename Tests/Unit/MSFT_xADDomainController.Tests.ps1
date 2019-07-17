@@ -256,7 +256,6 @@ try
                 $stubDomainController.Site = $incorrectSiteName
                 $stubDomainController.Domain = $correctDomainName
 
-
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
                 Mock -CommandName Test-ADReplicationSite -MockWith { return $true }
@@ -287,7 +286,6 @@ try
                 $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                 $stubDomainController.Site = $correctSiteName
                 $stubDomainController.Domain = $correctDomainName
-
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
@@ -326,7 +324,7 @@ try
                 $stubDomainController = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                 $stubDomainController.Site = $correctSiteName
                 $stubDomainController.Domain = $correctDomainName
-                Add-Member -InputObject $stubDomainController -name 'IsGlobalCatalog' -Value $true -MemberType NoteProperty -Force
+                $stubDomainController.IsGlobalCatalog = $true
 
                 Mock -CommandName Get-ADDomain -MockWith { return $true }
                 Mock -CommandName Get-DomainControllerObject -MockWith { return $stubDomainController }
@@ -341,7 +339,7 @@ try
             It 'Throws if "ReadOnlyReplica" is specified without Site' {
                 {
                     Test-TargetResource @testDefaultParams -DomainName $correctDomainName -ReadOnlyReplica $true
-                } | Should -Throw ($script:localizedData.RODCMissingSite)
+                } | Should -Throw $script:localizedData.RODCMissingSite
             }
 
             It 'Returns "True" when AllowPasswordReplicationAccountName matches' {
@@ -602,7 +600,11 @@ try
                                 SiteName = 'IncorrectSite'
                             }
                         }
-                        #Without this line the local tests are crashing powershell.exe (both 5 and 6). See line 606
+
+                        <#
+                            Without this line the local tests are crashing powershell.exe (both 5 and 6).
+                            See test 'Should call the correct mocks to move the domain controller to the correct site'.
+                        #>
                         Mock -CommandName Get-DomainControllerObject -MockWith {
                             return (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController)
                         }
@@ -611,7 +613,6 @@ try
                     It 'Should call the correct mocks to move the domain controller to the correct site' {
                         { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName } | Should -Not -Throw
 
-                        # FYI: This test will fail when run locally, but should succeed on the build server
                         Assert-MockCalled -CommandName Move-ADDirectoryServer -ParameterFilter {
                             $Site.ToString() -eq $correctSiteName
                         } -Exactly -Times 1 -Scope It
