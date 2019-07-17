@@ -16,13 +16,13 @@
 #>
 
 #Requires -module xActiveDirectory
+
 <#
     .DESCRIPTION
     This configuration will add a read-only domain controller to the domain contoso.com
     and specify a list of account, whose passwords are allowed/denied for synchronisation.
 #>
-
-Configuration Read-OnlyDomainController_Config
+Configuration AddReadOnlyDomainController_Config
 {
     param
     (
@@ -68,8 +68,9 @@ Configuration Read-OnlyDomainController_Config
             SafemodeAdministratorPassword       = $DomainAdministratorCredential
             ReadOnlyReplica                     = $true
             SiteName                            = 'Default-First-Site-Name'
-            AllowPasswordReplicationAccountName = 'pvdi.test1', 'pvdi.test'
-            DenyPasswordReplicationAccountName  = 'SVC_PVS', 'TA2SCVMM'
+            AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
+            DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
+
             DependsOn                           = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
