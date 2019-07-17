@@ -589,6 +589,26 @@ try
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
                     }
                 }
+
+                Context 'When providing parameter ReadOnlyReplica with a value of $true, but the node is already a writeable Domain Controller' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                          = $correctDomainName
+                                ReadOnlyReplica                     = $false
+                                Ensure                              = $true
+                            }
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName -ReadOnlyReplica $true
+                        } | Should -Throw $script:localizedData.CannotConvertToRODC
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    }
+                }
             }
         }
         #endregion

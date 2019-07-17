@@ -609,13 +609,13 @@ function Test-TargetResource
 
     $testTargetResourceReturnValue = $existingResource.Ensure
 
-    # if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica)
-    # {
-    #     if ($testTargetResourceReturnValue -and -not $testTargetResourceReturnValue.ReadOnlyReplica)
-    #     {
-    #         New-InvalidOperationException -Message $script:localizedData.CannotConvertToRODC
-    #     }
-    # }
+    if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica)
+    {
+        if ($testTargetResourceReturnValue -and -not $testTargetResourceReturnValue.ReadOnlyReplica)
+        {
+            New-InvalidOperationException -Message $script:localizedData.CannotConvertToRODC
+        }
+    }
 
     if ($PSBoundParameters.ContainsKey('SiteName') -and $existingResource.SiteName -ne $SiteName)
     {
