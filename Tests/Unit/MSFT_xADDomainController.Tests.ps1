@@ -134,7 +134,7 @@ try
         #endregion Pester Test Initialization
 
         #region Function Get-TargetResource
-        Describe 'xActiveDirectory\Get-TargetResource' -Tag 'Get' {
+        Describe 'xADDomainController\Get-TargetResource' -Tag 'Get' {
             Context 'When the domain name is not available' {
                 BeforeAll {
                     Mock -CommandName Get-ADDomain -MockWith {
@@ -286,7 +286,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xActiveDirectory\Test-TargetResource' -Tag 'Test' {
+        Describe 'xADDomainController\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
                     return [PSCustomObject]@{
@@ -614,7 +614,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xActiveDirectory\Set-TargetResource' -Tag 'Set' {
+        Describe 'xADDomainController\Set-TargetResource' -Tag 'Set' {
             Context 'When the system is not in the desired state' {
                 BeforeAll {
                     Mock -CommandName Install-ADDSDomainController
@@ -1014,6 +1014,141 @@ try
             }
         }
         #endregion
+
+        Describe 'xADDomainController\Get-MembersToAddAndRemove' -Tag 'Helper' {
+            Context 'When there is one desired member' {
+                Context 'When there are no current members' {
+                    Context 'When proving a $null value for CurrentMembers' {
+                        It 'Should return the correct values' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers $null
+                            $result.MembersToAdd | Should -HaveCount 1
+                            $result.MembersToAdd[0].SamAccountName | Should -Be 'Member1'
+                            $result.MembersToRemove | Should -HaveCount 0
+                        }
+                    }
+
+                    Context 'When proving an empty collection for CurrentMembers' {
+                        It 'Should return the correct values' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @()
+                            $result.MembersToAdd | Should -HaveCount 1
+                            $result.MembersToAdd[0].SamAccountName | Should -Be 'Member1'
+                            $result.MembersToRemove | Should -HaveCount 0
+                        }
+                    }
+                }
+
+                Context 'When there are one current member' {
+                    It 'Should return the correct values' {
+                        Context 'When proving a collection for CurrentMembers' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('OldMember')
+                            $result.MembersToAdd | Should -HaveCount 1
+                            $result.MembersToAdd[0].SamAccountName | Should -Be 'Member1'
+                            $result.MembersToRemove | Should -HaveCount 1
+                            $result.MembersToRemove[0].SamAccountName | Should -Be 'OldMember'
+                        }
+
+                        Context 'When proving a string value for CurrentMembers' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers 'OldMember'
+                            $result.MembersToAdd | Should -HaveCount 1
+                            $result.MembersToAdd[0].SamAccountName | Should -Be 'Member1'
+                            $result.MembersToRemove | Should -HaveCount 1
+                            $result.MembersToRemove[0].SamAccountName | Should -Be 'OldMember'
+                        }
+                    }
+                }
+
+                Context 'When there more than one current member' {
+                    It 'Should return the correct values' {
+                        $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('OldMember1','OldMember2')
+                        $result.MembersToAdd | Should -HaveCount 1
+                        $result.MembersToAdd[0].SamAccountName | Should -Be 'Member1'
+                        $result.MembersToRemove | Should -HaveCount 2
+                        $result.MembersToRemove[0].SamAccountName | Should -Be 'OldMember1'
+                        $result.MembersToRemove[1].SamAccountName | Should -Be 'OldMember2'
+                    }
+                }
+            }
+
+            Context 'When there is no desired members' {
+                Context 'When there are no current members' {
+                    Context 'When proving a $null value for DesiredMembers and CurrentMembers' {
+                        It 'Should return the correct values' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers $null
+                            $result.MembersToAdd | Should -HaveCount 0
+                            $result.MembersToRemove | Should -HaveCount 0
+                        }
+                    }
+
+                    Context 'When proving an empty collection for DesiredMembers and CurrentMembers' {
+                        It 'Should return the correct values' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers @() -CurrentMembers @()
+                            $result.MembersToAdd | Should -HaveCount 0
+                            $result.MembersToRemove | Should -HaveCount 0
+                        }
+                    }
+                }
+
+                Context 'When there are one current member' {
+                    It 'Should return the correct values' {
+                        Context 'When proving a collection for CurrentMembers' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers @('OldMember')
+                            $result.MembersToAdd | Should -HaveCount 0
+                            $result.MembersToRemove | Should -HaveCount 1
+                            $result.MembersToRemove[0].SamAccountName | Should -Be 'OldMember'
+                        }
+
+                        Context 'When proving a string value for CurrentMembers' {
+                            $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers 'OldMember'
+                            $result.MembersToAdd | Should -HaveCount 0
+                            $result.MembersToRemove | Should -HaveCount 1
+                            $result.MembersToRemove[0].SamAccountName | Should -Be 'OldMember'
+                        }
+                    }
+                }
+
+                Context 'When there more than one current member' {
+                    It 'Should return the correct values' {
+                        $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers @('OldMember1','OldMember2')
+                        $result.MembersToAdd | Should -HaveCount 0
+                        $result.MembersToRemove | Should -HaveCount 2
+                        $result.MembersToRemove[0].SamAccountName | Should -Be 'OldMember1'
+                        $result.MembersToRemove[1].SamAccountName | Should -Be 'OldMember2'
+                    }
+                }
+            }
+
+            Context 'When the same members are present in desired members and current members' {
+                Context 'When proving a collection for CurrentMembers' {
+                    $result = Get-MembersToAddAndRemove -DesiredMembers @('Member1') -CurrentMembers @('Member1')
+                    $result.MembersToAdd | Should -HaveCount 0
+                    $result.MembersToRemove | Should -HaveCount 0
+                }
+
+                Context 'When proving a string value for CurrentMembers' {
+                    $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers 'Member1'
+                    $result.MembersToAdd | Should -HaveCount 0
+                    $result.MembersToRemove | Should -HaveCount 0
+                }
+            }
+
+            Context 'When the there are more desired members than current members' {
+                Context 'When proving a collection for CurrentMembers' {
+                    $result = Get-MembersToAddAndRemove -DesiredMembers @('Member1','Member2') -CurrentMembers @('Member1')
+                    $result.MembersToAdd | Should -HaveCount 1
+                    $result.MembersToAdd[0].SamAccountName | Should -Be 'Member2'
+                    $result.MembersToRemove | Should -HaveCount 0
+                }
+            }
+
+            Context 'When the there are fewer desired members than current members' {
+                Context 'When proving a string value for CurrentMembers' {
+                    $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('Member1','Member2')
+                    $result.MembersToAdd | Should -HaveCount 0
+                    $result.MembersToRemove | Should -HaveCount 1
+                    $result.MembersToRemove[0].SamAccountName | Should -Be 'Member2'
+                }
+            }
+        }
     }
 }
 finally

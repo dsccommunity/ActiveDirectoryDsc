@@ -388,40 +388,36 @@ function Set-TargetResource
                     ($targetResource.AllowPasswordReplicationAccountName -join ';'),
                     ($AllowPasswordReplicationAccountName -join ';')
                 )
-            }
 
-            $adPrincipalsToRemove = foreach ($accountName in $targetResource.AllowPasswordReplicationAccountName)
-            {
-                if ($accountName -notin $AllowPasswordReplicationAccountName)
+                $getMembersToAddAndRemoveParameters = @{
+                    DesiredMembers = $AllowPasswordReplicationAccountName
+                    CurrentMembers = $targetResource.AllowPasswordReplicationAccountName
+                }
+
+                $getMembersToAddAndRemoveResult = Get-MembersToAddAndRemove @getMembersToAddAndRemoveParameters
+
+                $adPrincipalsToRemove = $getMembersToAddAndRemoveResult.MembersToRemove
+                $adPrincipalsToAdd = $getMembersToAddAndRemoveResult.MembersToAdd
+
+                if ($null -ne $adPrincipalsToRemove)
                 {
-                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
-                }
-            }
+                    $removeADPasswordReplicationPolicy = @{
+                        Identity    = $domainControllerObject
+                        AllowedList = $adPrincipalsToRemove
+                    }
 
-            if ($null -ne $adPrincipalsToRemove)
-            {
-                $removeADPasswordPolicy = @{
-                    Identity    = $domainControllerObject
-                    AllowedList = $adPrincipalsToRemove
+                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy
                 }
-                Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordPolicy
-            }
 
-            $adPrincipalsToAdd = foreach ($accountName in $AllowPasswordReplicationAccountName)
-            {
-                if ($accountName -notin $targetResource.AllowPasswordReplicationAccountName)
+                if ($null -ne $adPrincipalsToAdd)
                 {
-                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
-                }
-            }
+                    $addADPasswordReplicationPolicy = @{
+                        Identity    = $domainControllerObject
+                        AllowedList = $adPrincipalsToAdd
+                    }
 
-            if ($null -ne $adPrincipalsToAdd)
-            {
-                $addADPasswordPolicy = @{
-                    Identity    = $domainControllerObject
-                    AllowedList = $adPrincipalsToAdd
+                    Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordReplicationPolicy
                 }
-                Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordPolicy
             }
         }
 
@@ -439,40 +435,37 @@ function Set-TargetResource
                     ($targetResource.DenyPasswordReplicationAccountName -join ';'),
                     ($DenyPasswordReplicationAccountName -join ';')
                 )
-            }
 
-            $adPrincipalsToRemove = foreach ($accountName in $targetResource.DenyPasswordReplicationAccountName)
-            {
-                if ($accountName -notin $DenyPasswordReplicationAccountName)
+                $getMembersToAddAndRemoveParameters = @{
+                    DesiredMembers = $DenyPasswordReplicationAccountName
+                    CurrentMembers = $targetResource.DenyPasswordReplicationAccountName
+                }
+
+                $getMembersToAddAndRemoveResult = Get-MembersToAddAndRemove @getMembersToAddAndRemoveParameters
+
+                $adPrincipalsToRemove = $getMembersToAddAndRemoveResult.MembersToRemove
+                $adPrincipalsToAdd = $getMembersToAddAndRemoveResult.MembersToAdd
+
+                if ($null -ne $adPrincipalsToRemove)
                 {
-                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
-                }
-            }
+                    $removeADPasswordReplicationPolicy = @{
+                        Identity    = $domainControllerObject
+                        DeniedList  = $adPrincipalsToRemove
+                    }
 
-            if ($null -ne $adPrincipalsToRemove)
-            {
-                $removeADPasswordPolicy = @{
-                    Identity    = $domainControllerObject
-                    DeniedList  = $adPrincipalsToRemove
+                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy
                 }
-            Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordPolicy
-            }
 
-            $adPrincipalsToAdd = foreach ($accountName in $DenyPasswordReplicationAccountName)
-            {
-                if ($accountName -notin $targetResource.DenyPasswordReplicationAccountName)
+                if ($null -ne $adPrincipalsToAdd)
                 {
-                    New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $accountName
-                }
-            }
+                    $addADPasswordReplicationPolicy = @{
+                        Identity    = $domainControllerObject
+                        DeniedList  = $adPrincipalsToAdd
+                    }
 
-            if ($null -ne $adPrincipalsToAdd)
-            {
-                $addADPasswordPolicy = @{
-                    Identity    = $domainControllerObject
-                    DeniedList  = $adPrincipalsToAdd
+                    Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordReplicationPolicy
                 }
-            Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordPolicy
+
             }
         }
     }
@@ -678,11 +671,69 @@ function Test-TargetResource
                 ($existingResource.DenyPasswordReplicationAccountName -join ';'),
                 ($DenyPasswordReplicationAccountName -join ';')
             )
+
             $testTargetResourceReturnValue = $false
         }
     }
 
     return $testTargetResourceReturnValue
+}
+
+<#
+    .SYNOPSIS
+        Return a hashtable with members that are not present in CurrentMembers,
+        and members that are present add should not be present.
+
+    .PARAMETER DatabasePath
+        Provide the path where the NTDS.dit will be created and stored.
+
+    .PARAMETER LogPath
+        Provide the path where the logs for the NTDS will be created and stored.
+
+    .OUTPUTS
+        Returns a hashtable with two properties. The property MembersToAdd contains the
+        members as ADPrincipal objects that are not members in the collection
+        provided in $CurrentMembers. The property MembersToRemove contains the
+        unwanted members as ADPrincipal objects in the collection provided
+        in $CurrentMembers.
+#>
+function Get-MembersToAddAndRemove
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [AllowNull()]
+        [AllowEmptyCollection()]
+        [System.String[]]
+        $DesiredMembers,
+
+        [Parameter(Mandatory = $true)]
+        [AllowNull()]
+        [AllowEmptyCollection()]
+        [System.String[]]
+        $CurrentMembers
+    )
+
+    $principalsToRemove = foreach ($memberName in $CurrentMembers)
+    {
+        if ($memberName -notin $DesiredMembers)
+        {
+            New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $memberName
+        }
+    }
+
+    $principalsToAdd = foreach ($memberName in $DesiredMembers)
+    {
+        if ($memberName -notin $CurrentMembers)
+        {
+            New-Object -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal -ArgumentList $memberName
+        }
+    }
+
+    return @{
+        MembersToAdd = $principalsToAdd
+        MembersToRemove =  $principalsToRemove
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource
