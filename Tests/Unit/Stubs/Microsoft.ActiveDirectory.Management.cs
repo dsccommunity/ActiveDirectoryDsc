@@ -75,6 +75,10 @@ namespace Microsoft.ActiveDirectory.Management
     {
         public ADDomainController():base(){}
         public ADDomainController(System.String Identity):base(){}
+        public string Site;
+        public string Domain;
+        public bool IsGlobalCatalog;
+        public bool IsReadOnly;
     }
 
     public class ADDirectoryServer
@@ -97,13 +101,33 @@ namespace Microsoft.ActiveDirectory.Management
     public class ADPrincipal
     {
         public ADPrincipal():base(){}
-        public ADPrincipal(System.String Identity):base(){}
+        public ADPrincipal(System.String Identity):base(){ SamAccountName = Identity; }
+        public string SamAccountName { get; set; }
+
+        public override string ToString()
+        {
+            return this.SamAccountName;
+        }
     }
 
     public class ADReplicationSite
     {
         string site;
         public ADReplicationSite(System.String s){ site = s; }
+
+        // Added so that MSFT_xADDomainController unit test works
+        // 'When a domain controller is in the wrong site'
+        //     'Should call the correct mocks to move the domain controller to the correct site'
+
+        // The cmdlet Move-ADDirectoryServer accepts a string for the parameter
+        // Site, but that string get converted to a ADReplicationSite object.
+        // The ADReplicationSite object is what Pester sees and this method is
+        // the only one exposed in the real ADReplicationSite object to return
+        // the site name.
+        public override string ToString()
+        {
+            return this.site;
+        }
     }
 }
 

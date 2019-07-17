@@ -3,7 +3,8 @@
 
 .DESCRIPTION
     The xADDomainController DSC resource will install and configure domain
-    controllers in Active Directory.
+    controllers in Active Directory. Installation of Read-Only Domain Controllers
+    (RODC) is also supported.
 
     >**Note:** If the account used for the parameter `DomainAdministratorCredential`
     >cannot connect to another domain controller, for example using a credential
@@ -56,6 +57,18 @@
 .PARAMETER Ensure
     Read - String
     Returns the state of the Domain Controller.
+
+.PARAMETER ReadOnlyReplica
+    Write - Boolean
+    Indicates that the cmdlet installs the domain controller as an Read-Only Domain Controller (RODC) for an existing domain.
+
+.PARAMETER AllowPasswordReplicationAccountName
+    Write - String
+    Specifies an array of names of user accounts, group accounts, and computer accounts whose passwords can be replicated to this Read-Only Domain Controller (RODC).
+
+.PARAMETER DenyPasswordReplicationAccountName
+    Write - String
+    Specifies the names of user accounts, group accounts, and computer accounts whose passwords are not to be replicated to this Read-Only Domain Controller (RODC).
 
 .EXAMPLE 1
 
@@ -224,6 +237,65 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
             InstallationMediaPath         = 'F:\IFM'
 
             DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+        }
+    }
+}
+
+.EXAMPLE 4
+
+This configuration will add a read-only domain controller to the domain contoso.com
+and specify a list of account, whose passwords are allowed/denied for synchronisation.
+
+Configuration AddReadOnlyDomainController_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $DomainAdministratorCredential
+    )
+
+    Import-DscResource -ModuleName PSDscResources
+    Import-DscResource -ModuleName xActiveDirectory
+
+    node localhost
+    {
+        WindowsFeature 'InstallADDomainServicesFeature'
+        {
+            Ensure = 'Present'
+            Name   = 'AD-Domain-Services'
+        }
+
+        WindowsFeature 'RSATADPowerShell'
+        {
+            Ensure    = 'Present'
+            Name      = 'RSAT-AD-PowerShell'
+
+            DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
+        }
+
+        xWaitForADDomain 'WaitForestAvailability'
+        {
+            DomainName           = 'contoso.com'
+            DomainUserCredential = $DomainAdministratorCredential
+            RetryCount           = 10
+            RetryIntervalSec     = 120
+
+            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+        }
+
+        xADDomainController 'Read-OnlyDomainController(RODC)'
+        {
+            DomainName                          = 'contoso.com'
+            DomainAdministratorCredential       = $DomainAdministratorCredential
+            SafemodeAdministratorPassword       = $DomainAdministratorCredential
+            ReadOnlyReplica                     = $true
+            SiteName                            = 'Default-First-Site-Name'
+            AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
+            DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
+
+            DependsOn                           = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
 }

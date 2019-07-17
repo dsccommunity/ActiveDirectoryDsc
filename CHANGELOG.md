@@ -67,6 +67,11 @@
   - Added integration tests ([issue #348](https://github.com/PowerShell/xActiveDirectory/issues/348)).
 - Changes to xWaitForADDomain
   - Added comment-based help ([issue #341](https://github.com/PowerShell/xActiveDirectory/issues/341))
+- Changes to xAdDomainController
+  - Add support for creating Read-Only Domain Controller (RODC)
+    ([issue #40](https://github.com/PowerShell/xActiveDirectory/issues/40)).
+    [Svilen @SSvilen](https://github.com/SSvilen)
+  - Refactored unit tests for Test-TargetResource.
 
 ## 3.0.0.0
 

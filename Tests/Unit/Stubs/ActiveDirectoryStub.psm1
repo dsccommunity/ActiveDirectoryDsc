@@ -104,7 +104,7 @@ function Add-ADComputerServiceAccount
 #>
 function Add-ADDomainControllerPasswordReplicationPolicy
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter(Mandatory = $true, ParameterSetName = 'AllowedPRP')]
@@ -5135,7 +5135,7 @@ function Remove-ADComputerServiceAccount
 #>
 function Remove-ADDomainControllerPasswordReplicationPolicy
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter(Mandatory = $true, ParameterSetName = 'AllowedPRP')]
