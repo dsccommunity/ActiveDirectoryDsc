@@ -1,6 +1,3 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-param()
-
 $script:dscModuleName = 'xActiveDirectory'
 $script:dscResourceName = 'MSFT_xWaitForADDomain'
 

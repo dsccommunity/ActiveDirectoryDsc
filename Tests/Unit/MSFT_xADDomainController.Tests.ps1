@@ -1,6 +1,3 @@
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
-param()
-
 #region HEADER
 $script:dscModuleName = 'xActiveDirectory'
 $script:dscResourceName = 'MSFT_xADDomainController'
