@@ -67,7 +67,8 @@
 - Changes to xWaitForADDomain
   - Added comment-based help ([issue #341](https://github.com/PowerShell/xActiveDirectory/issues/341))
 - Changes to xAdDomainController
-  - Add RODC Creation Support
+  - Add support for creating Read-Only Domain Controller (RODC)
+    ([issue #40](https://github.com/PowerShell/xActiveDirectory/issues/40)).
 
 ## 3.0.0.0
 
