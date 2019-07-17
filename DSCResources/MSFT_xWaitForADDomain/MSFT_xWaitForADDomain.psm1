@@ -6,11 +6,33 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWaitForADDomain'
 
+<#
+    .SYNOPSIS
+        Gets the current state of the specified Active Directory to see if it
+        is available.
+
+    .PARAMETER DomainName
+        The name of the Active Directory domain to wait for.
+
+    .PARAMETER DomainUserCredential
+        The user account credentials to use to perform this task.
+
+    .PARAMETER RetryIntervalSec
+        The interval in seconds between retry attempts. Default value is 60.
+
+    .PARAMETER RetryCount
+        The number of retries before failing. Default value is 10.
+
+    .PARAMETER RebootRetryCount
+        The number of times to reboot after failing and then restart retrying.
+        Default value is 0 (zero).
+#>
 function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
     param
     (
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
@@ -57,6 +79,27 @@ function Get-TargetResource
     }
 }
 
+<#
+    .SYNOPSIS
+        Sets the current state of the specified Active Directory to see if a
+        reboot is required.
+
+    .PARAMETER DomainName
+        The name of the Active Directory domain to wait for.
+
+    .PARAMETER DomainUserCredential
+        The user account credentials to use to perform this task.
+
+    .PARAMETER RetryIntervalSec
+        The interval in seconds between retry attempts. Default value is 60.
+
+    .PARAMETER RetryCount
+        The number of retries before failing. Default value is 10.
+
+    .PARAMETER RebootRetryCount
+        The number of times to reboot after failing and then restart retrying.
+        Default value is 0 (zero).
+#>
 function Set-TargetResource
 {
     <#
@@ -147,6 +190,27 @@ function Set-TargetResource
     }
 }
 
+<#
+    .SYNOPSIS
+        Tests the current state of the specified Active Directory to see if it
+        is available.
+
+    .PARAMETER DomainName
+        The name of the Active Directory domain to wait for.
+
+    .PARAMETER DomainUserCredential
+        The user account credentials to use to perform this task.
+
+    .PARAMETER RetryIntervalSec
+        The interval in seconds between retry attempts. Default value is 60.
+
+    .PARAMETER RetryCount
+        The number of retries before failing. Default value is 10.
+
+    .PARAMETER RebootRetryCount
+        The number of times to reboot after failing and then restart retrying.
+        Default value is 0 (zero).
+#>
 function Test-TargetResource
 {
     [OutputType([System.Boolean])]
@@ -196,6 +260,16 @@ function Test-TargetResource
     }
 }
 
+<#
+    .SYNOPSIS
+        Gets the specified Active Directory domain
+
+    .PARAMETER DomainName
+        The name of the Active Directory domain to wait for.
+
+    .PARAMETER DomainUserCredential
+        The user account credentials to use to perform this task.
+#>
 function Get-Domain
 {
     [OutputType([PSObject])]
