@@ -33,6 +33,7 @@
     - New-CimCredentialInstance
     - Add-TypeAssembly
     - New-ADDirectoryContext
+  - Removed unnecessary Script Analyzer rule overrides from tests.
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
