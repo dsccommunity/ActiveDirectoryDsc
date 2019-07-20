@@ -34,7 +34,7 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController
         Provide the name of the site you want the Domain Controller to be added to.
 
     .PARAMETER InstallDns
-        Specifies if the Dns service will be installed or not. Default value is true.
+        Specifies if the DNS service will be installed. Default value is $true.
 #>
 function Get-TargetResource
 {
@@ -71,7 +71,7 @@ function Get-TargetResource
         $SiteName,
 
         [Parameter()]
-        [boolean]
+        [System.Boolean]
         $InstallDns
     )
 
@@ -196,7 +196,7 @@ function Get-TargetResource
         responding for the move to be allowed.
 
     .PARAMETER InstallDns
-        Specifies if the Dns service will be installed or not. Default value is true.
+        Specifies if the DNS service will be installed. Default value is $true.
 #>
 function Set-TargetResource
 {
@@ -598,7 +598,7 @@ function Set-TargetResource
         responding for the move to be allowed.
 
     .PARAMETER InstallDns
-        Specifies if the Dns service will be installed or not. Default value is true.
+        Specifies if the DNS service will be installed. Default value is $true.
 #>
 function Test-TargetResource
 {
