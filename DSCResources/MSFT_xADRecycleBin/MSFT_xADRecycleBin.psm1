@@ -6,6 +6,17 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADRecycleBin'
 
+<#
+    .SYNOPSIS
+        Gets the state of the Active Directory recycle bin.
+
+    .PARAMETER ForestFQDN
+        The fully qualified domain name (FQDN) of the forest in which to change the Recycle Bin feature.
+
+    .PARAMETER EnterpriseAdministratorCredential
+        The user account credentials to use to perform this task.
+
+#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -71,6 +82,17 @@ function Get-TargetResource
     }
 }
 
+<#
+    .SYNOPSIS
+        Sets the state of the Active Directory recycle bin.
+
+    .PARAMETER ForestFQDN
+        The fully qualified domain name (FQDN) of the forest in which to change the Recycle Bin feature.
+
+    .PARAMETER EnterpriseAdministratorCredential
+        The user account credentials to use to perform this task.
+
+#>
 function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
@@ -131,6 +153,17 @@ function Set-TargetResource
     }
 }
 
+<#
+    .SYNOPSIS
+        Tests the state the Active Directory recycle bin.
+
+    .PARAMETER ForestFQDN
+        The fully qualified domain name (FQDN) of the forest in which to change the Recycle Bin feature.
+
+    .PARAMETER EnterpriseAdministratorCredential
+        The user account credentials to use to perform this task.
+
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]

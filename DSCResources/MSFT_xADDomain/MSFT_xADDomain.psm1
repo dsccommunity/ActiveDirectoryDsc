@@ -46,6 +46,44 @@ function Get-TrackingFilename
     return Join-Path -Path ($env:temp) -ChildPath ('{0}.xADDomain.completed' -f $DomainName)
 }
 
+<#
+    .SYNOPSIS
+        Get the current state of the Domain.
+
+    .PARAMETER DomainName
+        The fully qualified domain name (FQDN) of the new domain.
+
+    .PARAMETER DomainAdministratorCredential
+        Credentials used to query for domain existence.
+
+    .PARAMETER SafemodeAdministratorPassword
+        Password for the administrator account when the computer is started in Safe Mode.
+
+    .PARAMETER ParentDomainName
+        Fully qualified domain name (FQDN) of the parent domain.
+
+    .PARAMETER DomainNetBIOSName
+        NetBIOS name for the new domain.
+
+    .PARAMETER DnsDelegationCredential
+        Credential used for creating DNS delegation.
+
+    .PARAMETER DatabasePath
+        Path to a directory that contains the domain database.
+
+    .PARAMETER LogPath
+        Path to a directory for the log file that will be written.
+
+    .PARAMETER SysvolPath
+        Path to a directory where the Sysvol file will be written.
+
+    .PARAMETER ForestMode
+        The Forest Functional Level for the entire forest.
+
+    .PARAMETER DomainMode
+        The Domain Functional Level for the entire domain.
+
+#>
 function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
@@ -192,6 +230,44 @@ function Get-TargetResource
 
 } #end function Get-TargetResource
 
+<#
+    .SYNOPSIS
+        Tests the current state of the Domain.
+
+    .PARAMETER DomainName
+        The fully qualified domain name (FQDN) of the new domain.
+
+    .PARAMETER DomainAdministratorCredential
+        Credentials used to query for domain existence.
+
+    .PARAMETER SafemodeAdministratorPassword
+        Password for the administrator account when the computer is started in Safe Mode.
+
+    .PARAMETER ParentDomainName
+        Fully qualified domain name (FQDN) of the parent domain.
+
+    .PARAMETER DomainNetBIOSName
+        NetBIOS name for the new domain.
+
+    .PARAMETER DnsDelegationCredential
+        Credential used for creating DNS delegation.
+
+    .PARAMETER DatabasePath
+        Path to a directory that contains the domain database.
+
+    .PARAMETER LogPath
+        Path to a directory for the log file that will be written.
+
+    .PARAMETER SysvolPath
+        Path to a directory where the Sysvol file will be written.
+
+    .PARAMETER ForestMode
+        The Forest Functional Level for the entire forest.
+
+    .PARAMETER DomainMode
+        The Domain Functional Level for the entire domain.
+
+#>
 function Test-TargetResource
 {
     [OutputType([System.Boolean])]
@@ -293,6 +369,44 @@ function Test-TargetResource
     }
 } #end function Test-TargetResource
 
+<#
+    .SYNOPSIS
+        Sets the state of the Domain.
+
+    .PARAMETER DomainName
+        The fully qualified domain name (FQDN) of the new domain.
+
+    .PARAMETER DomainAdministratorCredential
+        Credentials used to query for domain existence.
+
+    .PARAMETER SafemodeAdministratorPassword
+        Password for the administrator account when the computer is started in Safe Mode.
+
+    .PARAMETER ParentDomainName
+        Fully qualified domain name (FQDN) of the parent domain.
+
+    .PARAMETER DomainNetBIOSName
+        NetBIOS name for the new domain.
+
+    .PARAMETER DnsDelegationCredential
+        Credential used for creating DNS delegation.
+
+    .PARAMETER DatabasePath
+        Path to a directory that contains the domain database.
+
+    .PARAMETER LogPath
+        Path to a directory for the log file that will be written.
+
+    .PARAMETER SysvolPath
+        Path to a directory where the Sysvol file will be written.
+
+    .PARAMETER ForestMode
+        The Forest Functional Level for the entire forest.
+
+    .PARAMETER DomainMode
+        The Domain Functional Level for the entire domain.
+
+#>
 function Set-TargetResource
 {
     <#
