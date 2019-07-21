@@ -8,5 +8,5 @@ ConvertFrom-StringData @'
     ForestFunctionalLevelError = Forest functional level '{0}' does not meet minimum requirement of Windows2008R2Forest or greater. (ADRB0006)
     RecycleBinEnabled          = Active Directory Recycle Bin is enabled. (ADRB0007)
     RecycleBinNotEnabled       = Active Directory Recycle Bin is not enabled. (ADRB0008)
-    EnablingRecycleBin         = Enabling Active Directory Recycle Bin. (ADRB0009)
+    EnablingRecycleBin         = Enabling Active Directory Recycle Bin in the forest '{0}'. (ADRB0009)
 '@

@@ -57,6 +57,8 @@
     ([issue #332](https://github.com/PowerShell/xActiveDirectory/pull/332)).
 - Changes to xADRecycleBin
   - Updated tests and remove unnecessary mocks of `Write-Error`.
+  - Removed `SupportsShouldProcess` from the resource since DSC does not
+    support that interactive function ([issue #328](https://github.com/PowerShell/xActiveDirectory/issues/328)).
 - Changes to xADServicePrincipalName
   - Minor change to the unit tests that did not correct assert the localized
     string when an account is not found.
@@ -73,6 +75,8 @@
     ([issue #40](https://github.com/PowerShell/xActiveDirectory/issues/40)).
     [Svilen @SSvilen](https://github.com/SSvilen)
   - Refactored unit tests for Test-TargetResource.
+- Changes to xADObjectPermissionEntry
+  - Remove remnants of the `SupportsShouldProcess` ([issue #329](https://github.com/PowerShell/xActiveDirectory/issues/329)).
 
 ## 3.0.0.0
 
