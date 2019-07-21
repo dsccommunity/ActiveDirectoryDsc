@@ -190,7 +190,7 @@ $adPropertyMap = @(
     }
 )
 
-<# Get-TargetResource
+<#
     .SYNOPSIS
         Returns the current state of the Active Directory User
 
@@ -896,7 +896,7 @@ function Get-TargetResource
     return $targetResource
 } #end function Get-TargetResource
 
-<# Test-TargetResource
+<#
     .SYNOPSIS
         Tests the state of the Active Directory user account.
 
@@ -1572,7 +1572,7 @@ function Test-TargetResource
     return $isCompliant
 } #end function Test-TargetResource
 
-<# Set-TargetResource
+<#
     .SYNOPSIS
         Sets the properties of the Active Directory user account.
 

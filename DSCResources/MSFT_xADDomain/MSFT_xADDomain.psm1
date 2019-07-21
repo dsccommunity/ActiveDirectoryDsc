@@ -46,7 +46,7 @@ function Get-TrackingFilename
     return Join-Path -Path ($env:temp) -ChildPath ('{0}.xADDomain.completed' -f $DomainName)
 }
 
-<# Get-TargetResource
+<#
     .SYNOPSIS
         Get the current state of the Domain.
 
@@ -230,7 +230,7 @@ function Get-TargetResource
 
 } #end function Get-TargetResource
 
-<# Test-TargetResource
+<#
     .SYNOPSIS
         Tests the current state of the Domain.
 
@@ -369,7 +369,7 @@ function Test-TargetResource
     }
 } #end function Test-TargetResource
 
-<# Set-TargetResource
+<#
     .SYNOPSIS
         Sets the state of the Domain.
 

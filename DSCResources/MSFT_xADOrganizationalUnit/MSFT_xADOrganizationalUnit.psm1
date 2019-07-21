@@ -6,7 +6,7 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADOrganizationalUnit'
 
-<# Get-TargetResource
+<#
     .SYNOPSIS
         Gets the Organization Unit (OU) from Active Directory
 
@@ -69,7 +69,7 @@ function Get-TargetResource
     }
 } # end function Get-TargetResource
 
-<# Test-TargetResource
+<#
     .SYNOPSIS
         Tests the state of the specified Organization Unit (OU).
 
@@ -196,7 +196,7 @@ function Test-TargetResource
 
 } #end function Test-TargetResource
 
-<# Set-TargetResource
+<#
     .SYNOPSIS
         Sets the state of the Organization Unit (OU) in Active Directory.
 

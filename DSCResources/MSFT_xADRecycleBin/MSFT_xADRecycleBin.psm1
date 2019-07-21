@@ -6,7 +6,7 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADRecycleBin'
 
-<# Get-TargetResource
+<#
     .SYNOPSIS
         Gets the state of the Active Directory recycle bin.
 
@@ -82,7 +82,7 @@ function Get-TargetResource
     }
 }
 
-<# Set-TargetResource
+<#
     .SYNOPSIS
         Sets the state of the Active Directory recycle bin.
 
@@ -153,7 +153,7 @@ function Set-TargetResource
     }
 }
 
-<# Test-TargetResource
+<#
     .SYNOPSIS
         Tests the state the Active Directory recycle bin.
 

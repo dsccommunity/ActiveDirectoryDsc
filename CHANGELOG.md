@@ -72,7 +72,7 @@
     ([issue #40](https://github.com/PowerShell/xActiveDirectory/issues/40)).
     [Svilen @SSvilen](https://github.com/SSvilen)
   - Refactored unit tests for Test-TargetResource.
-- Fixed Comment based help for the following modules:
+- Fixed Comment based help for the following resources:
   - xADUser ([issue #340](https://github.com/PowerShell/xActiveDirectory/issues/340)).
   - xADOrganizational Unit ([issue #339](https://github.com/PowerShell/xActiveDirectory/issues/339)).
   - xADDomain ([issue #335](https://github.com/PowerShell/xActiveDirectory/issues/335)).
