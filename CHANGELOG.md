@@ -44,6 +44,7 @@
 - Changes to xADOrganizationalUnit
   - Catch exception when the path property specifies a non-existing path
     ([issue #408](https://github.com/PowerShell/xActiveDirectory/issues/408)).
+  - The unit tests are using the stub classes so the tests can be run locally.
 - Changes to xADUser
   - Fixes exception when creating a user with an empty string property
     ([issue #407](https://github.com/PowerShell/xActiveDirectory/issues/407)).

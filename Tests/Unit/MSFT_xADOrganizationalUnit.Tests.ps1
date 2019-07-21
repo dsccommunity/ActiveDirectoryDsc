@@ -36,6 +36,13 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
+        # If one type does not exist, it's assumed the other ones does not exist either.
+        if (-not ('Microsoft.ActiveDirectory.Management.ADComputer' -as [Type]))
+        {
+            $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
+            Add-Type -Path $adModuleStub
+        }
+
         function Get-ADOrganizationalUnit
         {
             param
