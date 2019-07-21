@@ -137,7 +137,7 @@ $adPropertyMap = @(
         Parameter = 'Manager'
     }
     @{
-         Parameter = 'Organization'
+        Parameter = 'Organization'
     }
     @{
         Parameter = 'OtherName'
@@ -190,6 +190,248 @@ $adPropertyMap = @(
     }
 )
 
+<#
+    .SYNOPSIS
+        Returns the current state of the Active Directory User
+
+    .PARAMETER DomainName
+        Name of the domain where the user account is located (only used if
+        password is managed).
+
+    .PARAMETER UserName
+        Specifies the Security Account Manager (SAM) account name of the user
+        (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER Password
+        Specifies a new password value for the account.
+
+    .PARAMETER Ensure
+        Specifies whether the user account should be present or absent. Default
+        value is 'Present'.
+
+    .PARAMETER CommonName
+        Specifies the common name assigned to the user account (ldapDisplayName
+        'cn'). If not specified the default value will be the same value
+        provided in parameter UserName.
+
+    .PARAMETER UserPrincipalName
+        Specifies the User Principal Name (UPN) assigned to the user account
+        (ldapDisplayName 'userPrincipalName').
+
+    .PARAMETER DisplayName
+        Specifies the display name of the object (ldapDisplayName
+        'displayName').
+
+    .PARAMETER Path
+        Specifies the X.500 path of the Organizational Unit (OU) or container
+        where the new object is created.
+
+    .PARAMETER GivenName
+        Specifies the user's given name (ldapDisplayName 'givenName').
+
+    .PARAMETER Initials
+        Specifies the initials that represent part of a user's name
+        (ldapDisplayName 'initials').
+
+    .PARAMETER Surname
+        Specifies the user's last name or surname (ldapDisplayName 'sn').
+
+    .PARAMETER Description
+        Specifies a description of the object (ldapDisplayName 'description').
+
+    .PARAMETER StreetAddress
+        Specifies the user's street address (ldapDisplayName 'streetAddress').
+
+    .PARAMETER POBox
+        Specifies the user's post office box number (ldapDisplayName
+        'postOfficeBox').
+
+    .PARAMETER City
+        Specifies the user's town or city (ldapDisplayName 'l').
+
+    .PARAMETER State
+        Specifies the user's or Organizational Unit's state or province
+        (ldapDisplayName 'st').
+
+    .PARAMETER PostalCode
+        Specifies the user's postal code or zip code (ldapDisplayName
+        'postalCode').
+
+    .PARAMETER Country
+        Specifies the country or region code for the user's language of choice
+        (ldapDisplayName 'c').
+
+    .PARAMETER Department
+        Specifies the user's department (ldapDisplayName 'department').
+
+    .PARAMETER Division
+        Specifies the user's division (ldapDisplayName 'division').
+
+    .PARAMETER Company
+        Specifies the user's company (ldapDisplayName 'company').
+
+    .PARAMETER Office
+        Specifies the location of the user's office or place of business
+        (ldapDisplayName 'physicalDeliveryOfficeName').
+
+    .PARAMETER JobTitle
+        Specifies the user's title (ldapDisplayName 'title').
+
+    .PARAMETER EmailAddress
+        Specifies the user's e-mail address (ldapDisplayName 'mail').
+
+    .PARAMETER EmployeeID
+        Specifies the user's employee ID (ldapDisplayName 'employeeID').
+
+    .PARAMETER EmployeeNumber
+        Specifies the user's employee number (ldapDisplayName 'employeeNumber').
+
+    .PARAMETER HomeDirectory
+        Specifies a user's home directory path (ldapDisplayName
+        'homeDirectory').
+
+    .PARAMETER HomeDrive
+        Specifies a drive that is associated with the UNC path defined by the
+        HomeDirectory property (ldapDisplayName 'homeDrive').
+
+    .PARAMETER HomePage
+        Specifies the URL of the home page of the object (ldapDisplayName
+        'wWWHomePage').
+
+    .PARAMETER ProfilePath
+        Specifies a path to the user's profile (ldapDisplayName 'profilePath').
+
+    .PARAMETER LogonScript
+        Specifies a path to the user's log on script (ldapDisplayName
+        'scriptPath').
+
+    .PARAMETER Notes
+        Specifies the notes attached to the user's accoutn (ldapDisplayName
+        'info').
+
+    .PARAMETER OfficePhone
+        Specifies the user's office telephone number (ldapDisplayName
+        'telephoneNumber').
+
+    .PARAMETER MobilePhone
+        Specifies the user's mobile phone number (ldapDisplayName 'mobile').
+
+    .PARAMETER Fax
+        Specifies the user's fax phone number (ldapDisplayName
+        'facsimileTelephoneNumber').
+
+    .PARAMETER HomePhone
+        Specifies the user's home telephone number (ldapDisplayName
+        'homePhone').
+
+    .PARAMETER Pager
+        Specifies the user's pager number (ldapDisplayName 'pager').
+
+    .PARAMETER IPPhone
+        Specifies the user's IP telephony phone number (ldapDisplayName
+        'ipPhone').
+
+    .PARAMETER Manager
+        Specifies the user's manager specified as a Distinguished Name
+        (ldapDisplayName 'manager').
+
+    .PARAMETER LogonWorkstations
+        Specifies the computers that the user can access. To specify more than
+        one computer, create a single comma-separated list. You can identify a
+        computer by using the Security Account Manager (SAM) account name
+        (sAMAccountName) or the DNS host name of the computer. The SAM account
+        name is the same as the NetBIOS name of the computer. The LDAP display
+        name (ldapDisplayName) for this property is userWorkStations.
+
+    .PARAMETER Organization
+        Specifies the user's organization. This parameter sets the Organization
+        property of a user object. The LDAP display name (ldapDisplayName) of
+        this property is 'o'.
+
+    .PARAMETER OtherName
+        Specifies a name in addition to a user's given name and surname, such as
+        the user's middle name. This parameter sets the OtherName property of a
+        user object. The LDAP display name (ldapDisplayName) of this property is
+        'middleName'.
+
+    .PARAMETER Enabled
+        Specifies if the account is enabled. Default value is $true.
+
+    .PARAMETER CannotChangePassword
+        Specifies whether the account password can be changed.
+
+    .PARAMETER ChangePasswordAtLogon
+        Specifies whether the account password must be changed during the next
+        logon attempt. This will only be enabled when the user is initially
+        created. This parameter cannot be set to $true if the parameter
+        PasswordNeverExpires is also set to $true.
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the password of an account can expire.
+
+    .PARAMETER TrustedForDelegation
+        Specifies whether an account is trusted for Kerberos delegation. Default
+        value is $false.
+
+    .PARAMETER AccountNotDelegated
+        Indicates whether the security context of the user is delegated to a
+        service.  When this parameter is set to true, the security context of
+        the account is not delegated to a service even when the service account
+        is set as trusted for Kerberos delegation. This parameter sets the
+        AccountNotDelegated property for an Active Directory account. This
+        parameter also sets the ADS_UF_NOT_DELEGATED flag of the Active
+        Directory User Account Control (UAC) attribute.
+
+    .PARAMETER AllowReversiblePasswordEncryption
+        Indicates whether reversible password encryption is allowed for the
+        account. This parameter sets the AllowReversiblePasswordEncryption
+        property of the account. This parameter also sets the
+        ADS_UF_ENCRYPTED_TEXT_PASSWORD_ALLOWED flag of the Active Directory User
+        Account Control (UAC) attribute.
+
+    .PARAMETER CompoundIdentitySupported
+        Specifies whether an account supports Kerberos service tickets which
+        includes the authorization data for the user's device. This value sets
+        the compound identity supported flag of the Active Directory
+        msDS-SupportedEncryptionTypes attribute.
+
+    .PARAMETER PasswordNotRequired
+        Specifies whether the account requires a password. A password is not
+        required for a new account. This parameter sets the PasswordNotRequired
+        property of an account object.
+
+    .PARAMETER SmartcardLogonRequired
+        Specifies whether a smart card is required to logon. This parameter sets
+        the SmartCardLoginRequired property for a user object. This parameter
+        also sets the ADS_UF_SMARTCARD_REQUIRED flag of the Active Directory
+        User Account Control attribute.
+
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to use to
+        perform the task.
+
+    .PARAMETER DomainAdministratorCredential
+        Specifies the user account credentials to use to perform this task.
+
+    .PARAMETER PasswordAuthentication
+        Specifies the authentication context type used when testing passwords.
+        Default value is 'Default'.
+
+    .PARAMETER PasswordNeverResets
+        Specifies whether existing user's password should be reset. Default
+        value is $false.
+
+    .PARAMETER RestoreFromRecycleBin
+        Try to restore the user object from the recycle bin before creating a
+        new one.
+
+    .PARAMETER ServicePrincipalNames
+        Specifies the service principal names for the user account.
+
+    .PARAMETER ProxyAddresses
+        Specifies the proxy addresses for the user account.
+
+#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -654,6 +896,248 @@ function Get-TargetResource
     return $targetResource
 } #end function Get-TargetResource
 
+<#
+    .SYNOPSIS
+        Tests the state of the Active Directory user account.
+
+    .PARAMETER DomainName
+        Name of the domain where the user account is located (only used if
+        password is managed).
+
+    .PARAMETER UserName
+        Specifies the Security Account Manager (SAM) account name of the user
+        (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER Password
+        Specifies a new password value for the account.
+
+    .PARAMETER Ensure
+        Specifies whether the user account should be present or absent. Default
+        value is 'Present'.
+
+    .PARAMETER CommonName
+        Specifies the common name assigned to the user account (ldapDisplayName
+        'cn'). If not specified the default value will be the same value
+        provided in parameter UserName.
+
+    .PARAMETER UserPrincipalName
+        Specifies the User Principal Name (UPN) assigned to the user account
+        (ldapDisplayName 'userPrincipalName').
+
+    .PARAMETER DisplayName
+        Specifies the display name of the object (ldapDisplayName
+        'displayName').
+
+    .PARAMETER Path
+        Specifies the X.500 path of the Organizational Unit (OU) or container
+        where the new object is created.
+
+    .PARAMETER GivenName
+        Specifies the user's given name (ldapDisplayName 'givenName').
+
+    .PARAMETER Initials
+        Specifies the initials that represent part of a user's name
+        (ldapDisplayName 'initials').
+
+    .PARAMETER Surname
+        Specifies the user's last name or surname (ldapDisplayName 'sn').
+
+    .PARAMETER Description
+        Specifies a description of the object (ldapDisplayName 'description').
+
+    .PARAMETER StreetAddress
+        Specifies the user's street address (ldapDisplayName 'streetAddress').
+
+    .PARAMETER POBox
+        Specifies the user's post office box number (ldapDisplayName
+        'postOfficeBox').
+
+    .PARAMETER City
+        Specifies the user's town or city (ldapDisplayName 'l').
+
+    .PARAMETER State
+        Specifies the user's or Organizational Unit's state or province
+        (ldapDisplayName 'st').
+
+    .PARAMETER PostalCode
+        Specifies the user's postal code or zip code (ldapDisplayName
+        'postalCode').
+
+    .PARAMETER Country
+        Specifies the country or region code for the user's language of choice
+        (ldapDisplayName 'c').
+
+    .PARAMETER Department
+        Specifies the user's department (ldapDisplayName 'department').
+
+    .PARAMETER Division
+        Specifies the user's division (ldapDisplayName 'division').
+
+    .PARAMETER Company
+        Specifies the user's company (ldapDisplayName 'company').
+
+    .PARAMETER Office
+        Specifies the location of the user's office or place of business
+        (ldapDisplayName 'physicalDeliveryOfficeName').
+
+    .PARAMETER JobTitle
+        Specifies the user's title (ldapDisplayName 'title').
+
+    .PARAMETER EmailAddress
+        Specifies the user's e-mail address (ldapDisplayName 'mail').
+
+    .PARAMETER EmployeeID
+        Specifies the user's employee ID (ldapDisplayName 'employeeID').
+
+    .PARAMETER EmployeeNumber
+        Specifies the user's employee number (ldapDisplayName 'employeeNumber').
+
+    .PARAMETER HomeDirectory
+        Specifies a user's home directory path (ldapDisplayName
+        'homeDirectory').
+
+    .PARAMETER HomeDrive
+        Specifies a drive that is associated with the UNC path defined by the
+        HomeDirectory property (ldapDisplayName 'homeDrive').
+
+    .PARAMETER HomePage
+        Specifies the URL of the home page of the object (ldapDisplayName
+        'wWWHomePage').
+
+    .PARAMETER ProfilePath
+        Specifies a path to the user's profile (ldapDisplayName 'profilePath').
+
+    .PARAMETER LogonScript
+        Specifies a path to the user's log on script (ldapDisplayName
+        'scriptPath').
+
+    .PARAMETER Notes
+        Specifies the notes attached to the user's accoutn (ldapDisplayName
+        'info').
+
+    .PARAMETER OfficePhone
+        Specifies the user's office telephone number (ldapDisplayName
+        'telephoneNumber').
+
+    .PARAMETER MobilePhone
+        Specifies the user's mobile phone number (ldapDisplayName 'mobile').
+
+    .PARAMETER Fax
+        Specifies the user's fax phone number (ldapDisplayName
+        'facsimileTelephoneNumber').
+
+    .PARAMETER HomePhone
+        Specifies the user's home telephone number (ldapDisplayName
+        'homePhone').
+
+    .PARAMETER Pager
+        Specifies the user's pager number (ldapDisplayName 'pager').
+
+    .PARAMETER IPPhone
+        Specifies the user's IP telephony phone number (ldapDisplayName
+        'ipPhone').
+
+    .PARAMETER Manager
+        Specifies the user's manager specified as a Distinguished Name
+        (ldapDisplayName 'manager').
+
+    .PARAMETER LogonWorkstations
+        Specifies the computers that the user can access. To specify more than
+        one computer, create a single comma-separated list. You can identify a
+        computer by using the Security Account Manager (SAM) account name
+        (sAMAccountName) or the DNS host name of the computer. The SAM account
+        name is the same as the NetBIOS name of the computer. The LDAP display
+        name (ldapDisplayName) for this property is userWorkStations.
+
+    .PARAMETER Organization
+        Specifies the user's organization. This parameter sets the Organization
+        property of a user object. The LDAP display name (ldapDisplayName) of
+        this property is 'o'.
+
+    .PARAMETER OtherName
+        Specifies a name in addition to a user's given name and surname, such as
+        the user's middle name. This parameter sets the OtherName property of a
+        user object. The LDAP display name (ldapDisplayName) of this property is
+        'middleName'.
+
+    .PARAMETER Enabled
+        Specifies if the account is enabled. Default value is $true.
+
+    .PARAMETER CannotChangePassword
+        Specifies whether the account password can be changed.
+
+    .PARAMETER ChangePasswordAtLogon
+        Specifies whether the account password must be changed during the next
+        logon attempt. This will only be enabled when the user is initially
+        created. This parameter cannot be set to $true if the parameter
+        PasswordNeverExpires is also set to $true.
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the password of an account can expire.
+
+    .PARAMETER TrustedForDelegation
+        Specifies whether an account is trusted for Kerberos delegation. Default
+        value is $false.
+
+    .PARAMETER AccountNotDelegated
+        Indicates whether the security context of the user is delegated to a
+        service.  When this parameter is set to true, the security context of
+        the account is not delegated to a service even when the service account
+        is set as trusted for Kerberos delegation. This parameter sets the
+        AccountNotDelegated property for an Active Directory account. This
+        parameter also sets the ADS_UF_NOT_DELEGATED flag of the Active
+        Directory User Account Control (UAC) attribute.
+
+    .PARAMETER AllowReversiblePasswordEncryption
+        Indicates whether reversible password encryption is allowed for the
+        account. This parameter sets the AllowReversiblePasswordEncryption
+        property of the account. This parameter also sets the
+        ADS_UF_ENCRYPTED_TEXT_PASSWORD_ALLOWED flag of the Active Directory User
+        Account Control (UAC) attribute.
+
+    .PARAMETER CompoundIdentitySupported
+        Specifies whether an account supports Kerberos service tickets which
+        includes the authorization data for the user's device. This value sets
+        the compound identity supported flag of the Active Directory
+        msDS-SupportedEncryptionTypes attribute.
+
+    .PARAMETER PasswordNotRequired
+        Specifies whether the account requires a password. A password is not
+        required for a new account. This parameter sets the PasswordNotRequired
+        property of an account object.
+
+    .PARAMETER SmartcardLogonRequired
+        Specifies whether a smart card is required to logon. This parameter sets
+        the SmartCardLoginRequired property for a user object. This parameter
+        also sets the ADS_UF_SMARTCARD_REQUIRED flag of the Active Directory
+        User Account Control attribute.
+
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to use to
+        perform the task.
+
+    .PARAMETER DomainAdministratorCredential
+        Specifies the user account credentials to use to perform this task.
+
+    .PARAMETER PasswordAuthentication
+        Specifies the authentication context type used when testing passwords.
+        Default value is 'Default'.
+
+    .PARAMETER PasswordNeverResets
+        Specifies whether existing user's password should be reset. Default
+        value is $false.
+
+    .PARAMETER RestoreFromRecycleBin
+        Try to restore the user object from the recycle bin before creating a
+        new one.
+
+    .PARAMETER ServicePrincipalNames
+        Specifies the service principal names for the user account.
+
+    .PARAMETER ProxyAddresses
+        Specifies the proxy addresses for the user account.
+
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -1062,7 +1546,7 @@ function Test-TargetResource
                 # Only process the ChangePasswordAtLogon = $true parameter during new user creation
                 continue
             }
-        # Only check properties that are returned by Get-TargetResource
+            # Only check properties that are returned by Get-TargetResource
             elseif ($targetResource.ContainsKey($parameter))
             {
                 # This check is required to be able to explicitly remove values with an empty string, if required
@@ -1074,8 +1558,8 @@ function Test-TargetResource
                     #>
                 }
                 elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
-                        ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
-                        (Compare-Object -ReferenceObject $PSBoundParameters.$parameter -DifferenceObject $targetResource.$parameter))
+                    ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
+                    (Compare-Object -ReferenceObject $PSBoundParameters.$parameter -DifferenceObject $targetResource.$parameter))
                 {
                     Write-Verbose -Message ($script:localizedData.ADUserNotDesiredPropertyState -f $parameter,
                         ($PSBoundParameters.$parameter -join '; '), ($targetResource.$parameter -join '; '))
@@ -1088,6 +1572,248 @@ function Test-TargetResource
     return $isCompliant
 } #end function Test-TargetResource
 
+<#
+    .SYNOPSIS
+        Sets the properties of the Active Directory user account.
+
+    .PARAMETER DomainName
+        Name of the domain where the user account is located (only used if
+        password is managed).
+
+    .PARAMETER UserName
+        Specifies the Security Account Manager (SAM) account name of the user
+        (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER Password
+        Specifies a new password value for the account.
+
+    .PARAMETER Ensure
+        Specifies whether the user account should be present or absent. Default
+        value is 'Present'.
+
+    .PARAMETER CommonName
+        Specifies the common name assigned to the user account (ldapDisplayName
+        'cn'). If not specified the default value will be the same value
+        provided in parameter UserName.
+
+    .PARAMETER UserPrincipalName
+        Specifies the User Principal Name (UPN) assigned to the user account
+        (ldapDisplayName 'userPrincipalName').
+
+    .PARAMETER DisplayName
+        Specifies the display name of the object (ldapDisplayName
+        'displayName').
+
+    .PARAMETER Path
+        Specifies the X.500 path of the Organizational Unit (OU) or container
+        where the new object is created.
+
+    .PARAMETER GivenName
+        Specifies the user's given name (ldapDisplayName 'givenName').
+
+    .PARAMETER Initials
+        Specifies the initials that represent part of a user's name
+        (ldapDisplayName 'initials').
+
+    .PARAMETER Surname
+        Specifies the user's last name or surname (ldapDisplayName 'sn').
+
+    .PARAMETER Description
+        Specifies a description of the object (ldapDisplayName 'description').
+
+    .PARAMETER StreetAddress
+        Specifies the user's street address (ldapDisplayName 'streetAddress').
+
+    .PARAMETER POBox
+        Specifies the user's post office box number (ldapDisplayName
+        'postOfficeBox').
+
+    .PARAMETER City
+        Specifies the user's town or city (ldapDisplayName 'l').
+
+    .PARAMETER State
+        Specifies the user's or Organizational Unit's state or province
+        (ldapDisplayName 'st').
+
+    .PARAMETER PostalCode
+        Specifies the user's postal code or zip code (ldapDisplayName
+        'postalCode').
+
+    .PARAMETER Country
+        Specifies the country or region code for the user's language of choice
+        (ldapDisplayName 'c').
+
+    .PARAMETER Department
+        Specifies the user's department (ldapDisplayName 'department').
+
+    .PARAMETER Division
+        Specifies the user's division (ldapDisplayName 'division').
+
+    .PARAMETER Company
+        Specifies the user's company (ldapDisplayName 'company').
+
+    .PARAMETER Office
+        Specifies the location of the user's office or place of business
+        (ldapDisplayName 'physicalDeliveryOfficeName').
+
+    .PARAMETER JobTitle
+        Specifies the user's title (ldapDisplayName 'title').
+
+    .PARAMETER EmailAddress
+        Specifies the user's e-mail address (ldapDisplayName 'mail').
+
+    .PARAMETER EmployeeID
+        Specifies the user's employee ID (ldapDisplayName 'employeeID').
+
+    .PARAMETER EmployeeNumber
+        Specifies the user's employee number (ldapDisplayName 'employeeNumber').
+
+    .PARAMETER HomeDirectory
+        Specifies a user's home directory path (ldapDisplayName
+        'homeDirectory').
+
+    .PARAMETER HomeDrive
+        Specifies a drive that is associated with the UNC path defined by the
+        HomeDirectory property (ldapDisplayName 'homeDrive').
+
+    .PARAMETER HomePage
+        Specifies the URL of the home page of the object (ldapDisplayName
+        'wWWHomePage').
+
+    .PARAMETER ProfilePath
+        Specifies a path to the user's profile (ldapDisplayName 'profilePath').
+
+    .PARAMETER LogonScript
+        Specifies a path to the user's log on script (ldapDisplayName
+        'scriptPath').
+
+    .PARAMETER Notes
+        Specifies the notes attached to the user's accoutn (ldapDisplayName
+        'info').
+
+    .PARAMETER OfficePhone
+        Specifies the user's office telephone number (ldapDisplayName
+        'telephoneNumber').
+
+    .PARAMETER MobilePhone
+        Specifies the user's mobile phone number (ldapDisplayName 'mobile').
+
+    .PARAMETER Fax
+        Specifies the user's fax phone number (ldapDisplayName
+        'facsimileTelephoneNumber').
+
+    .PARAMETER HomePhone
+        Specifies the user's home telephone number (ldapDisplayName
+        'homePhone').
+
+    .PARAMETER Pager
+        Specifies the user's pager number (ldapDisplayName 'pager').
+
+    .PARAMETER IPPhone
+        Specifies the user's IP telephony phone number (ldapDisplayName
+        'ipPhone').
+
+    .PARAMETER Manager
+        Specifies the user's manager specified as a Distinguished Name
+        (ldapDisplayName 'manager').
+
+    .PARAMETER LogonWorkstations
+        Specifies the computers that the user can access. To specify more than
+        one computer, create a single comma-separated list. You can identify a
+        computer by using the Security Account Manager (SAM) account name
+        (sAMAccountName) or the DNS host name of the computer. The SAM account
+        name is the same as the NetBIOS name of the computer. The LDAP display
+        name (ldapDisplayName) for this property is userWorkStations.
+
+    .PARAMETER Organization
+        Specifies the user's organization. This parameter sets the Organization
+        property of a user object. The LDAP display name (ldapDisplayName) of
+        this property is 'o'.
+
+    .PARAMETER OtherName
+        Specifies a name in addition to a user's given name and surname, such as
+        the user's middle name. This parameter sets the OtherName property of a
+        user object. The LDAP display name (ldapDisplayName) of this property is
+        'middleName'.
+
+    .PARAMETER Enabled
+        Specifies if the account is enabled. Default value is $true.
+
+    .PARAMETER CannotChangePassword
+        Specifies whether the account password can be changed.
+
+    .PARAMETER ChangePasswordAtLogon
+        Specifies whether the account password must be changed during the next
+        logon attempt. This will only be enabled when the user is initially
+        created. This parameter cannot be set to $true if the parameter
+        PasswordNeverExpires is also set to $true.
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the password of an account can expire.
+
+    .PARAMETER TrustedForDelegation
+        Specifies whether an account is trusted for Kerberos delegation. Default
+        value is $false.
+
+    .PARAMETER AccountNotDelegated
+        Indicates whether the security context of the user is delegated to a
+        service.  When this parameter is set to true, the security context of
+        the account is not delegated to a service even when the service account
+        is set as trusted for Kerberos delegation. This parameter sets the
+        AccountNotDelegated property for an Active Directory account. This
+        parameter also sets the ADS_UF_NOT_DELEGATED flag of the Active
+        Directory User Account Control (UAC) attribute.
+
+    .PARAMETER AllowReversiblePasswordEncryption
+        Indicates whether reversible password encryption is allowed for the
+        account. This parameter sets the AllowReversiblePasswordEncryption
+        property of the account. This parameter also sets the
+        ADS_UF_ENCRYPTED_TEXT_PASSWORD_ALLOWED flag of the Active Directory User
+        Account Control (UAC) attribute.
+
+    .PARAMETER CompoundIdentitySupported
+        Specifies whether an account supports Kerberos service tickets which
+        includes the authorization data for the user's device. This value sets
+        the compound identity supported flag of the Active Directory
+        msDS-SupportedEncryptionTypes attribute.
+
+    .PARAMETER PasswordNotRequired
+        Specifies whether the account requires a password. A password is not
+        required for a new account. This parameter sets the PasswordNotRequired
+        property of an account object.
+
+    .PARAMETER SmartcardLogonRequired
+        Specifies whether a smart card is required to logon. This parameter sets
+        the SmartCardLoginRequired property for a user object. This parameter
+        also sets the ADS_UF_SMARTCARD_REQUIRED flag of the Active Directory
+        User Account Control attribute.
+
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to use to
+        perform the task.
+
+    .PARAMETER DomainAdministratorCredential
+        Specifies the user account credentials to use to perform this task.
+
+    .PARAMETER PasswordAuthentication
+        Specifies the authentication context type used when testing passwords.
+        Default value is 'Default'.
+
+    .PARAMETER PasswordNeverResets
+        Specifies whether existing user's password should be reset. Default
+        value is $false.
+
+    .PARAMETER RestoreFromRecycleBin
+        Try to restore the user object from the recycle bin before creating a
+        new one.
+
+    .PARAMETER ServicePrincipalNames
+        Specifies the service principal names for the user account.
+
+    .PARAMETER ProxyAddresses
+        Specifies the proxy addresses for the user account.
+
+#>
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -1563,8 +2289,8 @@ function Set-TargetResource
                 }
                 # Use Compare-Object to allow comparison of string and array parameters
                 elseif (($null -ne $PSBoundParameters.$parameter -and $null -eq $targetResource.$parameter) -or
-                        ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
-                        (Compare-Object -ReferenceObject $PSBoundParameters.$parameter -DifferenceObject $targetResource.$parameter))
+                    ($null -eq $PSBoundParameters.$parameter -and $null -ne $targetResource.$parameter) -or
+                    (Compare-Object -ReferenceObject $PSBoundParameters.$parameter -DifferenceObject $targetResource.$parameter))
                 {
                     # Find the associated AD property
                     $adProperty = $adPropertyMap |
@@ -1675,6 +2401,29 @@ function Set-TargetResource
 
 } #end function Set-TargetResource
 
+<#
+    .SYNOPSIS
+        Internal function to validate unsupported options/configurations.
+
+    .PARAMETER Password
+        Specifies a new password value for the account.
+
+    .PARAMETER Enabled
+        Specifies if the account is enabled. Default value is $true.
+
+    .PARAMETER ChangePasswordAtLogon
+        Specifies whether the account password must be changed during the next
+        logon attempt. This will only be enabled when the user is initially
+        created. This parameter cannot be set to $true if the parameter
+        PasswordNeverExpires is also set to $true.
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the password of an account can expire.
+
+    .PARAMETER IgnoredArguments
+        Sets the rest of the arguments that are not passed into the this
+        function.
+#>
 # Internal function to validate unsupported options/configurations
 function Assert-Parameters
 {
@@ -1722,7 +2471,29 @@ function Assert-Parameters
 
 } #end function Assert-Parameters
 
-# Internal function to test the validity of a user's password.
+<#
+    .SYNOPSIS
+        Internal function to test the validity of a user's password.
+
+    .PARAMETER DomainName
+        Name of the domain where the user account is located (only used if
+        password is managed).
+
+    .PARAMETER UserName
+        Specifies the Security Account Manager (SAM) account name of the user
+        (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER Password
+        Specifies a new password value for the account.
+
+    .PARAMETER DomainAdministratorCredential
+        Specifies the user account credentials to use to perform this task.
+
+    .PARAMETER PasswordAuthentication
+        Specifies the authentication context type used when testing passwords.
+        Default value is 'Default'.
+#>
+
 function Test-Password
 {
     [CmdletBinding()]

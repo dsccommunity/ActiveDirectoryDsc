@@ -6,6 +6,18 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADOrganizationalUnit'
 
+<#
+    .SYNOPSIS
+        Gets the Organization Unit (OU) from Active Directory
+
+    .PARAMETER Name
+        The name of Organization Unit (OU).
+
+    .PARAMETER Path
+        Specifies the X.500 path of the Organization Unit (OU) or container
+        where the new object is created.
+
+#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -57,6 +69,37 @@ function Get-TargetResource
     }
 } # end function Get-TargetResource
 
+<#
+    .SYNOPSIS
+        Tests the state of the specified Organization Unit (OU).
+
+    .PARAMETER Name
+        The name of Organization Unit (OU).
+
+    .PARAMETER Path
+        Specifies the X.500 path of the Organization Unit (OU) or container
+        where the new object is created.
+
+    .PARAMETER Ensure
+        Specifies whether the Organization Unit (OU) is present or absent.
+        Default value is 'Present'.
+
+    .PARAMETER Credential
+        The credential to be used to perform the operation on Active Directory.
+
+    .PARAMETER ProtectedFromAccidentalDeletion
+        Specifies if the Organization Unit (OU) container should be protected
+        from deletion. Default value is $true.
+
+    .PARAMETER Description
+        The description of the Organization Unit (OU). Default value is empty
+        ('') description.
+
+    .PARAMETER RestoreFromRecycleBin
+        Try to restore the Organization Unit (OU) from the recycle bin before
+        creating a new one.
+
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -153,6 +196,37 @@ function Test-TargetResource
 
 } #end function Test-TargetResource
 
+<#
+    .SYNOPSIS
+        Sets the state of the Organization Unit (OU) in Active Directory.
+
+    .PARAMETER Name
+        The name of Organization Unit (OU).
+
+    .PARAMETER Path
+        Specifies the X.500 path of the Organization Unit (OU) or container
+        where the new object is created.
+
+    .PARAMETER Ensure
+        Specifies whether the Organization Unit (OU) is present or absent.
+        Default value is 'Present'.
+
+    .PARAMETER Credential
+        The credential to be used to perform the operation on Active Directory.
+
+    .PARAMETER ProtectedFromAccidentalDeletion
+        Specifies if the Organization Unit (OU) container should be protected
+        from deletion. Default value is $true.
+
+    .PARAMETER Description
+        The description of the Organization Unit (OU). Default value is empty
+        ('') description.
+
+    .PARAMETER RestoreFromRecycleBin
+        Try to restore the Organization Unit (OU) from the recycle bin before
+        creating a new one.
+
+#>
 function Set-TargetResource
 {
     [CmdletBinding()]
