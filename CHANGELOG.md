@@ -44,6 +44,8 @@
 - Changes to xADOrganizationalUnit
   - Catch exception when the path property specifies a non-existing path
     ([issue #408](https://github.com/PowerShell/xActiveDirectory/issues/408)).
+  - The unit tests are using the stub classes so the tests can be run locally.
+  - Added comment-based help ([issue #339](https://github.com/PowerShell/xActiveDirectory/issues/339)).
 - Changes to xADUser
   - Fixes exception when creating a user with an empty string property
     ([issue #407](https://github.com/PowerShell/xActiveDirectory/issues/407)).
@@ -51,11 +53,15 @@
     ([issue #402](https://github.com/PowerShell/xActiveDirectory/issues/402)).
   - Fixes ChangePasswordAtLogon Property to be only set to `true` at User
     Creation ([issue #414](https://github.com/PowerShell/xActiveDirectory/issues/414)).
+  - Added comment-based help ([issue #340](https://github.com/PowerShell/xActiveDirectory/issues/340)).
 - xADDomain
   - Updated tests and replaced `Write-Error` with `throw`
     ([issue #332](https://github.com/PowerShell/xActiveDirectory/pull/332)).
 - Changes to xADRecycleBin
   - Updated tests and remove unnecessary mocks of `Write-Error`.
+  - Removed `SupportsShouldProcess` from the resource since DSC does not
+    support that interactive function ([issue #328](https://github.com/PowerShell/xActiveDirectory/issues/328)).
+  - Added comment-based help ([issue #330](https://github.com/PowerShell/xActiveDirectory/issues/330)).
 - Changes to xADServicePrincipalName
   - Minor change to the unit tests that did not correct assert the localized
     string when an account is not found.
@@ -67,16 +73,15 @@
   - Added integration tests ([issue #348](https://github.com/PowerShell/xActiveDirectory/issues/348)).
 - Changes to xWaitForADDomain
   - Added comment-based help ([issue #341](https://github.com/PowerShell/xActiveDirectory/issues/341))
-- Changes to xAdDomainController
+- Changes to xADDomainController
   - Add support for creating Read-Only Domain Controller (RODC)
     ([issue #40](https://github.com/PowerShell/xActiveDirectory/issues/40)).
     [Svilen @SSvilen](https://github.com/SSvilen)
   - Refactored unit tests for Test-TargetResource.
-- Fixed Comment based help for the following resources:
-  - xADUser ([issue #340](https://github.com/PowerShell/xActiveDirectory/issues/340)).
-  - xADOrganizational Unit ([issue #339](https://github.com/PowerShell/xActiveDirectory/issues/339)).
-  - xADDomain ([issue #335](https://github.com/PowerShell/xActiveDirectory/issues/335)).
-  - xADRecycleBin ([issue #330](https://github.com/PowerShell/xActiveDirectory/issues/330)).
+- Changes to xADObjectPermissionEntry
+  - Remove remnants of the `SupportsShouldProcess` ([issue #329](https://github.com/PowerShell/xActiveDirectory/issues/329)).
+- Changes to xADDomain
+  - Added comment-based help ([issue #335](https://github.com/PowerShell/xActiveDirectory/issues/335)).
 
 ## 3.0.0.0
 

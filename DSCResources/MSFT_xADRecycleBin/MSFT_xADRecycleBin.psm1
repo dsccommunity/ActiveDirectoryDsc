@@ -95,7 +95,7 @@ function Get-TargetResource
 #>
 function Set-TargetResource
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -122,15 +122,12 @@ function Set-TargetResource
             throw ($script:localizedData.ForestFunctionalLevelError -f $forest.ForestMode)
         }
 
-        if ($PSCmdlet.ShouldProcess($forest.RootDomain, "Enable Active Directory Recycle Bin"))
-        {
-            Write-Verbose -Message $script:localizedData.EnablingRecycleBin
+        Write-Verbose -Message ($script:localizedData.EnablingRecycleBin -f $forest.RootDomain)
 
-            Enable-ADOptionalFeature 'Recycle Bin Feature' -Scope ForestOrConfigurationSet `
-                -Target $forest.RootDomain -Server $forest.DomainNamingMaster `
-                -Credential $EnterpriseAdministratorCredential `
-                -Verbose
-        }
+        Enable-ADOptionalFeature 'Recycle Bin Feature' -Scope ForestOrConfigurationSet `
+            -Target $forest.RootDomain -Server $forest.DomainNamingMaster `
+            -Credential $EnterpriseAdministratorCredential `
+            -Verbose
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
     {
