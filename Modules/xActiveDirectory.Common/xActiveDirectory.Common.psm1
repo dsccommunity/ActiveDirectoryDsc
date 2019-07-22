@@ -256,6 +256,23 @@ function New-InvalidResultException
 
     throw $errorRecordToThrow
 }
+
+<#
+    .SYNOPSIS
+        Tests the status of DSC resource parameters.
+
+    .DESCRIPTION
+        This function tests the parameter status of DSC resource parameters against the current values present on the system.
+
+    .PARAMETER CurrentValues
+        A hashtable with the current values on the system, obtained by e.g. Get-TargetResource.
+
+    .PARAMETER DesiredValues
+        The hashtable of desired values.
+
+    .PARAMETER ValuesToCheck
+        The values to check if not all values should be checked.
+#>
 function Test-DscParameterState
 {
     [CmdletBinding()]
@@ -470,7 +487,17 @@ function Start-ProcessWithTimeout
     return $sqlSetupProcess.ExitCode
 }
 
-# Internal function to assert if the role specific module is installed or not
+<#
+    .SYNOPSIS
+        Assert if the role specific module is installed or not and optionally
+        import it.
+
+    .PARAMETER ModuleName
+        The name of the module to assert is installed.
+
+    .PARAMETER ImportModule
+        This switch causes the module to be imported if it is installed.
+#>
 function Assert-Module
 {
     [CmdletBinding()]
@@ -498,7 +525,10 @@ function Assert-Module
     }
 } #end function Assert-Module
 
-# Internal function to test whether computer is a member of a domain
+<#
+    .SYNOPSIS
+        Tests whether this computer is a member of a domain.
+#>
 function Test-DomainMember
 {
     [CmdletBinding()]
@@ -508,11 +538,15 @@ function Test-DomainMember
     )
 
     $isDomainMember = [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain
+
     return $isDomainMember
 }
 
 
-# Internal function to get the domain name of the computer
+<#
+    .SYNOPSIS
+        Get the domain name of this computer.
+#>
 function Get-DomainName
 {
     [CmdletBinding()]
@@ -522,35 +556,55 @@ function Get-DomainName
     )
 
     $domainName = [System.String] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).Domain
+
     return $domainName
 } # function Get-DomainName
 
-# Internal function to build domain FQDN
+<#
+    .SYNOPSIS
+        Assemble a fully qualifies domain name by appending the domain name
+        to the parent domain name.
+
+    .PARAMETER DomainName
+        The domain name to append to the ParentDomainName.
+
+    .PARAMETER ParentDomainName
+        The parent domain name.
+#>
 function Resolve-DomainFQDN
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
-        [OutputType([System.String])]
-        [System.String] $DomainName,
+        [System.String]
+        $DomainName,
 
-        [Parameter()] [AllowNull()]
-        [System.String] $ParentDomainName
+        [Parameter()]
+        [AllowNull()]
+        [System.String]
+        $ParentDomainName
     )
 
     $domainFQDN = $DomainName
+
     if ($ParentDomainName)
     {
         $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName
     }
+
     return $domainFQDN
 }
 
-# Internal function to get an Active Directory object's parent Distinguished Name
-function Get-ADObjectParentDN
-{
-    <#
+<#
+    .SYNOPSIS
+        Get an Active Directory object's parent distinguished name.
+
+    .PARAMETER DN
+        The distinguished name of the object to return the parent from.
+
+    .NOTES
         Copyright (c) 2016 The University Of Vermont
         All rights reserved.
 
@@ -573,7 +627,9 @@ function Get-ADObjectParentDN
         THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         http://www.uvm.edu/~gcd/code-license/
-    #>
+#>
+function Get-ADObjectParentDN
+{
     [CmdletBinding()]
     [OutputType([System.String])]
     param
@@ -585,12 +641,23 @@ function Get-ADObjectParentDN
 
     # https://www.uvm.edu/~gcd/2012/07/listing-parent-of-ad-object-in-powershell/
     $distinguishedNameParts = $DN -split '(?<![\\]),'
-    $distinguishedNameParts[1..$($distinguishedNameParts.Count - 1)] -join ','
-
+    return $distinguishedNameParts[1..$($distinguishedNameParts.Count - 1)] -join ','
 } #end function GetADObjectParentDN
 
-# Internal function that validates the Members, MembersToInclude and MembersToExclude combination
-# is valid. If the combination is invalid, an InvalidArgumentError is raised.
+<#
+    .SYNOPSIS
+        Validates the Members, MembersToInclude and MembersToExclude combination
+        is valid. If the combination is invalid, an InvalidArgumentError is raised.
+
+    .PARAMETER Members
+        The Members to validate.
+
+    .PARAMETER MembersToInclude
+        The MembersToInclude to validate.
+
+    .PARAMETER MembersToExclude
+        The MembersToExclude to validate.
+#>
 function Assert-MemberParameters
 {
     [CmdletBinding()]
@@ -609,12 +676,7 @@ function Assert-MemberParameters
         [Parameter()]
         [ValidateNotNull()]
         [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ModuleName = 'xActiveDirectory'
+        $MembersToExclude
     )
 
     if ($PSBoundParameters.ContainsKey('Members'))
@@ -664,7 +726,13 @@ function Assert-MemberParameters
 
 } #end function Assert-MemberParameters
 
-# Internal function to remove duplicate strings (members) from a string array
+<#
+    .SYNOPSIS
+        Remove duplicate case insensitive strings (members) from a string array.
+
+    .PARAMETER Members
+        The array of members to remove duplicates from.
+#>
 function Remove-DuplicateMembers
 {
     [CmdletBinding()]
@@ -679,10 +747,12 @@ function Remove-DuplicateMembers
     Set-StrictMode -Version Latest
 
     $destIndex = 0
-    for ([int] $sourceIndex = 0 ; $sourceIndex -lt $Members.Count; $sourceIndex++)
+
+    for ($sourceIndex = 0 ; $sourceIndex -lt $Members.Count; $sourceIndex++)
     {
         $matchFound = $false
-        for ([int] $matchIndex = 0; $matchIndex -lt $destIndex; $matchIndex++)
+
+        for ($matchIndex = 0; $matchIndex -lt $destIndex; $matchIndex++)
         {
             if ($Members[$sourceIndex] -eq $Members[$matchIndex])
             {
@@ -706,36 +776,46 @@ function Remove-DuplicateMembers
     [System.Array]::Copy($Members, $destination, $destIndex)
 
     return $destination
-
 } #end function RemoveDuplicateMembers
 
-# Internal function to test whether the existing array members match the defined explicit array
-# members, the included members are present and the excluded members are not present.
+<#
+    .SYNOPSIS
+        Test whether the existing array members match the defined explicit array
+        and include/exclude the specified members.
+
+    .PARAMETER ExistingMembers
+        Existing array members.
+
+    .PARAMETER Members
+        Explicit array members.
+
+    .PARAMETER MembersToInclude
+       Compulsory array members.
+
+    .PARAMETER MembersToExclude
+       Excluded array members.
+#>
 function Test-Members
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
-        # Existing array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
         $ExistingMembers,
 
-        # Explicit array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
         $Members,
 
-        # Compulsory array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
         $MembersToInclude,
 
-        # Excluded array members
         [Parameter()]
         [AllowNull()]
         [System.String[]]
@@ -837,9 +917,19 @@ function Test-Members
 
     Write-Verbose -Message $script:localizedData.MembershipInDesiredState
     return $true
-
 } #end function Test-Membership
 
+<#
+    .SYNOPSIS
+        Convert a specified time period in seconds, minutes, hours or days into
+        a time span object.
+
+    .PARAMETER TimeSpan
+        The length of time to use for the time span.
+
+    .PARAMETER TimeSpanType
+        The units of measure in the TimeSpan parameter.
+#>
 function ConvertTo-TimeSpan
 {
     [CmdletBinding()]
@@ -858,20 +948,24 @@ function ConvertTo-TimeSpan
     )
 
     $newTimeSpanParams = @{ }
+
     switch ($TimeSpanType)
     {
         'Seconds'
         {
             $newTimeSpanParams['Seconds'] = $TimeSpan
         }
+
         'Minutes'
         {
             $newTimeSpanParams['Minutes'] = $TimeSpan
         }
+
         'Hours'
         {
             $newTimeSpanParams['Hours'] = $TimeSpan
         }
+
         'Days'
         {
             $newTimeSpanParams['Days'] = $TimeSpan
@@ -891,9 +985,9 @@ function ConvertTo-TimeSpan
         Convert timespan into the total number of seconds, minutes, hours or days.
 
     .EXAMPLE
-        $Get-ADDefaultDomainPasswordPolicy
+        ConvertFrom-TimeSpan -TimeSpan (New-TimeSpan -Days 15) -TimeSpanType Seconds
 
-        ConvertFrom-TimeSpan
+        Returns the number of seconds in 15 days.
 #>
 function ConvertFrom-TimeSpan
 {
@@ -935,25 +1029,30 @@ function ConvertFrom-TimeSpan
 
 <#
     .SYNOPSIS
-        Returns common AD cmdlet connection parameter for splatting
+        Returns common AD cmdlet connection parameter for splatting.
+
     .PARAMETER CommonName
-        When specified, a CommonName overrides theUsed by the xADUser cmdletReturns the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and
-        Remove-ADUser cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the
-        Name parameter.
+        When specified, a CommonName overrides theUsed by the xADUser
+        cmdletReturns the Identity as the Name key. For example, the
+        Get-ADUser, Set-ADUser and Remove-ADUser cmdlets take an Identity
+        parameter, but the New-ADUser cmdlet uses the Name parameter.
+
     .PARAMETER UseNameParameter
-        Returns the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and
-        Remove-ADUser cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the
-        Name parameter.
+        Returns the Identity as the Name key. For example, the Get-ADUser,
+        Set-ADUser and Remove-ADUser cmdlets take an Identity parameter,
+        but the New-ADUser cmdlet uses the Name parameter.
+
     .EXAMPLE
         $getADUserParams = Get-CommonADParameters @PSBoundParameters
 
-        Returns connection parameters suitable for Get-ADUser using the splatted cmdlet
-        parameters.
+        Returns connection parameters suitable for Get-ADUser using the
+        splatted cmdlet parameters.
+
     .EXAMPLE
         $newADUserParams = Get-CommonADParameters @PSBoundParameters -UseNameParameter
 
-        Returns connection parameters suitable for New-ADUser using the splatted cmdlet
-        parameters.
+        Returns connection parameters suitable for New-ADUser using
+        the splatted cmdlet parameters.
 #>
 function Get-ADCommonParameters
 {
@@ -1034,7 +1133,19 @@ function Get-ADCommonParameters
     return $adConnectionParameters
 } #end function Get-ADCommonParameters
 
-# Internal function to test site availability
+<#
+    .SYNOPSIS
+        Test Active Directory replication site availablity.
+
+    .PARAMETER SiteName
+        The replication site name to test the availability of.
+
+    .PARAMETER DomainName
+        The domain name containing the replication site.
+
+    .PARAMETER Credential
+        The credential to use to access the replication site.
+#>
 function Test-ADReplicationSite
 {
     [CmdletBinding()]
@@ -1070,6 +1181,19 @@ function Test-ADReplicationSite
     return ($null -ne $site)
 }
 
+<#
+    .SYNOPSIS
+        Convert a ModeId or Microsoft.ActiveDirectory.Management.ADForestMode to
+        a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
+
+    .PARAMETER ModeId
+        The ModeId value to convert to a
+        Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
+
+    .PARAMETER Mode
+        The Microsoft.ActiveDirectory.Management.ADForestMode value to convert
+        to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type
+#>
 function ConvertTo-DeploymentForestMode
 {
     [CmdletBinding()]
@@ -1087,12 +1211,7 @@ function ConvertTo-DeploymentForestMode
             ParameterSetName = 'ByName')]
         [AllowNull()]
         [System.Nullable``1[Microsoft.ActiveDirectory.Management.ADForestMode]]
-        $Mode,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ModuleName = 'xActiveDirectory'
+        $Mode
     )
 
     $convertedMode = $null
@@ -1115,6 +1234,19 @@ function ConvertTo-DeploymentForestMode
     return $convertedMode
 }
 
+<#
+    .SYNOPSIS
+        Convert a ModeId or Microsoft.ActiveDirectory.Management.ADDomainMode to
+        a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
+
+    .PARAMETER ModeId
+        The ModeId value to convert to a
+        Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
+
+    .PARAMETER Mode
+        The Microsoft.ActiveDirectory.Management.ADDomainMode value to convert
+        to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type
+#>
 function ConvertTo-DeploymentDomainMode
 {
     [CmdletBinding()]
@@ -1132,12 +1264,7 @@ function ConvertTo-DeploymentDomainMode
             ParameterSetName = 'ByName')]
         [AllowNull()]
         [System.Nullable``1[Microsoft.ActiveDirectory.Management.ADDomainMode]]
-        $Mode,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ModuleName = 'xActiveDirectory'
+        $Mode
     )
 
     $convertedMode = $null
@@ -1160,6 +1287,23 @@ function ConvertTo-DeploymentDomainMode
     return $convertedMode
 }
 
+<#
+    .SYNOPSIS
+        Restore and AD object from the AD recyle bin.
+
+    .PARAMETER Identity
+        The identity of the object to restore.
+
+    .PARAMETER ObjectClass
+        The type of the AD object to restore.
+
+    .PARAMETER Credential
+        The credential to use to restore the object in the Active
+        Directory.
+
+    .PARAMETER Server
+        The name of the domain controller use to restore the object.
+#>
 function Restore-ADCommonObject
 {
     [CmdletBinding()]
@@ -1237,14 +1381,22 @@ function Restore-ADCommonObject
 
 <#
     .SYNOPSIS
-        Author: Robert D. Biddle (https://github.com/RobBiddle)
-        Created: December.20.2017
+        Converts an Active Directory distinguished name into a fully
+        qualified domain name.
 
     .DESCRIPTION
-        Takes an Active Directory DistinguishedName as input, returns the domain FQDN
+        Takes an Active Directory distinguished name as input, returns
+        the domain FQDN.
+
+    .PARAMETER DistinguishedName
+        The distinguished name to convert into the FQDN.
 
     .EXAMPLE
         Get-ADDomainNameFromDistinguishedName -DistinguishedName 'CN=ExampleObject,OU=ExampleOU,DC=example,DC=com'
+
+    .NOTES
+        Author: Robert D. Biddle (https://github.com/RobBiddle)
+        Created: December.20.2017
 #>
 function Get-ADDomainNameFromDistinguishedName
 {
@@ -1263,20 +1415,36 @@ function Get-ADDomainNameFromDistinguishedName
 
     $splitDistinguishedName = ($DistinguishedName -split 'DC=')
     $splitDistinguishedNameParts = $splitDistinguishedName[1..$splitDistinguishedName.Length]
-    $domainFqdn = ""
+    $domainFqdn = ''
+
     foreach ($part in $splitDistinguishedNameParts)
     {
         $domainFqdn += "DC=$part"
     }
 
     $domainName = $domainFqdn -replace 'DC=', '' -replace ',', '.'
+
     return $domainName
 
 } #end function Get-ADDomainNameFromDistinguishedName
 
 <#
     .SYNOPSIS
-        Add group member from current or different domain
+        Add group member from current or different domain.
+
+    .PARAMETER Members
+        The members to add to the group. These may be in the same
+        domain as the group or in alternate domains.
+
+    .PARAMETER Parameters
+        The parameters to pass to the Add-ADGroupMember cmdlet when
+        adding the members to the group. This should include the group
+        identity.
+
+    .PARAMETER MembersInMultipleDomains
+        Setting this switch indicates that there are members from
+        alternate domains. This triggers the identities of the members
+        to be looked up in the alternate domain.
 
     .NOTES
         Author original code: Robert D. Biddle (https://github.com/RobBiddle)
@@ -1758,6 +1926,7 @@ function Assert-ADPSDrive
 #>
 function Set-DscADComputer
 {
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]

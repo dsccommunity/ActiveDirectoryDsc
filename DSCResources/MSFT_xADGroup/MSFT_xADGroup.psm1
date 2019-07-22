@@ -254,7 +254,7 @@ function Test-TargetResource
         $assertMemberParameters['MembersToExclude'] = $MembersToExclude
     }
 
-    Assert-MemberParameters @assertMemberParameters -ModuleName 'xADDomain' -ErrorAction Stop
+    Assert-MemberParameters @assertMemberParameters -ErrorAction Stop
 
     $targetResource = Get-TargetResource @PSBoundParameters
 

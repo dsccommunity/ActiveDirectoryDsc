@@ -82,6 +82,16 @@
   - Remove remnants of the `SupportsShouldProcess` ([issue #329](https://github.com/PowerShell/xActiveDirectory/issues/329)).
 - Changes to xADDomain
   - Added comment-based help ([issue #335](https://github.com/PowerShell/xActiveDirectory/issues/335)).
+- Fixed Comment based help for the following resources:
+  - xADUser ([issue #340](https://github.com/PowerShell/xActiveDirectory/issues/340)).
+  - xADOrganizational Unit ([issue #339](https://github.com/PowerShell/xActiveDirectory/issues/339)).
+  - xADDomain ([issue #335](https://github.com/PowerShell/xActiveDirectory/issues/335)).
+  - xADRecycleBin ([issue #330](https://github.com/PowerShell/xActiveDirectory/issues/330)).
+- Changes to xActiveDirectory.Common:
+  - Removed unused parameter `ModuleName` from `Assert-MemberParameters` function.
+  - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentForestMode` function.
+  - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentDomainMode` function.
+  - Added function help ([issue #321](https://github.com/PowerShell/xActiveDirectory/issues/321)).
 
 ## 3.0.0.0
 
