@@ -8,11 +8,6 @@
     2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
   - Added 'about_\<DSCResource\>.help.txt' file to all resources
     ([issue #404](https://github.com/PowerShell/xActiveDirectory/issues/404)).
-  - Removed the helper function `ThrowInvalidOperationError` and
-    `ThrowInvalidArgumentError` in favor of the
-    [new helper functions for localization](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#helper-functions-for-localization)
-    ([issue #316](https://github.com/PowerShell/xActiveDirectory/issues/316),
-    [issue #317](https://github.com/PowerShell/xActiveDirectory/issues/317)).
   - Fixed an issue that the helper function `Add-ADCommonGroupMember` was
     not outputting the correct group name in a verbose message and in an
     error message.
@@ -29,11 +24,21 @@
   - The default value on resource parameters are now reflected in the parameter
     descriptions in the schema.mof (so that Wiki will be updated)
     ([issue #426](https://github.com/PowerShell/xActiveDirectory/issues/426)).
+  - Removed unnecessary Script Analyzer rule overrides from tests.
   - Added new helper functions in xActiveDirectory.Common.
     - New-CimCredentialInstance
     - Add-TypeAssembly
     - New-ADDirectoryContext
-  - Removed unnecessary Script Analyzer rule overrides from tests.
+  - Changes to xActiveDirectory.Common:
+    - Removed unused parameter `ModuleName` from `Assert-MemberParameters` function.
+    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentForestMode` function.
+    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentDomainMode` function.
+    - Added function help ([issue #321](https://github.com/PowerShell/xActiveDirectory/issues/321)).
+    - Removed the helper function `ThrowInvalidOperationError` and
+      `ThrowInvalidArgumentError` in favor of the
+      [new helper functions for localization](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#helper-functions-for-localization)
+      ([issue #316](https://github.com/PowerShell/xActiveDirectory/issues/316),
+      [issue #317](https://github.com/PowerShell/xActiveDirectory/issues/317)).
 - Changes to xADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
@@ -82,16 +87,6 @@
   - Remove remnants of the `SupportsShouldProcess` ([issue #329](https://github.com/PowerShell/xActiveDirectory/issues/329)).
 - Changes to xADDomain
   - Added comment-based help ([issue #335](https://github.com/PowerShell/xActiveDirectory/issues/335)).
-- Fixed Comment based help for the following resources:
-  - xADUser ([issue #340](https://github.com/PowerShell/xActiveDirectory/issues/340)).
-  - xADOrganizational Unit ([issue #339](https://github.com/PowerShell/xActiveDirectory/issues/339)).
-  - xADDomain ([issue #335](https://github.com/PowerShell/xActiveDirectory/issues/335)).
-  - xADRecycleBin ([issue #330](https://github.com/PowerShell/xActiveDirectory/issues/330)).
-- Changes to xActiveDirectory.Common:
-  - Removed unused parameter `ModuleName` from `Assert-MemberParameters` function.
-  - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentForestMode` function.
-  - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentDomainMode` function.
-  - Added function help ([issue #321](https://github.com/PowerShell/xActiveDirectory/issues/321)).
 
 ## 3.0.0.0
 
