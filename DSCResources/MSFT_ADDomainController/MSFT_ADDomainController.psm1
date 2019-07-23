@@ -34,7 +34,9 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController
         Provide the name of the site you want the Domain Controller to be added to.
 
     .PARAMETER InstallDns
-        Specifies if the DNS service will be installed. Default value is $true.
+        Specifies if the DNS Server service should be installed and configured on the domain controller.
+        If this is not set, the default for the parameter InstallDns of the cmdlet [Install-ADDSDomainController]
+        (https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller) is used.
 #>
 function Get-TargetResource
 {
@@ -87,6 +89,7 @@ function Get-TargetResource
         AllowPasswordReplicationAccountName = $null
         DenyPasswordReplicationAccountName  = $null
         FlexibleSingleMasterOperationRole   = $null
+        InstallDns                          = $InstallDNs
     }
 
     Write-Verbose -Message (
@@ -196,7 +199,9 @@ function Get-TargetResource
         responding for the move to be allowed.
 
     .PARAMETER InstallDns
-        Specifies if the DNS service will be installed. Default value is $true.
+        Specifies if the DNS Server service should be installed and configured on the domain controller.
+        If this is not set, the default for the parameter InstallDns of the cmdlet [Install-ADDSDomainController]
+        (https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller) is used.
 #>
 function Set-TargetResource
 {
@@ -343,9 +348,9 @@ function Set-TargetResource
             $installADDSDomainControllerParameters.Add('NoGlobalCatalog', $true)
         }
 
-        if ($PSBoundParameters.ContainsKey('InstallDns') -and $InstallDns -eq $false)
+        if ($PSBoundParameters.ContainsKey('InstallDns'))
         {
-            $installADDSDomainControllerParameters.Add('InstallDns', $false)
+            $installADDSDomainControllerParameters.Add('InstallDns', $InstallDns)
         }
 
         if (-not [System.String]::IsNullOrWhiteSpace($InstallationMediaPath))
@@ -598,7 +603,11 @@ function Set-TargetResource
         responding for the move to be allowed.
 
     .PARAMETER InstallDns
-        Specifies if the DNS service will be installed. Default value is $true.
+        Specifies if the DNS Server service should be installed and configured on the domain controller.
+        If this is not set, the default for the parameter InstallDns of the cmdlet [Install-ADDSDomainController]
+        (https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller) is used.
+
+        Not used in Test-TargetResource.
 #>
 function Test-TargetResource
 {
