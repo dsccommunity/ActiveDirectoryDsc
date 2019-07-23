@@ -1,6 +1,6 @@
 
-[ClassVersion("1.0.0.0"), FriendlyName("xADReplicationSiteLink")]
-class MSFT_xADReplicationSiteLink : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("ADReplicationSiteLink")]
+class MSFT_ADReplicationSiteLink : OMI_BaseResource
 {
     [Key, Description("Specifies the name of the site link.")] String Name;
     [Write, Description("Specifies the cost to be placed on the site link.")] SInt32 Cost;

@@ -29,7 +29,7 @@ Configuration CreateADReplicationSite_Config
 
     Node localhost
     {
-        xADReplicationSite 'SeattleSite'
+        ADReplicationSite 'SeattleSite'
         {
             Ensure = 'Present'
             Name   = 'Seattle'

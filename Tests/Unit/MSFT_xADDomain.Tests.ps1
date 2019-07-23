@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADDomain'
+$script:dscResourceName = 'MSFT_ADDomain'
 
 #region HEADER
 
@@ -71,7 +71,7 @@ try
         }
 
         #region Function Get-TargetResource
-        Describe 'xADDomain\Get-TargetResource' {
+        Describe 'ADDomain\Get-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ADDSDeployment' }
 
             It 'Calls "Assert-Module" to check "ADDSDeployment" module is installed' {
@@ -208,7 +208,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADDomain\Test-TargetResource' {
+        Describe 'ADDomain\Test-TargetResource' {
             $correctDomainName = 'present.com'
             $correctChildDomainName = 'present'
             $correctDomainNetBIOSName = 'PRESENT'
@@ -288,7 +288,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADDomain\Set-TargetResource' {
+        Describe 'ADDomain\Set-TargetResource' {
             function Install-ADDSForest
             {
                 param

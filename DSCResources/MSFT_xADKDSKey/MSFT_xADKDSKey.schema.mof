@@ -1,5 +1,5 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xADKDSKey")]
-class MSFT_xADKDSKey : OMI_BaseResource
+[ClassVersion("1.0.1.0"), FriendlyName("ADKDSKey")]
+class MSFT_ADKDSKey : OMI_BaseResource
 {
     [Key, Description("Specifies the Effective time when a KDS root key can be used. There is a 10 hour minimum from creation date to allow active directory to properly replicate across all domain controllers. For this reason, the date must be set in the future for creation. While this parameter accepts a string, it will be converted into a DateTime object. This will also try to take into account cultural settings. Example: '05/01/1999 13:00 using default or 'en-US' culture would be May 1st, but using 'de-DE' culture would be 5th of January. The culture is automatically pulled from the operating system and this can be checked using 'Get-Culture'.")] String EffectiveTime;
     [Write, Description("Specifies if this KDS Root Key should be present or absent. Default value is 'Present'."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;

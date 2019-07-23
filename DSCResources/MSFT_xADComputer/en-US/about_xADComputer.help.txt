@@ -1,8 +1,8 @@
 .NAME
-    xADComputer
+    ADComputer
 
 .DESCRIPTION
-    The xADComputer DSC resource will manage computer accounts within Active Directory.
+    The ADComputer DSC resource will manage computer accounts within Active Directory.
     This resource can be used to provision a computer account before the computer is
     added to the domain. These pre-created computer objects can be used with offline
     domain join, unsecure domain Join and RODC domain join scenarios.
@@ -51,7 +51,7 @@
 
 .PARAMETER Enabled
     Write - Boolean
-    DEPRECATED - DO NOT USE. Please see the parameter EnabledOnCreation in this resource, and the resource xADObjectEnabledState on how to enforce the Enabled property. This parameter no longer sets or enforces the Enabled property. If this parameter is used then a warning message will be outputted saying that the Enabled parameter has been deprecated.
+    DEPRECATED - DO NOT USE. Please see the parameter EnabledOnCreation in this resource, and the resource ADObjectEnabledState on how to enforce the Enabled property. This parameter no longer sets or enforces the Enabled property. If this parameter is used then a warning message will be outputted saying that the Enabled parameter has been deprecated.
 
 .PARAMETER Manager
     Write - String
@@ -80,7 +80,7 @@
 
 .PARAMETER EnabledOnCreation
     Write - Boolean
-    Specifies if the computer account is created enabled or disabled. By default the Enabled property of the computer account will be set to the default value of the cmdlet New-ADComputer. This property is ignored if the parameter RequestFile is specified in the same configuration. This parameter does not enforce the property Enabled. To enforce the property Enabled see the resource xADObjectEnabledState.
+    Specifies if the computer account is created enabled or disabled. By default the Enabled property of the computer account will be set to the default value of the cmdlet New-ADComputer. This property is ignored if the parameter RequestFile is specified in the same configuration. This parameter does not enforce the property Enabled. To enforce the property Enabled see the resource ADObjectEnabledState.
 
 .PARAMETER DistinguishedName
     Read - String
@@ -113,12 +113,12 @@ Configuration AddComputerAccount_Config
 
     node localhost
     {
-        xADComputer 'CreateEnabled_SQL01'
+        ADComputer 'CreateEnabled_SQL01'
         {
             ComputerName = 'SQL01'
         }
 
-        xADComputer 'CreateEnabled_SQL02'
+        ADComputer 'CreateEnabled_SQL02'
         {
             ComputerName      = 'SQL02'
             EnabledOnCreation = $true
@@ -145,7 +145,7 @@ Configuration AddComputerAccountDisabled_Config
 
     node localhost
     {
-        xADComputer 'CreateDisabled'
+        ADComputer 'CreateDisabled'
         {
             ComputerName      = 'CLU_CNO01'
             EnabledOnCreation = $false
@@ -173,7 +173,7 @@ Configuration AddComputerAccountSpecificPath_Config
 
     node localhost
     {
-        xADComputer 'CreateComputerAccount'
+        ADComputer 'CreateComputerAccount'
         {
             DomainController              = 'DC01'
             ComputerName                  = 'SQL01'
@@ -204,7 +204,7 @@ Configuration AddComputerAccountAndCreateODJRequest_Config
 
     node localhost
     {
-        xADComputer 'CreateComputerAccount'
+        ADComputer 'CreateComputerAccount'
         {
             DomainController              = 'DC01'
             ComputerName                  = 'NANO-200'

@@ -37,7 +37,7 @@ Configuration CreateUserAndManagePassword_Config
 
     Node localhost
     {
-        xADUser 'Contoso\ExampleUser'
+        ADUser 'Contoso\ExampleUser'
         {
             Ensure     = 'Present'
             UserName   = 'ExampleUser'

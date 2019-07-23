@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xADObjectPermissionEntry")]
-class MSFT_xADObjectPermissionEntry : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("ADObjectPermissionEntry")]
+class MSFT_ADObjectPermissionEntry : OMI_BaseResource
 {
     [Write, Description("Indicates if the access will be added (Present) or will be removed (Absent). Default value is 'Present'."), ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
     [Key, Description("Active Directory path of the target object to add or remove the permission entry, specified as a Distinguished Name.")] String Path;

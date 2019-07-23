@@ -1,5 +1,5 @@
 .NAME
-    xADObjectEnabledState
+    ADObjectEnabledState
 
 .DESCRIPTION
     This resource enforces the property `Enabled` on the object class *Computer*.
@@ -48,19 +48,19 @@ Configuration EnabledComputerAccount_Config
 
     node localhost
     {
-        xADComputer 'CreateDisabled'
+        ADComputer 'CreateDisabled'
         {
             ComputerName      = 'CLU_CNO01'
             EnabledOnCreation = $false
         }
 
-        xADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
+        ADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
         {
             Identity    = 'CLU_CNO01'
             ObjectClass = 'Computer'
             Enabled     = $true
 
-            DependsOn   = '[xADComputer]CreateDisabled'
+            DependsOn   = '[ADComputer]CreateDisabled'
         }
     }
 }
@@ -86,7 +86,7 @@ Configuration CreateClusterComputerAccount_Config
 
     node localhost
     {
-        xADComputer 'ClusterAccount'
+        ADComputer 'ClusterAccount'
         {
             ComputerName      = 'CLU_CNO01'
             EnabledOnCreation = $false
@@ -98,10 +98,10 @@ Configuration CreateClusterComputerAccount_Config
             StaticIPAddress               = '192.168.100.20/24'
             DomainAdministratorCredential = $DomainAdministratorCredential
 
-            DependsOn                     = '[xADComputer]ClusterAccount'
+            DependsOn                     = '[ADComputer]ClusterAccount'
         }
 
-        xADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
+        ADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
         {
             Identity    = 'CLU_CNO01'
             ObjectClass = 'Computer'
@@ -139,7 +139,7 @@ Configuration EnabledPrestagedClusterComputerAccount_Config
             DomainAdministratorCredential = $DomainAdministratorCredential
         }
 
-        xADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
+        ADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
         {
             Identity    = 'CLU_CNO01'
             ObjectClass = 'Computer'

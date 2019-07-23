@@ -28,7 +28,7 @@ Configuration AddComputerServicePrincipalName_Config
 
     Node localhost
     {
-        xADServicePrincipalName 'web.contoso.com'
+        ADServicePrincipalName 'web.contoso.com'
         {
             ServicePrincipalName = 'HTTP/web.contoso.com'
             Account              = 'IIS01$'

@@ -62,7 +62,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerAllProperties'
+        ADDomainController 'DomainControllerAllProperties'
         {
             DomainName                    = 'contoso.com'
             DomainAdministratorCredential = $DomainAdministratorCredential

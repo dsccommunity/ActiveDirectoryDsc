@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xADOrganizationalUnit")]
-class MSFT_xADOrganizationalUnit : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("ADOrganizationalUnit")]
+class MSFT_ADOrganizationalUnit : OMI_BaseResource
 {
     [Key, Description("The name of Organization Unit (OU).")] String Name;
     [Key, Description("Specifies the X.500 path of the Organization Unit (OU) or container where the new object is created.")] String Path;

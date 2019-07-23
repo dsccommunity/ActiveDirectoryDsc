@@ -49,7 +49,7 @@ Configuration CreateADOU_Config
 
     Node localhost
     {
-        xADOrganizationalUnit 'ExampleOU'
+        ADOrganizationalUnit 'ExampleOU'
         {
             Name                            = $Name
             Path                            = $Path

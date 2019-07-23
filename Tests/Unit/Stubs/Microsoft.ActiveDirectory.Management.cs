@@ -115,7 +115,7 @@ namespace Microsoft.ActiveDirectory.Management
         string site;
         public ADReplicationSite(System.String s){ site = s; }
 
-        // Added so that MSFT_xADDomainController unit test works
+        // Added so that MSFT_ADDomainController unit test works
         // 'When a domain controller is in the wrong site'
         //     'Should call the correct mocks to move the domain controller to the correct site'
 

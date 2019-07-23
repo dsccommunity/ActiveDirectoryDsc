@@ -1,6 +1,6 @@
 # Description
 
-The xADDomainController DSC resource will install and configure domain
+The ADDomainController DSC resource will install and configure domain
 controllers in Active Directory. Installation of Read-Only Domain Controllers
 (RODC) is also supported.
 

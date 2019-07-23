@@ -37,7 +37,7 @@ Configuration AddComputerAccountDisabled_Config
 
     node localhost
     {
-        xADComputer 'CreateDisabled'
+        ADComputer 'CreateDisabled'
         {
             ComputerName      = 'CLU_CNO01'
             EnabledOnCreation = $false

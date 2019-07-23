@@ -56,7 +56,7 @@ Configuration NewDomainWithTwoDCs_Config
             Name   = 'AD-Domain-Services'
         }
 
-        xADDomain 'FirstDS'
+        ADDomain 'FirstDS'
         {
             DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred
@@ -71,10 +71,10 @@ Configuration NewDomainWithTwoDCs_Config
             DomainUserCredential = $domainCred
             RetryCount           = $Node.RetryCount
             RetryIntervalSec     = $Node.RetryIntervalSec
-            DependsOn            = '[xADDomain]FirstDS'
+            DependsOn            = '[ADDomain]FirstDS'
         }
 
-        xADUser 'FirstUser'
+        ADUser 'FirstUser'
         {
             DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred
@@ -102,7 +102,7 @@ Configuration NewDomainWithTwoDCs_Config
             DependsOn            = '[WindowsFeature]ADDSInstall'
         }
 
-        xADDomainController 'SecondDC'
+        ADDomainController 'SecondDC'
         {
             DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred

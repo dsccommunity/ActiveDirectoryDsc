@@ -28,19 +28,19 @@ Configuration EnabledComputerAccount_Config
 
     node localhost
     {
-        xADComputer 'CreateDisabled'
+        ADComputer 'CreateDisabled'
         {
             ComputerName      = 'CLU_CNO01'
             EnabledOnCreation = $false
         }
 
-        xADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
+        ADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
         {
             Identity    = 'CLU_CNO01'
             ObjectClass = 'Computer'
             Enabled     = $true
 
-            DependsOn   = '[xADComputer]CreateDisabled'
+            DependsOn   = '[ADComputer]CreateDisabled'
         }
     }
 }

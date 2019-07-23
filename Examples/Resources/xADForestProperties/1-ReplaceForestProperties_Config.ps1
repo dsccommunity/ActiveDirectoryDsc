@@ -30,7 +30,7 @@ Configuration ReplaceForestProperties_Config
 
     node $AllNodes.NodeName
     {
-        xADForestProperties $Node.ForestName
+        ADForestProperties $Node.ForestName
         {
             ForestName                 = $Node.ForestName
             UserPrincipalNameSuffix    = $Node.UserPrincipalNameSuffix

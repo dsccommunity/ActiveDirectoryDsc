@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADDomainTrust'
+$script:dscResourceName = 'MSFT_ADDomainTrust'
 
 #region HEADER
 
@@ -45,7 +45,7 @@ try
             $mockCredentialUserName, $mockCredentialPassword
         )
 
-        Describe 'MSFT_xADDomainTrust\Get-TargetResource' -Tag 'Get' {
+        Describe 'MSFT_ADDomainTrust\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
                 $mockDefaultParameters = @{
                     SourceDomainName                    = $mockSourceDomainName
@@ -212,7 +212,7 @@ try
 
         }
 
-        Describe 'MSFT_xADDomainTrust\Test-TargetResource' -Tag 'Test' {
+        Describe 'MSFT_ADDomainTrust\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 $mockDefaultParameters = @{
                     SourceDomainName                    = $mockSourceDomainName
@@ -357,7 +357,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADDomainTrust\Compare-TargetResourceState' -Tag 'Compare' {
+        Describe 'MSFT_ADDomainTrust\Compare-TargetResourceState' -Tag 'Compare' {
             BeforeAll {
                 $mockDefaultParameters = @{
                     SourceDomainName                    = $mockSourceDomainName
@@ -561,7 +561,7 @@ try
             }
         }
 
-         Describe 'MSFT_xADDomainTrust\Set-TargetResource' -Tag 'Set' {
+         Describe 'MSFT_ADDomainTrust\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 Mock -CommandName Get-TrustSourceAndTargetObject -MockWith {
                     $mockTrustSource = New-Object -TypeName Object |
@@ -888,7 +888,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADDomainTrust\ConvertTo-DirectoryContextType' -Tag 'Helper' {
+        Describe 'MSFT_ADDomainTrust\ConvertTo-DirectoryContextType' -Tag 'Helper' {
             BeforeAll {
                 $testCases = @(
                     @{
@@ -931,7 +931,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADDomainTrust\Get-TrustSourceAndTargetObject' -Tag 'Helper' {
+        Describe 'MSFT_ADDomainTrust\Get-TrustSourceAndTargetObject' -Tag 'Helper' {
             BeforeAll {
                 Mock -CommandName Get-ADDirectoryContext -MockWith {
                     # This should work on any client, domain joined or not.

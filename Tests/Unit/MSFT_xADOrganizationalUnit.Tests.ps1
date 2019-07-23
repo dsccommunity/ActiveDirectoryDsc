@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADOrganizationalUnit'
+$script:dscResourceName = 'MSFT_ADOrganizationalUnit'
 
 #region HEADER
 
@@ -100,7 +100,7 @@ try
         }
 
         #region Function Get-TargetResource
-        Describe 'xADOrganizationalUnit\Get-TargetResource' {
+        Describe 'ADOrganizationalUnit\Get-TargetResource' {
             It 'Returns a "System.Collections.Hashtable" object type' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
@@ -177,7 +177,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADOrganizationalUnit\Test-TargetResource' {
+        Describe 'ADOrganizationalUnit\Test-TargetResource' {
             It 'Returns a "System.Boolean" object type' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { return [PSCustomObject] $protectedFakeAdOu }
@@ -245,7 +245,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADOrganizationalUnit\Set-TargetResource' {
+        Describe 'ADOrganizationalUnit\Set-TargetResource' {
             It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and OU does not exist' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit

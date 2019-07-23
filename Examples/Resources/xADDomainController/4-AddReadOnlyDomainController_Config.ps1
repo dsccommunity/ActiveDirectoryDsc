@@ -61,7 +61,7 @@ Configuration AddReadOnlyDomainController_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'Read-OnlyDomainController(RODC)'
+        ADDomainController 'Read-OnlyDomainController(RODC)'
         {
             DomainName                          = 'contoso.com'
             DomainAdministratorCredential       = $DomainAdministratorCredential

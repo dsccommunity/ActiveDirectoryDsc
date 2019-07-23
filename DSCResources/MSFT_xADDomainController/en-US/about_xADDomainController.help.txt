@@ -1,8 +1,8 @@
 .NAME
-    xADDomainController
+    ADDomainController
 
 .DESCRIPTION
-    The xADDomainController DSC resource will install and configure domain
+    The ADDomainController DSC resource will install and configure domain
     controllers in Active Directory. Installation of Read-Only Domain Controllers
     (RODC) is also supported.
 
@@ -114,7 +114,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerMinimal'
+        ADDomainController 'DomainControllerMinimal'
         {
             DomainName                    = 'contoso.com'
             DomainAdministratorCredential = $DomainAdministratorCredential
@@ -169,7 +169,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerAllProperties'
+        ADDomainController 'DomainControllerAllProperties'
         {
             DomainName                    = 'contoso.com'
             DomainAdministratorCredential = $DomainAdministratorCredential
@@ -229,7 +229,7 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerWithIFM'
+        ADDomainController 'DomainControllerWithIFM'
         {
             DomainName                    = 'contoso.com'
             DomainAdministratorCredential = $DomainAdministratorCredential
@@ -285,7 +285,7 @@ Configuration AddReadOnlyDomainController_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'Read-OnlyDomainController(RODC)'
+        ADDomainController 'Read-OnlyDomainController(RODC)'
         {
             DomainName                          = 'contoso.com'
             DomainAdministratorCredential       = $DomainAdministratorCredential

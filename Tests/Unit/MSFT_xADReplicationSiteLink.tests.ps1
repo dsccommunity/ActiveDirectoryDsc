@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADReplicationSiteLink'
+$script:dscResourceName = 'MSFT_ADReplicationSiteLink'
 
 #region HEADER
 
@@ -61,7 +61,7 @@ try
         $mockADReplicationSiteLinkSitesExcluded = $mockGetADReplicationSiteLinkReturn.Clone()
         $mockADReplicationSiteLinkSitesExcluded['SitesIncluded'] = $null
 
-        Describe 'xADReplicationSiteLink\Get-TargetResource' {
+        Describe 'ADReplicationSiteLink\Get-TargetResource' {
             Context 'When sites are included' {
                 Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockGetADReplicationSiteLinkReturn }
 
@@ -123,7 +123,7 @@ try
             }
         }
 
-        Describe 'xADReplicationSiteLink\Test-TargetResource' {
+        Describe 'ADReplicationSiteLink\Test-TargetResource' {
             Context 'When target resource in desired state' {
                 Mock -CommandName Get-TargetResource -MockWith { $targetResourceParameters }
 
@@ -192,7 +192,7 @@ try
             }
         }
 
-        Describe 'xADReplicationSiteLink\Set-TargetResource' {
+        Describe 'ADReplicationSiteLink\Set-TargetResource' {
             Context 'Site Link is Absent but is desired Present' {
                 Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Absent' } }
                 Mock -CommandName New-ADReplicationSiteLink

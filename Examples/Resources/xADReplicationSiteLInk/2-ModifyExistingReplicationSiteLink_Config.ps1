@@ -28,7 +28,7 @@ Configuration ModifyExistingReplicationSiteLink_Config
 
     Node localhost
     {
-        xADReplicationSiteLink 'HQSiteLink'
+        ADReplicationSiteLink 'HQSiteLink'
         {
             Name                          = 'HQSiteLInk'
             SitesIncluded                 = 'site1'

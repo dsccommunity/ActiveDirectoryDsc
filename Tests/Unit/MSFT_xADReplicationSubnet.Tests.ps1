@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADReplicationSubnet'
+$script:dscResourceName = 'MSFT_ADReplicationSubnet'
 
 #region HEADER
 
@@ -37,7 +37,7 @@ try
 
     InModuleScope $script:dscResourceName {
         #region Function Get-TargetResource
-        Describe 'xADReplicationSubnet\Get-TargetResource' {
+        Describe 'ADReplicationSubnet\Get-TargetResource' {
             $testDefaultParameters = @{
                 Name = '10.0.0.0/8'
                 Site = 'Default-First-Site-Name'
@@ -108,7 +108,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADReplicationSubnet\Test-TargetResource' {
+        Describe 'ADReplicationSubnet\Test-TargetResource' {
 
             $testDefaultParameters = @{
                 Name     = '10.0.0.0/8'
@@ -175,7 +175,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADReplicationSubnet\Set-TargetResource' {
+        Describe 'ADReplicationSubnet\Set-TargetResource' {
             $testPresentParameters = @{
                 Ensure   = 'Present'
                 Name     = '10.0.0.0/8'

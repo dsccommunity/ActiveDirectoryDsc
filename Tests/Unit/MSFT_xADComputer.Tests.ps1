@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADComputer'
+$script:dscResourceName = 'MSFT_ADComputer'
 
 #region HEADER
 
@@ -73,7 +73,7 @@ try
             $mockCredentialUserName, $mockCredentialPassword
         )
 
-        Describe 'MSFT_xADComputer\Get-TargetResource' -Tag 'Get' {
+        Describe 'MSFT_ADComputer\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
                 Mock -CommandName Assert-Module
 
@@ -306,7 +306,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADComputer\Test-TargetResource' -Tag 'Test' {
+        Describe 'MSFT_ADComputer\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 Mock -CommandName Assert-Module
 
@@ -621,7 +621,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADComputer\Set-TargetResource' -Tag 'Set' {
+        Describe 'MSFT_ADComputer\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 Mock -CommandName Assert-Module
 

@@ -1,6 +1,6 @@
 # Description
 
-The xADReplicationSubnet DSC resource will manage replication subnets.
+The ADReplicationSubnet DSC resource will manage replication subnets.
 
 ## Requirements
 

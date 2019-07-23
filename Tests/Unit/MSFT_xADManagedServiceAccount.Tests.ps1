@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADManagedServiceAccount'
+$script:dscResourceName = 'MSFT_ADManagedServiceAccount'
 
 #region HEADER
 
@@ -295,7 +295,7 @@ try
         )
 
         #region Function Get-TargetResource
-        Describe -Name 'MSFT_xADManagedServiceAccount\Get-TargetResource' -Tag 'Get' {
+        Describe -Name 'MSFT_ADManagedServiceAccount\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
                 Mock -CommandName Assert-Module -ParameterFilter {
                     $ModuleName -eq 'ActiveDirectory'
@@ -456,7 +456,7 @@ try
         #endregion Function Get-TargetResource
 
         #region Function Compare-TargetResourceState
-        Describe -Name 'MSFT_xADManagedServiceAccount\Compare-TargetResourceState' -Tag 'Compare' {
+        Describe -Name 'MSFT_ADManagedServiceAccount\Compare-TargetResourceState' -Tag 'Compare' {
             Context -Name 'When the system is in the desired state (sMSA)' {
                 Mock -CommandName Get-TargetResource -ParameterFilter {
                     $mockSingleServiceAccount.Name -eq $ServiceAccountName
@@ -849,7 +849,7 @@ try
         #endregion Function Compare-TargetResourceState
 
         #region Function Test-TargetResource
-        Describe -Name 'MSFT_xADManagedServiceAccount\Test-TargetResource' -Tag 'Test' {
+        Describe -Name 'MSFT_ADManagedServiceAccount\Test-TargetResource' -Tag 'Test' {
             Context -Name "When the system is in the desired state and 'Ensure' is 'Present' (sMSA)" {
                 It "Should pass when the Parameters are properly set" {
                     Mock -CommandName Compare-TargetResourceState -ParameterFilter {
@@ -1028,7 +1028,7 @@ try
         }
         #endregion Function Test-TargetResource
 
-        Describe -Name 'MSFT_xADManagedServiceAccount\New-ADServiceAccountHelper' {
+        Describe -Name 'MSFT_ADManagedServiceAccount\New-ADServiceAccountHelper' {
             BeforeAll {
                 Mock -CommandName New-ADServiceAccount
             }
@@ -1069,7 +1069,7 @@ try
         }
 
         #region Function Set-TargetResource
-        Describe -Name 'MSFT_xADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
+        Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 Mock -CommandName New-ADServiceAccountHelper
                 Mock -CommandName Remove-ADServiceAccount

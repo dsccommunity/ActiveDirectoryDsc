@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADForestProperties'
+$script:dscResourceName = 'MSFT_ADForestProperties'
 
 #region HEADER
 
@@ -77,7 +77,7 @@ try
         Mock -CommandName Assert-Module
         Mock -CommandName Import-Module
 
-        Describe 'MSFT_xADForestProperties\Get-TargetResource' {
+        Describe 'MSFT_ADForestProperties\Get-TargetResource' {
             Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
 
             Context 'When used with add/remove parameters' {
@@ -113,7 +113,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADForestProperties\Test-TargetResource' {
+        Describe 'MSFT_ADForestProperties\Test-TargetResource' {
             Context 'When target resource in desired state' {
                 Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
 
@@ -147,7 +147,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADForestProperties\Set-TargetResource' {
+        Describe 'MSFT_ADForestProperties\Set-TargetResource' {
             Context 'When using replace parameters' {
                 Mock -CommandName Set-ADForest -ParameterFilter {
                     ($SpnSuffixes.Replace -join ',') -eq ($replaceParameters.ServicePrincipalNameSuffix -join ',') -and

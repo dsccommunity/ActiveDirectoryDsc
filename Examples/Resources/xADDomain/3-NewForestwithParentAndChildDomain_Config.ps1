@@ -54,7 +54,7 @@ Configuration NewForestWithParentAndChildDomain_Config
             Name   = 'AD-Domain-Services'
         }
 
-        xADDomain 'FirstDS'
+        ADDomain 'FirstDS'
         {
             DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred
@@ -69,10 +69,10 @@ Configuration NewForestWithParentAndChildDomain_Config
             DomainUserCredential = $domainCred
             RetryCount           = $Node.RetryCount
             RetryIntervalSec     = $Node.RetryIntervalSec
-            DependsOn            = '[xADDomain]FirstDS'
+            DependsOn            = '[ADDomain]FirstDS'
         }
 
-        xADUser 'FirstUser'
+        ADUser 'FirstUser'
         {
             DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domaincred
@@ -101,7 +101,7 @@ Configuration NewForestWithParentAndChildDomain_Config
             DependsOn            = '[WindowsFeature]ADDSInstall'
         }
 
-        xADDomain 'ChildDS'
+        ADDomain 'ChildDS'
         {
             DomainName                    = $Node.DomainName
             ParentDomainName              = $Node.ParentDomainName

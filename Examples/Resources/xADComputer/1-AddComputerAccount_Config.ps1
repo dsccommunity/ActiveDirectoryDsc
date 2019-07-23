@@ -37,12 +37,12 @@ Configuration AddComputerAccount_Config
 
     node localhost
     {
-        xADComputer 'CreateEnabled_SQL01'
+        ADComputer 'CreateEnabled_SQL01'
         {
             ComputerName = 'SQL01'
         }
 
-        xADComputer 'CreateEnabled_SQL02'
+        ADComputer 'CreateEnabled_SQL02'
         {
             ComputerName      = 'SQL02'
             EnabledOnCreation = $true

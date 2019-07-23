@@ -28,7 +28,7 @@ Configuration NewGroupWithMembers_Config
 
     node localhost
     {
-        xADGroup 'dl1'
+        ADGroup 'dl1'
         {
             GroupName  = 'DL_APP_1'
             GroupScope = 'DomainLocal'

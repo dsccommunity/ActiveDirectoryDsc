@@ -1,6 +1,6 @@
 # Description
 
-The xADUser DSC resource will manage Users within Active Directory.
+The ADUser DSC resource will manage Users within Active Directory.
 
 ## Requirements
 

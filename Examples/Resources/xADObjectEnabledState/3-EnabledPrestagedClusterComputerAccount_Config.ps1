@@ -45,7 +45,7 @@ Configuration EnabledPrestagedClusterComputerAccount_Config
             DomainAdministratorCredential = $DomainAdministratorCredential
         }
 
-        xADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
+        ADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
         {
             Identity    = 'CLU_CNO01'
             ObjectClass = 'Computer'

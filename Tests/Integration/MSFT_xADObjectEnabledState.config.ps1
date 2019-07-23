@@ -29,13 +29,13 @@ else
     .SYNOPSIS
         Creates a computer account using the default values.
 #>
-Configuration MSFT_xADObjectEnabledState_Prerequisites_Config
+Configuration MSFT_ADObjectEnabledState_Prerequisites_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'CreateComputerAccount'
+        ADComputer 'CreateComputerAccount'
         {
             ComputerName = $Node.ComputerName
         }
@@ -47,13 +47,13 @@ Configuration MSFT_xADObjectEnabledState_Prerequisites_Config
         Disables a computer account.
 
 #>
-Configuration MSFT_xADObjectEnabledState_DisableComputerAccount_Config
+Configuration MSFT_ADObjectEnabledState_DisableComputerAccount_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADObjectEnabledState 'Integration_Test'
+        ADObjectEnabledState 'Integration_Test'
         {
             Identity    = $Node.ComputerName
             ObjectClass = 'Computer'
@@ -67,13 +67,13 @@ Configuration MSFT_xADObjectEnabledState_DisableComputerAccount_Config
         Enables a computer account.
 
 #>
-Configuration MSFT_xADObjectEnabledState_EnableComputerAccount_Config
+Configuration MSFT_ADObjectEnabledState_EnableComputerAccount_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADObjectEnabledState 'Integration_Test'
+        ADObjectEnabledState 'Integration_Test'
         {
             Identity    = $Node.ComputerName
             ObjectClass = 'Computer'
@@ -86,13 +86,13 @@ Configuration MSFT_xADObjectEnabledState_EnableComputerAccount_Config
     .SYNOPSIS
         Clean up the computer account.
 #>
-Configuration MSFT_xADObjectEnabledState_CleanUp_Config
+Configuration MSFT_ADObjectEnabledState_CleanUp_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'RemoveComputerAccount'
+        ADComputer 'RemoveComputerAccount'
         {
             Ensure       = 'Absent'
             ComputerName = $Node.ComputerName

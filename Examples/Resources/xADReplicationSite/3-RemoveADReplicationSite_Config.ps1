@@ -29,7 +29,7 @@ Configuration RemoveADReplicationSite_Config
 
     Node localhost
     {
-        xADReplicationSite 'CupertinoSite'
+        ADReplicationSite 'CupertinoSite'
         {
             Ensure = 'Absent'
             Name   = 'Cupertino'

@@ -1032,7 +1032,7 @@ function ConvertFrom-TimeSpan
         Returns common AD cmdlet connection parameter for splatting.
 
     .PARAMETER CommonName
-        When specified, a CommonName overrides theUsed by the xADUser
+        When specified, a CommonName overrides theUsed by the ADUser
         cmdletReturns the Identity as the Name key. For example, the
         Get-ADUser, Set-ADUser and Remove-ADUser cmdlets take an Identity
         parameter, but the New-ADUser cmdlet uses the Name parameter.

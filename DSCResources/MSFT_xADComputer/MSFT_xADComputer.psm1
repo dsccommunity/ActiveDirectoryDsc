@@ -4,7 +4,7 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADComputer'
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADComputer'
 
 <#
     A property map that maps the resource parameters to the corresponding
@@ -79,7 +79,7 @@ $script:computerObjectPropertyMap = @(
         the default value of the cmdlet New-ADComputer. This property is ignored
         if the parameter RequestFile is specified in the same configuration.
         This parameter does not enforce the property `Enabled`. To enforce the
-        property `Enabled` see the resource xADObjectEnabledState.
+        property `Enabled` see the resource ADObjectEnabledState.
 
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to connect to perform the task.
@@ -301,7 +301,7 @@ function Get-TargetResource
         the default value of the cmdlet New-ADComputer. This property is ignored
         if the parameter RequestFile is specified in the same configuration.
         This parameter does not enforce the property `Enabled`. To enforce the
-        property `Enabled` see the resource xADObjectEnabledState.
+        property `Enabled` see the resource ADObjectEnabledState.
 #>
 function Test-TargetResource
 {
@@ -563,7 +563,7 @@ function Test-TargetResource
         the default value of the cmdlet New-ADComputer. This property is ignored
         if the parameter RequestFile is specified in the same configuration.
         This parameter does not enforce the property `Enabled`. To enforce the
-        property `Enabled` see the resource xADObjectEnabledState.
+        property `Enabled` see the resource ADObjectEnabledState.
 #>
 function Set-TargetResource
 {

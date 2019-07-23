@@ -28,7 +28,7 @@ Configuration AddUserServicePrincipalName_Config
 
     Node localhost
     {
-        xADServicePrincipalName 'SQL01Svc'
+        ADServicePrincipalName 'SQL01Svc'
         {
             ServicePrincipalName = 'MSSQLSvc/sql01.contoso.com:1433'
             Account              = 'SQL01Svc'

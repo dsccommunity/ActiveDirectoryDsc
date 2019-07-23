@@ -51,13 +51,13 @@ else
     .SYNOPSIS
         Creates a domain trust.
 #>
-Configuration MSFT_xADDomainTrust_CreateDomainTrust_Config
+Configuration MSFT_ADDomainTrust_CreateDomainTrust_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADDomainTrust 'Integration_Test'
+        ADDomainTrust 'Integration_Test'
         {
             SourceDomainName                    = $Node.SourceDomain
             TargetDomainName                    = $Node.TargetDomain
@@ -75,13 +75,13 @@ Configuration MSFT_xADDomainTrust_CreateDomainTrust_Config
     .SYNOPSIS
         Changes trust direction on an existing domain trust.
 #>
-Configuration MSFT_xADDomainTrust_ChangeDomainTrustDirection_Config
+Configuration MSFT_ADDomainTrust_ChangeDomainTrustDirection_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADDomainTrust 'Integration_Test'
+        ADDomainTrust 'Integration_Test'
         {
             SourceDomainName                    = $Node.SourceDomain
             TargetDomainName                    = $Node.TargetDomain
@@ -99,13 +99,13 @@ Configuration MSFT_xADDomainTrust_ChangeDomainTrustDirection_Config
     .SYNOPSIS
         Removes the domain trust.
 #>
-Configuration MSFT_xADDomainTrust_RemoveDomainTrust_Config
+Configuration MSFT_ADDomainTrust_RemoveDomainTrust_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADDomainTrust 'Integration_Test'
+        ADDomainTrust 'Integration_Test'
         {
             Ensure                              = 'Absent'
             SourceDomainName                    = $Node.SourceDomain
@@ -124,13 +124,13 @@ Configuration MSFT_xADDomainTrust_RemoveDomainTrust_Config
     .SYNOPSIS
         Creates a forest trust.
 #>
-Configuration MSFT_xADDomainTrust_CreateForestTrust_Config
+Configuration MSFT_ADDomainTrust_CreateForestTrust_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADDomainTrust 'Integration_Test'
+        ADDomainTrust 'Integration_Test'
         {
             SourceDomainName                    = $Node.SourceForest
             TargetDomainName                    = $Node.TargetForest
@@ -148,13 +148,13 @@ Configuration MSFT_xADDomainTrust_CreateForestTrust_Config
     .SYNOPSIS
         Changes trust direction on an existing forest trust.
 #>
-Configuration MSFT_xADDomainTrust_ChangeForestTrustDirection_Config
+Configuration MSFT_ADDomainTrust_ChangeForestTrustDirection_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADDomainTrust 'Integration_Test'
+        ADDomainTrust 'Integration_Test'
         {
             SourceDomainName                    = $Node.SourceForest
             TargetDomainName                    = $Node.TargetForest
@@ -172,13 +172,13 @@ Configuration MSFT_xADDomainTrust_ChangeForestTrustDirection_Config
     .SYNOPSIS
         Removes the domain trust.
 #>
-Configuration MSFT_xADDomainTrust_RemoveForestTrust_Config
+Configuration MSFT_ADDomainTrust_RemoveForestTrust_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADDomainTrust 'Integration_Test'
+        ADDomainTrust 'Integration_Test'
         {
             Ensure                              = 'Absent'
             SourceDomainName                    = $Node.SourceForest

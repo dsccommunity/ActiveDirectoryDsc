@@ -15,7 +15,7 @@ CompanyName = 'Microsoft Corporation'
 Copyright = '(c) 2014 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'The ActiveDirectoryDsc module is originally part of the Windows PowerShell Desired State Configuration (DSC) Resource Kit. This version has been modified for use in Azure. This module contains the xADDomain, xADDomainController, xADUser, and xWaitForDomain resources. These DSC Resources allow you to configure and manage Active Directory.
+Description = 'The ActiveDirectoryDsc module is originally part of the Windows PowerShell Desired State Configuration (DSC) Resource Kit. This version has been modified for use in Azure. This module contains the ADDomain, ADDomainController, ADUser, and xWaitForDomain resources. These DSC Resources allow you to configure and manage Active Directory.
 
 All of the resources in the DSC Resource Kit are provided AS IS, and are not supported through any Microsoft standard support program or service.'
 

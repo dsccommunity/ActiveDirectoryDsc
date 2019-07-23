@@ -62,7 +62,7 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerWithIFM'
+        ADDomainController 'DomainControllerWithIFM'
         {
             DomainName                    = 'contoso.com'
             DomainAdministratorCredential = $DomainAdministratorCredential

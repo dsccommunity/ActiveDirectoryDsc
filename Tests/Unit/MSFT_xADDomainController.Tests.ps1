@@ -3,7 +3,7 @@ param ()
 
 #region HEADER
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADDomainController'
+$script:dscResourceName = 'MSFT_ADDomainController'
 
 # Unit Test Template Version: 1.2.4
 $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -134,7 +134,7 @@ try
         #endregion Pester Test Initialization
 
         #region Function Get-TargetResource
-        Describe 'xADDomainController\Get-TargetResource' -Tag 'Get' {
+        Describe 'ADDomainController\Get-TargetResource' -Tag 'Get' {
             Context 'When the domain name is not available' {
                 BeforeAll {
                     Mock -CommandName Get-ADDomain -MockWith {
@@ -286,7 +286,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADDomainController\Test-TargetResource' -Tag 'Test' {
+        Describe 'ADDomainController\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed.IsPresent } -MockWith {
                     return [PSCustomObject]@{
@@ -614,7 +614,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADDomainController\Set-TargetResource' -Tag 'Set' {
+        Describe 'ADDomainController\Set-TargetResource' -Tag 'Set' {
             Context 'When the system is not in the desired state' {
                 BeforeAll {
                     Mock -CommandName Install-ADDSDomainController
@@ -1015,7 +1015,7 @@ try
         }
         #endregion
 
-        Describe 'xADDomainController\Get-MembersToAddAndRemove' -Tag 'Helper' {
+        Describe 'ADDomainController\Get-MembersToAddAndRemove' -Tag 'Helper' {
             Context 'When there is one desired member' {
                 Context 'When there are no current members' {
                     Context 'When proving a $null value for CurrentMembers' {

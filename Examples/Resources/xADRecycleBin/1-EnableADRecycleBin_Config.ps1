@@ -40,7 +40,7 @@ Configuration EnableADRecycleBin_Config
 
     Node localhost
     {
-        xADRecycleBin 'RecycleBin'
+        ADRecycleBin 'RecycleBin'
         {
             EnterpriseAdministratorCredential = $EACredential
             ForestFQDN                        = $ForestFQDN

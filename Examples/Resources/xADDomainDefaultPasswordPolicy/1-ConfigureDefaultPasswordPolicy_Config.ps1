@@ -44,7 +44,7 @@ Configuration ConfigureDefaultPasswordPolicy_Config
 
     Node localhost
     {
-        xADDomainDefaultPasswordPolicy 'DefaultPasswordPolicy'
+        ADDomainDefaultPasswordPolicy 'DefaultPasswordPolicy'
         {
             DomainName        = $DomainName
             ComplexityEnabled = $ComplexityEnabled

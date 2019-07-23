@@ -1,8 +1,8 @@
 .NAME
-    xADReplicationSubnet
+    ADReplicationSubnet
 
 .DESCRIPTION
-    The xADReplicationSubnet DSC resource will manage replication subnets.
+    The ADReplicationSubnet DSC resource will manage replication subnets.
 
     ## Requirements
 
@@ -35,7 +35,7 @@ Configuration CreateReplicationSubnet_Config
 
     Node localhost
     {
-        xADReplicationSubnet 'LondonSubnet'
+        ADReplicationSubnet 'LondonSubnet'
         {
             Name     = '10.0.0.0/24'
             Site     = 'London'

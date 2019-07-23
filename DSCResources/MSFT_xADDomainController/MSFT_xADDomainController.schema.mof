@@ -1,5 +1,5 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xADDomainController")]
-class MSFT_xADDomainController : OMI_BaseResource
+[ClassVersion("1.0.1.0"), FriendlyName("ADDomainController")]
+class MSFT_ADDomainController : OMI_BaseResource
 {
     [Key, Description("The fully qualified domain name (FQDN) of the domain the Domain Controller will be joining.")] String DomainName;
     [Required, Description("The credentials (as a 'PSCredential' object) of a user that has Domain Administrator rights to add the Domain Controller to the domain."), EmbeddedInstance("MSFT_Credential")] String DomainAdministratorCredential;

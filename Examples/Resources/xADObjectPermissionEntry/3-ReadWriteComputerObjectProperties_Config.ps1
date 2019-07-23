@@ -30,7 +30,7 @@ Configuration ReadWriteComputerObjectProperties_Config
 
     Node localhost
     {
-        xADObjectPermissionEntry 'ADObjectPermissionEntry'
+        ADObjectPermissionEntry 'ADObjectPermissionEntry'
         {
             Ensure                             = 'Present'
             Path                               = 'OU=ContosoComputers,DC=contoso,DC=com'

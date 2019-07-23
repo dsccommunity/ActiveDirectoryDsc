@@ -1,8 +1,8 @@
 .NAME
-    xADForestProperties
+    ADForestProperties
 
 .DESCRIPTION
-    The xADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
+    The ADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
 
     ## Requirements
 
@@ -52,7 +52,7 @@ Configuration ReplaceForestProperties_Config
 
     node $AllNodes.NodeName
     {
-        xADForestProperties $Node.ForestName
+        ADForestProperties $Node.ForestName
         {
             ForestName                 = $Node.ForestName
             UserPrincipalNameSuffix    = $Node.UserPrincipalNameSuffix
@@ -85,7 +85,7 @@ Configuration AddRemoveForestProperties_Config
 
     node localhost
     {
-        xADForestProperties 'ContosoProperties'
+        ADForestProperties 'ContosoProperties'
         {
             ForestName                         = 'contoso.com'
             ServicePrincipalNameSuffixToAdd    = 'test.net'

@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xADForestProperties")]
-class MSFT_xADForestProperties : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("ADForestProperties")]
+class MSFT_ADForestProperties : OMI_BaseResource
 {
     [Write, Description("Specifies the user account credentials to use to perform this task."), EmbeddedInstance("MSFT_Credential")] String Credential;
     [Key, Description("Specifies the target Active Directory forest for the change.")] String ForestName;

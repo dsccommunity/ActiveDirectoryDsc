@@ -53,13 +53,13 @@ else
         use the default value for the property Enable of the cmdlet
         New-ADComputer.
 #>
-Configuration MSFT_xADComputer_CreateComputerAccount1_Config
+Configuration MSFT_ADComputer_CreateComputerAccount1_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'Integration_Test'
+        ADComputer 'Integration_Test'
         {
             ComputerName = $Node.ComputerName1
         }
@@ -74,13 +74,13 @@ Configuration MSFT_xADComputer_CreateComputerAccount1_Config
         This removed computer account will later be used to restore the
         computer account from the recycle bin.
 #>
-Configuration MSFT_xADComputer_RemoveComputerAccount1_Config
+Configuration MSFT_ADComputer_RemoveComputerAccount1_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'Integration_Test'
+        ADComputer 'Integration_Test'
         {
             Ensure       = 'Absent'
             ComputerName = $Node.ComputerName1
@@ -93,13 +93,13 @@ Configuration MSFT_xADComputer_RemoveComputerAccount1_Config
         Restores a computer account from recycle bin.
 
 #>
-Configuration MSFT_xADComputer_RestoreComputerAccount1_Config
+Configuration MSFT_ADComputer_RestoreComputerAccount1_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'Integration_Test'
+        ADComputer 'Integration_Test'
         {
             Ensure                = 'Present'
             ComputerName          = $Node.ComputerName1
@@ -113,13 +113,13 @@ Configuration MSFT_xADComputer_RestoreComputerAccount1_Config
         Updates all available properties on a computer account.
 
 #>
-Configuration MSFT_xADComputer_UpdateComputerAccount1_Config
+Configuration MSFT_ADComputer_UpdateComputerAccount1_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADOrganizationalUnit 'Global'
+        ADOrganizationalUnit 'Global'
         {
             Ensure                          = 'Present'
             Name                            = $Node.OrganizationalUnitName
@@ -127,7 +127,7 @@ Configuration MSFT_xADComputer_UpdateComputerAccount1_Config
             ProtectedFromAccidentalDeletion = $false
         }
 
-        xADComputer 'Integration_Test'
+        ADComputer 'Integration_Test'
         {
             Ensure                = 'Present'
             ComputerName          = $Node.ComputerName1
@@ -139,7 +139,7 @@ Configuration MSFT_xADComputer_UpdateComputerAccount1_Config
             Path                  = 'OU={0},{1}' -f $Node.OrganizationalUnitName, $Node.DomainDistinguishedName
             Description           = $Node.Description
 
-            DependsOn             = '[xADOrganizationalUnit]Global'
+            DependsOn             = '[ADOrganizationalUnit]Global'
         }
     }
 }
@@ -148,13 +148,13 @@ Configuration MSFT_xADComputer_UpdateComputerAccount1_Config
     .SYNOPSIS
         Creates a computer account disabled.
 #>
-Configuration MSFT_xADComputer_CreateComputerAccount2Disabled_Config
+Configuration MSFT_ADComputer_CreateComputerAccount2Disabled_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'Integration_Test'
+        ADComputer 'Integration_Test'
         {
             ComputerName      = $Node.ComputerName2
             EnabledOnCreation = $false
@@ -172,13 +172,13 @@ Configuration MSFT_xADComputer_CreateComputerAccount2Disabled_Config
         use the default value for the property Enable of the cmdlet
         New-ADComputer.
 #>
-Configuration MSFT_xADComputer_CreateComputerAccount3WithOfflineDomainJoin_Config
+Configuration MSFT_ADComputer_CreateComputerAccount3WithOfflineDomainJoin_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'Integration_Test'
+        ADComputer 'Integration_Test'
         {
             ComputerName = $Node.ComputerName3
             RequestFile  = $Node.RequestFileName
@@ -190,32 +190,32 @@ Configuration MSFT_xADComputer_CreateComputerAccount3WithOfflineDomainJoin_Confi
     .SYNOPSIS
         Clean up all the computer accounts.
 #>
-Configuration MSFT_xADComputer_CleanUp_Config
+Configuration MSFT_ADComputer_CleanUp_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
 
     node $AllNodes.NodeName
     {
-        xADComputer 'RemoveComputerAccount1'
+        ADComputer 'RemoveComputerAccount1'
         {
             Ensure       = 'Absent'
             ComputerName = $Node.ComputerName1
         }
 
-        xADComputer 'RemoveComputerAccount2'
+        ADComputer 'RemoveComputerAccount2'
         {
             Ensure       = 'Absent'
             ComputerName = $Node.ComputerName2
         }
 
-        xADComputer 'RemoveComputerAccount3'
+        ADComputer 'RemoveComputerAccount3'
         {
             Ensure       = 'Absent'
             ComputerName = $Node.ComputerName3
         }
 
-        xADOrganizationalUnit 'RemoveGlobal'
+        ADOrganizationalUnit 'RemoveGlobal'
         {
             Ensure = 'Absent'
             Name   = $Node.OrganizationalUnitName

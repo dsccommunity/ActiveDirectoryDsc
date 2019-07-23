@@ -47,7 +47,7 @@ Configuration NewGroup_Config
 
     Node localhost
     {
-        xADGroup 'ExampleGroup'
+        ADGroup 'ExampleGroup'
         {
             GroupName   = $GroupName
             GroupScope  = $Scope

@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADRecycleBin'
+$script:dscResourceName = 'MSFT_ADRecycleBin'
 
 #region HEADER
 
@@ -83,7 +83,7 @@ try
             DomainNamingMaster = "dc01.$forestFQDN"
         }
 
-        Describe 'MSFT_xADRecycleBin\Get-TargetResource' {
+        Describe 'MSFT_ADRecycleBin\Get-TargetResource' {
             Mock -CommandName Get-ADRootDSE -MockWith { $mockRootDSE }
 
             Context 'When Recycle Bin feature is installed' {
@@ -145,7 +145,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADRecycleBin\Test-TargetResource' {
+        Describe 'MSFT_ADRecycleBin\Test-TargetResource' {
             Mock -CommandName Get-ADRootDSE -MockWith { $mockRootDSE }
 
             Context 'When Recycle Bin feature is installed' {
@@ -199,7 +199,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADRecycleBin\Set-TargetResource' {
+        Describe 'MSFT_ADRecycleBin\Set-TargetResource' {
             Mock -CommandName Enable-ADOptionalFeature
 
             Context 'When minimum forest level is too low' {

@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADDomainDefaultPasswordPolicy'
+$script:dscResourceName = 'MSFT_ADDomainDefaultPasswordPolicy'
 
 #region HEADER
 
@@ -61,7 +61,7 @@ try
         }
 
         #region Function Get-TargetResource
-        Describe 'xADDomainDefaultPasswordPolicy\Get-TargetResource' {
+        Describe 'ADDomainDefaultPasswordPolicy\Get-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
@@ -116,7 +116,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADDomainDefaultPasswordPolicy\Test-TargetResource' {
+        Describe 'ADDomainDefaultPasswordPolicy\Test-TargetResource' {
             $testDomainName = 'contoso.com'
             $testDefaultParams = @{
                 DomainName = $testDomainName
@@ -204,7 +204,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADDomainDefaultPasswordPolicy\Set-TargetResource' {
+        Describe 'ADDomainDefaultPasswordPolicy\Set-TargetResource' {
             $testDomainName = 'contoso.com'
             $testDefaultParams = @{
                 DomainName = $testDomainName

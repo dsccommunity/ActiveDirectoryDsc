@@ -8,7 +8,7 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADUser'
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADUser'
 
 # Create a property map that maps the DSC resource parameters to the
 # Active Directory user attributes.

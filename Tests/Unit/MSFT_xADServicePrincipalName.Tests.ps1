@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADServicePrincipalName'
+$script:dscResourceName = 'MSFT_ADServicePrincipalName'
 
 #region HEADER
 
@@ -37,7 +37,7 @@ try
 
     InModuleScope $script:dscResourceName {
         #region Function Get-TargetResource
-        Describe 'xADServicePrincipalName\Get-TargetResource' {
+        Describe 'ADServicePrincipalName\Get-TargetResource' {
             $testDefaultParameters = @{
                 ServicePrincipalName = 'HOST/demo'
             }
@@ -92,7 +92,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADServicePrincipalName\Test-TargetResource' {
+        Describe 'ADServicePrincipalName\Test-TargetResource' {
             $testDefaultParameters = @{
                 ServicePrincipalName = 'HOST/demo'
                 Account              = 'User'
@@ -177,7 +177,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADServicePrincipalName\Set-TargetResource' {
+        Describe 'ADServicePrincipalName\Set-TargetResource' {
             $testPresentParams = @{
                 Ensure               = 'Present'
                 ServicePrincipalName = 'HOST/demo'

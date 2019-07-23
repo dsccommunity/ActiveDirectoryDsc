@@ -31,7 +31,7 @@ Configuration DelegateFullControl_Config
 
     Node localhost
     {
-        xADObjectPermissionEntry 'ADObjectPermissionEntry'
+        ADObjectPermissionEntry 'ADObjectPermissionEntry'
         {
             Ensure                             = 'Present'
             Path                               = 'CN=ROLE01,CN=Computers,DC=contoso,DC=com'

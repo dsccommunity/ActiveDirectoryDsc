@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADKDSKey'
+$script:dscResourceName = 'MSFT_ADKDSKey'
 
 #region HEADER
 
@@ -153,7 +153,7 @@ try
         )
 
         #region Function Assert-HasDomainAdminRights
-        Describe -Name 'MSFT_xADKDSKey\Assert-HasDomainAdminRights' {
+        Describe -Name 'MSFT_ADKDSKey\Assert-HasDomainAdminRights' {
             Context 'When Assert-HasDomainAdminRights returns true' {
                 Context 'When the user has proper permissions' {
                     BeforeAll {
@@ -243,7 +243,7 @@ try
         #endregion Function Assert-HasDomainAdminRights
 
         #region Function Get-ADRootDomainDN
-        Describe -Name 'MSFT_xADKDSKey\Get-ADRootDomainDN' {
+        Describe -Name 'MSFT_ADKDSKey\Get-ADRootDomainDN' {
             BeforeAll {
                 Mock -CommandName New-Object -MockWith {
                     $object = [PSCustomObject] @{}
@@ -260,7 +260,7 @@ try
         #endregion Function Get-ADRootDomainDN
 
         #region Function Get-TargetResource
-        Describe -Name 'MSFT_xADKDSKey\Get-TargetResource' -Tag 'Get' {
+        Describe -Name 'MSFT_ADKDSKey\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
                 Mock -CommandName Assert-Module -ParameterFilter {
                     $ModuleName -eq 'ActiveDirectory'
@@ -434,7 +434,7 @@ try
         #endregion Function Get-TargetResource
 
         #region Function Compare-TargetResourceState
-        Describe -Name 'MSFT_xADKDSKey\Compare-TargetResourceState' -Tag 'Compare' {
+        Describe -Name 'MSFT_ADKDSKey\Compare-TargetResourceState' -Tag 'Compare' {
             BeforeAll {
                 Mock -CommandName Get-TargetResource -ParameterFilter {
                     $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
@@ -528,7 +528,7 @@ try
         #endregion Function Compare-TargetResourceState
 
         #region Function Test-TargetResource
-        Describe -Name 'MSFT_xADKDSKey\Test-TargetResource' -Tag 'Test' {
+        Describe -Name 'MSFT_ADKDSKey\Test-TargetResource' -Tag 'Test' {
             Context -Name "When the system is in the desired state and 'Ensure' is 'Present'" {
                 It "Should pass when the Parameters are properly set" {
                     Mock -CommandName Compare-TargetResourceState -MockWith {
@@ -620,7 +620,7 @@ try
         #endregion Function Test-TargetResource
 
         #region Function Set-TargetResource
-        Describe -Name 'MSFT_xADKDSKey\Set-TargetResource' -Tag 'Set' {
+        Describe -Name 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 Mock -CommandName Add-KDSRootKey
                 Mock -CommandName Remove-ADObject

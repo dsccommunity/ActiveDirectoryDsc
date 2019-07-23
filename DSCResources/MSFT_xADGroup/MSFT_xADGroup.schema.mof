@@ -1,5 +1,5 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xADGroup")]
-class MSFT_xADGroup : OMI_BaseResource
+[ClassVersion("1.0.1.0"), FriendlyName("ADGroup")]
+class MSFT_ADGroup : OMI_BaseResource
 {
     [Key, Description("Name of the Active Directory group.")] String GroupName;
     [Write, Description("Active Directory group scope. Default value is 'Group'."), ValueMap{"DomainLocal","Global","Universal"}, Values{"DomainLocal","Global","Universal"}] String GroupScope;

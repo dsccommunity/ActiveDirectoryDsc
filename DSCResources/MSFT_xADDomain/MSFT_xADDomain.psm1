@@ -4,20 +4,20 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomain'
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomain'
 
 <#
     .SYNOPSIS
-        Retrieves the name of the file that tracks the status of the xADDomain resource with the
+        Retrieves the name of the file that tracks the status of the ADDomain resource with the
         specified domain name.
 
     .PARAMETER DomainName
-        The domain name of the xADDomain resource to retrieve the tracking file name of.
+        The domain name of the ADDomain resource to retrieve the tracking file name of.
 
     .NOTES
         The tracking file is currently output to the environment's temp directory.
 
-        This file is NOT removed when a configuration completes, so if another call to a xADDomain
+        This file is NOT removed when a configuration completes, so if another call to a ADDomain
         resource with the same domain name occurs in the same environment, this file will already
         be present.
 
@@ -30,7 +30,7 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomain'
         If in the future this functionality needs to change so that future configurations are not
         affected, $env:temp should be changed to the resource's cache location which is removed
         after each configuration.
-        ($env:systemRoot\system32\Configuration\BuiltinProvCache\MSFT_xADDomain)
+        ($env:systemRoot\system32\Configuration\BuiltinProvCache\MSFT_ADDomain)
 #>
 function Get-TrackingFilename
 {
@@ -43,7 +43,7 @@ function Get-TrackingFilename
         $DomainName
     )
 
-    return Join-Path -Path ($env:temp) -ChildPath ('{0}.xADDomain.completed' -f $DomainName)
+    return Join-Path -Path ($env:temp) -ChildPath ('{0}.ADDomain.completed' -f $DomainName)
 }
 
 <#
@@ -171,7 +171,7 @@ function Get-TargetResource
             <#
                 No need to check whether the node is actually a domain controller. If we don't throw an exception,
                 the domain is already UP - and this resource shouldn't run. Domain controller functionality
-                should be checked by the xADDomainController resource?
+                should be checked by the ADDomainController resource?
             #>
             Write-Verbose ($script:localizedData.DomainFound -f $domain.DnsRoot)
 

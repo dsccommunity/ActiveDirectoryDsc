@@ -5,7 +5,7 @@ if ($env:APPVEYOR -eq $true)
 }
 
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceFriendlyName = 'xADObjectEnabledState'
+$script:dscResourceFriendlyName = 'ADObjectEnabledState'
 $script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
 
 #region HEADER

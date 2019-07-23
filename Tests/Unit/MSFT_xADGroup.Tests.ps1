@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADGroup'
+$script:dscResourceName = 'MSFT_ADGroup'
 
 #region HEADER
 
@@ -98,7 +98,7 @@ try
         )
 
         #region Function Get-TargetResource
-        Describe 'xADGroup\Get-TargetResource' {
+        Describe 'ADGroup\Get-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It 'Calls "Assert-Module" to check AD module is installed' {
@@ -164,7 +164,7 @@ try
         #end region
 
         #region Function Test-TargetResource
-        Describe 'xADGroup\Test-TargetResource' {
+        Describe 'ADGroup\Test-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             foreach ($attribute in @('SamAccountName','DistinguishedName','ObjectGUID','SID'))
@@ -332,7 +332,7 @@ try
         #end region
 
         #region Function Set-TargetResource
-        Describe 'xADGroup\Set-TargetResource' {
+        Describe 'ADGroup\Set-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
             It "Calls 'New-ADGroup' when 'Ensure' is 'Present' and the group does not exist" {

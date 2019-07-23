@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADObjectPermissionEntry'
+$script:dscResourceName = 'MSFT_ADObjectPermissionEntry'
 
 #region HEADER
 
@@ -93,7 +93,7 @@ try
         #endregion
 
         #region Function Get-TargetResource
-        Describe 'xADObjectPermissionEntry\Get-TargetResource' {
+        Describe 'ADObjectPermissionEntry\Get-TargetResource' {
             Mock -CommandName 'Assert-ADPSDrive'
 
             Context 'When the desired ace is present' {
@@ -157,7 +157,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADObjectPermissionEntry\Test-TargetResource' {
+        Describe 'ADObjectPermissionEntry\Test-TargetResource' {
             Mock -CommandName 'Assert-ADPSDrive' { }
 
             Context 'When the desired ace is present' {
@@ -213,7 +213,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADObjectPermissionEntry\Set-TargetResource' {
+        Describe 'ADObjectPermissionEntry\Set-TargetResource' {
             Mock -CommandName 'Assert-ADPSDrive'
 
             Context 'When the desired ace is present' {

@@ -39,7 +39,7 @@ Configuration AddComputerAccountAndCreateODJRequest_Config
 
     node localhost
     {
-        xADComputer 'CreateComputerAccount'
+        ADComputer 'CreateComputerAccount'
         {
             DomainController              = 'DC01'
             ComputerName                  = 'NANO-200'

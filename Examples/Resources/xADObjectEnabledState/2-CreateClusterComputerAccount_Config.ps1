@@ -39,7 +39,7 @@ Configuration CreateClusterComputerAccount_Config
 
     node localhost
     {
-        xADComputer 'ClusterAccount'
+        ADComputer 'ClusterAccount'
         {
             ComputerName      = 'CLU_CNO01'
             EnabledOnCreation = $false
@@ -51,10 +51,10 @@ Configuration CreateClusterComputerAccount_Config
             StaticIPAddress               = '192.168.100.20/24'
             DomainAdministratorCredential = $DomainAdministratorCredential
 
-            DependsOn                     = '[xADComputer]ClusterAccount'
+            DependsOn                     = '[ADComputer]ClusterAccount'
         }
 
-        xADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
+        ADObjectEnabledState 'EnforceEnabledPropertyToEnabled'
         {
             Identity    = 'CLU_CNO01'
             ObjectClass = 'Computer'

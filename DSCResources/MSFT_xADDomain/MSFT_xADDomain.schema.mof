@@ -1,5 +1,5 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xADDomain")]
-class MSFT_xADDomain : OMI_BaseResource
+[ClassVersion("1.0.1.0"), FriendlyName("ADDomain")]
+class MSFT_ADDomain : OMI_BaseResource
 {
     [Key, Description("The fully qualified domain name (FQDN) of the new domain.")] String DomainName;
     [Required, Description("Credentials used to query for domain existence."), EmbeddedInstance("MSFT_Credential")] String DomainAdministratorCredential;

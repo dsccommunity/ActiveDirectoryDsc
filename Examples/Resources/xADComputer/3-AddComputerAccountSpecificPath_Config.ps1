@@ -38,7 +38,7 @@ Configuration AddComputerAccountSpecificPath_Config
 
     node localhost
     {
-        xADComputer 'CreateComputerAccount'
+        ADComputer 'CreateComputerAccount'
         {
             DomainController              = 'DC01'
             ComputerName                  = 'SQL01'

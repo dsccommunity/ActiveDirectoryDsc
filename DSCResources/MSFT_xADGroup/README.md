@@ -1,6 +1,6 @@
 # Description
 
-The xADGroup DSC resource will manage groups within Active Directory.
+The ADGroup DSC resource will manage groups within Active Directory.
 
 ## Requirements
 

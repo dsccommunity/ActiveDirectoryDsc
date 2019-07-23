@@ -50,7 +50,7 @@ Configuration NewChildDomain_Config
             Ensure = 'Present'
         }
 
-        xADDomain $Node.DomainName
+        ADDomain $Node.DomainName
         {
             DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $DomainAdministratorCredential

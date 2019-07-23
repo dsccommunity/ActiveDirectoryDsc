@@ -62,7 +62,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerMinimal'
+        ADDomainController 'DomainControllerMinimal'
         {
             DomainName                    = 'contoso.com'
             DomainAdministratorCredential = $DomainAdministratorCredential

@@ -44,7 +44,7 @@ Configuration NewOneWayTrust_Config
 
     node localhost
     {
-        xADDomainTrust 'Trust'
+        ADDomainTrust 'Trust'
         {
             Ensure                              = 'Present'
             SourceDomainName                    = $SourceDomain

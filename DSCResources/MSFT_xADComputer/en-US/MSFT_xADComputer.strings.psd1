@@ -1,6 +1,6 @@
 # culture="en-US"
 ConvertFrom-StringData @'
-    EnabledDeprecatedMessage               = DEPRECATED parameter Enabled is being used in this configuration. The parameter Enabled no longer sets or enforces the Enabled property. Please see more information at https://github.com/PowerShell/ActiveDirectoryDsc/blob/master/README.md#xadcomputer. (ADC0001)
+    EnabledDeprecatedMessage               = DEPRECATED parameter Enabled is being used in this configuration. The parameter Enabled no longer sets or enforces the Enabled property. Please see more information at https://github.com/PowerShell/ActiveDirectoryDsc/blob/master/README.md#Adcomputer. (ADC0001)
     RetrievingComputerAccount              = Retrieving the information about the computer account '{0}' from Active Directory. (ADC0002)
     ComputerAccountIsPresent               = The computer account '{0}' is present in Active Directory. (ADC0003)
     ComputerAccountIsAbsent                = The computer account '{0}' is absent from Active Directory. (ADC0004)

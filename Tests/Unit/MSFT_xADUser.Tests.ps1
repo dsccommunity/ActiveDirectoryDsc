@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADUser'
+$script:dscResourceName = 'MSFT_ADUser'
 
 #region HEADER
 
@@ -73,7 +73,7 @@ try
         $testArrayProperties = @('ServicePrincipalNames', 'ProxyAddresses')
 
         #region Function Get-TargetResource
-        Describe 'xADUser\Get-TargetResource' {
+        Describe 'ADUser\Get-TargetResource' {
             It "Returns a 'System.Collections.Hashtable' object type" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
@@ -152,7 +152,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADUser\Test-TargetResource' {
+        Describe 'ADUser\Test-TargetResource' {
             It "Passes when user account does not exist and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
@@ -525,7 +525,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADUser\Set-TargetResource' {
+        Describe 'ADUser\Set-TargetResource' {
             It "Calls 'New-ADUser' when 'Ensure' is 'Present' and the account does not exist" {
                 $newUserName = 'NewUser'
                 $newAbsentParams = $testAbsentParams.Clone()
@@ -890,7 +890,7 @@ try
         #endregion
 
         #region Function Assert-TargetResource
-        Describe 'xADUser\Assert-Parameters' {
+        Describe 'ADUser\Assert-Parameters' {
             It 'Should not throw when both parameters PasswordNeverExpires and CannotChangePassword are specified' {
                 { Assert-Parameters -PasswordNeverExpires $true -CannotChangePassword $true } | Should -Not -Throw
             }

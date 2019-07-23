@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xADReplicationSite'
+$script:dscResourceName = 'MSFT_ADReplicationSite'
 
 #region HEADER
 
@@ -76,7 +76,7 @@ try
         # #endregion
 
         #region Function Get-TargetResource
-        Describe 'xADReplicationSite\Get-TargetResource' {
+        Describe 'ADReplicationSite\Get-TargetResource' {
             It 'Should return a "System.Collections.Hashtable" object type' {
 
                 # Arrange
@@ -118,7 +118,7 @@ try
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'xADReplicationSite\Test-TargetResource' {
+        Describe 'ADReplicationSite\Test-TargetResource' {
             It 'Should return a "System.Boolean" object type' {
 
                 # Arrange
@@ -183,7 +183,7 @@ try
         #endregion
 
         #region Function Set-TargetResource
-        Describe 'xADReplicationSite\Set-TargetResource' {
+        Describe 'ADReplicationSite\Set-TargetResource' {
             It 'Should add a new site' {
 
                 # Arrange
