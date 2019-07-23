@@ -45,7 +45,7 @@ from the creation time.
 
 Configuration CreateKDSRootKey_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -67,7 +67,7 @@ Use with caution
 
 Configuration CreateKDSRootKeyInPast_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -88,7 +88,7 @@ their passwords and it may cause services to fail.
 
 Configuration CreateKDSRootKeyRemoveLastKey_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

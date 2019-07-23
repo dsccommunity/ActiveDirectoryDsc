@@ -48,7 +48,7 @@ in the configuration.
 
 Configuration ReplaceForestProperties_Config
 {
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node $AllNodes.NodeName
     {
@@ -81,7 +81,7 @@ existing suffixes in the forest.
 
 Configuration AddRemoveForestProperties_Config
 {
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {

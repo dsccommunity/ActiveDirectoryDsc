@@ -44,7 +44,7 @@ enforcing the account to be enabled.
 
 Configuration EnabledComputerAccount_Config
 {
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -81,7 +81,7 @@ Configuration CreateClusterComputerAccount_Config
         $DomainAdministratorCredential
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
     Import-DscResource -ModuleName xFailoverCluster
 
     node localhost
@@ -127,7 +127,7 @@ Configuration EnabledPrestagedClusterComputerAccount_Config
         $DomainAdministratorCredential
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
     Import-DscResource -ModuleName xFailoverCluster
 
     node localhost

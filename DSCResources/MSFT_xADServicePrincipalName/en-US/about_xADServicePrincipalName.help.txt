@@ -27,7 +27,7 @@ This configuration will add a Service Principal Name to a user account.
 
 Configuration AddUserServicePrincipalName_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -45,7 +45,7 @@ This configuration will add a Service Principal Name to a computer account.
 
 Configuration AddComputerServicePrincipalName_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

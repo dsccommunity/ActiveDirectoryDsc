@@ -55,7 +55,7 @@ else
 #>
 Configuration MSFT_xADComputer_CreateComputerAccount1_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -76,7 +76,7 @@ Configuration MSFT_xADComputer_CreateComputerAccount1_Config
 #>
 Configuration MSFT_xADComputer_RemoveComputerAccount1_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -95,7 +95,7 @@ Configuration MSFT_xADComputer_RemoveComputerAccount1_Config
 #>
 Configuration MSFT_xADComputer_RestoreComputerAccount1_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -115,7 +115,7 @@ Configuration MSFT_xADComputer_RestoreComputerAccount1_Config
 #>
 Configuration MSFT_xADComputer_UpdateComputerAccount1_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -150,7 +150,7 @@ Configuration MSFT_xADComputer_UpdateComputerAccount1_Config
 #>
 Configuration MSFT_xADComputer_CreateComputerAccount2Disabled_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -174,7 +174,7 @@ Configuration MSFT_xADComputer_CreateComputerAccount2Disabled_Config
 #>
 Configuration MSFT_xADComputer_CreateComputerAccount3WithOfflineDomainJoin_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -192,7 +192,7 @@ Configuration MSFT_xADComputer_CreateComputerAccount3WithOfflineDomainJoin_Confi
 #>
 Configuration MSFT_xADComputer_CleanUp_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
 
     node $AllNodes.NodeName

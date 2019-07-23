@@ -70,7 +70,7 @@ Configuration NewForest_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node $AllNodes.NodeName
     {
@@ -122,7 +122,7 @@ Configuration NewChildDomain_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node $AllNodes.NodeName
     {
@@ -186,7 +186,7 @@ Configuration NewForestWithParentAndChildDomain_Config
         $NewADUserCred
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     Node $AllNodes.Where{ $_.Role -eq 'Parent DC' }.NodeName
     {
@@ -307,7 +307,7 @@ Configuration NewDomainWithTwoDCs_Config
         $NewADUserCred
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     Node $AllNodes.Where{ $_.Role -eq 'Primary DC' }.NodeName
     {

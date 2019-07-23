@@ -45,7 +45,7 @@ Configuration EnableADRecycleBin_Config
         $EACredential
     )
 
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

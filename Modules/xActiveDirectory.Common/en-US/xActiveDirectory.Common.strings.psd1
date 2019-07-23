@@ -1,4 +1,4 @@
-# Localized resources for helper module xActiveDirectory.Common.
+# Localized resources for helper module ActiveDirectoryDsc.Common.
 
 ConvertFrom-StringData @'
     WasExpectingDomainController        = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADCOMMON0001)

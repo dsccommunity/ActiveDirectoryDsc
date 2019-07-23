@@ -43,7 +43,7 @@ This configuration will create an AD Replication Site Link.
 
 Configuration CreateReplicationSiteLink_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -64,7 +64,7 @@ This configuration will modify an existing AD Replication Site Link.
 
 Configuration ModifyExistingReplicationSiteLink_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

@@ -109,7 +109,7 @@ Configuration AddComputerAccount_Config
         $DomainAdministratorCredential
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -141,7 +141,7 @@ Configuration AddComputerAccountDisabled_Config
         $DomainAdministratorCredential
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -169,7 +169,7 @@ Configuration AddComputerAccountSpecificPath_Config
         $DomainAdministratorCredential
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -200,7 +200,7 @@ Configuration AddComputerAccountAndCreateODJRequest_Config
         $DomainAdministratorCredential
     )
 
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {

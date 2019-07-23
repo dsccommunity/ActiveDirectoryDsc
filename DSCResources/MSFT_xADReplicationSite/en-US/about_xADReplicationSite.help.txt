@@ -28,7 +28,7 @@ called 'Seattle'.
 
 Configuration CreateADReplicationSite_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -48,7 +48,7 @@ this site instead of create a new one.
 
 Configuration CreateADReplicationSiteRenameDefault_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -68,7 +68,7 @@ called 'Cupertino'.
 
 Configuration RemoveADReplicationSite_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

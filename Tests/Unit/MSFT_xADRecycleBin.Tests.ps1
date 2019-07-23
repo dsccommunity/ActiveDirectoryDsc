@@ -1,4 +1,4 @@
-$script:dscModuleName = 'xActiveDirectory'
+$script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceName = 'MSFT_xADRecycleBin'
 
 #region HEADER

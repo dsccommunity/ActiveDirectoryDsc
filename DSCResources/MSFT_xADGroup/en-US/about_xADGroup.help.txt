@@ -101,7 +101,7 @@ Configuration NewGroup_Config
         $Description
     )
 
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -122,7 +122,7 @@ This configuration will create a new domain-local group with three members.
 
 Configuration NewGroupWithMembers_Config
 {
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -142,7 +142,7 @@ three members in different domains.
 
 Configuration NewGroupMultiDomainMembers_Config
 {
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {

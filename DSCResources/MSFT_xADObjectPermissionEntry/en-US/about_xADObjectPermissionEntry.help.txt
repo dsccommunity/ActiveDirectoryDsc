@@ -56,7 +56,7 @@ can control the roles AD objects.
 
 Configuration DelegateFullControl_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -82,7 +82,7 @@ may get created.
 
 Configuration CreateDeleteComputerObject_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -108,7 +108,7 @@ an OU and any sub-OUs that may get created.
 
 Configuration ReadWriteComputerObjectProperties_Config
 {
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

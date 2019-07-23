@@ -64,7 +64,7 @@ Configuration CreateADOU_Config
         $Description = ''
     )
 
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

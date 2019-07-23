@@ -4,7 +4,7 @@ if ($env:APPVEYOR -eq $true)
     return
 }
 
-$script:dscModuleName = 'xActiveDirectory'
+$script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceFriendlyName = 'xADComputer'
 $script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
 

@@ -1,8 +1,8 @@
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common'
-Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'xActiveDirectory.Common.psm1')
+$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
+Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xADDomainTrust'
 
@@ -476,7 +476,7 @@ function Compare-TargetResourceState
 
     .NOTES
         This is a wrapper to enable unit testing of this resource.
-        see issue https://github.com/PowerShell/xActiveDirectory/issues/324
+        see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
         for more information.
 #>
 function Get-ActiveDirectoryDomain
@@ -505,7 +505,7 @@ function Get-ActiveDirectoryDomain
 
     .NOTES
         This is a wrapper to enable unit testing of this resource.
-        see issue https://github.com/PowerShell/xActiveDirectory/issues/324
+        see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
         for more information.
 #>
 function Get-ActiveDirectoryForest

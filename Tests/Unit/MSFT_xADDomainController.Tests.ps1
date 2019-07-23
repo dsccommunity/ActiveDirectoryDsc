@@ -2,7 +2,7 @@
 param ()
 
 #region HEADER
-$script:dscModuleName = 'xActiveDirectory'
+$script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceName = 'MSFT_xADDomainController'
 
 # Unit Test Template Version: 1.2.4

@@ -31,7 +31,7 @@ else
 #>
 Configuration MSFT_xADObjectEnabledState_Prerequisites_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -49,7 +49,7 @@ Configuration MSFT_xADObjectEnabledState_Prerequisites_Config
 #>
 Configuration MSFT_xADObjectEnabledState_DisableComputerAccount_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -69,7 +69,7 @@ Configuration MSFT_xADObjectEnabledState_DisableComputerAccount_Config
 #>
 Configuration MSFT_xADObjectEnabledState_EnableComputerAccount_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -88,7 +88,7 @@ Configuration MSFT_xADObjectEnabledState_EnableComputerAccount_Config
 #>
 Configuration MSFT_xADObjectEnabledState_CleanUp_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {

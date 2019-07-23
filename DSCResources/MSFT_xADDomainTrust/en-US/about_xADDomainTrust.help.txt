@@ -57,7 +57,7 @@ Configuration NewOneWayTrust_Config
         $TargetDomainAdminCred
     )
 
-    Import-DscResource -module xActiveDirectory
+    Import-DscResource -module ActiveDirectoryDsc
 
     node localhost
     {

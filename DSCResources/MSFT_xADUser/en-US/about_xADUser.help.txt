@@ -265,7 +265,7 @@ Configuration CreateUserAndManagePassword_Config
         $Password
     )
 
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
@@ -296,7 +296,7 @@ Configuration CreateUserAndIgnorePasswordChanges_Config
         $Password
     )
 
-    Import-DscResource -Module xActiveDirectory
+    Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {

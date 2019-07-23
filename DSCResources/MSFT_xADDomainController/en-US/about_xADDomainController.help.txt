@@ -86,7 +86,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -141,7 +141,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -201,7 +201,7 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -257,7 +257,7 @@ Configuration AddReadOnlyDomainController_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {

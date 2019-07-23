@@ -53,7 +53,7 @@ else
 #>
 Configuration MSFT_xADDomainTrust_CreateDomainTrust_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -77,7 +77,7 @@ Configuration MSFT_xADDomainTrust_CreateDomainTrust_Config
 #>
 Configuration MSFT_xADDomainTrust_ChangeDomainTrustDirection_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -101,7 +101,7 @@ Configuration MSFT_xADDomainTrust_ChangeDomainTrustDirection_Config
 #>
 Configuration MSFT_xADDomainTrust_RemoveDomainTrust_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -126,7 +126,7 @@ Configuration MSFT_xADDomainTrust_RemoveDomainTrust_Config
 #>
 Configuration MSFT_xADDomainTrust_CreateForestTrust_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -150,7 +150,7 @@ Configuration MSFT_xADDomainTrust_CreateForestTrust_Config
 #>
 Configuration MSFT_xADDomainTrust_ChangeForestTrustDirection_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {
@@ -174,7 +174,7 @@ Configuration MSFT_xADDomainTrust_ChangeForestTrustDirection_Config
 #>
 Configuration MSFT_xADDomainTrust_RemoveForestTrust_Config
 {
-    Import-DscResource -ModuleName 'xActiveDirectory'
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
 
     node $AllNodes.NodeName
     {

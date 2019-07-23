@@ -1,8 +1,8 @@
-# Import the xActiveDirectory.Common module to test
+# Import the ActiveDirectoryDsc.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\xActiveDirectory.Common'
+$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\ActiveDirectoryDsc.Common'
 
-Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'xActiveDirectory.Common.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common.psm1') -Force
 
 # If one type does not exist, it's assumed the other ones does not exist either.
 if (-not ('Microsoft.DirectoryServices.Deployment.Types.ForestMode' -as [Type]))
@@ -16,8 +16,8 @@ if (-not ('Microsoft.ActiveDirectory.Management.ADForestMode' -as [Type]))
     Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.ActiveDirectory.Management.cs')
 }
 
-InModuleScope 'xActiveDirectory.Common' {
-    Describe 'xActiveDirectory.Common\Test-DscParameterState' -Tag TestDscParameterState {
+InModuleScope 'ActiveDirectoryDsc.Common' {
+    Describe 'ActiveDirectoryDsc.Common\Test-DscParameterState' -Tag TestDscParameterState {
         Context 'When passing values' {
             It 'Should return true for two identical tables' {
                 $mockDesiredValues = @{ Example = 'test' }
@@ -369,7 +369,7 @@ InModuleScope 'xActiveDirectory.Common' {
 
         Assert-VerifiableMock
     }
-    Describe 'xActiveDirectory.Common\Get-LocalizedData' {
+    Describe 'ActiveDirectoryDsc.Common\Get-LocalizedData' {
         $mockTestPath = {
             return $mockTestPathReturnValue
         }
@@ -463,7 +463,7 @@ InModuleScope 'xActiveDirectory.Common' {
         Assert-VerifiableMock
     }
 
-    Describe 'xActiveDirectory.Common\New-InvalidResultException' {
+    Describe 'ActiveDirectoryDsc.Common\New-InvalidResultException' {
         Context 'When calling with Message parameter only' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'
@@ -487,7 +487,7 @@ InModuleScope 'xActiveDirectory.Common' {
         Assert-VerifiableMock
     }
 
-    Describe 'xActiveDirectory.Common\New-ObjectNotFoundException' {
+    Describe 'ActiveDirectoryDsc.Common\New-ObjectNotFoundException' {
         Context 'When calling with Message parameter only' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'
@@ -511,7 +511,7 @@ InModuleScope 'xActiveDirectory.Common' {
         Assert-VerifiableMock
     }
 
-    Describe 'xActiveDirectory.Common\New-InvalidOperationException' {
+    Describe 'ActiveDirectoryDsc.Common\New-InvalidOperationException' {
         Context 'When calling with Message parameter only' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'
@@ -535,7 +535,7 @@ InModuleScope 'xActiveDirectory.Common' {
         Assert-VerifiableMock
     }
 
-    Describe 'xActiveDirectory.Common\New-InvalidArgumentException' {
+    Describe 'ActiveDirectoryDsc.Common\New-InvalidArgumentException' {
         Context 'When calling with both the Message and ArgumentName parameter' {
             It 'Should throw the correct error' {
                 $mockErrorMessage = 'Mocked error'
@@ -575,7 +575,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Resolve-DomainFQDN' {
+    Describe 'ActiveDirectoryDsc.Common\Resolve-DomainFQDN' {
         It 'Returns "DomainName" when "ParentDomainName" not supplied' {
             $testDomainName = 'contoso.com'
             $testParentDomainName = $null
@@ -595,7 +595,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Test-DomainMember' {
+    Describe 'ActiveDirectoryDsc.Common\Test-DomainMember' {
         It 'Returns "True" when domain member' {
             Mock -CommandName Get-CimInstance -MockWith {
                 return @{
@@ -618,7 +618,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Get-DomainName' {
+    Describe 'ActiveDirectoryDsc.Common\Get-DomainName' {
         It 'Returns expected domain name' {
             Mock -CommandName Get-CimInstance -MockWith {
                 return @{
@@ -631,7 +631,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Assert-Module' {
+    Describe 'ActiveDirectoryDsc.Common\Assert-Module' {
         BeforeAll {
             $testModuleName = 'TestModule'
         }
@@ -674,7 +674,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Get-ADObjectParentDN' {
+    Describe 'ActiveDirectoryDsc.Common\Get-ADObjectParentDN' {
         It 'Returns CN object parent path' {
             Get-ADObjectParentDN -DN 'CN=Administrator,CN=Users,DC=contoso,DC=com' | Should -Be 'CN=Users,DC=contoso,DC=com'
         }
@@ -684,7 +684,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Remove-DuplicateMembers' {
+    Describe 'ActiveDirectoryDsc.Common\Remove-DuplicateMembers' {
         It 'Removes one duplicate' {
             $members = Remove-DuplicateMembers -Members 'User1','User2','USER1'
 
@@ -710,7 +710,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Test-Members' {
+    Describe 'ActiveDirectoryDsc.Common\Test-Members' {
         It 'Passes when nothing is passed' {
             Test-Members -ExistingMembers $null | Should -Be $true
         }
@@ -862,7 +862,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Assert-MemberParameters' {
+    Describe 'ActiveDirectoryDsc.Common\Assert-MemberParameters' {
         It 'Should throw if parameter Members is specified but is empty' {
             {
                 Assert-MemberParameters -Members @()
@@ -894,7 +894,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\ConvertTo-Timespan' {
+    Describe 'ActiveDirectoryDsc.Common\ConvertTo-Timespan' {
         It "Returns 'System.TimeSpan' object type" {
             $testIntTimeSpan = 60
 
@@ -936,7 +936,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\ConvertFrom-Timespan' {
+    Describe 'ActiveDirectoryDsc.Common\ConvertFrom-Timespan' {
         It "Returns 'System.UInt32' object type" {
             $testIntTimeSpan = 60
             $testTimeSpan = New-TimeSpan -Seconds $testIntTimeSpan
@@ -983,7 +983,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Get-ADCommonParameters' {
+    Describe 'ActiveDirectoryDsc.Common\Get-ADCommonParameters' {
         It "Returns 'System.Collections.Hashtable' object type" {
             $testIdentity = 'contoso.com'
 
@@ -1118,7 +1118,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\ConvertTo-DeploymentForestMode' {
+    Describe 'ActiveDirectoryDsc.Common\ConvertTo-DeploymentForestMode' {
         It 'Converts an Microsoft.ActiveDirectory.Management.ForestMode to Microsoft.DirectoryServices.Deployment.Types.ForestMode' {
             ConvertTo-DeploymentForestMode -Mode Windows2012Forest | Should -BeOfType [Microsoft.DirectoryServices.Deployment.Types.ForestMode]
         }
@@ -1156,7 +1156,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\ConvertTo-DeploymentDomainMode' {
+    Describe 'ActiveDirectoryDsc.Common\ConvertTo-DeploymentDomainMode' {
         It 'Converts an Microsoft.ActiveDirectory.Management.DomainMode to Microsoft.DirectoryServices.Deployment.Types.DomainMode' {
             ConvertTo-DeploymentDomainMode -Mode Windows2012Domain | Should -BeOfType [Microsoft.DirectoryServices.Deployment.Types.DomainMode]
         }
@@ -1194,7 +1194,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Restore-ADCommonObject' {
+    Describe 'ActiveDirectoryDsc.Common\Restore-ADCommonObject' {
         $getAdObjectReturnValue = @(
             [PSCustomObject] @{
                 Deleted           = $true
@@ -1280,7 +1280,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Get-ADDomainNameFromDistinguishedName' {
+    Describe 'ActiveDirectoryDsc.Common\Get-ADDomainNameFromDistinguishedName' {
         $validDistinguishedNames = @(
             @{
                 DN     = 'CN=group1,OU=Group,OU=Wacken,DC=contoso,DC=com'
@@ -1321,7 +1321,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Add-ADCommonGroupMember' {
+    Describe 'ActiveDirectoryDsc.Common\Add-ADCommonGroupMember' {
         Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
         $memberData = @(
@@ -1446,7 +1446,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Get-DomainControllerObject' {
+    Describe 'ActiveDirectoryDsc.Common\Get-DomainControllerObject' {
         Context 'When domain name cannot be reached' {
             BeforeAll {
                 Mock -CommandName Get-ADDomainController -MockWith {
@@ -1543,7 +1543,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Test-IsDomainController' {
+    Describe 'ActiveDirectoryDsc.Common\Test-IsDomainController' {
         Context 'When operating system information says the node is a domain controller' {
             BeforeAll {
                 Mock -CommandName Get-CimInstance -MockWith {
@@ -1579,7 +1579,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Convert-PropertyMapToObjectProperties' {
+    Describe 'ActiveDirectoryDsc.Common\Convert-PropertyMapToObjectProperties' {
         Context 'When a property map should be converted to object properties' {
             BeforeAll {
                 $propertyMapValue = @(
@@ -1773,7 +1773,7 @@ InModuleScope 'xActiveDirectory.Common' {
         Assert-VerifiableMock
     }
 
-    Describe 'xActiveDirectory.Common\Compare-ResourcePropertyState' {
+    Describe 'ActiveDirectoryDsc.Common\Compare-ResourcePropertyState' {
         Context 'When one property is in desired state' {
             BeforeAll {
                 $mockCurrentValues = @{
@@ -2018,7 +2018,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Assert-ADPSDrive' {
+    Describe 'ActiveDirectoryDsc.Common\Assert-ADPSDrive' {
         Mock -CommandName Assert-Module
 
         Context 'When the AD PS Drive does not exist and the New-PSDrive function is successful' {
@@ -2086,7 +2086,7 @@ InModuleScope 'xActiveDirectory.Common' {
 
     }
 
-    Describe 'xActiveDirectory.Common\Test-ADReplicationSite' {
+    Describe 'ActiveDirectoryDsc.Common\Test-ADReplicationSite' {
         BeforeAll {
             function Get-ADDomainController
             {
@@ -2134,7 +2134,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\New-CimCredentialInstance' {
+    Describe 'ActiveDirectoryDsc.Common\New-CimCredentialInstance' {
         Context 'When creating a new MSFT_Credential CIM instance credential object' {
             BeforeAll {
                 $mockAdministratorUser = 'admin@contoso.com'
@@ -2155,7 +2155,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\Add-TypeAssembly' {
+    Describe 'ActiveDirectoryDsc.Common\Add-TypeAssembly' {
         Context 'When assembly fails to load' {
             BeforeAll {
                 Mock -CommandName Add-Type -MockWith {
@@ -2205,7 +2205,7 @@ InModuleScope 'xActiveDirectory.Common' {
         }
     }
 
-    Describe 'xActiveDirectory.Common\New-ADDirectoryContext' {
+    Describe 'ActiveDirectoryDsc.Common\New-ADDirectoryContext' {
         Context 'When creating a new Active Directory context' {
             BeforeAll {
                 # This credential object must be created before we mock New-Object.

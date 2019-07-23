@@ -2111,7 +2111,7 @@ function Get-ADDirectoryContext
     return New-Object @newObjectParameters
 }
 
-$script:localizedData = Get-LocalizedData -ResourceName 'xActiveDirectory.Common' -ScriptRoot $PSScriptRoot
+$script:localizedData = Get-LocalizedData -ResourceName 'ActiveDirectoryDsc.Common' -ScriptRoot $PSScriptRoot
 
 Export-ModuleMember -Function @(
     'New-InvalidArgumentException'

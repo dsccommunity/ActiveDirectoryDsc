@@ -5,8 +5,8 @@
 .COMPANYNAME Microsoft Corporation
 .COPYRIGHT (c) Microsoft Corporation. All rights reserved.
 .TAGS DSCConfiguration
-.LICENSEURI https://github.com/PowerShell/xActiveDirectory/blob/master/LICENSE
-.PROJECTURI https://github.com/PowerShell/xActiveDirectory
+.LICENSEURI https://github.com/PowerShell/ActiveDirectoryDsc/blob/master/LICENSE
+.PROJECTURI https://github.com/PowerShell/ActiveDirectoryDsc
 .ICONURI
 .EXTERNALMODULEDEPENDENCIES
 .REQUIREDSCRIPTS
@@ -15,7 +15,7 @@
 .PRIVATEDATA 2016-Datacenter,2016-Datacenter-Server-Core
 #>
 
-#Requires -module xActiveDirectory
+#Requires -module ActiveDirectoryDsc
 
 <#
     .DESCRIPTION
@@ -24,7 +24,7 @@
 #>
 Configuration EnabledComputerAccount_Config
 {
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
