@@ -52,7 +52,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -68,7 +68,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
             DomainAdministratorCredential = $DomainAdministratorCredential
             SafemodeAdministratorPassword = $DomainAdministratorCredential
 
-            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }

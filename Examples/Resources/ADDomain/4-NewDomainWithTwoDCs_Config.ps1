@@ -21,7 +21,7 @@
     .DESCRIPTION
         This configuration will create a highly available domain by adding
         a second domain controller to the newly created domain.
-        The xWaitForDomain resource is used to ensure that the domain is
+        The WaitForDomain resource is used to ensure that the domain is
         present before the second domain controller is added.
 #>
 
@@ -65,7 +65,7 @@ Configuration NewDomainWithTwoDCs_Config
             DependsOn                     = '[WindowsFeature]ADDSInstall'
         }
 
-        xWaitForADDomain 'DscForestWait'
+        WaitForADDomain 'DscForestWait'
         {
             DomainName           = $Node.DomainName
             DomainUserCredential = $domainCred
@@ -81,7 +81,7 @@ Configuration NewDomainWithTwoDCs_Config
             UserName                      = 'dummy'
             Password                      = $NewADUserCred
             Ensure                        = 'Present'
-            DependsOn                     = '[xWaitForADDomain]DscForestWait'
+            DependsOn                     = '[WaitForADDomain]DscForestWait'
         }
     }
 
@@ -93,7 +93,7 @@ Configuration NewDomainWithTwoDCs_Config
             Name   = 'AD-Domain-Services'
         }
 
-        xWaitForADDomain 'DscForestWait'
+        WaitForADDomain 'DscForestWait'
         {
             DomainName           = $Node.DomainName
             DomainUserCredential = $domainCred
@@ -107,7 +107,7 @@ Configuration NewDomainWithTwoDCs_Config
             DomainName                    = $Node.DomainName
             DomainAdministratorCredential = $domainCred
             SafemodeAdministratorPassword = $SafemodeAdministratorCred
-            DependsOn                     = '[xWaitForADDomain]DscForestWait'
+            DependsOn                     = '[WaitForADDomain]DscForestWait'
         }
     }
 }

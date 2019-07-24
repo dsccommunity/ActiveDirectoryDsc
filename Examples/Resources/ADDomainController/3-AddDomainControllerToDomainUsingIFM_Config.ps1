@@ -52,7 +52,7 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -69,7 +69,7 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
             SafemodeAdministratorPassword = $DomainAdministratorCredential
             InstallationMediaPath         = 'F:\IFM'
 
-            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }

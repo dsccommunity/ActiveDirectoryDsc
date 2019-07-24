@@ -104,7 +104,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -120,7 +120,7 @@ Configuration AddDomainControllerToDomainMinimal_Config
             DomainAdministratorCredential = $DomainAdministratorCredential
             SafemodeAdministratorPassword = $DomainAdministratorCredential
 
-            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }
@@ -159,7 +159,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -180,7 +180,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
             SiteName                      = 'Europe'
             IsGlobalCatalog               = $true
 
-            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }
@@ -219,7 +219,7 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -236,7 +236,7 @@ Configuration AddDomainControllerToDomainUsingIFM_Config
             SafemodeAdministratorPassword = $DomainAdministratorCredential
             InstallationMediaPath         = 'F:\IFM'
 
-            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }
@@ -275,7 +275,7 @@ Configuration AddReadOnlyDomainController_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -295,7 +295,7 @@ Configuration AddReadOnlyDomainController_Config
             AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
             DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
 
-            DependsOn                           = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                           = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }

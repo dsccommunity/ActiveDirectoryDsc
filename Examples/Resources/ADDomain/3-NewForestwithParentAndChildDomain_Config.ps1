@@ -63,7 +63,7 @@ Configuration NewForestWithParentAndChildDomain_Config
             DependsOn                     = '[WindowsFeature]ADDSInstall'
         }
 
-        xWaitForADDomain 'DscForestWait'
+        WaitForADDomain 'DscForestWait'
         {
             DomainName           = $Node.DomainName
             DomainUserCredential = $domainCred
@@ -79,7 +79,7 @@ Configuration NewForestWithParentAndChildDomain_Config
             UserName                      = 'dummy'
             Password                      = $NewADUserCred
             Ensure                        = 'Present'
-            DependsOn                     = '[xWaitForADDomain]DscForestWait'
+            DependsOn                     = '[WaitForADDomain]DscForestWait'
         }
 
     }
@@ -92,7 +92,7 @@ Configuration NewForestWithParentAndChildDomain_Config
             Name   = 'AD-Domain-Services'
         }
 
-        xWaitForADDomain 'DscForestWait'
+        WaitForADDomain 'DscForestWait'
         {
             DomainName           = $Node.ParentDomainName
             DomainUserCredential = $domainCred
@@ -107,7 +107,7 @@ Configuration NewForestWithParentAndChildDomain_Config
             ParentDomainName              = $Node.ParentDomainName
             DomainAdministratorCredential = $domainCred
             SafemodeAdministratorPassword = $SafemodeAdministratorCred
-            DependsOn                     = '[xWaitForADDomain]DscForestWait'
+            DependsOn                     = '[WaitForADDomain]DscForestWait'
         }
     }
 }

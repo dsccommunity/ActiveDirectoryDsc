@@ -1,6 +1,6 @@
 # Description
 
-The xWaitForADDomain resource is used to wait for Active Directory to become available.
+The WaitForADDomain resource is used to wait for Active Directory to become available.
 
 ## Requirements
 

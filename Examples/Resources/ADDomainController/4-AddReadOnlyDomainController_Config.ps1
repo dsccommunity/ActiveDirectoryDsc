@@ -51,7 +51,7 @@ Configuration AddReadOnlyDomainController_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -71,7 +71,7 @@ Configuration AddReadOnlyDomainController_Config
             AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
             DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
 
-            DependsOn                           = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                           = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }

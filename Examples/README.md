@@ -25,4 +25,4 @@ These are the links to the examples for each individual resource:
 - [ADReplicationSubnet](Resources/ADReplicationSubnet)
 - [ADServicePrincipalName](Resources/ADServicePrincipalName)
 - [ADUser](Resources/ADUser)
-- [xWaitForADDomain](Resources/xWaitForADDomain)
+- [WaitForADDomain](Resources/WaitForADDomain)

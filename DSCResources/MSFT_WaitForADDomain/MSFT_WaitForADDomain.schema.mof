@@ -1,5 +1,5 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xWaitForADDomain")]
-class MSFT_xWaitForADDomain : OMI_BaseResource
+[ClassVersion("1.0.1.0"), FriendlyName("WaitForADDomain")]
+class MSFT_WaitForADDomain : OMI_BaseResource
 {
     [Key, Description("The name of the Active Directory domain to wait for.")] String DomainName;
     [Write, Description("The user account credentials to use to perform this task."), EmbeddedInstance("MSFT_Credential")] String DomainUserCredential;

@@ -28,7 +28,7 @@ Configuration WaitForADDomain_Config
 
     Node localhost
     {
-        xWaitForADDomain 'contoso.com'
+        WaitForADDomain 'contoso.com'
         {
             DomainName           = 'contoso.com'
             RetryIntervalSec     = 60

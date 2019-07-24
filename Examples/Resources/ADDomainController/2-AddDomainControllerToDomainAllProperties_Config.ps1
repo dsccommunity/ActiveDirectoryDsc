@@ -52,7 +52,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -73,7 +73,7 @@ Configuration AddDomainControllerToDomainAllProperties_Config
             SiteName                      = 'Europe'
             IsGlobalCatalog               = $true
 
-            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }

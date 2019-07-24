@@ -1,5 +1,5 @@
 $script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_xWaitForADDomain'
+$script:dscResourceName = 'MSFT_WaitForADDomain'
 
 #region HEADER
 
@@ -60,7 +60,7 @@ try
         $fakeDomainObject = @{Name = $domainName}
 
         #region Function Get-TargetResource
-        Describe 'xWaitForADDomain\Get-TargetResource' {
+        Describe 'WaitForADDomain\Get-TargetResource' {
             It 'Returns a "System.Collections.Hashtable" object type' {
                 Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
                 $targetResource = Get-TargetResource @testParams
@@ -83,7 +83,7 @@ try
 
 
         #region Function Test-TargetResource
-        Describe 'xWaitForADDomain\Test-TargetResource' {
+        Describe 'WaitForADDomain\Test-TargetResource' {
             It 'Returns a "System.Boolean" object type' {
                 Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
                 $targetResource =  Test-TargetResource @testParams
@@ -104,7 +104,7 @@ try
 
 
         #region Function Set-TargetResource
-        Describe 'xWaitForADDomain\Set-TargetResource' {
+        Describe 'WaitForADDomain\Set-TargetResource' {
             BeforeEach{
                 $global:DSCMachineStatus = $null
             }

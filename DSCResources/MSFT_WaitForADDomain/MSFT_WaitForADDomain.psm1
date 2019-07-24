@@ -4,7 +4,7 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWaitForADDomain'
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_WaitForADDomain'
 
 <#
     .SYNOPSIS
@@ -137,7 +137,7 @@ function Set-TargetResource
 
     )
 
-    $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
+    $rebootLogFile = "$env:temp\WaitForADDomain_Reboot.tmp"
 
     for ($count = 0; $count -lt $RetryCount; $count++)
     {
@@ -238,7 +238,7 @@ function Test-TargetResource
 
     )
 
-    $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
+    $rebootLogFile = "$env:temp\WaitForADDomain_Reboot.tmp"
 
     $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
 
