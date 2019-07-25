@@ -1,8 +1,9 @@
-# Change log for xActiveDirectory
+# Change log for ActiveDirectoryDsc
 
 ## Unreleased
 
-- Changes to xActiveDirectory
+- Changes to ActiveDirectoryDsc
+  - BREAKING CHANGE: Renamed the xActiveDirectory to ActiveDirectoryDsc and removed the 'x' from all resource names.
   - Added a Requirements section to every DSC resource README with the
     bullet point stating "Target machine must be running Windows Server
     2008 R2 or later" ([issue #399](https://github.com/PowerShell/xActiveDirectory/issues/399)).
