@@ -19,7 +19,7 @@ out the [ActiveDirectoryDsc wiki](https://github.com/PowerShell/ActiveDirectoryD
 
 ### master
 
-[![Build status](https://ci.appveyor.com/api/projects/status/p4jejr60jrgb8ity/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/ActiveDirectoryDsc/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/x9haeb92nw57gjkh/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/ActiveDirectoryDsc/branch/master)
 [![codecov](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/master)
 
 This is the branch containing the latest release -
@@ -27,7 +27,7 @@ no contributions should be made directly to this branch.
 
 ### dev
 
-[![Build status](https://ci.appveyor.com/api/projects/status/p4jejr60jrgb8ity/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/ActiveDirectoryDsc/branch/dev)
+[![Build status](https://ci.appveyor.com/api/projects/status/x9haeb92nw57gjkh/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/ActiveDirectoryDsc/branch/dev)
 [![codecov](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/dev)
 
 This is the development branch
