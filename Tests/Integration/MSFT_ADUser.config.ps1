@@ -13,8 +13,9 @@ if (Test-Path -Path $configFile)
 }
 else
 {
-    $computersContainerDistinguishedName = (Get-ADDomain).ComputersContainer
-    if ($computersContainerDistinguishedName -match 'DC=.+')
+    $currentDomain = Get-ADDomain
+    $netBiosDomainName = $currentDomain.NetBIOSName
+    if ($currentDomain.ComputersContainer -match 'DC=.+')
     {
         $domainDistinguishedName = $matches[0]
     }
@@ -26,18 +27,20 @@ else
                 CertificateFile         = $env:DscPublicCertificatePath
 
                 DomainDistinguishedName = $domainDistinguishedName
-                UserNamePrefix          = 'DscUser'
-                DisplayNamePrefix       = 'Dsc User'
+                NetBIOSName             = $netBiosDomainName
+
+                UserName1               = 'DscTestUser1'
+                DisplayName1            = 'Dsc Test User 1'
 
                 Password                = New-Object `
                     -TypeName System.Management.Automation.PSCredential `
                     -ArgumentList @(
-                        'AnyName',
-                        (ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force)
-                    )
+                    'AnyName',
+                    (ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force)
+                )
 
-                AdministratorUserName  = ('{0}\Administrator' -f $domainDistinguishedName)
-                AdministratorPassword  = 'P@ssw0rd1'
+                AdministratorUserName   = ('{0}\Administrator' -f $netBiosDomainName)
+                AdministratorPassword   = 'P@ssw0rd1'
             }
         )
     }
@@ -45,7 +48,7 @@ else
 
 <#
     .SYNOPSIS
-        Creates a user account with a password that never expires.
+        Removes a user account.
 #>
 Configuration MSFT_ADUser_CreateUser1_Config
 {
@@ -55,21 +58,46 @@ Configuration MSFT_ADUser_CreateUser1_Config
     {
         ADUser 'Integration_Test'
         {
-            DomainName = $Node.DomainDistinguishedName
-            UserName = '{0}1' -f $Node.UserNamePrefix
-            UserPrincipalName = '{0}1' -f $Node.UserNamePrefix
-            DisplayName = '{0} 1' -f $Node.DisplayNamePrefix
+            # Using distinguished name for DomainName - Regression test for issue #451.
+            DomainName           = $Node.DomainDistinguishedName
+            UserName             = $Node.UserName1
+            UserPrincipalName    = $Node.UserName1
+            DisplayName          = $Node.DisplayName1
             PasswordNeverExpires = $true
-            Password = $Node.Password
+            Password             = $Node.Password
 
-            PasswordNeverResets = $true
-
-            DomainAdministratorCredential = New-Object `
+            Credential           = New-Object `
                 -TypeName System.Management.Automation.PSCredential `
                 -ArgumentList @(
-                    $Node.AdministratorUserName,
-                    (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-                )
+                $Node.AdministratorUserName,
+                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
+            )
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Creates a user account with a password that never expires.
+#>
+Configuration MSFT_ADUser_RemoveUser1_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADUser 'Integration_Test'
+        {
+            Ensure     = 'Absent'
+            DomainName = $Node.DomainDistinguishedName
+            UserName   = $Node.UserName1
+
+            Credential           = New-Object `
+                -TypeName System.Management.Automation.PSCredential `
+                -ArgumentList @(
+                $Node.AdministratorUserName,
+                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
+            )
         }
     }
 }
