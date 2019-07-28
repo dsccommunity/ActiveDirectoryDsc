@@ -115,26 +115,6 @@ try
                 }
             }
 
-            Context 'When the the parameter Enabled is used' {
-                BeforeAll {
-                    Mock -CommandName Get-ADComputer -MockWith $mockGetADComputer
-                    Mock -CommandName Write-Warning
-
-                    $getTargetResourceParameters = @{
-                        ComputerName = $mockComputerNamePresent
-                        Enabled      = $true
-                        Verbose      = $true
-                    }
-                }
-
-                It 'Should return the state as present, but write a warning message' {
-                    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                    $getTargetResourceResult.Ensure | Should -Be 'Present'
-
-                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
-                }
-            }
-
             Context 'When the system is in the desired state' {
                 Context 'When the computer account is absent in Active Directory' {
                     BeforeAll {
@@ -420,30 +400,6 @@ try
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                     }
                 }
-
-                Context 'When the the parameter Enabled is used' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                Ensure = 'Absent'
-                            }
-                        }
-
-                        Mock -CommandName Write-Warning
-
-                        $testTargetResourceParameters = @{
-                            ComputerName = $mockComputerNamePresent
-                            Enabled      = $true
-                            Verbose      = $true
-                        }
-                    }
-
-                    It 'Should return the state as present, but write a warning message' {
-                        { Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
-
-                        Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
-                    }
-                }
             }
 
             Context 'When the system is not in the desired state' {
@@ -671,31 +627,6 @@ try
                         SID                           = $mockSID
                         SamAccountName                = $mockSamAccountName
                     }
-                }
-            }
-
-            Context 'When the the parameter Enabled is used' {
-                BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith {
-                        return @{
-                            Ensure = 'Absent'
-                        }
-                    }
-
-                    Mock -CommandName Write-Warning
-
-                    $setTargetResourceParameters = @{
-                        Ensure       = 'Absent'
-                        ComputerName = $mockComputerNamePresent
-                        Enabled      = $true
-                        Verbose      = $true
-                    }
-                }
-
-                It 'Should return the state as present, but write a warning message' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
-
-                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
                 }
             }
 

@@ -49,10 +49,6 @@
     Write - String
     Specifies a description of the computer account.
 
-.PARAMETER Enabled
-    Write - Boolean
-    DEPRECATED - DO NOT USE. Please see the parameter EnabledOnCreation in this resource, and the resource ADObjectEnabledState on how to enforce the Enabled property. This parameter no longer sets or enforces the Enabled property. If this parameter is used then a warning message will be outputted saying that the Enabled parameter has been deprecated.
-
 .PARAMETER Manager
     Write - String
     Specifies the user or group Distinguished Name that manages the computer account. Valid values are the user's or group's DistinguishedName, ObjectGUID, SID or SamAccountName.
@@ -93,6 +89,10 @@
 .PARAMETER SamAccountName
     Read - String
     Returns the security identifier of the computer object.
+
+.PARAMETER Enabled
+    Read - Boolean
+    Returns $true if the computer object is enabled, otherwise it returns $false.
 
 .EXAMPLE 1
 
