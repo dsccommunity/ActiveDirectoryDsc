@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will wait for an AD Domain to respond before returning.
 #>
-
 Configuration WaitForADDomain_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

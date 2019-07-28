@@ -24,7 +24,6 @@
         unit. After the account is create an Offline Domain Join Request file
         is created to the specified path.
 #>
-
 Configuration AddComputerAccountAndCreateODJRequest_Config
 {
     param

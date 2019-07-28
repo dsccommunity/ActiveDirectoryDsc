@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will create a new domain-local group
 #>
-
 Configuration NewGroup_Config
 {
     param

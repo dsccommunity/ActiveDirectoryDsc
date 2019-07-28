@@ -22,7 +22,6 @@
         This configuration will set an Active Directory domain's default password
         policy to set the minimum password length and complexity.
 #>
-
 Configuration ConfigureDefaultPasswordPolicy_Config
 {
     Param

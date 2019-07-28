@@ -22,7 +22,6 @@
         This configuration will create a new child domain in an existing forest with
         a Domain Functional Level of Windows Server 2012R2.
 #>
-
 Configuration NewChildDomain_Config
 {
     param

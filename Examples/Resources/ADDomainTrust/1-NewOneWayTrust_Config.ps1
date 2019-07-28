@@ -22,7 +22,6 @@
         This configuration will create a new one way inbound trust between two
         domains.
 #>
-
 Configuration NewOneWayTrust_Config
 {
     param

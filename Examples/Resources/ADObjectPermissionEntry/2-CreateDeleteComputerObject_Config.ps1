@@ -23,7 +23,6 @@
         (CreateChild,DeleteChild) computer objects in an OU and any sub-OUs that
         may get created.
 #>
-
 Configuration CreateDeleteComputerObject_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will add a Service Principal Name to a user account.
 #>
-
 Configuration AddUserServicePrincipalName_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

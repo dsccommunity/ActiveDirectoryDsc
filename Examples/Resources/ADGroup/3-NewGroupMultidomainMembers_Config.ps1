@@ -22,7 +22,6 @@
         This configuration will create a new domain-local group in contoso with
         three members in different domains.
 #>
-
 Configuration NewGroupMultiDomainMembers_Config
 {
     Import-DscResource -ModuleName ActiveDirectoryDsc

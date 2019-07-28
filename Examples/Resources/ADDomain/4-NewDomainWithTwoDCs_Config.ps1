@@ -17,6 +17,30 @@
 
 #Requires -module ActiveDirectoryDsc
 
+# Configuration Data for AD
+$ConfigurationData = @{
+    AllNodes = @(
+        @{
+            NodeName         = 'dsc-testNode1'
+            Role             = 'Primary DC'
+            DomainName       = 'dsc-test.contoso.com'
+            CertificateFile  = 'C:\publicKeys\targetNode.cer'
+            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
+            RetryCount       = 20
+            RetryIntervalSec = 30
+        },
+        @{
+            NodeName         = 'dsc-testNode2'
+            Role             = 'Replica DC'
+            DomainName       = 'dsc-test.contoso.com'
+            CertificateFile  = 'C:\publicKeys\targetNode.cer'
+            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
+            RetryCount       = 20
+            RetryIntervalSec = 30
+        }
+    )
+}
+
 <#
     .DESCRIPTION
         This configuration will create a highly available domain by adding
@@ -24,7 +48,6 @@
         The WaitForDomain resource is used to ensure that the domain is
         present before the second domain controller is added.
 #>
-
 Configuration NewDomainWithTwoDCs_Config
 {
     param
@@ -76,12 +99,12 @@ Configuration NewDomainWithTwoDCs_Config
 
         ADUser 'FirstUser'
         {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $domainCred
-            UserName                      = 'dummy'
-            Password                      = $NewADUserCred
-            Ensure                        = 'Present'
-            DependsOn                     = '[WaitForADDomain]DscForestWait'
+            DomainName = $Node.DomainName
+            Credential = $domainCred
+            UserName   = 'dummy'
+            Password   = $NewADUserCred
+            Ensure     = 'Present'
+            DependsOn  = '[WaitForADDomain]DscForestWait'
         }
     }
 
@@ -110,28 +133,4 @@ Configuration NewDomainWithTwoDCs_Config
             DependsOn                     = '[WaitForADDomain]DscForestWait'
         }
     }
-}
-
-# Configuration Data for AD
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName         = 'dsc-testNode1'
-            Role             = 'Primary DC'
-            DomainName       = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 20
-            RetryIntervalSec = 30
-        },
-        @{
-            NodeName         = 'dsc-testNode2'
-            Role             = 'Replica DC'
-            DomainName       = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 20
-            RetryIntervalSec = 30
-        }
-    )
 }
