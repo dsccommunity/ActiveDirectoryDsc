@@ -2367,7 +2367,7 @@ function Test-Password
     if ($Credential)
     {
         Write-Verbose -Message (
-            $script:localizedData.CheckingADUserPassword -f $Credential.UserName, $UserName
+            $script:localizedData.TestPasswordUsingImpersonation -f $Credential.UserName, $UserName
         )
 
         $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @(
