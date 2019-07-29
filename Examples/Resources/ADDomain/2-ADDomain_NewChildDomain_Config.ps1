@@ -59,7 +59,7 @@ Configuration ADDomain_NewChildDomain_Config
             DomainName                    = 'child'
             Credential                    = $Credential
             SafemodeAdministratorPassword = $SafeModePassword
-            DomainMode                    = Win2012R2'
+            DomainMode                    = 'Win2012R2'
             ParentDomainName              = 'contoso.com'
         }
     }
