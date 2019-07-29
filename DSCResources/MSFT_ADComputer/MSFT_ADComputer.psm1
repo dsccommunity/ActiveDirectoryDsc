@@ -68,11 +68,6 @@ $script:computerObjectPropertyMap = @(
     .PARAMETER RequestFile
         Specifies the full path to the Offline Domain Join Request file to create.
 
-    .PARAMETER Enabled
-        DEPRECATED - DO NOT USE.
-
-        It is a parameter in Get-TargetResource to write the deprecated message.
-
     .PARAMETER EnabledOnCreation
         Specifies if the computer account is created enabled or disabled.
         By default the Enabled property of the computer account will be set to
@@ -112,11 +107,6 @@ function Get-TargetResource
 
         [Parameter()]
         [ValidateNotNull()]
-        [System.Boolean]
-        $Enabled,
-
-        [Parameter()]
-        [ValidateNotNull()]
         [System.String]
         $DomainController,
 
@@ -136,15 +126,6 @@ function Get-TargetResource
         [System.Boolean]
         $EnabledOnCreation
     )
-
-    <#
-        We have the deprecated message in Get-TargetResource so that it is
-        shown when using Get-DscConfiguration or Invoke-DscResource.
-    #>
-    if ($PSBoundParameters.ContainsKey('Enabled'))
-    {
-        Write-Warning -Message $script:localizedData.EnabledDeprecatedMessage
-    }
 
     Assert-Module -ModuleName 'ActiveDirectory' -ImportModule
 
@@ -282,9 +263,6 @@ function Get-TargetResource
     .PARAMETER RequestFile
         Specifies the full path to the Offline Domain Join Request file to create.
 
-    .PARAMETER Enabled
-        DEPRECATED - DO NOT USE.
-
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to connect to perform the task.
 
@@ -366,11 +344,6 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateNotNull()]
-        [System.Boolean]
-        $Enabled,
-
-        [Parameter()]
-        [ValidateNotNull()]
         [System.String]
         $DomainController,
 
@@ -394,15 +367,6 @@ function Test-TargetResource
     Write-Verbose -Message (
         $script:localizedData.TestConfiguration -f $ComputerName
     )
-
-    <#
-        We have the deprecated message in Test-TargetResource so that it is
-        shown when using Start-DscConfiguration or Invoke-DscResource.
-    #>
-    if ($PSBoundParameters.ContainsKey('Enabled'))
-    {
-        Write-Warning -Message $script:localizedData.EnabledDeprecatedMessage
-    }
 
     $getTargetResourceParameters = @{
         ComputerName                  = $ComputerName
@@ -455,7 +419,8 @@ function Test-TargetResource
                 - Ignore to compare the parameter ServicePrincipalNames here
                   because it needs a special comparison, so it is handled
                   afterwards.
-                - Ignores the Enabled property because it is DEPRECATED.
+                - Ignores the Enabled property because it is not enforced in this
+                  resource.
             #>
             $compareTargetResourceStateParameters = @{
                 CurrentValues    = $getTargetResourceResult
@@ -544,9 +509,6 @@ function Test-TargetResource
     .PARAMETER RequestFile
         Specifies the full path to the Offline Domain Join Request file to create.
 
-    .PARAMETER Enabled
-        DEPRECATED - DO NOT USE.
-
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to connect to perform the task.
 
@@ -626,11 +588,6 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateNotNull()]
-        [System.Boolean]
-        $Enabled,
-
-        [Parameter()]
-        [ValidateNotNull()]
         [System.String]
         $DomainController,
 
@@ -650,15 +607,6 @@ function Set-TargetResource
         [System.Boolean]
         $EnabledOnCreation
     )
-
-    <#
-        We have the deprecated message in Test-TargetResource so that it is
-        shown when using Start-DscConfiguration or Invoke-DscResource.
-    #>
-    if ($PSBoundParameters.ContainsKey('Enabled'))
-    {
-        Write-Warning -Message $script:localizedData.EnabledDeprecatedMessage
-    }
 
     $getTargetResourceParameters = @{
         ComputerName                  = $ComputerName
@@ -825,7 +773,8 @@ function Set-TargetResource
             - Ignore to compare the parameter ServicePrincipalNames here
               because it needs a special comparison, so it is handled
               afterwards.
-            - Ignores the Enabled property because it is DEPRECATED.
+            - Ignores the Enabled property because it is not enforced in this
+              resource.
         #>
         $compareTargetResourceStateParameters = @{
             CurrentValues    = $getTargetResourceResult

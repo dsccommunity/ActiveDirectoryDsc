@@ -49,6 +49,9 @@
     need at least one Windows Server 2012 Domain Controller"
     ([issue #399](https://github.com/PowerShell/ActiveDirectoryDsc/issues/399)).
 - Changes to ADComputer
+  - BREAKING CHANGE: The previously made obsolete parameter `Enabled` has
+    been removed and is now a read-only property. See resource documentation
+    how to enforce the `Enabled` property.
   - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config
     ([issue #410](https://github.com/PowerShell/ActiveDirectoryDsc/issues/410)).
 - Changes to ADOrganizationalUnit
