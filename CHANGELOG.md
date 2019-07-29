@@ -52,6 +52,9 @@
   - BREAKING CHANGE: The previously made obsolete parameter `Enabled` has
     been removed and is now a read-only property. See resource documentation
     how to enforce the `Enabled` property.
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
   - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config
     ([issue #410](https://github.com/PowerShell/ActiveDirectoryDsc/issues/410)).
 - Changes to ADOrganizationalUnit

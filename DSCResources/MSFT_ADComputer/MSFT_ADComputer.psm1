@@ -81,7 +81,7 @@ $script:computerObjectPropertyMap = @(
 
         Used by Get-ADCommonParameters and is returned as a common parameter.
 
-    .PARAMETER DomainAdministratorCredential
+    .PARAMETER Credential
         Specifies the user account credentials to use to perform the task.
 
         Used by Get-ADCommonParameters and is returned as a common parameter.
@@ -114,7 +114,7 @@ function Get-TargetResource
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $DomainAdministratorCredential,
+        $Credential,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -134,25 +134,25 @@ function Get-TargetResource
         Computer account object.
     #>
     $getTargetResourceReturnValue = @{
-        Ensure                        = 'Absent'
-        ComputerName                  = $null
-        Location                      = $null
-        DnsHostName                   = $null
-        ServicePrincipalNames         = $null
-        UserPrincipalName             = $null
-        DisplayName                   = $null
-        Path                          = $null
-        Description                   = $null
-        Enabled                       = $false
-        Manager                       = $null
-        DomainController              = $DomainController
-        DomainAdministratorCredential = $DomainAdministratorCredential
-        RequestFile                   = $RequestFile
-        RestoreFromRecycleBin         = $RestoreFromRecycleBin
-        EnabledOnCreation             = $EnabledOnCreation
-        DistinguishedName             = $null
-        SID                           = $null
-        SamAccountName                = $null
+        Ensure                = 'Absent'
+        ComputerName          = $null
+        Location              = $null
+        DnsHostName           = $null
+        ServicePrincipalNames = $null
+        UserPrincipalName     = $null
+        DisplayName           = $null
+        Path                  = $null
+        Description           = $null
+        Enabled               = $false
+        Manager               = $null
+        DomainController      = $DomainController
+        Credential            = $Credential
+        RequestFile           = $RequestFile
+        RestoreFromRecycleBin = $RestoreFromRecycleBin
+        EnabledOnCreation     = $EnabledOnCreation
+        DistinguishedName     = $null
+        SID                   = $null
+        SamAccountName        = $null
     }
 
     $getADComputerResult = $null
@@ -200,7 +200,7 @@ function Get-TargetResource
         $getTargetResourceReturnValue['Enabled'] = $getADComputerResult.Enabled
         $getTargetResourceReturnValue['Manager'] = $getADComputerResult.ManagedBy
         $getTargetResourceReturnValue['DomainController'] = $DomainController
-        $getTargetResourceReturnValue['DomainAdministratorCredential'] = $DomainAdministratorCredential
+        $getTargetResourceReturnValue['Credential'] = $Credential
         $getTargetResourceReturnValue['RequestFile'] = $RequestFile
         $getTargetResourceReturnValue['RestoreFromRecycleBin'] = $RestoreFromRecycleBin
         $getTargetResourceReturnValue['EnabledOnCreation'] = $EnabledOnCreation
@@ -266,7 +266,7 @@ function Get-TargetResource
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to connect to perform the task.
 
-    .PARAMETER DomainAdministratorCredential
+    .PARAMETER Credential
         Specifies the user account credentials to use to perform the task.
 
     .PARAMETER RestoreFromRecycleBin
@@ -351,7 +351,7 @@ function Test-TargetResource
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $DomainAdministratorCredential,
+        $Credential,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -369,12 +369,12 @@ function Test-TargetResource
     )
 
     $getTargetResourceParameters = @{
-        ComputerName                  = $ComputerName
-        RequestFile                   = $RequestFile
-        DomainController              = $DomainController
-        DomainAdministratorCredential = $DomainAdministratorCredential
-        RestoreFromRecycleBin         = $RestoreFromRecycleBin
-        EnabledOnCreation             = $EnabledOnCreation
+        ComputerName          = $ComputerName
+        RequestFile           = $RequestFile
+        DomainController      = $DomainController
+        Credential            = $Credential
+        RestoreFromRecycleBin = $RestoreFromRecycleBin
+        EnabledOnCreation     = $EnabledOnCreation
     }
 
     # Need the @() around this to get a new array to enumerate.
@@ -512,7 +512,7 @@ function Test-TargetResource
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to connect to perform the task.
 
-    .PARAMETER DomainAdministratorCredential
+    .PARAMETER Credential
         Specifies the user account credentials to use to perform the task.
 
     .PARAMETER RestoreFromRecycleBin
@@ -595,7 +595,7 @@ function Set-TargetResource
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
-        $DomainAdministratorCredential,
+        $Credential,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -609,12 +609,12 @@ function Set-TargetResource
     )
 
     $getTargetResourceParameters = @{
-        ComputerName                  = $ComputerName
-        RequestFile                   = $RequestFile
-        DomainController              = $DomainController
-        DomainAdministratorCredential = $DomainAdministratorCredential
-        RestoreFromRecycleBin         = $RestoreFromRecycleBin
-        EnabledOnCreation             = $EnabledOnCreation
+        ComputerName          = $ComputerName
+        RequestFile           = $RequestFile
+        DomainController      = $DomainController
+        Credential            = $Credential
+        RestoreFromRecycleBin = $RestoreFromRecycleBin
+        EnabledOnCreation     = $EnabledOnCreation
     }
 
     # Need the @() around this to get a new array to enumerate.
