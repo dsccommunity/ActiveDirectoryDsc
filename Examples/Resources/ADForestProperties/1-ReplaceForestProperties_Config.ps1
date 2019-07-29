@@ -23,7 +23,6 @@
         in the forest by replacing any existing suffixes with the ones specified
         in the configuration.
 #>
-
 Configuration ReplaceForestProperties_Config
 {
     Import-DscResource -ModuleName ActiveDirectoryDsc

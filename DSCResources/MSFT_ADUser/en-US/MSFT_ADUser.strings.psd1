@@ -18,4 +18,5 @@ ConvertFrom-StringData @'
     MovingADUser                         = Moving user from '{0}' to '{1}'. (ADU0016)
     RenamingADUser                       = Renaming user from '{0}' to '{1}'. (ADU0017)
     RestoringUser                        = Attempting to restore the user object {0} from the recycle bin. (ADU0018)
+    TestPasswordUsingImpersonation       = Impersonating the credentials ''{0}'' to test password for user ''{1}''.
 '@

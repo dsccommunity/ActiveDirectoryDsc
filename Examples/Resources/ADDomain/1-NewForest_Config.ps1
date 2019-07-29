@@ -22,7 +22,6 @@
         This configuration will create a new domain with a new forest and a forest
         functional level of Server 2016.
 #>
-
 Configuration NewForest_Config
 {
     param

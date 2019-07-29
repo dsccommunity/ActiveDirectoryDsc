@@ -22,7 +22,6 @@
         This configuration will add an Active Directory organizational unit to the
         domain.
 #>
-
 Configuration CreateADOU_Config
 {
     param

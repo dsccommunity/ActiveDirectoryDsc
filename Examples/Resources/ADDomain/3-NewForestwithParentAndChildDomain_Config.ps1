@@ -17,12 +17,36 @@
 
 #Requires -module ActiveDirectoryDsc
 
+$ConfigurationData = @{
+    AllNodes = @(
+        @{
+            NodeName         = 'dsc-testNode1'
+            Role             = 'Parent DC'
+            DomainName       = 'dsc-test.contoso.com'
+            CertificateFile  = 'C:\publicKeys\targetNode.cer'
+            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
+            RetryCount       = 50
+            RetryIntervalSec = 30
+        },
+
+        @{
+            NodeName         = 'dsc-testNode2'
+            Role             = 'Child DC'
+            DomainName       = 'dsc-child'
+            ParentDomainName = 'dsc-test.contoso.com'
+            CertificateFile  = 'C:\publicKeys\targetNode.cer'
+            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
+            RetryCount       = 50
+            RetryIntervalSec = 30
+        }
+    )
+}
+
 <#
     .DESCRIPTION
         This configuration will create a domain, and then create a child domain on
         another node.
 #>
-
 Configuration NewForestWithParentAndChildDomain_Config
 {
     param
@@ -74,12 +98,12 @@ Configuration NewForestWithParentAndChildDomain_Config
 
         ADUser 'FirstUser'
         {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $domaincred
-            UserName                      = 'dummy'
-            Password                      = $NewADUserCred
-            Ensure                        = 'Present'
-            DependsOn                     = '[WaitForADDomain]DscForestWait'
+            DomainName = $Node.DomainName
+            Credential = $domaincred
+            UserName   = 'dummy'
+            Password   = $NewADUserCred
+            Ensure     = 'Present'
+            DependsOn  = '[WaitForADDomain]DscForestWait'
         }
 
     }
@@ -110,29 +134,4 @@ Configuration NewForestWithParentAndChildDomain_Config
             DependsOn                     = '[WaitForADDomain]DscForestWait'
         }
     }
-}
-
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName         = 'dsc-testNode1'
-            Role             = 'Parent DC'
-            DomainName       = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 50
-            RetryIntervalSec = 30
-        },
-
-        @{
-            NodeName         = 'dsc-testNode2'
-            Role             = 'Child DC'
-            DomainName       = 'dsc-child'
-            ParentDomainName = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 50
-            RetryIntervalSec = 30
-        }
-    )
 }

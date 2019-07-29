@@ -24,7 +24,6 @@
         replicated yet, there may be issues when retrieving the gMSA password.
         Use with caution
 #>
-
 Configuration CreateKDSRootKeyInPast_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

@@ -56,6 +56,9 @@
   - The unit tests are using the stub classes so the tests can be run locally.
   - Added comment-based help ([issue #339](https://github.com/PowerShell/ActiveDirectoryDsc/issues/339)).
 - Changes to ADUser
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
   - Fixes exception when creating a user with an empty string property
     ([issue #407](https://github.com/PowerShell/ActiveDirectoryDsc/issues/407)).
   - Fixes exception when updating `CommonName` and `Path` concurrently
@@ -63,6 +66,9 @@
   - Fixes ChangePasswordAtLogon Property to be only set to `true` at User
     Creation ([issue #414](https://github.com/PowerShell/ActiveDirectoryDsc/issues/414)).
   - Added comment-based help ([issue #340](https://github.com/PowerShell/ActiveDirectoryDsc/issues/340)).
+  - Now it correctly tests passwords when parameter DomainName is set to
+   distinguished name and parameter Credential is used ([issue #451](https://github.com/PowerShell/ActiveDirectoryDsc/issues/451)).
+  - Added integration tests ([issue #359](https://github.com/PowerShell/ActiveDirectoryDsc/issues/359)).
 - Changes to ADDomain
   - Updated tests and replaced `Write-Error` with `throw`
     ([issue #332](https://github.com/PowerShell/ActiveDirectoryDsc/pull/332)).

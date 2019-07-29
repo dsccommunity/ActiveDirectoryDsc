@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will create a group managed service account.
 #>
-
 Configuration CreateGroupManagedServiceAccount_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

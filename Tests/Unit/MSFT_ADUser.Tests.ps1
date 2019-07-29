@@ -113,10 +113,10 @@ try
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Server -eq $testDomainController } -Scope It
             }
 
-            It "Calls 'Get-ADUser' with 'Credential' parameter when 'DomainAdministratorCredential' specified" {
+            It "Calls 'Get-ADUser' with 'Credential' parameter when 'Credential' specified" {
                 Mock -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -MockWith { return [PSCustomObject] $fakeADUser }
 
-                Get-TargetResource @testPresentParams -DomainAdministratorCredential $testCredential
+                Get-TargetResource @testPresentParams -Credential $testCredential
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
@@ -599,15 +599,15 @@ try
                 Assert-MockCalled -CommandName Set-ADAccountPassword -Scope It -Times 0
             }
 
-            It "Calls 'Test-Password' with the correct parameters when 'DomainAdministratorCredential' is specified" {
+            It "Calls 'Test-Password' with the correct parameters when 'Credential' is specified" {
                 Mock -CommandName Get-ADUser -MockWith { return $fakeADUser }
                 Mock -CommandName Set-ADUser
                 Mock -CommandName Set-ADAccountPassword -ParameterFilter { $NewPassword -eq $testCredential.Password }
-                Mock -CommandName Test-Password -ParameterFilter { $DomainAdministratorCredential -eq $testCredential } -MockWith { $true }
+                Mock -CommandName Test-Password -ParameterFilter { $Credential -eq $testCredential } -MockWith { $true }
 
-                Set-TargetResource @testPresentParams -Password $testCredential -DomainAdministratorCredential $testCredential
+                Set-TargetResource @testPresentParams -Password $testCredential -Credential $testCredential
 
-                Assert-MockCalled -CommandName Test-Password -ParameterFilter { $DomainAdministratorCredential -eq $testCredential } -Scope It -Exactly 1
+                Assert-MockCalled -CommandName Test-Password -ParameterFilter { $Credential -eq $testCredential } -Scope It -Exactly 1
             }
 
             It "Should call 'Set-ADUser' with 'Replace' when existing mismatched AD property is null" {

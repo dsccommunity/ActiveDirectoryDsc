@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will modify an existing AD Replication Site Link.
 #>
-
 Configuration ModifyExistingReplicationSiteLink_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

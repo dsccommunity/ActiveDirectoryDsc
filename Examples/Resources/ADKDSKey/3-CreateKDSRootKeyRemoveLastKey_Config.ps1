@@ -23,7 +23,6 @@
         If gMSAs are installed on the network, they will not be able to reset
         their passwords and it may cause services to fail.
 #>
-
 Configuration CreateKDSRootKeyRemoveLastKey_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

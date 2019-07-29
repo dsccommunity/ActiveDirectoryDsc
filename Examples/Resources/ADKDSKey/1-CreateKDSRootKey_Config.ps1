@@ -23,7 +23,6 @@
         slightly ahead in the future, the key won't be usable for at least 10 hours
         from the creation time.
 #>
-
 Configuration CreateKDSRootKey_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc
