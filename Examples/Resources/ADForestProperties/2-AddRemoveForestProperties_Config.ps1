@@ -23,7 +23,6 @@
     the forest by adding and removing the desired suffixes. This will not overwrite
     existing suffixes in the forest.
 #>
-
 Configuration AddRemoveForestProperties_Config
 {
     Import-DscResource -ModuleName ActiveDirectoryDsc

@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will create an AD Replication Site Link.
 #>
-
 Configuration CreateReplicationSiteLink_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will create a new domain-local group with three members.
 #>
-
 Configuration NewGroupWithMembers_Config
 {
     Import-DscResource -ModuleName ActiveDirectoryDsc

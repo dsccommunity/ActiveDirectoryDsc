@@ -22,7 +22,6 @@
         This configuration will remove the Active Directory replication site
         called 'Cupertino'.
 #>
-
 Configuration RemoveADReplicationSite_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

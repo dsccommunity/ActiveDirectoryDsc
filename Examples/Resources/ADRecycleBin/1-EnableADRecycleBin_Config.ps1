@@ -22,7 +22,6 @@
         This configuration will enable the Active Directory Recycle Bin for a
         specified Domain
 #>
-
 Configuration EnableADRecycleBin_Config
 {
     param

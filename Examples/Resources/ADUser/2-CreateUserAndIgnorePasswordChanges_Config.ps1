@@ -23,7 +23,6 @@
         when the password has changed. This might be used with a traditional
         user account where a managed password is not desired.
 #>
-
 Configuration CreateUserAndIgnorePasswordChanges_Config
 {
     param

@@ -22,7 +22,6 @@
         This configuration will create an Active Directory replication site
         called 'Seattle'.
 #>
-
 Configuration CreateADReplicationSite_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

@@ -22,7 +22,6 @@
         This configuration will create an Active Directory computer account
         disabled. The property Enabled will not be enforced.
 #>
-
 Configuration AddComputerAccountDisabled_Config
 {
     param

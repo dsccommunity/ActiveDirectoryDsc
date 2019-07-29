@@ -23,7 +23,6 @@
         on the specified domain controller and in the specific organizational
         unit.
 #>
-
 Configuration AddComputerAccountSpecificPath_Config
 {
     param

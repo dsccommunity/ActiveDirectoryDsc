@@ -21,7 +21,6 @@
     .DESCRIPTION
         This configuration will create a managed service account.
 #>
-
 Configuration CreateManagedServiceAccount_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

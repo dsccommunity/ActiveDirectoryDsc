@@ -23,7 +23,6 @@
         'Seattle'. If the 'Default-First-Site-Name' site exists, it will rename
         this site instead of create a new one.
 #>
-
 Configuration CreateADReplicationSiteRenameDefault_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

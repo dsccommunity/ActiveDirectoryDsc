@@ -24,7 +24,6 @@
         CONTOSO\CLUSTER01$. This is used so that the Windows Failover Cluster
         can control the roles AD objects.
 #>
-
 Configuration DelegateFullControl_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc

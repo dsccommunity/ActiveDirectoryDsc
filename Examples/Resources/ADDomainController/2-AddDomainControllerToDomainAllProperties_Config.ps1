@@ -22,7 +22,6 @@
         This configuration will add a domain controller to the domain
         contoso.com, specifying all properties of the resource.
 #>
-
 Configuration AddDomainControllerToDomainAllProperties_Config
 {
     param
