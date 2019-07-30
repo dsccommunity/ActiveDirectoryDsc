@@ -36,47 +36,115 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
-        $domainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-            'Username',
-            $(ConvertTo-SecureString -String 'Password' -AsPlainText -Force)
+        $mockUserName = 'User1'
+        $mockDomainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+            $mockUserName,
+            (ConvertTo-SecureString -String 'Password' -AsPlainText -Force)
         )
 
-        $domainName = 'example.com'
-        $testParams = @{
-            DomainName = $domainName
-            DomainUserCredential = $domainUserCredential
-            RetryIntervalSec = 10
-            RetryCount = 5
-        }
+        $mockDomainName = 'example.com'
+        $mockSiteName = 'Europe'
 
-        $rebootTestParams = @{
-            DomainName = $domainName
-            DomainUserCredential = $domainUserCredential
-            RetryIntervalSec = 10
-            RetryCount = 5
-            RebootRetryCount = 3
+        $mockDefaultParameters = @{
+            DomainName = $mockDomainName
+            Verbose = $true
         }
-
-        $fakeDomainObject = @{Name = $domainName}
 
         #region Function Get-TargetResource
         Describe 'WaitForADDomain\Get-TargetResource' {
-            It 'Returns a "System.Collections.Hashtable" object type' {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                $targetResource = Get-TargetResource @testParams
-                $targetResource -is [System.Collections.Hashtable] | Should -Be $true
-            }
+            Context 'When the system is in the desired state' {
+                Context 'When no domain controller is found in the domain' {
+                    BeforeAll {
+                        Mock -CommandName Find-DomainController -MockWith {
+                            return $null
+                        }
 
-            It "Returns DomainName = $($testParams.DomainName) when domain is found" {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                $targetResource = Get-TargetResource @testParams
-                $targetResource.DomainName | Should -Be $testParams.DomainName
-            }
+                        $getTargetResourceParameters = $mockDefaultParameters.Clone()
+                    }
 
-            It "Returns an empty DomainName when domain is not found" {
-                Mock -CommandName Get-Domain
-                $targetResource = Get-TargetResource @testParams
-                $targetResource.DomainName | Should -Be $null
+                    It 'Should return the same values as passed as parameters' {
+                        $result = Get-TargetResource @getTargetResourceParameters
+                        $result.DomainName | Should -Be $mockDomainName
+                    }
+
+                    It 'Should return default value for property WaitTimeout' {
+                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                        $getTargetResourceResult.WaitTimeout | Should -Be 300
+                    }
+
+                    It 'Should return $null for the rest of the properties' {
+                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                        $getTargetResourceResult.SiteName | Should -BeNullOrEmpty
+                        $getTargetResourceResult.Credential | Should -BeNullOrEmpty
+                        $getTargetResourceResult.RebootCount | Should -Be 0
+                    }
+                }
+
+                Context 'When a domain controller is found in the domain' {
+                    Context 'When using the default parameters' {
+                            BeforeAll {
+                            Mock -CommandName Find-DomainController -MockWith {
+                                return New-Object -TypeName PSObject |
+                                    Add-Member -MemberType ScriptProperty -Name 'Domain' -Value {
+                                        New-Object -TypeName PSObject |
+                                            Add-Member -MemberType ScriptMethod -Name 'ToString' -Value {
+                                                return $mockDomainName
+                                            } -PassThru -Force
+                                    } -PassThru |
+                                    Add-Member -MemberType NoteProperty -Name 'SiteName' -Value $mockSiteName -PassThru -Force
+                            }
+
+                            $getTargetResourceParameters = $mockDefaultParameters.Clone()
+                        }
+
+                        It 'Should return the same values as passed as parameters' {
+                            $result = Get-TargetResource @getTargetResourceParameters
+                            $result.DomainName | Should -Be $mockDomainName
+                        }
+
+                        It 'Should return default value for property WaitTimeout' {
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.WaitTimeout | Should -Be 300
+                        }
+
+                        It 'Should return $null for the rest of the properties' {
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.SiteName | Should -Be 'Europe'
+                            $getTargetResourceResult.Credential | Should -BeNullOrEmpty
+                            $getTargetResourceResult.RebootCount | Should -Be 0
+                        }
+                    }
+
+                    Context 'When using all available parameters' {
+                        BeforeAll {
+                            Mock -CommandName Find-DomainController -MockWith {
+                                return New-Object -TypeName PSObject |
+                                    Add-Member -MemberType ScriptProperty -Name 'Domain' -Value {
+                                        New-Object -TypeName PSObject |
+                                            Add-Member -MemberType ScriptMethod -Name 'ToString' -Value {
+                                                return $mockDomainName
+                                            } -PassThru -Force
+                                    } -PassThru |
+                                    Add-Member -MemberType NoteProperty -Name 'SiteName' -Value $mockSiteName -PassThru -Force
+                            }
+
+                            $getTargetResourceParameters = $mockDefaultParameters.Clone()
+                            $getTargetResourceParameters['Credential'] = $mockDomainUserCredential
+                            $getTargetResourceParameters['SiteName'] = 'Europe'
+                            $getTargetResourceParameters['WaitTimeout'] = 600
+                            $getTargetResourceParameters['RebootCount'] = 2
+                        }
+
+                        It 'Should return the same values as passed as parameters' {
+                            $result = Get-TargetResource @getTargetResourceParameters
+                            $result.DomainName | Should -Be $mockDomainName
+                            $result.SiteName | Should -Be 'Europe'
+                            $result.WaitTimeout | Should -Be 600
+                            $result.RebootCount | Should -Be 2
+                            $result.Credential.UserName | Should -Be $mockUserName
+                        }
+                    }
+                }
             }
         }
         #endregion

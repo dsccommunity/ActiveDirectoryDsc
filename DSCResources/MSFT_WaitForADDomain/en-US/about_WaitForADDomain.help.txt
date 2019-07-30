@@ -10,23 +10,23 @@
 
 .PARAMETER DomainName
     Key - String
-    The name of the Active Directory domain to wait for.
+    Specifies the fully qualified domain name to wait for.
 
-.PARAMETER DomainUserCredential
+.PARAMETER SiteName
     Write - String
-    The user account credentials to use to perform this task.
+    Specifies the site in the domain where to look for a domain controller.
 
-.PARAMETER RetryIntervalSec
+.PARAMETER Credential
+    Write - String
+    Specifies the credentials that are used when accessing the domain, unless the built-in PsDscRunAsCredential is used.
+
+.PARAMETER WaitTimeout
     Write - UInt64
-    The interval in seconds between retry attempts. Default value is 60.
+    Specifies the timeout in seconds that the resource will wait for the domain to be accessible. Default value is 300 seconds.
 
-.PARAMETER RetryCount
+.PARAMETER RebootCount
     Write - UInt32
-    The number of retries before failing. Default value is 10.
-
-.PARAMETER RebootRetryCount
-    Write - UInt32
-    The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
+    Specifies the number of times the node will be reboot in an effort to connect to the domain.
 
 .EXAMPLE 1
 

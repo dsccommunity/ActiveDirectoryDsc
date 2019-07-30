@@ -45,6 +45,8 @@
       `Credential` in the function `Restore-ADCommonObject`
     - Removed the alias `DomainAdministratorCredential` from the parameter
       `Credential` in the function `Get-ADCommonParameters`
+    - Added function `Find-DomainController`.
+    - Added function `Get-CurrentUser` (moved from the resource ADKDSKey).
   - Updated all the examples files to be prefixed with the resource
     name so they are more easily discovered in PowerShell Gallery and
     Azure Automation ([issue #416](https://github.com/PowerShell/ActiveDirectoryDsc/issues/416)).
@@ -105,7 +107,15 @@
   - Added comment-based help ([issue #337](https://github.com/PowerShell/ActiveDirectoryDsc/issues/337)).
   - Added integration tests ([issue #348](https://github.com/PowerShell/ActiveDirectoryDsc/issues/348)).
 - Changes to WaitForADDomain
-  - Added comment-based help ([issue #341](https://github.com/PowerShell/ActiveDirectoryDsc/issues/341))
+  - BREAKING CHANGE: Refactored the resource to handle timeout better and
+    more correctly wait for a specific amount, and at the same time make
+    the resource more intuitive to use. This change has replaced parameters
+    in the resource ([issue #343](https://github.com/PowerShell/ActiveDirectoryDsc/issues/343)).
+  - Now the resource can use built-in `PsDscRunAsCredential` instead of
+    specifying the `Credential` parameter ([issue #367](https://github.com/PowerShell/ActiveDirectoryDsc/issues/367)).
+  - New parameter `SiteName` can be used to wait for a domain controller
+    in a specific site in the domain.
+  - Added comment-based help ([issue #341](https://github.com/PowerShell/ActiveDirectoryDsc/issues/341)).
 - Changes to ADDomainController
   - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
     to `Credential` to better indicate that it is possible to impersonate

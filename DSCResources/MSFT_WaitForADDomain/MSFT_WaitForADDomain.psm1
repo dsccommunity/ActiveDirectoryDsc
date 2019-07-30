@@ -6,99 +6,144 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_WaitForADDomain'
 
+# This file is used to remember the number of times the node has been rebooted.
+$script:rebootLogFile = Join-Path $env:temp -ChildPath 'WaitForADDomain_Reboot.tmp'
+
 <#
     .SYNOPSIS
-        Gets the current state of the specified Active Directory to see if it
-        is available.
+        Returns the current state of the specified Active Directory domain.
 
     .PARAMETER DomainName
-        The name of the Active Directory domain to wait for.
+        Specifies the fully qualified domain name to wait for.
 
-    .PARAMETER DomainUserCredential
-        The user account credentials to use to perform this task.
+    .PARAMETER SiteName
+        Specifies the site in the domain where to look for a domain controller.
 
-    .PARAMETER RetryIntervalSec
-        The interval in seconds between retry attempts. Default value is 60.
+    .PARAMETER Credential
+        Specifies the credentials that are used when accessing the domain,
+        unless the built-in PsDscRunAsCredential is used.
 
-    .PARAMETER RetryCount
-        The number of retries before failing. Default value is 10.
+    .PARAMETER WaitTimeout
+        Specifies the timeout in seconds that the resource will wait for the
+        domain to be accessible. Default value is 300 seconds.
 
-    .PARAMETER RebootRetryCount
-        The number of times to reboot after failing and then restart retrying.
-        Default value is 0 (zero).
+    .PARAMETER RebootCount
+        Specifies the number of times the node will be reboot in an effort to
+        connect to the domain.
 #>
 function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
     param
     (
-
         [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
 
         [Parameter()]
+        [System.String]
+        $SiteName,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DomainUserCredential,
+        $Credential,
 
         [Parameter()]
         [System.UInt64]
-        $RetryIntervalSec = 60,
+        $WaitTimeout = 300,
 
         [Parameter()]
         [System.UInt32]
-        $RetryCount = 10,
-
-        [Parameter()]
-        [System.UInt32]
-        $RebootRetryCount = 0
+        $RebootCount
     )
 
-    if ($DomainUserCredential)
+    $findDomainControllerParameters = @{
+        DomainName = $DomainName
+    }
+
+    Write-Verbose -Message ($script:localizedData.SearchDomainController -f $DomainName)
+
+    if ($PSBoundParameters.ContainsKey('SiteName'))
     {
-        $convertToCimCredential = New-CimInstance -ClassName MSFT_Credential -Namespace 'root/microsoft/windows/desiredstateconfiguration' -ClientOnly -Property @{
-            Username = [System.String] $DomainUserCredential.UserName
-            Password = [System.String] $null
-        }
+        $findDomainControllerParameters['SiteName'] = $SiteName
+
+        Write-Verbose -Message ($script:localizedData.SearchInSiteOnly -f $SiteName)
+    }
+
+    if ($PSBoundParameters.ContainsKey('Credential'))
+    {
+        $cimCredentialInstance = New-CimCredentialInstance -Credential $Credential
+
+        $findDomainControllerParameters['Credential'] = $Credential
+
+        Write-Verbose -Message ($script:localizedData.ImpersonatingCredentials -f $Credential.UserName)
     }
     else
     {
-        $convertToCimCredential = $null
+        if ($null -ne $PsDscContext.RunAsUser)
+        {
+            # Running using PsDscRunAsCredential
+            Write-Verbose -Message ($script:localizedData.ImpersonatingCredentials -f $PsDscContext.RunAsUser)
+        }
+        else
+        {
+            # Running as SYSTEM or current user.
+            Write-Verbose -Message ($script:localizedData.ImpersonatingCredentials -f (Get-CurrentUser).Name)
+        }
+
+        $cimCredentialInstance = $null
     }
 
-    Write-Verbose -Message ($script:localizedData.GetDomain -f $DomainName)
+    $currentDomainController = Find-DomainController @findDomainControllerParameters
 
-    $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
+    if ($currentDomainController)
+    {
+        $domainFound = $true
+        $domainControllerSiteName = $currentDomainController.SiteName
+
+        Write-Verbose -Message $script:localizedData.FoundDomainController
+
+    }
+    else
+    {
+        $domainFound = $false
+        $domainControllerSiteName = $null
+
+        Write-Verbose -Message $script:localizedData.NoFoundDomainController
+    }
 
     return @{
-        DomainName = $domain.Name
-        DomainUserCredential = $convertToCimCredential
-        RetryIntervalSec = $RetryIntervalSec
-        RetryCount = $RetryCount
-        RebootRetryCount = $RebootRetryCount
+        DomainName  = $DomainName
+        SiteName    = $domainControllerSiteName
+        Credential  = $cimCredentialInstance
+        WaitTimeout = $WaitTimeout
+        RebootCount = $RebootCount
+        IsAvailable = $domainFound
     }
 }
 
 <#
     .SYNOPSIS
-        Sets the current state of the specified Active Directory to see if a
-        reboot is required.
+        Waits for the specified Active Directory domain to have a domain
+        controller that can serve connections.
 
     .PARAMETER DomainName
-        The name of the Active Directory domain to wait for.
+        Specifies the fully qualified domain name to wait for.
 
-    .PARAMETER DomainUserCredential
-        The user account credentials to use to perform this task.
+    .PARAMETER SiteName
+        Specifies the site in the domain where to look for a domain controller.
 
-    .PARAMETER RetryIntervalSec
-        The interval in seconds between retry attempts. Default value is 60.
+    .PARAMETER Credential
+        Specifies the credentials that are used when accessing the domain,
+        unless the built-in PsDscRunAsCredential is used.
 
-    .PARAMETER RetryCount
-        The number of retries before failing. Default value is 10.
+    .PARAMETER WaitTimeout
+        Specifies the timeout in seconds that the resource will wait for the
+        domain to be accessible. Default value is 300 seconds.
 
-    .PARAMETER RebootRetryCount
-        The number of times to reboot after failing and then restart retrying.
-        Default value is 0 (zero).
+    .PARAMETER RebootCount
+        Specifies the number of times the node will be reboot in an effort to
+        connect to the domain.
 #>
 function Set-TargetResource
 {
@@ -120,24 +165,21 @@ function Set-TargetResource
         $DomainName,
 
         [Parameter()]
+        [System.String]
+        $SiteName,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DomainUserCredential,
+        $Credential,
 
         [Parameter()]
         [System.UInt64]
-        $RetryIntervalSec = 60,
+        $WaitTimeout = 300,
 
         [Parameter()]
         [System.UInt32]
-        $RetryCount = 10,
-
-        [Parameter()]
-        [System.UInt32]
-        $RebootRetryCount = 0
-
+        $RebootCount
     )
-
-    $rebootLogFile = "$env:temp\WaitForADDomain_Reboot.tmp"
 
     for ($count = 0; $count -lt $RetryCount; $count++)
     {
@@ -192,24 +234,26 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
-        Tests the current state of the specified Active Directory to see if it
-        is available.
+        Determines if the specified Active Directory domain have a domain controller
+        that can serve connections.
 
     .PARAMETER DomainName
-        The name of the Active Directory domain to wait for.
+        Specifies the fully qualified domain name to wait for.
 
-    .PARAMETER DomainUserCredential
-        The user account credentials to use to perform this task.
+    .PARAMETER SiteName
+        Specifies the site in the domain where to look for a domain controller.
 
-    .PARAMETER RetryIntervalSec
-        The interval in seconds between retry attempts. Default value is 60.
+    .PARAMETER Credential
+        Specifies the credentials that are used when accessing the domain,
+        unless the built-in PsDscRunAsCredential is used.
 
-    .PARAMETER RetryCount
-        The number of retries before failing. Default value is 10.
+    .PARAMETER WaitTimeout
+        Specifies the timeout in seconds that the resource will wait for the
+        domain to be accessible. Default value is 300 seconds.
 
-    .PARAMETER RebootRetryCount
-        The number of times to reboot after failing and then restart retrying.
-        Default value is 0 (zero).
+    .PARAMETER RebootCount
+        Specifies the number of times the node will be reboot in an effort to
+        connect to the domain.
 #>
 function Test-TargetResource
 {
@@ -221,58 +265,82 @@ function Test-TargetResource
         $DomainName,
 
         [Parameter()]
+        [System.String]
+        $SiteName,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DomainUserCredential,
+        $Credential,
 
         [Parameter()]
         [System.UInt64]
-        $RetryIntervalSec = 60,
+        $WaitTimeout = 300,
 
         [Parameter()]
         [System.UInt32]
-        $RetryCount = 10,
-
-        [Parameter()]
-        [System.UInt32]
-        $RebootRetryCount = 0
-
+        $RebootCount
     )
 
-    $rebootLogFile = "$env:temp\WaitForADDomain_Reboot.tmp"
+    Write-Verbose -Message (
+        $script:localizedData.TestConfiguration -f $DomainName
+    )
 
-    $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
+    # Only pass properties that could be used when fetching the domain controller.
+    $compareTargetResourceStateParameters = @{
+        DomainName = $DomainName
+        SiteName = $SiteName
+        Credential = $Credential
+    }
 
-    if ($domain)
+    <#
+        This returns array of hashtables which contain the properties ParameterName,
+        Expected, Actual, and InDesiredState. In this case only the property
+        'IsAvailable' will be returned.
+    #>
+    $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
+
+    if ($false -in $compareTargetResourceStateResult.InDesiredState)
     {
-        if ($RebootRetryCount -gt 0)
-        {
-            Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
-        }
+        $testTargetResourceReturnValue = $false
 
-        Write-Verbose -Message ($script:localizedData.DomainInDesiredState -f $DomainName)
-
-        return $true
+        Write-Verbose -Message ($script:localizedData.DomainNotInDesiredState -f $DomainName)
     }
     else
     {
-        Write-Verbose -Message ($script:localizedData.DomainNotInDesiredState -f $DomainName)
-        return $false
+        $testTargetResourceReturnValue = $true
+
+        if ($PSBoundParameters.ContainsKey('RebootCount') -and $RebootCount -gt 0 )
+        {
+            if (Test-Path -Path $script:rebootLogFile)
+            {
+                Remove-Item $script:rebootLogFile -Force -ErrorAction SilentlyContinue
+            }
+        }
+
+        Write-Verbose -Message ($script:localizedData.DomainInDesiredState -f $DomainName)
     }
+
+    return $testTargetResourceReturnValue
 }
 
 <#
     .SYNOPSIS
-        Gets the specified Active Directory domain
+        Compares the properties in the current state with the properties of the
+        desired state and returns a hashtable with the comparison result.
 
     .PARAMETER DomainName
-        The name of the Active Directory domain to wait for.
+        Specifies the fully qualified domain name to wait for.
 
-    .PARAMETER DomainUserCredential
-        The user account credentials to use to perform this task.
+    .PARAMETER SiteName
+        Specifies the site in the domain where to look for a domain controller.
+
+    .PARAMETER Credential
+        Specifies the credentials that are used when accessing the domain,
+        unless the built-in PsDscRunAsCredential is used.
 #>
-function Get-Domain
+function Compare-TargetResourceState
 {
-    [OutputType([PSObject])]
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -280,33 +348,44 @@ function Get-Domain
         $DomainName,
 
         [Parameter()]
+        [System.String]
+        $SiteName,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
-        $DomainUserCredential
+        $Credential
     )
 
-    Write-Verbose -Message ($script:localizedData.CheckDomain -f $DomainName)
-
-    if ($DomainUserCredential)
-    {
-        $context = New-Object -TypeName 'System.DirectoryServices.ActiveDirectory.DirectoryContext' -ArgumentList @('Domain', $DomainName, $DomainUserCredential.UserName, $DomainUserCredential.GetNetworkCredential().Password)
-    }
-    else
-    {
-        $context = New-Object -TypeName 'System.DirectoryServices.ActiveDirectory.DirectoryContext' -ArgumentList @('Domain', $DomainName)
+    $getTargetResourceParameters = @{
+        DomainName  = $DomainName
+        SiteName    = $SiteName
+        Credential  = $Credential
     }
 
-    try
-    {
-        $domain = ([System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($context)).domain.ToString()
-
-        Write-Verbose -Message ($script:localizedData.FoundDomain -f $DomainName)
-
-        return @{
-            Name = $domain
+    <#
+        Removes any keys not bound to $PSBoundParameters.
+        Need the @() around this to get a new array to enumerate.
+    #>
+    @($getTargetResourceParameters.Keys) | ForEach-Object {
+        if (-not $PSBoundParameters.ContainsKey($_))
+        {
+            $getTargetResourceParameters.Remove($_)
         }
     }
-    catch
-    {
-        Write-Verbose -Message ($script:localizedData.DomainNotFound -f $DomainName)
+
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+
+    <#
+        Only interested in the read-only property IsAvailable, which
+        should always be compared to the value $true.
+    #>
+    $compareResourcePropertyStateParameters = @{
+        CurrentValues = $getTargetResourceResult
+        DesiredValues = @{
+            IsAvailable = $true
+        }
+        Properties    = 'IsAvailable'
     }
+
+    return Compare-ResourcePropertyState @compareResourcePropertyStateParameters
 }
