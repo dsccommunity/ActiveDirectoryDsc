@@ -2109,6 +2109,175 @@ function Get-ADDirectoryContext
     return New-Object @newObjectParameters
 }
 
+<#
+    .SYNOPSIS
+        Gets the specified Active Directory domain
+
+    .PARAMETER DomainName
+        Specifies the fully qualified domain name to wait for..
+
+    .PARAMETER DomainName
+        Specifies the site in the domain where to look for a domain controller.
+
+    .PARAMETER Credential
+        Specifies the credentials that are used when accessing the domain,
+        or uses the current user if not specified.
+
+    .NOTES
+        This function is designed so that it can run on any computer without
+        having the ActiveDirectory module installed.
+#>
+function Find-DomainController
+{
+    [OutputType([System.DirectoryServices.ActiveDirectory.DomainController])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+
+        [Parameter()]
+        [System.String]
+        $SiteName,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    if ($PSBoundParameters.ContainsKey('SiteName'))
+    {
+        Write-Verbose -Message ($script:localizedData.SearchingForDomainControllerInSite -f $SiteName, $DomainName)
+    }
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.SearchingForDomainController -f $DomainName)
+    }
+
+    if ($PSBoundParameters.ContainsKey('Credential'))
+    {
+        $adDirectoryContext = Get-ADDirectoryContext -DirectoryContextType 'Domain' -Name $DomainName -Credential $Credential
+    }
+    else
+    {
+        $adDirectoryContext = Get-ADDirectoryContext -DirectoryContextType 'Domain' -Name $DomainName
+    }
+
+    $domainControllerObject = $null
+
+    try
+    {
+        if ($PSBoundParameters.ContainsKey('SiteName'))
+        {
+            $domainControllerObject = Find-DomainControllerFindOneInSiteWrapper -DirectoryContext $adDirectoryContext -SiteName $SiteName
+
+            Write-Verbose -Message ($script:localizedData.FoundDomainControllerInSite -f $SiteName, $DomainName)
+        }
+        else
+        {
+            $domainControllerObject = Find-DomainControllerFindOneWrapper -DirectoryContext $adDirectoryContext
+
+            Write-Verbose -Message ($script:localizedData.FoundDomainController -f $DomainName)
+        }
+    }
+    catch [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException]
+    {
+        Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName)
+    }
+    catch
+    {
+        throw $_
+    }
+
+    return $domainControllerObject
+}
+
+<#
+    .SYNOPSIS
+        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Forest
+        which is a class that represents an Active Directory Domain Services forest.
+
+    .PARAMETER DirectoryContext
+        The Active Directory context from which the forest object is returned.
+        Calling the Get-ADDirectoryContext gets a value that can be provided in
+        this parameter.
+
+    .NOTES
+        This is a wrapper to enable unit testing of the function Find-DomainController.
+        It is not possible to make a stub class to mock these, since these classes
+        are loaded into the PowerShell session when it starts.
+
+        This function is not exported.
+#>
+function Find-DomainControllerFindOneWrapper
+{
+    [CmdletBinding()]
+    [OutputType([System.DirectoryServices.ActiveDirectory.DomainController])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.DirectoryServices.ActiveDirectory.DirectoryContext]
+        $DirectoryContext
+    )
+
+    return [System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($DirectoryContext)
+}
+
+<#
+    .SYNOPSIS
+        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Forest
+        which is a class that represents an Active Directory Domain Services forest.
+
+    .PARAMETER DirectoryContext
+        The Active Directory context from which the forest object is returned.
+        Calling the Get-ADDirectoryContext gets a value that can be provided in
+        this parameter.
+
+    .PARAMETER SiteName
+        Specifies the site in the domain where to look for a domain controller.
+
+    .NOTES
+        This is a wrapper to enable unit testing of the function Find-DomainController.
+        It is not possible to make a stub class to mock these, since these classes
+        are loaded into the PowerShell session when it starts.
+
+        This function is not exported.
+#>
+function Find-DomainControllerFindOneInSiteWrapper
+{
+    [CmdletBinding()]
+    [OutputType([System.DirectoryServices.ActiveDirectory.DomainController])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.DirectoryServices.ActiveDirectory.DirectoryContext]
+        $DirectoryContext,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $SiteName
+    )
+
+    return [System.DirectoryServices.ActiveDirectory.DomainController]::FindOne($DirectoryContext, $SiteName)
+}
+
+<#
+    .SYNOPSIS
+        This is used to get the current user context when the resource
+        script runs.
+
+    .NOTES
+        We are putting this in a function so we can mock it with pester
+#>
+function Get-CurrentUser
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param ()
+
+    return [System.Security.Principal.WindowsIdentity]::GetCurrent()
+}
+
 $script:localizedData = Get-LocalizedData -ResourceName 'ActiveDirectoryDsc.Common' -ScriptRoot $PSScriptRoot
 
 Export-ModuleMember -Function @(
@@ -2146,4 +2315,6 @@ Export-ModuleMember -Function @(
     'New-CimCredentialInstance'
     'Add-TypeAssembly'
     'Get-ADDirectoryContext'
+    'Find-DomainController'
+    'Get-CurrentUser'
 )

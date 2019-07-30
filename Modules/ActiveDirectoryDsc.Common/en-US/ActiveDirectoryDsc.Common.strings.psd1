@@ -46,4 +46,9 @@ ConvertFrom-StringData @'
     NewDirectoryContext                 = Get a new Active Directory context of the type '{0}'. (ADCOMMON0046)
     NewDirectoryContextTarget           = The Active Directory context will target '{0}'. (ADCOMMON0047)
     NewDirectoryContextCredential       = The Active Directory context will be accessed using the '{0}' credentials. (ADCOMMON0048)
+    FoundDomainController               = Found a domain controller in the domain '{0}'. (ADCOMMON0049)
+    FoundDomainControllerInSite         = Found a domain controller in the site '{0}' in the domain '{1}'. (ADCOMMON0050)
+    FailedToFindDomainController        = No domain controller was found in the domain '{0}'. (ADCOMMON0051)
+    SearchingForDomainController        = Searching for a domain controller in the domain '{0}'. (ADCOMMON0052)
+    SearchingForDomainControllerInSite  = Searching for a domain controller in the site '{0}' in the domain '{1}'. (ADCOMMON0053)
 '@
