@@ -29,13 +29,18 @@ Configuration ADDomain_NewForest_Config
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential
+        $Credential,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $SafeModePassword
     )
 
     Import-DscResource -ModuleName PSDscResources
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
-    node $AllNodes.NodeName
+    node 'localhost'
     {
         WindowsFeature 'ADDS'
         {
@@ -49,22 +54,12 @@ Configuration ADDomain_NewForest_Config
             Ensure = 'Present'
         }
 
-        ADDomain $Node.DomainName
+        ADDomain 'contoso.com'
         {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $DomainAdministratorCredential
-            SafemodeAdministratorPassword = $DomainAdministratorCredential
-            ForestMode                    = $Node.FFL
+            DomainName                    = 'contoso.com'
+            Credential                    = $Credential
+            SafemodeAdministratorPassword = $SafeModePassword
+            ForestMode                    = 'WinThreshold'
         }
     }
-}
-
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName   = 'localhost'
-            FFL        = 'WinThreshold'
-            DomainName = 'contoso.com'
-        }
-    )
 }

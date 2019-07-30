@@ -1,4 +1,4 @@
-﻿.NAME
+.NAME
     ADDomain
 
 .DESCRIPTION
@@ -12,9 +12,9 @@
     Key - String
     The fully qualified domain name (FQDN) of the new domain.
 
-.PARAMETER DomainAdministratorCredential
+.PARAMETER Credential
     Required - String
-    Credentials used to query for domain existence.
+    Specifies the user name and password that corresponds to the account used to install the domain controller.
 
 .PARAMETER SafemodeAdministratorPassword
     Required - String
@@ -66,13 +66,18 @@ Configuration ADDomain_NewForest_Config
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential
+        $Credential,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $SafeModePassword
     )
 
     Import-DscResource -ModuleName PSDscResources
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
-    node $AllNodes.NodeName
+    node 'localhost'
     {
         WindowsFeature 'ADDS'
         {
@@ -86,24 +91,14 @@ Configuration ADDomain_NewForest_Config
             Ensure = 'Present'
         }
 
-        ADDomain $Node.DomainName
+        ADDomain 'contoso.com'
         {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $DomainAdministratorCredential
-            SafemodeAdministratorPassword = $DomainAdministratorCredential
-            ForestMode                    = $Node.FFL
+            DomainName                    = 'contoso.com'
+            Credential                    = $Credential
+            SafemodeAdministratorPassword = $SafeModePassword
+            ForestMode                    = 'WinThreshold'
         }
     }
-}
-
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName   = 'localhost'
-            FFL        = 'WinThreshold'
-            DomainName = 'contoso.com'
-        }
-    )
 }
 
 .EXAMPLE 2
@@ -118,13 +113,18 @@ Configuration ADDomain_NewChildDomain_Config
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential
+        $Credential,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $SafeModePassword
     )
 
     Import-DscResource -ModuleName PSDscResources
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
-    node $AllNodes.NodeName
+    node 'localhost'
     {
         WindowsFeature 'ADDS'
         {
@@ -138,263 +138,15 @@ Configuration ADDomain_NewChildDomain_Config
             Ensure = 'Present'
         }
 
-        ADDomain $Node.DomainName
+        ADDomain 'child'
         {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $DomainAdministratorCredential
-            SafemodeAdministratorPassword = $DomainAdministratorCredential
-            DomainMode                    = $Node.DFL
-            ParentDomainName              = $node.ParentDomain
+            DomainName                    = 'child'
+            Credential                    = $Credential
+            SafemodeAdministratorPassword = $SafeModePassword
+            DomainMode                    = 'Win2012R2'
+            ParentDomainName              = 'contoso.com'
         }
     }
-}
-
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName     = 'localhost'
-            DFL          = 'Win2012R2'
-            DomainName   = 'child'
-            ParentDomain = 'contoso.com'
-        }
-    )
-}
-
-.EXAMPLE 3
-
-This configuration will create a domain, and then create a child domain on
-another node.
-
-Configuration ADDomain_NewForestWithParentAndChildDomain_Config
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $SafemodeAdministratorCred,
-
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $DomainCred,
-
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $DnsDelegationCred,
-
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $NewADUserCred
-    )
-
-    Import-DscResource -ModuleName ActiveDirectoryDsc
-
-    Node $AllNodes.Where{ $_.Role -eq 'Parent DC' }.NodeName
-    {
-        WindowsFeature 'ADDSInstall'
-        {
-            Ensure = 'Present'
-            Name   = 'AD-Domain-Services'
-        }
-
-        ADDomain 'FirstDS'
-        {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $domainCred
-            SafemodeAdministratorPassword = $SafemodeAdministratorCred
-            DnsDelegationCredential       = $DnsDelegationCred
-            DependsOn                     = '[WindowsFeature]ADDSInstall'
-        }
-
-        WaitForADDomain 'DscForestWait'
-        {
-            DomainName           = $Node.DomainName
-            DomainUserCredential = $domainCred
-            RetryCount           = $Node.RetryCount
-            RetryIntervalSec     = $Node.RetryIntervalSec
-            DependsOn            = '[ADDomain]FirstDS'
-        }
-
-        ADUser 'FirstUser'
-        {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $domaincred
-            UserName                      = 'dummy'
-            Password                      = $NewADUserCred
-            Ensure                        = 'Present'
-            DependsOn                     = '[WaitForADDomain]DscForestWait'
-        }
-
-    }
-
-    Node $AllNodes.Where{ $_.Role -eq 'Child DC' }.NodeName
-    {
-        WindowsFeature 'ADDSInstall'
-        {
-            Ensure = 'Present'
-            Name   = 'AD-Domain-Services'
-        }
-
-        WaitForADDomain 'DscForestWait'
-        {
-            DomainName           = $Node.ParentDomainName
-            DomainUserCredential = $domainCred
-            RetryCount           = $Node.RetryCount
-            RetryIntervalSec     = $Node.RetryIntervalSec
-            DependsOn            = '[WindowsFeature]ADDSInstall'
-        }
-
-        ADDomain 'ChildDS'
-        {
-            DomainName                    = $Node.DomainName
-            ParentDomainName              = $Node.ParentDomainName
-            DomainAdministratorCredential = $domainCred
-            SafemodeAdministratorPassword = $SafemodeAdministratorCred
-            DependsOn                     = '[WaitForADDomain]DscForestWait'
-        }
-    }
-}
-
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName         = 'dsc-testNode1'
-            Role             = 'Parent DC'
-            DomainName       = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 50
-            RetryIntervalSec = 30
-        },
-
-        @{
-            NodeName         = 'dsc-testNode2'
-            Role             = 'Child DC'
-            DomainName       = 'dsc-child'
-            ParentDomainName = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 50
-            RetryIntervalSec = 30
-        }
-    )
-}
-
-.EXAMPLE 4
-
-This configuration will create a highly available domain by adding
-a second domain controller to the newly created domain.
-The WaitForDomain resource is used to ensure that the domain is
-present before the second domain controller is added.
-
-Configuration ADDomain_NewDomainWithTwoDCs_Config
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $SafemodeAdministratorCred,
-
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $domainCred,
-
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $DNSDelegationCred,
-
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        $NewADUserCred
-    )
-
-    Import-DscResource -ModuleName ActiveDirectoryDsc
-
-    Node $AllNodes.Where{ $_.Role -eq 'Primary DC' }.NodeName
-    {
-        WindowsFeature 'ADDSInstall'
-        {
-            Ensure = 'Present'
-            Name   = 'AD-Domain-Services'
-        }
-
-        ADDomain 'FirstDS'
-        {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $domainCred
-            SafemodeAdministratorPassword = $SafemodeAdministratorCred
-            DnsDelegationCredential       = $DNSDelegationCred
-            DependsOn                     = '[WindowsFeature]ADDSInstall'
-        }
-
-        WaitForADDomain 'DscForestWait'
-        {
-            DomainName           = $Node.DomainName
-            DomainUserCredential = $domainCred
-            RetryCount           = $Node.RetryCount
-            RetryIntervalSec     = $Node.RetryIntervalSec
-            DependsOn            = '[ADDomain]FirstDS'
-        }
-
-        ADUser 'FirstUser'
-        {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $domainCred
-            UserName                      = 'dummy'
-            Password                      = $NewADUserCred
-            Ensure                        = 'Present'
-            DependsOn                     = '[WaitForADDomain]DscForestWait'
-        }
-    }
-
-    Node $AllNodes.Where{ $_.Role -eq 'Replica DC' }.NodeName
-    {
-        WindowsFeature 'ADDSInstall'
-        {
-            Ensure = 'Present'
-            Name   = 'AD-Domain-Services'
-        }
-
-        WaitForADDomain 'DscForestWait'
-        {
-            DomainName           = $Node.DomainName
-            DomainUserCredential = $domainCred
-            RetryCount           = $Node.RetryCount
-            RetryIntervalSec     = $Node.RetryIntervalSec
-            DependsOn            = '[WindowsFeature]ADDSInstall'
-        }
-
-        ADDomainController 'SecondDC'
-        {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $domainCred
-            SafemodeAdministratorPassword = $SafemodeAdministratorCred
-            DependsOn                     = '[WaitForADDomain]DscForestWait'
-        }
-    }
-}
-
-# Configuration Data for AD
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName         = 'dsc-testNode1'
-            Role             = 'Primary DC'
-            DomainName       = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 20
-            RetryIntervalSec = 30
-        },
-        @{
-            NodeName         = 'dsc-testNode2'
-            Role             = 'Replica DC'
-            DomainName       = 'dsc-test.contoso.com'
-            CertificateFile  = 'C:\publicKeys\targetNode.cer'
-            Thumbprint       = 'AC23EA3A9E291A75757A556D0B71CBBF8C4F6FD8'
-            RetryCount       = 20
-            RetryIntervalSec = 30
-        }
-    )
 }
 
 

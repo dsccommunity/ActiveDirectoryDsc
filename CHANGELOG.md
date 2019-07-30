@@ -41,6 +41,10 @@
       [new helper functions for localization](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#helper-functions-for-localization)
       ([issue #316](https://github.com/PowerShell/ActiveDirectoryDsc/issues/316),
       [issue #317](https://github.com/PowerShell/ActiveDirectoryDsc/issues/317)).
+    - Removed the alias `DomainAdministratorCredential` from the parameter
+      `Credential` in the function `Restore-ADCommonObject`
+    - Removed the alias `DomainAdministratorCredential` from the parameter
+      `Credential` in the function `Get-ADCommonParameters`
   - Updated all the examples files to be prefixed with the resource
     name so they are more easily discovered in PowerShell Gallery and
     Azure Automation ([issue #416](https://github.com/PowerShell/ActiveDirectoryDsc/issues/416)).
@@ -52,6 +56,9 @@
   - BREAKING CHANGE: The previously made obsolete parameter `Enabled` has
     been removed and is now a read-only property. See resource documentation
     how to enforce the `Enabled` property.
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
   - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config
     ([issue #410](https://github.com/PowerShell/ActiveDirectoryDsc/issues/410)).
 - Changes to ADOrganizationalUnit
@@ -74,6 +81,9 @@
    distinguished name and parameter Credential is used ([issue #451](https://github.com/PowerShell/ActiveDirectoryDsc/issues/451)).
   - Added integration tests ([issue #359](https://github.com/PowerShell/ActiveDirectoryDsc/issues/359)).
 - Changes to ADDomain
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
   - Updated tests and replaced `Write-Error` with `throw`
     ([issue #332](https://github.com/PowerShell/ActiveDirectoryDsc/pull/332)).
   - Added comment-based help ([issue #335](https://github.com/PowerShell/ActiveDirectoryDsc/issues/335)).
@@ -86,6 +96,9 @@
   - Minor change to the unit tests that did not correct assert the localized
     string when an account is not found.
 - Changes to ADDomainTrust
+  - BREAKING CHANGE: Renamed the parameter `TargetDomainAdministratorCredential`
+    to `TargetCredential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
   - Refactored the resource to enable unit tests, and at the same time changed
     it to use the same code pattern as the resource xADObjectEnabledState.
   - Added unit tests ([issue #324](https://github.com/PowerShell/ActiveDirectoryDsc/issues/324)).
@@ -94,6 +107,9 @@
 - Changes to WaitForADDomain
   - Added comment-based help ([issue #341](https://github.com/PowerShell/ActiveDirectoryDsc/issues/341))
 - Changes to ADDomainController
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
   - Add support for creating Read-Only Domain Controller (RODC)
     ([issue #40](https://github.com/PowerShell/ActiveDirectoryDsc/issues/40)).
     [Svilen @SSvilen](https://github.com/SSvilen)

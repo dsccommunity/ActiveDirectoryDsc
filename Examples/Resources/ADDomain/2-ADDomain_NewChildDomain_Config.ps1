@@ -29,13 +29,18 @@ Configuration ADDomain_NewChildDomain_Config
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential
+        $Credential,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $SafeModePassword
     )
 
     Import-DscResource -ModuleName PSDscResources
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
-    node $AllNodes.NodeName
+    node 'localhost'
     {
         WindowsFeature 'ADDS'
         {
@@ -49,24 +54,13 @@ Configuration ADDomain_NewChildDomain_Config
             Ensure = 'Present'
         }
 
-        ADDomain $Node.DomainName
+        ADDomain 'child'
         {
-            DomainName                    = $Node.DomainName
-            DomainAdministratorCredential = $DomainAdministratorCredential
-            SafemodeAdministratorPassword = $DomainAdministratorCredential
-            DomainMode                    = $Node.DFL
-            ParentDomainName              = $node.ParentDomain
+            DomainName                    = 'child'
+            Credential                    = $Credential
+            SafemodeAdministratorPassword = $SafeModePassword
+            DomainMode                    = 'Win2012R2'
+            ParentDomainName              = 'contoso.com'
         }
     }
-}
-
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName     = 'localhost'
-            DFL          = 'Win2012R2'
-            DomainName   = 'child'
-            ParentDomain = 'contoso.com'
-        }
-    )
 }
