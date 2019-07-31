@@ -6,8 +6,8 @@
   - BREAKING CHANGE: Renamed the xActiveDirectory to ActiveDirectoryDsc
     and removed the 'x' from all resource names ([issue #312](https://github.com/PowerShell/ActiveDirectoryDsc/issues/312)).
   - The helper function `Find-DomainController` is exported in the module
-    manifest. When running `Import-Module ActiveDirectoryDsc` the module
-    will also import the nested module ActiveDirectoryDsc.Common.
+    manifest. When running `Import-Module -Name ActiveDirectoryDsc` the
+    module will also import the nested module ActiveDirectoryDsc.Common.
     It is exported so that the resource WaitForADDomain can reuse code
     when running a background job to search for a domain controller.
   - Added a Requirements section to every DSC resource README with the
