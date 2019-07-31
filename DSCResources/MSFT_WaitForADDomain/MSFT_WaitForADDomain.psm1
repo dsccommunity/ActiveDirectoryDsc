@@ -9,6 +9,7 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_WaitForADDomain'
 # This file is used to remember the number of times the node has been rebooted.
 $script:restartLogFile = Join-Path $env:temp -ChildPath 'WaitForADDomain_Reboot.tmp'
 
+# This scriptblock is ran inside the background job.
 $script:waitForDomainControllerScriptBlock = {
     param
     (
