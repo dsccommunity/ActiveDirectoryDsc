@@ -76,7 +76,7 @@ try
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                         $getTargetResourceResult.SiteName | Should -BeNullOrEmpty
                         $getTargetResourceResult.Credential | Should -BeNullOrEmpty
-                        $getTargetResourceResult.RebootCount | Should -Be 0
+                        $getTargetResourceResult.RestartCount | Should -Be 0
                     }
                 }
 
@@ -111,7 +111,7 @@ try
                             $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                             $getTargetResourceResult.SiteName | Should -Be 'Europe'
                             $getTargetResourceResult.Credential | Should -BeNullOrEmpty
-                            $getTargetResourceResult.RebootCount | Should -Be 0
+                            $getTargetResourceResult.RestartCount | Should -Be 0
                         }
                     }
 
@@ -132,7 +132,7 @@ try
                             $getTargetResourceParameters['Credential'] = $mockDomainUserCredential
                             $getTargetResourceParameters['SiteName'] = 'Europe'
                             $getTargetResourceParameters['WaitTimeout'] = 600
-                            $getTargetResourceParameters['RebootCount'] = 2
+                            $getTargetResourceParameters['RestartCount'] = 2
                         }
 
                         It 'Should return the same values as passed as parameters' {
@@ -140,7 +140,7 @@ try
                             $result.DomainName | Should -Be $mockDomainName
                             $result.SiteName | Should -Be 'Europe'
                             $result.WaitTimeout | Should -Be 600
-                            $result.RebootCount | Should -Be 2
+                            $result.RestartCount | Should -Be 2
                             $result.Credential.UserName | Should -Be $mockUserName
                         }
                     }

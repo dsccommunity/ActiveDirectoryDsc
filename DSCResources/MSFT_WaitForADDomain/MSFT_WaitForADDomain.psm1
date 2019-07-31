@@ -27,7 +27,7 @@ $script:rebootLogFile = Join-Path $env:temp -ChildPath 'WaitForADDomain_Reboot.t
         Specifies the timeout in seconds that the resource will wait for the
         domain to be accessible. Default value is 300 seconds.
 
-    .PARAMETER RebootCount
+    .PARAMETER RestartCount
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
 #>
@@ -54,7 +54,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $RebootCount
+        $RestartCount
     )
 
     $findDomainControllerParameters = @{
@@ -117,7 +117,7 @@ function Get-TargetResource
         SiteName    = $domainControllerSiteName
         Credential  = $cimCredentialInstance
         WaitTimeout = $WaitTimeout
-        RebootCount = $RebootCount
+        RestartCount = $RestartCount
         IsAvailable = $domainFound
     }
 }
@@ -141,7 +141,7 @@ function Get-TargetResource
         Specifies the timeout in seconds that the resource will wait for the
         domain to be accessible. Default value is 300 seconds.
 
-    .PARAMETER RebootCount
+    .PARAMETER RestartCount
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
 #>
@@ -178,7 +178,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $RebootCount
+        $RestartCount
     )
 
     for ($count = 0; $count -lt $RetryCount; $count++)
@@ -208,15 +208,15 @@ function Set-TargetResource
     {
         if ($RebootRetryCount -gt 0)
         {
-            [System.UInt32] $rebootCount = Get-Content $RebootLogFile -ErrorAction SilentlyContinue
+            [System.UInt32] $RestartCount = Get-Content $RebootLogFile -ErrorAction SilentlyContinue
 
-            if ($rebootCount -lt $RebootRetryCount)
+            if ($RestartCount -lt $RebootRetryCount)
             {
-                $rebootCount = $rebootCount + 1
+                $RestartCount = $RestartCount + 1
 
-                Write-Verbose -Message  ($script:localizedData.DomainNotFoundRebooting -f $DomainName, $count, $RetryIntervalSec, $rebootCount, $RebootRetryCount)
+                Write-Verbose -Message  ($script:localizedData.DomainNotFoundRebooting -f $DomainName, $count, $RetryIntervalSec, $RestartCount, $RebootRetryCount)
 
-                Set-Content -Path $RebootLogFile -Value $rebootCount
+                Set-Content -Path $RebootLogFile -Value $RestartCount
 
                 $global:DSCMachineStatus = 1
             }
@@ -251,7 +251,7 @@ function Set-TargetResource
         Specifies the timeout in seconds that the resource will wait for the
         domain to be accessible. Default value is 300 seconds.
 
-    .PARAMETER RebootCount
+    .PARAMETER RestartCount
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
 #>
@@ -278,7 +278,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $RebootCount
+        $RestartCount
     )
 
     Write-Verbose -Message (
@@ -309,7 +309,7 @@ function Test-TargetResource
     {
         $testTargetResourceReturnValue = $true
 
-        if ($PSBoundParameters.ContainsKey('RebootCount') -and $RebootCount -gt 0 )
+        if ($PSBoundParameters.ContainsKey('RestartCount') -and $RestartCount -gt 0 )
         {
             if (Test-Path -Path $script:rebootLogFile)
             {

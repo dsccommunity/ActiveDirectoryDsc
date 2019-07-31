@@ -19,9 +19,14 @@
 
 <#
     .DESCRIPTION
-        This configuration will wait for an AD Domain to respond before returning.
+        This configuration will wait for an Active Directory domain controller
+        to respond within 300 seconds (default) in the domain 'contoso.com'
+        before returning and allowing the configuration to continue run.
+        If the timeout is reached an error will be thrown.
+        This will use the current user when determining if the domain is available,
+        if run though LCM this will use SYSTEM (which might not have access).
 #>
-Configuration WaitForADDomain_Config
+Configuration WaitForADDomain_WaitForDomainController_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc
 
@@ -29,10 +34,7 @@ Configuration WaitForADDomain_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName           = 'contoso.com'
-            RetryIntervalSec     = 60
-            RetryCount           = 10
-            RebootRetryCount     = 1
+            DomainName = 'contoso.com'
         }
     }
 }
