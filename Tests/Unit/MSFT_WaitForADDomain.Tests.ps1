@@ -384,6 +384,53 @@ try
             }
         }
         #endregion
+
+        Describe 'MSFT_ADDomainTrust\WaitForDomainControllerScriptBlock' -Tag 'Helper' {
+            BeforeAll {
+                Mock -CommandName Clear-DnsClientCache
+                Mock -CommandName Start-Sleep
+            }
+
+            Context 'When a domain controller cannot be found' {
+                BeforeAll {
+                    Mock -CommandName Find-DomainController
+                }
+
+                It 'Should not throw and call the correct mocks' {
+                    Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
+                        'contoso.com' # DomainName
+                        'Europe', # SiteName
+                        $mockDomainUserCredential, # Credential
+                        $true # RunOnce
+                    )
+
+                    Assert-MockCalled -CommandName Find-DomainController -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Clear-DnsClientCache -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When a domain controller is found' {
+                BeforeAll {
+                    Mock -CommandName Find-DomainController -MockWith {
+                        return New-Object -TypeName 'PSObject'
+                    }
+                }
+
+                It 'Should not throw and call the correct mocks' {
+                    Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
+                        'contoso.com' # DomainName
+                        'Europe', # SiteName
+                        $null, # Credential
+                        $true # RunOnce
+                    )
+
+                    Assert-MockCalled -CommandName Find-DomainController -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Clear-DnsClientCache -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 0 -Scope It
+                }
+            }
+        }
     }
     #endregion
 }

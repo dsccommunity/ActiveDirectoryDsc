@@ -56,7 +56,6 @@ $script:waitForDomainControllerScriptBlock = {
         if ($currentDomainController)
         {
             $domainFound = $true
-
         }
         else
         {
@@ -285,23 +284,13 @@ function Set-TargetResource
 
     if (-not $isInDesiredState)
     {
-        $jobArgumentList = @(
-            $DomainName
-        )
-
-        if ($PSBoundParameters.ContainsKey('SiteName'))
-        {
-            $jobArgumentList += $SiteName
-        }
-
-        if ($PSBoundParameters.ContainsKey('Credential'))
-        {
-            $jobArgumentList += $Credential
-        }
-
         $startJobParameters = @{
             ScriptBlock = $script:waitForDomainControllerScriptBlock
-            ArgumentList = $jobArgumentList
+            ArgumentList = @(
+                $DomainName
+                $SiteName
+                $Credential
+            )
         }
 
         Write-Verbose -Message $script:localizedData.StartBackgroundJob
