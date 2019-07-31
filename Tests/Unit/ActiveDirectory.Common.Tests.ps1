@@ -2336,6 +2336,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 Mock -CommandName Write-Verbose -ParameterFilter {
                     $Message -eq ($script:localizedData.FailedToFindDomainController -f $mockDomainName)
+                } -MockWith {
+                    Write-Verbose -Message ('VERBOSE OUTPUT FROM MOCK: {0}' -f $Message) -Verbose
                 }
             }
 

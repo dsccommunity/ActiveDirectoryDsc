@@ -2100,6 +2100,10 @@ function Get-ADDirectoryContext
             $Credential.GetNetworkCredential().Password
         )
     }
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.NewDirectoryContextCredential -f (Get-CurrentUser).Name) -Verbose
+    }
 
     $newObjectParameters = @{
         TypeName = $typeName
@@ -2147,11 +2151,11 @@ function Find-DomainController
 
     if ($PSBoundParameters.ContainsKey('SiteName'))
     {
-        Write-Verbose -Message ($script:localizedData.SearchingForDomainControllerInSite -f $SiteName, $DomainName)
+        Write-Verbose -Message ($script:localizedData.SearchingForDomainControllerInSite -f $SiteName, $DomainName) -Verbose
     }
     else
     {
-        Write-Verbose -Message ($script:localizedData.SearchingForDomainController -f $DomainName)
+        Write-Verbose -Message ($script:localizedData.SearchingForDomainController -f $DomainName) -Verbose
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -2171,18 +2175,18 @@ function Find-DomainController
         {
             $domainControllerObject = Find-DomainControllerFindOneInSiteWrapper -DirectoryContext $adDirectoryContext -SiteName $SiteName
 
-            Write-Verbose -Message ($script:localizedData.FoundDomainControllerInSite -f $SiteName, $DomainName)
+            Write-Verbose -Message ($script:localizedData.FoundDomainControllerInSite -f $SiteName, $DomainName) -Verbose
         }
         else
         {
             $domainControllerObject = Find-DomainControllerFindOneWrapper -DirectoryContext $adDirectoryContext
 
-            Write-Verbose -Message ($script:localizedData.FoundDomainController -f $DomainName)
+            Write-Verbose -Message ($script:localizedData.FoundDomainController -f $DomainName) -Verbose
         }
     }
     catch [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException]
     {
-        Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName)
+        Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName) -Verbose
     }
     catch
     {
