@@ -1,5 +1,5 @@
 <#
-    This module is loaded as a nested module when the ActiveDirectryDsc module is imported,
+    This module is loaded as a nested module when the ActiveDirectoryDsc module is imported,
     remove the module from the session to avoid the error message:
 
         Multiple Script modules named 'ActiveDirectoryDsc.Common'
