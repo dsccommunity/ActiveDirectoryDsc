@@ -1,3 +1,13 @@
+<#
+    This module is loaded as a nested module when the ActiveDirectryDsc module is imported,
+    remove the module from the session to avoid the error message:
+
+        Multiple Script modules named 'ActiveDirectoryDsc.Common'
+        are currently loaded.  Make sure to remove any extra copies
+        of the module from your session before testing.
+#>
+Remove-Module -Name 'ActiveDirectoryDsc.Common' -Force
+
 # Import the ActiveDirectoryDsc.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\ActiveDirectoryDsc.Common'

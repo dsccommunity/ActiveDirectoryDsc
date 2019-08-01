@@ -306,7 +306,6 @@ function Set-TargetResource
         if ($waitJobResult)
         {
             Write-Verbose -Message $script:localizedData.BackgroundJobFinished
-
             switch ($waitJobResult.State)
             {
                 'Failed'
@@ -355,7 +354,7 @@ function Set-TargetResource
         }
 
         # Only output the result from the running job if Verbose was chosen.
-        if ($PSBoundParameters.ContainsKey('Verbose'))
+        if ($PSBoundParameters.ContainsKey('Verbose') -or $waitJobResult.State -eq 'Failed')
         {
             Write-Verbose -Message $script:localizedData.StartOutputBackgroundJob
 

@@ -58,12 +58,10 @@ Configuration ADDomainController_AddReadOnlyDomainController_Config
 
         WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName           = 'contoso.com'
-            DomainUserCredential = $Credential
-            RetryCount           = 10
-            RetryIntervalSec     = 120
+            DomainName = 'contoso.com'
+            Credential = $Credential
 
-            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+            DependsOn  = '[WindowsFeature]RSATADPowerShell'
         }
 
         ADDomainController 'Read-OnlyDomainController(RODC)'

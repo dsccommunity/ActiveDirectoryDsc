@@ -113,9 +113,9 @@
   - Added integration tests ([issue #348](https://github.com/PowerShell/ActiveDirectoryDsc/issues/348)).
 - Changes to WaitForADDomain
   - BREAKING CHANGE: Refactored the resource to handle timeout better and
-    more correctly wait for a specific amount, and at the same time make
-    the resource more intuitive to use. This change has replaced parameters
-    in the resource ([issue #343](https://github.com/PowerShell/ActiveDirectoryDsc/issues/343)).
+    more correctly wait for a specific amount of time, and at the same time
+    make the resource more intuitive to use. This change has replaced
+    parameters in the resource ([issue #343](https://github.com/PowerShell/ActiveDirectoryDsc/issues/343)).
   - Now the resource can use built-in `PsDscRunAsCredential` instead of
     specifying the `Credential` parameter ([issue #367](https://github.com/PowerShell/ActiveDirectoryDsc/issues/367)).
   - New parameter `SiteName` can be used to wait for a domain controller
