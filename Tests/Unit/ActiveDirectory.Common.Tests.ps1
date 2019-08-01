@@ -6,13 +6,13 @@
         are currently loaded.  Make sure to remove any extra copies
         of the module from your session before testing.
 #>
-Remove-Module -Name 'ActiveDirectoryDsc.Common' -Force
+# Remove-Module -Name 'ActiveDirectoryDsc.Common' -Force
 
-# Import the ActiveDirectoryDsc.Common module to test
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\ActiveDirectoryDsc.Common'
+# # Import the ActiveDirectoryDsc.Common module to test
+# $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+# $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\ActiveDirectoryDsc.Common'
 
-Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common.psm1') -Force
+# Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common.psm1') -Force
 
 # If one type does not exist, it's assumed the other ones does not exist either.
 if (-not ('Microsoft.DirectoryServices.Deployment.Types.ForestMode' -as [Type]))
