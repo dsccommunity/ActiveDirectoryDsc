@@ -15,10 +15,7 @@ else
 {
     $currentDomain = Get-ADDomain
     $netBiosDomainName = $currentDomain.NetBIOSName
-    if ($currentDomain.ComputersContainer -match 'DC=.+')
-    {
-        $domainDistinguishedName = $matches[0]
-    }
+    $domainDistinguishedName = $currentDomain.DistinguishedName
 
     $ConfigurationData = @{
         AllNodes = @(

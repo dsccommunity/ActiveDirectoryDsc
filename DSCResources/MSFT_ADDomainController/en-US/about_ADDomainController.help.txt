@@ -111,12 +111,10 @@ Configuration ADDomainController_AddDomainControllerToDomainMinimal_Config
 
         WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName           = 'contoso.com'
-            DomainUserCredential = $Credential
-            RetryCount           = 10
-            RetryIntervalSec     = 120
+            DomainName = 'contoso.com'
+            Credential = $Credential
 
-            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+            DependsOn  = '[WindowsFeature]RSATADPowerShell'
         }
 
         ADDomainController 'DomainControllerMinimal'
@@ -171,12 +169,10 @@ Configuration ADDomainController_AddDomainControllerToDomainAllProperties_Config
 
         WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName           = 'contoso.com'
-            DomainUserCredential = $Credential
-            RetryCount           = 10
-            RetryIntervalSec     = 120
+            DomainName = 'contoso.com'
+            Credential = $Credential
 
-            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+            DependsOn  = '[WindowsFeature]RSATADPowerShell'
         }
 
         ADDomainController 'DomainControllerAllProperties'
@@ -236,12 +232,10 @@ Configuration ADDomainController_AddDomainControllerToDomainUsingIFM_Config
 
         WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName           = 'contoso.com'
-            DomainUserCredential = $Credential
-            RetryCount           = 10
-            RetryIntervalSec     = 120
+            DomainName = 'contoso.com'
+            Credential = $Credential
 
-            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+            DependsOn  = '[WindowsFeature]RSATADPowerShell'
         }
 
         ADDomainController 'DomainControllerWithIFM'
@@ -297,12 +291,10 @@ Configuration ADDomainController_AddReadOnlyDomainController_Config
 
         WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName           = 'contoso.com'
-            DomainUserCredential = $Credential
-            RetryCount           = 10
-            RetryIntervalSec     = 120
+            DomainName = 'contoso.com'
+            Credential = $Credential
 
-            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+            DependsOn  = '[WindowsFeature]RSATADPowerShell'
         }
 
         ADDomainController 'Read-OnlyDomainController(RODC)'

@@ -10,29 +10,38 @@
 
 .PARAMETER DomainName
     Key - String
-    The name of the Active Directory domain to wait for.
+    Specifies the fully qualified domain name to wait for.
 
-.PARAMETER DomainUserCredential
+.PARAMETER SiteName
     Write - String
-    The user account credentials to use to perform this task.
+    Specifies the site in the domain where to look for a domain controller.
 
-.PARAMETER RetryIntervalSec
+.PARAMETER Credential
+    Write - String
+    Specifies the credentials that are used when accessing the domain, unless the built-in PsDscRunAsCredential is used.
+
+.PARAMETER WaitTimeout
     Write - UInt64
-    The interval in seconds between retry attempts. Default value is 60.
+    Specifies the timeout in seconds that the resource will wait for the domain to be accessible. Default value is 300 seconds.
 
-.PARAMETER RetryCount
+.PARAMETER RestartCount
     Write - UInt32
-    The number of retries before failing. Default value is 10.
+    Specifies the number of times the node will be reboot in an effort to connect to the domain.
 
-.PARAMETER RebootRetryCount
-    Write - UInt32
-    The number of times to reboot after failing and then restart retrying. Default value is 0 (zero).
+.PARAMETER IsAvailable
+    Read - Boolean
+    Returns a value indicating if a domain controller was found.
 
 .EXAMPLE 1
 
-This configuration will wait for an AD Domain to respond before returning.
+This configuration will wait for an Active Directory domain controller
+to respond within 300 seconds (default) in the domain 'contoso.com'
+before returning and allowing the configuration to continue run.
+If the timeout is reached an error will be thrown.
+This will use the current user when determining if the domain is available,
+if run though LCM this will use SYSTEM (which might not have access).
 
-Configuration WaitForADDomain_Config
+Configuration WaitForADDomain_WaitForDomainController_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc
 
@@ -40,10 +49,172 @@ Configuration WaitForADDomain_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName           = 'contoso.com'
-            RetryIntervalSec     = 60
-            RetryCount           = 10
-            RebootRetryCount     = 1
+            DomainName = 'contoso.com'
+        }
+    }
+}
+
+.EXAMPLE 2
+
+This configuration will wait for an Active Directory domain controller
+to respond within 300 seconds (default) in the domain 'contoso.com'
+before returning and allowing the configuration to continue run.
+If the timeout is reached an error will be thrown.
+This will use the user credential passes to the built-in PsDscRunAsCredential
+parameter when determining if the domain is available.
+
+Configuration WaitForADDomain_WaitForDomainControllerUsingBuiltInCredential_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        WaitForADDomain 'contoso.com'
+        {
+            DomainName = 'contoso.com'
+
+            PsDscRunAsCredential = $Credential
+        }
+    }
+}
+
+.EXAMPLE 3
+
+This configuration will wait for an Active Directory domain controller
+to respond within 300 seconds (default) in the domain 'contoso.com'
+before returning and allowing the configuration to continue run.
+If the timeout is reached an error will be thrown.
+This will use the user credential passes to the parameter Credential
+when determining if the domain is available.
+
+Configuration WaitForADDomain_WaitForDomainControllerUsingCredential_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        WaitForADDomain 'contoso.com'
+        {
+            DomainName = 'contoso.com'
+            Credential = $Credential
+        }
+    }
+}
+
+.EXAMPLE 4
+
+This configuration will wait for an Active Directory domain controller
+in the site 'Europe' to respond within 300 seconds (default) in the
+domain 'contoso.com' before returning and allowing the configuration to
+continue run.
+If the timeout is reached an error will be thrown.
+This will use the user credential passes to the built-in PsDscRunAsCredential
+parameter when determining if the domain is available.
+
+Configuration WaitForADDomain_WaitForDomainControllerInSite_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        WaitForADDomain 'contoso.com'
+        {
+            DomainName = 'contoso.com'
+            SiteName   = 'Europe'
+
+            PsDscRunAsCredential = $Credential
+        }
+    }
+}
+
+.EXAMPLE 5
+
+This configuration will wait for an Active Directory domain controller
+to respond within 300 seconds (default) in the domain 'contoso.com'
+before returning and allowing the configuration to continue run.
+If the timeout is reached the node will be restarted up to two times
+and again wait after each restart. If the no domain controller is found
+after the second restart an error will be thrown.
+This will use the user credential passes to the built-in PsDscRunAsCredential
+parameter when determining if the domain is available.
+
+Configuration WaitForADDomain_WaitForDomainControllerWithReboot_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        WaitForADDomain 'contoso.com'
+        {
+            DomainName = 'contoso.com'
+            RestartCount = 2
+
+            PsDscRunAsCredential = $Credential
+        }
+    }
+}
+
+.EXAMPLE 6
+
+This configuration will wait for an Active Directory domain controller
+to respond within 600 seconds in the domain 'contoso.com' before
+returning and allowing the configuration to continue run. If the timeout
+is reached an error will be thrown.
+This will use the user credential passes to the built-in PsDscRunAsCredential
+parameter when determining if the domain is available.
+
+Configuration WaitForADDomain_WaitForDomainControllerWithLongerDelay_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $Credential
+    )
+
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        WaitForADDomain 'contoso.com'
+        {
+            DomainName = 'contoso.com'
+            WaitTimeout = 600
+
+            PsDscRunAsCredential = $Credential
         }
     }
 }

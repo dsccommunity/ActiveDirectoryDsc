@@ -513,14 +513,4 @@ function Get-ADRootDomainDN
     return $rootDomainDN
 }
 
-<#
-    .SYNOPSIS
-        This is used to get the current user context when the resource script runs.
-        We are putting this in a function so we can mock it with pester
-#>
-function Get-CurrentUser
-{
-    return [System.Security.Principal.WindowsIdentity]::GetCurrent()
-}
-
 Export-ModuleMember *-TargetResource

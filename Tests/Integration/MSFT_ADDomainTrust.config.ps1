@@ -7,8 +7,8 @@
         To run this integration test there are prerequisites that need to
         be setup.
 
-        1. One Domain Controller with forest contoso.com.
-        2. One Domain Controller with forest lab.local.
+        1. One Domain Controller as source (e.g. forest contoso.com).
+        2. One Domain Controller to target with forest lab.local.
         3. DNS working between the forests (conditional forwarder).
         4. Credentials with permission in the target domain (lab.local).
         5. If no certificate path is set to the environment variable
@@ -28,16 +28,21 @@ if (Test-Path -Path $configFile)
 }
 else
 {
+
+    $currentDomainController = Get-ADDomainController
+    $domainName = $currentDomainController.Domain
+    $forestName = $currentDomainController.Forest
+
     $ConfigurationData = @{
         AllNodes = @(
             @{
                 NodeName        = 'localhost'
                 CertificateFile = $env:DscPublicCertificatePath
 
-                SourceDomain    = 'contoso.com'
+                SourceDomain    = $domainName
                 TargetDomain    = 'lab.local'
 
-                SourceForest    = 'contoso.com'
+                SourceForest    = $forestName
                 TargetForest    = 'lab.local'
 
                 TargetUserName  = 'LAB\Administrator'

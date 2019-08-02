@@ -36,141 +36,595 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
-        $domainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-            'Username',
-            $(ConvertTo-SecureString -String 'Password' -AsPlainText -Force)
+        $mockUserName = 'User1'
+        $mockDomainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+            $mockUserName,
+            (ConvertTo-SecureString -String 'Password' -AsPlainText -Force)
         )
 
-        $domainName = 'example.com'
-        $testParams = @{
-            DomainName = $domainName
-            DomainUserCredential = $domainUserCredential
-            RetryIntervalSec = 10
-            RetryCount = 5
-        }
+        $mockDomainName = 'example.com'
+        $mockSiteName = 'Europe'
 
-        $rebootTestParams = @{
-            DomainName = $domainName
-            DomainUserCredential = $domainUserCredential
-            RetryIntervalSec = 10
-            RetryCount = 5
-            RebootRetryCount = 3
+        $mockDefaultParameters = @{
+            DomainName = $mockDomainName
+            Verbose    = $true
         }
-
-        $fakeDomainObject = @{Name = $domainName}
 
         #region Function Get-TargetResource
-        Describe 'WaitForADDomain\Get-TargetResource' {
-            It 'Returns a "System.Collections.Hashtable" object type' {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                $targetResource = Get-TargetResource @testParams
-                $targetResource -is [System.Collections.Hashtable] | Should -Be $true
-            }
+        Describe 'WaitForADDomain\Get-TargetResource' -Tag 'Get' {
+            Context 'When the system is in the desired state' {
+                Context 'When no domain controller is found in the domain' {
+                    BeforeAll {
+                        Mock -CommandName Find-DomainController -MockWith {
+                            return $null
+                        }
 
-            It "Returns DomainName = $($testParams.DomainName) when domain is found" {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                $targetResource = Get-TargetResource @testParams
-                $targetResource.DomainName | Should -Be $testParams.DomainName
-            }
+                        $getTargetResourceParameters = $mockDefaultParameters.Clone()
+                    }
 
-            It "Returns an empty DomainName when domain is not found" {
-                Mock -CommandName Get-Domain
-                $targetResource = Get-TargetResource @testParams
-                $targetResource.DomainName | Should -Be $null
+                    It 'Should return the same values as passed as parameters' {
+                        $result = Get-TargetResource @getTargetResourceParameters
+                        $result.DomainName | Should -Be $mockDomainName
+                    }
+
+                    It 'Should return default value for property WaitTimeout' {
+                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                        $getTargetResourceResult.WaitTimeout | Should -Be 300
+                    }
+
+                    It 'Should return $null for the rest of the properties' {
+                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                        $getTargetResourceResult.SiteName | Should -BeNullOrEmpty
+                        $getTargetResourceResult.Credential | Should -BeNullOrEmpty
+                        $getTargetResourceResult.RestartCount | Should -Be 0
+                    }
+                }
+
+                Context 'When a domain controller is found in the domain' {
+                    BeforeAll {
+                        Mock -CommandName Find-DomainController -MockWith {
+                            return New-Object -TypeName PSObject |
+                                Add-Member -MemberType ScriptProperty -Name 'Domain' -Value {
+                                    New-Object -TypeName PSObject |
+                                        Add-Member -MemberType ScriptMethod -Name 'ToString' -Value {
+                                            return $mockDomainName
+                                        } -PassThru -Force
+                                } -PassThru |
+                                Add-Member -MemberType NoteProperty -Name 'SiteName' -Value $mockSiteName -PassThru -Force
+                        }
+
+                        $getTargetResourceParameters = $mockDefaultParameters.Clone()
+                    }
+
+                    Context 'When using the default parameters' {
+                        It 'Should return the same values as passed as parameters' {
+                            $result = Get-TargetResource @getTargetResourceParameters
+                            $result.DomainName | Should -Be $mockDomainName
+                        }
+
+                        It 'Should return default value for property WaitTimeout' {
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.WaitTimeout | Should -Be 300
+                        }
+
+                        It 'Should return $null for the rest of the properties' {
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.SiteName | Should -Be 'Europe'
+                            $getTargetResourceResult.Credential | Should -BeNullOrEmpty
+                            $getTargetResourceResult.RestartCount | Should -Be 0
+                        }
+                    }
+
+                    Context 'When using all available parameters' {
+                        BeforeAll {
+                            $getTargetResourceParameters['Credential'] = $mockDomainUserCredential
+                            $getTargetResourceParameters['SiteName'] = 'Europe'
+                            $getTargetResourceParameters['WaitTimeout'] = 600
+                            $getTargetResourceParameters['RestartCount'] = 2
+                        }
+
+                        It 'Should return the same values as passed as parameters' {
+                            $result = Get-TargetResource @getTargetResourceParameters
+                            $result.DomainName | Should -Be $mockDomainName
+                            $result.SiteName | Should -Be 'Europe'
+                            $result.WaitTimeout | Should -Be 600
+                            $result.RestartCount | Should -Be 2
+                            $result.Credential.UserName | Should -Be $mockUserName
+                        }
+                    }
+
+                    Context 'When using all available parameters' {
+                        BeforeAll {
+                            $mockBuiltInCredentialName = 'BuiltInCredential'
+
+                            # Mock PsDscRunAsCredential context.
+                            $PsDscContext = @{
+                                RunAsUser = $mockBuiltInCredentialName
+                            }
+
+                            Mock -CommandName Write-Verbose -ParameterFilter {
+                                $Message -eq ($script:localizedData.ImpersonatingCredentials -f $mockBuiltInCredentialName)
+                            } -MockWith {
+                                Write-Verbose -Message ('VERBOSE OUTPUT FROM MOCK: {0}' -f $Message) -Verbose
+                            }
+
+                            $getTargetResourceParameters = $mockDefaultParameters.Clone()
+                        }
+
+                        It 'Should return the same values as passed as parameters' {
+                            $result = Get-TargetResource @getTargetResourceParameters
+                            $result.DomainName | Should -Be $mockDomainName
+                            $result.Credential | Should -BeNullOrEmpty
+
+                            Assert-MockCalled -CommandName Write-Verbose -Exactly -Times 1 -Scope It
+                        }
+                    }
+                }
             }
         }
         #endregion
 
 
         #region Function Test-TargetResource
-        Describe 'WaitForADDomain\Test-TargetResource' {
-            It 'Returns a "System.Boolean" object type' {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                $targetResource =  Test-TargetResource @testParams
-                $targetResource -is [System.Boolean] | Should -Be $true
+        Describe 'WaitForADDomain\Test-TargetResource' -tag 'Test' {
+            Context 'When the system is in the desired state' {
+                Context 'When a domain controller is found' {
+                    BeforeAll {
+                        Mock -CommandName Compare-TargetResourceState -MockWith {
+                            return @(
+                                @{
+                                    ParameterName  = 'IsAvailable'
+                                    InDesiredState = $true
+                                }
+                            )
+                        }
+                    }
+
+                    It 'Should return $true' {
+                        $testTargetResourceResult = Test-TargetResource @mockDefaultParameters
+                        $testTargetResourceResult | Should -BeTrue
+
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When a domain controller is found, and RestartCount was used' {
+                    BeforeAll {
+                        Mock -CommandName Compare-TargetResourceState -MockWith {
+                            return @(
+                                @{
+                                    ParameterName  = 'IsAvailable'
+                                    InDesiredState = $true
+                                }
+                            )
+                        }
+
+                        Mock -CommandName Remove-Item
+                        Mock -CommandName Test-Path -MockWith {
+                            return $true
+                        }
+
+                        $testTargetResourceParameters = $mockDefaultParameters.Clone()
+                        $testTargetResourceParameters['RestartCount'] = 2
+                    }
+
+                    It 'Should return $true' {
+                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
+                        $testTargetResourceResult | Should -BeTrue
+
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-Item -Exactly -Times 1 -Scope It
+                    }
+                }
             }
 
-            It 'Passes when domain found' {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                Test-TargetResource @testParams | Should -Be $true
-            }
+            Context 'When the system is not in the desired state' {
+                Context 'When a domain controller cannot be reached' {
+                    BeforeAll {
+                        Mock -CommandName Compare-TargetResourceState -MockWith {
+                            return @(
+                                @{
+                                    ParameterName  = 'IsAvailable'
+                                    InDesiredState = $false
+                                }
+                            )
+                        }
+                    }
 
-            It 'Fails when domain not found' {
-                Mock -CommandName Get-Domain
-                Test-TargetResource @testParams | Should -Be $false
+                    It 'Should return $false' {
+                        $testTargetResourceResult = Test-TargetResource @mockDefaultParameters
+                        $testTargetResourceResult | Should -BeFalse
+
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                    }
+                }
             }
         }
         #endregion
 
+        Describe 'MSFT_ADDomainTrust\Compare-TargetResourceState' -Tag 'Compare' {
+            BeforeAll {
+                $mockGetTargetResource_Absent = {
+                    return @{
+                        DomainName   = $mockDomainName
+                        SiteName     = $null
+                        Credential   = $null
+                        WaitTimeout  = 300
+                        RestartCount = 0
+                        IsAvailable  = $false
+                    }
+                }
+
+                $mockGetTargetResource_Present = {
+                    return @{
+                        DomainName   = $mockDomainName
+                        SiteName     = $mockSiteName
+                        Credential   = $null
+                        WaitTimeout  = 300
+                        RestartCount = 0
+                        IsAvailable  = $true
+                    }
+                }
+            }
+
+            Context 'When the system is in the desired state' {
+                Context 'When a domain controller is found' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Present
+
+                        $testTargetResourceParameters = $mockDefaultParameters.Clone()
+                        $testTargetResourceParameters['DomainName'] = $mockDomainName
+                    }
+
+                    It 'Should return the correct values' {
+                        $compareTargetResourceStateResult = Compare-TargetResourceState @testTargetResourceParameters
+                        $compareTargetResourceStateResult | Should -HaveCount 1
+
+                        $comparedReturnValue = $compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'IsAvailable' })
+                        $comparedReturnValue | Should -Not -BeNullOrEmpty
+                        $comparedReturnValue.Expected | Should -Be $true
+                        $comparedReturnValue.Actual | Should -Be $true
+                        $comparedReturnValue.InDesiredState | Should -BeTrue
+
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    }
+                }
+
+            }
+
+            Context 'When the system is not in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Absent
+
+                    $testTargetResourceParameters = $mockDefaultParameters.Clone()
+                    $testTargetResourceParameters['DomainName'] = $mockDomainName
+                }
+
+                It 'Should return the correct values' {
+                    $compareTargetResourceStateResult = Compare-TargetResourceState @testTargetResourceParameters
+                    $compareTargetResourceStateResult | Should -HaveCount 1
+
+                    $comparedReturnValue = $compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'IsAvailable' })
+                    $comparedReturnValue | Should -Not -BeNullOrEmpty
+                    $comparedReturnValue.Expected | Should -Be $true
+                    $comparedReturnValue.Actual | Should -Be $false
+                    $comparedReturnValue.InDesiredState | Should -BeFalse
+
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                }
+            }
+        }
 
         #region Function Set-TargetResource
-        Describe 'WaitForADDomain\Set-TargetResource' {
-            BeforeEach{
-                $global:DSCMachineStatus = $null
+        Describe 'WaitForADDomain\Set-TargetResource' -Tag 'Set' {
+            BeforeEach {
+                $global:DSCMachineStatus = 0
             }
 
-            It "Doesn't throw exception and doesn't call Start-Sleep, Clear-DnsClientCache or set `$global:DSCMachineStatus when domain found" {
-                Mock -CommandName Get-Domain -MockWith {return $fakeDomainObject}
-                Mock -CommandName Start-Sleep
-                Mock -CommandName Clear-DnsClientCache
-                {Set-TargetResource @testParams} | Should -Not -Throw
-                $global:DSCMachineStatus | Should -Not -Be 1
-                Assert-MockCalled -CommandName Start-Sleep -Times 0 -Scope It
-                Assert-MockCalled -CommandName Clear-DnsClientCache -Times 0 -Scope It
+            Context 'When the system is in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Remove-RestartLogFile
+                    Mock -CommandName Receive-Job
+                    Mock -CommandName Start-Job
+                    Mock -CommandName Wait-Job
+                    Mock -CommandName Remove-Job
+
+                    Mock -CommandName Compare-TargetResourceState -MockWith {
+                        return @(
+                            @{
+                                ParameterName  = 'IsAvailable'
+                                InDesiredState = $true
+                            }
+                        )
+                    }
+                }
+
+                Context 'When a domain controller is found' {
+                    It 'Should not throw and call the correct mocks' {
+                        { Set-TargetResource @mockDefaultParameters } | Should -Not -Throw
+
+                        $global:DSCMachineStatus | Should -Be 0
+
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Receive-Job -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Start-Job -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Wait-Job -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Remove-Job -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+                    }
+                }
             }
 
-            It "Throws exception and does not set `$global:DSCMachineStatus when domain not found after $($testParams.RetryCount) retries when RebootRetryCount is not set" {
-                Mock -CommandName Get-Domain
-                {Set-TargetResource @testParams} | Should -Throw
-                $global:DSCMachineStatus | Should -Not -Be 1
-            }
+            Context 'When the system is not in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Remove-RestartLogFile
+                    Mock -CommandName Receive-Job
 
-            It "Throws exception when domain not found after $($rebootTestParams.RebootRetryCount) reboot retries when RebootRetryCount is exceeded" {
-                Mock -CommandName Get-Domain
-                Mock -CommandName Get-Content -MockWith {return $rebootTestParams.RebootRetryCount}
-                {Set-TargetResource @rebootTestParams} | Should -Throw
-            }
+                    <#
+                        The code being tested is using parameter Job, so here
+                        that parameter must be avoided so that we don't mock
+                        in an endless loop.
+                    #>
+                    Mock -CommandName Start-Job -ParameterFilter {
+                        $PSBoundParameters.ContainsKey('ArgumentList')
+                    } -MockWith {
+                        <#
+                            Need to mock an object by actually creating a job
+                            that completes successfully.
+                        #>
+                        $mockJobObject = Start-Job -ScriptBlock {
+                            Start-Sleep -Milliseconds 1
+                        }
 
-            It "Calls Set-Content if reboot count is less than RebootRetryCount when domain not found" {
-                Mock -CommandName Get-Domain
-                Mock -CommandName Get-Content -MockWith {return 0}
-                Mock -CommandName Set-Content
-                {Set-TargetResource @rebootTestParams} | Should -Not -Throw
-                Assert-MockCalled -CommandName Set-Content -Times 1 -Exactly -Scope It
-            }
+                        Remove-Job -Id $mockJobObject.Id -Force
 
-            It "Sets `$global:DSCMachineStatus = 1 and does not throw an exception if the domain is not found and RebootRetryCount is not exceeded" {
-                Mock -CommandName Get-Domain
-                Mock -CommandName Get-Content -MockWith {return 0}
-                {Set-TargetResource @rebootTestParams} | Should -Not -Throw
-                $global:DSCMachineStatus | Should -Be 1
-            }
+                        return $mockJobObject
+                    }
 
-            It "Calls Get-Domain exactly $($testParams.RetryCount) times when domain not found" {
-                Mock -CommandName Get-Domain
-                Mock -CommandName Start-Sleep
-                Mock -CommandName Clear-DnsClientCache
-                {Set-TargetResource @testParams} | Should -Throw
-                Assert-MockCalled -CommandName Get-Domain -Times $testParams.RetryCount -Exactly -Scope It
-            }
+                    <#
+                        The code being tested is using parameter Job, so here
+                        that parameter must be avoided so that we don't mock
+                        in an endless loop.
+                    #>
+                    Mock -CommandName Remove-Job -ParameterFilter {
+                        $null -ne $Job
+                    }
 
-            It "Calls Start-Sleep exactly $($testParams.RetryCount) times when domain not found" {
-                Mock -CommandName Get-Domain
-                Mock -CommandName Start-Sleep
-                Mock -CommandName Clear-DnsClientCache
-                {Set-TargetResource @testParams} | Should -Throw
-                Assert-MockCalled -CommandName Start-Sleep -Times $testParams.RetryCount -Exactly -Scope It
-            }
+                    Mock -CommandName Compare-TargetResourceState -MockWith {
+                        return @(
+                            @{
+                                ParameterName  = 'IsAvailable'
+                                InDesiredState = $false
+                            }
+                        )
+                    }
+                }
 
-            It "Calls Clear-DnsClientCache exactly $($testParams.RetryCount) times when domain not found" {
-                Mock -CommandName Get-Domain
-                Mock -CommandName Start-Sleep
-                Mock -CommandName Clear-DnsClientCache
-                {Set-TargetResource @testParams} | Should -Throw
-                Assert-MockCalled -CommandName Clear-DnsClientCache -Times $testParams.RetryCount -Exactly -Scope It
+                Context 'When a domain controller is reached before the timeout period' {
+                    BeforeAll {
+                        <#
+                            The code being tested is using parameter Job, so here
+                            that parameter must be avoided so that we don't mock
+                            in an endless loop.
+                        #>
+                        Mock -CommandName Wait-Job -ParameterFilter {
+                            $null -ne $Job
+                        } -MockWith {
+                            <#
+                                Need to mock an object by actually creating a job
+                                that completes successfully.
+                            #>
+                            $mockJobObject = Start-Job -ScriptBlock {
+                                Start-Sleep -Milliseconds 1
+                            }
+
+                            <#
+                                The variable name must not be the same as the one
+                                used in the call to Wait-Job.
+                            #>
+                            $mockWaitJobObject = Wait-Job -Id $mockJobObject.Id
+
+                            Remove-Job -Id $mockJobObject.Id -Force
+
+                            return $mockJobObject
+                        }
+                    }
+
+                    It 'Should not throw and call the correct mocks' {
+                        { Set-TargetResource @mockDefaultParameters } | Should -Not -Throw
+
+                        $global:DSCMachineStatus | Should -Be 0
+
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Start-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+                    }
+
+                    Context 'When a restart was requested' {
+                        BeforeAll {
+                            $setTagetResourceParameters = $mockDefaultParameters.Clone()
+                            $setTagetResourceParameters['RestartCount'] = 1
+                        }
+
+                        It 'Should not throw and call the correct mocks' {
+                            { Set-TargetResource @setTagetResourceParameters  } | Should -Not -Throw
+
+                            $global:DSCMachineStatus | Should -Be 0
+
+                            Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 1 -Scope It
+                        }
+                    }
+                }
+
+                Context 'When the script that searches for a domain controller fails' {
+                    BeforeAll {
+                        <#
+                            The code being tested is using parameter Job, so here
+                            that parameter must be avoided so that we don't mock
+                            in an endless loop.
+                        #>
+                        Mock -CommandName Wait-Job -ParameterFilter {
+                            $null -ne $Job
+                        } -MockWith {
+                            <#
+                                Need to mock an object by actually creating a job
+                                that completes successfully.
+                            #>
+                            $mockJobObject = Start-Job -ScriptBlock {
+                                throw 'Mocked error in mocked script'
+                            }
+
+                            <#
+                                The variable name must not be the same as the one
+                                used in the call to Wait-Job.
+                            #>
+                            $mockWaitJobObject = Wait-Job -Id $mockJobObject.Id
+
+                            Remove-Job -Id $mockJobObject.Id -Force
+
+                            return $mockJobObject
+                        }
+
+                        $setTagetResourceParameters = $mockDefaultParameters.Clone()
+
+                        <#
+                            To test that the background job output is written when
+                            the job fails even if `Verbose` is not set.
+                        #>
+                        $setTagetResourceParameters.Remove('Verbose')
+                    }
+
+                    It 'Should not throw and call the correct mocks' {
+                        { Set-TargetResource @setTagetResourceParameters } | Should -Throw $script:localizedData.NoDomainController
+
+                        $global:DSCMachineStatus | Should -Be 0
+
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Start-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When a domain controller cannot be reached before the timeout period' {
+                    BeforeAll {
+                        <#
+                            The code being tested is using parameter Job, so here
+                            that parameter must be avoided so that we don't mock
+                            in an endless loop.
+                        #>
+                        Mock -CommandName Wait-Job -ParameterFilter {
+                            $null -ne $Job
+                        } -MockWith {
+                            return $null
+                        }
+                    }
+
+                    It 'Should throw the correct error message and call the correct mocks' {
+                        { Set-TargetResource @mockDefaultParameters } | Should -Throw $script:localizedData.NoDomainController
+
+                        $global:DSCMachineStatus | Should -Be 0
+
+                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Start-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+                    }
+
+                    Context 'When a restart is requested when a domain controller cannot be found' {
+                        BeforeAll {
+                            Mock -CommandName Get-Content
+                            Mock -CommandName Set-Content
+
+                            <#
+                                The code being tested is using parameter Job, so here
+                                that parameter must be avoided so that we don't mock
+                                in an endless loop.
+                            #>
+                            Mock -CommandName Wait-Job -ParameterFilter {
+                                $null -ne $Job
+                            } -MockWith {
+                                return $null
+                            }
+
+                            $setTagetResourceParameters = $mockDefaultParameters.Clone()
+                            $setTagetResourceParameters['RestartCount'] = 1
+                        }
+
+                        It 'Should throw the correct error message and call the correct mocks' {
+                            { Set-TargetResource @setTagetResourceParameters  } | Should -Throw $script:localizedData.NoDomainController
+
+                            $global:DSCMachineStatus | Should -Be 1
+
+                            Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Start-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Get-Content -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Set-Content -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+                        }
+                    }
+                }
             }
         }
         #endregion
+
+        Describe 'MSFT_ADDomainTrust\WaitForDomainControllerScriptBlock' -Tag 'Helper' {
+            BeforeAll {
+                Mock -CommandName Clear-DnsClientCache
+                Mock -CommandName Start-Sleep
+            }
+
+            Context 'When a domain controller cannot be found' {
+                BeforeAll {
+                    Mock -CommandName Find-DomainController
+                }
+
+                It 'Should not throw and call the correct mocks' {
+                    Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
+                        'contoso.com' # DomainName
+                        'Europe', # SiteName
+                        $mockDomainUserCredential, # Credential
+                        $true # RunOnce
+                    )
+
+                    Assert-MockCalled -CommandName Find-DomainController -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Clear-DnsClientCache -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When a domain controller is found' {
+                BeforeAll {
+                    Mock -CommandName Find-DomainController -MockWith {
+                        return New-Object -TypeName 'PSObject'
+                    }
+                }
+
+                It 'Should not throw and call the correct mocks' {
+                    Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
+                        'contoso.com' # DomainName
+                        'Europe', # SiteName
+                        $null, # Credential
+                        $true # RunOnce
+                    )
+
+                    Assert-MockCalled -CommandName Find-DomainController -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Clear-DnsClientCache -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 0 -Scope It
+                }
+            }
+        }
     }
     #endregion
 }
