@@ -2377,7 +2377,9 @@ function Test-Password
 
     Write-Verbose -Message ($script:localizedData.CreatingADDomainConnection -f $DomainName)
 
-    Add-Type -AssemblyName 'System.DirectoryServices.AccountManagement'
+    $typeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
+
+    Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName $typeName
 
     <#
         If the domain name contains a distinguished name, set it to the fully
@@ -2397,7 +2399,7 @@ function Test-Password
             $script:localizedData.TestPasswordUsingImpersonation -f $Credential.UserName, $UserName
         )
 
-        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @(
+        $principalContext = New-Object -TypeName $typeName -ArgumentList @(
             [System.DirectoryServices.AccountManagement.ContextType]::Domain,
             $DomainName,
             $Credential.UserName,
@@ -2406,7 +2408,7 @@ function Test-Password
     }
     else
     {
-        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @(
+        $principalContext = New-Object -TypeName $typeName -ArgumentList @(
             [System.DirectoryServices.AccountManagement.ContextType]::Domain,
             $DomainName,
             $null,
