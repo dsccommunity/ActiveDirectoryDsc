@@ -1,3 +1,13 @@
+<#
+    This module is loaded as a nested module when the ActiveDirectoryDsc module is imported,
+    remove the module from the session to avoid the error message:
+
+        Multiple Script modules named 'ActiveDirectoryDsc.Common'
+        are currently loaded.  Make sure to remove any extra copies
+        of the module from your session before testing.
+#>
+Get-Module -Name 'ActiveDirectoryDsc.Common' -All | Remove-Module -Force
+
 # Import the ActiveDirectoryDsc.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\ActiveDirectoryDsc.Common'
@@ -2250,6 +2260,126 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                         -and $ArgumentList[3] -eq $mockAdministratorPassword
                     } -Exactly -Times 1 -Scope It
                 }
+            }
+
+            Assert-VerifiableMock
+        }
+    }
+
+    Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainController'  {
+        Context 'When a domain controller is found in a domain' {
+            BeforeAll {
+                $mockAdministratorUser = 'admin@contoso.com'
+                $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12'
+                $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                    $mockAdministratorUser,
+                    ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
+                )
+
+                $mockDomainName = 'contoso.com'
+
+                Mock -CommandName Find-DomainControllerFindOneInSiteWrapper
+                Mock -CommandName Find-DomainControllerFindOneWrapper
+                Mock -CommandName Get-ADDirectoryContext -MockWith {
+                    return New-Object `
+                        -TypeName 'System.DirectoryServices.ActiveDirectory.DirectoryContext' `
+                        -ArgumentList @('Domain', $mockDomainName)
+                }
+            }
+
+            Context 'When the calling with only the parameter DomainName' {
+                It 'Should not throw and call the correct mocks' {
+                    { Find-DomainController -DomainName $mockDomainName -Verbose } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Get-ADDirectoryContext -ParameterFilter {
+                        $Name -eq $mockDomainName `
+                        -and -not $PSBoundParameters.ContainsKey('Credential')
+                    } -Exactly -Times 1 -Scope It
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -Command Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When the calling with the parameter SiteName' {
+                It 'Should not throw and call the correct mocks' {
+                    { Find-DomainController -DomainName $mockDomainName -SiteName 'Europe' -Verbose } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Get-ADDirectoryContext -ParameterFilter {
+                        $Name -eq $mockDomainName `
+                        -and -not $PSBoundParameters.ContainsKey('Credential')
+                    } -Exactly -Times 1 -Scope It
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -Command Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the calling with the parameter Credential' {
+                It 'Should not throw and call the correct mocks' {
+                    { Find-DomainController -DomainName $mockDomainName -Credential $mockAdministratorCredential -Verbose } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Get-ADDirectoryContext -ParameterFilter {
+                        $Name -eq $mockDomainName `
+                        -and $PSBoundParameters.ContainsKey('Credential')
+                    } -Exactly -Times 1 -Scope It
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -Command Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Assert-VerifiableMock
+        }
+
+        Context 'When no domain controller is found' {
+            BeforeAll {
+                Mock -CommandName Get-ADDirectoryContext -MockWith {
+                    return New-Object `
+                        -TypeName 'System.DirectoryServices.ActiveDirectory.DirectoryContext' `
+                        -ArgumentList @('Domain', $mockDomainName)
+                }
+
+                Mock -CommandName Find-DomainControllerFindOneWrapper -MockWith {
+                    throw New-object -TypeName 'System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException'
+                }
+
+                Mock -CommandName Write-Verbose -ParameterFilter {
+                    $Message -eq ($script:localizedData.FailedToFindDomainController -f $mockDomainName)
+                } -MockWith {
+                    Write-Verbose -Message ('VERBOSE OUTPUT FROM MOCK: {0}' -f $Message) -Verbose
+                }
+            }
+
+            It 'Should not throw and call the correct mocks' {
+                { Find-DomainController -DomainName $mockDomainName -Verbose } | Should -Not -Throw
+
+                Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                Assert-MockCalled -Command Write-Verbose -Exactly -Times 1 -Scope It
+            }
+
+            Assert-VerifiableMock
+        }
+
+        Context 'When the lookup for a domain controller fails' {
+            BeforeAll {
+                Mock -CommandName Get-ADDirectoryContext -MockWith {
+                    return New-Object `
+                        -TypeName 'System.DirectoryServices.ActiveDirectory.DirectoryContext' `
+                        -ArgumentList @('Domain', $mockDomainName)
+                }
+
+                $mockErrorMessage = 'Mocked error'
+
+                Mock -CommandName Find-DomainControllerFindOneWrapper -MockWith {
+                    throw $mockErrorMessage
+                }
+            }
+
+            It 'Should throw the correct error' {
+                { Find-DomainController -DomainName $mockDomainName -Verbose } | Should -Throw $mockErrorMessage
+
+                Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
             }
 
             Assert-VerifiableMock

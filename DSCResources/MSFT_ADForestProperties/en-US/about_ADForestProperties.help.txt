@@ -52,7 +52,7 @@ Configuration ADForestProperties_ReplaceForestProperties_Config
 
     node 'localhost'
     {
-        ADForestProperties $Node.ForestName
+        ADForestProperties 'contoso.com'
         {
             ForestName                 = 'contoso.com'
             UserPrincipalNameSuffix    = 'fabrikam.com', 'industry.com'

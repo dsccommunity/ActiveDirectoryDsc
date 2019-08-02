@@ -16,10 +16,10 @@ else
     $ConfigurationData = @{
         AllNodes = @(
             @{
-                NodeName                = 'localhost'
-                CertificateFile         = $env:DscPublicCertificatePath
+                NodeName        = 'localhost'
+                CertificateFile = $env:DscPublicCertificatePath
 
-                ComputerName            = 'DSCINTEGTEST01'
+                ComputerName    = 'DSCINTEGTEST01'
             }
         )
     }

@@ -12,7 +12,7 @@ Author = 'Microsoft Corporation'
 CompanyName = 'Microsoft Corporation'
 
 # Copyright statement for this module
-Copyright = '(c) 2014 Microsoft Corporation. All rights reserved.'
+Copyright = '(c) 2019 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'The ActiveDirectoryDsc module contains DSC resources for deployment and configuration of Active Directory.
@@ -25,11 +25,20 @@ PowerShellVersion = '4.0'
 # Minimum version of the common language runtime (CLR) required by this module
 CLRVersion = '4.0'
 
+# Nested modules to load when this module is imported.
+NestedModules = 'Modules\ActiveDirectoryDsc.Common\ActiveDirectoryDsc.Common.psm1'
+
 # Functions to export from this module
-FunctionsToExport = '*'
+FunctionsToExport = @(
+  # Exported so that WaitForADDomain can use this function in a separate scope.
+  'Find-DomainController'
+)
 
 # Cmdlets to export from this module
-CmdletsToExport = '*'
+CmdletsToExport = @()
+
+# Aliases to export from this module
+AliasesToExport = @()
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
