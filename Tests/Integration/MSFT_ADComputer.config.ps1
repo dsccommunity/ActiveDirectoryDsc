@@ -13,11 +13,9 @@ if (Test-Path -Path $configFile)
 }
 else
 {
-    $computersContainerDistinguishedName = (Get-ADDomain).ComputersContainer
-    if ($computersContainerDistinguishedName -match 'DC=.+')
-    {
-        $domainDistinguishedName = $matches[0]
-    }
+    $domainDistinguishedName = (Get-ADDomain).DistinguishedName
+    $currentDomainController = Get-ADDomainController
+    $domainName = $currentDomainController.Domain
 
     $ConfigurationData = @{
         AllNodes = @(
@@ -34,9 +32,9 @@ else
                 OrganizationalUnitName  = 'Global'
 
                 Location                = 'New location'
-                DnsHostName             = 'DSCINTEGTEST01@contoso.com'
+                DnsHostName             = 'DSCINTEGTEST01@{0}' -f $domainName
                 ServicePrincipalNames   = @('spn/a', 'spn/b')
-                UserPrincipalName       = 'DSCINTEGTEST01@contoso.com'
+                UserPrincipalName       = 'DSCINTEGTEST01@{0}' -f $domainName
                 DisplayName             = 'DSCINTEGTEST01'
                 Description             = 'New description'
             }
