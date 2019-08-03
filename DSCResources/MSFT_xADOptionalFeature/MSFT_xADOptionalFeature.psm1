@@ -4,47 +4,55 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $FeatureName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ForestFQDN,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $EnterpriseAdministratorCredential
     )
 
-    Try
+    try
     {
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
 
+        Write-Verbose -Message "Retrieving the Optional Feature $FeatureName"
         $Feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
 
-        If ($Feature.EnabledScopes.Count -gt 0) {
+        if ($Feature.EnabledScopes.Count -gt 0)
+        {
             $FeatureEnabled = $True
-        } Else {
+        }
+        else
+        {
             $FeatureEnabled = $False
         }
     }
 
-    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException] {
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
         Write-Error -Message "Cannot contact forest $ForestFQDN. Check the spelling of the Forest FQDN and make sure that a domain contoller is available on the network."
         Throw $_
     }
-    Catch [System.Security.Authentication.AuthenticationException] {
+    catch [System.Security.Authentication.AuthenticationException]
+    {
         Write-Error -Message "Credential error. Check the username and password used."
         Throw $_
     }
-    Catch {
+    catch
+    {
         Write-Error -Message "Unhandled exception getting $FeatureName status for forest $ForestFQDN."
         Throw $_
     }
 
-    Finally {
+    finally
+    {
         $ErrorActionPreference = 'Continue'
     }
 
@@ -63,21 +71,21 @@ function Set-TargetResource
     [CmdletBinding(SupportsShouldProcess=$true)]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $FeatureName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ForestFQDN,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $EnterpriseAdministratorCredential
     )
 
 
-    Try
+    try
     {
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
@@ -89,18 +97,21 @@ function Set-TargetResource
 
 
         # Check minimum forest level and throw if not
-        If (($Forest.ForestMode -as [int]) -lt ($Feature.RequiredForestMode -as [int])) {
+        if (($Forest.ForestMode -as [int]) -lt ($Feature.RequiredForestMode -as [int]))
+        {
             Write-Verbose -Message "Forest functionality level $($Forest.ForestMode) does not meet minimum requirement of $($Feature.RequiredForestMode) or greater."
             Throw "Forest functionality level $($Forest.ForestMode) does not meet minimum requirement of $($Feature.RequiredForestMode) or greater."
         }
 
         # Check minimum domain level and throw if not
-        If (($Domain.DomainMode -as [int]) -lt ($Feature.RequiredDomainMode -as [int])) {
+        if (($Domain.DomainMode -as [int]) -lt ($Feature.RequiredDomainMode -as [int]))
+        {
             Write-Verbose -Message "Domain functionality level $($Domain.DomainMode) does not meet minimum requirement of $($Feature.RequiredDomainMode) or greater."
             Throw "Domain functionality level $($Domain.DomainMode) does not meet minimum requirement of $($Feature.RequiredDomainMode) or greater."
         }
 
-        If ($PSCmdlet.ShouldProcess($Forest.RootDomain, "Enable $FeatureName")) {
+        if ($PSCmdlet.ShouldProcess($Forest.RootDomain, "Enable $FeatureName"))
+        {
             Enable-ADOptionalFeature -Identity $FeatureName -Scope ForestOrConfigurationSet `
                 -Target $Forest.RootDomain -Server $Forest.DomainNamingMaster `
                 -Credential $EnterpriseAdministratorCredential `
@@ -108,20 +119,24 @@ function Set-TargetResource
         }
     }
 
-    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException] {
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
         Write-Error -Message "Cannot contact forest $ForestFQDN. Check the spelling of the Forest FQDN and make sure that a domain contoller is available on the network."
         Throw $_
     }
-    Catch [System.Security.Authentication.AuthenticationException] {
+    catch [System.Security.Authentication.AuthenticationException]
+    {
         Write-Error -Message "Credential error. Check the username and password used."
         Throw $_
     }
-    Catch {
+    catch
+    {
         Write-Error -Message "Unhandled exception setting $FeatureName status for forest $ForestFQDN."
         Throw $_
     }
 
-    Finally {
+    finally
+    {
         $ErrorActionPreference = 'Continue'
     }
 
@@ -134,20 +149,21 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $FeatureName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ForestFQDN,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $EnterpriseAdministratorCredential
     )
 
-    Try {
+    try
+    {
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
 
@@ -162,20 +178,24 @@ function Test-TargetResource
         }
     }
 
-    Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException] {
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.ADServerDownException]
+    {
         Write-Error -Message "Cannot contact forest $ForestFQDN. Check the spelling of the Forest FQDN and make sure that a domain contoller is available on the network."
         Throw $_
     }
-    Catch [System.Security.Authentication.AuthenticationException] {
+    catch [System.Security.Authentication.AuthenticationException]
+    {
         Write-Error -Message "Credential error. Check the username and password used."
         Throw $_
     }
-    Catch {
+    catch
+    {
         Write-Error -Message "Unhandled exception testing $FeatureName status for forest $ForestFQDN."
         Throw $_
     }
 
-    Finally {
+    finally
+    {
         $ErrorActionPreference = 'Continue'
     }
 
