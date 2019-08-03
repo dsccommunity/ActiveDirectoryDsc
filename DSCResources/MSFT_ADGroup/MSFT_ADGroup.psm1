@@ -14,7 +14,7 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADGroup'
          Name of the Active Directory group.
 
     .PARAMETER GroupScope
-        Active Directory group scope. Default value is 'Group'.
+        Active Directory group scope. Default value is 'Global'.
 
     .PARAMETER Category
         Active Directory group category. Default value is 'Security'.
@@ -212,7 +212,7 @@ function Get-TargetResource
          Name of the Active Directory group.
 
     .PARAMETER GroupScope
-        Active Directory group scope. Default value is 'Group'.
+        Active Directory group scope. Default value is 'Global'.
 
     .PARAMETER Category
         Active Directory group category. Default value is 'Security'.
@@ -434,7 +434,7 @@ function Test-TargetResource
          Name of the Active Directory group.
 
     .PARAMETER GroupScope
-        Active Directory group scope. Default value is 'Group'.
+        Active Directory group scope. Default value is 'Global'.
 
     .PARAMETER Category
         Active Directory group category. Default value is 'Security'.
