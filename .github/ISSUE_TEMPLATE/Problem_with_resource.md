@@ -22,6 +22,11 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
     but please keep the headers.
 -->
 #### Details of the scenario you tried and the problem that is occurring
+<!--
+    If you are having an issue with the old xActiveDirectory, please verify
+    your scenario with the latest resources in the new ActiveDirectoryDsc
+    module.
+-->
 
 #### Verbose logs showing the problem
 

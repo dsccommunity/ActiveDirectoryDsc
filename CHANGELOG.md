@@ -55,6 +55,8 @@
   - Updated all the examples files to be prefixed with the resource
     name so they are more easily discovered in PowerShell Gallery and
     Azure Automation ([issue #416](https://github.com/PowerShell/ActiveDirectoryDsc/issues/416)).
+  - Fix examples that had duplicate guid that would have prevented them
+    to be published.
 - Changes to ADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
@@ -68,6 +70,7 @@
     any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
   - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config
     ([issue #410](https://github.com/PowerShell/ActiveDirectoryDsc/issues/410)).
+  - Add example showing how to create cluster computer account ([issue #401](https://github.com/PowerShell/ActiveDirectoryDsc/issues/401)).
 - Changes to ADOrganizationalUnit
   - Catch exception when the path property specifies a non-existing path
     ([issue #408](https://github.com/PowerShell/ActiveDirectoryDsc/issues/408)).
