@@ -57,5 +57,3 @@ Configuration ADOptionalFeature_EnableADRecycleBin_Config
         }
     }
 }
-
-
