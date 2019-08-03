@@ -1,22 +1,47 @@
-$script:DSCModuleName = 'xActiveDirectory'
-$script:DSCResourceName = 'MSFT_xADOptionalFeature'
+$script:dscModuleName = 'ActiveDirectoryDsc'
+$script:dscResourceName = 'MSFT_ADOptionalFeature'
 
+#region HEADER
+
+# Unit Test Template Version: 1.2.4
 $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType Unit
 
+#endregion HEADER
+
+function Invoke-TestSetup
+{
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
+
+# Begin Testing
 try
 {
-    InModuleScope $script:DSCResourceName {
+    Invoke-TestSetup
+
+    InModuleScope $script:dscResourceName {
+        # If one type does not exist, it's assumed the other ones does not exist either.
+        if (-not ('Microsoft.ActiveDirectory.Management.ADComputer' -as [Type]))
+        {
+            $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
+            Add-Type -Path $adModuleStub
+        }
 
         $forestName = 'contoso.com'
         $testCredential = [System.Management.Automation.PSCredential]::Empty
@@ -68,7 +93,7 @@ try
             RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2008R2Forest
         }
 
-        Describe 'MSFT_xADOptionalFeature\Get-TargetResource' {
+        Describe 'MSFT_ADOptionalFeature\Get-TargetResource' {
             Context 'When feature is enabled' {
                 mock Get-ADOptionalFeature { $mockADRecycleBinEnabled }
 
@@ -96,7 +121,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADOptionalFeature\Test-TargetResource' {
+        Describe 'MSFT_ADOptionalFeature\Test-TargetResource' {
             Context 'When target resource in desired state' {
                 mock Get-ADOptionalFeature { $mockADRecycleBinEnabled }
 
@@ -114,7 +139,7 @@ try
             }
         }
 
-        Describe 'MSFT_xADOptionalFeature\Set-TargetResource' {
+        Describe 'MSFT_ADOptionalFeature\Set-TargetResource' {
             Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
             Mock -CommandName Get-ADDomain -MockWith { $mockADDomainDesiredState }
             Mock Get-ADOptionalFeature { $mockADRecycleBinDisabled }
@@ -146,5 +171,5 @@ try
 }
 finally
 {
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+    Invoke-TestCleanup
 }

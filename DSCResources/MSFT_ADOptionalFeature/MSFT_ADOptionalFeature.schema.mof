@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xADOptionalFeature")]
-class MSFT_xADOptionalFeature : OMI_BaseResource
+[ClassVersion("1.0.0.0"), FriendlyName("ADOptionalFeature")]
+class MSFT_ADOptionalFeature : OMI_BaseResource
 {
     [Key, Description("Specifies the target Active Directory forest for the change.")] String ForestFQDN;
     [Key, Description("Specifies the feature to be activated")] String FeatureName;
