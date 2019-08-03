@@ -151,6 +151,7 @@
     GroupScope.
 - Changes to ADDomainDefaultPasswordPolicy
   - Added comment-based help ([issue #336](https://github.com/PowerShell/ActiveDirectoryDsc/issues/336)).
+- Refactored ADRecycleBin into ADOptionalFeature
 
 ## 3.0.0.0
 
