@@ -90,6 +90,9 @@
   - Now it correctly tests passwords when parameter DomainName is set to
    distinguished name and parameter Credential is used ([issue #451](https://github.com/PowerShell/ActiveDirectoryDsc/issues/451)).
   - Added integration tests ([issue #359](https://github.com/PowerShell/ActiveDirectoryDsc/issues/359)).
+  - Update the logic for setting the default value for the parameter
+    `CommonName`. This is due to an how LCM handles parameters when a
+    default value is derived from another parameter ([issue #427](https://github.com/PowerShell/ActiveDirectoryDsc/issues/427)).
 - Changes to ADDomain
   - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
     to `Credential` to better indicate that it is possible to impersonate
