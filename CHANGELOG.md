@@ -95,6 +95,8 @@
   - Update the logic for setting the default value for the parameter
     `CommonName`. This is due to an how LCM handles parameters when a
     default value is derived from another parameter ([issue #427](https://github.com/PowerShell/ActiveDirectoryDsc/issues/427)).
+  - Now uses the helper function `Add-TypeAssembly` which have some benefit
+    instead of directly using `Add-Type`, like verbose logging ([issue #431](https://github.com/PowerShell/ActiveDirectoryDsc/issues/431)).
 - Changes to ADDomain
   - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
     to `Credential` to better indicate that it is possible to impersonate
