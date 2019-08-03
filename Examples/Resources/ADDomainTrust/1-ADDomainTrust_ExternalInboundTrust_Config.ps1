@@ -22,7 +22,7 @@
         This configuration will create a new one way inbound trust between two
         domains.
 #>
-Configuration ADDomainTrust_NewOneWayTrust_Config
+Configuration ADDomainTrust_ExternalInboundTrust_Config
 {
     param
     (
