@@ -96,12 +96,12 @@ function Set-TargetResource
 
         # Check minimum domain level and throw if not
         If (($Domain.DomainMode -as [int]) -lt ($Feature.RequiredDomainMode -as [int])) {
-            Write-Verbose -Message "Forest functionality level $($Forest.ForestMode) does not meet minimum requirement of $($Feature.RequiredDomainMode) or greater."
+            Write-Verbose -Message "Domain functionality level $($Domain.DomainMode) does not meet minimum requirement of $($Feature.RequiredDomainMode) or greater."
             Throw "Domain functionality level $($Domain.DomainMode) does not meet minimum requirement of $($Feature.RequiredDomainMode) or greater."
         }
 
         If ($PSCmdlet.ShouldProcess($Forest.RootDomain, "Enable $FeatureName")) {
-            Enable-ADOptionalFeature $FeatureName -Scope ForestOrConfigurationSet `
+            Enable-ADOptionalFeature -Identity $FeatureName -Scope ForestOrConfigurationSet `
                 -Target $Forest.RootDomain -Server $Forest.DomainNamingMaster `
                 -Credential $EnterpriseAdministratorCredential `
                 -Verbose
