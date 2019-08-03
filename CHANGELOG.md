@@ -139,6 +139,10 @@
   - Refactored unit tests for Test-TargetResource.
 - Changes to ADObjectPermissionEntry
   - Remove remnants of the `SupportsShouldProcess` ([issue #329](https://github.com/PowerShell/ActiveDirectoryDsc/issues/329)).
+- Changes to ADGroup
+  - Added comment-based help ([issue #338](https://github.com/PowerShell/ActiveDirectoryDsc/issues/338)).
+- Changes to ADDomainDefaultPasswordPolicy
+  - Added comment-based help ([issue #336](https://github.com/PowerShell/ActiveDirectoryDsc/issues/336)).
 
 ## 3.0.0.0
 
