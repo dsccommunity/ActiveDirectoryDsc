@@ -82,14 +82,14 @@ try
                 "CN=NTDS Settings,CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com"
             )
             Name               = "Recycle Bin Feature"
-            RequiredDomainMode = $null
+            RequiredDomainMode = -1
             RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2008R2Forest
         }
 
         $mockADRecycleBinDisabled = @{
             EnabledScopes      = @()
             Name               = "Recycle Bin Feature"
-            RequiredDomainMode = $null
+            RequiredDomainMode = -1
             RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2008R2Forest
         }
 
