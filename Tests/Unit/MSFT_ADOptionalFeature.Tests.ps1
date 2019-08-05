@@ -44,13 +44,25 @@ try
         }
 
         $forestName = 'contoso.com'
-        $testCredential = [System.Management.Automation.PSCredential]::Empty
+        $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+            'DummyUser',
+            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+        )
 
         $featureParameters = @{
             FeatureName                       = 'Recycle Bin Feature'
             ForestFqdn                        = $forestName
             EnterpriseAdministratorCredential = $testCredential
         }
+
+        $testFeatureProperties = $featureParameters.Clone()
+        $testFeatureProperties.FeatureName = "Test Feature"
+
+        $badCredentialsProperties = $featureParameters.Clone()
+        $badCredentialsProperties.EnterpriseAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+            'Invalid',
+            (ConvertTo-SecureString -String 'Invalid' -AsPlainText -Force)
+        )
 
         $mockADForestDesiredState = @{
             Name               = $forestName
@@ -59,71 +71,88 @@ try
             DomainNamingMaster = "DC01"
         }
 
-        $mockADForestNonDesiredState = @{
-            Name               = $forestName
-            ForestMode         = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2000Forest
-            RootDomain         = $forestName
-            DomainNamingMaster = "DC01"
-        }
+        $mockADForestNonDesiredState = $mockADForestDesiredState.Clone()
+        $mockADForestNonDesiredState.ForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2000Forest
 
         $mockADDomainDesiredState = @{
             Name        = $forestName
             DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2016Domain
         }
 
-        $mockADDomainNonDesiredState = @{
-            Name        = $forestName
-            DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2000Domain -as [int]
-        }
-
-        $mockADRecycleBinEnabled = @{
-            EnabledScopes      = @(
-                "CN=Partitions,CN=Configuration,DC=contoso,DC=com",
-                "CN=NTDS Settings,CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com"
-            )
-            Name               = "Recycle Bin Feature"
-            RequiredDomainMode = -1
-            RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2008R2Forest
-        }
+        $mockADDomainNonDesiredState = $mockADDomainDesiredState.Clone()
+        $mockADDomainNonDesiredState.DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2000Domain -as [int]
 
         $mockADRecycleBinDisabled = @{
             EnabledScopes      = @()
             Name               = "Recycle Bin Feature"
-            RequiredDomainMode = -1
+            RequiredDomainMode = $null
             RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2008R2Forest
+        }
+
+        $mockADRecycleBinEnabled= $mockADRecycleBinDisabled.Clone()
+        $mockADRecycleBinEnabled.EnabledScopes = @(
+                "CN=Partitions,CN=Configuration,DC=contoso,DC=com",
+                "CN=NTDS Settings,CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com"
+            )
+
+        $mockTestFeatureDisabled = @{
+            EnabledScopes      = @()
+            Name               = "Test Feature"
+            RequiredDomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2016Domain
+            RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2016Forest
         }
 
         Describe 'MSFT_ADOptionalFeature\Get-TargetResource' {
             Context 'When feature is enabled' {
-                mock Get-ADOptionalFeature { $mockADRecycleBinEnabled }
+                Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinEnabled }
 
                 It 'Should return expected properties' {
                     $targetResource = Get-TargetResource @featureParameters
 
-                    $targetResource.FeatureName                       | Should -Be $featureParameters.FeatureName
-                    $targetResource.ForestFqdn                        | Should -Be $featureParameters.ForestFqdn
-                    $targetResource.Enabled                           | Should -BeTrue
-                    $targetResource.EnterpriseAdministratorCredential | Should -BeNullOrEmpty
+                    $targetResource.FeatureName                                | Should -Be $featureParameters.FeatureName
+                    $targetResource.ForestFqdn                                 | Should -Be $featureParameters.ForestFqdn
+                    $targetResource.Enabled                                    | Should -BeTrue
+                    $targetResource.EnterpriseAdministratorCredential.Username | Should -Be $featureParameters.EnterpriseAdministratorCredential.Username
+                    $targetResource.EnterpriseAdministratorCredential.Password | Should -BeNullOrEmpty
                 }
             }
 
             Context 'When feature isnt enabled' {
-                mock Get-ADOptionalFeature { $mockADRecycleBinDisabled }
+                Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinDisabled }
 
                 It 'Should return expected properties' {
                     $targetResource = Get-TargetResource @featureParameters
 
-                    $targetResource.FeatureName                       | Should -Be $featureParameters.FeatureName
-                    $targetResource.ForestFqdn                        | Should -Be $featureParameters.ForestFqdn
-                    $targetResource.Enabled                           | Should -BeFalse
-                    $targetResource.EnterpriseAdministratorCredential | Should -BeNullOrEmpty
+                    $targetResource.FeatureName                                | Should -Be $featureParameters.FeatureName
+                    $targetResource.ForestFqdn                                 | Should -Be $featureParameters.ForestFqdn
+                    $targetResource.Enabled                                    | Should -BeFalse
+                    $targetResource.EnterpriseAdministratorCredential.Username | Should -Be $featureParameters.EnterpriseAdministratorCredential.Username
+                    $targetResource.EnterpriseAdministratorCredential.Password | Should -BeNullOrEmpty
+                }
+            }
+
+            context 'When domain is not available' {
+                It 'Throws "Credential Error" when domain is available but authentication fails' {
+                    Mock -CommandName Get-ADOptionalFeature -ParameterFilter { $Credential.Username -eq $badCredentialsProperties.EnterpriseAdministratorCredential.Username } -MockWith {
+                        throw New-Object System.Security.Authentication.AuthenticationException
+                    }
+
+                    { Get-TargetResource @badCredentialsProperties } | Should -Throw $script:localizedData.CredentialError
+                }
+
+                It 'Throws "Cannot contact forest" when forest cannot be located' {
+                    Mock -CommandName Get-ADOptionalFeature -MockWith {
+                        throw New-Object Microsoft.ActiveDirectory.Management.ADServerDownException
+                    }
+
+                    { Get-TargetResource @featureParameters } | Should -Throw ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
                 }
             }
         }
 
         Describe 'MSFT_ADOptionalFeature\Test-TargetResource' {
             Context 'When target resource in desired state' {
-                mock Get-ADOptionalFeature { $mockADRecycleBinEnabled }
+                Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinEnabled }
 
                 It 'Should return $true' {
                     Test-TargetResource @featureParameters | Should -Be $true
@@ -131,7 +160,7 @@ try
             }
 
             Context 'When target not in desired state' {
-                mock Get-ADOptionalFeature { $mockADRecycleBinDisabled }
+                Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinDisabled }
 
                 It 'Should return $false' {
                     Test-TargetResource @featureParameters | Should -Be $false
@@ -142,7 +171,7 @@ try
         Describe 'MSFT_ADOptionalFeature\Set-TargetResource' {
             Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
             Mock -CommandName Get-ADDomain -MockWith { $mockADDomainDesiredState }
-            Mock Get-ADOptionalFeature { $mockADRecycleBinDisabled }
+            Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinDisabled }
 
             Context 'When domain and forest requirements are met' {
                 Mock -CommandName Enable-ADOptionalFeature
@@ -164,6 +193,51 @@ try
 
                 It 'Should throw exception that forest functional level is too low' {
                     { Set-TargetResource @featureParameters } | Should -Throw
+                }
+            }
+
+            Context 'When domain requirements are met' {
+                Mock -CommandName Get-ADOptionalFeature -MockWith { $mockTestFeatureDisabled }
+                Mock -CommandName Get-ADForest -MockWith { $mockADForesDesiredState }
+                Mock -CommandName Get-ADDomain -MockWith { $mockADDomainNonDesiredState }
+                Mock -CommandName Enable-ADOptionalFeature
+
+                It 'Should throw exception that domain functional level is too low' {
+                    { Set-TargetResource @testFeatureProperties } | Should -Throw
+                }
+            }
+
+            context 'When domain is not available' {
+                It 'Throws "Credential Error" when forest is available but authentication fails' {
+                    Mock -CommandName Get-ADForest -ParameterFilter { $Credential.Username -eq $badCredentialsProperties.EnterpriseAdministratorCredential.Username } -MockWith {
+                        throw New-Object System.Security.Authentication.AuthenticationException
+                    }
+
+                    { Set-TargetResource @badCredentialsProperties } | Should -Throw $script:localizedData.CredentialError
+                }
+
+                It 'Throws "Cannot contact forest" when forest cannot be located' {
+                    Mock -CommandName Get-ADForest -MockWith {
+                        throw New-Object Microsoft.ActiveDirectory.Management.ADServerDownException
+                    }
+
+                    { Set-TargetResource @featureParameters } | Should -Throw ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
+                }
+
+                It 'Throws "Credential Error" when domain is available but authentication fails' {
+                    Mock -CommandName Get-ADDomain -ParameterFilter { $Credential.Username -eq $badCredentialsProperties.EnterpriseAdministratorCredential.Username } -MockWith {
+                        throw New-Object System.Security.Authentication.AuthenticationException
+                    }
+
+                    { Set-TargetResource @badCredentialsProperties } | Should -Throw $script:localizedData.CredentialError
+                }
+
+                It 'Throws "Cannot contact forest" when domain cannot be located' {
+                    Mock -CommandName Get-ADDomain -MockWith {
+                        throw New-Object Microsoft.ActiveDirectory.Management.ADServerDownException
+                    }
+
+                    { Set-TargetResource @featureParameters } | Should -Throw ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
                 }
             }
         }

@@ -46,17 +46,17 @@ function Get-TargetResource
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
 
-        $Feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
+        $feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
 
-        if ($Feature.EnabledScopes.Count -gt 0)
+        if ($feature.EnabledScopes.Count -gt 0)
         {
             Write-Verbose -Message ($script:localizedData.OptionalFeatureEnabled -f $FeatureName)
-            $FeatureEnabled = $True
+            $featureEnabled = $True
         }
         else
         {
             Write-Verbose -Message ($script:localizedData.OptionalFeatureNotEnabled -f $FeatureName)
-            $FeatureEnabled = $False
+            $featureEnabled = $False
         }
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
@@ -79,10 +79,14 @@ function Get-TargetResource
         $ErrorActionPreference = $previousErrorActionPreference
     }
 
+    # Return a credential object without the password.
+    $cimCredentialInstance = New-CimCredentialInstance -Credential $EnterpriseAdministratorCredential
+
     return @{
-        ForestFQDN = $ForestFQDN
-        FeatureName = $FeatureName
-        Enabled = $FeatureEnabled
+        ForestFQDN                        = $ForestFQDN
+        FeatureName                       = $FeatureName
+        Enabled                           = $featureEnabled
+        EnterpriseAdministratorCredential = $cimCredentialInstance
     }
 }
 
@@ -102,7 +106,7 @@ function Get-TargetResource
 #>
 function Set-TargetResource
 {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -148,7 +152,7 @@ function Set-TargetResource
         Enable-ADOptionalFeature -Identity $FeatureName -Scope ForestOrConfigurationSet `
             -Target $forest.RootDomain -Server $forest.DomainNamingMaster `
             -Credential $EnterpriseAdministratorCredential `
-            -Verbose
+            -Verbose:$VerbosePreference
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
     {
@@ -211,17 +215,17 @@ function Test-TargetResource
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
 
-        $State = Get-TargetResource @PSBoundParameters
+        $state = Get-TargetResource @PSBoundParameters
 
-        if ($true -eq $State.Enabled)
+        if ($true -eq $state.Enabled)
         {
             Write-Verbose -Message ($script:localizedData.OptionalFeatureEnabled -f $FeatureName)
-            Return $True
+            Return $true
         }
         else
         {
             Write-Verbose -Message ($script:localizedData.OptionalFeatureNotEnabled -f $FeatureName)
-            Return $False
+            Return $false
         }
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]

@@ -24,15 +24,15 @@
 #>
 Configuration ADOptionalFeature_EnableADRecycleBin_Config
 {
-Param(
-    [Parameter(Mandatory = $true)]
-    [System.String]
-    $ForestFQDN,
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ForestFQDN,
 
-    [Parameter(Mandatory = $true)]
-    [System.Management.Automation.PSCredential]
-    $EACredential
-)
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        $EnterpriseAdministratorCredential
+    )
 
     Import-DscResource -Module ActiveDirectoryDsc
 
@@ -40,9 +40,9 @@ Param(
     {
         ADOptionalFeature RecycleBin
         {
-           FeatureName = "Recycle Bin Feature"
-           EnterpriseAdministratorCredential = $EACredential
-           ForestFQDN = $ForestFQDN
+            FeatureName                       = "Recycle Bin Feature"
+            EnterpriseAdministratorCredential = $EnterpriseAdministratorCredential
+            ForestFQDN                        = $ForestFQDN
         }
     }
 }
