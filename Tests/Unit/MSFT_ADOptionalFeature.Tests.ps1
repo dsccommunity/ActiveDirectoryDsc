@@ -115,6 +115,17 @@ try
                     $targetResource.Enabled                                    | Should -BeTrue
                     $targetResource.EnterpriseAdministratorCredential.Username | Should -Be $featureParameters.EnterpriseAdministratorCredential.Username
                     $targetResource.EnterpriseAdministratorCredential.Password | Should -BeNullOrEmpty
+
+                    Assert-MockCalled -CommandName Get-ADOptionalFeature -Times 1 -Exactly -Scope It -ParameterFilter {
+                        $Identity.ToString() -eq $featureParameters.FeatureName -and
+                        $Server -eq $mockADForestDesiredState.DomainNamingMaster -and
+                        $Credential.Username -eq $featureParameters.EnterpriseAdministratorCredential.Username
+                    }
+
+                    Assert-MockCalled -CommandName Get-ADForest -Times 1 -Exactly -Scope It -ParameterFilter {
+                        $Server -eq $featureParameters.ForestFQDN -and
+                        $Credential.Username -eq $featureParameters.EnterpriseAdministratorCredential.Username
+                    }
                 }
             }
 
@@ -147,6 +158,16 @@ try
                     }
 
                     { Get-TargetResource @featureParameters } | Should -Throw ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
+                }
+            }
+
+            context 'When unknown error occurs' {
+                It 'Should throw "unknown" when unknown error occurs' {
+                    Mock -CommandName Get-ADOptionalFeature -MockWith {
+                        throw "Unknown error"
+                    }
+
+                    { Get-TargetResource @featureParameters } | Should -Throw
                 }
             }
         }
@@ -186,6 +207,22 @@ try
                         $Scope.ToString() -eq "ForestOrConfigurationSet" -and
                         $Server -eq $mockADForestDesiredState.DomainNamingMaster
                     }
+
+                    Assert-MockCalled -CommandName Get-ADOptionalFeature -Times 1 -Exactly -Scope It -ParameterFilter {
+                        $Identity.ToString() -eq $featureParameters.FeatureName -and
+                        $Server -eq $mockADForestDesiredState.DomainNamingMaster -and
+                        $Credential.Username -eq $featureParameters.EnterpriseAdministratorCredential.Username
+                    }
+
+                    Assert-MockCalled -CommandName Get-ADForest -Times 1 -Exactly -Scope It -ParameterFilter {
+                        $Server -eq $featureParameters.ForestFQDN -and
+                        $Credential.Username -eq $featureParameters.EnterpriseAdministratorCredential.Username
+                    }
+
+                    Assert-MockCalled -CommandName Get-ADDomain -Times 1 -Exactly -Scope It -ParameterFilter {
+                        $Server -eq $featureParameters.ForestFQDN -and
+                        $Credential.Username -eq $featureParameters.EnterpriseAdministratorCredential.Username
+                    }
                 }
             }
 
@@ -195,6 +232,8 @@ try
 
                 It 'Should throw exception that forest functional level is too low' {
                     { Set-TargetResource @featureParameters } | Should -Throw
+
+                    Assert-MockCalled Enable-ADOptionalFeature -Scope It -Times 0 -Exactly
                 }
             }
 
@@ -206,6 +245,8 @@ try
 
                 It 'Should throw exception that domain functional level is too low' {
                     { Set-TargetResource @testFeatureProperties } | Should -Throw
+
+                    Assert-MockCalled Enable-ADOptionalFeature -Scope It -Times 0 -Exactly
                 }
             }
 
@@ -240,6 +281,16 @@ try
                     }
 
                     { Set-TargetResource @featureParameters } | Should -Throw ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
+                }
+            }
+
+            context 'When unknown error occurs' {
+                It 'Should throw "unknown" when unknown error occurs' {
+                    Mock -CommandName Get-ADOptionalFeature -MockWith {
+                        throw "Unknown error"
+                    }
+
+                    { Get-TargetResource @featureParameters } | Should -Throw
                 }
             }
         }

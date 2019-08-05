@@ -48,7 +48,7 @@ function Get-TargetResource
 
         $forest = Get-ADForest -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
 
-        $feature = Get-ADOptionalFeature -Filter { name -eq $FeatureName } -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
+        $feature = Get-ADOptionalFeature -Identity $FeatureName -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
 
         if ($feature.EnabledScopes.Count -gt 0)
         {
@@ -134,7 +134,7 @@ function Set-TargetResource
         $forest = Get-ADForest -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
         $domain = Get-ADDomain -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
 
-        $feature = Get-ADOptionalFeature -Filter { name -eq $FeatureName } -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
+        $feature = Get-ADOptionalFeature -Identity $FeatureName -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
 
         # Check minimum forest level and throw if not
         if (($forest.ForestMode -as [int]) -lt ($feature.RequiredForestMode -as [int]))
