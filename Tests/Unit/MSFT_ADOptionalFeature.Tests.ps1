@@ -132,7 +132,7 @@ try
             }
 
             context 'When domain is not available' {
-                It 'Throws "Credential Error" when domain is available but authentication fails' {
+                It 'Should throw "Credential Error" when domain is available but authentication fails' {
                     Mock -CommandName Get-ADOptionalFeature -ParameterFilter { $Credential.Username -eq $badCredentialsProperties.EnterpriseAdministratorCredential.Username } -MockWith {
                         throw New-Object System.Security.Authentication.AuthenticationException
                     }
@@ -140,7 +140,7 @@ try
                     { Get-TargetResource @badCredentialsProperties } | Should -Throw $script:localizedData.CredentialError
                 }
 
-                It 'Throws "Cannot contact forest" when forest cannot be located' {
+                It 'Should throw "Cannot contact forest" when forest cannot be located' {
                     Mock -CommandName Get-ADOptionalFeature -MockWith {
                         throw New-Object Microsoft.ActiveDirectory.Management.ADServerDownException
                     }
@@ -187,7 +187,7 @@ try
                 }
             }
 
-            Context 'When forest requirements are met' {
+            Context 'When forest requirements are not met' {
                 Mock -CommandName Get-ADForest -MockWith { $mockADForestNonDesiredState }
                 Mock -CommandName Enable-ADOptionalFeature
 
@@ -196,7 +196,7 @@ try
                 }
             }
 
-            Context 'When domain requirements are met' {
+            Context 'When domain requirements are not met' {
                 Mock -CommandName Get-ADOptionalFeature -MockWith { $mockTestFeatureDisabled }
                 Mock -CommandName Get-ADForest -MockWith { $mockADForesDesiredState }
                 Mock -CommandName Get-ADDomain -MockWith { $mockADDomainNonDesiredState }
@@ -208,7 +208,7 @@ try
             }
 
             context 'When domain is not available' {
-                It 'Throws "Credential Error" when forest is available but authentication fails' {
+                It 'Should throw "Credential Error" when forest is available but authentication fails' {
                     Mock -CommandName Get-ADForest -ParameterFilter { $Credential.Username -eq $badCredentialsProperties.EnterpriseAdministratorCredential.Username } -MockWith {
                         throw New-Object System.Security.Authentication.AuthenticationException
                     }
@@ -216,7 +216,7 @@ try
                     { Set-TargetResource @badCredentialsProperties } | Should -Throw $script:localizedData.CredentialError
                 }
 
-                It 'Throws "Cannot contact forest" when forest cannot be located' {
+                It 'Should throw "Cannot contact forest" when forest cannot be located' {
                     Mock -CommandName Get-ADForest -MockWith {
                         throw New-Object Microsoft.ActiveDirectory.Management.ADServerDownException
                     }
@@ -224,7 +224,7 @@ try
                     { Set-TargetResource @featureParameters } | Should -Throw ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
                 }
 
-                It 'Throws "Credential Error" when domain is available but authentication fails' {
+                It 'Should throw "Credential Error" when domain is available but authentication fails' {
                     Mock -CommandName Get-ADDomain -ParameterFilter { $Credential.Username -eq $badCredentialsProperties.EnterpriseAdministratorCredential.Username } -MockWith {
                         throw New-Object System.Security.Authentication.AuthenticationException
                     }
@@ -232,7 +232,7 @@ try
                     { Set-TargetResource @badCredentialsProperties } | Should -Throw $script:localizedData.CredentialError
                 }
 
-                It 'Throws "Cannot contact forest" when domain cannot be located' {
+                It 'Should throw "Cannot contact forest" when domain cannot be located' {
                     Mock -CommandName Get-ADDomain -MockWith {
                         throw New-Object Microsoft.ActiveDirectory.Management.ADServerDownException
                     }

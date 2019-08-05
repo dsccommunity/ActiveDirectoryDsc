@@ -24,7 +24,8 @@
 #>
 Configuration ADOptionalFeature_EnableADRecycleBin_Config
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $ForestFQDN,

@@ -220,12 +220,12 @@ function Test-TargetResource
         if ($true -eq $state.Enabled)
         {
             Write-Verbose -Message ($script:localizedData.OptionalFeatureEnabled -f $FeatureName)
-            Return $true
+            return $true
         }
         else
         {
             Write-Verbose -Message ($script:localizedData.OptionalFeatureNotEnabled -f $FeatureName)
-            Return $false
+            return $false
         }
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
