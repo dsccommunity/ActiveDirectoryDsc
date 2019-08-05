@@ -134,13 +134,13 @@ function Set-TargetResource
         # Check minimum forest level and throw if not
         if (($forest.ForestMode -as [int]) -lt ($feature.RequiredForestMode -as [int]))
         {
-            throw ($script:localizedData.ForestFunctionalLevelError -f $forest.ForestMode, $FeatureName)
+            throw ($script:localizedData.ForestFunctionalLevelError -f $forest.ForestMode)
         }
 
         # Check minimum domain level and throw if not
         if (($domain.DomainMode -as [int]) -lt ($feature.RequiredDomainMode -as [int]))
         {
-            throw ($script:localizedData.DomainFunctionalLevelError -f $domain.DomainMode, $FeatureName)
+            throw ($script:localizedData.DomainFunctionalLevelError -f $domain.DomainMode)
         }
 
         Write-Verbose -Message ($script:localizedData.EnablingOptionalFeature -f $forest.RootDomain, $FeatureName)
