@@ -66,27 +66,27 @@ try
 
         $mockADForestDesiredState = @{
             Name               = $forestName
-            ForestMode         = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2016Forest
+            ForestMode         = [Microsoft.ActiveDirectory.Management.ADForestMode]7 # Windows2016Forest
             RootDomain         = $forestName
             DomainNamingMaster = "DC01"
         }
 
         $mockADForestNonDesiredState = $mockADForestDesiredState.Clone()
-        $mockADForestNonDesiredState.ForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2000Forest
+        $mockADForestNonDesiredState.ForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]0 # Windows2000Forest
 
         $mockADDomainDesiredState = @{
             Name        = $forestName
-            DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2016Domain
+            DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]7  # Windows2016Domain
         }
 
         $mockADDomainNonDesiredState = $mockADDomainDesiredState.Clone()
-        $mockADDomainNonDesiredState.DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2000Domain -as [int]
+        $mockADDomainNonDesiredState.DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]0  # Windows2000Domain
 
         $mockADRecycleBinDisabled = @{
             EnabledScopes      = @()
             Name               = "Recycle Bin Feature"
             RequiredDomainMode = $null
-            RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2008R2Forest
+            RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]4 # Windows2008R2
         }
 
         $mockADRecycleBinEnabled= $mockADRecycleBinDisabled.Clone()
@@ -98,8 +98,8 @@ try
         $mockTestFeatureDisabled = @{
             EnabledScopes      = @()
             Name               = "Test Feature"
-            RequiredDomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2016Domain
-            RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2016Forest
+            RequiredDomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]7 # Windows2016Domain
+            RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]7 # Windows2016Forest
         }
 
         Describe 'MSFT_ADOptionalFeature\Get-TargetResource' {
