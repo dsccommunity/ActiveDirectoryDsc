@@ -3,7 +3,8 @@
 ## Unreleased
 
 - Changes to ActiveDirectoryDsc
-  - BREAKING CHANGE: ADRecycleBin is replaced by the new resource ADOptionalFeature ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
+  - BREAKING CHANGE: ADRecycleBin is replaced by the new resource ADOptionalFeature
+    ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
   - New resource ADOptionalFeature ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
   - BREAKING CHANGE: Renamed the xActiveDirectory to ActiveDirectoryDsc
     and removed the 'x' from all resource names ([issue #312](https://github.com/PowerShell/ActiveDirectoryDsc/issues/312)).
@@ -39,9 +40,14 @@
     - Add-TypeAssembly
     - New-ADDirectoryContext
   - Changes to ActiveDirectoryDsc.Common:
-    - Removed unused parameter `ModuleName` from `Assert-MemberParameters` function.
-    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentForestMode` function.
-    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentDomainMode` function.
+    - Removed unused parameter `ModuleName` from `Assert-MemberParameters`
+      function.
+      - The improvements to `Remove-DuplicateMembers` meant some minor
+        cleanup could be done in the code.
+    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentForestMode`
+      function.
+    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentDomainMode`
+      function.
     - Added function help ([issue #321](https://github.com/PowerShell/ActiveDirectoryDsc/issues/321)).
     - Removed the helper function `ThrowInvalidOperationError` and
       `ThrowInvalidArgumentError` in favor of the
@@ -54,6 +60,9 @@
       `Credential` in the function `Get-ADCommonParameters`
     - Added function `Find-DomainController`.
     - Added function `Get-CurrentUser` (moved from the resource ADKDSKey).
+    - Refactor `Remove-DuplicateMembers` and added more unit tests
+      ([issue #443](https://github.com/PowerShell/ActiveDirectoryDsc/issues/443)).
+    - Minor cleanup in `Test-Members` because of the improved `Remove-DuplicateMembers`.
   - Updated all the examples files to be prefixed with the resource
     name so they are more easily discovered in PowerShell Gallery and
     Azure Automation ([issue #416](https://github.com/PowerShell/ActiveDirectoryDsc/issues/416)).
