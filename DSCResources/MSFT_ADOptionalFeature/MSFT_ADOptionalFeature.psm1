@@ -48,7 +48,7 @@ function Get-TargetResource
 
         $forest = Get-ADForest -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
 
-        $feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
+        $feature = Get-ADOptionalFeature -Filter { name -eq $FeatureName } -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
 
         if ($feature.EnabledScopes.Count -gt 0)
         {
@@ -134,7 +134,7 @@ function Set-TargetResource
         $forest = Get-ADForest -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
         $domain = Get-ADDomain -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
 
-        $feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
+        $feature = Get-ADOptionalFeature -Filter { name -eq $FeatureName } -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
 
         # Check minimum forest level and throw if not
         if (($forest.ForestMode -as [int]) -lt ($feature.RequiredForestMode -as [int]))
@@ -209,44 +209,17 @@ function Test-TargetResource
         $EnterpriseAdministratorCredential
     )
 
-    $previousErrorActionPreference = $ErrorActionPreference
+    $state = Get-TargetResource @PSBoundParameters
 
-    try
+    if ($true -eq $state.Enabled)
     {
-        # AD cmdlets generate non-terminating errors.
-        $ErrorActionPreference = 'Stop'
-
-        $state = Get-TargetResource @PSBoundParameters
-
-        if ($true -eq $state.Enabled)
-        {
-            Write-Verbose -Message ($script:localizedData.OptionalFeatureEnabled -f $FeatureName)
-            return $true
-        }
-        else
-        {
-            Write-Verbose -Message ($script:localizedData.OptionalFeatureNotEnabled -f $FeatureName)
-            return $false
-        }
+        Write-Verbose -Message ($script:localizedData.OptionalFeatureEnabled -f $FeatureName)
+        return $true
     }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException], [Microsoft.ActiveDirectory.Management.ADServerDownException]
+    else
     {
-        $errorMessage = $script:localizedData.ForestNotFound -f $ForestFQDN
-        New-ObjectNotFoundException -Message $errorMessage -ErrorRecord $_
-    }
-    catch [System.Security.Authentication.AuthenticationException]
-    {
-        $errorMessage = $script:localizedData.CredentialError
-        New-InvalidArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
-    }
-    catch
-    {
-        $errorMessage = $script:localizedData.TestUnhandledException -f $ForestFQDN
-        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-    }
-    finally
-    {
-        $ErrorActionPreference = $previousErrorActionPreference
+        Write-Verbose -Message ($script:localizedData.OptionalFeatureNotEnabled -f $FeatureName)
+        return $false
     }
 }
 
