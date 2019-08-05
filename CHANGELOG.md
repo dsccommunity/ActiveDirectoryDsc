@@ -42,8 +42,6 @@
   - Changes to ActiveDirectoryDsc.Common:
     - Removed unused parameter `ModuleName` from `Assert-MemberParameters`
       function.
-      - The improvements to `Remove-DuplicateMembers` meant some minor
-        cleanup could be done in the code.
     - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentForestMode`
       function.
     - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentDomainMode`
@@ -63,6 +61,7 @@
     - Refactor `Remove-DuplicateMembers` and added more unit tests
       ([issue #443](https://github.com/PowerShell/ActiveDirectoryDsc/issues/443)).
     - Minor cleanup in `Test-Members` because of the improved `Remove-DuplicateMembers`.
+    - Minor cleanup in `Assert-MemberParameters` because of the improved `Remove-DuplicateMembers`.
   - Updated all the examples files to be prefixed with the resource
     name so they are more easily discovered in PowerShell Gallery and
     Azure Automation ([issue #416](https://github.com/PowerShell/ActiveDirectoryDsc/issues/416)).
