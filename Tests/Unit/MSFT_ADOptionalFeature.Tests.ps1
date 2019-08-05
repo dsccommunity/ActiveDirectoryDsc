@@ -103,6 +103,7 @@ try
         }
 
         Describe 'MSFT_ADOptionalFeature\Get-TargetResource' {
+            Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
             Context 'When feature is enabled' {
                 Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinEnabled }
 
@@ -151,6 +152,7 @@ try
         }
 
         Describe 'MSFT_ADOptionalFeature\Test-TargetResource' {
+            Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
             Context 'When target resource in desired state' {
                 Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinEnabled }
 
@@ -198,7 +200,7 @@ try
 
             Context 'When domain requirements are not met' {
                 Mock -CommandName Get-ADOptionalFeature -MockWith { $mockTestFeatureDisabled }
-                Mock -CommandName Get-ADForest -MockWith { $mockADForesDesiredState }
+                Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
                 Mock -CommandName Get-ADDomain -MockWith { $mockADDomainNonDesiredState }
                 Mock -CommandName Enable-ADOptionalFeature
 

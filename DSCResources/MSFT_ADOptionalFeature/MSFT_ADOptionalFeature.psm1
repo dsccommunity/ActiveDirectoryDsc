@@ -46,7 +46,9 @@ function Get-TargetResource
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
 
-        $feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
+        $forest = Get-ADForest -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
+
+        $feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
 
         if ($feature.EnabledScopes.Count -gt 0)
         {
@@ -129,10 +131,10 @@ function Set-TargetResource
         # AD cmdlets generate non-terminating errors.
         $ErrorActionPreference = 'Stop'
 
-        $feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
-
         $forest = Get-ADForest -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
         $domain = Get-ADDomain -Server $ForestFQDN -Credential $EnterpriseAdministratorCredential
+
+        $feature = Get-ADOptionalFeature -Filter {name -eq $FeatureName} -Server $forest.DomainNamingMaster -Credential $EnterpriseAdministratorCredential
 
         # Check minimum forest level and throw if not
         if (($forest.ForestMode -as [int]) -lt ($feature.RequiredForestMode -as [int]))
