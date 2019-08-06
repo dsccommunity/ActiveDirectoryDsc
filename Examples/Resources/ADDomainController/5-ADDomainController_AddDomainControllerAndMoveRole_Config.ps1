@@ -20,7 +20,9 @@
 <#
     .DESCRIPTION
         This configuration will add a domain controller to the domain
-        contoso.com.
+        contoso.com, and when the configuration is enforced it will
+        move the Flexible Single Master Operation (FSMO) role
+        'RIDMaster' from the current owner to this domain controller.
 #>
 Configuration ADDomainController_AddDomainControllerAndMoveRole_Config
 {
