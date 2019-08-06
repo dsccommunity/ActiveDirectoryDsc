@@ -71,6 +71,12 @@ namespace Microsoft.ActiveDirectory.Management
         public ADDomain(System.String Identity):base(){}
     }
 
+    public class ADForest
+    {
+        public ADForest():base(){}
+        public ADForest(System.String Identity):base(){}
+    }
+
     public class ADDomainController
     {
         public ADDomainController():base(){}
@@ -79,6 +85,7 @@ namespace Microsoft.ActiveDirectory.Management
         public string Domain;
         public bool IsGlobalCatalog;
         public bool IsReadOnly;
+        public string[] OperationMasterRoles;
     }
 
     public class ADDirectoryServer
@@ -146,5 +153,10 @@ namespace Microsoft.ActiveDirectory.Management.Commands
     public class ADDiscoverableService
     {
         public ADDiscoverableService():base(){}
+    }
+
+    public class ADCurrentForestType
+    {
+        public ADCurrentForestType():base(){}
     }
 }
