@@ -192,9 +192,9 @@ try
                         $result.LogPath | Should -Be $correctLogPath
                         $result.SysvolPath | Should -Be $correctSysvolPath
                         $result.SiteName | Should -Be $correctSiteName
-                        $result.Ensure | Should -Be $true
-                        $result.IsGlobalCatalog | Should -Be $true
-                        $result.ReadOnlyReplica | Should -Be $false
+                        $result.Ensure | Should -BeTrue
+                        $result.IsGlobalCatalog | Should -BeTrue
+                        $result.ReadOnlyReplica | Should -BeFalse
                         $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                     }
@@ -248,9 +248,9 @@ try
                         $result.LogPath | Should -Be $correctLogPath
                         $result.SysvolPath | Should -Be $correctSysvolPath
                         $result.SiteName | Should -Be $correctSiteName
-                        $result.Ensure | Should -Be $true
-                        $result.IsGlobalCatalog | Should -Be $true
-                        $result.ReadOnlyReplica | Should -Be $true
+                        $result.Ensure | Should -BeTrue
+                        $result.IsGlobalCatalog | Should -BeTrue
+                        $result.ReadOnlyReplica | Should -BeTrue
                         $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
@@ -273,10 +273,10 @@ try
                         $result.LogPath | Should -BeNullOrEmpty
                         $result.SysvolPath | Should -BeNullOrEmpty
                         $result.SiteName | Should -BeNullOrEmpty
-                        $result.Ensure | Should -Be $false
-                        $result.IsGlobalCatalog | Should -Be $false
+                        $result.Ensure | Should -BeFalse
+                        $result.IsGlobalCatalog | Should -BeFalse
                         $result.NtdsSettingsObjectDn | Should -BeNullOrEmpty
-                        $result.ReadOnlyReplica | Should -Be $false
+                        $result.ReadOnlyReplica | Should -BeFalse
                         $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                     }
@@ -322,7 +322,7 @@ try
                 Context 'When creating a domain controller with only mandatory parameters' {
                     It 'Should return $true' {
                         $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName
-                        $result | Should -Be $true
+                        $result | Should -BeTrue
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -332,7 +332,7 @@ try
                 Context 'When property SiteName is in desired state' {
                     It 'Should return $true' {
                         $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
-                        $result | Should -Be $true
+                        $result | Should -BeTrue
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1 -Scope It
@@ -342,7 +342,7 @@ try
                 Context 'When property IsGlobalCatalog is in desired state' {
                     It 'Should return $true' {
                         $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true
-                        $result | Should -Be $true
+                        $result | Should -BeTrue
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -352,7 +352,7 @@ try
                 Context 'When property AllowPasswordReplicationAccountName is in desired state' {
                     It 'Should return $true' {
                         $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount)
-                        $result | Should -Be $true
+                        $result | Should -BeTrue
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -362,7 +362,7 @@ try
                 Context 'When property DenyPasswordReplicationAccountName is in desired state' {
                     It 'Should return $true' {
                         $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($deniedAccount)
-                        $result | Should -Be $true
+                        $result | Should -BeTrue
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -389,7 +389,7 @@ try
 
                     It 'Should return $false' {
                         $result = Test-TargetResource @testDefaultParams -DomainName 'WrongDomainName'
-                        $result | Should -Be $false
+                        $result | Should -BeFalse
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -410,7 +410,7 @@ try
 
                         It 'Should return $false' {
                             $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName 'NewSiteName'
-                            $result | Should -Be $false
+                            $result | Should -BeFalse
 
                             Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                             Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1 -Scope It
@@ -431,7 +431,7 @@ try
 
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $true
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -451,7 +451,7 @@ try
 
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -IsGlobalCatalog $false
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -473,7 +473,7 @@ try
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @('NewMember1','NewMember2')
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -483,7 +483,7 @@ try
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount,'Member2','NewMember')
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -493,7 +493,7 @@ try
                         Context 'When there exist more members that the desired state' {
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount)
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -515,7 +515,7 @@ try
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @('NewMember1','NewMember2')
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -525,7 +525,7 @@ try
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($allowedAccount,'Member2','NewMember')
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It
@@ -535,7 +535,7 @@ try
                         Context 'When there exist more members that the desired state' {
                             It 'Should return $false' {
                                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($allowedAccount)
-                                $result | Should -Be $false
+                                $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0 -Scope It

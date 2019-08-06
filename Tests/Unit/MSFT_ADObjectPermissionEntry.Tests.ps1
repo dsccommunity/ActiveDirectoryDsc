@@ -177,7 +177,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters -Verbose
 
                     # Assert
-                    $targetResource | Should -Be $true
+                    $targetResource | Should -BeTrue
                 }
 
                 It 'Should return $false if the ace desired state is absent' {
@@ -185,7 +185,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testAbsentParameters
 
                     # Assert
-                    $targetResource | Should -Be $false
+                    $targetResource | Should -BeFalse
                 }
             }
 
@@ -198,7 +198,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testPresentParameters
 
                     # Assert
-                    $targetResource | Should -Be $false
+                    $targetResource | Should -BeFalse
                 }
 
                 It 'Should return $true if the ace desired state is absent' {
@@ -206,7 +206,7 @@ try
                     $targetResource = Test-TargetResource @testDefaultParameters @testAbsentParameters
 
                     # Assert
-                    $targetResource | Should -Be $true
+                    $targetResource | Should -BeTrue
                 }
             }
         }

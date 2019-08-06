@@ -37,7 +37,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when a value is different for [System.String]' {
@@ -49,7 +49,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [System.Int32]' {
@@ -61,7 +61,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [System.Int16]' {
@@ -73,7 +73,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [System.UInt16]' {
@@ -85,7 +85,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [System.Boolean]' {
@@ -97,7 +97,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is missing' {
@@ -109,7 +109,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return true when only a specified value matches, but other non-listed values do not' {
@@ -129,7 +129,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     ValuesToCheck = @('Example')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when only specified values do not match, but other non-listed values do ' {
@@ -149,7 +149,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     ValuesToCheck = @('SecondExample')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when an empty hash table is used in the current values' {
@@ -164,7 +164,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return true when evaluating a table against a CimInstance' {
@@ -193,7 +193,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when evaluating a table against a CimInstance and a value is wrong' {
@@ -222,7 +222,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return true when evaluating a hash table containing an array' {
@@ -241,7 +241,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when evaluating a hash table containing an array with wrong values' {
@@ -260,7 +260,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when evaluating a hash table containing an array, but the CurrentValues are missing an array' {
@@ -278,7 +278,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when evaluating a hash table containing an array, but the property i CurrentValues is $null' {
@@ -297,7 +297,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
         }
 
@@ -342,7 +342,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
 
                 Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1
             }
@@ -614,7 +614,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 }
             }
 
-            Test-DomainMember | Should -Be $true
+            Test-DomainMember | Should -BeTrue
         }
 
         It 'Returns "False" when workgroup member' {
@@ -624,7 +624,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 }
             }
 
-            Test-DomainMember | Should -Be $false
+            Test-DomainMember | Should -BeFalse
         }
     }
 
@@ -700,8 +700,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
-            $members -contains 'User1' | Should -Be $true
-            $members -contains 'User2' | Should -Be $true
+            $members -contains 'User1' | Should -BeTrue
+            $members -contains 'User2' | Should -BeTrue
         }
 
         It 'Should removes two duplicates' {
@@ -709,8 +709,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
-            $members -contains 'User1' | Should -Be $true
-            $members -contains 'User2' | Should -Be $true
+            $members -contains 'User1' | Should -BeTrue
+            $members -contains 'User2' | Should -BeTrue
         }
 
         It 'Should removes double duplicates' {
@@ -718,8 +718,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
-            $members -contains 'User1' | Should -Be $true
-            $members -contains 'User2' | Should -Be $true
+            $members -contains 'User1' | Should -BeTrue
+            $members -contains 'User2' | Should -BeTrue
         }
 
         It 'Should return a string array with one one entry' {
@@ -727,7 +727,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 1
-            $members -contains 'User1' | Should -Be $true
+            $members -contains 'User1' | Should -BeTrue
         }
 
         It 'Should return empty collection when passed a $null value' {
@@ -747,41 +747,41 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
     Describe 'ActiveDirectoryDsc.Common\Test-Members' {
         It 'Passes when nothing is passed' {
-            Test-Members -ExistingMembers $null | Should -Be $true
+            Test-Members -ExistingMembers $null | Should -BeTrue
         }
 
         It 'Passes when there are existing members but members are required' {
             $testExistingMembers = @('USER1', 'USER2')
 
-            Test-Members -ExistingMembers $testExistingMembers | Should -Be $true
+            Test-Members -ExistingMembers $testExistingMembers | Should -BeTrue
         }
 
         It 'Passes when existing members match required members' {
             $testExistingMembers = @('USER1', 'USER2')
             $testMembers = @('USER2', 'USER1')
 
-            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should -Be $true
+            Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should -BeTrue
         }
 
         It 'Fails when there are no existing members and members are required' {
             $testExistingMembers = @('USER1', 'USER2')
             $testMembers = @('USER1', 'USER3')
 
-            Test-Members -ExistingMembers $null -Members $testMembers | Should -Be $false
+            Test-Members -ExistingMembers $null -Members $testMembers | Should -BeFalse
         }
 
         It 'Fails when there are more existing members than the members required' {
             $testExistingMembers = @('USER1', 'USER2', 'USER3')
             $testMembers = @('USER1', 'USER3')
 
-            Test-Members -ExistingMembers $null -Members $testMembers | Should -Be $false
+            Test-Members -ExistingMembers $null -Members $testMembers | Should -BeFalse
         }
 
         It 'Fails when there are more existing members than the members required' {
             $testExistingMembers = @('USER1', 'USER2')
             $testMembers = @('USER1', 'USER3', 'USER2')
 
-            Test-Members -ExistingMembers $null -Members $testMembers | Should -Be $false
+            Test-Members -ExistingMembers $null -Members $testMembers | Should -BeFalse
         }
 
         It 'Fails when existing members do not match required members' {
@@ -935,7 +935,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             $result = ConvertTo-TimeSpan -TimeSpan $testIntTimeSpan -TimeSpanType Minutes
 
-            $result -is [System.TimeSpan] | Should -Be $true
+            $result -is [System.TimeSpan] | Should -BeTrue
         }
 
         It 'Creates TimeSpan from seconds' {
@@ -978,7 +978,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds
 
-            $result -is [System.UInt32] | Should -Be $true
+            $result -is [System.UInt32] | Should -BeTrue
         }
 
         It 'Converts TimeSpan to total seconds' {
@@ -1024,7 +1024,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             $result = Get-ADCommonParameters -Identity $testIdentity
 
-            $result -is [System.Collections.Hashtable] | Should -Be $true
+            $result -is [System.Collections.Hashtable] | Should -BeTrue
         }
 
         It "Returns 'Identity' key by default" {
@@ -1097,7 +1097,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             $result = Get-ADCommonParameters -Identity $testIdentity
 
-            $result.ContainsKey('Credential') | Should -Be $false
+            $result.ContainsKey('Credential') | Should -BeFalse
         }
 
         It "Returns 'Credential' key when specified" {
@@ -1114,7 +1114,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             $result = Get-ADCommonParameters -Identity $testIdentity
 
-            $result.ContainsKey('Server') | Should -Be $false
+            $result.ContainsKey('Server') | Should -BeFalse
         }
 
         It "Returns 'Server' key when specified" {
@@ -1654,7 +1654,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = 'Test'
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $true
+                Test-DscPropertyState -Values $mockValues | Should -BeTrue
             }
         }
 
@@ -1665,7 +1665,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.String] 'test'
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
             It 'Should return false when a String value is missing' {
@@ -1674,7 +1674,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.String] 'Something'
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
         }
 
@@ -1685,7 +1685,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.Int32] 2
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [System.Int16]' {
@@ -1694,7 +1694,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.Int16] 2
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [System.UInt16]' {
@@ -1703,7 +1703,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.UInt16] 2
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
             It 'Should return false when a Integer value is missing' {
@@ -1712,7 +1712,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.Int32] 1
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
         }
 
@@ -1723,7 +1723,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.Boolean] $false
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
             It 'Should return false when a Boolean value is missing' {
@@ -1732,7 +1732,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = [System.Boolean] $true
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
         }
 
@@ -1743,7 +1743,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = @('1','2')
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $true
+                Test-DscPropertyState -Values $mockValues | Should -BeTrue
             }
 
             It 'Should return false when evaluating an array with wrong values' {
@@ -1752,7 +1752,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = @('DesiredValue1','DesiredValue2')
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
             It 'Should return false when evaluating an array, but the current value is $null' {
@@ -1761,7 +1761,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = @('1','2')
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
         }
 
@@ -1790,7 +1790,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     DesiredValue = New-Object -TypeName 'MockUnknownType'
                 }
 
-                Test-DscPropertyState -Values $mockValues | Should -Be $false
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
 
                 Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
             }

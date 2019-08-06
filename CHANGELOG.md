@@ -72,6 +72,7 @@
     to be published.
   - Integration tests are now correctly evaluates the value from `Test-DscConfiguration`
     ([issue #434](https://github.com/PowerShell/ActiveDirectoryDsc/issues/434)).
+  - Update all tests to use `| Should -BeTrue` and `| Should -BeFalse'`.
 - Changes to ADManagedServiceAccount
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"

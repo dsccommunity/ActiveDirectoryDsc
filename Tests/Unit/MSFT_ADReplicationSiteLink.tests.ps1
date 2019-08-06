@@ -128,11 +128,11 @@ try
                 Mock -CommandName Get-TargetResource -MockWith { $targetResourceParameters }
 
                 It 'Should return $true when sites included' {
-                    Test-TargetResource @targetResourceParameters | Should -Be $true
+                    Test-TargetResource @targetResourceParameters | Should -BeTrue
                 }
 
                 It 'Should return $true when sites excluded' {
-                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -Be $true
+                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -BeTrue
                 }
             }
 
@@ -146,7 +146,7 @@ try
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
-                    Test-TargetResource @targetResourceParameters | Should -Be $false
+                    Test-TargetResource @targetResourceParameters | Should -BeFalse
                 }
 
                 It 'Should return $false with Description is non compliant' {
@@ -154,7 +154,7 @@ try
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
-                    Test-TargetResource @targetResourceParameters | Should -Be $false
+                    Test-TargetResource @targetResourceParameters | Should -BeFalse
                 }
 
                 It 'Should return $false with Replication Frequency In Minutes is non compliant' {
@@ -162,7 +162,7 @@ try
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
-                    Test-TargetResource @targetResourceParameters | Should -Be $false
+                    Test-TargetResource @targetResourceParameters | Should -BeFalse
                 }
 
                 It 'Should return $false with Sites Included is non compliant' {
@@ -170,7 +170,7 @@ try
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
-                    Test-TargetResource @targetResourceParameters | Should -Be $false
+                    Test-TargetResource @targetResourceParameters | Should -BeFalse
                 }
 
                 It 'Should return $false with Ensure is non compliant' {
@@ -178,7 +178,7 @@ try
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
-                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -Be $false
+                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -BeFalse
                 }
 
                 It 'Should return $false with Sites Excluded is non compliant' {
@@ -187,7 +187,7 @@ try
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
-                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -Be $false
+                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -BeFalse
                 }
             }
         }

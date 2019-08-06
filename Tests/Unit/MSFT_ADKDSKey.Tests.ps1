@@ -539,7 +539,7 @@ try
                         EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
                     }
 
-                    Test-TargetResource @testTargetResourceParametersFuture | Should -Be $true
+                    Test-TargetResource @testTargetResourceParametersFuture | Should -BeTrue
 
                     Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
@@ -563,7 +563,7 @@ try
                         Ensure        = 'Absent'
                     }
 
-                    Test-TargetResource @testTargetResourceParametersFuture | Should -Be $true
+                    Test-TargetResource @testTargetResourceParametersFuture | Should -BeTrue
 
                     Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime
@@ -608,7 +608,7 @@ try
                     }
 
                     $testTargetResourceParametersFuture[$Parameter] = $value
-                    Test-TargetResource @testTargetResourceParametersFuture | Should -Be $false
+                    Test-TargetResource @testTargetResourceParametersFuture | Should -BeFalse
 
                     Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime -eq $EffectiveTime

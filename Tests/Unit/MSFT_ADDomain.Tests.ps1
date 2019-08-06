@@ -109,7 +109,7 @@ try
 
                 $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
-                $result -is [System.Collections.Hashtable] | Should -Be $true
+                $result -is [System.Collections.Hashtable] | Should -BeTrue
             }
 
             It 'Calls "Get-ADDomain" without credentials if domain member' {
@@ -241,7 +241,7 @@ try
 
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName
 
-                $result | Should -Be $true
+                $result | Should -BeTrue
             }
 
             It 'Returns "False" when "DomainName" does not match' {
@@ -249,7 +249,7 @@ try
 
                 $result = Test-TargetResource @testDefaultParams -DomainName $incorrectDomainName
 
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
 
             It 'Returns "True" when "DomainNetBIOSName" matches' {
@@ -257,7 +257,7 @@ try
 
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DomainNetBIOSName $correctDomainNetBIOSName
 
-                $result | Should -Be $true
+                $result | Should -BeTrue
             }
 
             It 'Returns "False" when "DomainNetBIOSName" does not match' {
@@ -265,7 +265,7 @@ try
 
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DomainNetBIOSName 'INCORRECT'
 
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
 
             It 'Returns "True" when "ParentDomainName" matches' {
@@ -273,7 +273,7 @@ try
 
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctChildDomainName -ParentDomainName $parentDomainName
 
-                $result | Should -Be $true
+                $result | Should -BeTrue
             }
 
             It 'Returns "False" when "ParentDomainName" does not match' {
@@ -281,7 +281,7 @@ try
 
                 $result = Test-TargetResource @testDefaultParams -DomainName $correctChildDomainName -ParentDomainName 'incorrect.com'
 
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
 
         }
