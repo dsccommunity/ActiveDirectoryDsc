@@ -68,6 +68,9 @@
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
     ([issue #399](https://github.com/PowerShell/ActiveDirectoryDsc/issues/399)).
+  - Using `$PSBoundParameters.Remove()` returns a `[System.Boolean]` to
+    indicate of the removal was done or not. That returned value has been
+    suppressed ([issue #466](https://github.com/PowerShell/ActiveDirectoryDsc/issues/466)).
 - Changes to ADComputer
   - BREAKING CHANGE: The previously made obsolete parameter `Enabled` has
     been removed and is now a read-only property. See resource documentation
@@ -115,6 +118,9 @@
   - Updated tests and replaced `Write-Error` with `throw`
     ([issue #332](https://github.com/PowerShell/ActiveDirectoryDsc/pull/332)).
   - Added comment-based help ([issue #335](https://github.com/PowerShell/ActiveDirectoryDsc/issues/335)).
+  - Using `$PSBoundParameters.Remove()` returns a `[System.Boolean]` to
+    indicate of the removal was done or not. That returned value has been
+    suppressed ([issue #466](https://github.com/PowerShell/ActiveDirectoryDsc/issues/466)).
 - Changes to ADServicePrincipalName
   - Minor change to the unit tests that did not correct assert the localized
     string when an account is not found.
