@@ -2619,7 +2619,7 @@ function Get-ThumbnailByteArray
 
     .PARAMETER DesiredThumbnailPhoto
         The desired thumbnail photo. Can be set to either a path to a .jpg-file,
-        a  Base64-encoded jpeg image, an empty string, or $null.
+        a Base64-encoded jpeg image, an empty string, or $null.
 
     .PARAMETER CurrentThumbnailPhotoHash
         The current thumbnail photo MD5 hash, or an empty string or $null if there
