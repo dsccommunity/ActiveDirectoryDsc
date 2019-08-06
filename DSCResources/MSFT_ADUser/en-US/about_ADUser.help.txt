@@ -248,7 +248,7 @@
 
 .PARAMETER ThumbnailPhoto
     Write - String
-    Specifies the thumbnail photo to be used for the user object. Can be set to either a path to a .jpg-file or a Base64-encoded jpg. If set to an empty string ('') the current thumbnail photo will be removed. The property ThumbnailPhoto will always return the Base64-encoded string of the image even if it was set to a file path.
+    Specifies the thumbnail photo to be used for the user object. Can be set either to a path pointing to a .jpg-file, or to a Base64-encoded jpeg image. If set to an empty string ('') the current thumbnail photo will be removed. The property ThumbnailPhoto will always return the image as a Base64-encoded string even if the configuration specified a file path.
 
 .PARAMETER DistinguishedName
     Read - String

@@ -437,10 +437,10 @@ $adPropertyMap = @(
 
     .PARAMETER ThumbnailPhoto
         Specifies the thumbnail photo to be used for the user object. Can be set
-        to either a path to a .jpg-file or a Base64-encoded jpg. If set to an
-        empty string ('') the current thumbnail photo will be removed. The
-        property ThumbnailPhoto will always return the Base64-encoded string of
-        the image even if it was set to a file path.
+        either to a path pointing to a .jpg-file, or to a Base64-encoded jpeg
+        image. If set to an empty string ('') the current thumbnail photo will be
+        removed. The property ThumbnailPhoto will always return the image as a
+        Base64-encoded string even if the configuration specified a file path.
 #>
 function Get-TargetResource
 {
@@ -1116,10 +1116,10 @@ function Get-TargetResource
 
     .PARAMETER ThumbnailPhoto
         Specifies the thumbnail photo to be used for the user object. Can be set
-        to either a path to a .jpg-file or a Base64-encoded jpg. If set to an
-        empty string ('') the current thumbnail photo will be removed. The
-        property ThumbnailPhoto will always return the Base64-encoded string of
-        the image even if it was set to a file path.
+        either to a path pointing to a .jpg-file, or to a Base64-encoded jpeg
+        image. If set to an empty string ('') the current thumbnail photo will be
+        removed. The property ThumbnailPhoto will always return the image as a
+        Base64-encoded string even if the configuration specified a file path.
 #>
 function Test-TargetResource
 {
@@ -1486,7 +1486,7 @@ function Test-TargetResource
             elseif ($parameter -eq 'ThumbnailPhoto')
             {
                 <#
-                    Compare thumbnail hash if they are the same. The function
+                    Compare thumbnail hash, if they are the same the function
                     Compare-ThumbnailPhoto returns $null if they are the same.
                 #>
                 $compareThumbnailPhotoResult = Compare-ThumbnailPhoto -DesiredThumbnailPhoto $ThumbnailPhoto -CurrentThumbnailPhotoHash $targetResource.ThumbnailPhotoHash
@@ -1770,10 +1770,10 @@ function Test-TargetResource
 
     .PARAMETER ThumbnailPhoto
         Specifies the thumbnail photo to be used for the user object. Can be set
-        to either a path to a .jpg-file or a Base64-encoded jpg. If set to an
-        empty string ('') the current thumbnail photo will be removed. The
-        property ThumbnailPhoto will always return the Base64-encoded string of
-        the image even if it was set to a file path.
+        either to a path pointing to a .jpg-file, or to a Base64-encoded jpeg
+        image. If set to an empty string ('') the current thumbnail photo will be
+        removed. The property ThumbnailPhoto will always return the image as a
+        Base64-encoded string even if the configuration specified a file path.
 #>
 function Set-TargetResource
 {
@@ -2196,7 +2196,7 @@ function Set-TargetResource
                 elseif ($parameter -eq 'ThumbnailPhoto')
                 {
                     <#
-                        Compare thumbnail hash if they are the same. The function
+                        Compare thumbnail hash, if they are the same the function
                         Compare-ThumbnailPhoto returns $null if they are the same.
                     #>
                     if (Compare-ThumbnailPhoto -DesiredThumbnailPhoto $ThumbnailPhoto -CurrentThumbnailPhotoHash $targetResource.ThumbnailPhotoHash)
@@ -2537,9 +2537,8 @@ function Test-Password
     .SYNOPSIS
         Internal function to calculate the thumbnailPhoto hash.
 
-    .PARAMETER DomainName
-        Name of the domain where the user account is located (only used if
-        password is managed).
+    .PARAMETER Bytes
+        A Byte array that will be hashed.
 
     .OUTPUTS
         Returns the MD5 hash of the bytes past in parameter Bytes, or $null if
@@ -2572,14 +2571,14 @@ function Get-MD5HashString
 
 <#
     .SYNOPSIS
-        Internal function to convert Base64 or filename to byte[].
+        Internal function to convert either a .jpg-file or a Base64-encoded jpeg
+        image to a Byte array.
 
-    .PARAMETER DomainName
-        Name of the domain where the user account is located (only used if
-        password is managed).
+    .PARAMETER ThumbnailPhoto
+        A string of either a .jpg-file or the string of a Base64-encoded jpeg image.
 
     .OUTPUTS
-        Returns a byte array of a either a .jpg-file or a Base64-encoded jpg.
+        Returns a byte array of the image specified in the parameter ThumbnailPhoto.
 #>
 function Get-ThumbnailByteArray
 {
@@ -2620,7 +2619,7 @@ function Get-ThumbnailByteArray
 
     .PARAMETER DesiredThumbnailPhoto
         The desired thumbnail photo. Can be set to either a path to a .jpg-file,
-        a Base64-encoded jpg, an empty string, or $null.
+        a  Base64-encoded jpeg image, an empty string, or $null.
 
     .PARAMETER CurrentThumbnailPhotoHash
         The current thumbnail photo MD5 hash, or an empty string or $null if there
