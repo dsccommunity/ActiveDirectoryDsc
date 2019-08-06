@@ -13,6 +13,9 @@
     module will also import the nested module ActiveDirectoryDsc.Common.
     It is exported so that the resource WaitForADDomain can reuse code
     when running a background job to search for a domain controller.
+  - Module manifest has been updated to optimize module auto-discovery
+    according to the article [*PowerShell module authoring considerations*](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/powershell/module-authoring-considerations)
+    ([issue #463](https://github.com/PowerShell/ActiveDirectoryDsc/issues/463)).
   - Added a Requirements section to every DSC resource README with the
     bullet point stating "Target machine must be running Windows Server
     2008 R2 or later" ([issue #399](https://github.com/PowerShell/ActiveDirectoryDsc/issues/399)).
@@ -73,6 +76,9 @@
   - Added a requirement to README stating "Group Managed Service Accounts
     need at least one Windows Server 2012 Domain Controller"
     ([issue #399](https://github.com/PowerShell/ActiveDirectoryDsc/issues/399)).
+  - Using `$PSBoundParameters.Remove()` returns a `[System.Boolean]` to
+    indicate of the removal was done or not. That returned value has been
+    suppressed ([issue #466](https://github.com/PowerShell/ActiveDirectoryDsc/issues/466)).
 - Changes to ADComputer
   - BREAKING CHANGE: The previously made obsolete parameter `Enabled` has
     been removed and is now a read-only property. See resource documentation
@@ -107,6 +113,8 @@
     default value is derived from another parameter ([issue #427](https://github.com/PowerShell/ActiveDirectoryDsc/issues/427)).
   - Now uses the helper function `Add-TypeAssembly` which have some benefit
     instead of directly using `Add-Type`, like verbose logging ([issue #431](https://github.com/PowerShell/ActiveDirectoryDsc/issues/431)).
+  - Add new property `ThumbnailPhoto` and read-only property `ThumbnailPhotoHash`
+    ([issue #44](https://github.com/PowerShell/ActiveDirectoryDsc/issues/44)).
 - Changes to ADDomain
   - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
     to `Credential` to better indicate that it is possible to impersonate
@@ -118,6 +126,9 @@
   - Updated tests and replaced `Write-Error` with `throw`
     ([issue #332](https://github.com/PowerShell/ActiveDirectoryDsc/pull/332)).
   - Added comment-based help ([issue #335](https://github.com/PowerShell/ActiveDirectoryDsc/issues/335)).
+  - Using `$PSBoundParameters.Remove()` returns a `[System.Boolean]` to
+    indicate of the removal was done or not. That returned value has been
+    suppressed ([issue #466](https://github.com/PowerShell/ActiveDirectoryDsc/issues/466)).
 - Changes to ADServicePrincipalName
   - Minor change to the unit tests that did not correct assert the localized
     string when an account is not found.
