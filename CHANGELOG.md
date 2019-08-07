@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.0.0.0
+
 - Changes to ActiveDirectoryDsc
   - BREAKING CHANGE: ADRecycleBin is replaced by the new resource ADOptionalFeature
     ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
