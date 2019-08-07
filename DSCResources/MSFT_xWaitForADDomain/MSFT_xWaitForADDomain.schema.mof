@@ -1,9 +1,0 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xWaitForADDomain")]
-class MSFT_xWaitForADDomain : OMI_BaseResource
-{
-    [Key, Description("The name of the AD Domain to wait for.")] String DomainName;
-    [Write, Description("The user account credentials to use to perform this task."), EmbeddedInstance("MSFT_Credential")] String DomainUserCredential;
-    [Write, Description("The interval in seconds between retry attempts.")] uint64 RetryIntervalSec;
-    [Write, Description("The number of retries before failing.")] uint32 RetryCount;
-    [Write, Description("The number of times to reboot after failing and then restart retrying.")] uint32 RebootRetryCount;
-};

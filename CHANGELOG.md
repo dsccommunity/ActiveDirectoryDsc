@@ -1,6 +1,179 @@
-# Change log for xActiveDirectory
+# Change log for ActiveDirectoryDsc
 
 ## Unreleased
+
+## 4.0.0.0
+
+- Changes to ActiveDirectoryDsc
+  - BREAKING CHANGE: ADRecycleBin is replaced by the new resource ADOptionalFeature
+    ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
+  - New resource ADOptionalFeature ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
+  - BREAKING CHANGE: Renamed the xActiveDirectory to ActiveDirectoryDsc
+    and removed the 'x' from all resource names ([issue #312](https://github.com/PowerShell/ActiveDirectoryDsc/issues/312)).
+  - The helper function `Find-DomainController` is exported in the module
+    manifest. When running `Import-Module -Name ActiveDirectoryDsc` the
+    module will also import the nested module ActiveDirectoryDsc.Common.
+    It is exported so that the resource WaitForADDomain can reuse code
+    when running a background job to search for a domain controller.
+  - Module manifest has been updated to optimize module auto-discovery
+    according to the article [*PowerShell module authoring considerations*](https://docs.microsoft.com/en-us/windows-server/administration/performance-tuning/powershell/module-authoring-considerations)
+    ([issue #463](https://github.com/PowerShell/ActiveDirectoryDsc/issues/463)).
+  - Added a Requirements section to every DSC resource README with the
+    bullet point stating "Target machine must be running Windows Server
+    2008 R2 or later" ([issue #399](https://github.com/PowerShell/ActiveDirectoryDsc/issues/399)).
+  - Added 'about_\<DSCResource\>.help.txt' file to all resources
+    ([issue #404](https://github.com/PowerShell/ActiveDirectoryDsc/issues/404)).
+  - Fixed an issue that the helper function `Add-ADCommonGroupMember` was
+    not outputting the correct group name in a verbose message and in an
+    error message.
+  - Style guideline cleanup.
+    - Cleaned up some minor style violations in the code.
+    - All localized strings in the resources now has a string ID suffix
+      ([issue #419](https://github.com/PowerShell/ActiveDirectoryDsc/issues/419)).
+    - All schema properties description now ends with full stop (.)
+      ([issue #420](https://github.com/PowerShell/ActiveDirectoryDsc/issues/420)).
+    - Updated all types in the resources schema to use PascalCase.
+  - Updated all resource read-only parameters to start the description
+    with 'Returns...' so it is more clear that the property cannot be
+    assigned a value.
+  - The default value on resource parameters are now reflected in the parameter
+    descriptions in the schema.mof (so that Wiki will be updated)
+    ([issue #426](https://github.com/PowerShell/ActiveDirectoryDsc/issues/426)).
+  - Removed unnecessary Script Analyzer rule overrides from tests.
+  - Added new helper functions in xActiveDirectory.Common.
+    - New-CimCredentialInstance
+    - Add-TypeAssembly
+    - New-ADDirectoryContext
+  - Changes to ActiveDirectoryDsc.Common:
+    - Removed unused parameter `ModuleName` from `Assert-MemberParameters`
+      function.
+    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentForestMode`
+      function.
+    - Removed unused parameter `ModuleName` from `ConvertTo-DeploymentDomainMode`
+      function.
+    - Added function help ([issue #321](https://github.com/PowerShell/ActiveDirectoryDsc/issues/321)).
+    - Removed the helper function `ThrowInvalidOperationError` and
+      `ThrowInvalidArgumentError` in favor of the
+      [new helper functions for localization](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#helper-functions-for-localization)
+      ([issue #316](https://github.com/PowerShell/ActiveDirectoryDsc/issues/316),
+      [issue #317](https://github.com/PowerShell/ActiveDirectoryDsc/issues/317)).
+    - Removed the alias `DomainAdministratorCredential` from the parameter
+      `Credential` in the function `Restore-ADCommonObject`
+    - Removed the alias `DomainAdministratorCredential` from the parameter
+      `Credential` in the function `Get-ADCommonParameters`
+    - Added function `Find-DomainController`.
+    - Added function `Get-CurrentUser` (moved from the resource ADKDSKey).
+    - Refactor `Remove-DuplicateMembers` and added more unit tests
+      ([issue #443](https://github.com/PowerShell/ActiveDirectoryDsc/issues/443)).
+    - Minor cleanup in `Test-Members` because of the improved `Remove-DuplicateMembers`.
+    - Minor cleanup in `Assert-MemberParameters` because of the improved `Remove-DuplicateMembers`.
+  - Updated all the examples files to be prefixed with the resource
+    name so they are more easily discovered in PowerShell Gallery and
+    Azure Automation ([issue #416](https://github.com/PowerShell/ActiveDirectoryDsc/issues/416)).
+  - Fix examples that had duplicate guid that would have prevented them
+    to be published.
+  - Integration tests are now correctly evaluates the value from `Test-DscConfiguration`
+    ([issue #434](https://github.com/PowerShell/ActiveDirectoryDsc/issues/434)).
+  - Update all tests to use `| Should -BeTrue` and `| Should -BeFalse'`.
+- Changes to ADManagedServiceAccount
+  - Added a requirement to README stating "Group Managed Service Accounts
+    need at least one Windows Server 2012 Domain Controller"
+    ([issue #399](https://github.com/PowerShell/ActiveDirectoryDsc/issues/399)).
+  - Using `$PSBoundParameters.Remove()` returns a `[System.Boolean]` to
+    indicate of the removal was done or not. That returned value has been
+    suppressed ([issue #466](https://github.com/PowerShell/ActiveDirectoryDsc/issues/466)).
+- Changes to ADComputer
+  - BREAKING CHANGE: The previously made obsolete parameter `Enabled` has
+    been removed and is now a read-only property. See resource documentation
+    how to enforce the `Enabled` property.
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
+  - Fixed the GUID in Example 3-AddComputerAccountSpecificPath_Config
+    ([issue #410](https://github.com/PowerShell/ActiveDirectoryDsc/issues/410)).
+  - Add example showing how to create cluster computer account ([issue #401](https://github.com/PowerShell/ActiveDirectoryDsc/issues/401)).
+- Changes to ADOrganizationalUnit
+  - Catch exception when the path property specifies a non-existing path
+    ([issue #408](https://github.com/PowerShell/ActiveDirectoryDsc/issues/408)).
+  - The unit tests are using the stub classes so the tests can be run locally.
+  - Added comment-based help ([issue #339](https://github.com/PowerShell/ActiveDirectoryDsc/issues/339)).
+- Changes to ADUser
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
+  - Fixes exception when creating a user with an empty string property
+    ([issue #407](https://github.com/PowerShell/ActiveDirectoryDsc/issues/407)).
+  - Fixes exception when updating `CommonName` and `Path` concurrently
+    ([issue #402](https://github.com/PowerShell/ActiveDirectoryDsc/issues/402)).
+  - Fixes ChangePasswordAtLogon Property to be only set to `true` at User
+    Creation ([issue #414](https://github.com/PowerShell/ActiveDirectoryDsc/issues/414)).
+  - Added comment-based help ([issue #340](https://github.com/PowerShell/ActiveDirectoryDsc/issues/340)).
+  - Now it correctly tests passwords when parameter DomainName is set to
+   distinguished name and parameter Credential is used ([issue #451](https://github.com/PowerShell/ActiveDirectoryDsc/issues/451)).
+  - Added integration tests ([issue #359](https://github.com/PowerShell/ActiveDirectoryDsc/issues/359)).
+  - Update the logic for setting the default value for the parameter
+    `CommonName`. This is due to an how LCM handles parameters when a
+    default value is derived from another parameter ([issue #427](https://github.com/PowerShell/ActiveDirectoryDsc/issues/427)).
+  - Now uses the helper function `Add-TypeAssembly` which have some benefit
+    instead of directly using `Add-Type`, like verbose logging ([issue #431](https://github.com/PowerShell/ActiveDirectoryDsc/issues/431)).
+  - Add new property `ThumbnailPhoto` and read-only property `ThumbnailPhotoHash`
+    ([issue #44](https://github.com/PowerShell/ActiveDirectoryDsc/issues/44)).
+- Changes to ADDomain
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
+  - BREAKING CHANGE: A new parameter `AllowTrustRecreation` has been added
+    that when set allows a trust to be recreated in scenarios where that
+    is required. This way the user have to opt-in to such destructive
+    action since since it can result in service interruption ([issue #421](https://github.com/PowerShell/ActiveDirectoryDsc/issues/421)).
+  - Updated tests and replaced `Write-Error` with `throw`
+    ([issue #332](https://github.com/PowerShell/ActiveDirectoryDsc/pull/332)).
+  - Added comment-based help ([issue #335](https://github.com/PowerShell/ActiveDirectoryDsc/issues/335)).
+  - Using `$PSBoundParameters.Remove()` returns a `[System.Boolean]` to
+    indicate of the removal was done or not. That returned value has been
+    suppressed ([issue #466](https://github.com/PowerShell/ActiveDirectoryDsc/issues/466)).
+- Changes to ADServicePrincipalName
+  - Minor change to the unit tests that did not correct assert the localized
+    string when an account is not found.
+- Changes to ADDomainTrust
+  - BREAKING CHANGE: Renamed the parameter `TargetDomainAdministratorCredential`
+    to `TargetCredential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
+  - Refactored the resource to enable unit tests, and at the same time changed
+    it to use the same code pattern as the resource xADObjectEnabledState.
+  - Added unit tests ([issue #324](https://github.com/PowerShell/ActiveDirectoryDsc/issues/324)).
+  - Added comment-based help ([issue #337](https://github.com/PowerShell/ActiveDirectoryDsc/issues/337)).
+  - Added integration tests ([issue #348](https://github.com/PowerShell/ActiveDirectoryDsc/issues/348)).
+- Changes to WaitForADDomain
+  - BREAKING CHANGE: Refactored the resource to handle timeout better and
+    more correctly wait for a specific amount of time, and at the same time
+    make the resource more intuitive to use. This change has replaced
+    parameters in the resource ([issue #343](https://github.com/PowerShell/ActiveDirectoryDsc/issues/343)).
+  - Now the resource can use built-in `PsDscRunAsCredential` instead of
+    specifying the `Credential` parameter ([issue #367](https://github.com/PowerShell/ActiveDirectoryDsc/issues/367)).
+  - New parameter `SiteName` can be used to wait for a domain controller
+    in a specific site in the domain.
+  - Added comment-based help ([issue #341](https://github.com/PowerShell/ActiveDirectoryDsc/issues/341)).
+- Changes to ADDomainController
+  - BREAKING CHANGE: Renamed the parameter `DomainAdministratorCredential`
+    to `Credential` to better indicate that it is possible to impersonate
+    any credential with enough permission to perform the task ([issue #269](https://github.com/PowerShell/ActiveDirectoryDsc/issues/269)).
+  - Add support for creating Read-Only Domain Controller (RODC)
+    ([issue #40](https://github.com/PowerShell/ActiveDirectoryDsc/issues/40)).
+    [Svilen @SSvilen](https://github.com/SSvilen)
+  - Refactored unit tests for Test-TargetResource.
+  - Added new parameter `FlexibleSingleMasterOperationRole` to able to move
+    Flexible Single Master Operation (FSMO) roles to the current node.
+    It does not allow seizing of roles, only allows a move when both
+    domain controllers are available ([issue #55](https://github.com/PowerShell/ActiveDirectoryDsc/issues/55)).
+- Changes to ADObjectPermissionEntry
+  - Remove remnants of the `SupportsShouldProcess` ([issue #329](https://github.com/PowerShell/ActiveDirectoryDsc/issues/329)).
+- Changes to ADGroup
+  - Added comment-based help ([issue #338](https://github.com/PowerShell/ActiveDirectoryDsc/issues/338)).
+  - Update the documentation with the correct default value for the parameter
+    GroupScope.
+- Changes to ADDomainDefaultPasswordPolicy
+  - Added comment-based help ([issue #336](https://github.com/PowerShell/ActiveDirectoryDsc/issues/336)).
 
 ## 3.0.0.0
 
@@ -16,16 +189,16 @@
     - Common Tests - Custom Script Analyzer Rules
     - Common Tests - Required Script Analyzer Rules
     - Common Tests - Flagged Script Analyzer Rules
-    - Common Tests - Validate Module Files ([issue #282](https://github.com/PowerShell/xActiveDirectory/issues/282))
-    - Common Tests - Validate Script Files ([issue #283](https://github.com/PowerShell/xActiveDirectory/issues/283))
-    - Common Tests - Relative Path Length ([issue #284](https://github.com/PowerShell/xActiveDirectory/issues/284))
-    - Common Tests - Validate Markdown Links ([issue #280](https://github.com/PowerShell/xActiveDirectory/issues/280))
-    - Common Tests - Validate Localization ([issue #281](https://github.com/PowerShell/xActiveDirectory/issues/281))
-    - Common Tests - Validate Example Files ([issue #279](https://github.com/PowerShell/xActiveDirectory/issues/279))
-    - Common Tests - Validate Example Files To Be Published ([issue #311](https://github.com/PowerShell/xActiveDirectory/issues/311))
-  - Move resource descriptions to Wiki using auto-documentation ([issue #289](https://github.com/PowerShell/xActiveDirectory/issues/289))
+    - Common Tests - Validate Module Files ([issue #282](https://github.com/PowerShell/ActiveDirectoryDsc/issues/282))
+    - Common Tests - Validate Script Files ([issue #283](https://github.com/PowerShell/ActiveDirectoryDsc/issues/283))
+    - Common Tests - Relative Path Length ([issue #284](https://github.com/PowerShell/ActiveDirectoryDsc/issues/284))
+    - Common Tests - Validate Markdown Links ([issue #280](https://github.com/PowerShell/ActiveDirectoryDsc/issues/280))
+    - Common Tests - Validate Localization ([issue #281](https://github.com/PowerShell/ActiveDirectoryDsc/issues/281))
+    - Common Tests - Validate Example Files ([issue #279](https://github.com/PowerShell/ActiveDirectoryDsc/issues/279))
+    - Common Tests - Validate Example Files To Be Published ([issue #311](https://github.com/PowerShell/ActiveDirectoryDsc/issues/311))
+  - Move resource descriptions to Wiki using auto-documentation ([issue #289](https://github.com/PowerShell/ActiveDirectoryDsc/issues/289))
   - Move helper functions from MSFT_xADCommon to the module
-    xActiveDirectory.Common ([issue #288](https://github.com/PowerShell/xActiveDirectory/issues/288)).
+    xActiveDirectory.Common ([issue #288](https://github.com/PowerShell/ActiveDirectoryDsc/issues/288)).
     - Removed helper function `Test-ADDomain` since it was not used. The
       helper function had design flaws too.
     - Now the helper function `Test-Members` outputs all the members that
@@ -38,13 +211,14 @@
     xADComputer.
   - Cleanup of code
     - Removed semicolon throughout where it is not needed.
-    - Migrate tests to Pester syntax v4.x ([issue #322](https://github.com/PowerShell/xActiveDirectory/issues/322)).
+    - Migrate tests to Pester syntax v4.x ([issue #322](https://github.com/PowerShell/ActiveDirectoryDsc/issues/322)).
     - Removed `-MockWith {}` in unit tests.
     - Use fully qualified type names for parameters and variables
-      ([issue #374](https://github.com/PowerShell/xActiveDirectory/issues/374)).
+      ([issue #374](https://github.com/PowerShell/ActiveDirectoryDsc/issues/374)).
   - Removed unused legacy test files from the root of the repository.
   - Updated Example List README with missing resources.
-  - Added missing examples for xADReplicationSubnet, xADServicePrincipalName and xWaitForADDomain. ([issue #395](https://github.com/PowerShell/xActiveDirectory/issues/395)).
+  - Added missing examples for xADReplicationSubnet, xADServicePrincipalName
+    and xWaitForADDomain ([issue #395](https://github.com/PowerShell/ActiveDirectoryDsc/issues/395)).
 - Changes to xADComputer
   - Refactored the resource and the unit tests.
   - BREAKING CHANGE: The `Enabled` property is **DEPRECATED** and is no
@@ -61,8 +235,8 @@
   - Moved examples from the README.md to separate example files in the
     Examples folder.
   - Fix the RestoreFromRecycleBin description.
-  - Fix unnecessary cast in `Test-TargetResource` ([issue #295](https://github.com/PowerShell/xActiveDirectory/issues/295)).
-  - Fix ServicePrincipalNames property empty string exception ([issue #382](https://github.com/PowerShell/xActiveDirectory/issues/382)).
+  - Fix unnecessary cast in `Test-TargetResource` ([issue #295](https://github.com/PowerShell/ActiveDirectoryDsc/issues/295)).
+  - Fix ServicePrincipalNames property empty string exception ([issue #382](https://github.com/PowerShell/ActiveDirectoryDsc/issues/382)).
 - Changes to xADGroup
   - Change the description of the property RestoreFromRecycleBin.
   - Code cleanup.
@@ -74,11 +248,12 @@
 - Changes to xADOrganizationalUnit
   - Change the description of the property RestoreFromRecycleBin.
   - Code cleanup.
-  - Fix incorrect verbose message when this resource has Ensure set to Absent ([issue #276](https://github.com/PowerShell/xActiveDirectory/issues/276)).
+  - Fix incorrect verbose message when this resource has Ensure set to
+    Absent ([issue #276](https://github.com/PowerShell/ActiveDirectoryDsc/issues/276)).
 - Changes to xADUser
   - Change the description of the property RestoreFromRecycleBin.
-  - Added ServicePrincipalNames property ([issue #153](https://github.com/PowerShell/xActiveDirectory/issues/153)).
-  - Added ChangePasswordAtLogon property ([issue #246](https://github.com/PowerShell/xActiveDirectory/issues/246)).
+  - Added ServicePrincipalNames property ([issue #153](https://github.com/PowerShell/ActiveDirectoryDsc/issues/153)).
+  - Added ChangePasswordAtLogon property ([issue #246](https://github.com/PowerShell/ActiveDirectoryDsc/issues/246)).
   - Code cleanup.
   - Added LogonWorkstations property
   - Added Organization property
@@ -88,10 +263,10 @@
   - Added CompoundIdentitySupported property
   - Added PasswordNotRequired property
   - Added SmartcardLogonRequired property
-  - Added ProxyAddresses property ([Issue #254](https://github.com/PowerShell/xActiveDirectory/issues/254)).
+  - Added ProxyAddresses property ([Issue #254](https://github.com/PowerShell/ActiveDirectoryDsc/issues/254)).
   - Fix Password property being updated whenever another property is changed
-    ([issue #384](https://github.com/PowerShell/xActiveDirectory/issues/384)).
-  - Replace Write-Error with the correct helper function ([Issue #331](https://github.com/PowerShell/xActiveDirectory/issues/331)).
+    ([issue #384](https://github.com/PowerShell/ActiveDirectoryDsc/issues/384)).
+  - Replace Write-Error with the correct helper function ([Issue #331](https://github.com/PowerShell/ActiveDirectoryDsc/issues/331)).
 - Changes to xADDomainController
   - Change the `#Requires` statement in the Examples to require the correct
     module.
@@ -111,15 +286,15 @@
   - Suppressing the Script Analyzer rule `PSAvoidGlobalVars` since the
     resource is using the `$global:DSCMachineStatus` variable to trigger
     a reboot.
-  - Added missing property schema descriptions ([issue #369](https://github.com/PowerShell/xActiveDirectory/issues/369)).
+  - Added missing property schema descriptions ([issue #369](https://github.com/PowerShell/ActiveDirectoryDsc/issues/369)).
   - Code cleanup.
 - Changes to xADRecycleBin
   - Remove unneeded example and resource designer files.
-  - Added missing property schema descriptions ([issue #368](https://github.com/PowerShell/xActiveDirectory/issues/368)).
+  - Added missing property schema descriptions ([issue #368](https://github.com/PowerShell/ActiveDirectoryDsc/issues/368)).
   - Code cleanup.
   - It now sets back the `$ErrorActionPreference` that was set prior to
     setting it to `'Stop'`.
-  - Replace Write-Error with the correct helper function ([issue #327](https://github.com/PowerShell/xActiveDirectory/issues/327)).
+  - Replace Write-Error with the correct helper function ([issue #327](https://github.com/PowerShell/ActiveDirectoryDsc/issues/327)).
 - Changes to xADReplicationSiteLink
   - Fix ADIdentityNotFoundException when creating a new site link.
   - Code cleanup.
@@ -148,24 +323,26 @@
   - Added localization module -DscResource.LocalizationHelper* containing
     the helper functions `Get-LocalizedData`, `New-InvalidArgumentException`,
     `New-InvalidOperationException`, `New-ObjectNotFoundException`, and
-    `New-InvalidResultException` ([issue #257](https://github.com/PowerShell/xActiveDirectory/issues/257)).
+    `New-InvalidResultException` ([issue #257](https://github.com/PowerShell/ActiveDirectoryDsc/issues/257)).
     For more information around these helper functions and localization
     in resources, see [Localization section in the Style Guideline](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md#localization).
   - Added common module *DscResource.Common* containing the helper function
     `Test-DscParameterState`. The goal is that all resource common functions
     are moved to this module (functions that are or can be used by more
-    than one resource) ([issue #257](https://github.com/PowerShell/xActiveDirectory/issues/257)).
+    than one resource) ([issue #257](https://github.com/PowerShell/ActiveDirectoryDsc/issues/257)).
   - Added xADManagedServiceAccount resource to manage Managed Service
     Accounts (MSAs). [Andrew Wickham (@awickham10)](https://github.com/awickham10)
     and [@kungfu71186](https://github.com/kungfu71186)
   - Removing the Misc Folder, as it is no longer required.
   - Added xADKDSKey resource to create KDS Root Keys for gMSAs. [@kungfu71186](https://github.com/kungfu71186)
-  - Combined DscResource.LocalizationHelper and DscResource.Common Modules into xActiveDirectory.Common
+  - Combined DscResource.LocalizationHelper and DscResource.Common Modules
+    into xActiveDirectory.Common
 - Changes to xADReplicationSiteLink
   - Make use of the new localization helper functions.
 - Changes to xAdDomainController
   - Added new parameter to disable or enable the Global Catalog (GC)
-    ([issue #75](https://github.com/PowerShell/xActiveDirectory/issues/75)). [Eric Foskett @Merto410](https://github.com/Merto410)
+    ([issue #75](https://github.com/PowerShell/ActiveDirectoryDsc/issues/75)).
+    [Eric Foskett @Merto410](https://github.com/Merto410)
   - Fixed a bug with the parameter `InstallationMediaPath` that it would
     not be added if it was specified in a configuration. Now the parameter
     `InstallationMediaPath` is correctly passed to `Install-ADDSDomainController`.
@@ -177,22 +354,22 @@
   - Restoring a computer account from the recycle bin no longer fails if
     there is more than one object with the same name in the recycle bin.
     Now it uses the object that was changed last using the property
-    `whenChanged` ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+    `whenChanged` ([issue #271](https://github.com/PowerShell/ActiveDirectoryDsc/issues/271)).
 - Changes to xADGroup
   - Restoring a group from the recycle bin no longer fails if there is
     more than one object with the same name in the recycle bin. Now it
     uses the object that was changed last using the property `whenChanged`
-    ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+    ([issue #271](https://github.com/PowerShell/ActiveDirectoryDsc/issues/271)).
 - Changes to xADOrganizationalUnit
   - Restoring an organizational unit from the recycle bin no longer fails
     if there is more than one object with the same name in the recycle bin.
     Now it uses the object that was changed last using the property `whenChanged`
-    ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+    ([issue #271](https://github.com/PowerShell/ActiveDirectoryDsc/issues/271)).
 - Changes to xADUser
   - Restoring a user from the recycle bin no longer fails if there is
     more than one object with the same name in the recycle bin. Now it
     uses the object that was changed last using the property `whenChanged`
-    ([issue #271](https://github.com/PowerShell/xActiveDirectory/issues/271)).
+    ([issue #271](https://github.com/PowerShell/ActiveDirectoryDsc/issues/271)).
 
 ## 2.25.0.0
 
@@ -204,13 +381,13 @@
 - Changes to xADUser
   - Added TrustedForDelegation parameter to xADUser to support enabling/disabling Kerberos delegation
   - Minor clean up of unit tests.
-- Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue #155](https://github.com/PowerShell/xActiveDirectory/issues/155)).
+- Added Ensure Read property to xADDomainController to fix Get-TargetResource return bug ([issue #155](https://github.com/PowerShell/ActiveDirectoryDsc/issues/155)).
   - Updated readme and add release notes
-- Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/xActiveDirectory/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+- Updated xADGroup to support group membership from multiple domains ([issue #152](https://github.com/PowerShell/ActiveDirectoryDsc/issues/152)). [Robert Biddle (@robbiddle)](https://github.com/RobBiddle) and [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ## 2.24.0.0
 
-- Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/xActiveDirectory/issues/108)).
+- Added parameter to xADDomainController to support InstallationMediaPath ([issue #108](https://github.com/PowerShell/ActiveDirectoryDsc/issues/108)).
 - Updated xADDomainController schema to be standard and provide Descriptions.
 
 ## 2.23.0.0
@@ -230,30 +407,30 @@
 - Added xADObjectPermissionEntry
   - New resource added to control the AD object permissions entries [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
 - Changes to xADCommon
-  - Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+  - Assert-Module has been extended with a parameter ImportModule to also import the module ([issue #218](https://github.com/PowerShell/ActiveDirectoryDsc/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 - Changes to xADDomain
-  - xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue #218](https://github.com/PowerShell/xActiveDirectory/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
-- xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue #221](https://github.com/PowerShell/xActiveDirectory/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+  - xADDomain makes use of new parameter ImportModule of Assert-Module in order to import the ADDSDeployment module ([issue #218](https://github.com/PowerShell/ActiveDirectoryDsc/issues/218)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+- xADComputer, xADGroup, xADOrganizationalUnit and xADUser now support restoring from AD recycle bin ([Issue #221](https://github.com/PowerShell/ActiveDirectoryDsc/issues/211)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ## 2.20.0.0
 
 - Changes to xActiveDirectory
-  - Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/xActiveDirectory/issues/190)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
-  - Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/xActiveDirectory/issues/198)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
-  - xADDomain is now capable of setting the forest and domain functional level ([issue #187](https://github.com/PowerShell/xActiveDirectory/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
+  - Changed MSFT_xADUser.schema.mof version to "1.0.0.0" to match other resources ([issue #190](https://github.com/PowerShell/ActiveDirectoryDsc/issues/190)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
+  - Removed duplicated code from examples in README.md ([issue #198](https://github.com/PowerShell/ActiveDirectoryDsc/issues/198)). [thequietman44 (@thequietman44)](https://github.com/thequietman44)
+  - xADDomain is now capable of setting the forest and domain functional level ([issue #187](https://github.com/PowerShell/ActiveDirectoryDsc/issues/187)). [Jan-Hendrik Peters (@nyanhp)](https://github.com/nyanhp)
 
 ## 2.19.0.0
 
 - Changes to xActiveDirectory
   - Activated the GitHub App Stale on the GitHub repository.
   - The resources are now in alphabetical order in the README.md
-    ([issue #194](https://github.com/PowerShell/xActiveDirectory/issues/194)).
+    ([issue #194](https://github.com/PowerShell/ActiveDirectoryDsc/issues/194)).
   - Adding a Branches section to the README.md with Codecov badges for both
-    master and dev branch ([issue #192](https://github.com/PowerShell/xActiveDirectory/issues/192)).
-  - xADGroup no longer resets GroupScope and Category to default values ([issue #183](https://github.com/PowerShell/xActiveDirectory/issues/183)).
+    master and dev branch ([issue #192](https://github.com/PowerShell/ActiveDirectoryDsc/issues/192)).
+  - xADGroup no longer resets GroupScope and Category to default values ([issue #183](https://github.com/PowerShell/ActiveDirectoryDsc/issues/183)).
   - The helper function script file MSFT_xADCommon.ps1 was renamed to
     MSFT_xADCommon.psm1 to be a module script file instead. This makes it
-    possible to report code coverage for the helper functions ([issue #201](https://github.com/PowerShell/xActiveDirectory/issues/201)).
+    possible to report code coverage for the helper functions ([issue #201](https://github.com/PowerShell/ActiveDirectoryDsc/issues/201)).
 
 ## 2.18.0.0
 
@@ -309,7 +486,7 @@
 - xADDomain: Added check for Active Directory cmdlets.
 - xADDomain: Added additional error trapping, verbose and diagnostic information.
 - xADDomain: Added unit test coverage.
-- Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomin, xADGroup, xADOrganizationalUnit and xADUser resources.
+- Fixes CredentialAttribute and other PSScriptAnalyzer tests in xADCommon, xADDomain, xADGroup, xADOrganizationalUnit and xADUser resources.
 
 ## 2.9.0.0
 

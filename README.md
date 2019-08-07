@@ -1,6 +1,6 @@
-# xActiveDirectory
+# ActiveDirectoryDsc
 
-The **xActiveDirectory** module contains DSC resources for deployment and
+The **ActiveDirectoryDsc** module contains DSC resources for deployment and
 configuration of Active Directory.
 
 These DSC resources allow you to configure new domains, child domains, and high
@@ -12,23 +12,23 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 ## Documentation and Examples
 
-For a full list of resources in xActiveDirectory and examples on their use, check
-out the [xActiveDirectory wiki](https://github.com/PowerShell/xActiveDirectory/wiki).
+For a full list of resources in ActiveDirectoryDsc and examples on their use, check
+out the [ActiveDirectoryDsc wiki](https://github.com/PowerShell/ActiveDirectoryDsc/wiki).
 
 ## Branches
 
 ### master
 
-[![Build status](https://ci.appveyor.com/api/projects/status/p4jejr60jrgb8ity/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xActiveDirectory/branch/master)
-[![codecov](https://codecov.io/gh/PowerShell/xActiveDirectory/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xActiveDirectory/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/x9haeb92nw57gjkh/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/ActiveDirectoryDsc/branch/master)
+[![codecov](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/master)
 
 This is the branch containing the latest release -
 no contributions should be made directly to this branch.
 
 ### dev
 
-[![Build status](https://ci.appveyor.com/api/projects/status/p4jejr60jrgb8ity/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xActiveDirectory/branch/dev)
-[![codecov](https://codecov.io/gh/PowerShell/xActiveDirectory/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/xActiveDirectory/branch/dev)
+[![Build status](https://ci.appveyor.com/api/projects/status/x9haeb92nw57gjkh/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/ActiveDirectoryDsc/branch/dev)
+[![codecov](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/ActiveDirectoryDsc/branch/dev)
 
 This is the development branch
 to which contributions should be proposed by contributors as pull requests.
