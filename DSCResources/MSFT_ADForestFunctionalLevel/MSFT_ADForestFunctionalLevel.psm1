@@ -8,7 +8,7 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADForestFunctional
 
 <#
     .SYNOPSIS
-        Returns the current functional level of the domain.
+        Returns the current functional level of the forest.
 
     .PARAMETER ForestIdentity
         Specifies the Active Directory forest to modify. You can identify a
