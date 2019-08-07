@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 1.0.0
-.GUID 924568d9-9764-4277-ab85-5a03b818bf6d
+.GUID 09a75817-166a-4c9e-8d94-46b64526e01b
 .AUTHOR Microsoft Corporation
 .COMPANYNAME Microsoft Corporation
 .COPYRIGHT (c) Microsoft Corporation. All rights reserved.
@@ -28,7 +28,7 @@ Configuration ADDomainControllerProperties_SetContentFreshness_Config
 
     node localhost
     {
-        ADDomainControllerProperties 'ChangeForestFunctionalLevel'
+        ADForestFunctionalLevel 'ChangeForestFunctionalLevel'
         {
             ForestIdentity          = 'contoso.com'
             ForestMode              = 'Windows2012R2Forest'
