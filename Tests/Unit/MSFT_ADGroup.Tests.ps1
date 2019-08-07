@@ -175,7 +175,7 @@ try
 
                     $targetResource = Test-TargetResource @testPresentParams -Members $fakeADUser1.$attribute, $fakeADUser2.$attribute -MembershipAttribute $attribute
 
-                    $targetResource | Should -Be $true
+                    $targetResource | Should -BeTrue
                 }
 
                 It "Fails when group membership counts do not match using '$attribute'" {
@@ -184,7 +184,7 @@ try
 
                     $targetResource = Test-TargetResource @testPresentParams -Members $fakeADUser2.$attribute, $fakeADUser3.$attribute -MembershipAttribute $attribute
 
-                    $targetResource | Should -Be $false
+                    $targetResource | Should -BeFalse
                 }
 
                 It "Fails when group 'Members' do not match using '$attribute'" {
@@ -193,7 +193,7 @@ try
 
                     $targetResource = Test-TargetResource @testPresentParams -Members $fakeADUser2.$attribute, $fakeADUser3.$attribute -MembershipAttribute $attribute
 
-                    $targetResource | Should -Be $false
+                    $targetResource | Should -BeFalse
                 }
 
                 It "Passes when specified 'MembersToInclude' match using '$attribute'" {
@@ -202,7 +202,7 @@ try
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToInclude $fakeADUser2.$attribute -MembershipAttribute $attribute
 
-                    $targetResource | Should -Be $true
+                    $targetResource | Should -BeTrue
                 }
 
                 It "Fails when specified 'MembersToInclude' are missing using '$attribute'" {
@@ -211,7 +211,7 @@ try
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToInclude $fakeADUser3.$attribute -MembershipAttribute $attribute
 
-                    $targetResource | Should -Be $false
+                    $targetResource | Should -BeFalse
                 }
 
                 It "Passes when specified 'MembersToExclude' are missing using '$attribute'" {
@@ -220,7 +220,7 @@ try
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToExclude $fakeADUser3.$attribute -MembershipAttribute $attribute
 
-                    $targetResource | Should -Be $true
+                    $targetResource | Should -BeTrue
                 }
 
                 It "Fails when when specified 'MembersToExclude' match using '$attribute'" {
@@ -229,7 +229,7 @@ try
 
                     $targetResource = Test-TargetResource @testPresentParams -MembersToExclude $fakeADUser2.$attribute -MembershipAttribute $attribute
 
-                    $targetResource | Should -Be $false
+                    $targetResource | Should -BeFalse
                 }
 
             } #end foreach attribute
@@ -237,7 +237,7 @@ try
             It "Fails when group does not exist and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Scope' is wrong" {
@@ -247,7 +247,7 @@ try
                     return $duffADGroup
                 }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Category' is wrong" {
@@ -257,7 +257,7 @@ try
                     return $duffADGroup
                 }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Path' is wrong" {
@@ -267,7 +267,7 @@ try
                     return $duffADGroup
                 }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Description' is wrong" {
@@ -277,7 +277,7 @@ try
                     return $duffADGroup
                 }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'DisplayName' is wrong" {
@@ -287,7 +287,7 @@ try
                     return $duffADGroup
                 }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'ManagedBy' is wrong" {
@@ -297,7 +297,7 @@ try
                     return $duffADGroup
                 }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists, 'Ensure' is 'Present' but 'Notes' is wrong" {
@@ -307,25 +307,25 @@ try
                     return $duffADGroup
                 }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when group exists and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-                Test-TargetResource @testAbsentParams | Should -Be $false
+                Test-TargetResource @testAbsentParams | Should -BeFalse
             }
 
             It "Passes when group exists, target matches and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-                Test-TargetResource @testPresentParams | Should -Be $true
+                Test-TargetResource @testPresentParams | Should -BeTrue
             }
 
             It "Passes when group does not exist and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
-                Test-TargetResource @testAbsentParams | Should -Be $true
+                Test-TargetResource @testAbsentParams | Should -BeTrue
             }
 
         }
@@ -631,7 +631,7 @@ try
                 Mock -CommandName Add-ADCommonGroupMember
 
                 $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
-                $universalGroupInCompliance | Should -Be $true
+                $universalGroupInCompliance | Should -BeTrue
             }
 
             # tests for issue 183
@@ -646,7 +646,7 @@ try
                 Mock -CommandName Add-ADCommonGroupMember
 
                 $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
-                $universalGroupInCompliance | Should -Be $true
+                $universalGroupInCompliance | Should -BeTrue
             }
 
             It "Calls Restore-AdCommonObject when RestoreFromRecycleBin is used" {

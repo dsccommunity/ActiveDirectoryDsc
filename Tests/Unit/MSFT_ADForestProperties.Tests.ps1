@@ -118,11 +118,11 @@ try
                 Mock -CommandName Get-ADForest -MockWith { $mockADForestDesiredState }
 
                 It 'Should return $true when using add/remove parameters' {
-                    Test-TargetResource @addRemoveParameters | Should -Be $true
+                    Test-TargetResource @addRemoveParameters | Should -BeTrue
                 }
 
                 It 'Should return $true when using replace parameters' {
-                    Test-TargetResource @replaceParameters | Should -Be $true
+                    Test-TargetResource @replaceParameters | Should -BeTrue
                 }
             }
 
@@ -130,11 +130,11 @@ try
                 Mock -CommandName Get-ADForest -MockWith { $mockADForestNonDesiredState }
 
                 It 'Should return $false when using add/remove parameters' {
-                    Test-TargetResource @addRemoveParameters | Should -Be $false
+                    Test-TargetResource @addRemoveParameters | Should -BeFalse
                 }
 
                 It 'Should return $false when using replace parameters' {
-                    Test-TargetResource @replaceParameters | Should -Be $false
+                    Test-TargetResource @replaceParameters | Should -BeFalse
                 }
             }
 

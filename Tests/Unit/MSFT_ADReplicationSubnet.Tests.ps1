@@ -123,13 +123,13 @@ try
                 It 'Should return false for present' {
 
                     $result = Test-TargetResource -Ensure 'Present' @testDefaultParameters
-                    $result | Should -Be $false
+                    $result | Should -BeFalse
                 }
 
                 It 'Should return true for absent' {
 
                     $result = Test-TargetResource -Ensure 'Absent' @testDefaultParameters
-                    $result | Should -Be $true
+                    $result | Should -BeTrue
                 }
             }
 
@@ -150,25 +150,25 @@ try
                 It 'Should return true for present' {
 
                     $result = Test-TargetResource -Ensure 'Present' @testDefaultParameters
-                    $result | Should -Be $true
+                    $result | Should -BeTrue
                 }
 
                 It 'Should return false for absent' {
 
                     $result = Test-TargetResource -Ensure 'Absent' @testDefaultParameters
-                    $result | Should -Be $false
+                    $result | Should -BeFalse
                 }
 
                 It 'Should return false for wrong site' {
 
                     $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site 'WrongSite' -Location $testDefaultParameters.Location
-                    $result | Should -Be $false
+                    $result | Should -BeFalse
                 }
 
                 It 'Should return false for wrong location' {
 
                     $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location 'WringLocation'
-                    $result | Should -Be $false
+                    $result | Should -BeFalse
                 }
             }
         }

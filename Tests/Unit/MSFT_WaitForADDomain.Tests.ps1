@@ -283,8 +283,8 @@ try
 
                         $comparedReturnValue = $compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'IsAvailable' })
                         $comparedReturnValue | Should -Not -BeNullOrEmpty
-                        $comparedReturnValue.Expected | Should -Be $true
-                        $comparedReturnValue.Actual | Should -Be $true
+                        $comparedReturnValue.Expected | Should -BeTrue
+                        $comparedReturnValue.Actual | Should -BeTrue
                         $comparedReturnValue.InDesiredState | Should -BeTrue
 
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
@@ -307,8 +307,8 @@ try
 
                     $comparedReturnValue = $compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'IsAvailable' })
                     $comparedReturnValue | Should -Not -BeNullOrEmpty
-                    $comparedReturnValue.Expected | Should -Be $true
-                    $comparedReturnValue.Actual | Should -Be $false
+                    $comparedReturnValue.Expected | Should -BeTrue
+                    $comparedReturnValue.Actual | Should -BeFalse
                     $comparedReturnValue.InDesiredState | Should -BeFalse
 
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It

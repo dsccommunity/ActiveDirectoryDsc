@@ -178,7 +178,7 @@ try
                 Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinEnabled }
 
                 It 'Should return $true' {
-                    Test-TargetResource @featureParameters | Should -Be $true
+                    Test-TargetResource @featureParameters | Should -BeTrue
                 }
             }
 
@@ -186,7 +186,7 @@ try
                 Mock -CommandName Get-ADOptionalFeature -MockWith { $mockADRecycleBinDisabled }
 
                 It 'Should return $false' {
-                    Test-TargetResource @featureParameters | Should -Be $false
+                    Test-TargetResource @featureParameters | Should -BeFalse
                 }
             }
         }

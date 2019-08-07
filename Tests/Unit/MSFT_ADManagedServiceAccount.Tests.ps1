@@ -868,7 +868,7 @@ try
                         DisplayName        = ''
                     }
 
-                    Test-TargetResource @testResourceParametersSingle | Should -Be $true
+                    Test-TargetResource @testResourceParametersSingle | Should -BeTrue
                 }
             }
 
@@ -892,7 +892,7 @@ try
                         DisplayName         = ''
                     }
 
-                    Test-TargetResource @testResourceParametersGroup | Should -Be $true
+                    Test-TargetResource @testResourceParametersGroup | Should -BeTrue
                 }
             }
 
@@ -915,7 +915,7 @@ try
                         Ensure             = 'Absent'
                     }
 
-                    Test-TargetResource @testResourceParametersSingle | Should -Be $true
+                    Test-TargetResource @testResourceParametersSingle | Should -BeTrue
                 }
             }
 
@@ -967,7 +967,7 @@ try
                     }
 
                     $testResourceParametersSingle[$Parameter] = $value
-                    Test-TargetResource @testResourceParametersSingle | Should -Be $false
+                    Test-TargetResource @testResourceParametersSingle | Should -BeFalse
                 }
             }
 
@@ -1022,7 +1022,7 @@ try
                     }
 
                     $testResourceParametersGroup[$Parameter] = $value
-                    Test-TargetResource @testResourceParametersGroup | Should -Be $false
+                    Test-TargetResource @testResourceParametersGroup | Should -BeFalse
                 }
             }
         }

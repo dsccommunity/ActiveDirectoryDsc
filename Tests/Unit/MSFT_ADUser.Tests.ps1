@@ -196,7 +196,7 @@ try
 
                 $adUser = Get-TargetResource @testPresentParams
 
-                $adUser -is [System.Collections.Hashtable] | Should -Be $true
+                $adUser -is [System.Collections.Hashtable] | Should -BeTrue
             }
 
             It "Returns 'Ensure' is 'Present' when user account exists" {
@@ -252,7 +252,7 @@ try
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
 
                 $adUser = Get-TargetResource @mockPresentParams
-                $adUser.ChangePasswordAtLogon | Should -Be $true
+                $adUser.ChangePasswordAtLogon | Should -BeTrue
             }
 
             It "Should return the correct value of 'ChangePassswordAtLogon' if it is false" {
@@ -263,7 +263,7 @@ try
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
 
                 $adUser = Get-TargetResource @mockPresentParams
-                $adUser.ChangePasswordAtLogon | Should -Be $false
+                $adUser.ChangePasswordAtLogon | Should -BeFalse
             }
 
             It "Should return the correct value of 'ThumbnailPhoto'." {
@@ -290,46 +290,46 @@ try
             It "Passes when user account does not exist and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
-                Test-TargetResource @testAbsentParams | Should -Be $true
+                Test-TargetResource @testAbsentParams | Should -BeTrue
             }
 
             It "Passes when user account exists and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-                Test-TargetResource @testPresentParams | Should -Be $true
+                Test-TargetResource @testPresentParams | Should -BeTrue
             }
 
             It "Passes when user account password matches, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $true }
 
-                Test-TargetResource @testPresentParams -Password $testCredential | Should -Be $true
+                Test-TargetResource @testPresentParams -Password $testCredential | Should -BeTrue
             }
 
             It "Passes when user account password does not match, 'Password' is specified and 'PasswordNeverResets' is True" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $false }
 
-                Test-TargetResource @testPresentParams -Password $testCredential -PasswordNeverResets $true | Should -Be $true
+                Test-TargetResource @testPresentParams -Password $testCredential -PasswordNeverResets $true | Should -BeTrue
             }
 
             It "Fails when user account does not exist and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
-                Test-TargetResource @testPresentParams | Should -Be $false
+                Test-TargetResource @testPresentParams | Should -BeFalse
             }
 
             It "Fails when user account exists, and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
 
-                Test-TargetResource @testAbsentParams | Should -Be $false
+                Test-TargetResource @testAbsentParams | Should -BeFalse
             }
 
             It "Fails when user account password is incorrect, 'Password' is specified and 'PasswordNeverResets' is False" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testPresentParams }
                 Mock -CommandName Test-Password { return $false }
 
-                Test-TargetResource @testPresentParams -Password $testCredential | Should -Be $false
+                Test-TargetResource @testPresentParams -Password $testCredential | Should -BeFalse
             }
 
             It "Calls 'Test-Password' with 'Default' PasswordAuthentication by default" {
@@ -363,7 +363,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
 
                 It "Fails when user account '$testParameter' does not match incorrect AD account property value" {
@@ -377,7 +377,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
                 It "Fails when user account '$testParameter' does not match empty AD account property value" {
@@ -391,7 +391,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
                 It "Fails when user account '$testParameter' does not match null AD account property value" {
@@ -405,7 +405,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
                 It "Passes when empty user account '$testParameter' matches empty AD account property" {
@@ -417,7 +417,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
 
                 It "Passes when empty user account '$testParameter' matches null AD account property" {
@@ -429,7 +429,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
 
             } #end foreach test string property
@@ -446,7 +446,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
 
                 It "Should fail when user account '$testParameter' is true and does not match AD account property value" {
@@ -459,7 +459,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
                 It "Should pass when user account '$testParameter' is false matches AD account property" {
@@ -472,7 +472,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
 
                 It "Should fail when user account '$testParameter' is false and does not match AD account property value" {
@@ -485,7 +485,7 @@ try
                         return $invalidADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
             } #end foreach test boolean property
@@ -501,7 +501,7 @@ try
                     return $validADUser
                 }
 
-                Test-TargetResource @testValidPresentParams | Should -Be $true
+                Test-TargetResource @testValidPresentParams | Should -BeTrue
             }
 
             It "Should fail when ChangePasswordAtLogon is false and does not match the AD Account property" {
@@ -515,7 +515,7 @@ try
                     return $invalidADUser
                 }
 
-                Test-TargetResource @testValidPresentParams | Should -Be $false
+                Test-TargetResource @testValidPresentParams | Should -BeFalse
             }
 
             It "Should pass when ChangePasswordAtLogon is true and matches the AD Account property and the user already exists" {
@@ -530,7 +530,7 @@ try
                     return $validADUser
                 }
 
-                Test-TargetResource @testValidPresentParams | Should -Be $true
+                Test-TargetResource @testValidPresentParams | Should -BeTrue
             }
 
             It "Should pass when ChangePasswordAtLogon is true and does not match the AD Account property and the user already exists" {
@@ -545,7 +545,7 @@ try
                     return $invalidADUser
                 }
 
-                Test-TargetResource @testValidPresentParams | Should -Be $true
+                Test-TargetResource @testValidPresentParams | Should -BeTrue
             }
 
             It "Should fail when ChangePasswordAtLogon is true and does not match the AD Account property and the user does not exist" {
@@ -560,7 +560,7 @@ try
                     return $invalidADUser
                 }
 
-                Test-TargetResource @testValidPresentParams | Should -Be $false
+                Test-TargetResource @testValidPresentParams | Should -BeFalse
             }
 
             foreach ($testParameter in $testArrayProperties)
@@ -575,7 +575,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
 
                 It "Passes when user account '$testParameter' matches single AD account property" {
@@ -588,7 +588,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
                 It "Passes when user account '$testParameter' matches multiple AD account property" {
                     $testParameterValue = @('Entry1', 'Entry2')
@@ -600,7 +600,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $true
+                    Test-TargetResource @testValidPresentParams | Should -BeTrue
                 }
                 It "Fails when user account '$testParameter' does not match AD account property count" {
                     $testParameterValue = @('Entry1', 'Entry2')
@@ -612,7 +612,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
                 It "Fails when user account '$testParameter' does not match AD account property name" {
@@ -625,7 +625,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
                 It "Fails when user account '$testParameter' does not match empty AD account property" {
@@ -638,7 +638,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
                 It "Fails when empty user account '$testParameter' does not match AD account property" {
@@ -651,7 +651,7 @@ try
                         return $validADUser
                     }
 
-                    Test-TargetResource @testValidPresentParams | Should -Be $false
+                    Test-TargetResource @testValidPresentParams | Should -BeFalse
                 }
 
             }#end foreach test array property
@@ -672,7 +672,7 @@ try
                         }
 
                         It 'Should return $true' {
-                            Test-TargetResource @testTargetResourceParameters | Should -Be $true
+                            Test-TargetResource @testTargetResourceParameters | Should -BeTrue
                         }
                     }
 
@@ -690,7 +690,7 @@ try
                         }
 
                         It 'Should return $true' {
-                            Test-TargetResource @testTargetResourceParameters | Should -Be $true
+                            Test-TargetResource @testTargetResourceParameters | Should -BeTrue
                         }
                     }
                 }
@@ -712,7 +712,7 @@ try
                         }
 
                         It 'Should return $false' {
-                            Test-TargetResource @testTargetResourceParameters | Should -Be $false
+                            Test-TargetResource @testTargetResourceParameters | Should -BeFalse
                         }
                     }
 
@@ -730,7 +730,7 @@ try
                         }
 
                         It 'Should return $false' {
-                            Test-TargetResource @testTargetResourceParameters | Should -Be $false
+                            Test-TargetResource @testTargetResourceParameters | Should -BeFalse
                         }
                     }
 
@@ -748,7 +748,7 @@ try
                         }
 
                         It 'Should return $false' {
-                            Test-TargetResource @testTargetResourceParameters | Should -Be $false
+                            Test-TargetResource @testTargetResourceParameters | Should -BeFalse
                         }
                     }
                 }
