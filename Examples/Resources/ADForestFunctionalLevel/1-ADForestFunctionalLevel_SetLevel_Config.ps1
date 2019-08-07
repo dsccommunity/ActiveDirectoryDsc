@@ -22,7 +22,7 @@
         This configuration will change the forest functional level to
         a Windows Server 2012 R2 Forest.
 #>
-Configuration ADDomainControllerProperties_SetContentFreshness_Config
+Configuration ADForestFunctionalLevel_SetLevel_Config
 {
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
