@@ -10,6 +10,7 @@ These are the links to the examples for each individual resource:
 - [ADComputer](Resources/ADComputer)
 - [ADDomain](Resources/ADDomain)
 - [ADDomainController](Resources/ADDomainController)
+- [ADDomainControllerProperties](Resources/ADDomainControllerProperties)
 - [ADDomainDefaultPasswordPolicy](Resources/ADDomainDefaultPasswordPolicy)
 - [ADDomainTrust](Resources/ADDomainTrust)
 - [ADForestProperties](Resources/ADForestProperties)

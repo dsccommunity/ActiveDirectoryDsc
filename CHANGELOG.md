@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Changes to ActiveDirectoryDsc
+  - New resource ADDomainControllerProperties ([issue #301](https://github.com/PowerShell/ActiveDirectoryDsc/issues/301)).
+
 ## 4.0.0.0
 
 - Changes to ActiveDirectoryDsc
