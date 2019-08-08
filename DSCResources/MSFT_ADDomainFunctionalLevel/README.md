@@ -1,6 +1,6 @@
 # Description
 
-This resource change the forest functional level. Functional levels can
+This resource change the domain functional level. Functional levels can
 be read more about in the article [Forest and Domain Functional Levels](https://docs.microsoft.com/sv-se/windows-server/identity/ad-ds/active-directory-functional-levels).
 
 **WARNING: This action might be irreversibel!** Make sure to understand

@@ -16,7 +16,7 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainFunctional
         name, or NetBIOS domain name.
 
     .PARAMETER DomainMode
-        Specifies the domain mode for an Active Directory domain.
+        Specifies the functional level for the Active Directory domain.
 
         Not used in Get-TargetResource.
 #>
@@ -45,9 +45,9 @@ function Get-TargetResource
         DomainMode = $null
     }
 
-    $forestObject = Get-ADDomain -Identity $DomainIdentity -ErrorAction 'Stop'
+    $domainObject = Get-ADDomain -Identity $DomainIdentity -ErrorAction 'Stop'
 
-    $getTargetResourceReturnValue['DomainMode'] = $forestObject.DomainMode
+    $getTargetResourceReturnValue['DomainMode'] = $domainObject.DomainMode
 
     return $getTargetResourceReturnValue
 }
@@ -62,7 +62,7 @@ function Get-TargetResource
         name, or NetBIOS domain name.
 
     .PARAMETER DomainMode
-        Specifies the domain mode for an Active Directory domain.
+        Specifies the functional level for the Active Directory domain.
 #>
 function Test-TargetResource
 {
@@ -112,7 +112,7 @@ function Test-TargetResource
         name, or NetBIOS domain name.
 
     .PARAMETER DomainMode
-        Specifies the domain mode for an Active Directory domain.
+        Specifies the functional level for the Active Directory domain.
 #>
 function Set-TargetResource
 {
@@ -136,12 +136,12 @@ function Set-TargetResource
         -not $_.InDesiredState
     }
 
-    $DomainModeProperty = $propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'DomainMode' })
+    $domainModeProperty = $propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'DomainMode' })
 
-    if ($DomainModeProperty)
+    if ($domainModeProperty)
     {
         Write-Verbose -Message (
-            $script:localizedData.DomainModeUpdating -f $DomainModeProperty.Actual, $DomainMode
+            $script:localizedData.DomainModeUpdating -f $domainModeProperty.Actual, $DomainMode
         )
 
         $setADDomainModeParameters = @{
@@ -165,7 +165,7 @@ function Set-TargetResource
         name, or NetBIOS domain name.
 
     .PARAMETER DomainMode
-        Specifies the domain mode for an Active Directory domain.
+       Specifies the functional level for the Active Directory domain.
 #>
 function Compare-TargetResourceState
 {

@@ -23,7 +23,7 @@
 .PARAMETER ForestMode
     Required - String
     Allowed values: Windows2008R2Forest,  Windows2012Forest,  Windows2012R2Forest,  Windows2016Forest
-    Specifies the forest mode for an Active Directory forest.
+    Specifies the the functional level for the Active Directory forest..
 
 .EXAMPLE 1
 

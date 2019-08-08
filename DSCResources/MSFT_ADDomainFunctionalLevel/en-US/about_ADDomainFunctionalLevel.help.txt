@@ -23,7 +23,7 @@
 .PARAMETER DomainMode
     Required - String
     Allowed values: Windows2008R2Domain,  Windows2012Domain,  Windows2012R2Domain,  Windows2016Domain
-    Specifies the domain mode for an Active Directory domain.
+    Specifies the functional level for the Active Directory domain.
 
 .EXAMPLE 1
 
