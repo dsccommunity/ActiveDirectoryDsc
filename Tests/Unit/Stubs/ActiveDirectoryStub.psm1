@@ -1188,7 +1188,7 @@ function Get-ADDomain
         $Current,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADDomain]
+        [System.Object]
         $Identity,
 
         [Parameter()]
