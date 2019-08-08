@@ -4,19 +4,19 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADForestFunctionalLevel'
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainFunctionalLevel'
 
 <#
     .SYNOPSIS
-        Returns the current functional level of the forest.
+        Returns the current functional level of the domain.
 
-    .PARAMETER ForestIdentity
-        Specifies the Active Directory forest to modify. You can identify a
-        forest by its fully qualified domain name (FQDN), GUID, DNS host name,
-        or NetBIOS name.
+    .PARAMETER DomainIdentity
+        Specifies the Active Directory domain to modify. You can identify a
+        domain by its distinguished name, GUID, security identifier, DNS domain
+        name, or NetBIOS domain name.
 
-    .PARAMETER ForestMode
-        Specifies the the functional level for the Active Directory forest.
+    .PARAMETER DomainMode
+        Specifies the functional level for the Active Directory domain.
 
         Not used in Get-TargetResource.
 #>
@@ -28,25 +28,26 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $ForestIdentity,
+        $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
         [System.String]
-        $ForestMode
+        $DomainMode
     )
 
     Write-Verbose -Message (
-        $script:localizedData.RetrievingForestMode -f $ForestIdentity
+        $script:localizedData.RetrievingDomainMode -f $DomainIdentity
     )
 
     $getTargetResourceReturnValue = @{
-        ForestIdentity = $ForestIdentity
-        ForestMode = $null
+        DomainIdentity = $DomainIdentity
+        DomainMode = $null
     }
 
-    $forestObject = Get-ADForest -Identity $ForestIdentity -ErrorAction 'Stop'
-    $getTargetResourceReturnValue['ForestMode'] = $forestObject.ForestMode
+    $domainObject = Get-ADDomain -Identity $DomainIdentity -ErrorAction 'Stop'
+
+    $getTargetResourceReturnValue['DomainMode'] = $domainObject.DomainMode
 
     return $getTargetResourceReturnValue
 }
@@ -55,13 +56,13 @@ function Get-TargetResource
     .SYNOPSIS
         Determines if the functional level is in the desired state.
 
-    .PARAMETER ForestIdentity
-        Specifies the Active Directory forest to modify. You can identify a
-        forest by its fully qualified domain name (FQDN), GUID, DNS host name,
-        or NetBIOS name.
+    .PARAMETER DomainIdentity
+        Specifies the Active Directory domain to modify. You can identify a
+        domain by its distinguished name, GUID, security identifier, DNS domain
+        name, or NetBIOS domain name.
 
-    .PARAMETER ForestMode
-        Specifies the the functional level for the Active Directory forest.
+    .PARAMETER DomainMode
+        Specifies the functional level for the Active Directory domain.
 #>
 function Test-TargetResource
 {
@@ -71,16 +72,16 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $ForestIdentity,
+        $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
         [System.String]
-        $ForestMode
+        $DomainMode
     )
 
     Write-Verbose -Message (
-        $script:localizedData.TestConfiguration -f $ForestIdentity
+        $script:localizedData.TestConfiguration -f $DomainIdentity
     )
 
     $compareTargetResourceStateResult = Compare-TargetResourceState @PSBoundParameters
@@ -103,15 +104,15 @@ function Test-TargetResource
 
 <#
     .SYNOPSIS
-        Sets the functional level on the Active Directory forest.
+        Sets the functional level on the Active Directory domain.
 
-    .PARAMETER ForestIdentity
-        Specifies the Active Directory forest to modify. You can identify a
-        forest by its fully qualified domain name (FQDN), GUID, DNS host name,
-        or NetBIOS name.
+    .PARAMETER DomainIdentity
+        Specifies the Active Directory domain to modify. You can identify a
+        domain by its distinguished name, GUID, security identifier, DNS domain
+        name, or NetBIOS domain name.
 
-    .PARAMETER ForestMode
-        Specifies the the functional level for the Active Directory forest.
+    .PARAMETER DomainMode
+        Specifies the functional level for the Active Directory domain.
 #>
 function Set-TargetResource
 {
@@ -120,12 +121,12 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $ForestIdentity,
+        $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
         [System.String]
-        $ForestMode
+        $DomainMode
     )
 
     $compareTargetResourceStateResult = Compare-TargetResourceState @PSBoundParameters
@@ -135,21 +136,21 @@ function Set-TargetResource
         -not $_.InDesiredState
     }
 
-    $forestModeProperty = $propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'ForestMode' })
+    $domainModeProperty = $propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'DomainMode' })
 
-    if ($forestModeProperty)
+    if ($domainModeProperty)
     {
         Write-Verbose -Message (
-            $script:localizedData.ForestModeUpdating -f $forestModeProperty.Actual, $ForestMode
+            $script:localizedData.DomainModeUpdating -f $domainModeProperty.Actual, $DomainMode
         )
 
-        $setADForestModeParameters = @{
-            Identity = $ForestIdentity
-            ForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::$ForestMode
+        $setADDomainModeParameters = @{
+            Identity = $DomainIdentity
+            DomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]::$DomainMode
             Confirm = $false
         }
 
-        Set-ADForestMode @setADForestModeParameters
+        Set-ADDomainMode @setADDomainModeParameters
     }
 }
 
@@ -158,13 +159,13 @@ function Set-TargetResource
         Compares the properties in the current state with the properties of the
         desired state and returns a hashtable with the comparison result.
 
-    .PARAMETER ForestIdentity
-        Specifies the Active Directory forest to modify. You can identify a
-        forest by its fully qualified domain name (FQDN), GUID, DNS host name,
-        or NetBIOS name.
+    .PARAMETER DomainIdentity
+        Specifies the Active Directory domain to modify. You can identify a
+        domain by its distinguished name, GUID, security identifier, DNS domain
+        name, or NetBIOS domain name.
 
-    .PARAMETER ForestMode
-       Specifies the the functional level for the Active Directory forest.
+    .PARAMETER DomainMode
+       Specifies the functional level for the Active Directory domain.
 #>
 function Compare-TargetResourceState
 {
@@ -173,12 +174,12 @@ function Compare-TargetResourceState
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $ForestIdentity,
+        $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
         [System.String]
-        $ForestMode
+        $DomainMode
     )
 
     $getTargetResourceResult = Get-TargetResource @PSBoundParameters
@@ -186,7 +187,7 @@ function Compare-TargetResourceState
     $compareTargetResourceStateParameters = @{
         CurrentValues = $getTargetResourceResult
         DesiredValues = $PSBoundParameters
-        Properties    = @('ForestMode')
+        Properties    = @('DomainMode')
     }
 
     return Compare-ResourcePropertyState @compareTargetResourceStateParameters

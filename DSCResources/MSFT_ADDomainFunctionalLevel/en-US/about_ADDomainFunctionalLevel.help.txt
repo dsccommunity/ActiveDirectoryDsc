@@ -1,5 +1,5 @@
 .NAME
-    ADForestFunctionalLevel
+    ADDomainFunctionalLevel
 
 .DESCRIPTION
     This resource change the forest functional level. Functional levels can
@@ -16,19 +16,19 @@
 
     * Target machine must be running Windows Server 2008 R2 or later.
 
-.PARAMETER ForestIdentity
+.PARAMETER DomainIdentity
     Key - String
-    Specifies the Active Directory forest to modify. You can identify a forest by its fully qualified domain name (FQDN), GUID, DNS host name, or NetBIOS name.
+    Specifies the Active Directory domain to modify. You can identify a domain by its distinguished name, GUID, security identifier, DNS domain name, or NetBIOS domain name.
 
-.PARAMETER ForestMode
+.PARAMETER DomainMode
     Required - String
-    Allowed values: Windows2008R2Forest,  Windows2012Forest,  Windows2012R2Forest,  Windows2016Forest
-    Specifies the the functional level for the Active Directory forest..
+    Allowed values: Windows2008R2Domain,  Windows2012Domain,  Windows2012R2Domain,  Windows2016Domain
+    Specifies the functional level for the Active Directory domain.
 
 .EXAMPLE 1
 
-This configuration will change the forest functional level to
-a Windows Server 2012 R2 Forest.
+This configuration will change the domain functional level to
+a Windows Server 2012 R2 Domain.
 
 Configuration ADDomainControllerProperties_SetContentFreshness_Config
 {
@@ -38,8 +38,8 @@ Configuration ADDomainControllerProperties_SetContentFreshness_Config
     {
         ADDomainControllerProperties 'ChangeForestFunctionalLevel'
         {
-            ForestIdentity          = 'contoso.com'
-            ForestMode              = 'Windows2012R2Forest'
+            DomainIdentity          = 'contoso.com'
+            DomainMode              = 'Windows2012R2Domain'
         }
     }
 }
