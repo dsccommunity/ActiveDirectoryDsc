@@ -1,6 +1,11 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
 param ()
 
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests')
+{
+    return
+}
+
 #region HEADER
 $script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceName = 'MSFT_ADDomainController'

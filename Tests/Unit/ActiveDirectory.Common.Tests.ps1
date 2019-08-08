@@ -8,6 +8,13 @@
 #>
 Get-Module -Name 'ActiveDirectoryDsc.Common' -All | Remove-Module -Force
 
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\ActiveDirectoryDsc.TestHelper.psm1')
+
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests')
+{
+    return
+}
+
 # Import the ActiveDirectoryDsc.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\ActiveDirectoryDsc.Common'

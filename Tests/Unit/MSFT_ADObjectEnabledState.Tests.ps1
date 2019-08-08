@@ -1,3 +1,8 @@
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests')
+{
+    return
+}
+
 $script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceName = 'MSFT_ADObjectEnabledState'
 
