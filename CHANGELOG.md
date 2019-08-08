@@ -4,6 +4,7 @@
 
 - Changes to ActiveDirectoryDsc
   - New resource ADDomainControllerProperties ([issue #301](https://github.com/PowerShell/ActiveDirectoryDsc/issues/301)).
+  - New resource ADForestFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
 
 ## 4.0.0.0
 
@@ -11,7 +12,6 @@
   - BREAKING CHANGE: ADRecycleBin is replaced by the new resource ADOptionalFeature
     ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
   - New resource ADOptionalFeature ([issue #162](https://github.com/PowerShell/ActiveDirectoryDsc/issues/162)).
-  - New resource ADForestFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
   - BREAKING CHANGE: Renamed the xActiveDirectory to ActiveDirectoryDsc
     and removed the 'x' from all resource names ([issue #312](https://github.com/PowerShell/ActiveDirectoryDsc/issues/312)).
   - The helper function `Find-DomainController` is exported in the module
