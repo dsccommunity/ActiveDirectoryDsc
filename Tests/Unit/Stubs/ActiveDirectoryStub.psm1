@@ -1150,7 +1150,7 @@ function Get-ADDefaultDomainPasswordPolicy
         $Current,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADDefaultDomainPasswordPolicy]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -7112,7 +7112,7 @@ function Set-ADDefaultDomainPasswordPolicy
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADDefaultDomainPasswordPolicy]
+        [System.Object]
         $Identity,
 
         [Parameter()]
