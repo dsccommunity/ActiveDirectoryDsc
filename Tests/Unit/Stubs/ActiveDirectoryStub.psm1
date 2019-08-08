@@ -204,7 +204,7 @@ function Add-ADGroupMember
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true)]
@@ -1524,7 +1524,7 @@ function Get-ADGroup
         $Filter,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'LdapFilter')]
@@ -1636,7 +1636,7 @@ function Get-ADObject
         $Filter,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADObject]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -2643,7 +2643,7 @@ function Get-ADUser
         $Filter,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADUser]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'LdapFilter')]
@@ -2857,7 +2857,7 @@ function Move-ADDirectoryServerOperationMasterRole
     param
     (
         [Parameter()]
-        [PSObject]
+        [System.Object]
         $AuthType,
 
         [Parameter()]
@@ -2869,7 +2869,7 @@ function Move-ADDirectoryServerOperationMasterRole
         $Force,
 
         [Parameter(Mandatory = $true)]
-        [PSObject]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true)]
