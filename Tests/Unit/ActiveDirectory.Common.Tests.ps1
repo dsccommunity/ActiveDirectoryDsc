@@ -10,7 +10,7 @@ Get-Module -Name 'ActiveDirectoryDsc.Common' -All | Remove-Module -Force
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\ActiveDirectoryDsc.TestHelper.psm1')
 
-if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests')
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests'))
 {
     return
 }

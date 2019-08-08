@@ -1,4 +1,4 @@
-if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests')
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests'))
 {
     return
 }
