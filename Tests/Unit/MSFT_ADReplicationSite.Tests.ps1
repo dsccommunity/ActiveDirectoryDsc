@@ -1,3 +1,5 @@
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\ActiveDirectoryDsc.TestHelper.psm1')
+
 if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests'))
 {
     return
