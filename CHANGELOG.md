@@ -4,6 +4,7 @@
 
 - Changes to ActiveDirectoryDsc
   - New resource ADDomainControllerProperties ([issue #301](https://github.com/PowerShell/ActiveDirectoryDsc/issues/301)).
+  - New resource ADForestFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
 
 ## 4.0.0.0
 
