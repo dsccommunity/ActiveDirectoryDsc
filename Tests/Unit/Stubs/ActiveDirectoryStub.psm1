@@ -1590,7 +1590,7 @@ function Get-ADGroupMember
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -3751,11 +3751,11 @@ function New-ADGroup
         $DisplayName,
 
         [Parameter()]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupCategory]]
+        [System.Object]
         $GroupCategory,
 
         [Parameter(Mandatory = $true)]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupScope]]
+        [System.Object]
         $GroupScope,
 
         [Parameter()]
@@ -3763,7 +3763,7 @@ function New-ADGroup
         $HomePage,
 
         [Parameter()]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Instance,
 
         [Parameter()]
@@ -5261,7 +5261,7 @@ function Remove-ADFineGrainedPasswordPolicySubject
 #>
 function Remove-ADGroup
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter()]
@@ -5273,7 +5273,7 @@ function Remove-ADGroup
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -5299,7 +5299,7 @@ function Remove-ADGroup
 #>
 function Remove-ADGroupMember
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter()]
@@ -5311,7 +5311,7 @@ function Remove-ADGroupMember
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true)]
@@ -7508,11 +7508,11 @@ function Set-ADGroup
         $DisplayName,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupCategory]]
+        [System.Object]
         $GroupCategory,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupScope]]
+        [System.Object]
         $GroupScope,
 
         [Parameter(ParameterSetName = 'Identity')]
@@ -7520,11 +7520,11 @@ function Set-ADGroup
         $HomePage,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Instance')]
-        [Microsoft.ActiveDirectory.Management.ADGroup]
+        [System.Object]
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
