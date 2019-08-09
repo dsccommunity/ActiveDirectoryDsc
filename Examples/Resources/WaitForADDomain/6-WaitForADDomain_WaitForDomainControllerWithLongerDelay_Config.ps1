@@ -42,7 +42,7 @@ Configuration WaitForADDomain_WaitForDomainControllerWithLongerDelay_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName = 'contoso.com'
+            DomainName  = 'contoso.com'
             WaitTimeout = 600
 
             PsDscRunAsCredential = $Credential
