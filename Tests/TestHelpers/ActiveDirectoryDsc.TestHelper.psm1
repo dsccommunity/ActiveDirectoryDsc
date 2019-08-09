@@ -80,11 +80,11 @@ function Test-ContinuousIntegrationTaskCategory
         $Category
     )
 
-    $result = $false
+    $result = $true
 
-    if ($env:CI -eq $true -and $env:CONFIGURATION -in $Category)
+    if ($env:CI -eq $true -and $env:CONFIGURATION -notin $Category)
     {
-        $result = $true
+        $result = $false
     }
 
     return $result
