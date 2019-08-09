@@ -5725,7 +5725,7 @@ function Remove-ADResourcePropertyListMember
 #>
 function Remove-ADServiceAccount
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter()]
