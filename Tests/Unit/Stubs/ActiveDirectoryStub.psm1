@@ -86,7 +86,7 @@ function Add-ADComputerServiceAccount
         $Server,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount[]]
+        [System.Object[]]
         $ServiceAccount
     )
 
@@ -2523,7 +2523,7 @@ function Get-ADServiceAccount
         $Filter,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'LdapFilter')]
@@ -2793,7 +2793,7 @@ function Install-ADServiceAccount
         $Force,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -4461,7 +4461,7 @@ function New-ADServiceAccount
         $HomePage,
 
         [Parameter()]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Instance,
 
         [Parameter()]
@@ -5117,7 +5117,7 @@ function Remove-ADComputerServiceAccount
         $Server,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount[]]
+        [System.Object[]]
         $ServiceAccount
     )
 
@@ -5737,7 +5737,7 @@ function Remove-ADServiceAccount
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -5855,7 +5855,7 @@ function Reset-ADServiceAccountPassword
         $AuthType,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -8372,11 +8372,11 @@ function Set-ADServiceAccount
         $HomePage,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Instance')]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
@@ -8805,7 +8805,7 @@ function Test-ADServiceAccount
         $AuthType,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Identity
     )
 
@@ -8835,7 +8835,7 @@ function Uninstall-ADServiceAccount
         $ForceRemoveLocal,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADServiceAccount]
+        [System.Object]
         $Identity
     )
 
