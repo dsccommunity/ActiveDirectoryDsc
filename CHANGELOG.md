@@ -16,6 +16,9 @@
     in the CI pipeline.
 - Changes to xWaitForADDomain
   - Correct Grammar Issues in Example Descriptions.
+- Changes to WaitForADDomain
+  - An optional parameter `IgnoreAuthenticationErrors` can be set to $true
+    to tell the resource to ignore authentication errors ([issue #478](https://github.com/PowerShell/ActiveDirectoryDsc/issues/478)).
 
 ## 4.0.0.0
 
