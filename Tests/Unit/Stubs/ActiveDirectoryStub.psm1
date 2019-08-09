@@ -4659,7 +4659,7 @@ function New-ADUser
         $Initials,
 
         [Parameter()]
-        [Microsoft.ActiveDirectory.Management.ADUser]
+        [System.Object]
         $Instance,
 
         [Parameter()]
@@ -4671,7 +4671,7 @@ function New-ADUser
         $LogonWorkstations,
 
         [Parameter()]
-        [Microsoft.ActiveDirectory.Management.ADUser]
+        [System.Object]
         $Manager,
 
         [Parameter()]
@@ -5763,7 +5763,7 @@ function Remove-ADServiceAccount
 #>
 function Remove-ADUser
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter()]
@@ -5775,7 +5775,7 @@ function Remove-ADUser
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADUser]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -6259,7 +6259,7 @@ function Set-ADAccountPassword
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADAccount]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -8562,7 +8562,7 @@ function Set-ADUser
         $HomePhone,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADUser]
+        [System.Object]
         $Identity,
 
         [Parameter(ParameterSetName = 'Identity')]
@@ -8570,7 +8570,7 @@ function Set-ADUser
         $Initials,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Instance')]
-        [Microsoft.ActiveDirectory.Management.ADUser]
+        [System.Object]
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
@@ -8582,7 +8582,7 @@ function Set-ADUser
         $LogonWorkstations,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADUser]
+        [System.Object]
         $Manager,
 
         [Parameter(ParameterSetName = 'Identity')]
