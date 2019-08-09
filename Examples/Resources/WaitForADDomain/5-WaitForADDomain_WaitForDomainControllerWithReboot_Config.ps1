@@ -25,7 +25,7 @@
         If the timeout is reached the node will be restarted up to two times
         and again wait after each restart. If no domain controller is found
         after the second restart an error will be thrown.
-        This will use the user credential passed to the built-in PsDscRunAsCredential
+        This will use the user credential passed in the built-in PsDscRunAsCredential
         parameter when determining if the domain is available.
 #>
 Configuration WaitForADDomain_WaitForDomainControllerWithReboot_Config
