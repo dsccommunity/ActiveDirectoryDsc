@@ -2242,7 +2242,7 @@ function Get-ADReplicationSubnet
         $Filter,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSubnet]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -4227,7 +4227,7 @@ function New-ADReplicationSubnet
         $Description,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSubnet]
+        [System.Object]
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
@@ -5581,7 +5581,7 @@ function Remove-ADReplicationSiteLinkBridge
 #>
 function Remove-ADReplicationSubnet
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter()]
@@ -5593,7 +5593,7 @@ function Remove-ADReplicationSubnet
         $Credential,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSubnet]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -8110,11 +8110,11 @@ function Set-ADReplicationSubnet
         $Description,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSubnet]
+        [System.Object]
         $Identity,
 
         [Parameter(ParameterSetName = 'Instance')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSubnet]
+        [System.Object]
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
