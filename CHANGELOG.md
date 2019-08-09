@@ -6,6 +6,8 @@
   - New resource ADDomainControllerProperties ([issue #301](https://github.com/PowerShell/ActiveDirectoryDsc/issues/301)).
   - New resource ADForestFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
   - New resource ADDomainFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
+- Changes to xWaitforADDomain
+  - Correct Grammar Issues in Example Descriptions.
 
 ## 4.0.0.0
 
