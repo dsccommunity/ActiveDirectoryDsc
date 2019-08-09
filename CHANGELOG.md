@@ -14,7 +14,7 @@
     will no longer be an ActiveDirectory module installed. This is
     to make sure that if the unit tests work locally they should also work
     in the CI pipeline.
-- Changes to xWaitforADDomain
+- Changes to xWaitForADDomain
   - Correct Grammar Issues in Example Descriptions.
 
 ## 4.0.0.0

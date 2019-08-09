@@ -45,7 +45,7 @@
 
 This configuration will wait for an Active Directory domain controller
 to respond within 300 seconds (default) in the domain 'contoso.com'
-before returning and allowing the configuration to continue run.
+before returning and allowing the configuration to continue to run.
 If the timeout is reached an error will be thrown.
 This will use the current user when determining if the domain is available,
 if run though LCM this will use SYSTEM (which might not have access).
@@ -67,9 +67,9 @@ Configuration WaitForADDomain_WaitForDomainController_Config
 
 This configuration will wait for an Active Directory domain controller
 to respond within 300 seconds (default) in the domain 'contoso.com'
-before returning and allowing the configuration to continue run.
+before returning and allowing the configuration to continue to run.
 If the timeout is reached an error will be thrown.
-This will use the user credential passes to the built-in PsDscRunAsCredential
+This will use the user credential passed in the built-in PsDscRunAsCredential
 parameter when determining if the domain is available.
 
 Configuration WaitForADDomain_WaitForDomainControllerUsingBuiltInCredential_Config
@@ -99,9 +99,9 @@ Configuration WaitForADDomain_WaitForDomainControllerUsingBuiltInCredential_Conf
 
 This configuration will wait for an Active Directory domain controller
 to respond within 300 seconds (default) in the domain 'contoso.com'
-before returning and allowing the configuration to continue run.
+before returning and allowing the configuration to continue to run.
 If the timeout is reached an error will be thrown.
-This will use the user credential passes to the parameter Credential
+This will use the user credential passed in the parameter Credential
 when determining if the domain is available.
 
 Configuration WaitForADDomain_WaitForDomainControllerUsingCredential_Config
@@ -131,9 +131,9 @@ Configuration WaitForADDomain_WaitForDomainControllerUsingCredential_Config
 This configuration will wait for an Active Directory domain controller
 in the site 'Europe' to respond within 300 seconds (default) in the
 domain 'contoso.com' before returning and allowing the configuration to
-continue run.
+continue to run.
 If the timeout is reached an error will be thrown.
-This will use the user credential passes to the built-in PsDscRunAsCredential
+This will use the user credential passed in the built-in PsDscRunAsCredential
 parameter when determining if the domain is available.
 
 Configuration WaitForADDomain_WaitForDomainControllerInSite_Config
@@ -164,11 +164,11 @@ Configuration WaitForADDomain_WaitForDomainControllerInSite_Config
 
 This configuration will wait for an Active Directory domain controller
 to respond within 300 seconds (default) in the domain 'contoso.com'
-before returning and allowing the configuration to continue run.
+before returning and allowing the configuration to continue to run.
 If the timeout is reached the node will be restarted up to two times
-and again wait after each restart. If the no domain controller is found
+and again wait after each restart. If no domain controller is found
 after the second restart an error will be thrown.
-This will use the user credential passes to the built-in PsDscRunAsCredential
+This will use the user credential passed in the built-in PsDscRunAsCredential
 parameter when determining if the domain is available.
 
 Configuration WaitForADDomain_WaitForDomainControllerWithReboot_Config
@@ -187,9 +187,9 @@ Configuration WaitForADDomain_WaitForDomainControllerWithReboot_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName = 'contoso.com'
+            DomainName   = 'contoso.com'
             RestartCount = 2
-
+            
             PsDscRunAsCredential = $Credential
         }
     }
@@ -199,9 +199,9 @@ Configuration WaitForADDomain_WaitForDomainControllerWithReboot_Config
 
 This configuration will wait for an Active Directory domain controller
 to respond within 600 seconds in the domain 'contoso.com' before
-returning and allowing the configuration to continue run. If the timeout
+returning and allowing the configuration to continue to run. If the timeout
 is reached an error will be thrown.
-This will use the user credential passes to the built-in PsDscRunAsCredential
+This will use the user credential passed in the built-in PsDscRunAsCredential
 parameter when determining if the domain is available.
 
 Configuration WaitForADDomain_WaitForDomainControllerWithLongerDelay_Config
@@ -220,7 +220,7 @@ Configuration WaitForADDomain_WaitForDomainControllerWithLongerDelay_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName = 'contoso.com'
+            DomainName  = 'contoso.com'
             WaitTimeout = 600
 
             PsDscRunAsCredential = $Credential
