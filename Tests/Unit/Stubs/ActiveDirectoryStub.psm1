@@ -5479,7 +5479,7 @@ function Remove-ADPrincipalGroupMembership
 #>
 function Remove-ADReplicationSite
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter(ParameterSetName = 'Identity')]
