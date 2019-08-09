@@ -468,7 +468,7 @@ function Disable-ADOptionalFeature
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADOptionalFeature]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -476,7 +476,7 @@ function Disable-ADOptionalFeature
         $PassThru,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADOptionalFeatureScope]
+        [System.Object]
         $Scope,
 
         [Parameter()]
@@ -484,7 +484,7 @@ function Disable-ADOptionalFeature
         $Server,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADEntity]
+        [System.Object]
         $Target
     )
 
@@ -556,7 +556,7 @@ function Enable-ADOptionalFeature
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADOptionalFeature]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -564,7 +564,7 @@ function Enable-ADOptionalFeature
         $PassThru,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADOptionalFeatureScope]
+        [System.Object]
         $Scope,
 
         [Parameter()]
@@ -572,7 +572,7 @@ function Enable-ADOptionalFeature
         $Server,
 
         [Parameter(Mandatory = $true)]
-        [Microsoft.ActiveDirectory.Management.ADEntity]
+        [System.Object]
         $Target
     )
 
@@ -1710,7 +1710,7 @@ function Get-ADOptionalFeature
         $Filter,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADOptionalFeature]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'LdapFilter')]
