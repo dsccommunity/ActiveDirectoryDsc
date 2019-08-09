@@ -6,8 +6,8 @@
   - New resource ADDomainControllerProperties ([issue #301](https://github.com/PowerShell/ActiveDirectoryDsc/issues/301)).
   - New resource ADForestFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
   - New resource ADDomainFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
-  - Split meta tests, unit and integration tests in different AppVeyor
-    jobs ([issue #437](https://github.com/PowerShell/ActiveDirectoryDsc/issues/437)).
+  - Split the meta tests and the unit and integration tests in different
+    AppVeyor jobs ([issue #437](https://github.com/PowerShell/ActiveDirectoryDsc/issues/437)).
   - Fixed all stub cmdlets and unit tests so the unit test can be run locally
     without having the ActiveDirectory module installed on the computer.
     This will also be reflected in the AppVeyor build worker where there
