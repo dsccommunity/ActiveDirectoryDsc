@@ -5345,7 +5345,7 @@ function Remove-ADGroupMember
 #>
 function Remove-ADObject
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter()]
