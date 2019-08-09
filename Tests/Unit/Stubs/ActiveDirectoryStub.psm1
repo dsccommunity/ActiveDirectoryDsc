@@ -7597,12 +7597,12 @@ function Set-ADObject
         [string]
         $DisplayName,
 
-        [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADObject]
+        [Parameter(Mandatory = $true, ParameterSetName = 'Identity', ValueFromPipeline = $true)]
+        [System.Object]
         $Identity,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Instance')]
-        [Microsoft.ActiveDirectory.Management.ADObject]
+        [System.Object]
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
