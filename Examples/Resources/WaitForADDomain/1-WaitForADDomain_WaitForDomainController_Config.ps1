@@ -21,7 +21,7 @@
     .DESCRIPTION
         This configuration will wait for an Active Directory domain controller
         to respond within 300 seconds (default) in the domain 'contoso.com'
-        before returning and allowing the configuration to continue run.
+        before returning and allowing the configuration to continue to run.
         If the timeout is reached an error will be thrown.
         This will use the current user when determining if the domain is available,
         if run though LCM this will use SYSTEM (which might not have access).
