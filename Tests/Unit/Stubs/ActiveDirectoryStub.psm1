@@ -2158,7 +2158,7 @@ function Get-ADReplicationSiteLink
         $Filter,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSiteLink]
+        [System.Object]
         $Identity,
 
         [Parameter()]
@@ -4103,11 +4103,11 @@ function New-ADReplicationSiteLink
         $Description,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSiteLink]
+        [System.Object]
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADInterSiteTransportProtocolType]]
+        [System.Object]
         $InterSiteTransportProtocol,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
@@ -4173,7 +4173,7 @@ function New-ADReplicationSiteLinkBridge
         $Instance,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [System.Nullable[Microsoft.ActiveDirectory.Management.ADInterSiteTransportProtocolType]]
+        [System.Object]
         $InterSiteTransportProtocol,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
@@ -4193,7 +4193,7 @@ function New-ADReplicationSiteLinkBridge
         $Server,
 
         [Parameter(ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSiteLink[]]
+        [System.Object[]]
         $SiteLinksIncluded
     )
 
@@ -5525,7 +5525,7 @@ function Remove-ADReplicationSiteLink
         $Credential,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSiteLink]
+        [System.Object]
         $Identity,
 
         [Parameter(ParameterSetName = 'Identity')]
@@ -7970,11 +7970,11 @@ function Set-ADReplicationSiteLink
         $Description,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Identity')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSiteLink]
+        [System.Object]
         $Identity,
 
         [Parameter(ParameterSetName = 'Instance')]
-        [Microsoft.ActiveDirectory.Management.ADReplicationSiteLink]
+        [System.Object]
         $Instance,
 
         [Parameter()]
