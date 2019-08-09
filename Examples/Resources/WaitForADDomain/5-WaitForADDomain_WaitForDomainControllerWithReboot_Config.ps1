@@ -21,11 +21,11 @@
     .DESCRIPTION
         This configuration will wait for an Active Directory domain controller
         to respond within 300 seconds (default) in the domain 'contoso.com'
-        before returning and allowing the configuration to continue run.
+        before returning and allowing the configuration to continue to run.
         If the timeout is reached the node will be restarted up to two times
-        and again wait after each restart. If the no domain controller is found
+        and again wait after each restart. If no domain controller is found
         after the second restart an error will be thrown.
-        This will use the user credential passes to the built-in PsDscRunAsCredential
+        This will use the user credential passeed to the built-in PsDscRunAsCredential
         parameter when determining if the domain is available.
 #>
 Configuration WaitForADDomain_WaitForDomainControllerWithReboot_Config
@@ -44,9 +44,9 @@ Configuration WaitForADDomain_WaitForDomainControllerWithReboot_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName = 'contoso.com'
+            DomainName   = 'contoso.com'
             RestartCount = 2
-
+            
             PsDscRunAsCredential = $Credential
         }
     }
