@@ -21,9 +21,9 @@
     .DESCRIPTION
         This configuration will wait for an Active Directory domain controller
         to respond within 600 seconds in the domain 'contoso.com' before
-        returning and allowing the configuration to continue run. If the timeout
+        returning and allowing the configuration to continue to run. If the timeout
         is reached an error will be thrown.
-        This will use the user credential passes to the built-in PsDscRunAsCredential
+        This will use the user credential passed in the built-in PsDscRunAsCredential
         parameter when determining if the domain is available.
 #>
 Configuration WaitForADDomain_WaitForDomainControllerWithLongerDelay_Config
@@ -42,7 +42,7 @@ Configuration WaitForADDomain_WaitForDomainControllerWithLongerDelay_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName = 'contoso.com'
+            DomainName  = 'contoso.com'
             WaitTimeout = 600
 
             PsDscRunAsCredential = $Credential
