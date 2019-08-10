@@ -19,7 +19,7 @@ install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
         Write-Verbose -Message "PowerShell version $($PSVersionTable.PSVersion)" -Verbose
-        Import-Module "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
         Invoke-AppveyorInstallTask
 
 #---------------------------------#
@@ -56,7 +56,6 @@ for:
 
   test_script:
     - ps: |
-        #Add-WindowsFeature RSAT-AD-PowerShell
         Invoke-AppveyorTestScriptTask -CodeCoverage -CodeCovIo
 
 # Runs for all jobs.

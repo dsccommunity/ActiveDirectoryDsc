@@ -113,8 +113,6 @@ namespace Microsoft.ActiveDirectory.Management
     {
         public ADObject():base(){}
         public ADObject(System.String Identity):base(){}
-
-        // Add-ADCommonGroupMember might need DistingueshedName property and ToString() method
     }
 
     public class ADPrincipal
