@@ -14,6 +14,8 @@
     will no longer be an ActiveDirectory module installed. This is
     to make sure that if the unit tests work locally they should also work
     in the CI pipeline.
+  - Added stubs for the modules ActiveDirectory and ADDSDeployment to be
+    used with unit tests ([issue #245](https://github.com/PowerShell/ActiveDirectoryDsc/issues/245)).
 - Changes to ActiveDirectoryDsc.Common
   - Updated common helper function `Find-DomainController` with the
     optional parameter `WaitForValidCredentials` which will ignore
