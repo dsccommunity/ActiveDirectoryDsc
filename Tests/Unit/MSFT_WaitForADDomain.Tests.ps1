@@ -84,7 +84,7 @@ try
                         $getTargetResourceResult.SiteName | Should -BeNullOrEmpty
                         $getTargetResourceResult.Credential | Should -BeNullOrEmpty
                         $getTargetResourceResult.RestartCount | Should -Be 0
-                        $getTargetResourceResult.WaitForValidCredentials | Should -BeNullOrEmpty
+                        $getTargetResourceResult.WaitForValidCredentials | Should -BeFalse
                     }
                 }
 
@@ -120,7 +120,7 @@ try
                             $getTargetResourceResult.SiteName | Should -Be 'Europe'
                             $getTargetResourceResult.Credential | Should -BeNullOrEmpty
                             $getTargetResourceResult.RestartCount | Should -Be 0
-                            $getTargetResourceResult.WaitForValidCredentials | Should -BeNullOrEmpty
+                            $getTargetResourceResult.WaitForValidCredentials | Should -BeFalse
                         }
                     }
 
