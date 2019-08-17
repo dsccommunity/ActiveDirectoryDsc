@@ -134,17 +134,17 @@ try
                         }
 
                         It 'Should return the same values as passed as parameters' {
-                            $result = Get-TargetResource @getTargetResourceParameters
-                            $result.DomainName | Should -Be $mockDomainName
-                            $result.SiteName | Should -Be 'Europe'
-                            $result.WaitTimeout | Should -Be 600
-                            $result.RestartCount | Should -Be 2
-                            $result.Credential.UserName | Should -Be $mockUserName
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.DomainName | Should -Be $mockDomainName
+                            $getTargetResourceResult.SiteName | Should -Be 'Europe'
+                            $getTargetResourceResult.WaitTimeout | Should -Be 600
+                            $getTargetResourceResult.RestartCount | Should -Be 2
+                            $getTargetResourceResult.Credential.UserName | Should -Be $mockUserName
                             $getTargetResourceResult.WaitForValidCredentials | Should -BeTrue
                         }
                     }
 
-                    Context 'When using all available parameters' {
+                    Context 'When using BuiltInCredential parameter' {
                         BeforeAll {
                             $mockBuiltInCredentialName = 'BuiltInCredential'
 
@@ -163,9 +163,9 @@ try
                         }
 
                         It 'Should return the same values as passed as parameters' {
-                            $result = Get-TargetResource @getTargetResourceParameters
-                            $result.DomainName | Should -Be $mockDomainName
-                            $result.Credential | Should -BeNullOrEmpty
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.DomainName | Should -Be $mockDomainName
+                            $getTargetResourceResult.Credential | Should -BeNullOrEmpty
 
                             Assert-MockCalled -CommandName Write-Verbose -Exactly -Times 1 -Scope It
                         }
