@@ -32,7 +32,7 @@ $script:waitForDomainControllerScriptBlock = {
 
         [Parameter()]
         [System.Boolean]
-        $IgnoreAuthenticationErrors
+        $WaitForValidCredentials
     )
 
     $domainFound = $false
@@ -67,7 +67,7 @@ $script:waitForDomainControllerScriptBlock = {
         {
             $isTypeNameToSuppress = $_.Exception.InnerException -is [System.Security.Authentication.AuthenticationException]
 
-            if ($IgnoreAuthenticationErrors -and $isTypeNameToSuppress)
+            if ($WaitForValidCredentials -and $isTypeNameToSuppress)
             {
                 # Keeping this simple to not need localization.
                 Write-Warning -Message (
@@ -118,7 +118,7 @@ $script:waitForDomainControllerScriptBlock = {
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
 
-    .PARAMETER IgnoreAuthenticationErrors
+    .PARAMETER WaitForValidCredentials
         Specifies that the resource will not throw an error if authentication
         fails using the provided credentials and continue wait for the timeout.
         This can be used if the credentials are known to eventually exist but
@@ -151,7 +151,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $IgnoreAuthenticationErrors
+        $WaitForValidCredentials
     )
 
     $findDomainControllerParameters = @{
@@ -211,7 +211,7 @@ function Get-TargetResource
     {
         $isTypeNameToSuppress = $_.Exception.InnerException -is [System.Security.Authentication.AuthenticationException]
 
-        if ($IgnoreAuthenticationErrors -and $isTypeNameToSuppress)
+        if ($WaitForValidCredentials -and $isTypeNameToSuppress)
         {
             Write-Warning -Message (
                 $script:localizedData.IgnoreCredentialError -f $_.FullyQualifiedErrorId, $_.Exception.Message
@@ -240,12 +240,13 @@ function Get-TargetResource
     }
 
     return @{
-        DomainName   = $DomainName
-        SiteName     = $domainControllerSiteName
-        Credential   = $cimCredentialInstance
-        WaitTimeout  = $WaitTimeout
-        RestartCount = $RestartCount
-        IsAvailable  = $domainFound
+        DomainName              = $DomainName
+        SiteName                = $domainControllerSiteName
+        Credential              = $cimCredentialInstance
+        WaitTimeout             = $WaitTimeout
+        RestartCount            = $RestartCount
+        IsAvailable             = $domainFound
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 }
 
@@ -272,7 +273,7 @@ function Get-TargetResource
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
 
-    .PARAMETER IgnoreAuthenticationErrors
+    .PARAMETER WaitForValidCredentials
         Specifies that the resource will not throw an error if authentication
         fails using the provided credentials and continue wait for the timeout.
         This can be used if the credentials are known to eventually exist but
@@ -315,7 +316,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $IgnoreAuthenticationErrors
+        $WaitForValidCredentials
     )
 
     Write-Verbose -Message (
@@ -324,10 +325,10 @@ function Set-TargetResource
 
     # Only pass properties that could be used when fetching the domain controller.
     $compareTargetResourceStateParameters = @{
-        DomainName = $DomainName
-        SiteName = $SiteName
-        Credential = $Credential
-        IgnoreAuthenticationErrors = $IgnoreAuthenticationErrors
+        DomainName              = $DomainName
+        SiteName                = $SiteName
+        Credential              = $Credential
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 
     <#
@@ -353,13 +354,13 @@ function Set-TargetResource
     if (-not $isInDesiredState)
     {
         $startJobParameters = @{
-            ScriptBlock = $script:waitForDomainControllerScriptBlock
+            ScriptBlock  = $script:waitForDomainControllerScriptBlock
             ArgumentList = @(
                 $false
                 $DomainName
                 $SiteName
                 $Credential
-                $IgnoreAuthenticationErrors
+                $WaitForValidCredentials
             )
         }
 
@@ -475,7 +476,7 @@ function Set-TargetResource
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
 
-    .PARAMETER IgnoreAuthenticationErrors
+    .PARAMETER WaitForValidCredentials
         Specifies that the resource will not throw an error if authentication
         fails using the provided credentials and continue wait for the timeout.
         This can be used if the credentials are known to eventually exist but
@@ -508,7 +509,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $IgnoreAuthenticationErrors
+        $WaitForValidCredentials
     )
 
     Write-Verbose -Message (
@@ -517,10 +518,10 @@ function Test-TargetResource
 
     # Only pass properties that could be used when fetching the domain controller.
     $compareTargetResourceStateParameters = @{
-        DomainName = $DomainName
-        SiteName = $SiteName
-        Credential = $Credential
-        IgnoreAuthenticationErrors = $IgnoreAuthenticationErrors
+        DomainName              = $DomainName
+        SiteName                = $SiteName
+        Credential              = $Credential
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 
     <#
@@ -581,7 +582,7 @@ function Test-TargetResource
         Specifies the credentials that are used when accessing the domain,
         unless the built-in PsDscRunAsCredential is used.
 
-    .PARAMETER IgnoreAuthenticationErrors
+    .PARAMETER WaitForValidCredentials
         Specifies that the resource will not throw an error if authentication
         fails using the provided credentials and continue wait for the timeout.
         This can be used if the credentials are known to eventually exist but
@@ -606,14 +607,14 @@ function Compare-TargetResourceState
 
         [Parameter()]
         [System.Boolean]
-        $IgnoreAuthenticationErrors
+        $WaitForValidCredentials
     )
 
     $getTargetResourceParameters = @{
-        DomainName  = $DomainName
-        SiteName    = $SiteName
-        Credential  = $Credential
-        IgnoreAuthenticationErrors = $IgnoreAuthenticationErrors
+        DomainName              = $DomainName
+        SiteName                = $SiteName
+        Credential              = $Credential
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 
     <#

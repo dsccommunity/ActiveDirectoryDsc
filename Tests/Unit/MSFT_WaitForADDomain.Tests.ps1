@@ -84,6 +84,7 @@ try
                         $getTargetResourceResult.SiteName | Should -BeNullOrEmpty
                         $getTargetResourceResult.Credential | Should -BeNullOrEmpty
                         $getTargetResourceResult.RestartCount | Should -Be 0
+                        $getTargetResourceResult.WaitForValidCredentials | Should -BeNullOrEmpty
                     }
                 }
 
@@ -119,6 +120,7 @@ try
                             $getTargetResourceResult.SiteName | Should -Be 'Europe'
                             $getTargetResourceResult.Credential | Should -BeNullOrEmpty
                             $getTargetResourceResult.RestartCount | Should -Be 0
+                            $getTargetResourceResult.WaitForValidCredentials | Should -BeNullOrEmpty
                         }
                     }
 
@@ -128,6 +130,7 @@ try
                             $getTargetResourceParameters['SiteName'] = 'Europe'
                             $getTargetResourceParameters['WaitTimeout'] = 600
                             $getTargetResourceParameters['RestartCount'] = 2
+                            $getTargetResourceParameters['WaitForValidCredentials'] = $true
                         }
 
                         It 'Should return the same values as passed as parameters' {
@@ -137,6 +140,7 @@ try
                             $result.WaitTimeout | Should -Be 600
                             $result.RestartCount | Should -Be 2
                             $result.Credential.UserName | Should -Be $mockUserName
+                            $getTargetResourceResult.WaitForValidCredentials | Should -BeTrue
                         }
                     }
 
@@ -197,15 +201,15 @@ try
                     $getTargetResourceParameters['Credential'] = $mockDomainUserCredential
                 }
 
-                Context 'When the parameter IgnoreAuthenticationErrors is not specified' {
+                Context 'When the parameter WaitForValidCredentials is not specified' {
                     It 'Should throw the correct error' {
                         { Get-TargetResource @getTargetResourceParameters } | Should -Throw 'The user name or password is incorrect.'
                     }
                 }
 
-                Context 'When the parameter IgnoreAuthenticationErrors is set to $false' {
+                Context 'When the parameter WaitForValidCredentials is set to $false' {
                     BeforeEach {
-                        $getTargetResourceParameters['IgnoreAuthenticationErrors'] = $false
+                        $getTargetResourceParameters['WaitForValidCredentials'] = $false
                     }
 
                     It 'Should throw the correct error' {
@@ -213,19 +217,20 @@ try
                     }
                 }
 
-                Context 'When the parameter IgnoreAuthenticationErrors is set to $true' {
+                Context 'When the parameter WaitForValidCredentials is set to $true' {
                     BeforeAll {
                         Mock -CommandName Write-Warning
                     }
 
                     BeforeEach {
-                        $getTargetResourceParameters['IgnoreAuthenticationErrors'] = $true
+                        $getTargetResourceParameters['WaitForValidCredentials'] = $true
                     }
 
                     It 'Should return the same values as passed as parameters' {
                         $result = Get-TargetResource @getTargetResourceParameters
                         $result.DomainName | Should -Be $mockDomainName
                         $result.Credential.UserName | Should -Be $mockUserName
+                        $result.WaitForValidCredentials | Should -BeTrue
                     }
 
                     It 'Should output a warning message' {
@@ -588,7 +593,7 @@ try
 
                     Context 'When specifying that credentials errors should be ignored' {
                         BeforeEach {
-                            $setTargetResourceParameters['IgnoreAuthenticationErrors'] = $true
+                            $setTargetResourceParameters['WaitForValidCredentials'] = $true
                         }
 
                         It 'Should not throw and call the correct mocks' {
@@ -796,7 +801,7 @@ try
                     }
                 }
 
-                Context 'When the parameter IgnoreAuthenticationErrors is not specified' {
+                Context 'When the parameter WaitForValidCredentials is not specified' {
                     It 'Should throw the correct error' {
                         {
                             Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
@@ -809,7 +814,7 @@ try
                     }
                 }
 
-                Context 'When the parameter IgnoreAuthenticationErrors is set to $false' {
+                Context 'When the parameter WaitForValidCredentials is set to $false' {
                     It 'Should throw the correct error' {
                         {
                             Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
@@ -823,7 +828,7 @@ try
                     }
                 }
 
-                Context 'When the parameter IgnoreAuthenticationErrors is set to $true' {
+                Context 'When the parameter WaitForValidCredentials is set to $true' {
                     BeforeAll {
                         Mock -CommandName Write-Warning
                     }
