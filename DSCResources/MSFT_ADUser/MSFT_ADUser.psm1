@@ -928,12 +928,10 @@ function Test-TargetResource
     {
         $getParameters['DomainController'] = $PSBoundParameters['DomainController']
     }
-
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
         $getParameters['Credential'] = $PSBoundParameters['Credential']
     }
-
     $targetResource = Get-TargetResource @getParameters
 
     $isCompliant = $true
@@ -1596,12 +1594,10 @@ function Set-TargetResource
     {
         $getParameters['DomainController'] = $PSBoundParameters['DomainController']
     }
-
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
         $getParameters['Credential'] = $PSBoundParameters['Credential']
     }
-
     $targetResource = Get-TargetResource @getParameters
 
     # Add common name, ensure and enabled as they may not be explicitly passed
