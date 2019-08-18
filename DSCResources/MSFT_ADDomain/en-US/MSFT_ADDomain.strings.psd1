@@ -16,6 +16,6 @@ ConvertFrom-StringData @'
     RetryingGetADDomain                  = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds. (ADD0014)
     UnhandledError                       = Unhandled error occurred, detail here: {0} (ADD0015)
     FaultExceptionAndDomainShouldExist   = ServiceModel FaultException detected and domain should exist, performing retry. (ADD0016)
-    MissingTrackingFile                  = The domain exist but the tracking file '{0}' could not be found. This can make the resource try to recreate the domain in some circumstances, for example if LCM is quicker to start than the domain is when the node restarts. Please recreate the tracking file by running `'Finished' | Out-File -FilePath '{0}' -Force`. (ADD0017)
+    MissingTrackingFile                  = The domain exists but the tracking file '{0}' could not be found. This can make the resource try to recreate the domain in some circumstances, for example if LCM is quicker to start than the domain is when the node restarts. Please recreate the tracking file by running `'Finished' | Out-File -FilePath '{0}' -Force`. (ADD0017)
     ExpectedDomain                       = Expected to find the domain '{0}', but it was not found. (ADD0016)
 '@

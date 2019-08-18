@@ -59,9 +59,8 @@ function Get-TrackingFilename
         to install the domain controller. When adding a child domain these credentials
         need the correct permission in the parent domain. The credentials will also
         be used to query for the existence of the domain or child domain. This will
-        not be a user name and password in a new domain, the password of the new
-        domain Administrator will be the same as the password of the local
-        Administrator of this computer.
+        not be created as a user in the new domain. The domain administrator password
+        will be the same as the password of the local Administrator of this node.
 
     .PARAMETER SafeModeAdministratorPassword
         Password for the administrator account when the computer is started in Safe Mode.
@@ -180,8 +179,8 @@ function Get-TargetResource
     $retryIntervalInSeconds = 30
 
     <#
-        If the domain was create on this node, then the tracking file will be
-        present which mean we should wait for the domain to be available.
+        If the domain was created on this node, then the tracking file will be
+        present which means we should wait for the domain to be available.
     #>
     $domainShouldExist = Test-Path -Path (Get-TrackingFilename -DomainName $DomainName)
     $domainFound = $false
@@ -233,10 +232,10 @@ function Get-TargetResource
         catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
         {
             <#
-                This is thrown when the node is a domain member, mening the node
+                This is thrown when the node is a domain member, meaning the node
                 is able to evaluate if there is a domain controller managing the
                 domain name (which is different that its own domain).
-                That means this node cannot be provisioned to a domain controller
+                That means this node cannot be provisioned as a domain controller
                 for another domain name.
             #>
             $errorMessage = $script:localizedData.ExistingDomainMemberError -f $DomainName
@@ -299,9 +298,8 @@ function Get-TargetResource
         to install the domain controller. When adding a child domain these credentials
         need the correct permission in the parent domain. The credentials will also
         be used to query for the existence of the domain or child domain. This will
-        not be a user name and password in a new domain, the password of the new
-        domain Administrator will be the same as the password of the local
-        Administrator of this computer.
+        not be created as a user in the new domain. The domain administrator password
+        will be the same as the password of the local Administrator of this node.
 
     .PARAMETER SafeModeAdministratorPassword
         Password for the administrator account when the computer is started in Safe Mode.
@@ -459,9 +457,8 @@ function Test-TargetResource
         to install the domain controller. When adding a child domain these credentials
         need the correct permission in the parent domain. The credentials will also
         be used to query for the existence of the domain or child domain. This will
-        not be a user name and password in a new domain, the password of the new
-        domain Administrator will be the same as the password of the local
-        Administrator of this computer.
+        not be created as a user in the new domain. The domain administrator password
+        will be the same as the password of the local Administrator of this node.
 
     .PARAMETER SafeModeAdministratorPassword
         Password for the administrator account when the computer is started in Safe Mode.
@@ -571,6 +568,7 @@ function Set-TargetResource
             SafeModeAdministratorPassword = $SafeModeAdministratorPassword.Password
             NoRebootOnCompletion = $true
             Force = $true
+            ErrorAction = 'Stop'
         }
 
         if ($PSBoundParameters.ContainsKey('DnsDelegationCredential'))
@@ -612,7 +610,7 @@ function Set-TargetResource
                 $installADDSParameters['NewDomainNetBiosName'] = $DomainNetBiosName
             }
 
-            Install-ADDSDomain @installADDSParameters -ErrorAction 'Stop'
+            Install-ADDSDomain @installADDSParameters
 
             Write-Verbose -Message ($script:localizedData.CreatedChildDomain)
         }
@@ -631,7 +629,7 @@ function Set-TargetResource
                 $installADDSParameters['ForestMode'] = $ForestMode
             }
 
-            Install-ADDSForest @installADDSParameters -ErrorAction 'Stop'
+            Install-ADDSForest @installADDSParameters
 
             Write-Verbose -Message ($script:localizedData.CreatedForest -f $DomainName)
         }

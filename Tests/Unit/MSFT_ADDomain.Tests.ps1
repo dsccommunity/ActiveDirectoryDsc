@@ -175,7 +175,7 @@ try
                     }
                 }
 
-                Context 'When the domain exist' {
+                Context 'When the domain exists' {
                     Context 'When the node is a domain member' {
                         BeforeAll {
                             Mock -CommandName Test-Path -MockWith {
@@ -190,7 +190,7 @@ try
                         }
 
                         It 'Should call the correct mocks' {
-                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $null = Get-TargetResource @getTargetResourceParameters
 
                             Assert-MockCalled -CommandName Test-DomainMember -Exactly -Times 1 -Scope It
                             Assert-MockCalled -CommandName Get-ADDomain -ParameterFilter {
@@ -203,13 +203,13 @@ try
                         }
 
                         It 'Should return the same values as passed as parameters' {
-                            $result = Get-TargetResource @getTargetResourceParameters
-                            $result.DomainName | Should -Be $getTargetResourceParameters.DomainName
-                            $result.Credential.UserName | Should -Be $getTargetResourceParameters.Credential.UserName
-                            $result.SafeModeAdministratorPassword.UserName | Should -Be $getTargetResourceParameters.SafeModeAdministratorPassword.UserName
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.DomainName | Should -Be $getTargetResourceParameters.DomainName
+                            $getTargetResourceResult.Credential.UserName | Should -Be $getTargetResourceParameters.Credential.UserName
+                            $getTargetResourceResult.SafeModeAdministratorPassword.UserName | Should -Be $getTargetResourceParameters.SafeModeAdministratorPassword.UserName
                         }
 
-                        It 'Should return $null for the rest of the properties' {
+                        It 'Should return correct values for the rest of the properties' {
                             $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                             $getTargetResourceResult.DnsRoot | Should -Be $mockDomainName
                             $getTargetResourceResult.ParentDomainName | Should -Be $mockDomainName
@@ -286,7 +286,7 @@ try
                             $result.SafeModeAdministratorPassword.UserName | Should -Be $getTargetResourceParameters.SafeModeAdministratorPassword.UserName
                         }
 
-                        It 'Should return $null for the rest of the properties' {
+                        It 'Should return correct values for the rest of the properties' {
                             $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                             $getTargetResourceResult.DnsRoot | Should -Be $mockDomainName
                             $getTargetResourceResult.ParentDomainName | Should -Be $mockDomainName
@@ -341,6 +341,11 @@ try
                         $result.SafeModeAdministratorPassword.UserName | Should -Be $getTargetResourceParameters.SafeModeAdministratorPassword.UserName
                     }
 
+                    It 'Should return $false for the property DomainExist' {
+                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                        $getTargetResourceResult.DomainExist | Should -BeFalse
+                    }
+
                     It 'Should return $null for the rest of the properties' {
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                         $getTargetResourceResult.DnsRoot | Should -BeNullOrEmpty
@@ -352,7 +357,6 @@ try
                         $getTargetResourceResult.SysvolPath | Should -BeNullOrEmpty
                         $getTargetResourceResult.ForestMode | Should -BeNullOrEmpty
                         $getTargetResourceResult.DomainMode | Should -BeNullOrEmpty
-                        $getTargetResourceResult.DomainExist | Should -BeFalse
                     }
                 }
 
@@ -386,6 +390,11 @@ try
                         $result.SafeModeAdministratorPassword.UserName | Should -Be $getTargetResourceParameters.SafeModeAdministratorPassword.UserName
                     }
 
+                    It 'Should return $false for the property DomainExist' {
+                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                        $getTargetResourceResult.DomainExist | Should -BeFalse
+                    }
+
                     It 'Should return $null for the rest of the properties' {
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                         $getTargetResourceResult.DnsRoot | Should -BeNullOrEmpty
@@ -397,7 +406,6 @@ try
                         $getTargetResourceResult.SysvolPath | Should -BeNullOrEmpty
                         $getTargetResourceResult.ForestMode | Should -BeNullOrEmpty
                         $getTargetResourceResult.DomainMode | Should -BeNullOrEmpty
-                        $getTargetResourceResult.DomainExist | Should -BeFalse
                     }
                 }
             }

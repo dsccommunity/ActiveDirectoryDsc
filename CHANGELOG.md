@@ -26,9 +26,9 @@
   - The property `DomainName` will now always return the same value as
     was passed in as the parameter. For the fully qualified domain name
     (FQDN) of the domain see the new read-only property `DnsRoot`.
-  - Now resource waits just 5 times when calling the `Get-TargetResource`
-    if the domain should exist (the tracking file was previously created)
-    ([issue #181](https://github.com/PowerShell/ActiveDirectoryDsc/issues/181)).
+  - If the domain should exist, the resource correctly waits only 5 times
+    when calling `Get-TargetResource` if the tracking file was previously
+    created ([issue #181](https://github.com/PowerShell/ActiveDirectoryDsc/issues/181)).
   - The resource now throws if either one of the cmdlets `Install-ADDSForest`
     or `Install-ADDSDomain` fails, and will not create the tracking file
     ([issue #181](https://github.com/PowerShell/ActiveDirectoryDsc/issues/181)).
