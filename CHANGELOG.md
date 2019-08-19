@@ -18,7 +18,7 @@
   - Updated common helper function `Find-DomainController` with the
     optional parameter `WaitForValidCredentials` which will ignore
     authentication exceptions when the credentials cannot be authenticated.
-- Changes to xWaitForADDomain
+- Changes to WaitForADDomain
   - Correct grammar issues in example descriptions.
   - An optional parameter `WaitForValidCredentials` can be set to $true
     to tell the resource to ignore authentication errors ([issue #478](https://github.com/PowerShell/ActiveDirectoryDsc/issues/478)).
