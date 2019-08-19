@@ -14,8 +14,15 @@
     will no longer be an ActiveDirectory module installed. This is
     to make sure that if the unit tests work locally they should also work
     in the CI pipeline.
+- Changes to ActiveDirectoryDsc.Common
+  - Updated common helper function `Find-DomainController` with the
+    optional parameter `WaitForValidCredentials` which will ignore
+    authentication exceptions when the credentials cannot be authenticated.
 - Changes to xWaitForADDomain
   - Correct Grammar Issues in Example Descriptions.
+- Changes to WaitForADDomain
+  - An optional parameter `WaitForValidCredentials` can be set to $true
+    to tell the resource to ignore authentication errors ([issue #478](https://github.com/PowerShell/ActiveDirectoryDsc/issues/478)).
 
 ## 4.0.0.0
 

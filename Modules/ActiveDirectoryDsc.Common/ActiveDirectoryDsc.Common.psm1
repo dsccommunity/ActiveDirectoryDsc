@@ -2114,6 +2114,9 @@ function Get-ADDirectoryContext
         Specifies the credentials that are used when accessing the domain,
         or uses the current user if not specified.
 
+    .PARAMETER WaitForValidCredentials
+        Specifies if authentication exceptions should be ignored.
+
     .NOTES
         This function is designed so that it can run on any computer without
         having the ActiveDirectory module installed.
@@ -2133,7 +2136,11 @@ function Find-DomainController
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $WaitForValidCredentials
     )
 
     if ($PSBoundParameters.ContainsKey('SiteName'))
@@ -2174,6 +2181,21 @@ function Find-DomainController
     catch [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException]
     {
         Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName) -Verbose
+    }
+    catch [System.Management.Automation.MethodInvocationException]
+    {
+        $isTypeNameToSuppress = $_.Exception.InnerException -is [System.Security.Authentication.AuthenticationException]
+
+        if ($WaitForValidCredentials.IsPresent -and $isTypeNameToSuppress)
+        {
+            Write-Warning -Message (
+                $script:localizedData.IgnoreCredentialError -f $_.FullyQualifiedErrorId, $_.Exception.Message
+            )
+        }
+        else
+        {
+            throw $_
+        }
     }
     catch
     {

@@ -13,6 +13,11 @@ $script:restartLogFile = Join-Path $env:temp -ChildPath 'WaitForADDomain_Reboot.
 $script:waitForDomainControllerScriptBlock = {
     param
     (
+        # Only used for unit tests, and debug purpose.
+        [Parameter()]
+        [System.Boolean]
+        $RunOnce,
+
         [Parameter(Mandatory = $true)]
         [System.String]
         $DomainName,
@@ -25,9 +30,9 @@ $script:waitForDomainControllerScriptBlock = {
         [System.Management.Automation.PSCredential]
         $Credential,
 
-        # Only used for unit tests, and debug purpose.
         [Parameter()]
-        $RunOnce = $false
+        [System.Boolean]
+        $WaitForValidCredentials
     )
 
     $domainFound = $false
@@ -50,6 +55,13 @@ $script:waitForDomainControllerScriptBlock = {
         {
             $findDomainControllerParameters['Credential'] = $Credential
         }
+
+        if ($PSBoundParameters.ContainsKey('WaitForValidCredentials'))
+        {
+            $findDomainControllerParameters['WaitForValidCredentials'] = $WaitForValidCredentials
+        }
+
+        $currentDomainController = $null
 
         # Using verbose so that Receive-Job can output whats happened.
         $currentDomainController = Find-DomainController @findDomainControllerParameters -Verbose
@@ -91,6 +103,12 @@ $script:waitForDomainControllerScriptBlock = {
     .PARAMETER RestartCount
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
+
+    .PARAMETER WaitForValidCredentials
+        Specifies that the resource will not throw an error if authentication
+        fails using the provided credentials and continue wait for the timeout.
+        This can be used if the credentials are known to eventually exist but
+        there are a potential timing issue before they are accessible.
 #>
 function Get-TargetResource
 {
@@ -115,7 +133,11 @@ function Get-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $RestartCount
+        $RestartCount,
+
+        [Parameter()]
+        [System.Boolean]
+        $WaitForValidCredentials
     )
 
     $findDomainControllerParameters = @{
@@ -165,6 +187,13 @@ function Get-TargetResource
         $cimCredentialInstance = $null
     }
 
+    $currentDomainController = $null
+
+    if ($PSBoundParameters.ContainsKey('WaitForValidCredentials'))
+    {
+        $findDomainControllerParameters['WaitForValidCredentials'] = $WaitForValidCredentials
+    }
+
     $currentDomainController = Find-DomainController @findDomainControllerParameters
 
     if ($currentDomainController)
@@ -184,12 +213,13 @@ function Get-TargetResource
     }
 
     return @{
-        DomainName   = $DomainName
-        SiteName     = $domainControllerSiteName
-        Credential   = $cimCredentialInstance
-        WaitTimeout  = $WaitTimeout
-        RestartCount = $RestartCount
-        IsAvailable  = $domainFound
+        DomainName              = $DomainName
+        SiteName                = $domainControllerSiteName
+        Credential              = $cimCredentialInstance
+        WaitTimeout             = $WaitTimeout
+        RestartCount            = $RestartCount
+        IsAvailable             = $domainFound
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 }
 
@@ -215,6 +245,12 @@ function Get-TargetResource
     .PARAMETER RestartCount
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
+
+    .PARAMETER WaitForValidCredentials
+        Specifies that the resource will not throw an error if authentication
+        fails using the provided credentials and continue wait for the timeout.
+        This can be used if the credentials are known to eventually exist but
+        there are a potential timing issue before they are accessible.
 #>
 function Set-TargetResource
 {
@@ -249,7 +285,11 @@ function Set-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $RestartCount
+        $RestartCount,
+
+        [Parameter()]
+        [System.Boolean]
+        $WaitForValidCredentials
     )
 
     Write-Verbose -Message (
@@ -258,9 +298,10 @@ function Set-TargetResource
 
     # Only pass properties that could be used when fetching the domain controller.
     $compareTargetResourceStateParameters = @{
-        DomainName = $DomainName
-        SiteName = $SiteName
-        Credential = $Credential
+        DomainName              = $DomainName
+        SiteName                = $SiteName
+        Credential              = $Credential
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 
     <#
@@ -286,11 +327,13 @@ function Set-TargetResource
     if (-not $isInDesiredState)
     {
         $startJobParameters = @{
-            ScriptBlock = $script:waitForDomainControllerScriptBlock
+            ScriptBlock  = $script:waitForDomainControllerScriptBlock
             ArgumentList = @(
+                $false
                 $DomainName
                 $SiteName
                 $Credential
+                $WaitForValidCredentials
             )
         }
 
@@ -405,6 +448,12 @@ function Set-TargetResource
     .PARAMETER RestartCount
         Specifies the number of times the node will be reboot in an effort to
         connect to the domain.
+
+    .PARAMETER WaitForValidCredentials
+        Specifies that the resource will not throw an error if authentication
+        fails using the provided credentials and continue wait for the timeout.
+        This can be used if the credentials are known to eventually exist but
+        there are a potential timing issue before they are accessible.
 #>
 function Test-TargetResource
 {
@@ -429,7 +478,11 @@ function Test-TargetResource
 
         [Parameter()]
         [System.UInt32]
-        $RestartCount
+        $RestartCount,
+
+        [Parameter()]
+        [System.Boolean]
+        $WaitForValidCredentials
     )
 
     Write-Verbose -Message (
@@ -438,9 +491,10 @@ function Test-TargetResource
 
     # Only pass properties that could be used when fetching the domain controller.
     $compareTargetResourceStateParameters = @{
-        DomainName = $DomainName
-        SiteName = $SiteName
-        Credential = $Credential
+        DomainName              = $DomainName
+        SiteName                = $SiteName
+        Credential              = $Credential
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 
     <#
@@ -500,6 +554,12 @@ function Test-TargetResource
     .PARAMETER Credential
         Specifies the credentials that are used when accessing the domain,
         unless the built-in PsDscRunAsCredential is used.
+
+    .PARAMETER WaitForValidCredentials
+        Specifies that the resource will not throw an error if authentication
+        fails using the provided credentials and continue wait for the timeout.
+        This can be used if the credentials are known to eventually exist but
+        there are a potential timing issue before they are accessible.
 #>
 function Compare-TargetResourceState
 {
@@ -516,13 +576,18 @@ function Compare-TargetResourceState
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [Parameter()]
+        [System.Boolean]
+        $WaitForValidCredentials
     )
 
     $getTargetResourceParameters = @{
-        DomainName  = $DomainName
-        SiteName    = $SiteName
-        Credential  = $Credential
+        DomainName              = $DomainName
+        SiteName                = $SiteName
+        Credential              = $Credential
+        WaitForValidCredentials = $WaitForValidCredentials
     }
 
     <#

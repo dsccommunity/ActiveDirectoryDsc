@@ -84,6 +84,7 @@ try
                         $getTargetResourceResult.SiteName | Should -BeNullOrEmpty
                         $getTargetResourceResult.Credential | Should -BeNullOrEmpty
                         $getTargetResourceResult.RestartCount | Should -Be 0
+                        $getTargetResourceResult.WaitForValidCredentials | Should -BeFalse
                     }
                 }
 
@@ -119,6 +120,7 @@ try
                             $getTargetResourceResult.SiteName | Should -Be 'Europe'
                             $getTargetResourceResult.Credential | Should -BeNullOrEmpty
                             $getTargetResourceResult.RestartCount | Should -Be 0
+                            $getTargetResourceResult.WaitForValidCredentials | Should -BeFalse
                         }
                     }
 
@@ -128,19 +130,25 @@ try
                             $getTargetResourceParameters['SiteName'] = 'Europe'
                             $getTargetResourceParameters['WaitTimeout'] = 600
                             $getTargetResourceParameters['RestartCount'] = 2
+                            $getTargetResourceParameters['WaitForValidCredentials'] = $true
                         }
 
                         It 'Should return the same values as passed as parameters' {
-                            $result = Get-TargetResource @getTargetResourceParameters
-                            $result.DomainName | Should -Be $mockDomainName
-                            $result.SiteName | Should -Be 'Europe'
-                            $result.WaitTimeout | Should -Be 600
-                            $result.RestartCount | Should -Be 2
-                            $result.Credential.UserName | Should -Be $mockUserName
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.DomainName | Should -Be $mockDomainName
+                            $getTargetResourceResult.SiteName | Should -Be 'Europe'
+                            $getTargetResourceResult.WaitTimeout | Should -Be 600
+                            $getTargetResourceResult.RestartCount | Should -Be 2
+                            $getTargetResourceResult.Credential.UserName | Should -Be $mockUserName
+                            $getTargetResourceResult.WaitForValidCredentials | Should -BeTrue
+
+                            Assert-MockCalled -CommandName Find-DomainController -ParameterFilter {
+                                $PSBoundParameters.ContainsKey('WaitForValidCredentials')
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
-                    Context 'When using all available parameters' {
+                    Context 'When using BuiltInCredential parameter' {
                         BeforeAll {
                             $mockBuiltInCredentialName = 'BuiltInCredential'
 
@@ -159,9 +167,9 @@ try
                         }
 
                         It 'Should return the same values as passed as parameters' {
-                            $result = Get-TargetResource @getTargetResourceParameters
-                            $result.DomainName | Should -Be $mockDomainName
-                            $result.Credential | Should -BeNullOrEmpty
+                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                            $getTargetResourceResult.DomainName | Should -Be $mockDomainName
+                            $getTargetResourceResult.Credential | Should -BeNullOrEmpty
 
                             Assert-MockCalled -CommandName Write-Verbose -Exactly -Times 1 -Scope It
                         }
@@ -438,17 +446,112 @@ try
                         }
                     }
 
-                    It 'Should not throw and call the correct mocks' {
-                        { Set-TargetResource @mockDefaultParameters } | Should -Not -Throw
+                    BeforeEach {
+                        $setTargetResourceParameters = $mockDefaultParameters.Clone()
+                    }
 
-                        $global:DSCMachineStatus | Should -Be 0
+                    Context 'When only specifying the default parameter' {
+                        It 'Should not throw and call the correct mocks' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Start-Job -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+                            $global:DSCMachineStatus | Should -Be 0
+
+                            Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+
+                            Assert-MockCalled -CommandName Start-Job -ParameterFilter {
+                                $PSBoundParameters.ContainsKey('ArgumentList') `
+                                -and $ArgumentList[0] -eq $false `
+                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                -and [System.String]::IsNullOrEmpty($ArgumentList[3]) `
+                                -and $ArgumentList[4] -eq $false
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When specifying a site name' {
+                        BeforeEach {
+                            $setTargetResourceParameters['SiteName'] = $mockSiteName
+                        }
+
+                        It 'Should not throw and call the correct mocks' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            $global:DSCMachineStatus | Should -Be 0
+
+                            Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+
+                            Assert-MockCalled -CommandName Start-Job -ParameterFilter {
+                                $PSBoundParameters.ContainsKey('ArgumentList') `
+                                -and $ArgumentList[0] -eq $false `
+                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                -and $ArgumentList[2] -eq $setTargetResourceParameters.SiteName `
+                                -and [System.String]::IsNullOrEmpty($ArgumentList[3]) `
+                                -and $ArgumentList[4] -eq $false
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When specifying credentials' {
+                        BeforeEach {
+                            $setTargetResourceParameters['Credential'] = $mockDomainUserCredential
+                        }
+
+                        It 'Should not throw and call the correct mocks' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            $global:DSCMachineStatus | Should -Be 0
+
+                            Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+
+                            Assert-MockCalled -CommandName Start-Job -ParameterFilter {
+                                $PSBoundParameters.ContainsKey('ArgumentList') `
+                                -and $ArgumentList[0] -eq $false `
+                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                -and $ArgumentList[3].UserName -eq $setTargetResourceParameters.Credential.UserName `
+                                -and $ArgumentList[4] -eq $false
+                            } -Exactly -Times 1 -Scope It
+                        }
+                    }
+
+                    Context 'When specifying that credentials errors should be ignored' {
+                        BeforeEach {
+                            $setTargetResourceParameters['WaitForValidCredentials'] = $true
+                        }
+
+                        It 'Should not throw and call the correct mocks' {
+                            { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+
+                            $global:DSCMachineStatus | Should -Be 0
+
+                            Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Receive-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Wait-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-Job -Exactly -Times 1 -Scope It
+                            Assert-MockCalled -CommandName Remove-RestartLogFile -Exactly -Times 0 -Scope It
+
+                            Assert-MockCalled -CommandName Start-Job -ParameterFilter {
+                                $PSBoundParameters.ContainsKey('ArgumentList') `
+                                -and $ArgumentList[0] -eq $false `
+                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                -and $ArgumentList[4] -eq $true
+                            } -Exactly -Times 1 -Scope It
+                        }
                     }
 
                     Context 'When a restart was requested' {
@@ -599,15 +702,40 @@ try
 
                 It 'Should not throw and call the correct mocks' {
                     Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
-                        'contoso.com' # DomainName
-                        'Europe', # SiteName
-                        $mockDomainUserCredential, # Credential
                         $true # RunOnce
+                        'contoso.com' # DomainName
+                        'Europe' # SiteName
+                        $mockDomainUserCredential # Credential
                     )
 
-                    Assert-MockCalled -CommandName Find-DomainController -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Find-DomainController -ParameterFilter {
+                        -not $PSBoundParameters.ContainsKey('WaitForValidCredentials')
+                    } -Exactly -Times 1 -Scope It
+
                     Assert-MockCalled -CommandName Clear-DnsClientCache -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the Find-DomainController should ignore authentication exceptions' {
+                BeforeAll {
+                    Mock -CommandName Find-DomainController
+                }
+
+                Context 'When the parameter WaitForValidCredentials is set to $true' {
+                    It 'Should output a warning message' {
+                        Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
+                                $true # RunOnce
+                                'contoso.com' # DomainName
+                                'Europe' # SiteName
+                                $mockDomainUserCredential # Credential
+                                $true
+                            )
+
+                        Assert-MockCalled -CommandName Find-DomainController -ParameterFilter {
+                            $PSBoundParameters.ContainsKey('WaitForValidCredentials')
+                        } -Exactly -Times 1 -Scope It
+                    }
                 }
             }
 
@@ -620,10 +748,10 @@ try
 
                 It 'Should not throw and call the correct mocks' {
                     Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
-                        'contoso.com' # DomainName
-                        'Europe', # SiteName
-                        $null, # Credential
                         $true # RunOnce
+                        'contoso.com' # DomainName
+                        'Europe' # SiteName
+                        $null # Credential
                     )
 
                     Assert-MockCalled -CommandName Find-DomainController -Exactly -Times 1 -Scope It
