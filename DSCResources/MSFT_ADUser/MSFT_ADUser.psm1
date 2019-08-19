@@ -928,10 +928,12 @@ function Test-TargetResource
     {
         $getParameters['DomainController'] = $PSBoundParameters['DomainController']
     }
+
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
         $getParameters['Credential'] = $PSBoundParameters['Credential']
     }
+
     $targetResource = Get-TargetResource @getParameters
 
     $isCompliant = $true
@@ -1594,10 +1596,12 @@ function Set-TargetResource
     {
         $getParameters['DomainController'] = $PSBoundParameters['DomainController']
     }
+
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
         $getParameters['Credential'] = $PSBoundParameters['Credential']
     }
+
     $targetResource = Get-TargetResource @getParameters
 
     # Add common name, ensure and enabled as they may not be explicitly passed
@@ -2070,7 +2074,7 @@ function Get-MD5HashString
         $md5 = [System.Security.Cryptography.MD5]::Create()
         $hashBytes = $md5.ComputeHash($Bytes)
 
-        $md5ReturnValue = [System.BitConverter]::ToString($hashBytes).Replace('-','')
+        $md5ReturnValue = [System.BitConverter]::ToString($hashBytes).Replace('-', '')
     }
 
     return $md5ReturnValue
