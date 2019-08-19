@@ -203,13 +203,14 @@ try
         Describe 'ADUser\Get-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module
-                $testPresentParams.Remove('Ensure')
+                $getTargetResourceParameters = $testPresentParams.Clone()
+                $getTargetResourceParameters.Remove('Ensure')
             }
 
             It "Returns a 'System.Collections.Hashtable' object type" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
-                $adUser = Get-TargetResource @testPresentParams
+                $adUser = Get-TargetResource @getTargetResourceParameters
 
                 $adUser -is [System.Collections.Hashtable] | Should -BeTrue
             }
@@ -217,7 +218,7 @@ try
             It "Returns 'Ensure' is 'Present' when user account exists" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
-                $adUser = Get-TargetResource @testPresentParams
+                $adUser = Get-TargetResource @getTargetResourceParameters
 
                 $adUser.Ensure | Should -Be 'Present'
             }
@@ -225,7 +226,7 @@ try
             It "Returns 'Ensure' is 'Absent' when user account does not exist" {
                 Mock -CommandName Get-ADUser -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
-                $adUser = Get-TargetResource @testPresentParams
+                $adUser = Get-TargetResource @getTargetResourceParameters
 
                 $adUser.Ensure | Should -Be 'Absent'
             }
@@ -233,14 +234,14 @@ try
             It "Should throw the correct exception when Get-ADUser returns an unknown error" {
                 Mock -CommandName Get-ADUser -MockWith { throw }
 
-                $expectedError = $script:localizedData.RetrievingADUserError -f $testPresentParams.UserName, $testPresentParams.DomainName
-                { Get-TargetResource @testPresentParams } | Should -Throw $expectedError
+                $expectedError = $script:localizedData.RetrievingADUserError -f $getTargetResourceParameters.UserName, $getTargetResourceParameters.DomainName
+                { Get-TargetResource @getTargetResourceParameters } | Should -Throw $expectedError
             }
 
             It "Calls 'Get-ADUser' with 'Server' parameter when 'DomainController' specified" {
                 Mock -CommandName Get-ADUser -ParameterFilter { $Server -eq $testDomainController } -MockWith { return [PSCustomObject] $fakeADUser }
 
-                Get-TargetResource @testPresentParams -DomainController $testDomainController
+                Get-TargetResource @getTargetResourceParameters -DomainController $testDomainController
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Server -eq $testDomainController } -Scope It
             }
@@ -248,14 +249,14 @@ try
             It "Calls 'Get-ADUser' with 'Credential' parameter when 'Credential' specified" {
                 Mock -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -MockWith { return [PSCustomObject] $fakeADUser }
 
-                Get-TargetResource @testPresentParams -Credential $testCredential
+                Get-TargetResource @getTargetResourceParameters -Credential $testCredential
 
                 Assert-MockCalled -CommandName Get-ADUser -ParameterFilter { $Credential -eq $testCredential } -Scope It
             }
             It "Should return the correct value for an Array property" {
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $fakeADUser }
 
-                $adUser = Get-TargetResource @testPresentParams
+                $adUser = Get-TargetResource @getTargetResourceParameters
                 $adUser.ServicePrincipalNames | Should -Be $fakeADUser.ServicePrincipalName
             }
 
@@ -264,7 +265,7 @@ try
                 $mockADUser['pwdLastSet'] = 0
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
 
-                $adUser = Get-TargetResource @testPresentParams
+                $adUser = Get-TargetResource @getTargetResourceParameters
                 $adUser.ChangePasswordAtLogon | Should -BeTrue
             }
 
@@ -273,7 +274,7 @@ try
                 $mockADUser['pwdLastSet'] = 12345678
                 Mock -CommandName Get-ADUser -MockWith { return [PSCustomObject] $mockADUser }
 
-                $adUser = Get-TargetResource @testPresentParams
+                $adUser = Get-TargetResource @getTargetResourceParameters
                 $adUser.ChangePasswordAtLogon | Should -BeFalse
             }
 
@@ -287,7 +288,7 @@ try
                     return [PSCustomObject] $mockADUser
                 }
 
-                $adUser = Get-TargetResource @testPresentParams
+                $adUser = Get-TargetResource @getTargetResourceParameters
                 $adUser.ThumbnailPhoto | Should -Be $mockThumbnailPhotoBase64
                 $adUser.ThumbnailPhotoHash | Should -Be $mockThumbnailPhotoHash
             }
@@ -296,9 +297,7 @@ try
 
         #region Function Test-TargetResource
         Describe 'ADUser\Test-TargetResource' {
-            BeforeAll {
-                $testPresentParams['Ensure'] = 'Present'
-            }
+
             It "Passes when user account does not exist and 'Ensure' is 'Absent'" {
                 Mock -CommandName Get-TargetResource -MockWith { return $testAbsentParams }
 
