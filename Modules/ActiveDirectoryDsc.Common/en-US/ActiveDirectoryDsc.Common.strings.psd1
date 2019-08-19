@@ -50,4 +50,5 @@ ConvertFrom-StringData @'
     FailedToFindDomainController        = No domain controller was found in the domain '{0}'. (ADCOMMON0051)
     SearchingForDomainController        = Searching for a domain controller in the domain '{0}'. (ADCOMMON0052)
     SearchingForDomainControllerInSite  = Searching for a domain controller in the site '{0}' in the domain '{1}'. (ADCOMMON0053)
+    IgnoreCredentialError               = Suppressing the credential error '{0}' with the message '{1}'. (ADCOMMON0054)
 '@

@@ -2473,5 +2473,60 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             Assert-VerifiableMock
         }
+
+        Context 'When the Find-DomainController throws an authentication exception' {
+            BeforeAll {
+                $mockErrorMessage = 'The user name or password is incorrect.'
+
+                Mock -CommandName Find-DomainControllerFindOneWrapper -MockWith {
+                    $exceptionWithInnerException = New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
+                    -ArgumentList @(
+                        $mockErrorMessage,
+                        (New-Object -TypeName 'System.Security.Authentication.AuthenticationException')
+                    )
+
+                    $newObjectParameters = @{
+                        TypeName     = 'System.Management.Automation.ErrorRecord'
+                        ArgumentList = @(
+                            $exceptionWithInnerException,
+                            'AuthenticationException',
+                            'InvalidOperation',
+                            $null
+                        )
+                    }
+
+                    throw New-Object @newObjectParameters
+                }
+            }
+
+            Context 'When the parameter WaitForValidCredentials is not specified' {
+                It 'Should throw the correct error' {
+                    { Find-DomainController -DomainName $mockDomainName -Verbose } | Should -Throw $mockErrorMessage
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the parameter WaitForValidCredentials is set to $false' {
+                It 'Should throw the correct error' {
+                    { Find-DomainController -DomainName $mockDomainName -WaitForValidCredentials:$false -Verbose } | Should -Throw $mockErrorMessage
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the parameter WaitForValidCredentials is set to $true' {
+                BeforeAll {
+                    Mock -CommandName Write-Warning
+                }
+
+                It 'Should not throw an exception' {
+                    { Find-DomainController -DomainName $mockDomainName -WaitForValidCredentials -Verbose } | Should -Not -Throw
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
+                }
+            }
+        }
     }
 }

@@ -141,6 +141,10 @@ try
                             $getTargetResourceResult.RestartCount | Should -Be 2
                             $getTargetResourceResult.Credential.UserName | Should -Be $mockUserName
                             $getTargetResourceResult.WaitForValidCredentials | Should -BeTrue
+
+                            Assert-MockCalled -CommandName Find-DomainController -ParameterFilter {
+                                $PSBoundParameters.ContainsKey('WaitForValidCredentials')
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
@@ -169,74 +173,6 @@ try
 
                             Assert-MockCalled -CommandName Write-Verbose -Exactly -Times 1 -Scope It
                         }
-                    }
-                }
-            }
-
-            Context 'When the Find-DomainController throws an authentication exception' {
-                BeforeAll {
-                    Mock -CommandName Find-DomainController -MockWith {
-                        $exceptionWithInnerException = New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
-                        -ArgumentList @(
-                            'The user name or password is incorrect.',
-                            (New-Object -TypeName 'System.Security.Authentication.AuthenticationException')
-                        )
-
-                        $newObjectParameters = @{
-                            TypeName     = 'System.Management.Automation.ErrorRecord'
-                            ArgumentList = @(
-                                $exceptionWithInnerException,
-                                'AuthenticationException',
-                                'InvalidOperation',
-                                $null
-                            )
-                        }
-
-                        throw New-Object @newObjectParameters
-                    }
-                }
-
-                BeforeEach {
-                    $getTargetResourceParameters = $mockDefaultParameters.Clone()
-                    $getTargetResourceParameters['Credential'] = $mockDomainUserCredential
-                }
-
-                Context 'When the parameter WaitForValidCredentials is not specified' {
-                    It 'Should throw the correct error' {
-                        { Get-TargetResource @getTargetResourceParameters } | Should -Throw 'The user name or password is incorrect.'
-                    }
-                }
-
-                Context 'When the parameter WaitForValidCredentials is set to $false' {
-                    BeforeEach {
-                        $getTargetResourceParameters['WaitForValidCredentials'] = $false
-                    }
-
-                    It 'Should throw the correct error' {
-                        { Get-TargetResource @getTargetResourceParameters } | Should -Throw 'The user name or password is incorrect.'
-                    }
-                }
-
-                Context 'When the parameter WaitForValidCredentials is set to $true' {
-                    BeforeAll {
-                        Mock -CommandName Write-Warning
-                    }
-
-                    BeforeEach {
-                        $getTargetResourceParameters['WaitForValidCredentials'] = $true
-                    }
-
-                    It 'Should return the same values as passed as parameters' {
-                        $result = Get-TargetResource @getTargetResourceParameters
-                        $result.DomainName | Should -Be $mockDomainName
-                        $result.Credential.UserName | Should -Be $mockUserName
-                        $result.WaitForValidCredentials | Should -BeTrue
-                    }
-
-                    It 'Should output a warning message' {
-                        $null = Get-TargetResource @getTargetResourceParameters
-
-                        Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
                     }
                 }
             }
@@ -772,67 +708,21 @@ try
                         $mockDomainUserCredential # Credential
                     )
 
-                    Assert-MockCalled -CommandName Find-DomainController -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Find-DomainController -ParameterFilter {
+                        -not $PSBoundParameters.ContainsKey('WaitForValidCredentials')
+                    } -Exactly -Times 1 -Scope It
+
                     Assert-MockCalled -CommandName Clear-DnsClientCache -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 1 -Scope It
                 }
             }
 
-            Context 'When the Find-DomainController throws an authentication exception' {
+            Context 'When the Find-DomainController should ignore authentication exceptions' {
                 BeforeAll {
-                    Mock -CommandName Find-DomainController -MockWith {
-                        $exceptionWithInnerException = New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
-                        -ArgumentList @(
-                            'The user name or password is incorrect.',
-                            (New-Object -TypeName 'System.Security.Authentication.AuthenticationException')
-                        )
-
-                        $newObjectParameters = @{
-                            TypeName     = 'System.Management.Automation.ErrorRecord'
-                            ArgumentList = @(
-                                $exceptionWithInnerException,
-                                'AuthenticationException',
-                                'InvalidOperation',
-                                $null
-                            )
-                        }
-
-                        throw New-Object @newObjectParameters
-                    }
-                }
-
-                Context 'When the parameter WaitForValidCredentials is not specified' {
-                    It 'Should throw the correct error' {
-                        {
-                            Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
-                                $true # RunOnce
-                                'contoso.com' # DomainName
-                                'Europe' # SiteName
-                                $mockDomainUserCredential # Credential
-                            )
-                        } | Should -Throw 'The user name or password is incorrect.'
-                    }
-                }
-
-                Context 'When the parameter WaitForValidCredentials is set to $false' {
-                    It 'Should throw the correct error' {
-                        {
-                            Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
-                                $true # RunOnce
-                                'contoso.com' # DomainName
-                                'Europe' # SiteName
-                                $mockDomainUserCredential # Credential
-                                $false
-                            )
-                        } | Should -Throw 'The user name or password is incorrect.'
-                    }
+                    Mock -CommandName Find-DomainController
                 }
 
                 Context 'When the parameter WaitForValidCredentials is set to $true' {
-                    BeforeAll {
-                        Mock -CommandName Write-Warning
-                    }
-
                     It 'Should output a warning message' {
                         Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
                                 $true # RunOnce
@@ -842,7 +732,9 @@ try
                                 $true
                             )
 
-                            Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Find-DomainController -ParameterFilter {
+                            $PSBoundParameters.ContainsKey('WaitForValidCredentials')
+                        } -Exactly -Times 1 -Scope It
                     }
                 }
             }

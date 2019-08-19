@@ -56,29 +56,15 @@ $script:waitForDomainControllerScriptBlock = {
             $findDomainControllerParameters['Credential'] = $Credential
         }
 
+        if ($PSBoundParameters.ContainsKey('WaitForValidCredentials'))
+        {
+            $findDomainControllerParameters['WaitForValidCredentials'] = $WaitForValidCredentials
+        }
+
         $currentDomainController = $null
 
         # Using verbose so that Receive-Job can output whats happened.
-        try
-        {
-            $currentDomainController = Find-DomainController @findDomainControllerParameters -Verbose
-        }
-        catch [System.Management.Automation.MethodInvocationException]
-        {
-            $isTypeNameToSuppress = $_.Exception.InnerException -is [System.Security.Authentication.AuthenticationException]
-
-            if ($WaitForValidCredentials -and $isTypeNameToSuppress)
-            {
-                # Keeping this simple to not need localization.
-                Write-Warning -Message (
-                    '{0} - {1}' -f $_.FullyQualifiedErrorId, $_.Exception.Message
-                )
-            }
-            else
-            {
-                throw $_
-            }
-        }
+        $currentDomainController = Find-DomainController @findDomainControllerParameters -Verbose
 
         if ($currentDomainController)
         {
@@ -203,25 +189,12 @@ function Get-TargetResource
 
     $currentDomainController = $null
 
-    try
+    if ($PSBoundParameters.ContainsKey('WaitForValidCredentials'))
     {
-        $currentDomainController = Find-DomainController @findDomainControllerParameters
+        $findDomainControllerParameters['WaitForValidCredentials'] = $WaitForValidCredentials
     }
-    catch [System.Management.Automation.MethodInvocationException]
-    {
-        $isTypeNameToSuppress = $_.Exception.InnerException -is [System.Security.Authentication.AuthenticationException]
 
-        if ($WaitForValidCredentials -and $isTypeNameToSuppress)
-        {
-            Write-Warning -Message (
-                $script:localizedData.IgnoreCredentialError -f $_.FullyQualifiedErrorId, $_.Exception.Message
-            )
-        }
-        else
-        {
-            throw $_
-        }
-    }
+    $currentDomainController = Find-DomainController @findDomainControllerParameters
 
     if ($currentDomainController)
     {
