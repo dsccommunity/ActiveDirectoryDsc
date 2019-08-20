@@ -18,11 +18,38 @@
   - Updated common helper function `Find-DomainController` with the
     optional parameter `WaitForValidCredentials` which will ignore
     authentication exceptions when the credentials cannot be authenticated.
-- Changes to xWaitForADDomain
-  - Correct Grammar Issues in Example Descriptions.
 - Changes to WaitForADDomain
+  - Correct grammar issues in example descriptions.
   - An optional parameter `WaitForValidCredentials` can be set to $true
     to tell the resource to ignore authentication errors ([issue #478](https://github.com/PowerShell/ActiveDirectoryDsc/issues/478)).
+- Changes to ADDomain
+  - The property `DomainName` will now always return the same value as
+    was passed in as the parameter. For the fully qualified domain name
+    (FQDN) of the domain see the new read-only property `DnsRoot`.
+  - If the domain should exist, the resource correctly waits only 5 times
+    when calling `Get-TargetResource` if the tracking file was previously
+    created ([issue #181](https://github.com/PowerShell/ActiveDirectoryDsc/issues/181)).
+  - The resource now throws if either one of the cmdlets `Install-ADDSForest`
+    or `Install-ADDSDomain` fails, and will not create the tracking file
+    ([issue #181](https://github.com/PowerShell/ActiveDirectoryDsc/issues/181)).
+  - The resource now outputs the properties from `Get-TargetResource`
+    when a domain cannot be found.
+  - Minor casing corrections on the parameter and variable names.
+  - Improved the parameter descriptions of the parameters `DomainName`
+    and `Credential`.
+  - If the tracking file is missing and the domain is found a warning
+    message is now written asking the consumer to recreate the file.
+  - Correctly outputs the time in seconds in the verbose message how long
+    the resource waits between ech retry when looking for the domain
+    (when a tracking file exist and the domain is not yet responding).
+  - If the `Set-TargetResource` is called directly it will not try to
+    create the domain if it already exist.
+  - Added read-only property `DnsRoot` that will return the fully qualified
+    domain name (FQDN) of the domain or child domain.
+  - Added read-only property `Forest` that will return the fully qualified
+    domain name (FQDN) of the forest that the domain belongs to.
+  - Added read-only property `DomainExist` that will return `$true` if
+    the domain was found, or `$false` if it was not.
 
 ## 4.0.0.0
 
