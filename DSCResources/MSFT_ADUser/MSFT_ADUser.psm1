@@ -626,7 +626,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
-        $ensure = 'Present',
+        $Ensure = 'Present',
 
         [Parameter()]
         [ValidateNotNull()]
@@ -921,24 +921,26 @@ function Test-TargetResource
 
     $getParameters = @{ }
 
-    $getParameters['DomainName'] = $PSBoundParameters['DomainName']
-    $getParameters['UserName'] = $PSBoundParameters['UserName']
+    $getParameters = @{
+        DomainName = $DomainName
+        UserName   = $UserName
+    }
 
     if ($PSBoundParameters.ContainsKey('DomainController'))
     {
-        $getParameters['DomainController'] = $PSBoundParameters['DomainController']
+        $getParameters['DomainController'] = $DomainController
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
-        $getParameters['Credential'] = $PSBoundParameters['Credential']
+        $getParameters['Credential'] = $Credential
     }
 
     $targetResource = Get-TargetResource @getParameters
 
     $isCompliant = $true
 
-    if ($ensure -eq 'Absent')
+    if ($Ensure -eq 'Absent')
     {
         if ($targetResource.Ensure -eq 'Present')
         {
@@ -948,8 +950,8 @@ function Test-TargetResource
     }
     else
     {
-        # Add common name, ensure and enabled as they may not be explicitly passed and we want to enumerate them
-        $PSBoundParameters['Ensure'] = $ensure
+        # Add common name, Ensure and enabled as they may not be explicitly passed and we want to enumerate them
+        $PSBoundParameters['Ensure'] = $Ensure
         $PSBoundParameters['Enabled'] = $Enabled
 
         foreach ($parameter in $PSBoundParameters.Keys)
@@ -1293,7 +1295,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
-        $ensure = 'Present',
+        $Ensure = 'Present',
 
         [Parameter()]
         [ValidateNotNull()]
@@ -1589,27 +1591,29 @@ function Set-TargetResource
 
     $getParameters = @{ }
 
-    $getParameters['DomainName'] = $PSBoundParameters['DomainName']
-    $getParameters['UserName'] = $PSBoundParameters['UserName']
+    $getParameters = @{
+        DomainName = $DomainName
+        UserName   = $UserName
+    }
 
     if ($PSBoundParameters.ContainsKey('DomainController'))
     {
-        $getParameters['DomainController'] = $PSBoundParameters['DomainController']
+        $getParameters['DomainController'] = $DomainController
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
-        $getParameters['Credential'] = $PSBoundParameters['Credential']
+        $getParameters['Credential'] = $Credential
     }
 
     $targetResource = Get-TargetResource @getParameters
 
-    # Add common name, ensure and enabled as they may not be explicitly passed
-    $PSBoundParameters['Ensure'] = $ensure
+    # Add common name, Ensure and enabled as they may not be explicitly passed
+    $PSBoundParameters['Ensure'] = $Ensure
     $PSBoundParameters['Enabled'] = $Enabled
     $newADUser = $false
 
-    if ($ensure -eq 'Present')
+    if ($Ensure -eq 'Present')
     {
         if ($targetResource.Ensure -eq 'Absent')
         {
@@ -1847,7 +1851,7 @@ function Set-TargetResource
             Rename-ADObject @renameAdObjectParameters -NewName $PSBoundParameters.CommonName
         }
     }
-    elseif (($ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present'))
+    elseif (($Ensure -eq 'Absent') -and ($targetResource.Ensure -eq 'Present'))
     {
         # User exists and needs removing
         Write-Verbose ($script:localizedData.RemovingADUser -f $UserName)
