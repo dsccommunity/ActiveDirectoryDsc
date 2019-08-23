@@ -919,8 +919,6 @@ function Test-TargetResource
     }
     Assert-Parameters @PSBoundParameters
 
-    $getParameters = @{ }
-
     $getParameters = @{
         DomainName = $DomainName
         UserName   = $UserName
@@ -1588,8 +1586,6 @@ function Set-TargetResource
     }
 
     Assert-Parameters @PSBoundParameters
-
-    $getParameters = @{ }
 
     $getParameters = @{
         DomainName = $DomainName
