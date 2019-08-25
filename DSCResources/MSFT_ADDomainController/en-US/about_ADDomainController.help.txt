@@ -6,11 +6,14 @@
     controllers in Active Directory. Installation of Read-Only Domain Controllers
     (RODC) is also supported.
 
-    Promotion of a Domain Controller using an existing DNS is available using the InstallDns
-    parameter. The parameter specifies if the DNS Server service should be installed and configured
-    on the domain controller. If this is not set, the default for the parameter InstallDns of the cmdlet
-    [Install-ADDSDomainController](https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller)
-    is used.
+    Promotion of a Domain Controller using an existing DNS is available using
+    the `InstallDns` parameter. The parameter specifies if the DNS Server service
+    should be installed and configured on the domain controller. If this is
+    not set the default value of the parameter `InstallDns` of the cmdlet
+    [`Install-ADDSDomainController`](https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller)
+    is used. The parameter `InstallDns` is only used during the provisioning
+    of a domain controller. The parameter cannot be used to install or uninstall
+    the DNS server on an already provisioned domain controller.
 
     >**Note:** If the account used for the parameter `Credential`
     >cannot connect to another domain controller, for example using a credential
@@ -92,7 +95,7 @@
 
 .PARAMETER InstallDns
     Write - Boolean
-    Specifies if the DNS Server service should be installed and configured on the Domain Controller. If this is not set the default for the parameter InstallDns of the cmdlet Install-ADDSDomainController is used.
+    Specifies if the DNS Server service should be installed and configured on the Domain Controller. If this is not set the default value of the parameter `InstallDns` of the cmdlet Install-ADDSDomainController is used. This parameter is only used during the provisioning of a domain controller. The parameter cannot be used to install or uninstall the DNS server on an already provisioned domain controller.
 
 .EXAMPLE 1
 
@@ -393,6 +396,61 @@ Configuration ADDomainController_AddDomainControllerAndMoveRole_Config
             FlexibleSingleMasterOperationRole = @('RIDMaster')
 
             DependsOn                         = '[WaitForADDomain]WaitForestAvailability'
+        }
+    }
+}
+
+.EXAMPLE 6
+
+This configuration will add a domain controller to the domain contoso.com
+without installing the local DNS server service and using the one in the existing domain.
+
+Configuration AddDomainControllerUsingInstallDns_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $DomainAdministratorCredential
+    )
+
+    Import-DscResource -ModuleName PSDscResources
+    Import-DscResource -ModuleName xActiveDirectory
+
+    node localhost
+    {
+        WindowsFeature 'InstallADDomainServicesFeature'
+        {
+            Ensure = 'Present'
+            Name   = 'AD-Domain-Services'
+        }
+
+        WindowsFeature 'RSATADPowerShell'
+        {
+            Ensure    = 'Present'
+            Name      = 'RSAT-AD-PowerShell'
+
+            DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
+        }
+
+        xWaitForADDomain 'WaitForestAvailability'
+        {
+            DomainName           = 'contoso.com'
+            DomainUserCredential = $DomainAdministratorCredential
+            RetryCount           = 10
+            RetryIntervalSec     = 120
+
+            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+        }
+
+        xADDomainController 'DomainControllerUsingExistingDNSServer'
+        {
+            DomainName                    = 'contoso.com'
+            DomainAdministratorCredential = $DomainAdministratorCredential
+            SafemodeAdministratorPassword = $DomainAdministratorCredential
+            InstallDns                    = $false
+            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
 }
