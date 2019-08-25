@@ -35,8 +35,11 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController
 
     .PARAMETER InstallDns
         Specifies if the DNS Server service should be installed and configured on
-        the domain controller. If this is not set, the default for the parameter
+        the domain controller. If this is not set the default value of the parameter
         InstallDns of the cmdlet Install-ADDSDomainController is used.
+        The parameter `InstallDns` is only used during the provisioning of a domain
+        controller. The parameter cannot be used to install or uninstall the DNS
+        server on an already provisioned domain controller.
 #>
 function Get-TargetResource
 {
@@ -200,8 +203,11 @@ function Get-TargetResource
 
     .PARAMETER InstallDns
         Specifies if the DNS Server service should be installed and configured on
-        the domain controller. If this is not set, the default for the parameter
+        the domain controller. If this is not set the default value of the parameter
         InstallDns of the cmdlet Install-ADDSDomainController is used.
+        The parameter `InstallDns` is only used during the provisioning of a domain
+        controller. The parameter cannot be used to install or uninstall the DNS
+        server on an already provisioned domain controller.
 #>
 function Set-TargetResource
 {
@@ -604,8 +610,11 @@ function Set-TargetResource
 
     .PARAMETER InstallDns
         Specifies if the DNS Server service should be installed and configured on
-        the domain controller. If this is not set, the default for the parameter
+        the domain controller. If this is not set the default value of the parameter
         InstallDns of the cmdlet Install-ADDSDomainController is used.
+        The parameter `InstallDns` is only used during the provisioning of a domain
+        controller. The parameter cannot be used to install or uninstall the DNS
+        server on an already provisioned domain controller.
 
         Not used in Test-TargetResource.
 #>
