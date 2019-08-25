@@ -53,19 +53,19 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
 
         WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName           = 'contoso.com'
-            DomainUserCredential = $DomainAdministratorCredential
-            RetryCount           = 10
-            RetryIntervalSec     = 120
+            DomainName       = 'contoso.com'
+            Credential       = $DomainAdministratorCredential
+            RetryCount       = 10
+            RetryIntervalSec = 120
 
-            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+            DependsOn        = '[WindowsFeature]RSATADPowerShell'
         }
 
         ADDomainController 'DomainControllerUsingExistingDNSServer'
         {
             DomainName                    = 'contoso.com'
-            DomainAdministratorCredential = $DomainAdministratorCredential
-            SafemodeAdministratorPassword = $DomainAdministratorCredential
+            Credential                    = $DomainAdministratorCredential
+            SafeModeAdministratorPassword = $DomainAdministratorCredential
             InstallDns                    = $false
             DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
         }

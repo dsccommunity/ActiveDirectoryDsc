@@ -405,7 +405,7 @@ Configuration ADDomainController_AddDomainControllerAndMoveRole_Config
 This configuration will add a domain controller to the domain contoso.com
 without installing the local DNS server service and using the one in the existing domain.
 
-Configuration AddDomainControllerUsingInstallDns_Config
+Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
 {
     param
     (
@@ -416,7 +416,7 @@ Configuration AddDomainControllerUsingInstallDns_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
@@ -434,21 +434,21 @@ Configuration AddDomainControllerUsingInstallDns_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName           = 'contoso.com'
-            DomainUserCredential = $DomainAdministratorCredential
-            RetryCount           = 10
-            RetryIntervalSec     = 120
+            DomainName       = 'contoso.com'
+            Credential       = $DomainAdministratorCredential
+            RetryCount       = 10
+            RetryIntervalSec = 120
 
-            DependsOn            = '[WindowsFeature]RSATADPowerShell'
+            DependsOn        = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerUsingExistingDNSServer'
+        ADDomainController 'DomainControllerUsingExistingDNSServer'
         {
             DomainName                    = 'contoso.com'
-            DomainAdministratorCredential = $DomainAdministratorCredential
-            SafemodeAdministratorPassword = $DomainAdministratorCredential
+            Credential                    = $DomainAdministratorCredential
+            SafeModeAdministratorPassword = $DomainAdministratorCredential
             InstallDns                    = $false
             DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
         }
