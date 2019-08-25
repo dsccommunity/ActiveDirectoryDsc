@@ -29,7 +29,7 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $DomainAdministratorCredential
+        $Credential
     )
 
     Import-DscResource -ModuleName PSDscResources
@@ -54,7 +54,7 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
         WaitForADDomain 'WaitForestAvailability'
         {
             DomainName       = 'contoso.com'
-            Credential       = $DomainAdministratorCredential
+            Credential       = $Credential
             RetryCount       = 10
             RetryIntervalSec = 120
 
@@ -64,8 +64,8 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
         ADDomainController 'DomainControllerUsingExistingDNSServer'
         {
             DomainName                    = 'contoso.com'
-            Credential                    = $DomainAdministratorCredential
-            SafeModeAdministratorPassword = $DomainAdministratorCredential
+            Credential                    = $Credential
+            SafeModeAdministratorPassword = $Credential
             InstallDns                    = $false
             DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
         }
