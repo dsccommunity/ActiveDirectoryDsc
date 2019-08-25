@@ -51,7 +51,7 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
             DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
         }
 
-        xWaitForADDomain 'WaitForestAvailability'
+        WaitForADDomain 'WaitForestAvailability'
         {
             DomainName           = 'contoso.com'
             DomainUserCredential = $DomainAdministratorCredential
@@ -61,7 +61,7 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
             DependsOn            = '[WindowsFeature]RSATADPowerShell'
         }
 
-        xADDomainController 'DomainControllerUsingExistingDNSServer'
+        ADDomainController 'DomainControllerUsingExistingDNSServer'
         {
             DomainName                    = 'contoso.com'
             DomainAdministratorCredential = $DomainAdministratorCredential
