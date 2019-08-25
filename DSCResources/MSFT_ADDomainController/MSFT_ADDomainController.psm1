@@ -34,9 +34,9 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController
         Provide the name of the site you want the Domain Controller to be added to.
 
     .PARAMETER InstallDns
-        Specifies if the DNS Server service should be installed and configured on the domain controller.
-        If this is not set, the default for the parameter InstallDns of the cmdlet [Install-ADDSDomainController]
-        (https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller) is used.
+        Specifies if the DNS Server service should be installed and configured on
+        the domain controller. If this is not set, the default for the parameter
+        InstallDns of the cmdlet Install-ADDSDomainController is used.
 #>
 function Get-TargetResource
 {
@@ -199,9 +199,9 @@ function Get-TargetResource
         responding for the move to be allowed.
 
     .PARAMETER InstallDns
-        Specifies if the DNS Server service should be installed and configured on the domain controller.
-        If this is not set, the default for the parameter InstallDns of the cmdlet [Install-ADDSDomainController]
-        (https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller) is used.
+        Specifies if the DNS Server service should be installed and configured on
+        the domain controller. If this is not set, the default for the parameter
+        InstallDns of the cmdlet Install-ADDSDomainController is used.
 #>
 function Set-TargetResource
 {
@@ -603,9 +603,9 @@ function Set-TargetResource
         responding for the move to be allowed.
 
     .PARAMETER InstallDns
-        Specifies if the DNS Server service should be installed and configured on the domain controller.
-        If this is not set, the default for the parameter InstallDns of the cmdlet [Install-ADDSDomainController]
-        (https://docs.microsoft.com/en-us/powershell/module/addsdeployment/install-addsdomaincontroller) is used.
+        Specifies if the DNS Server service should be installed and configured on
+        the domain controller. If this is not set, the default for the parameter
+        InstallDns of the cmdlet Install-ADDSDomainController is used.
 
         Not used in Test-TargetResource.
 #>
