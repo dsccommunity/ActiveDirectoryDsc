@@ -33,7 +33,7 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
     )
 
     Import-DscResource -ModuleName PSDscResources
-    Import-DscResource -ModuleName xActiveDirectory
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node localhost
     {
