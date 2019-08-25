@@ -130,7 +130,7 @@ try
                             return $null
                         }
 
-                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name IFM
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
                     }
 
                     It 'Should returns current Domain Controller properties' {
@@ -148,6 +148,7 @@ try
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.FlexibleSingleMasterOperationRole | Should -Contain 'DomainNamingMaster'
                         $result.FlexibleSingleMasterOperationRole | Should -Contain 'RIDMaster'
+                        $result.InstallDns | Should -BeFalse
                     }
                 }
 
@@ -188,7 +189,7 @@ try
                             }
                         }
 
-                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name IFM
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
                     }
 
                     It 'Returns current Domain Controller properties' {
@@ -205,10 +206,89 @@ try
                         $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
+                        $result.InstallDns | Should -BeFalse
                     }
                 }
 
-                Context 'When the node is not a Domain Controller' {
+                Context 'When the node is a Domain Controller with DNS installed' {
+                    BeforeAll {
+                        Mock -CommandName Get-ADDomain -MockWith { return $true }
+                        Mock -CommandName Get-DomainControllerObject {
+                            $domainControllerObject = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $domainControllerObject.Site = $correctSiteName
+                            $domainControllerObject.Domain = $correctDomainName
+                            $domainControllerObject.IsGlobalCatalog = $true
+                            $domainControllerObject.IsReadOnly = $false
+                            return $domainControllerObject
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } -MockWith {
+                            return @{
+                                'Database log files path' = 'C:\Windows\NTDS'
+                                'DSA Working Directory'   = 'C:\Windows\NTDS'
+                            }
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' } -MockWith {
+                            return @{
+                                'SysVol' = 'C:\Windows\SYSVOL\sysvol'
+                            }
+                        }
+
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
+                    }
+
+                    It 'Returns current Domain Controller properties' {
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallDns $true
+
+                        $result.DomainName | Should -Be $correctDomainName
+                        $result.InstallDns | Should -BeTrue
+                    }
+                }
+
+                Context 'When the node is a Domain Controller and no DNS should be installed' {
+                    BeforeAll {
+                        Mock -CommandName Get-ADDomain -MockWith { return $true }
+                        Mock -CommandName Get-DomainControllerObject {
+                            $domainControllerObject = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $domainControllerObject.Site = $correctSiteName
+                            $domainControllerObject.Domain = $correctDomainName
+                            $domainControllerObject.IsGlobalCatalog = $true
+                            $domainControllerObject.IsReadOnly = $false
+                            return $domainControllerObject
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } -MockWith {
+                            return @{
+                                'Database log files path' = 'C:\Windows\NTDS'
+                                'DSA Working Directory'   = 'C:\Windows\NTDS'
+                            }
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' } -MockWith {
+                            return @{
+                                'SysVol' = 'C:\Windows\SYSVOL\sysvol'
+                            }
+                        }
+
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
+                    }
+
+                    It 'Returns current Domain Controller properties' {
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallDns $false
+
+                        $result.DomainName | Should -Be $correctDomainName
+                        $result.InstallDns | Should -BeFalse
+                    }
+                }
+
+                Context 'When the node should not be a Domain Controller' {
                     BeforeAll {
                         Mock -CommandName Get-ADDomain -MockWith { return $true }
                         Mock -CommandName Get-DomainControllerObject -MockWith {
@@ -231,6 +311,7 @@ try
                         $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.FlexibleSingleMasterOperationRole | Should -BeNullOrEmpty
+                        $result.InstallDns | Should -BeFalse
                     }
                 }
             }
@@ -701,6 +782,26 @@ try
 
                         Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
                             $DenyPasswordReplicationAccountName -eq $deniedAccount
+                        } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When the domain controller should have a DNS installed' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -InstallDns $true } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $InstallDns -eq $true
+                        } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When the domain controller should not have a DNS installed' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -InstallDns $false } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $InstallDns -eq $false
                         } -Exactly -Times 1 -Scope It
                     }
                 }
