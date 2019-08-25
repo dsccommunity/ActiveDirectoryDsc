@@ -55,8 +55,6 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
         {
             DomainName       = 'contoso.com'
             Credential       = $Credential
-            RetryCount       = 10
-            RetryIntervalSec = 120
 
             DependsOn        = '[WindowsFeature]RSATADPowerShell'
         }
@@ -67,6 +65,7 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
             Credential                    = $Credential
             SafeModeAdministratorPassword = $Credential
             InstallDns                    = $false
+
             DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
         }
     }
