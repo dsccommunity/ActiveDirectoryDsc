@@ -66,7 +66,7 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
             SafeModeAdministratorPassword = $Credential
             InstallDns                    = $false
 
-            DependsOn                     = '[xWaitForADDomain]WaitForestAvailability'
+            DependsOn                     = '[WaitForADDomain]WaitForestAvailability'
         }
     }
 }
