@@ -4,9 +4,9 @@
         cloned. It is automatically clone as soon as any unit or
         integration tests are run.
     #>
-    CustomRulePath = '.\DSCResource.Tests\DscResource.AnalyzerRules'
+    CustomRulePath      = '.\DSCResource.Tests\DscResource.AnalyzerRules'
 
-    IncludeRules   = @(
+    IncludeRules        = @(
         # DSC Resource Kit style guideline rules.
         'PSAvoidDefaultValueForMandatoryParameter',
         'PSAvoidDefaultValueSwitchParameter',
@@ -50,4 +50,6 @@
         #>
         'Measure-*'
     )
+
+    IncludeDefaultRules = $true
 }
