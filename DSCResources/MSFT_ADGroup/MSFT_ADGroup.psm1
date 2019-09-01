@@ -721,7 +721,7 @@ function Set-TargetResource
 
                         Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                        Add-ADCommonGroupMember -Parameter $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
+                        Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
                     }
 
                     if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
@@ -730,7 +730,7 @@ function Set-TargetResource
 
                         Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                        Add-ADCommonGroupMember -Parameter $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
+                        Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
                     }
 
                     if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
@@ -834,7 +834,7 @@ function Set-TargetResource
 
                 Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                Add-ADCommonGroupMember -Parameter $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
+                Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
             }
             elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
             {
@@ -842,7 +842,7 @@ function Set-TargetResource
 
                 Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                Add-ADCommonGroupMember -Parameter $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
+                Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
             }
         }
     } #end catch
