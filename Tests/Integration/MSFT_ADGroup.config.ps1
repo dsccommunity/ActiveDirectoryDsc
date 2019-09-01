@@ -15,18 +15,12 @@ else
 {
     $currentDomain = Get-ADDomain
     $netBiosDomainName = $currentDomain.NetBIOSName
-    #$domainDistinguishedName = $currentDomain.DistinguishedName
 
     $ConfigurationData = @{
         AllNodes = @(
             @{
                 NodeName                = 'localhost'
                 CertificateFile         = $env:DscPublicCertificatePath
-
-                PsDscAllowPlainTextPassword = $true
-
-                #DomainDistinguishedName = $domainDistinguishedName
-                #NetBIOSName             = $netBiosDomainName
 
                 Group1_Name             = 'DscGroup1'
 
@@ -284,7 +278,6 @@ Configuration MSFT_ADGroup_UpdateGroup1_Config
         }
     }
 }
-
 
 <#
     .SYNOPSIS
