@@ -15,12 +15,17 @@ else
 {
     $currentDomain = Get-ADDomain
     $netBiosDomainName = $currentDomain.NetBIOSName
+    $domainDistinguishedName = $currentDomain.DistinguishedName
 
     $ConfigurationData = @{
         AllNodes = @(
             @{
                 NodeName                = 'localhost'
                 CertificateFile         = $env:DscPublicCertificatePath
+
+                PsDscAllowPlainTextPassword = $true
+
+                DomainDistinguishedName = $domainDistinguishedName
 
                 Group1_Name             = 'DscGroup1'
 
@@ -259,11 +264,11 @@ Configuration MSFT_ADGroup_UpdateGroup1_Config
         {
             Ensure                = 'Present'
             GroupName             = $Node.Group1_Name
-            Path                  = 'CN=Computers,DC=contoso,DC=com'
+            Path                  = 'CN=Computers,{0}' -f $Node.DomainDistinguishedName
             DisplayName           = 'DSC Group 1'
             Description           = 'A DSC description'
             Notes                 = 'Notes for this group'
-            ManagedBy             = 'CN=Administrator,CN=Users,DC=contoso,DC=com'
+            ManagedBy             = 'CN=Administrator,CN=Users,{0}' -f $Node.DomainDistinguishedName
             Members               = @(
                 'Administrator',
                 'Guest'
@@ -358,6 +363,34 @@ Configuration MSFT_ADGroup_EnforceMembersGroup5_Config
                 'Administrator'
                 'Guest'
             )
+
+            Credential = New-Object `
+                -TypeName System.Management.Automation.PSCredential `
+                -ArgumentList @(
+                $Node.AdministratorUserName,
+                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
+            )
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Enforce no members in a group.
+
+    .NOTES
+        Regression test for issue #189.
+#>
+Configuration MSFT_ADGroup_ClearMembersGroup5_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADGroup 'Integration_Test'
+        {
+            GroupName  = $Node.Group5_Name
+            Members    = @()
 
             Credential = New-Object `
                 -TypeName System.Management.Automation.PSCredential `

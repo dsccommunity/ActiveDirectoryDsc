@@ -29,6 +29,12 @@
     authentication exceptions when the credentials cannot be authenticated.
   - Updated the function `Test-ADReplicationSite` to make the parameter
     `Credential` mandatory.
+  - Update helper function `Add-ADCommonGroupMember` to reduce duplicated
+    code, and add an evaluation if `Members` is empty.
+  - Updated helper function `Restore-ADCommonObject` to write out a verbose
+    message when no object was found in the recycle bin.
+  - Updated helper function `Assert-MemberParameters` to not throw an error
+    if the parameter `Members` is en empty array.
 - Changes to WaitForADDomain
   - Correct grammar issues in example descriptions.
   - An optional parameter `WaitForValidCredentials` can be set to $true
@@ -70,6 +76,13 @@
   - Now Get-TargetResource returns correct value when the group does not
     exist.
   - Added integration tests ([issue #350](https://github.com/PowerShell/ActiveDirectoryDsc/issues/350)).
+  - Added a read-only property `DistinguishedName`.
+  - Refactor the function `Set-TargetResource` to use the function
+    `Get-TargetResource` so that `Set-TargetResource` can correctly throw
+    an error when something goes wrong ([issue #151](https://github.com/PowerShell/ActiveDirectoryDsc/issues/151),
+    [issue #493](https://github.com/PowerShell/ActiveDirectoryDsc/issues/493)).
+  - It is now possible to enforce a group with no members by using
+    `Members = @()` in a configuration ([issue #189](https://github.com/PowerShell/xActiveDirectory/issues/189)).
 
 ## 4.0.0.0
 

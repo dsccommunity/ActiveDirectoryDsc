@@ -344,6 +344,7 @@ try
         #region Function Set-TargetResource
         Describe 'ADGroup\Set-TargetResource' {
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+            Mock -CommandName Assert-MemberParameters
 
             It "Calls 'New-ADGroup' when 'Ensure' is 'Present' and the group does not exist" {
                 Mock -CommandName Get-ADGroup -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
