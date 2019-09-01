@@ -148,11 +148,27 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    $adGroupParams = Get-ADCommonParameters @PSBoundParameters
+    $getTargetResourceReturnValue = @{
+        Ensure              = 'Absent'
+        GroupName           = $GroupName
+        GroupScope          = $null
+        Category            = $null
+        Path                = $null
+        Description         = $null
+        DisplayName         = $null
+        Members             = @()
+        MembersToInclude    = $MembersToInclude
+        MembersToExclude    = $MembersToExclude
+        MembershipAttribute = $MembershipAttribute
+        ManagedBy           = $null
+        Notes               = $null
+    }
+
+    $adGroupParameters = Get-ADCommonParameters @PSBoundParameters
 
     try
     {
-        $adGroup = Get-ADGroup @adGroupParams -Properties @(
+        $adGroup = Get-ADGroup @adGroupParameters -Properties @(
             'Name',
             'GroupScope',
             'GroupCategory',
@@ -165,52 +181,29 @@ function Get-TargetResource
 
         Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
-        # Retrieve the current list of members, returning the specified membership attribute
-        [System.Array] $adGroupMembers = (Get-ADGroupMember @adGroupParams).$MembershipAttribute
-
-        $targetResource = @{
-            GroupName           = $adGroup.Name
-            GroupScope          = $adGroup.GroupScope
-            Category            = $adGroup.GroupCategory
-            Path                = Get-ADObjectParentDN -DN $adGroup.DistinguishedName
-            Description         = $adGroup.Description
-            DisplayName         = $adGroup.DisplayName
-            Members             = $adGroupMembers
-            MembersToInclude    = $MembersToInclude
-            MembersToExclude    = $MembersToExclude
-            MembershipAttribute = $MembershipAttribute
-            ManagedBy           = $adGroup.ManagedBy
-            Notes               = $adGroup.Info
-            Ensure              = 'Absent'
-        }
-
         if ($adGroup)
         {
-            $targetResource['Ensure'] = 'Present'
+            # Retrieve the current list of members, returning the specified membership attribute
+            [System.Array] $adGroupMembers = (Get-ADGroupMember @adGroupParameters).$MembershipAttribute
+
+            $getTargetResourceReturnValue['Ensure'] = 'Present'
+            $getTargetResourceReturnValue['GroupName'] = $adGroup.Name
+            $getTargetResourceReturnValue['GroupScope'] = $adGroup.GroupScope
+            $getTargetResourceReturnValue['Category'] = $adGroup.GroupCategory
+            $getTargetResourceReturnValue['Path'] = Get-ADObjectParentDN -DN $adGroup.DistinguishedName
+            $getTargetResourceReturnValue['Description'] = $adGroup.Description
+            $getTargetResourceReturnValue['DisplayName'] = $adGroup.DisplayName
+            $getTargetResourceReturnValue['Members'] = $adGroupMembers
+            $getTargetResourceReturnValue['ManagedBy'] = $adGroup.ManagedBy
+            $getTargetResourceReturnValue['Notes'] = $adGroup.Info
         }
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
         Write-Verbose -Message ($script:localizedData.GroupNotFound -f $GroupName)
-
-        $targetResource = @{
-            GroupName           = $GroupName
-            GroupScope          = $GroupScope
-            Category            = $Category
-            Path                = $Path
-            Description         = $Description
-            DisplayName         = $DisplayName
-            Members             = @()
-            MembersToInclude    = $MembersToInclude
-            MembersToExclude    = $MembersToExclude
-            MembershipAttribute = $MembershipAttribute
-            ManagedBy           = $ManagedBy
-            Notes               = $Notes
-            Ensure              = 'Absent'
-        }
     }
 
-    return $targetResource
+    return $getTargetResourceReturnValue
 } #end function Get-TargetResource
 
 <#
@@ -624,6 +617,7 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey('Category') -and $Category -ne $adGroup.GroupCategory)
             {
                 Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'Category', $Category)
+
                 $setADGroupParams['GroupCategory'] = $Category
             }
 
@@ -631,32 +625,40 @@ function Set-TargetResource
             {
                 # Cannot change DomainLocal to Global or vice versa directly. Need to change them to a Universal group first!
                 Set-ADGroup -Identity $adGroup.DistinguishedName -GroupScope Universal
+
                 Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope)
+
                 $setADGroupParams['GroupScope'] = $GroupScope
             }
 
             if ($Description -and ($Description -ne $adGroup.Description))
             {
                 Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'Description', $Description)
+
                 $setADGroupParams['Description'] = $Description
             }
 
             if ($DisplayName -and ($DisplayName -ne $adGroup.DisplayName))
             {
                 Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'DisplayName', $DisplayName)
+
                 $setADGroupParams['DisplayName'] = $DisplayName
             }
 
             if ($ManagedBy -and ($ManagedBy -ne $adGroup.ManagedBy))
             {
                 Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'ManagedBy', $ManagedBy)
+
                 $setADGroupParams['ManagedBy'] = $ManagedBy
             }
 
             if ($Notes -and ($Notes -ne $adGroup.Info))
             {
                 Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'Notes', $Notes)
-                $setADGroupParams['Replace'] = @{ Info = $Notes }
+
+                $setADGroupParams['Replace'] = @{
+                    Info = $Notes
+                }
             }
 
             Write-Verbose -Message ($script:localizedData.UpdatingGroup -f $GroupName)

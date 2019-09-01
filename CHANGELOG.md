@@ -66,6 +66,10 @@
 - Changes to ADDomainController
   - Add InstallDns parameter to enable promotion without installing local
     DNS Server Service ([issue #87](https://github.com/PowerShell/xActiveDirectory/issues/87)).
+- Changes to ADGroup
+  - Now Get-TargetResource returns correct value when the group does not
+    exist.
+  - Added integration tests ([issue #350](https://github.com/PowerShell/ActiveDirectoryDsc/issues/350)).
 
 ## 4.0.0.0
 
