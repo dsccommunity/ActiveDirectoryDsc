@@ -80,6 +80,7 @@
   - Refactor the function `Set-TargetResource` to use the function
     `Get-TargetResource` so that `Set-TargetResource` can correctly throw
     an error when something goes wrong ([issue #151](https://github.com/PowerShell/ActiveDirectoryDsc/issues/151),
+    [issue #166](https://github.com/PowerShell/ActiveDirectoryDsc/issues/166),
     [issue #493](https://github.com/PowerShell/ActiveDirectoryDsc/issues/493)).
   - It is now possible to enforce a group with no members by using
     `Members = @()` in a configuration ([issue #189](https://github.com/PowerShell/xActiveDirectory/issues/189)).

@@ -23,8 +23,6 @@ else
                 NodeName                = 'localhost'
                 CertificateFile         = $env:DscPublicCertificatePath
 
-                PsDscAllowPlainTextPassword = $true
-
                 DomainDistinguishedName = $domainDistinguishedName
 
                 Group1_Name             = 'DscGroup1'
