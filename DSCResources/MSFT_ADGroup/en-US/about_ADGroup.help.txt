@@ -76,6 +76,10 @@
     Write - Boolean
     Try to restore the group from the recycle bin before creating a new one.
 
+.PARAMETER DistinguishedName
+    Read - String
+    Returns the distinguished name of the Active Directory group.
+
 .EXAMPLE 1
 
 This configuration will create a new domain-local group

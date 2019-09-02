@@ -76,7 +76,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group1_Name
                 $resourceCurrentState.GroupScope | Should -Be 'Global'
                 $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -88,6 +88,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group1_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -137,7 +138,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group2_Name
                 $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group2_Scope
                 $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -149,6 +150,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group2_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -198,7 +200,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group3_Name
                 $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group3_Scope
                 $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -210,6 +212,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group3_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -259,7 +262,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group3_Name
                 $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group3_Scope
                 $resourceCurrentState.Category | Should -Be 'Distribution'
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -271,6 +274,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group3_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -320,7 +324,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group4_Name
                 $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group4_Scope
                 $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -332,6 +336,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group4_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -381,7 +386,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group4_Name
                 $resourceCurrentState.GroupScope | Should -Be 'Global'
                 $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -393,6 +398,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group4_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -454,6 +460,8 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -BeNullOrEmpty
+
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -503,7 +511,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group1_Name
                 $resourceCurrentState.GroupScope | Should -Be 'Global'
                 $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -515,6 +523,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group1_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -564,7 +573,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group1_Name
                 $resourceCurrentState.GroupScope | Should -Be 'Global'
                 $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be 'CN=Computers,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Computers,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -Be 'A DSC description'
                 $resourceCurrentState.DisplayName | Should -Be 'DSC Group 1'
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -575,9 +584,10 @@ try
                 $resourceCurrentState.MembersToInclude | Should -BeNullOrEmpty
                 $resourceCurrentState.MembersToExclude | Should -BeNullOrEmpty
                 $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
-                $resourceCurrentState.ManagedBy | Should -Be 'CN=Administrator,CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.ManagedBy | Should -Be ('CN=Administrator,CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Notes | Should -Be 'Notes for this group'
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Computers,{1}' -f $ConfigurationData.AllNodes.Group1_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -627,7 +637,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group5_Name
                 $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group5_Scope
                 $resourceCurrentState.Category | Should -Be $ConfigurationData.AllNodes.Group5_Category
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -640,6 +650,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group5_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -689,7 +700,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group5_Name
                 $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group5_Scope
                 $resourceCurrentState.Category | Should -Be $ConfigurationData.AllNodes.Group5_Category
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -704,6 +715,7 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group5_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
@@ -753,7 +765,7 @@ try
                 $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group5_Name
                 $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group5_Scope
                 $resourceCurrentState.Category | Should -Be $ConfigurationData.AllNodes.Group5_Category
-                $resourceCurrentState.Path | Should -Be 'CN=Users,DC=contoso,DC=com'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Credential | Should -BeNullOrEmpty
@@ -767,6 +779,69 @@ try
                 $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group5_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
+            }
+
+            It 'Should return $true when Test-DscConfiguration is run' {
+                Test-DscConfiguration -Verbose | Should -Be 'True'
+            }
+        }
+
+        $configurationName = "$($script:dscResourceName)_ClearMembersGroup5_Config"
+
+        Context ('When using configuration {0}' -f $configurationName) {
+            It 'Should compile and apply the MOF without throwing' {
+                {
+                    $configurationParameters = @{
+                        OutputPath        = $TestDrive
+                        # The variable $ConfigurationData was dot-sourced above.
+                        ConfigurationData = $ConfigurationData
+                    }
+
+                    & $configurationName @configurationParameters
+
+                    $startDscConfigurationParameters = @{
+                        Path         = $TestDrive
+                        ComputerName = 'localhost'
+                        Wait         = $true
+                        Verbose      = $true
+                        Force        = $true
+                        ErrorAction  = 'Stop'
+                    }
+
+                    Start-DscConfiguration @startDscConfigurationParameters
+                } | Should -Not -Throw
+            }
+
+            It 'Should be able to call Get-DscConfiguration without throwing' {
+                {
+                    $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
+                } | Should -Not -Throw
+            }
+
+            It 'Should have set the resource and all the parameters should match' {
+                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
+                    $_.ConfigurationName -eq $configurationName `
+                        -and $_.ResourceId -eq $resourceId
+                }
+
+                $resourceCurrentState.Ensure | Should -Be 'Present'
+                $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group5_Name
+                $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group5_Scope
+                $resourceCurrentState.Category | Should -Be $ConfigurationData.AllNodes.Group5_Category
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
+                $resourceCurrentState.Description | Should -BeNullOrEmpty
+                $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
+                $resourceCurrentState.Credential | Should -BeNullOrEmpty
+                $resourceCurrentState.DomainController | Should -BeNullOrEmpty
+                $resourceCurrentState.Members | Should -BeNullOrEmpty
+                $resourceCurrentState.MembersToInclude | Should -BeNullOrEmpty
+                $resourceCurrentState.MembersToExclude | Should -BeNullOrEmpty
+                $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
+                $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
+                $resourceCurrentState.Notes | Should -BeNullOrEmpty
+                $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group5_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {

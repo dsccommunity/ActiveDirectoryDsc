@@ -664,7 +664,6 @@ function Assert-MemberParameters
     param
     (
         [Parameter()]
-        [ValidateNotNull()]
         [System.String[]]
         $Members,
 
@@ -685,12 +684,6 @@ function Assert-MemberParameters
         {
             # If Members are provided, Include and Exclude are not allowed.
             $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude'
-            New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
-        }
-
-        if ($Members.Length -eq 0)
-        {
-            $errorMessage = $script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude'
             New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
         }
     }
@@ -1350,6 +1343,7 @@ function Restore-ADCommonObject
             $restoreParams['ErrorAction'] = 'Stop'
             $restoreParams['Identity'] = $restorableObject.DistinguishedName
             $restoredObject = Restore-ADObject @restoreParams
+
             Write-Verbose -Message ($script:localizedData.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass) -Verbose
         }
         catch [Microsoft.ActiveDirectory.Management.ADException]
@@ -1358,6 +1352,10 @@ function Restore-ADCommonObject
             $errorMessage = $script:localizedData.RecycleBinRestoreFailed -f $Identity, $ObjectClass
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
+    }
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.NoObjectFoundInRecycleBin) -Verbose
     }
 
     return $restoredObject
@@ -1454,41 +1452,52 @@ function Add-ADCommonGroupMember
 
     Assert-Module -ModuleName ActiveDirectory
 
-    if ($MembersInMultipleDomains.IsPresent)
+    if ($Members)
     {
-        foreach ($member in $Members)
+        if ($MembersInMultipleDomains.IsPresent)
         {
-            $memberDomain = Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
-
-            if (-not $memberDomain)
+            foreach ($member in $Members)
             {
-                $errorMessage = $script:localizedData.EmptyDomainError -f $member, $Parameters.Identity
-                New-InvalidOperationException -Message $errorMessage
-            }
+                $memberDomain = Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
 
-            Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.Identity)
+                if (-not $memberDomain)
+                {
+                    $errorMessage = $script:localizedData.EmptyDomainError -f $member, $Parameters.Identity
+                    New-InvalidOperationException -Message $errorMessage
+                }
 
-            $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass
+                Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.Identity)
 
-            if ($memberObjectClass -eq 'computer')
-            {
-                $memberObject = Get-ADComputer -Identity $member -Server $memberDomain
-            }
-            elseif ($memberObjectClass -eq 'group')
-            {
-                $memberObject = Get-ADGroup -Identity $member -Server $memberDomain
-            }
-            elseif ($memberObjectClass -eq 'user')
-            {
-                $memberObject = Get-ADUser -Identity $member -Server $memberDomain
-            }
+                $commonParameters = @{
+                    Identity = $member
+                    Server = $memberDomain
+                    ErrorAction = 'Stop'
+                }
 
-            Add-ADGroupMember @Parameters -Members $memberObject
+                $activeDirectoryObject = Get-ADObject @commonParameters -Properties @('ObjectClass')
+
+                $memberObjectClass = $activeDirectoryObject.ObjectClass
+
+                if ($memberObjectClass -eq 'computer')
+                {
+                    $memberObject = Get-ADComputer @commonParameters
+                }
+                elseif ($memberObjectClass -eq 'group')
+                {
+                    $memberObject = Get-ADGroup @commonParameters
+                }
+                elseif ($memberObjectClass -eq 'user')
+                {
+                    $memberObject = Get-ADUser @commonParameters
+                }
+
+                Add-ADGroupMember @Parameters -Members $memberObject -ErrorAction 'Stop'
+            }
         }
-    }
-    else
-    {
-        Add-ADGroupMember @Parameters -Members $Members
+        else
+        {
+            Add-ADGroupMember @Parameters -Members $Members -ErrorAction 'Stop'
+        }
     }
 }
 

@@ -897,12 +897,6 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     }
 
     Describe 'ActiveDirectoryDsc.Common\Assert-MemberParameters' {
-        It 'Should throw if parameter Members is specified but is empty' {
-            {
-                Assert-MemberParameters -Members @()
-            } | Should -Throw ($script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude')
-        }
-
         It 'Should throws if both parameters Members and MembersToInclude are specified' {
             {
                 Assert-MemberParameters -Members @('User1') -MembersToInclude @('User2')
