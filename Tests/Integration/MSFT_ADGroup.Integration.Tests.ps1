@@ -344,6 +344,131 @@ try
             }
         }
 
+        $configurationName = "$($script:dscResourceName)_RemoveGroup4_Config"
+
+        Context ('When using configuration {0}' -f $configurationName) {
+            It 'Should compile and apply the MOF without throwing' {
+                {
+                    $configurationParameters = @{
+                        OutputPath        = $TestDrive
+                        # The variable $ConfigurationData was dot-sourced above.
+                        ConfigurationData = $ConfigurationData
+                    }
+
+                    & $configurationName @configurationParameters
+
+                    $startDscConfigurationParameters = @{
+                        Path         = $TestDrive
+                        ComputerName = 'localhost'
+                        Wait         = $true
+                        Verbose      = $true
+                        Force        = $true
+                        ErrorAction  = 'Stop'
+                    }
+
+                    Start-DscConfiguration @startDscConfigurationParameters
+                } | Should -Not -Throw
+            }
+
+            It 'Should be able to call Get-DscConfiguration without throwing' {
+                {
+                    $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
+                } | Should -Not -Throw
+            }
+
+            It 'Should have set the resource and all the parameters should match' {
+                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
+                    $_.ConfigurationName -eq $configurationName `
+                        -and $_.ResourceId -eq $resourceId
+                }
+
+                $resourceCurrentState.Ensure | Should -Be 'Absent'
+                $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group4_Name
+                $resourceCurrentState.GroupScope | Should -BeNullOrEmpty
+                $resourceCurrentState.Category | Should -BeNullOrEmpty
+                $resourceCurrentState.Path | Should -BeNullOrEmpty
+                $resourceCurrentState.Description | Should -BeNullOrEmpty
+                $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
+                $resourceCurrentState.Credential | Should -BeNullOrEmpty
+                $resourceCurrentState.DomainController | Should -BeNullOrEmpty
+                $resourceCurrentState.Members | Should -BeNullOrEmpty
+                $resourceCurrentState.MembersToInclude | Should -BeNullOrEmpty
+                $resourceCurrentState.MembersToExclude | Should -BeNullOrEmpty
+                $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
+                $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
+                $resourceCurrentState.Notes | Should -BeNullOrEmpty
+                $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -BeNullOrEmpty
+
+            }
+
+            It 'Should return $true when Test-DscConfiguration is run' {
+                Test-DscConfiguration -Verbose | Should -Be 'True'
+            }
+        }
+
+        $configurationName = "$($script:dscResourceName)_RestoreGroup4_Config"
+
+        Context ('When using configuration {0}' -f $configurationName) {
+            It 'Should compile and apply the MOF without throwing' {
+                {
+                    $configurationParameters = @{
+                        OutputPath        = $TestDrive
+                        # The variable $ConfigurationData was dot-sourced above.
+                        ConfigurationData = $ConfigurationData
+                    }
+
+                    & $configurationName @configurationParameters
+
+                    $startDscConfigurationParameters = @{
+                        Path         = $TestDrive
+                        ComputerName = 'localhost'
+                        Wait         = $true
+                        Verbose      = $true
+                        Force        = $true
+                        ErrorAction  = 'Stop'
+                    }
+
+                    Start-DscConfiguration @startDscConfigurationParameters
+                } | Should -Not -Throw
+            }
+
+            It 'Should be able to call Get-DscConfiguration without throwing' {
+                {
+                    $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
+                } | Should -Not -Throw
+            }
+
+            It 'Should have set the resource and all the parameters should match' {
+                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
+                    $_.ConfigurationName -eq $configurationName `
+                        -and $_.ResourceId -eq $resourceId
+                }
+
+                $resourceCurrentState.Ensure | Should -Be 'Present'
+                $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group4_Name
+                $resourceCurrentState.GroupScope | Should -Be $ConfigurationData.AllNodes.Group4_Scope
+                $resourceCurrentState.Category | Should -Be 'Security'
+                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
+                $resourceCurrentState.Description | Should -BeNullOrEmpty
+                $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
+                $resourceCurrentState.Credential | Should -BeNullOrEmpty
+                $resourceCurrentState.DomainController | Should -BeNullOrEmpty
+                $resourceCurrentState.Members | Should -BeNullOrEmpty
+                $resourceCurrentState.MembersToInclude | Should -BeNullOrEmpty
+                $resourceCurrentState.MembersToExclude | Should -BeNullOrEmpty
+                $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
+                $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
+                $resourceCurrentState.Notes | Should -BeNullOrEmpty
+                $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group4_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
+            }
+
+            It 'Should return $true when Test-DscConfiguration is run' {
+                Test-DscConfiguration -Verbose | Should -Be 'True'
+            }
+        }
+
         $configurationName = "$($script:dscResourceName)_ChangeScopeGroup4_Config"
 
         Context ('When using configuration {0}' -f $configurationName) {
@@ -399,131 +524,6 @@ try
                 $resourceCurrentState.Notes | Should -BeNullOrEmpty
                 $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
                 $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group4_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
-            }
-
-            It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
-            }
-        }
-
-        $configurationName = "$($script:dscResourceName)_RemoveGroup1_Config"
-
-        Context ('When using configuration {0}' -f $configurationName) {
-            It 'Should compile and apply the MOF without throwing' {
-                {
-                    $configurationParameters = @{
-                        OutputPath        = $TestDrive
-                        # The variable $ConfigurationData was dot-sourced above.
-                        ConfigurationData = $ConfigurationData
-                    }
-
-                    & $configurationName @configurationParameters
-
-                    $startDscConfigurationParameters = @{
-                        Path         = $TestDrive
-                        ComputerName = 'localhost'
-                        Wait         = $true
-                        Verbose      = $true
-                        Force        = $true
-                        ErrorAction  = 'Stop'
-                    }
-
-                    Start-DscConfiguration @startDscConfigurationParameters
-                } | Should -Not -Throw
-            }
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                {
-                    $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
-                } | Should -Not -Throw
-            }
-
-            It 'Should have set the resource and all the parameters should match' {
-                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
-                    $_.ConfigurationName -eq $configurationName `
-                        -and $_.ResourceId -eq $resourceId
-                }
-
-                $resourceCurrentState.Ensure | Should -Be 'Absent'
-                $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group1_Name
-                $resourceCurrentState.GroupScope | Should -BeNullOrEmpty
-                $resourceCurrentState.Category | Should -BeNullOrEmpty
-                $resourceCurrentState.Path | Should -BeNullOrEmpty
-                $resourceCurrentState.Description | Should -BeNullOrEmpty
-                $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
-                $resourceCurrentState.Credential | Should -BeNullOrEmpty
-                $resourceCurrentState.DomainController | Should -BeNullOrEmpty
-                $resourceCurrentState.Members | Should -BeNullOrEmpty
-                $resourceCurrentState.MembersToInclude | Should -BeNullOrEmpty
-                $resourceCurrentState.MembersToExclude | Should -BeNullOrEmpty
-                $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
-                $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
-                $resourceCurrentState.Notes | Should -BeNullOrEmpty
-                $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
-                $resourceCurrentState.DistinguishedName | Should -BeNullOrEmpty
-
-            }
-
-            It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration -Verbose | Should -Be 'True'
-            }
-        }
-
-        $configurationName = "$($script:dscResourceName)_RestoreGroup1_Config"
-
-        Context ('When using configuration {0}' -f $configurationName) {
-            It 'Should compile and apply the MOF without throwing' {
-                {
-                    $configurationParameters = @{
-                        OutputPath        = $TestDrive
-                        # The variable $ConfigurationData was dot-sourced above.
-                        ConfigurationData = $ConfigurationData
-                    }
-
-                    & $configurationName @configurationParameters
-
-                    $startDscConfigurationParameters = @{
-                        Path         = $TestDrive
-                        ComputerName = 'localhost'
-                        Wait         = $true
-                        Verbose      = $true
-                        Force        = $true
-                        ErrorAction  = 'Stop'
-                    }
-
-                    Start-DscConfiguration @startDscConfigurationParameters
-                } | Should -Not -Throw
-            }
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                {
-                    $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
-                } | Should -Not -Throw
-            }
-
-            It 'Should have set the resource and all the parameters should match' {
-                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
-                    $_.ConfigurationName -eq $configurationName `
-                        -and $_.ResourceId -eq $resourceId
-                }
-
-                $resourceCurrentState.Ensure | Should -Be 'Present'
-                $resourceCurrentState.GroupName | Should -Be $ConfigurationData.AllNodes.Group1_Name
-                $resourceCurrentState.GroupScope | Should -Be 'Global'
-                $resourceCurrentState.Category | Should -Be 'Security'
-                $resourceCurrentState.Path | Should -Be ('CN=Users,{0}' -f $ConfigurationData.AllNodes.DomainDistinguishedName)
-                $resourceCurrentState.Description | Should -BeNullOrEmpty
-                $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
-                $resourceCurrentState.Credential | Should -BeNullOrEmpty
-                $resourceCurrentState.DomainController | Should -BeNullOrEmpty
-                $resourceCurrentState.Members | Should -BeNullOrEmpty
-                $resourceCurrentState.MembersToInclude | Should -BeNullOrEmpty
-                $resourceCurrentState.MembersToExclude | Should -BeNullOrEmpty
-                $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
-                $resourceCurrentState.ManagedBy | Should -BeNullOrEmpty
-                $resourceCurrentState.Notes | Should -BeNullOrEmpty
-                $resourceCurrentState.RestoreFromRecycleBin | Should -BeNullOrEmpty
-                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},CN=Users,{1}' -f $ConfigurationData.AllNodes.Group1_Name, $ConfigurationData.AllNodes.DomainDistinguishedName)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {

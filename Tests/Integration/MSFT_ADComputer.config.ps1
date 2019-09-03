@@ -60,6 +60,12 @@ Configuration MSFT_ADComputer_CreateComputerAccount1_Config
         ADComputer 'Integration_Test'
         {
             ComputerName = $Node.ComputerName1
+
+            <#
+                This property is used to verify that the restore works
+                in one of the next test.
+            #>
+            Location     = 'Old location'
         }
     }
 }
@@ -90,6 +96,15 @@ Configuration MSFT_ADComputer_RemoveComputerAccount1_Config
     .SYNOPSIS
         Restores a computer account from recycle bin.
 
+    .NOTES
+        This test verifies that restored computer account location
+        property is set to the previous value. If the restore does
+        not work a computer account will be created using the default
+        values and the test vill fail since the location will not be
+        correct.
+
+        For this to work the Recycle Bin must be enabled prior to
+        running this test.
 #>
 Configuration MSFT_ADComputer_RestoreComputerAccount1_Config
 {
