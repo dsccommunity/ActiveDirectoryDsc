@@ -173,6 +173,67 @@ Configuration MSFT_ADGroup_CreateGroup4_Config
 
 <#
     .SYNOPSIS
+        Remove a group.
+#>
+Configuration MSFT_ADGroup_RemoveGroup4_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADGroup 'Integration_Test'
+        {
+            Ensure     = 'Absent'
+            GroupName  = $Node.Group4_Name
+
+            Credential = New-Object `
+                -TypeName System.Management.Automation.PSCredential `
+                -ArgumentList @(
+                $Node.AdministratorUserName,
+                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
+            )
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Restore a group with scope domain local from recycle bin.
+
+    .NOTES
+        This restores a group with the scope domain local so that the test
+        will generate an error if the restore does not work instead a new group
+        is created. If a new group is created it will be created using default
+        value of scope with is Global, and the test will fail on the group
+        having the wrong scope.
+
+        For this to work the Recycle Bin must be enabled prior to
+        running this test.
+#>
+Configuration MSFT_ADGroup_RestoreGroup4_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADGroup 'Integration_Test'
+        {
+            Ensure                = 'Present'
+            GroupName             = $Node.Group4_Name
+            RestoreFromRecycleBin = $true
+
+            Credential            = New-Object `
+                -TypeName System.Management.Automation.PSCredential `
+                -ArgumentList @(
+                $Node.AdministratorUserName,
+                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
+            )
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
         Change existing domain local group to global group.
 #>
 Configuration MSFT_ADGroup_ChangeScopeGroup4_Config
@@ -188,57 +249,6 @@ Configuration MSFT_ADGroup_ChangeScopeGroup4_Config
             GroupScope = 'Global'
 
             Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Remove a group.
-#>
-Configuration MSFT_ADGroup_RemoveGroup1_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            Ensure     = 'Absent'
-            GroupName  = $Node.Group1_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Restore a group from recycle bin.
-#>
-Configuration MSFT_ADGroup_RestoreGroup1_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            Ensure                = 'Present'
-            GroupName             = $Node.Group1_Name
-            RestoreFromRecycleBin = $true
-
-            Credential            = New-Object `
                 -TypeName System.Management.Automation.PSCredential `
                 -ArgumentList @(
                 $Node.AdministratorUserName,

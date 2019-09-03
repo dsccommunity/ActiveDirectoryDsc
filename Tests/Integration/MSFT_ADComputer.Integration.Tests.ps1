@@ -74,7 +74,7 @@ try
 
                 $resourceCurrentState.Ensure | Should -Be 'Present'
                 $resourceCurrentState.ComputerName | Should -Be $ConfigurationData.AllNodes.ComputerName1
-                $resourceCurrentState.Location | Should -BeNullOrEmpty
+                $resourceCurrentState.Location | Should -Be 'Old location'
                 $resourceCurrentState.DnsHostName | Should -BeNullOrEmpty
                 $resourceCurrentState.ServicePrincipalNames | Should -BeNullOrEmpty
                 $resourceCurrentState.UserPrincipalName | Should -BeNullOrEmpty
@@ -184,6 +184,7 @@ try
 
                 $resourceCurrentState.Ensure | Should -Be 'Present'
                 $resourceCurrentState.Enabled | Should -BeTrue
+                $resourceCurrentState.Location | Should -Be 'Old location'
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {

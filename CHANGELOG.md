@@ -94,6 +94,8 @@
 - Changes to ADComputer
   - Added a note to the resource README.md that `RestoreFromRecycleBin`
     needs the feature Recycle Bin enabled ([issue #498](https://github.com/PowerShell/xActiveDirectory/issues/498)).
+  - Updated integration test to be able to catch when a computer account
+    cannot be restored.
 
 ## 4.0.0.0
 
