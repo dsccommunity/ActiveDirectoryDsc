@@ -69,6 +69,8 @@
     the domain was found, or `$false` if it was not.
 - Changes to ADUser
   - Remove unused non-mandatory parameters from the Get-TargetResource ([issue #293](https://github.com/PowerShell/ActiveDirectoryDsc/issues/293)).
+  - Added a note to the resource README.md that `RestoreFromRecycleBin`
+    needs the feature Recycle Bin enabled.
 - Changes to ADDomainController
   - Add InstallDns parameter to enable promotion without installing local
     DNS Server Service ([issue #87](https://github.com/PowerShell/xActiveDirectory/issues/87)).
@@ -84,6 +86,14 @@
     [issue #493](https://github.com/PowerShell/ActiveDirectoryDsc/issues/493)).
   - It is now possible to enforce a group with no members by using
     `Members = @()` in a configuration ([issue #189](https://github.com/PowerShell/xActiveDirectory/issues/189)).
+  - Added a note to the resource README.md that `RestoreFromRecycleBin`
+    needs the feature Recycle Bin enabled ([issue #496](https://github.com/PowerShell/xActiveDirectory/issues/496)).
+- Changes to ADOrganizationalUnit
+  - Added a note to the resource README.md that `RestoreFromRecycleBin`
+    needs the feature Recycle Bin enabled.
+- Changes to ADComputer
+  - Added a note to the resource README.md that `RestoreFromRecycleBin`
+    needs the feature Recycle Bin enabled ([issue #498](https://github.com/PowerShell/xActiveDirectory/issues/498)).
 
 ## 4.0.0.0
 
