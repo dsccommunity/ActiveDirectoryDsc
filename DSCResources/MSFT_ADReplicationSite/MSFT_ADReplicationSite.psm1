@@ -35,6 +35,7 @@ function Get-TargetResource
         $returnValue = @{
             Ensure                     = 'Absent'
             Name                       = $Name
+            Description                = ''
             RenameDefaultFirstSiteName = ''
         }
     }
@@ -44,6 +45,7 @@ function Get-TargetResource
         $returnValue = @{
             Ensure                     = 'Present'
             Name                       = $Name
+            Description                = $replicationSite.Description
             RenameDefaultFirstSiteName = ''
         }
     }
