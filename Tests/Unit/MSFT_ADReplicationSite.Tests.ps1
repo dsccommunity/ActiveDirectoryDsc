@@ -241,6 +241,7 @@ try
                 Mock -CommandName Get-ADReplicationSite -MockWith { $defaultFirstSiteNameSiteMock }
                 Mock -CommandName 'Rename-ADObject' -Verifiable
                 Mock -CommandName 'New-ADReplicationSite' -Verifiable
+                Mock -CommandName Set-ADReplicationSite -Verifiable
 
                 # Act
                 Set-TargetResource @presentSiteTestPresentRename
@@ -263,6 +264,15 @@ try
                 # Assert
                 Assert-MockCalled -CommandName 'Rename-ADObject' -Times 0 -Scope It
                 Assert-MockCalled -CommandName 'New-ADReplicationSite' -Times 1 -Scope It
+            }
+
+            It 'Should update a site if the description does not match' {
+                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteTestPresent }
+                Mock -CommandName Set-ADReplicationSite -Verifiable
+
+                Set-TargetResource @presentSiteTestMismatchDescription
+
+                Assert-MockCalled -CommandName Set-ADReplicationSite -Times 1 -Scope It
             }
 
             It 'Should remove an existing site' {

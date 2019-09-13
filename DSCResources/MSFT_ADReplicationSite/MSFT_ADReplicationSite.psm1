@@ -84,8 +84,16 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $RenameDefaultFirstSiteName = $false
+        $RenameDefaultFirstSiteName = $false,
+
+        [Parameter()]
+        [System.String]
+        $Description
     )
+
+    $Params = @{}
+    $createOrUpdate = Get-ADReplicationSite -Identity $Name
+
 
     if ($Ensure -eq 'Present')
     {
@@ -101,12 +109,33 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.AddReplicationSiteDefaultFirstSiteName -f $Name)
 
             Rename-ADObject -Identity $defaultFirstSiteName.DistinguishedName -NewName $Name -ErrorAction Stop
+
+            if($Description)
+            {
+                Set-ADReplicationSite -Identity $Name -Description $Description
+            }
         }
         else
         {
-            Write-Verbose -Message ($script:localizedData.AddReplicationSite -f $Name)
+            if ($createOrUpdate)
+            {
+                # Update site
+                Write-Verbose -Message ($script:localizedData.UpdateReplicationSite -f $Name)
+                Set-ADReplicationSite -Identity $Name -Description $Description
+            }
+            else
+            {
+                Write-Verbose -Message ($script:localizedData.AddReplicationSite -f $Name)
 
-            New-ADReplicationSite -Name $Name -ErrorAction Stop
+                $Params.Add('Name', $Name)
+                $Params.Add('ErrorAction', 'Stop')
+                if($Description)
+                {
+                    $Params.Add('Description', $Description)
+                }
+
+                New-ADReplicationSite @Params
+            }
         }
     }
 
