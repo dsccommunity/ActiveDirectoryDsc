@@ -273,6 +273,7 @@ try
                 Set-TargetResource @presentSiteTestMismatchDescription
 
                 Assert-MockCalled -CommandName Set-ADReplicationSite -Times 1 -Scope It
+                Assert-MockCalled -CommandName Get-ADReplicationSite -Times 2 -Scope It -Exactly
             }
 
             It 'Should remove an existing site' {
@@ -286,6 +287,7 @@ try
 
                 # Assert
                 Assert-MockCalled -CommandName 'Remove-ADReplicationSite' -Times 1 -Scope It
+                Assert-MockCalled -CommandName Get-ADReplicationSite -Times 1 -Scope It -Exactly
             }
         }
         #endregion
