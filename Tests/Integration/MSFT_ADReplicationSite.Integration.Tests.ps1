@@ -30,9 +30,6 @@ try
     . $configFile
 
     Describe "$($script:dscResourceName)_Integration" {
-        BeforeAll {
-            $resourceId = "[$($script:dscResourceFriendlyName)]Integration_Test"
-        }
 
         $configurationName = "$($script:dscResourceName)_CreateSite_Config"
 
@@ -173,7 +170,6 @@ try
                 Test-DscConfiguration -Verbose | Should -Be 'True'
             }
         }
-
     }
 }
 finally
