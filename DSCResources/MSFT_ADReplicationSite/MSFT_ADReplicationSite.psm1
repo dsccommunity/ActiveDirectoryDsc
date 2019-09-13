@@ -27,7 +27,7 @@ function Get-TargetResource
     # Get the replication site filtered by it's name. If the site is not
     # present, the command will return $null.
     Write-Verbose -Message ($script:localizedData.GetReplicationSite -f $Name)
-    $replicationSite = Get-ADReplicationSite -Filter { Name -eq $Name }
+    $replicationSite = Get-ADReplicationSite -Filter { Name -eq $Name } -ErrorAction SilentlyContinue
 
     if ($null -eq $replicationSite)
     {
@@ -92,12 +92,12 @@ function Set-TargetResource
     )
 
     $Params = @{}
-    $createOrUpdate = Get-ADReplicationSite -Identity $Name
+    $createOrUpdate = Get-ADReplicationSite -Filter { Name -eq $Name } -ErrorAction SilentlyContinue
 
 
     if ($Ensure -eq 'Present')
     {
-        $defaultFirstSiteName = Get-ADReplicationSite -Filter { Name -eq 'Default-First-Site-Name' }
+        $defaultFirstSiteName = Get-ADReplicationSite -Filter { Name -eq 'Default-First-Site-Name' } -ErrorAction SilentlyContinue
 
         <#
             Check if the user specified to rename the Default-First-Site-Name
