@@ -46,12 +46,14 @@ try
         # Load stub cmdlets and classes.
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 
-        $presentSiteName = 'DemoSite'
-        $absentSiteName  = 'MissingSite'
+        $presentSiteName    = 'DemoSite'
+        $absentSiteName     = 'MissingSite'
+        $genericDescription = "Demonstration Site Description"
 
         $presentSiteMock = [PSCustomObject] @{
             Name              = $presentSiteName
             DistinguishedName = "CN=$presentSiteName,CN=Sites,CN=Configuration,DC=contoso,DC=com"
+            Description       = $genericDescription
         }
 
         $defaultFirstSiteNameSiteMock = [PSCustomObject] @{
@@ -60,32 +62,43 @@ try
         }
 
         $presentSiteTestPresent = @{
-            Ensure = 'Present'
-            Name   = $presentSiteName
+            Ensure      = 'Present'
+            Name        = $presentSiteName
+            Description = $genericDescription
         }
         $presentSiteTestAbsent = @{
             Ensure = 'Absent'
             Name   = $presentSiteName
+            Description = $genericDescription
+        }
+
+        $presentSiteTestMismatchDescription = @{
+            Ensure = 'Present'
+            Name   = $presentSiteName
+            Description = 'Some random test description'
         }
 
         $absentSiteTestPresent = @{
             Ensure = 'Present'
             Name   = $absentSiteName
+            Description = $genericDescription
         }
         $absentSiteTestAbsent = @{
             Ensure = 'Absent'
             Name   = $absentSiteName
+            Description = $genericDescription
         }
 
         $presentSiteTestPresentRename = @{
             Ensure                     = 'Present'
             Name                       = $presentSiteName
+            Description = $genericDescription
             RenameDefaultFirstSiteName = $true
         }
 
         #region Function Get-TargetResource
-        Describe 'ADReplicationSite\Get-TargetResource' {
-            It 'Should return a "System.Collections.Hashtable" object type' {
+        Describe 'When getting the Target Resource Information' {
+            It 'Should return a "System.Collections.Hashtable" object type with specified attributes' {
 
                 # Arrange
                 Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
@@ -95,6 +108,9 @@ try
 
                 # Assert
                 $targetResource -is [System.Collections.Hashtable] | Should -BeTrue
+                $targetResource.Description | Should -BeOfType String
+                $targetResource.Name | Should -Not -BeNullOrEmpty
+                $targetResource.Ensure | Should -Not -BeNullOrEmpty
             }
 
             It 'Should return present if the site exists' {
@@ -108,6 +124,7 @@ try
                 # Assert
                 $targetResource.Ensure | Should -Be 'Present'
                 $targetResource.Name   | Should -Be $presentSiteName
+                $targetResource.Description | Should -Be $genericDescription
             }
 
             It 'Should return absent if the site does not exist' {
@@ -121,12 +138,13 @@ try
                 # Assert
                 $targetResource.Ensure | Should -Be 'Absent'
                 $targetResource.Name   | Should -Be $absentSiteName
+                $targetResource.Description | Should -BeNullOrEmpty
             }
         }
         #endregion
 
         #region Function Test-TargetResource
-        Describe 'ADReplicationSite\Test-TargetResource' {
+        Describe 'When testing the Target Resource configuration' {
             It 'Should return a "System.Boolean" object type' {
 
                 # Arrange
@@ -139,7 +157,7 @@ try
                 $targetResourceState -is [System.Boolean] | Should -BeTrue
             }
 
-            It 'Should return true if the site should exists and does exists' {
+            It 'Should return true if the site should exist and does exist' {
 
                 # Arrange
                 Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
@@ -151,7 +169,7 @@ try
                 $targetResourceState | Should -BeTrue
             }
 
-            It 'Should return false if the site should exists but does not exists' {
+            It 'Should return false if the site should exist but does not exist' {
 
                 # Arrange
                 Mock -CommandName Get-ADReplicationSite
@@ -163,7 +181,7 @@ try
                 $targetResourceState | Should -BeFalse
             }
 
-            It 'Should return false if the site should not exists but does exists' {
+            It 'Should return false if the site should not exist but does exist' {
 
                 # Arrange
                 Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
@@ -175,7 +193,7 @@ try
                 $targetResourceState | Should -BeFalse
             }
 
-            It 'Should return true if the site should not exists and does not exists' {
+            It 'Should return true if the site should not exist and does not exist' {
 
                 # Arrange
                 Mock -CommandName Get-ADReplicationSite
@@ -185,6 +203,18 @@ try
 
                 # Assert
                 $targetResourceState | Should -BeTrue
+            }
+
+            It 'Should return false if the site exists but the description is mismatched' {
+
+                # Arrange
+                Mock -CommandName Get-ADReplicationSite
+
+                # Act
+                $targetResourceState = Test-TargetResource @presentSiteTestMismatchDescription
+
+                # Assert
+                $targetResourceState | Should -BeFalse
             }
         }
 

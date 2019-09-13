@@ -132,6 +132,11 @@ function Set-TargetResource
     .PARAMETER RenameDefaultFirstSiteName
         Specify if the Default-First-Site-Name should be renamed, if it exists.
         Dafult value is 'false'.
+
+    .PARAMETER Description
+        Specifies a description of the object. This parameter sets the value of
+        the Description property for the object. The LDAP Display Name
+        (ldapDisplayName) for this property is 'description'.
 #>
 function Test-TargetResource
 {
@@ -150,18 +155,53 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $RenameDefaultFirstSiteName = $false
+        $RenameDefaultFirstSiteName = $false,
+
+        [Parameter()]
+        [System.String]
+        $Description
     )
 
     $currentConfiguration = Get-TargetResource -Name $Name
+    $configurationCompliant = $true
 
-    if ($currentConfiguration.Ensure -eq $Ensure)
+    if ($currentConfiguration.Ensure -eq 'Absent')
     {
-        Write-Verbose -Message ($script:localizedData.ReplicationSiteInDesiredState -f $Name)
+        # Site doesn't exist
+        if ($currentConfiguration.Ensure -eq $Ensure)
+        {
+            # Site should not exist
+            Write-Verbose -Message ($script:localizedData.ReplicationSiteInDesiredState -f $Name)
+        }
+        else
+        {
+            #Site should exist
+            Write-Verbose -Message ($script:localizedData.ReplicationSiteNotInDesiredState -f $Name)
+            $configurationCompliant = $false
+        }
     }
-    else
-    {
-        Write-Verbose -Message ($script:localizedData.ReplicationSiteNotInDesiredState -f $Name)
+    else {
+        # Site Exists
+        if ($currentConfiguration.Ensure -eq $Ensure)
+        {
+            # Site should exist
+            if ($currentConfiguration.Description -ne $Description)
+            {
+                Write-Verbose -Message ($script:localizedData.ReplicationSiteNotInDesiredState -f $Name)
+                $configurationCompliant = $false
+            }
+            else
+            {
+                Write-Verbose -Message ($script:localizedData.ReplicationSiteInDesiredState -f $Name)
+            }
+        }
+        else
+        {
+            # Site should not exist
+            Write-Verbose -Message ($script:localizedData.ReplicationSiteNotInDesiredState -f $Name)
+            $configurationCompliant = $false
+        }
     }
-    return $currentConfiguration.Ensure -eq $Ensure
+
+    return $configurationCompliant
 }
