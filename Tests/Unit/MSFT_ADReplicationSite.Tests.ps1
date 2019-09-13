@@ -208,7 +208,7 @@ try
             It 'Should return false if the site exists but the description is mismatched' {
 
                 # Arrange
-                Mock -CommandName Get-ADReplicationSite
+                Mock -CommandName Get-ADReplicationSite { $presentSiteTestPresent }
 
                 # Act
                 $targetResourceState = Test-TargetResource @presentSiteTestMismatchDescription
