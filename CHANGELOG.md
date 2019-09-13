@@ -96,6 +96,9 @@
     needs the feature Recycle Bin enabled ([issue #498](https://github.com/PowerShell/xActiveDirectory/issues/498)).
   - Updated integration test to be able to catch when a computer account
     cannot be restored.
+- Changes to ADReplicationSite
+  - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355))
 
 ## 4.0.0.0
 
