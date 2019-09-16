@@ -31,6 +31,10 @@ try
 
     Describe "$($script:dscResourceName)_Integration" {
 
+        BeforeAll {
+            $resourceId = "[$($script:dscResourceFriendlyName)]Integration_Test"
+        }
+
         $configurationName = "$($script:dscResourceName)_CreateSite_Config"
 
         Context ('When using configuration {0}' -f $configurationName) {
@@ -177,10 +181,12 @@ finally
     #region FOOTER
 
     # Rename Site back to Default
-    $RenamedSite = Get-ADReplicationSite -Filter { Name -eq 'RenamedDefaultADSite' }
-    Set-ADReplicationSite $RenamedSite -Description $null
-    Rename-ADObject -Identity $RenamedSite.DistinguishedName -NewName 'Default-First-Site-Name' -ErrorAction Stop
-
+    $renamedSite = Get-ADReplicationSite -Filter { Name -eq 'RenamedDefaultADSite' }
+    if ($null -ne $renamedSite)
+    {
+        Set-ADReplicationSite -Identity $RenamedSite -Description $null
+        Rename-ADObject -Identity $RenamedSite.DistinguishedName -NewName 'Default-First-Site-Name' -ErrorAction Stop
+    }
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }

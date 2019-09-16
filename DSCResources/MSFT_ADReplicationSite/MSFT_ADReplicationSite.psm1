@@ -35,7 +35,7 @@ function Get-TargetResource
         $returnValue = @{
             Ensure                     = 'Absent'
             Name                       = $Name
-            Description                = ''
+            Description                = $null
             RenameDefaultFirstSiteName = ''
         }
     }
@@ -91,9 +91,7 @@ function Set-TargetResource
         $Description
     )
 
-    $Params = @{}
-    $createOrUpdate = Get-ADReplicationSite -Filter { Name -eq $Name } -ErrorAction SilentlyContinue
-
+    $createOrUpdate = Get-TargetResource $Name
 
     if ($Ensure -eq 'Present')
     {
@@ -109,33 +107,31 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.AddReplicationSiteDefaultFirstSiteName -f $Name)
 
             Rename-ADObject -Identity $defaultFirstSiteName.DistinguishedName -NewName $Name -ErrorAction Stop
-
-            if($Description)
-            {
-                Set-ADReplicationSite -Identity $Name -Description $Description
-            }
         }
         else
         {
-            if ($createOrUpdate)
-            {
-                # Update site
-                Write-Verbose -Message ($script:localizedData.UpdateReplicationSite -f $Name)
-                Set-ADReplicationSite -Identity $Name -Description $Description
-            }
-            else
+            if ($createOrUpdate.Ensure -eq 'Absent')
             {
                 Write-Verbose -Message ($script:localizedData.AddReplicationSite -f $Name)
 
-                $Params.Add('Name', $Name)
-                $Params.Add('ErrorAction', 'Stop')
-                if($Description)
-                {
-                    $Params.Add('Description', $Description)
+                $newADReplicationSiteParameters = @{
+                    Name        = $Name
+                    ErrorAction = 'Stop'
                 }
 
-                New-ADReplicationSite @Params
+                if($PSBoundParameters.ContainsKey('Description'))
+                {
+                    $newADReplicationSiteParameters['Description'] = $Description
+                }
+
+                New-ADReplicationSite @newADReplicationSiteParameters
             }
+        }
+
+        if($PSBoundParameters.ContainsKey('Description') -and ($createOrUpdate.Ensure -eq 'Present' -or $RenameDefaultFirstSiteName))
+        {
+            Write-Verbose -Message ($script:localizedData.UpdateReplicationSite -f $Name)
+            Set-ADReplicationSite -Identity $Name -Description $Description
         }
     }
 
