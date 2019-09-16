@@ -13,20 +13,11 @@ if (Test-Path -Path $configFile)
 }
 else
 {
-    $currentDomain = Get-ADDomain
-    $ForestFullyQualifiedDomainName = $currentDomain.Forest
-    $netBiosDomainName = $currentDomain.NetBIOSName
-
     $ConfigurationData = @{
         AllNodes = @(
             @{
                 NodeName        = 'localhost'
                 CertificateFile = $env:DscPublicCertificatePath
-
-                ForestFullyQualifiedDomainName = $ForestFullyQualifiedDomainName
-
-                AdministratorUserName = ('{0}\Administrator' -f $netBiosDomainName)
-                AdministratorPassword = 'P@ssw0rd1'
             }
         )
     }
