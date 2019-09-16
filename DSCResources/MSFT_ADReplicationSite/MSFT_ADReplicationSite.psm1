@@ -36,7 +36,7 @@ function Get-TargetResource
             Ensure                     = 'Absent'
             Name                       = $Name
             Description                = $null
-            RenameDefaultFirstSiteName = ''
+            RenameDefaultFirstSiteName = $false
         }
     }
     else
@@ -46,7 +46,7 @@ function Get-TargetResource
             Ensure                     = 'Present'
             Name                       = $Name
             Description                = $replicationSite.Description
-            RenameDefaultFirstSiteName = ''
+            RenameDefaultFirstSiteName = $false
         }
     }
 
