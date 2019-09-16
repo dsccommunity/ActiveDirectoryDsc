@@ -35,10 +35,9 @@ Configuration MSFT_ADReplicationSubnet_CreateSubnet_Config
     {
         ADReplicationSubnet 'LondonSubnet'
         {
-            Ensure   = 'Present'
-            Name     = '10.0.0.0/24'
-            Site     = 'London'
-            Location = 'Datacenter 3'
+            Ensure      = 'Present'
+            Name        = '10.0.0.0/24'
+            Site        = 'London'
         }
     }
 }
@@ -55,10 +54,9 @@ Configuration MSFT_ADReplicationSubnet_ChangeSubnetSite_Config
     {
         ADReplicationSubnet 'LondonSubnet'
         {
-            Ensure   = 'Present'
-            Name     = '10.0.0.0/24'
-            Site     = 'Default-First-Site-Name'
-            Location = 'Datacenter 3'
+            Ensure      = 'Present'
+            Name        = '10.0.0.0/24'
+            Site        = 'Default-First-Site-Name'
         }
     }
 }
@@ -75,10 +73,31 @@ Configuration MSFT_ADReplicationSubnet_ChangeSubnetLocation_Config
     {
         ADReplicationSubnet 'LondonSubnet'
         {
-            Ensure   = 'Present'
-            Name     = '10.0.0.0/24'
-            Site     = 'Default-First-Site-Name'
-            Location = 'Office 12'
+            Ensure      = 'Present'
+            Name        = '10.0.0.0/24'
+            Site        = 'Default-First-Site-Name'
+            Location    = 'Office 12'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Changes a Replication Subnet Description.
+#>
+Configuration MSFT_ADReplicationSubnet_ChangeSubnetDescription_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSubnet 'LondonSubnet'
+        {
+            Ensure      = 'Present'
+            Name        = '10.0.0.0/24'
+            Site        = 'Default-First-Site-Name'
+            Location    = 'Office 12'
+            Description = 'Updated Subnet Description'
         }
     }
 }
