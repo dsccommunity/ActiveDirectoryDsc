@@ -108,7 +108,7 @@ function Set-TargetResource
                 and if it still exists. If both is true, rename the replication site
                 instead of creating a new site.
             #>
-            if ($RenameDefaultFirstSiteName -and ($null -ne $defaultFirstSiteName))
+            if ($RenameDefaultFirstSiteName -and $null -ne $defaultFirstSiteName)
             {
                 Write-Verbose -Message ($script:localizedData.AddReplicationSiteDefaultFirstSiteName -f $Name)
 
@@ -132,7 +132,7 @@ function Set-TargetResource
             }
         }
 
-        if ($PSBoundParameters.ContainsKey('Description') -and ($getTargetResourceResult.Description -ne $Description))
+        if ($PSBoundParameters.ContainsKey('Description') -and $getTargetResourceResult.Description -ne $Description)
         {
             Write-Verbose -Message ($script:localizedData.UpdateReplicationSite -f $Name)
             Set-ADReplicationSite -Identity $Name -Description $Description
