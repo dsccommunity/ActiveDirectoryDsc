@@ -61,6 +61,13 @@ try
             DistinguishedName = "CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com"
         }
 
+        $absentSiteDefaultRenameMock = @{
+            Ensure                     = 'Absent'
+            Name                       = $presentSiteTestPresent
+            Description                = $null
+            RenameDefaultFirstSiteName = $true
+        }
+
         $presentSiteTestPresent = @{
             Ensure      = 'Present'
             Name        = $presentSiteName
@@ -92,7 +99,7 @@ try
         $presentSiteTestPresentRename = @{
             Ensure                     = 'Present'
             Name                       = $presentSiteName
-            Description = $genericDescription
+            Description                = $genericDescription
             RenameDefaultFirstSiteName = $true
         }
 
@@ -227,6 +234,7 @@ try
                 # Arrange
                 Mock -CommandName Get-ADReplicationSite
                 Mock -CommandName 'New-ADReplicationSite' -Verifiable
+                Mock -CommandName 'Set-ADReplicationSite' -Verifiable
 
                 # Act
                 Set-TargetResource @presentSiteTestPresent
@@ -238,6 +246,7 @@ try
             It 'Should rename the Default-First-Site-Name if it exists' {
 
                 # Arrange
+                Mock -CommandName Get-TargetResource -MockWith { $absentSiteDefaultRenameMock }
                 Mock -CommandName Get-ADReplicationSite -MockWith { $defaultFirstSiteNameSiteMock }
                 Mock -CommandName 'Rename-ADObject' -Verifiable
                 Mock -CommandName 'New-ADReplicationSite' -Verifiable
@@ -273,7 +282,7 @@ try
                 Set-TargetResource @presentSiteTestMismatchDescription
 
                 Assert-MockCalled -CommandName Set-ADReplicationSite -Times 1 -Scope It
-                Assert-MockCalled -CommandName Get-ADReplicationSite -Times 2 -Scope It -Exactly
+                Assert-MockCalled -CommandName Get-ADReplicationSite -Times 1 -Scope It -Exactly
             }
 
             It 'Should remove an existing site' {
@@ -287,7 +296,6 @@ try
 
                 # Assert
                 Assert-MockCalled -CommandName 'Remove-ADReplicationSite' -Times 1 -Scope It
-                Assert-MockCalled -CommandName Get-ADReplicationSite -Times 1 -Scope It -Exactly
             }
         }
         #endregion
