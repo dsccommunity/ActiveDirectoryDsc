@@ -1,6 +1,13 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
 param ()
 
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\ActiveDirectoryDsc.TestHelper.psm1')
+
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests'))
+{
+    return
+}
+
 #region HEADER
 $script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceName = 'MSFT_ADDomainController'
@@ -38,21 +45,9 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
-        #Load the AD Module Stub, so we can mock the cmdlets, then load the AD types
-        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectoryStub.psm1') -Force
-
-        # If one type does not exist, it's assumed the other ones does not exist either.
-        if (-not ('Microsoft.ActiveDirectory.Management.ADAuthType' -as [Type]))
-        {
-            $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
-            Add-Type -Path $adModuleStub
-        }
-
-        # If one type does not exist, it's assumed the other ones does not exist either.
-        if (-not ('Microsoft.ActiveDirectory.Management.ADForestMode' -as [Type]))
-        {
-            Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.ActiveDirectory.Management.cs')
-        }
+        # Load stub cmdlets and classes.
+        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
+        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ADDSDeployment_2019.psm1') -Force
 
         #region Pester Test Variable Initialization
         $correctDomainName = 'present.com'
@@ -80,67 +75,14 @@ try
             ReadOnlyReplica               = $true
             SiteName                      = $correctSiteName
         }
-
-        #Fake function because it is only available on Windows Server
-        function Install-ADDSDomainController
-        {
-            [CmdletBinding()]
-            param
-            (
-                [Parameter()]
-                $DomainName,
-
-                [Parameter()]
-                [System.Management.Automation.PSCredential]
-                $SafeModeAdministratorPassword,
-
-                [Parameter()]
-                [System.Management.Automation.PSCredential]
-                $Credential,
-
-                [Parameter()]
-                $NoRebootOnCompletion,
-
-                [Parameter()]
-                $Force,
-
-                [Parameter()]
-                $DatabasePath,
-
-                [Parameter()]
-                $LogPath,
-
-                [Parameter()]
-                $SysvolPath,
-
-                [Parameter()]
-                $SiteName,
-
-                [Parameter()]
-                $InstallationMediaPath,
-
-                [Parameter()]
-                $NoGlobalCatalog,
-
-                [Parameter()]
-                [System.Boolean]
-                $ReadOnlyReplica,
-
-                [Parameter()]
-                [System.String[]]
-                $AllowPasswordReplicationAccountName,
-
-                [Parameter()]
-                [System.String[]]
-                $DenyPasswordReplicationAccountName
-            )
-
-            throw [exception] 'Not Implemented'
-        }
-        #endregion Pester Test Initialization
+        #endregion Pester Test Variable Initialization
 
         #region Function Get-TargetResource
         Describe 'ADDomainController\Get-TargetResource' -Tag 'Get' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+            }
+
             Context 'When the domain name is not available' {
                 BeforeAll {
                     Mock -CommandName Get-ADDomain -MockWith {
@@ -188,7 +130,7 @@ try
                             return $null
                         }
 
-                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name IFM
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
                     }
 
                     It 'Should returns current Domain Controller properties' {
@@ -206,6 +148,7 @@ try
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.FlexibleSingleMasterOperationRole | Should -Contain 'DomainNamingMaster'
                         $result.FlexibleSingleMasterOperationRole | Should -Contain 'RIDMaster'
+                        $result.InstallDns | Should -BeFalse
                     }
                 }
 
@@ -246,7 +189,7 @@ try
                             }
                         }
 
-                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name IFM
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
                     }
 
                     It 'Returns current Domain Controller properties' {
@@ -263,10 +206,89 @@ try
                         $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
+                        $result.InstallDns | Should -BeFalse
                     }
                 }
 
-                Context 'When the node is not a Domain Controller' {
+                Context 'When the node is a Domain Controller with DNS installed' {
+                    BeforeAll {
+                        Mock -CommandName Get-ADDomain -MockWith { return $true }
+                        Mock -CommandName Get-DomainControllerObject {
+                            $domainControllerObject = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $domainControllerObject.Site = $correctSiteName
+                            $domainControllerObject.Domain = $correctDomainName
+                            $domainControllerObject.IsGlobalCatalog = $true
+                            $domainControllerObject.IsReadOnly = $false
+                            return $domainControllerObject
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } -MockWith {
+                            return @{
+                                'Database log files path' = 'C:\Windows\NTDS'
+                                'DSA Working Directory'   = 'C:\Windows\NTDS'
+                            }
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' } -MockWith {
+                            return @{
+                                'SysVol' = 'C:\Windows\SYSVOL\sysvol'
+                            }
+                        }
+
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
+                    }
+
+                    It 'Returns current Domain Controller properties' {
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallDns $true
+
+                        $result.DomainName | Should -Be $correctDomainName
+                        $result.InstallDns | Should -BeTrue
+                    }
+                }
+
+                Context 'When the node is a Domain Controller and no DNS should be installed' {
+                    BeforeAll {
+                        Mock -CommandName Get-ADDomain -MockWith { return $true }
+                        Mock -CommandName Get-DomainControllerObject {
+                            $domainControllerObject = New-Object -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $domainControllerObject.Site = $correctSiteName
+                            $domainControllerObject.Domain = $correctDomainName
+                            $domainControllerObject.IsGlobalCatalog = $true
+                            $domainControllerObject.IsReadOnly = $false
+                            return $domainControllerObject
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } -MockWith {
+                            return @{
+                                'Database log files path' = 'C:\Windows\NTDS'
+                                'DSA Working Directory'   = 'C:\Windows\NTDS'
+                            }
+                        }
+
+                        Mock -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' } -MockWith {
+                            return @{
+                                'SysVol' = 'C:\Windows\SYSVOL\sysvol'
+                            }
+                        }
+
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+                        Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy
+
+                        New-Item -Path 'TestDrive:\' -ItemType Directory -Name 'IFM'
+                    }
+
+                    It 'Returns current Domain Controller properties' {
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -InstallDns $false
+
+                        $result.DomainName | Should -Be $correctDomainName
+                        $result.InstallDns | Should -BeFalse
+                    }
+                }
+
+                Context 'When the node should not be a Domain Controller' {
                     BeforeAll {
                         Mock -CommandName Get-ADDomain -MockWith { return $true }
                         Mock -CommandName Get-DomainControllerObject -MockWith {
@@ -289,6 +311,7 @@ try
                         $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.FlexibleSingleMasterOperationRole | Should -BeNullOrEmpty
+                        $result.InstallDns | Should -BeFalse
                     }
                 }
             }
@@ -763,6 +786,26 @@ try
                     }
                 }
 
+                Context 'When the domain controller should have a DNS installed' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -InstallDns $true } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $InstallDns -eq $true
+                        } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When the domain controller should not have a DNS installed' {
+                    It 'It should call the correct mocks' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName -InstallDns $false } | Should -Not -Throw
+
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $InstallDns -eq $false
+                        } -Exactly -Times 1 -Scope It
+                    }
+                }
+
                 Context 'When a domain controller is in the wrong site' {
                     BeforeAll {
                         Mock -CommandName Move-ADDirectoryServer
@@ -956,7 +999,7 @@ try
                         Mock -CommandName Get-ADDomain
                         Mock -CommandName Get-ADForest -MockWith {
                             return @{
-                                RIDMaster = 'dc.contoso.com'
+                                SchemaMaster = 'dc.contoso.com'
                             }
                         }
 

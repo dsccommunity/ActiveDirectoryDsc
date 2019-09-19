@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '4.0.0.0'
+moduleVersion = '4.1.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -61,27 +61,13 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'The change log length exceeds the allowable limit for PowerShell Gallery.  For detailed information about the changes to each resource, see the changelog.md file in the GitHub repo.
-- Changes to ActiveDirectoryDsc
-- Changes to ADManagedServiceAccount
-- Changes to ADComputer
-- Changes to ADOrganizationalUnit
-- Changes to ADUser
-- Changes to ADDomain
-- Changes to ADServicePrincipalName
-- Changes to ADDomainTrust
-- Changes to WaitForADDomain
-- Changes to ADDomainController
-- Changes to ADObjectPermissionEntry
-- Changes to ADGroup
-- Changes to ADDomainDefaultPasswordPolicy
-
-'
+        ReleaseNotes = 'We could not add the change log to the release notes due to the length of the change log. What have change in this release can be found here https://github.com/PowerShell/ActiveDirectoryDsc/blob/dev/CHANGELOG.md#4100.'
 
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
 }
+
 
 
 

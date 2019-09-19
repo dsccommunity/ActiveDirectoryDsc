@@ -32,6 +32,14 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController
 
     .PARAMETER SiteName
         Provide the name of the site you want the Domain Controller to be added to.
+
+    .PARAMETER InstallDns
+        Specifies if the DNS Server service should be installed and configured on
+        the domain controller. If this is not set the default value of the parameter
+        InstallDns of the cmdlet Install-ADDSDomainController is used.
+        The parameter `InstallDns` is only used during the provisioning of a domain
+        controller. The parameter cannot be used to install or uninstall the DNS
+        server on an already provisioned domain controller.
 #>
 function Get-TargetResource
 {
@@ -65,7 +73,11 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String]
-        $SiteName
+        $SiteName,
+
+        [Parameter()]
+        [System.Boolean]
+        $InstallDns
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
@@ -80,6 +92,7 @@ function Get-TargetResource
         AllowPasswordReplicationAccountName = $null
         DenyPasswordReplicationAccountName  = $null
         FlexibleSingleMasterOperationRole   = $null
+        InstallDns                          = $InstallDNs
     }
 
     Write-Verbose -Message (
@@ -187,6 +200,14 @@ function Get-TargetResource
         Specifies one or more Flexible Single Master Operation (FSMO) roles to
         move to this domain controller. The current owner must be online and
         responding for the move to be allowed.
+
+    .PARAMETER InstallDns
+        Specifies if the DNS Server service should be installed and configured on
+        the domain controller. If this is not set the default value of the parameter
+        InstallDns of the cmdlet Install-ADDSDomainController is used.
+        The parameter `InstallDns` is only used during the provisioning of a domain
+        controller. The parameter cannot be used to install or uninstall the DNS
+        server on an already provisioned domain controller.
 #>
 function Set-TargetResource
 {
@@ -257,7 +278,11 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet('DomainNamingMaster', 'SchemaMaster', 'InfrastructureMaster', 'PDCEmulator', 'RIDMaster')]
         [System.String[]]
-        $FlexibleSingleMasterOperationRole
+        $FlexibleSingleMasterOperationRole,
+
+        [Parameter()]
+        [System.Boolean]
+        $InstallDns
     )
 
     $getTargetResourceParameters = @{} + $PSBoundParameters
@@ -327,6 +352,11 @@ function Set-TargetResource
         if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and $IsGlobalCatalog -eq $false)
         {
             $installADDSDomainControllerParameters.Add('NoGlobalCatalog', $true)
+        }
+
+        if ($PSBoundParameters.ContainsKey('InstallDns'))
+        {
+            $installADDSDomainControllerParameters.Add('InstallDns', $InstallDns)
         }
 
         if (-not [System.String]::IsNullOrWhiteSpace($InstallationMediaPath))
@@ -577,6 +607,16 @@ function Set-TargetResource
         Specifies one or more Flexible Single Master Operation (FSMO) roles to
         move to this domain controller. The current owner must be online and
         responding for the move to be allowed.
+
+    .PARAMETER InstallDns
+        Specifies if the DNS Server service should be installed and configured on
+        the domain controller. If this is not set the default value of the parameter
+        InstallDns of the cmdlet Install-ADDSDomainController is used.
+        The parameter `InstallDns` is only used during the provisioning of a domain
+        controller. The parameter cannot be used to install or uninstall the DNS
+        server on an already provisioned domain controller.
+
+        Not used in Test-TargetResource.
 #>
 function Test-TargetResource
 {
@@ -637,7 +677,11 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet('DomainNamingMaster', 'SchemaMaster', 'InfrastructureMaster', 'PDCEmulator', 'RIDMaster')]
         [System.String[]]
-        $FlexibleSingleMasterOperationRole
+        $FlexibleSingleMasterOperationRole,
+
+        [Parameter()]
+        [System.Boolean]
+        $InstallDns
     )
 
     Write-Verbose -Message (

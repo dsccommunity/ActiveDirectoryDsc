@@ -664,7 +664,6 @@ function Assert-MemberParameters
     param
     (
         [Parameter()]
-        [ValidateNotNull()]
         [System.String[]]
         $Members,
 
@@ -685,12 +684,6 @@ function Assert-MemberParameters
         {
             # If Members are provided, Include and Exclude are not allowed.
             $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude'
-            New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
-        }
-
-        if ($Members.Length -eq 0)
-        {
-            $errorMessage = $script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude'
             New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
         }
     }
@@ -1145,7 +1138,7 @@ function Test-ADReplicationSite
         [System.String]
         $DomainName,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $Credential
     )
@@ -1350,6 +1343,7 @@ function Restore-ADCommonObject
             $restoreParams['ErrorAction'] = 'Stop'
             $restoreParams['Identity'] = $restorableObject.DistinguishedName
             $restoredObject = Restore-ADObject @restoreParams
+
             Write-Verbose -Message ($script:localizedData.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass) -Verbose
         }
         catch [Microsoft.ActiveDirectory.Management.ADException]
@@ -1358,6 +1352,10 @@ function Restore-ADCommonObject
             $errorMessage = $script:localizedData.RecycleBinRestoreFailed -f $Identity, $ObjectClass
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
+    }
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.NoObjectFoundInRecycleBin) -Verbose
     }
 
     return $restoredObject
@@ -1454,41 +1452,52 @@ function Add-ADCommonGroupMember
 
     Assert-Module -ModuleName ActiveDirectory
 
-    if ($MembersInMultipleDomains.IsPresent)
+    if ($Members)
     {
-        foreach ($member in $Members)
+        if ($MembersInMultipleDomains.IsPresent)
         {
-            $memberDomain = Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
-
-            if (-not $memberDomain)
+            foreach ($member in $Members)
             {
-                $errorMessage = $script:localizedData.EmptyDomainError -f $member, $Parameters.Identity
-                New-InvalidOperationException -Message $errorMessage
-            }
+                $memberDomain = Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
 
-            Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.Identity)
+                if (-not $memberDomain)
+                {
+                    $errorMessage = $script:localizedData.EmptyDomainError -f $member, $Parameters.Identity
+                    New-InvalidOperationException -Message $errorMessage
+                }
 
-            $memberObjectClass = (Get-ADObject -Identity $member -Server $memberDomain -Properties ObjectClass).ObjectClass
+                Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.Identity)
 
-            if ($memberObjectClass -eq 'computer')
-            {
-                $memberObject = Get-ADComputer -Identity $member -Server $memberDomain
-            }
-            elseif ($memberObjectClass -eq 'group')
-            {
-                $memberObject = Get-ADGroup -Identity $member -Server $memberDomain
-            }
-            elseif ($memberObjectClass -eq 'user')
-            {
-                $memberObject = Get-ADUser -Identity $member -Server $memberDomain
-            }
+                $commonParameters = @{
+                    Identity = $member
+                    Server = $memberDomain
+                    ErrorAction = 'Stop'
+                }
 
-            Add-ADGroupMember @Parameters -Members $memberObject
+                $activeDirectoryObject = Get-ADObject @commonParameters -Properties @('ObjectClass')
+
+                $memberObjectClass = $activeDirectoryObject.ObjectClass
+
+                if ($memberObjectClass -eq 'computer')
+                {
+                    $memberObject = Get-ADComputer @commonParameters
+                }
+                elseif ($memberObjectClass -eq 'group')
+                {
+                    $memberObject = Get-ADGroup @commonParameters
+                }
+                elseif ($memberObjectClass -eq 'user')
+                {
+                    $memberObject = Get-ADUser @commonParameters
+                }
+
+                Add-ADGroupMember @Parameters -Members $memberObject -ErrorAction 'Stop'
+            }
         }
-    }
-    else
-    {
-        Add-ADGroupMember @Parameters -Members $Members
+        else
+        {
+            Add-ADGroupMember @Parameters -Members $Members -ErrorAction 'Stop'
+        }
     }
 }
 
@@ -1831,6 +1840,7 @@ function Test-DscPropertyState
             $supportedTypes = @(
                 'String'
                 'Int32'
+                'UInt32'
                 'Int16'
                 'UInt16'
                 'Single'
@@ -2113,6 +2123,9 @@ function Get-ADDirectoryContext
         Specifies the credentials that are used when accessing the domain,
         or uses the current user if not specified.
 
+    .PARAMETER WaitForValidCredentials
+        Specifies if authentication exceptions should be ignored.
+
     .NOTES
         This function is designed so that it can run on any computer without
         having the ActiveDirectory module installed.
@@ -2132,7 +2145,11 @@ function Find-DomainController
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $WaitForValidCredentials
     )
 
     if ($PSBoundParameters.ContainsKey('SiteName'))
@@ -2173,6 +2190,21 @@ function Find-DomainController
     catch [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException]
     {
         Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName) -Verbose
+    }
+    catch [System.Management.Automation.MethodInvocationException]
+    {
+        $isTypeNameToSuppress = $_.Exception.InnerException -is [System.Security.Authentication.AuthenticationException]
+
+        if ($WaitForValidCredentials.IsPresent -and $isTypeNameToSuppress)
+        {
+            Write-Warning -Message (
+                $script:localizedData.IgnoreCredentialError -f $_.FullyQualifiedErrorId, $_.Exception.Message
+            )
+        }
+        else
+        {
+            throw $_
+        }
     }
     catch
     {

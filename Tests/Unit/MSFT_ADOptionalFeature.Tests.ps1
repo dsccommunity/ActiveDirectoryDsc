@@ -1,3 +1,10 @@
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\ActiveDirectoryDsc.TestHelper.psm1')
+
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests'))
+{
+    return
+}
+
 $script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceName = 'MSFT_ADOptionalFeature'
 
@@ -36,12 +43,8 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
-        # If one type does not exist, it's assumed the other ones does not exist either.
-        if (-not ('Microsoft.ActiveDirectory.Management.ADComputer' -as [Type]))
-        {
-            $adModuleStub = (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\Microsoft.ActiveDirectory.Management.cs')
-            Add-Type -Path $adModuleStub
-        }
+        # Load stub cmdlets and classes.
+        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 
         $forestName = 'contoso.com'
         $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(

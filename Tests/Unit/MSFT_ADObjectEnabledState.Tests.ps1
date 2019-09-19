@@ -1,3 +1,10 @@
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\ActiveDirectoryDsc.TestHelper.psm1')
+
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests'))
+{
+    return
+}
+
 $script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceName = 'MSFT_ADObjectEnabledState'
 
@@ -37,6 +44,9 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:dscResourceName {
+        # Load stub cmdlets and classes.
+        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
+
         $mockComputerNamePresent = 'TEST01'
         $mockDomain = 'contoso.com'
         $mockEnabled = $true
@@ -50,7 +60,7 @@ try
             $mockCredentialUserName, $mockCredentialPassword
         )
 
-        Describe 'MSFT_ADComputer\Get-TargetResource' -Tag 'Get' {
+        Describe 'MSFT_ADObjectEnabledState\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
                 Mock -CommandName Assert-Module
             }
@@ -246,7 +256,7 @@ try
             }
         }
 
-        Describe 'MSFT_ADComputer\Test-TargetResource' -Tag 'Test' {
+        Describe 'MSFT_ADObjectEnabledState\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 Mock -CommandName Assert-Module
 
@@ -356,7 +366,7 @@ try
             }
         }
 
-        Describe 'MSFT_ADComputer\Set-TargetResource' -Tag 'Set' {
+        Describe 'MSFT_ADObjectEnabledState\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Set-DscADComputer

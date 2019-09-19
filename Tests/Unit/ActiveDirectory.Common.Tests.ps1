@@ -8,25 +8,24 @@
 #>
 Get-Module -Name 'ActiveDirectoryDsc.Common' -All | Remove-Module -Force
 
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\ActiveDirectoryDsc.TestHelper.psm1')
+
+if (-not (Test-RunForCITestCategory -Type 'Unit' -Category 'Tests'))
+{
+    return
+}
+
 # Import the ActiveDirectoryDsc.Common module to test
 $script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules\ActiveDirectoryDsc.Common'
 
 Import-Module -Name (Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common.psm1') -Force
 
-# If one type does not exist, it's assumed the other ones does not exist either.
-if (-not ('Microsoft.DirectoryServices.Deployment.Types.ForestMode' -as [Type]))
-{
-    Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.DirectoryServices.Deployment.Types.cs')
-}
-
-# If one type does not exist, it's assumed the other ones does not exist either.
-if (-not ('Microsoft.ActiveDirectory.Management.ADForestMode' -as [Type]))
-{
-    Add-Type -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'Unit\Stubs\Microsoft.ActiveDirectory.Management.cs')
-}
-
 InModuleScope 'ActiveDirectoryDsc.Common' {
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ADDSDeployment_2019.psm1') -Force
+
     Describe 'ActiveDirectoryDsc.Common\Test-DscParameterState' -Tag TestDscParameterState {
         Context 'When passing values' {
             It 'Should return true for two identical tables' {
@@ -898,12 +897,6 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     }
 
     Describe 'ActiveDirectoryDsc.Common\Assert-MemberParameters' {
-        It 'Should throw if parameter Members is specified but is empty' {
-            {
-                Assert-MemberParameters -Members @()
-            } | Should -Throw ($script:localizedData.MembersIsNullError -f 'Members', 'MembersToInclude', 'MembersToExclude')
-        }
-
         It 'Should throws if both parameters Members and MembersToInclude are specified' {
             {
                 Assert-MemberParameters -Members @('User1') -MembersToInclude @('User2')
@@ -1246,10 +1239,6 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             Name              = 'a375347'
             ObjectClass       = 'user'
             ObjectGUID        = 'd3c8b8c1-c42b-4533-af7d-3aa73ecd2216'
-        }
-
-        function Restore-ADObject
-        {
         }
 
         $getAdCommonParameterReturnValue = @{Identity = 'something'}
@@ -1676,6 +1665,15 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
+
+            It 'Should return true when two strings are equal' {
+                $mockValues = @{
+                    CurrentValue = [System.String] 'Something'
+                    DesiredValue = [System.String] 'Something'
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -Be $true
+            }
         }
 
         Context 'When comparing integers' {
@@ -1688,6 +1686,33 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
+            It 'Should return true when the values are the same for [System.Int32]' {
+                $mockValues = @{
+                    CurrentValue = [System.Int32] 2
+                    DesiredValue = [System.Int32] 2
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -Be $true
+            }
+
+            It 'Should return false when a value is different for [System.UInt32]' {
+                $mockValues = @{
+                    CurrentValue = [System.UInt32] 1
+                    DesiredValue = [System.UInt32] 2
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -Be $false
+            }
+
+            It 'Should return true when the values are the same for [System.UInt32]' {
+                $mockValues = @{
+                    CurrentValue = [System.UInt32] 2
+                    DesiredValue = [System.UInt32] 2
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -Be $true
+            }
+
             It 'Should return false when a value is different for [System.Int16]' {
                 $mockValues = @{
                     CurrentValue = [System.Int16] 1
@@ -1697,6 +1722,15 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
             }
 
+            It 'Should return true when the values are the same for [System.Int16]' {
+                $mockValues = @{
+                    CurrentValue = [System.Int16] 2
+                    DesiredValue = [System.Int16] 2
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -Be $true
+            }
+
             It 'Should return false when a value is different for [System.UInt16]' {
                 $mockValues = @{
                     CurrentValue = [System.UInt16] 1
@@ -1704,6 +1738,15 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 }
 
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
+            }
+
+            It 'Should return true when the values are the same for [System.UInt16]' {
+                $mockValues = @{
+                    CurrentValue = [System.UInt16] 2
+                    DesiredValue = [System.UInt16] 2
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -Be $true
             }
 
             It 'Should return false when a Integer value is missing' {
@@ -2109,21 +2152,21 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Assert-MockCalled -CommandName New-PSDrive -Exactly -Times 0 -Scope Context
             }
         }
-
     }
 
     Describe 'ActiveDirectoryDsc.Common\Test-ADReplicationSite' {
         BeforeAll {
-            function Get-ADDomainController
-            {
-            }
-
-            function Get-ADReplicationSite
-            {
-            }
+            $mockAdministratorUser = 'admin@contoso.com'
+            $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12'
+            $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                $mockAdministratorUser,
+                ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
+            )
 
             Mock -CommandName Get-ADDomainController -MockWith {
-                return $env:COMPUTERNAME
+                return @{
+                    HostName = $env:COMPUTERNAME
+                }
             }
         }
 
@@ -2135,7 +2178,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return $false' {
-                $testADReplicationSiteResult = Test-ADReplicationSite -SiteName 'TestSite' -DomainName 'contoso.com'
+                $testADReplicationSiteResult = Test-ADReplicationSite -SiteName 'TestSite' -DomainName 'contoso.com' -Credential $mockAdministratorCredential
                 $testADReplicationSiteResult | Should -BeFalse
 
                 Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
@@ -2151,7 +2194,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return $true' {
-                $testADReplicationSiteResult = Test-ADReplicationSite -SiteName 'TestSite' -DomainName 'contoso.com'
+                $testADReplicationSiteResult = Test-ADReplicationSite -SiteName 'TestSite' -DomainName 'contoso.com' -Credential $mockAdministratorCredential
                 $testADReplicationSiteResult | Should -BeTrue
 
                 Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
@@ -2408,6 +2451,61 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             Assert-VerifiableMock
+        }
+
+        Context 'When the Find-DomainController throws an authentication exception' {
+            BeforeAll {
+                $mockErrorMessage = 'The user name or password is incorrect.'
+
+                Mock -CommandName Find-DomainControllerFindOneWrapper -MockWith {
+                    $exceptionWithInnerException = New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
+                    -ArgumentList @(
+                        $mockErrorMessage,
+                        (New-Object -TypeName 'System.Security.Authentication.AuthenticationException')
+                    )
+
+                    $newObjectParameters = @{
+                        TypeName     = 'System.Management.Automation.ErrorRecord'
+                        ArgumentList = @(
+                            $exceptionWithInnerException,
+                            'AuthenticationException',
+                            'InvalidOperation',
+                            $null
+                        )
+                    }
+
+                    throw New-Object @newObjectParameters
+                }
+            }
+
+            Context 'When the parameter WaitForValidCredentials is not specified' {
+                It 'Should throw the correct error' {
+                    { Find-DomainController -DomainName $mockDomainName -Verbose } | Should -Throw $mockErrorMessage
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the parameter WaitForValidCredentials is set to $false' {
+                It 'Should throw the correct error' {
+                    { Find-DomainController -DomainName $mockDomainName -WaitForValidCredentials:$false -Verbose } | Should -Throw $mockErrorMessage
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the parameter WaitForValidCredentials is set to $true' {
+                BeforeAll {
+                    Mock -CommandName Write-Warning
+                }
+
+                It 'Should not throw an exception' {
+                    { Find-DomainController -DomainName $mockDomainName -WaitForValidCredentials -Verbose } | Should -Not -Throw
+
+                    Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
+                }
+            }
         }
     }
 }

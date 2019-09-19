@@ -12,7 +12,6 @@ ConvertFrom-StringData @'
     UnableToCompareType                 = Unable to compare the type {0} as it is not handled by the Test-DscPropertyState cmdlet. (ADCOMMON0009)
     ModuleNotFoundError                 = Please ensure that the PowerShell module for role '{0}' is installed. (ADCOMMON0010)
     MembersAndIncludeExcludeError       = The '{0}' and '{1}' and/or '{2}' parameters conflict. The '{0}' parameter should not be used in any combination with the '{1}' and '{2}' parameters. (ADCOMMON0011)
-    MembersIsNullError                  = The Members parameter value is null. The '{0}' parameter must be provided if neither '{1}' nor '{2}' is provided. (ADCOMMON0012)
     IncludeAndExcludeConflictError      = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values. (ADCOMMON0014)
     IncludeAndExcludeAreEmptyError      = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters. (ADCOMMON0015)
     RecycleBinRestoreFailed             = Failed restoring {0} ({1}) from the recycle bin. (ADCOMMON0017)
@@ -50,4 +49,6 @@ ConvertFrom-StringData @'
     FailedToFindDomainController        = No domain controller was found in the domain '{0}'. (ADCOMMON0051)
     SearchingForDomainController        = Searching for a domain controller in the domain '{0}'. (ADCOMMON0052)
     SearchingForDomainControllerInSite  = Searching for a domain controller in the site '{0}' in the domain '{1}'. (ADCOMMON0053)
+    IgnoreCredentialError               = Suppressing the credential error '{0}' with the message '{1}'. (ADCOMMON0054)
+    NoObjectFoundInRecycleBin           = Did not find a restorable object in the recycle bin. (ADCOMMON0055)
 '@
