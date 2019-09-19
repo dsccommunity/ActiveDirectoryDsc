@@ -61,7 +61,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Due to the length of the change log what have change in this release can be found here https://github.com/PowerShell/ActiveDirectoryDsc/blob/dev/CHANGELOG.md#4100.'
+        ReleaseNotes = 'We could not add the change log to the release notes due to the length of the change log. What have change in this release can be found here https://github.com/PowerShell/ActiveDirectoryDsc/blob/dev/CHANGELOG.md#4100.'
 
     } # End of PSData hashtable
 
