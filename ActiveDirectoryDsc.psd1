@@ -156,8 +156,6 @@ PrivateData = @{
   - Updated integration test to be able to catch when a computer account
     cannot be restored.
 
-'
-
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
