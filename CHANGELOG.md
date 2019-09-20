@@ -1,6 +1,7 @@
 # Change log for ActiveDirectoryDsc
 
 ## Unreleased
+
 - Changes to ADReplicationSite
   - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
   - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
