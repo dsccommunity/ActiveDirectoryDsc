@@ -21,6 +21,10 @@
     Write - Boolean
     Specifies if the Default-First-Site-Name should be renamed if it exists. Default value is $false.
 
+.PARAMETER Description
+    Write - String
+    Specifies a description of the object. This parameter sets the value of the Description property for the object. The LDAP Display Name (ldapDisplayName) for this property is 'description'.
+
 .EXAMPLE 1
 
 This configuration will create an Active Directory replication site
@@ -80,4 +84,22 @@ Configuration ADReplicationSite_RemoveADReplicationSite_Config
     }
 }
 
+.EXAMPLE 4
 
+This configuration will set the AD Relication Site description for
+a site called SeattleSite
+
+Configuration ADReplicationSite_CreateADReplicationSite_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node localhost
+    {
+        ADReplicationSite 'SeattleSite'
+        {
+            Ensure      = 'Present'
+            Name        = 'Seattle'
+            Description = 'Seattle Head Office'
+        }
+    }
+}
