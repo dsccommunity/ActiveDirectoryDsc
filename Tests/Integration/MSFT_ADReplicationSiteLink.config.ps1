@@ -132,6 +132,102 @@ Configuration MSFT_ADReplicationSiteLink_SetAttributes_Config
 
 <#
     .SYNOPSIS
+        Enable Change Notification
+#>
+Configuration MSFT_ADReplicationSiteLink_SetChangeNotification_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSiteLink 'Integration_Test'
+        {
+            Name                          = 'Integration1-Integration2'
+            SitesIncluded                 = @('Integration1', 'Integration3')
+            Description                   = 'Integration Test Site Link'
+            Cost                          = 20
+            ReplicationFrequencyInMinutes = 15
+            OptionChangeNotification      = $true
+            Ensure                        = 'Present'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Enable TWOWAY_SYNC
+        Should also leave Change notification enabled from previous config
+#>
+Configuration MSFT_ADReplicationSiteLink_SetTwoWaySync_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSiteLink 'Integration_Test'
+        {
+            Name                          = 'Integration1-Integration2'
+            SitesIncluded                 = @('Integration1', 'Integration3')
+            Description                   = 'Integration Test Site Link'
+            Cost                          = 20
+            ReplicationFrequencyInMinutes = 15
+            OptionTwoWaySync              = $true
+            Ensure                        = 'Present'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Enable Disabling Compression
+        Should also leave Change notification and TwoWay enabled from previous config
+#>
+Configuration MSFT_ADReplicationSiteLink_SetDisableCompression_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSiteLink 'Integration_Test'
+        {
+            Name                          = 'Integration1-Integration2'
+            SitesIncluded                 = @('Integration1', 'Integration3')
+            Description                   = 'Integration Test Site Link'
+            Cost                          = 20
+            ReplicationFrequencyInMinutes = 15
+            OptionDisableCompression      = $true
+            Ensure                        = 'Present'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Clear options when value = 0
+#>
+Configuration MSFT_ADReplicationSiteLink_ClearOptions_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSiteLink 'Integration_Test'
+        {
+            Name                          = 'Integration1-Integration2'
+            SitesIncluded                 = @('Integration1', 'Integration3')
+            Description                   = 'Integration Test Site Link'
+            Cost                          = 20
+            ReplicationFrequencyInMinutes = 15
+            OptionChangeNotification      = $false
+            OptionTwoWaySync              = $false
+            OptionDisableCompression      = $false
+            Ensure                        = 'Present'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
         Remove a SiteLink
 #>
 Configuration MSFT_ADReplicationSiteLink_RemoveSiteLink_Config

@@ -61,6 +61,9 @@ try
             ReplicationFrequencyInMinutes = 180
             SitesIncluded = @('site1', 'site2')
             SitesExcluded = @()
+            OptionChangeNotification = $false
+            OptionTwoWaySync = $false
+            OptionDisableCompression = $false
             Ensure = 'Present'
         }
 
@@ -88,6 +91,10 @@ try
                     $getResult.SitesIncluded                 | Should -Be $targetResourceParameters.SitesIncluded
                     $getResult.SitesExcluded                 | Should -Be $targetResourceParameters.SitesExcluded
                     $getResult.Ensure                        | Should -Be $targetResourceParameters.Ensure
+                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParametersSitesExcluded.OptionChangeNotification
+                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParametersSitesExcluded.OptionTwoWaySync
+                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParametersSitesExcluded.OptionDisableCompression
+
                 }
             }
 
@@ -104,6 +111,10 @@ try
                     $getResult.SitesIncluded                 | Should -BeNullOrEmpty
                     $getResult.SitesExcluded                 | Should -BeNullOrEmpty
                     $getResult.Ensure                        | Should -Be 'Absent'
+                    $getResult.OptionChangeNotification      | Should -BeFalse
+                    $getResult.OptionTwoWaySync              | Should -BeFalse
+                    $getResult.OptionDisableCompression      | Should -BeFalse
+
                 }
             }
 
@@ -129,6 +140,9 @@ try
                     $getResult.SitesIncluded                 | Should -Be $targetResourceParametersSitesExcluded.SitesIncluded
                     $getResult.SitesExcluded                 | Should -Be $targetResourceParametersSitesExcluded.SitesExcluded
                     $getResult.Ensure                        | Should -Be $targetResourceParametersSitesExcluded.Ensure
+                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParametersSitesExcluded.OptionChangeNotification
+                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParametersSitesExcluded.OptionTwoWaySync
+                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParametersSitesExcluded.OptionDisableCompression
                 }
             }
         }
@@ -199,6 +213,30 @@ try
 
                     Test-TargetResource @targetResourceParametersSitesExcluded | Should -BeFalse
                 }
+
+                It 'Should return $false with OptionChangeNotification $true is non compliant' {
+                    $mockTargetResourceNotInDesiredState['OptionChangeNotification'] = $true
+
+                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
+
+                    Test-TargetResource @targetResourceParameters | Should -BeFalse
+                }
+
+                It 'Should return $false with OptionTwoWaySync $true is non compliant' {
+                    $mockTargetResourceNotInDesiredState['OptionTwoWaySync'] = $true
+
+                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
+
+                    Test-TargetResource @targetResourceParameters | Should -BeFalse
+                }
+
+                It 'Should return $false with OptionDisableCompression $true is non compliant' {
+                    $mockTargetResourceNotInDesiredState['OptionDisableCompression'] = $true
+
+                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
+
+                    Test-TargetResource @targetResourceParameters | Should -BeFalse
+                }
             }
         }
 
@@ -247,7 +285,12 @@ try
                     Ensure        = 'Present'
                 }
 
-                Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Present' ; SitesIncluded = 'Site0'} }
+                Mock -CommandName Get-TargetResource -MockWith { @{
+                    Ensure = 'Present' ;
+                    SitesIncluded = 'Site0';
+                    OptionDisableCompression = $false;
+                    OptionChangeNotification = $false;
+                    OptionTwoWaySync = $false} }
                 Mock -CommandName Set-ADReplicationSiteLink
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Remove-ADReplicationSiteLink
