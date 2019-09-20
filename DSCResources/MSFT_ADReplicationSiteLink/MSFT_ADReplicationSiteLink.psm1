@@ -33,7 +33,7 @@ function Get-TargetResource
 
     try
     {
-        $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties 'Description'
+        $siteLink = Get-ADReplicationSiteLink -Identity $Name -Properties 'Description', 'Options'
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
@@ -46,6 +46,9 @@ function Get-TargetResource
             ReplicationFrequencyInMinutes = $null
             SitesIncluded                 = $null
             SitesExcluded                 = $SitesExcluded
+            OptionChangeNotification      = $false
+            OptionTwoWaySync              = $false
+            OptionDisableCompression      = $false
             Ensure                        = 'Absent'
         }
         $siteLink = $null
@@ -68,6 +71,15 @@ function Get-TargetResource
             }
         }
 
+        if ($Sitelink.Options)
+        {
+            $SiteLinkOptions = Get-EnabledOptions -OptionValue $siteLink.Options
+        }
+        else
+        {
+            $SiteLinkOptions = Get-EnabledOptions -OptionValue 0
+        }
+
         $sitesExcludedEvaluated = $SitesExcluded |
             Where-Object -FilterScript { $_ -notin $siteCommonNames }
 
@@ -78,6 +90,9 @@ function Get-TargetResource
             ReplicationFrequencyInMinutes = $siteLink.ReplicationFrequencyInMinutes
             SitesIncluded                 = $siteCommonNames
             SitesExcluded                 = $sitesExcludedEvaluated
+            OptionChangeNotification      = $SiteLinkOptions.USE_NOTIFY
+            OptionTwoWaySync              = $SiteLinkOptions.TWOWAY_SYNC
+            OptionDisableCompression      = $SiteLinkOptions.DISABLE_COMPRESSION
             Ensure                        = 'Present'
         }
     }
@@ -140,6 +155,18 @@ function Set-TargetResource
         $SitesExcluded,
 
         [Parameter()]
+        [System.Boolean]
+        $OptionChangeNotification = $false,
+
+        [Parameter()]
+        [System.Boolean]
+        $OptionTwoWaySync = $false,
+
+        [Parameter()]
+        [System.Boolean]
+        $OptionDisableCompression = $false,
+
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
@@ -170,6 +197,8 @@ function Set-TargetResource
                 Identity = $Name
             }
 
+            $replacePraams = @{}
+
             # build the SitesIncluded hashtable.
             $sitesIncludedParameters = @{ }
             if ($SitesExcluded)
@@ -199,13 +228,58 @@ function Set-TargetResource
                 $setParameters.Add('SitesIncluded', $sitesIncludedParameters)
             }
 
+            $OptionParams = 'OptionsChangeNotification', 'OptionTwoWaySync', 'OptionDisableCompression'
+
+            # Calculate the options required without impacting existing options
+            if ($PSBoundParameters.Keys -contains $OptionParams)
+            {
+                if ($PSBoundParameters.Keys -contains 'OptionChangeNotification')
+                {
+                    $ChangeNotification = $OptionChangeNotification
+                }
+                else
+                {
+                    $ChangeNotification = $currentADSiteLink.OptionChangeNotification
+                }
+
+                if ($PSBoundParameters.keys -contains 'OptionTwoWaySync')
+                {
+                    $TwoWaySync = $OptionTwoWaySync
+                }
+                else
+                {
+                    $TwoWaySync = $currentADSiteLink.OptionTwoWaySync
+                }
+
+                if ($PSBoundParameters.Keys -contains 'OptionDisableCompression')
+                {
+                    $DisableCompression = $OptionDisableCompression
+                }
+                else
+                {
+                    $DisableCompression = $currentADSiteLink.OptionDisableCompression
+                }
+
+                $OptionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $ChangeNotification -OptionTwoWaySync $TwoWaySync -OptionDisableCompression $DisableCompression
+
+                if ($OptionsValue -gt 0)
+                {
+                    $replacePraams.Add('Options', $OptionsValue)
+                }
+            }
+
             # Add the rest of the parameters.
             foreach ($parameter in $PSBoundParameters.Keys)
             {
-                if ($parameter -notmatch 'SitesIncluded|SitesExcluded|Name|Ensure')
+                if ($parameter -notmatch 'SitesIncluded|SitesExcluded|Name|Ensure|OptionChangeNotification|OptionTwoWaySync|OptionDisableCompression')
                 {
                     $setParameters.Add($parameter, $PSBoundParameters[$parameter])
                 }
+            }
+
+            if ($replacePraams.Count -gt 0)
+            {
+                $setParameters.Add('Replace', $replacePraams)
             }
 
             Set-ADReplicationSiteLink @setParameters
@@ -275,6 +349,18 @@ function Test-TargetResource
         $SitesExcluded,
 
         [Parameter()]
+        [System.Boolean]
+        $OptionChangeNotification = $false,
+
+        [Parameter()]
+        [System.Boolean]
+        $OptionTwoWaySync = $false,
+
+        [Parameter()]
+        [System.Boolean]
+        $OptionDisableCompression = $false,
+
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
@@ -309,14 +395,36 @@ function Test-TargetResource
         }
     }
 
-    # Test for Description|ReplicationFrequencyInMinutes|Cost.
     foreach ($parameter in $PSBoundParameters.Keys)
     {
+        # Test for Description|ReplicationFrequencyInMinutes|Cost.
         if ($parameter -match 'Description|ReplicationFrequencyInMinutes|Cost')
         {
             if ($PSBoundParameters[$parameter] -ne $currentSiteLink[$parameter])
             {
                 Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameter, $($currentSiteLink[$parameter]), $($PSBoundParameters[$parameter]))
+                $isCompliant = $false
+            }
+        }
+
+        # Test for Options
+        if ($parameter -match 'OptionChangeNotification|OptionTwoWaySync|OptionDisableCompression')
+        {
+            if ($PSBoundParameters.OptionChangeNotification -ne $currentSiteLink.OptionChangeNotification)
+            {
+                Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameter, $($currentSiteLink.OptionChangeNotification), $($PSBoundParameters[$parameter]))
+                $isCompliant = $false
+            }
+
+            if ($PSBoundParameters.OptionTwoWaySync -ne $currentSiteLink.OptionTwoWaySync)
+            {
+                Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameter, $($currentSiteLink.OptionTwoWaySync), $($PSBoundParameters[$parameter]))
+                $isCompliant = $false
+            }
+
+            if ($PSBoundParameters.OptionDisableCompression -ne $currentSiteLink.OptionDisableCompression)
+            {
+                Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameter, $($currentSiteLink.OptionDisableCompression), $($PSBoundParameters[$parameter]))
                 $isCompliant = $false
             }
         }
@@ -351,6 +459,112 @@ function Resolve-SiteLinkName
     $adSite = Get-ADReplicationSite -Identity $SiteName
 
     return $adSite.Name
+}
+
+<#
+    .SYNOPSIS
+        Calculates the options enabled on a Site Link
+
+    .PARAMETER OptionsValue
+        The value of currently enabled options
+#>
+function Get-EnabledOptions
+{
+    [OutputType([System.Collections.Hashtable])]
+    [CmdletBinding()]
+    # Parameter help description
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.Int32]
+        $OptionValue
+    )
+
+    $stringValue = [convert]::ToString($OptionValue, 2)
+
+    $returnvalue = @{
+        USE_NOTIFY          = $false
+        TWOWAY_SYNC         = $false
+        DISABLE_COMPRESSION = $false
+    }
+
+    $optNotify = $stringValue.Substring($stringValue.Length -1,1)
+
+    if ($optNotify -eq '1')
+    {
+        $returnvalue.USE_NOTIFY = $true
+    }
+
+    if ($stringValue.Length -gt 1)
+    {
+        $optTwoWay = $stringValue.Substring($stringValue.Length -2,1)
+        if ($optTwoWay -eq '1')
+        {
+            $returnvalue.TWOWAY_SYNC = $true
+        }
+    }
+
+    if ($stringValue.Length -gt 2)
+    {
+        $optCompres = $stringValue.Substring($stringValue.Length -3,1)
+        if ($optCompres -eq '1')
+        {
+            $returnvalue.DISABLE_COMPRESSION = $true
+        }
+    }
+    return $returnvalue
+}
+
+<#
+    .SYNOPSIS
+        Calculates the options value for the given choices
+
+    .PARAMETER OptionChangeNotification
+        Enable/Disable Change notification replication
+
+    .PARAMETER OptionTwoWaySync
+        Enable/Disable Two Way sync
+
+    .PARAMETER OptionDisableCompression
+        Enable/Disable Compression
+#>
+function ConvertTo-EnabledOptions
+{
+    [OutputType([System.Int32])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [System.Boolean]
+        $OptionChangeNotification,
+
+        [Parameter()]
+        [System.Boolean]
+        $OptionTwoWaySync,
+
+        [Parameter()]
+        [System.Boolean]
+        $OptionDisableCompression
+    )
+
+    $returnValue = 0
+
+    if ($OptionChangeNotification)
+    {
+        $returnValue = $returnValue + 1
+    }
+
+    if ($OptionTwoWaySync)
+    {
+        $returnValue = $returnValue + 2
+    }
+
+    if ($OptionDisableCompression)
+    {
+        $returnValue = $returnValue + 4
+    }
+
+    return $returnvalue
 }
 
 Export-ModuleMember -Function *-TargetResource
