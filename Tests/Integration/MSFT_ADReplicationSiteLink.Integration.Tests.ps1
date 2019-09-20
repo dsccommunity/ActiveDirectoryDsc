@@ -472,7 +472,7 @@ try
                 Test-DscConfiguration -Verbose | Should -Be 'True'
             }
         }
-pause
+
         $configurationName = "$($script:dscResourceName)_RemoveSiteLink_Config"
 
         Context ('When using configuration {0}' -f $configurationName) {
