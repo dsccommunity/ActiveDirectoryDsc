@@ -21,7 +21,11 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Name
+        $Name,
+
+        [Parameter()]
+        [System.Boolean]
+        $RenameDefaultFirstSiteName
     )
 
     # Get the replication site filtered by it's name. If the site is not
@@ -36,7 +40,7 @@ function Get-TargetResource
             Ensure                     = 'Absent'
             Name                       = $Name
             Description                = $null
-            RenameDefaultFirstSiteName = $false
+            RenameDefaultFirstSiteName = $RenameDefaultFirstSiteName
         }
     }
     else
@@ -46,7 +50,7 @@ function Get-TargetResource
             Ensure                     = 'Present'
             Name                       = $Name
             Description                = $replicationSite.Description
-            RenameDefaultFirstSiteName = $false
+            RenameDefaultFirstSiteName = $RenameDefaultFirstSiteName
         }
     }
 
@@ -91,26 +95,26 @@ function Set-TargetResource
         $Description
     )
 
-    $createOrUpdate = Get-TargetResource $Name
+    $getTargetResourceResult = Get-TargetResource -Name $Name -RenameDefaultFirstSiteName $RenameDefaultFirstSiteName
 
     if ($Ensure -eq 'Present')
     {
-        $defaultFirstSiteName = Get-ADReplicationSite -Filter { Name -eq 'Default-First-Site-Name' } -ErrorAction SilentlyContinue
-
-        <#
-            Check if the user specified to rename the Default-First-Site-Name
-            and if it still exists. If both is true, rename the replication site
-            instead of creating a new site.
-        #>
-        if ($RenameDefaultFirstSiteName -and ($null -ne $defaultFirstSiteName))
+        if ($getTargetResourceResult.Ensure -eq 'Absent')
         {
-            Write-Verbose -Message ($script:localizedData.AddReplicationSiteDefaultFirstSiteName -f $Name)
+            $defaultFirstSiteName = Get-ADReplicationSite -Filter { Name -eq 'Default-First-Site-Name' } -ErrorAction SilentlyContinue
 
-            Rename-ADObject -Identity $defaultFirstSiteName.DistinguishedName -NewName $Name -ErrorAction Stop
-        }
-        else
-        {
-            if ($createOrUpdate.Ensure -eq 'Absent')
+            <#
+                Check if the user specified to rename the Default-First-Site-Name
+                and if it still exists. If both is true, rename the replication site
+                instead of creating a new site.
+            #>
+            if ($RenameDefaultFirstSiteName -and $null -ne $defaultFirstSiteName)
+            {
+                Write-Verbose -Message ($script:localizedData.AddReplicationSiteDefaultFirstSiteName -f $Name)
+
+                Rename-ADObject -Identity $defaultFirstSiteName.DistinguishedName -NewName $Name -ErrorAction Stop
+            }
+            else
             {
                 Write-Verbose -Message ($script:localizedData.AddReplicationSite -f $Name)
 
@@ -119,7 +123,7 @@ function Set-TargetResource
                     ErrorAction = 'Stop'
                 }
 
-                if($PSBoundParameters.ContainsKey('Description'))
+                if ($PSBoundParameters.ContainsKey('Description'))
                 {
                     $newADReplicationSiteParameters['Description'] = $Description
                 }
@@ -128,7 +132,7 @@ function Set-TargetResource
             }
         }
 
-        if($PSBoundParameters.ContainsKey('Description') -and ($createOrUpdate.Ensure -eq 'Present' -or $RenameDefaultFirstSiteName))
+        if ($PSBoundParameters.ContainsKey('Description') -and $getTargetResourceResult.Description -ne $Description)
         {
             Write-Verbose -Message ($script:localizedData.UpdateReplicationSite -f $Name)
             Set-ADReplicationSite -Identity $Name -Description $Description
@@ -187,13 +191,13 @@ function Test-TargetResource
         $Description
     )
 
-    $currentConfiguration = Get-TargetResource -Name $Name
+    $getTargetResourceResult = Get-TargetResource -Name $Name -RenameDefaultFirstSiteName $RenameDefaultFirstSiteName
     $configurationCompliant = $true
 
-    if ($currentConfiguration.Ensure -eq 'Absent')
+    if ($getTargetResourceResult.Ensure -eq 'Absent')
     {
         # Site doesn't exist
-        if ($currentConfiguration.Ensure -eq $Ensure)
+        if ($getTargetResourceResult.Ensure -eq $Ensure)
         {
             # Site should not exist
             Write-Verbose -Message ($script:localizedData.ReplicationSiteInDesiredState -f $Name)
@@ -205,12 +209,13 @@ function Test-TargetResource
             $configurationCompliant = $false
         }
     }
-    else {
+    else
+    {
         # Site Exists
-        if ($currentConfiguration.Ensure -eq $Ensure)
+        if ($getTargetResourceResult.Ensure -eq $Ensure)
         {
             # Site should exist
-            if ($currentConfiguration.Description -ne $Description)
+            if ($getTargetResourceResult.Description -ne $Description)
             {
                 Write-Verbose -Message ($script:localizedData.ReplicationSiteNotInDesiredState -f $Name)
                 $configurationCompliant = $false
