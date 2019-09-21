@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Changes to ActiveDirectoryDsc
+  - Resolved custom Script Analyzer rules that was added to the test framework.
 - Changes to ADReplicationSite
   - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
   - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
