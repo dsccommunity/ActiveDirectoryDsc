@@ -300,6 +300,15 @@ try
                     Assert-MockCalled -CommandName Set-ADReplicationSubnet -ParameterFilter { $Location -eq 'OtherLocation' } -Scope It -Times 1 -Exactly
                 }
 
+                It 'Should update the subnet location to $null when an empty string is passed' {
+
+                    # Act
+                    Set-TargetResource -Ensure $testPresentParameters.Ensure -Name $testPresentParameters.Name -Site $testPresentParameters.Site -Location ''
+
+                    # Assert
+                    Assert-MockCalled -CommandName Set-ADReplicationSubnet -ParameterFilter { $Location -eq $null } -Scope It -Times 1 -Exactly
+                }
+
                 It 'Should update the subnet description' {
 
                     # Act
