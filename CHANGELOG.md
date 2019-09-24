@@ -3,6 +3,15 @@
 ## Unreleased
 
 - Changes to ActiveDirectoryDsc
+  - Resolved custom Script Analyzer rules that was added to the test framework.
+- Changes to ADReplicationSite
+  - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
+  - Correct value returned for RenameDefaultFirstSiteName ([issue #502](https://github.com/PowerShell/ActiveDirectoryDsc/issues/502)).
+
+## 4.1.0.0
+
+- Changes to ActiveDirectoryDsc
   - New resource ADDomainControllerProperties ([issue #301](https://github.com/PowerShell/ActiveDirectoryDsc/issues/301)).
   - New resource ADForestFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
   - New resource ADDomainFunctionalLevel ([issue #200](https://github.com/PowerShell/ActiveDirectoryDsc/issues/200)).
