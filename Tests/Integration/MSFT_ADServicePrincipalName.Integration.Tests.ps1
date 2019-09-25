@@ -34,6 +34,42 @@ try
             $resourceId = "[$($script:dscResourceFriendlyName)]Integration_Test"
         }
 
+        try
+        {
+            New-ADUser SQL01Svc -ErrorAction Stop
+        }
+        catch [Microsoft.ActiveDirectory.Management.ADIdentityAlreadyExistsException]
+        {
+            Write-Verbose 'User already exists, continue'
+        }
+
+        $configurationName = "$($script:dscResourceName)_PreReqs_Config"
+
+        Context ('When using configuration {0}' -f $configurationName) {
+            It 'Should compile and apply the MOF without throwing' {
+                {
+                    $configurationParameters = @{
+                        OutputPath        = $TestDrive
+                        # The variable $ConfigurationData was dot-sourced above.
+                        ConfigurationData = $ConfigurationData
+                    }
+
+                    & $configurationName @configurationParameters
+
+                    $startDscConfigurationParameters = @{
+                        Path         = $TestDrive
+                        ComputerName = 'localhost'
+                        Wait         = $true
+                        Verbose      = $true
+                        Force        = $true
+                        ErrorAction  = 'Stop'
+                    }
+
+                    Start-DscConfiguration @startDscConfigurationParameters
+                } | Should -Not -Throw
+            }
+        }
+
         $configurationName = "$($script:dscResourceName)_AddUserServicePrincipalName_Config"
 
         Context ('When using configuration {0}' -f $configurationName) {
@@ -315,10 +351,46 @@ try
                 Test-DscConfiguration -Verbose | Should -Be 'True'
             }
         }
+
+        $configurationName = "$($script:dscResourceName)_RemovePreReqs_Config"
+
+        Context ('When using configuration {0}' -f $configurationName) {
+            It 'Should compile and apply the MOF without throwing' {
+                {
+                    $configurationParameters = @{
+                        OutputPath        = $TestDrive
+                        # The variable $ConfigurationData was dot-sourced above.
+                        ConfigurationData = $ConfigurationData
+                    }
+
+                    & $configurationName @configurationParameters
+
+                    $startDscConfigurationParameters = @{
+                        Path         = $TestDrive
+                        ComputerName = 'localhost'
+                        Wait         = $true
+                        Verbose      = $true
+                        Force        = $true
+                        ErrorAction  = 'Stop'
+                    }
+
+                    Start-DscConfiguration @startDscConfigurationParameters
+                } | Should -Not -Throw
+            }
+        }
     }
 }
 finally
 {
+    try
+    {
+        Get-ADUser SQL01Svc | Remove-ADUser -Confirm:$false -ErrorAction Stop
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        Write-Verbose 'User does not exist, continue'
+    }
+
     #region FOOTER
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion

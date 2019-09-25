@@ -14,7 +14,6 @@ if (Test-Path -Path $configFile)
 else
 {
     $currentDomain = Get-ADDomain
-    $netBiosDomainName = $currentDomain.NetBIOSName
     $domainDistinguishedName = $currentDomain.DistinguishedName
 
     $ConfigurationData = @{
@@ -24,6 +23,24 @@ else
                 CertificateFile = $env:DscPublicCertificatePath
             }
         )
+    }
+}
+
+<#
+    .DESCRIPTION
+        This configuration will add a Computer to the domain
+#>
+Configuration MSFT_ADServicePrincipalName_PreReqs_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node $AllNodes.NodeName
+    {
+        ADComputer 'Integration_Test'
+        {
+            ComputerName = 'IIS01'
+            Ensure       = 'Present'
+        }
     }
 }
 
@@ -137,6 +154,24 @@ Configuration MSFT_ADServicePrincipalName_RemoveComputerServicePrincipalName_Con
             ServicePrincipalName = 'HTTP/web.contoso.com'
             Account              = 'IIS01$'
             Ensure               = 'Absent'
+        }
+    }
+}
+
+<#
+    .DESCRIPTION
+        This configuration will remove a Computer from the domain
+#>
+Configuration MSFT_ADServicePrincipalName_RemovePreReqs_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node $AllNodes.NodeName
+    {
+        ADComputer 'Integration_Test'
+        {
+            ComputerName = 'IIS01'
+            Ensure       = 'Absent'
         }
     }
 }
