@@ -71,7 +71,7 @@ function Get-TargetResource
             }
         }
 
-        if ($Sitelink.Options)
+        if ($Sitelink.Options -gt 0)
         {
             $SiteLinkOptions = Get-EnabledOptions -OptionValue $siteLink.Options
         }
