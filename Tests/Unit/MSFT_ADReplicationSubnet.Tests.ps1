@@ -92,7 +92,7 @@ try
                     $result.Name     | Should -Be $testDefaultParameters.Name
                     $result.Site     | Should -Be 'Default-First-Site-Name'
                     $result.Location | Should -Be 'Seattle'
-                    $result.Description | should -Be 'Default First Site Description'
+                    $result.Description | Should -Be 'Default First Site Description'
                 }
             }
 
@@ -188,8 +188,14 @@ try
 
                 It 'Should return false for wrong Description' {
 
-                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location $testDefaultParameters.Location -Description 'Test description fail'
+                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location $testDefaultParameters.Location -Description 'Test description mismatch'
                     $result | Should -BeFalse
+                }
+
+                It 'Should return true for matching Description' {
+
+                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location $testDefaultParameters.Location -Description $testDefaultParameters.Description
+                    $result | Should -BeTrue
                 }
             }
         }
