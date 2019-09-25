@@ -8,6 +8,9 @@
   - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
   - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
   - Correct value returned for RenameDefaultFirstSiteName ([issue #502](https://github.com/PowerShell/ActiveDirectoryDsc/issues/502)).
+- Changes to ADReplicationSubnet
+  - Added 'Description' attribute parameter ([issue #503](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500))
+  - Added Integration testing ([issue #357](https://github.com/PowerShell/ActiveDirectoryDsc/issues/357))
 
 ## 4.1.0.0
 
