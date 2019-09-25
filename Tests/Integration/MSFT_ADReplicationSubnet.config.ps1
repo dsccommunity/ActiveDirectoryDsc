@@ -25,6 +25,30 @@ else
 
 <#
     .SYNOPSIS
+        Creates a site as part of prerequisits.
+#>
+Configuration MSFT_ADReplicationSubnet_CreatePreReq_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSite 'Site1'
+        {
+            Ensure      = 'Present'
+            Name        = 'IntegrationTestSite'
+        }
+
+        ADReplicationSite 'Site2'
+        {
+            Ensure      = 'Present'
+            Name        = 'IntegrationTestSite2'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
         Creates a site subnet.
 #>
 Configuration MSFT_ADReplicationSubnet_CreateSubnet_Config
@@ -33,11 +57,11 @@ Configuration MSFT_ADReplicationSubnet_CreateSubnet_Config
 
     node $AllNodes.NodeName
     {
-        ADReplicationSubnet 'LondonSubnet'
+        ADReplicationSubnet 'Integration_Test'
         {
             Ensure      = 'Present'
             Name        = '10.0.0.0/24'
-            Site        = 'London'
+            Site        = 'IntegrationTestSite'
         }
     }
 }
@@ -52,11 +76,11 @@ Configuration MSFT_ADReplicationSubnet_ChangeSubnetSite_Config
 
     node $AllNodes.NodeName
     {
-        ADReplicationSubnet 'LondonSubnet'
+        ADReplicationSubnet 'Integration_Test'
         {
             Ensure      = 'Present'
             Name        = '10.0.0.0/24'
-            Site        = 'Default-First-Site-Name'
+            Site        = 'IntegrationTestSite2'
         }
     }
 }
@@ -71,11 +95,11 @@ Configuration MSFT_ADReplicationSubnet_ChangeSubnetLocation_Config
 
     node $AllNodes.NodeName
     {
-        ADReplicationSubnet 'LondonSubnet'
+        ADReplicationSubnet 'Integration_Test'
         {
             Ensure      = 'Present'
             Name        = '10.0.0.0/24'
-            Site        = 'Default-First-Site-Name'
+            Site        = 'IntegrationTestSite2'
             Location    = 'Office 12'
         }
     }
@@ -91,11 +115,11 @@ Configuration MSFT_ADReplicationSubnet_ChangeSubnetDescription_Config
 
     node $AllNodes.NodeName
     {
-        ADReplicationSubnet 'LondonSubnet'
+        ADReplicationSubnet 'Integration_Test'
         {
             Ensure      = 'Present'
             Name        = '10.0.0.0/24'
-            Site        = 'Default-First-Site-Name'
+            Site        = 'IntegrationTestSite2'
             Location    = 'Office 12'
             Description = 'Updated Subnet Description'
         }
@@ -112,12 +136,36 @@ Configuration MSFT_ADReplicationSubnet_RemoveSubnet_Config
 
     node $AllNodes.NodeName
     {
-        ADReplicationSubnet 'LondonSubnet'
+        ADReplicationSubnet 'Integration_Test'
         {
             Ensure   = 'Absent'
             Name     = '10.0.0.0/24'
-            Site     = 'Default-First-Site-Name'
+            Site     = 'IntegrationTestSite2'
             Location = 'Datacenter 3'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Creates a site as part of prerequisits.
+#>
+Configuration MSFT_ADReplicationSubnet_RemovePreReq_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSite 'Site1'
+        {
+            Ensure      = 'Absent'
+            Name        = 'IntegrationTestSite'
+        }
+
+        ADReplicationSite 'Site2'
+        {
+            Ensure      = 'Absent'
+            Name        = 'IntegrationTestSite2'
         }
     }
 }
