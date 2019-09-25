@@ -148,7 +148,7 @@ Configuration MSFT_ADReplicationSubnet_RemoveSubnet_Config
 
 <#
     .SYNOPSIS
-        Creates a site as part of prerequisits.
+        Removes the sites as part of prerequisits.
 #>
 Configuration MSFT_ADReplicationSubnet_RemovePreReq_Config
 {
