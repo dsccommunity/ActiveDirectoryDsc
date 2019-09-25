@@ -122,6 +122,15 @@ function Get-TargetResource
     .PARAMETER SitesExcluded
         Specifies the list of sites to remove from a site link.
 
+    .PARAMETER OptionChangeNotification
+        Enables or disables Change Notification Replication on a site link. Default value is $false.
+
+    .PARAMETER OptionTwoWaySync
+        Two Way Sync on a site link. Default value is $false.
+
+    .PARAMETER OptionDisableCompression
+        Enables or disables Compression on a site link. Default value is $false.
+
     .PARAMETER Ensure
         Specifies if the site link is created or deleted.
 #>
@@ -314,6 +323,15 @@ function Set-TargetResource
 
     .PARAMETER SitesExcluded
         Specifies the list of sites to remove from a site link.
+
+    .PARAMETER OptionChangeNotification
+        Enables or disables Change Notification Replication on a site link. Default value is $false.
+
+    .PARAMETER OptionTwoWaySync
+        Two Way Sync on a site link. Default value is $false.
+
+    .PARAMETER OptionDisableCompression
+        Enables or disables Compression on a site link. Default value is $false.
 
     .PARAMETER Ensure
         Specifies if the site link is created or deleted.

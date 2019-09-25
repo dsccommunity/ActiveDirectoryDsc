@@ -8,6 +8,9 @@
   - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
   - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
   - Correct value returned for RenameDefaultFirstSiteName ([issue #502](https://github.com/PowerShell/ActiveDirectoryDsc/issues/502)).
+- Changes to ADReplicationSiteLink
+  - Added Integration testing ([issue #356](https://github.com/PowerShell/ActiveDirectoryDsc/issues/356)).
+  - Added ability to set 'Options' such as Change Notification Replication ([issue #504](https://github.com/PowerShell/ActiveDirectoryDsc/issues/504)).
 
 ## 4.1.0.0
 
