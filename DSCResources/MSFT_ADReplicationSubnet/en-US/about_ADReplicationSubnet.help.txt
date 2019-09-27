@@ -25,6 +25,10 @@
     Write - String
     The location for the Active Directory replication site. Default value is empty ('') location.
 
+.PARAMETER Description
+    Write - String
+    Specifies a description of the object. This parameter sets the value of the Description property for the object.
+
 .EXAMPLE 1
 
 This configuration will create an AD Replication Subnet.
@@ -37,9 +41,10 @@ Configuration ADReplicationSubnet_CreateReplicationSubnet_Config
     {
         ADReplicationSubnet 'LondonSubnet'
         {
-            Name     = '10.0.0.0/24'
-            Site     = 'London'
-            Location = 'Datacenter 3'
+            Name        = '10.0.0.0/24'
+            Site        = 'London'
+            Location    = 'Datacenter 3'
+            Description = 'Datacenter Management Subnet'
         }
     }
 }

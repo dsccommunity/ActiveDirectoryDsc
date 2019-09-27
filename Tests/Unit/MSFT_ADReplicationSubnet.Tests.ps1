@@ -49,8 +49,8 @@ try
         #region Function Get-TargetResource
         Describe 'ADReplicationSubnet\Get-TargetResource' {
             $testDefaultParameters = @{
-                Name = '10.0.0.0/8'
-                Site = 'Default-First-Site-Name'
+                Name        = '10.0.0.0/8'
+                Site        = 'Default-First-Site-Name'
             }
 
             Context 'Subnet does not exist' {
@@ -61,10 +61,11 @@ try
 
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure   | Should -Be 'Absent'
-                    $result.Name     | Should -Be $testDefaultParameters.Name
-                    $result.Site     | Should -Be ''
-                    $result.Location | Should -Be ''
+                    $result.Ensure      | Should -Be 'Absent'
+                    $result.Name        | Should -Be $testDefaultParameters.Name
+                    $result.Site        | Should -Be ''
+                    $result.Location    | Should -BeNullOrEmpty
+                    $result.Description | Should -BeNullOrEmpty
                 }
             }
 
@@ -76,6 +77,7 @@ try
                         Name              = '10.0.0.0/8'
                         Location          = 'Seattle'
                         Site              = 'CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                        Description       = 'Default First Site Description'
                     }
                 }
                 Mock -CommandName Get-ADObject -MockWith {
@@ -90,6 +92,7 @@ try
                     $result.Name     | Should -Be $testDefaultParameters.Name
                     $result.Site     | Should -Be 'Default-First-Site-Name'
                     $result.Location | Should -Be 'Seattle'
+                    $result.Description | Should -Be 'Default First Site Description'
                 }
             }
 
@@ -121,9 +124,10 @@ try
         Describe 'ADReplicationSubnet\Test-TargetResource' {
 
             $testDefaultParameters = @{
-                Name     = '10.0.0.0/8'
-                Site     = 'Default-First-Site-Name'
-                Location = 'Seattle'
+                Name        = '10.0.0.0/8'
+                Site        = 'Default-First-Site-Name'
+                Location    = 'Seattle'
+                Description = 'Default First Site Description'
             }
 
             Context 'Subnet does not exist' {
@@ -151,6 +155,7 @@ try
                         Name              = '10.0.0.0/8'
                         Location          = 'Seattle'
                         Site              = 'CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                        Description       = 'Default First Site Description'
                     }
                 }
                 Mock -CommandName Get-ADObject -MockWith {
@@ -171,14 +176,26 @@ try
 
                 It 'Should return false for wrong site' {
 
-                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site 'WrongSite' -Location $testDefaultParameters.Location
+                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site 'WrongSite' -Location $testDefaultParameters.Location -Description $testDefaultParameters.Description
                     $result | Should -BeFalse
                 }
 
                 It 'Should return false for wrong location' {
 
-                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location 'WringLocation'
+                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location 'WringLocation' -Description $testDefaultParameters.Description
                     $result | Should -BeFalse
+                }
+
+                It 'Should return false for wrong Description' {
+
+                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location $testDefaultParameters.Location -Description 'Test description mismatch'
+                    $result | Should -BeFalse
+                }
+
+                It 'Should return true for matching Description' {
+
+                    $result = Test-TargetResource -Ensure 'Present' -Name $testDefaultParameters.Name -Site $testDefaultParameters.Site -Location $testDefaultParameters.Location -Description $testDefaultParameters.Description
+                    $result | Should -BeTrue
                 }
             }
         }
@@ -187,10 +204,11 @@ try
         #region Function Set-TargetResource
         Describe 'ADReplicationSubnet\Set-TargetResource' {
             $testPresentParameters = @{
-                Ensure   = 'Present'
-                Name     = '10.0.0.0/8'
-                Site     = 'Default-First-Site-Name'
-                Location = 'Seattle'
+                Ensure      = 'Present'
+                Name        = '10.0.0.0/8'
+                Site        = 'Default-First-Site-Name'
+                Location    = 'Seattle'
+                Description = 'Default First Site Description'
             }
             $testAbsentParameters = @{
                 Ensure   = 'Absent'
@@ -211,6 +229,7 @@ try
                         Name              = '10.0.0.0/8'
                         Location          = 'Seattle'
                         Site              = 'CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                        Description       = 'Default First Site Description'
                     }
                 }
 
@@ -232,6 +251,7 @@ try
                         Name              = '10.0.0.0/8'
                         Location          = 'Seattle'
                         Site              = 'CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                        Description       = 'Default First Site Description'
                     }
                 }
                 Mock -CommandName Get-ADObject -MockWith {
@@ -244,6 +264,7 @@ try
                         Name              = '10.0.0.0/8'
                         Location          = 'Seattle'
                         Site              = 'CN=OtherSite,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                        Description       = 'Default First Site Description'
                     }
                 }
                 Mock -CommandName Set-ADReplicationSubnet -ParameterFilter { $Location -eq 'OtherLocation' } -MockWith {
@@ -252,6 +273,17 @@ try
                         Name              = '10.0.0.0/8'
                         Location          = 'OtherLocation'
                         Site              = 'CN=OtherSite,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                        Description       = 'Default First Site Description'
+                    }
+                }
+
+                Mock -CommandName Set-ADReplicationSubnet -ParameterFilter { $Description -eq 'Test Description' } -MockWith {
+                    [PSCustomObject] @{
+                        DistinguishedName = 'CN=10.0.0.0/8,CN=Subnets,CN=Sites,CN=Configuration,DC=arcade,DC=local'
+                        Name              = '10.0.0.0/8'
+                        Location          = 'OtherLocation'
+                        Site              = 'CN=OtherSite,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                        Description       = 'Test Description'
                     }
                 }
                 Mock -CommandName Remove-ADReplicationSubnet
@@ -272,6 +304,24 @@ try
 
                     # Assert
                     Assert-MockCalled -CommandName Set-ADReplicationSubnet -ParameterFilter { $Location -eq 'OtherLocation' } -Scope It -Times 1 -Exactly
+                }
+
+                It 'Should update the subnet location to $null when an empty string is passed' {
+
+                    # Act
+                    Set-TargetResource -Ensure $testPresentParameters.Ensure -Name $testPresentParameters.Name -Site $testPresentParameters.Site -Location ''
+
+                    # Assert
+                    Assert-MockCalled -CommandName Set-ADReplicationSubnet -ParameterFilter { $Location -eq $null } -Scope It -Times 1 -Exactly
+                }
+
+                It 'Should update the subnet description' {
+
+                    # Act
+                    Set-TargetResource -Ensure $testPresentParameters.Ensure -Name $testPresentParameters.Name -Site $testPresentParameters.Site -Location $testPresentParameters.Location -Description 'Test description fail'
+
+                    # Assert
+                    Assert-MockCalled -CommandName Set-ADReplicationSubnet -ParameterFilter { $Description -eq 'Test description fail' } -Scope It -Times 1 -Exactly
                 }
 
                 It 'Should remove the subnet' {

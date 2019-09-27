@@ -29,9 +29,10 @@ Configuration ADReplicationSubnet_CreateReplicationSubnet_Config
     {
         ADReplicationSubnet 'LondonSubnet'
         {
-            Name     = '10.0.0.0/24'
-            Site     = 'London'
-            Location = 'Datacenter 3'
+            Name        = '10.0.0.0/24'
+            Site        = 'London'
+            Location    = 'Datacenter 3'
+            Description = 'Datacenter Management Subnet'
         }
     }
 }
