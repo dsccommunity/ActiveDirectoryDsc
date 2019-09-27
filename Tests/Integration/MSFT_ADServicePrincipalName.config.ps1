@@ -21,6 +21,16 @@ else
             @{
                 NodeName        = 'localhost'
                 CertificateFile = $env:DscPublicCertificatePath
+
+                PSDscAllowPlainTextPassword = $true
+
+                DomainDistinguishedName = $domainDistinguishedName
+                Password = New-Object `
+                    -TypeName System.Management.Automation.PSCredential `
+                    -ArgumentList @(
+                    'AnyName',
+                    (ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force)
+                )
             }
         )
     }
@@ -40,6 +50,13 @@ Configuration MSFT_ADServicePrincipalName_PreReqs_Config
         {
             ComputerName = 'IIS01'
             Ensure       = 'Present'
+        }
+
+        ADUser 'Integration_Test'
+        {
+            DomainName = $Node.DomainDistinguishedName
+            UserName   = 'SQL01Svc'
+            Password   = $Node.Password
         }
     }
 }
@@ -172,6 +189,13 @@ Configuration MSFT_ADServicePrincipalName_RemovePreReqs_Config
         {
             ComputerName = 'IIS01'
             Ensure       = 'Absent'
+        }
+        ADUser 'Integration_Test'
+        {
+            DomainName = $Node.DomainDistinguishedName
+            UserName   = 'SQL01Svc'
+            Password   = $Node.Password
+            Ensure     = 'Absent'
         }
     }
 }

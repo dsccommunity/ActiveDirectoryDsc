@@ -34,15 +34,6 @@ try
             $resourceId = "[$($script:dscResourceFriendlyName)]Integration_Test"
         }
 
-        try
-        {
-            New-ADUser SQL01Svc -ErrorAction Stop
-        }
-        catch [Microsoft.ActiveDirectory.Management.ADIdentityAlreadyExistsException]
-        {
-            Write-Verbose 'User already exists, continue'
-        }
-
         $configurationName = "$($script:dscResourceName)_PreReqs_Config"
 
         Context ('When using configuration {0}' -f $configurationName) {
@@ -382,15 +373,6 @@ try
 }
 finally
 {
-    try
-    {
-        Get-ADUser SQL01Svc | Remove-ADUser -Confirm:$false -ErrorAction Stop
-    }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
-    {
-        Write-Verbose 'User does not exist, continue'
-    }
-
     #region FOOTER
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
