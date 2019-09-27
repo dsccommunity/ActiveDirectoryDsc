@@ -54,6 +54,15 @@ try
             SitesIncluded                 = @('CN=SITE1,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com', 'CN=SITE2,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com')
         }
 
+        $mockGetADReplicationSiteLinkOptionsReturn = @{
+            Name                          = 'HQSiteLink'
+            Cost                          = 100
+            Description                   = 'HQ Site'
+            ReplicationFrequencyInMinutes = 180
+            SitesIncluded                 = @('CN=SITE1,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com', 'CN=SITE2,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com')
+            Options                       = 7
+        }
+
         $targetResourceParameters = @{
             Name = 'HQSiteLink'
             Cost = 100
@@ -64,6 +73,19 @@ try
             OptionChangeNotification = $false
             OptionTwoWaySync = $false
             OptionDisableCompression = $false
+            Ensure = 'Present'
+        }
+
+        $targetResourceParametersWithOptions = @{
+            Name = 'HQSiteLink'
+            Cost = 100
+            Description = 'HQ Site'
+            ReplicationFrequencyInMinutes = 180
+            SitesIncluded = @('site1', 'site2')
+            SitesExcluded = @()
+            OptionChangeNotification = $true
+            OptionTwoWaySync = $true
+            OptionDisableCompression = $true
             Ensure = 'Present'
         }
 
@@ -91,9 +113,32 @@ try
                     $getResult.SitesIncluded                 | Should -Be $targetResourceParameters.SitesIncluded
                     $getResult.SitesExcluded                 | Should -Be $targetResourceParameters.SitesExcluded
                     $getResult.Ensure                        | Should -Be $targetResourceParameters.Ensure
-                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParametersSitesExcluded.OptionChangeNotification
-                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParametersSitesExcluded.OptionTwoWaySync
-                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParametersSitesExcluded.OptionDisableCompression
+                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParameters.OptionChangeNotification
+                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParameters.OptionTwoWaySync
+                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParameters.OptionDisableCompression
+
+                }
+            }
+
+            Context 'When site link options are enabled' {
+                Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockGetADReplicationSiteLinkOptionsReturn }
+
+                It 'All parameters should match' {
+                    Mock -CommandName Resolve-SiteLinkName -MockWith { 'site1' } -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkOptionsReturn.SitesIncluded[0] }
+                    Mock -CommandName Resolve-SiteLinkName -MockWith { 'site2' } -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkOptionsReturn.SitesIncluded[1] }
+
+                    $getResult = Get-TargetResource -Name HQSiteLink
+
+                    $getResult.Name                          | Should -Be $targetResourceParametersWithOptions.Name
+                    $getResult.Cost                          | Should -Be $targetResourceParametersWithOptions.Cost
+                    $getResult.Description                   | Should -Be $targetResourceParametersWithOptions.Description
+                    $getResult.ReplicationFrequencyInMinutes | Should -Be $targetResourceParametersWithOptions.ReplicationFrequencyInMinutes
+                    $getResult.SitesIncluded                 | Should -Be $targetResourceParametersWithOptions.SitesIncluded
+                    $getResult.SitesExcluded                 | Should -Be $targetResourceParametersWithOptions.SitesExcluded
+                    $getResult.Ensure                        | Should -Be $targetResourceParametersWithOptions.Ensure
+                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParametersWithOptions.OptionChangeNotification
+                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParametersWithOptions.OptionTwoWaySync
+                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParametersWithOptions.OptionDisableCompression
 
                 }
             }
