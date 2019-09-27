@@ -363,6 +363,45 @@ try
                     Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly
                 }
             }
+
+            Context 'Site Link is Present and now enabling Site Link Options' {
+                $addSitesParameters = @{
+                    Name                          = 'TestSite'
+                    SitesIncluded                 = 'Site1'
+                    Ensure                        = 'Present'
+                    ReplicationFrequencyInMinutes = 15
+                    OptionChangeNotification      = $true
+                    OptionDisableCompression      = $true
+                    OptionTwoWaySync              = $true
+                }
+
+                Mock -CommandName Get-TargetResource -MockWith { @{
+                    Ensure = 'Present' ;
+                    SitesIncluded = 'Site0';
+                    OptionDisableCompression = $false;
+                    OptionChangeNotification = $false;
+                    OptionTwoWaySync = $false} }
+                Mock -CommandName Set-ADReplicationSiteLink
+                Mock -CommandName New-ADReplicationSiteLink
+                Mock -CommandName Remove-ADReplicationSiteLink
+
+                It "Should call Set-ADReplicationSiteLink" {
+                    Mock -CommandName Set-ADReplicationSiteLink
+                    Set-TargetResource @addSitesParameters
+
+                    Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
+                    Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 1 -Exactly
+                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly -ParameterFilter {
+                        $ReplicationFrequencyInMinutes -eq 15
+                        $Name -eq 'TestSite'
+                        $Ensure -eq 'Present'
+                        $SitesIncluded -eq 'Site1'
+                        $OptionChangeNotification -eq $true
+                        $OptionDisableCompression -eq $true
+                        $OptionTwoWaySync -eq $true
+                    }
+                }
+            }
         }
     }
 }
