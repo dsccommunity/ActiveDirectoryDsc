@@ -13,6 +13,8 @@
   - Added Integration testing ([issue #357](https://github.com/PowerShell/ActiveDirectoryDsc/issues/357))
 - Changes to ADServicePrincipalName
   - Added Integration testing ([issue #358](https://github.com/PowerShell/ActiveDirectoryDsc/issues/358)).
+- Changes to ActiveDirectoryDsc.Common
+  - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays. ([issue #513](https://github.com/PowerShell/ActiveDirectoryDsc/issues/513))
 
 ## 4.1.0.0
 
