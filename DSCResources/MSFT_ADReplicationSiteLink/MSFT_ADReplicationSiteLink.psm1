@@ -472,10 +472,8 @@ function Get-EnabledOptions
     (
         [Parameter(Mandatory = $true)]
         [System.Int32]
-        $OptionValue
+        $optionValue
     )
-
-    $stringValue = [convert]::ToString($OptionValue, 2)
 
     $returnValue = @{
         USE_NOTIFY          = $false
@@ -483,30 +481,21 @@ function Get-EnabledOptions
         DISABLE_COMPRESSION = $false
     }
 
-    $optNotify = $stringValue.Substring($stringValue.Length -1,1)
-
-    if ($optNotify -eq '1')
+    if (1 -band $optionValue)
     {
         $returnValue.USE_NOTIFY = $true
     }
 
-    if ($stringValue.Length -gt 1)
+    if (2 -band $optionValue)
     {
-        $optTwoWay = $stringValue.Substring($stringValue.Length -2,1)
-        if ($optTwoWay -eq '1')
-        {
-            $returnValue.TWOWAY_SYNC = $true
-        }
+        $returnValue.TWOWAY_SYNC = $true
     }
 
-    if ($stringValue.Length -gt 2)
+    if (4 -band $optionValue)
     {
-        $optCompres = $stringValue.Substring($stringValue.Length -3,1)
-        if ($optCompres -eq '1')
-        {
-            $returnValue.DISABLE_COMPRESSION = $true
-        }
+        $returnValue.DISABLE_COMPRESSION = $true
     }
+
     return $returnValue
 }
 
