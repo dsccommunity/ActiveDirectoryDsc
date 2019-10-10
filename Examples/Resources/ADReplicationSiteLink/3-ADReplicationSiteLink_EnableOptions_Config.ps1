@@ -21,7 +21,7 @@
     .DESCRIPTION
         This configuration will modify an existing AD Replication Site Link by enabling Replication Options.
 #>
-Configuration ADReplicationSiteLink_EnableReplicationSiteLinkOptions_Config
+Configuration ADReplicationSiteLink_EnableOptions_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc
 
