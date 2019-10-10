@@ -93,7 +93,7 @@ Configuration ADReplicationSiteLink_ModifyExistingReplicationSiteLink_Config
 
 This configuration will modify an existing AD Replication Site Link.
 
-Configuration ADReplicationSiteLink_ModifyExistingReplicationSiteLink_Config
+Configuration ADReplicationSiteLink_EnableReplicationSiteLinkOptions_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc
 
@@ -106,10 +106,10 @@ Configuration ADReplicationSiteLink_ModifyExistingReplicationSiteLink_Config
             SitesExcluded                 = 'site2'
             Cost                          = 100
             ReplicationFrequencyInMinutes = 20
-            Ensure                        = 'Present'
             OptionChangeNotification      = $true
             OptionTwoWaySync              = $true
             OptionDisableCompression      = $true
+            Ensure                        = 'Present'
         }
     }
 }
