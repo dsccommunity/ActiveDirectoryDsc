@@ -73,11 +73,11 @@ function Get-TargetResource
 
         if ($Sitelink.Options -gt 0)
         {
-            $SiteLinkOptions = Get-EnabledOptions -OptionValue $siteLink.Options
+            $siteLinkOptions = Get-EnabledOptions -OptionValue $siteLink.Options
         }
         else
         {
-            $SiteLinkOptions = Get-EnabledOptions -OptionValue 0
+            $siteLinkOptions = Get-EnabledOptions -OptionValue 0
         }
 
         $sitesExcludedEvaluated = $SitesExcluded |
@@ -90,9 +90,9 @@ function Get-TargetResource
             ReplicationFrequencyInMinutes = $siteLink.ReplicationFrequencyInMinutes
             SitesIncluded                 = $siteCommonNames
             SitesExcluded                 = $sitesExcludedEvaluated
-            OptionChangeNotification      = $SiteLinkOptions.USE_NOTIFY
-            OptionTwoWaySync              = $SiteLinkOptions.TWOWAY_SYNC
-            OptionDisableCompression      = $SiteLinkOptions.DISABLE_COMPRESSION
+            OptionChangeNotification      = $siteLinkOptions.USE_NOTIFY
+            OptionTwoWaySync              = $siteLinkOptions.TWOWAY_SYNC
+            OptionDisableCompression      = $siteLinkOptions.DISABLE_COMPRESSION
             Ensure                        = 'Present'
         }
     }
@@ -206,8 +206,7 @@ function Set-TargetResource
                 Identity = $Name
             }
 
-            $replacePraams = @{}
-            $clearParams = @{}
+            $replaceParameters = @{}
 
             # build the SitesIncluded hashtable.
             $sitesIncludedParameters = @{ }
@@ -241,11 +240,11 @@ function Set-TargetResource
             # Calculate the Options value for Change Notification replication
             if ($PSBoundParameters.ContainsKey('OptionChangeNotification'))
             {
-                $ChangeNotification = $OptionChangeNotification
+                $changeNotification = $OptionChangeNotification
             }
             else
             {
-                $ChangeNotification = $currentADSiteLink.OptionChangeNotification
+                $changeNotification = $currentADSiteLink.OptionChangeNotification
             }
 
             if ($PSBoundParameters.ContainsKey('OptionTwoWaySync'))
@@ -266,15 +265,15 @@ function Set-TargetResource
                 $DisableCompression = $currentADSiteLink.OptionDisableCompression
             }
 
-            $OptionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $ChangeNotification -OptionTwoWaySync $TwoWaySync -OptionDisableCompression $DisableCompression
+            $optionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $changeNotification -OptionTwoWaySync $TwoWaySync -OptionDisableCompression $DisableCompression
 
-            if ($OptionsValue -eq 0)
+            if ($optionsValue -eq 0)
             {
-                $setParameters.Add('clear', 'options')
+                $setParameters.Add('Clear', 'Options')
             }
             else
             {
-                $replacePraams.Add('Options', $OptionsValue)
+                $replaceParameters.Add('Options', $optionsValue)
             }
 
             # Add the rest of the parameters.
@@ -286,9 +285,9 @@ function Set-TargetResource
                 }
             }
 
-            if ($replacePraams.Count -gt 0)
+            if ($replaceParameters.Count -gt 0)
             {
-                $setParameters.Add('Replace', $replacePraams)
+                $setParameters.Add('Replace', $replaceParameters)
             }
 
             Set-ADReplicationSiteLink @setParameters
@@ -468,7 +467,7 @@ function Get-EnabledOptions
 {
     [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
-    # Parameter help description
+
     param
     (
         [Parameter(Mandatory = $true)]
@@ -478,7 +477,7 @@ function Get-EnabledOptions
 
     $stringValue = [convert]::ToString($OptionValue, 2)
 
-    $returnvalue = @{
+    $returnValue = @{
         USE_NOTIFY          = $false
         TWOWAY_SYNC         = $false
         DISABLE_COMPRESSION = $false
@@ -488,7 +487,7 @@ function Get-EnabledOptions
 
     if ($optNotify -eq '1')
     {
-        $returnvalue.USE_NOTIFY = $true
+        $returnValue.USE_NOTIFY = $true
     }
 
     if ($stringValue.Length -gt 1)
@@ -496,7 +495,7 @@ function Get-EnabledOptions
         $optTwoWay = $stringValue.Substring($stringValue.Length -2,1)
         if ($optTwoWay -eq '1')
         {
-            $returnvalue.TWOWAY_SYNC = $true
+            $returnValue.TWOWAY_SYNC = $true
         }
     }
 
@@ -505,10 +504,10 @@ function Get-EnabledOptions
         $optCompres = $stringValue.Substring($stringValue.Length -3,1)
         if ($optCompres -eq '1')
         {
-            $returnvalue.DISABLE_COMPRESSION = $true
+            $returnValue.DISABLE_COMPRESSION = $true
         }
     }
-    return $returnvalue
+    return $returnValue
 }
 
 <#
@@ -560,7 +559,7 @@ function ConvertTo-EnabledOptions
         $returnValue = $returnValue + 4
     }
 
-    return $returnvalue
+    return $returnValue
 }
 
 Export-ModuleMember -Function *-TargetResource
