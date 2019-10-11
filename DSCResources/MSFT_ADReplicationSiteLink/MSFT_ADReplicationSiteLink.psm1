@@ -71,7 +71,7 @@ function Get-TargetResource
             }
         }
 
-        if ($Sitelink.Options -gt 0)
+        if ($siteLink.Options -gt 0)
         {
             $siteLinkOptions = Get-EnabledOptions -OptionValue $siteLink.Options
         }
@@ -249,23 +249,23 @@ function Set-TargetResource
 
             if ($PSBoundParameters.ContainsKey('OptionTwoWaySync'))
             {
-                $TwoWaySync = $OptionTwoWaySync
+                $twoWaySync = $OptionTwoWaySync
             }
             else
             {
-                $TwoWaySync = $currentADSiteLink.OptionTwoWaySync
+                $twoWaySync = $currentADSiteLink.OptionTwoWaySync
             }
 
             if ($PSBoundParameters.ContainsKey('OptionDisableCompression'))
             {
-                $DisableCompression = $OptionDisableCompression
+                $disableCompression = $OptionDisableCompression
             }
             else
             {
-                $DisableCompression = $currentADSiteLink.OptionDisableCompression
+                $disableCompression = $currentADSiteLink.OptionDisableCompression
             }
 
-            $optionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $changeNotification -OptionTwoWaySync $TwoWaySync -OptionDisableCompression $DisableCompression
+            $optionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $changeNotification -OptionTwoWaySync $twoWaySync -OptionDisableCompression $disableCompression
 
             if ($optionsValue -eq 0)
             {
@@ -460,7 +460,7 @@ function Resolve-SiteLinkName
     .SYNOPSIS
         Calculates the options enabled on a Site Link
 
-    .PARAMETER OptionsValue
+    .PARAMETER OptionValue
         The value of currently enabled options
 #>
 function Get-EnabledOptions
@@ -472,7 +472,7 @@ function Get-EnabledOptions
     (
         [Parameter(Mandatory = $true)]
         [System.Int32]
-        $optionValue
+        $OptionValue
     )
 
     $returnValue = @{

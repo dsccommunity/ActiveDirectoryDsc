@@ -93,7 +93,7 @@ Configuration ADReplicationSiteLink_ModifyExistingReplicationSiteLink_Config
 
 This configuration will modify an existing AD Replication Site Link.
 
-Configuration ADReplicationSiteLink_EnableReplicationSiteLinkOptions_Config
+Configuration ADReplicationSiteLink_EnableOptions_Config
 {
     Import-DscResource -Module ActiveDirectoryDsc
 
