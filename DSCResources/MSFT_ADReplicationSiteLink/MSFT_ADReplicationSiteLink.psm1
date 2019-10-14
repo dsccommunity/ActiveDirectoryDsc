@@ -71,13 +71,13 @@ function Get-TargetResource
             }
         }
 
-        if ($siteLink.Options -gt 0)
+        if ($null -eq $siteLink.Options)
         {
-            $siteLinkOptions = Get-EnabledOptions -OptionValue $siteLink.Options
+            $siteLinkOptions = Get-EnabledOptions -OptionValue 0
         }
         else
         {
-            $siteLinkOptions = Get-EnabledOptions -OptionValue 0
+            $siteLinkOptions = Get-EnabledOptions -OptionValue $siteLink.Options
         }
 
         $sitesExcludedEvaluated = $SitesExcluded |
