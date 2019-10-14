@@ -331,11 +331,13 @@ try
                 }
 
                 Mock -CommandName Get-TargetResource -MockWith { @{
-                    Ensure = 'Present' ;
-                    SitesIncluded = 'Site0';
-                    OptionDisableCompression = $false;
-                    OptionChangeNotification = $false;
-                    OptionTwoWaySync = $false} }
+                    Ensure = 'Present'
+                    SitesIncluded = 'Site0'
+                    OptionDisableCompression = $false
+                    OptionChangeNotification = $false
+                    OptionTwoWaySync = $false
+                    }
+                }
                 Mock -CommandName Set-ADReplicationSiteLink
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Remove-ADReplicationSiteLink
@@ -376,11 +378,13 @@ try
                 }
 
                 Mock -CommandName Get-TargetResource -MockWith { @{
-                    Ensure = 'Present' ;
-                    SitesIncluded = 'Site0';
-                    OptionDisableCompression = $false;
-                    OptionChangeNotification = $false;
-                    OptionTwoWaySync = $false} }
+                    Ensure = 'Present'
+                    SitesIncluded = 'Site0'
+                    OptionDisableCompression = $false
+                    OptionChangeNotification = $false
+                    OptionTwoWaySync = $false
+                    }
+                }
                 Mock -CommandName Set-ADReplicationSiteLink
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Remove-ADReplicationSiteLink
@@ -403,9 +407,10 @@ try
                 }
             }
         }
+
         Describe 'ADReplicationSiteLink\Get-EnabledOptions' {
             Context 'When all options are disabled' {
-                It "Should Return False False False" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 0
 
                     $result.USE_NOTIFY          | Should -BeFalse
@@ -415,7 +420,7 @@ try
             }
 
             Context 'When Change Notification Replication is enabled' {
-                It "Should Return True False False" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 1
 
                     $result.USE_NOTIFY          | Should -BeTrue
@@ -425,7 +430,7 @@ try
             }
 
             Context 'When Two Way Sync Replication is enabled' {
-                It "Should Return False True False" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 2
 
                     $result.USE_NOTIFY          | Should -BeFalse
@@ -435,7 +440,7 @@ try
             }
 
             Context 'When Change Notification and Two Way Sync Replication are enabled' {
-                It "Should Return True True False" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 3
 
                     $result.USE_NOTIFY          | Should -BeTrue
@@ -445,7 +450,7 @@ try
             }
 
             Context 'When Disable Compression is enabled' {
-                It "Should Return False False True" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 4
 
                     $result.USE_NOTIFY          | Should -BeFalse
@@ -455,7 +460,7 @@ try
             }
 
             Context 'When Change Notification and Disable Compression Replication are enabled' {
-                It "Should Return True False True" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 5
 
                     $result.USE_NOTIFY          | Should -BeTrue
@@ -465,7 +470,7 @@ try
             }
 
             Context 'When Disable Compression and Two Way Sync Replication are enabled' {
-                It "Should Return False True True" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 6
 
                     $result.USE_NOTIFY          | Should -BeFalse
@@ -475,7 +480,7 @@ try
             }
 
             Context 'When all options are enabled' {
-                It "Should Return True True True" {
+                It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 7
 
                     $result.USE_NOTIFY          | Should -BeTrue
@@ -487,7 +492,7 @@ try
 
         Describe 'ADReplicationSiteLink\ConvertTo-EnabledOptions' {
             Context 'When all options are disabled' {
-                It "Should return 0"{
+                It 'Should return 0' {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $false
@@ -498,8 +503,9 @@ try
                     $result | Should -Be 0
                 }
             }
+
             Context 'When Change Notification Replication is enabled' {
-                It "Should return 1"{
+                It 'Should return 1' {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $false
@@ -512,7 +518,7 @@ try
             }
 
             Context 'When Two Way Sync is enabled' {
-                It "Should return 2"{
+                It 'Should return 2' {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $true
@@ -525,7 +531,7 @@ try
             }
 
             Context 'When Change Notification Replication and Two Way Sync are enabled' {
-                It "Should return 3"{
+                It 'Should return 3' {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $true
@@ -538,7 +544,7 @@ try
             }
 
             Context 'When Disable Compression is enabled' {
-                It "Should return 4"{
+                It 'Should return 4' {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $false
@@ -551,7 +557,7 @@ try
             }
 
             Context 'When Change Notification Replication and Disable Compression are enabled' {
-                It "Should return 5"{
+                It 'Should return 5' {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $false
@@ -564,7 +570,7 @@ try
             }
 
             Context 'When Disable Compression and Two Way Sync are enabled' {
-                It "Should return 6"{
+                It 'Should return 6' {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $true
@@ -577,7 +583,7 @@ try
             }
 
             Context 'When all options are enabled' {
-                It "Should return 7"{
+                It 'Should return 7' {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $true
