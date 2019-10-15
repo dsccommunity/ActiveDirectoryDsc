@@ -13,6 +13,9 @@
   - Added Integration testing ([issue #357](https://github.com/PowerShell/ActiveDirectoryDsc/issues/357))
 - Changes to ADServicePrincipalName
   - Added Integration testing ([issue #358](https://github.com/PowerShell/ActiveDirectoryDsc/issues/358)).
+- Changes to ADReplicationSiteLink
+  - Added Integration testing ([issue #356](https://github.com/PowerShell/ActiveDirectoryDsc/issues/356)).
+  - Added ability to set 'Options' such as Change Notification Replication ([issue #504](https://github.com/PowerShell/ActiveDirectoryDsc/issues/504)).
 - Changes to ActiveDirectoryDsc.Common
   - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays. ([issue #513](https://github.com/PowerShell/ActiveDirectoryDsc/issues/513))
 
