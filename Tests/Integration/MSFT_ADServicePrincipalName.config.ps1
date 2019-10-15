@@ -22,8 +22,6 @@ else
                 NodeName        = 'localhost'
                 CertificateFile = $env:DscPublicCertificatePath
 
-                PSDscAllowPlainTextPassword = $true
-
                 DomainDistinguishedName = $domainDistinguishedName
                 Password = New-Object `
                     -TypeName System.Management.Automation.PSCredential `
