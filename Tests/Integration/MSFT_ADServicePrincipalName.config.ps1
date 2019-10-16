@@ -36,7 +36,7 @@ else
 
 <#
     .DESCRIPTION
-        This configuration will add a Computer to the domain
+        This configuration will add prereqs to the domain
 #>
 Configuration MSFT_ADServicePrincipalName_PreReqs_Config
 {
@@ -44,17 +44,31 @@ Configuration MSFT_ADServicePrincipalName_PreReqs_Config
 
     Node $AllNodes.NodeName
     {
-        ADComputer 'Integration_Test'
+        ADComputer 'IIS01'
         {
             ComputerName = 'IIS01'
             Ensure       = 'Present'
         }
 
-        ADUser 'Integration_Test'
+        ADUser 'SQL01Svc'
         {
             DomainName = $Node.DomainDistinguishedName
             UserName   = 'SQL01Svc'
             Password   = $Node.Password
+        }
+
+        ADUser 'SQL02Svc'
+        {
+            DomainName = $Node.DomainDistinguishedName
+            UserName   = 'SQL02Svc'
+            Password   = $Node.Password
+        }
+
+        ADServicePrincipalName 'SQL02Spn'
+        {
+            ServicePrincipalName = 'MSSQLSvc/sql02.contoso.com:1433'
+            Account              = 'SQL02Svc'
+            Ensure               = 'Present'
         }
     }
 }
@@ -90,7 +104,7 @@ Configuration MSFT_ADServicePrincipalName_AddSecondUserServicePrincipalName_Conf
     {
         ADServicePrincipalName 'Integration_Test'
         {
-            ServicePrincipalName = 'MSSQLSvc/sql02.contoso.com:1433'
+            ServicePrincipalName = 'MSSQLSvc/sql01dev.contoso.com:1433'
             Account              = 'SQL01Svc'
             Ensure               = 'Present'
         }
@@ -118,6 +132,25 @@ Configuration MSFT_ADServicePrincipalName_AddComputerServicePrincipalName_Config
 
 <#
     .DESCRIPTION
+        This configuration will Change the account a SPN belongs to.
+#>
+Configuration MSFT_ADServicePrincipalName_ChangeAccountForServicePrincipalName_Config
+{
+    Import-DscResource -Module ActiveDirectoryDsc
+
+    Node $AllNodes.NodeName
+    {
+        ADServicePrincipalName 'Integration_Test'
+        {
+            ServicePrincipalName = 'MSSQLSvc/sql02.contoso.com:1433'
+            Account              = 'SQL01Svc'
+            Ensure               = 'Present'
+        }
+    }
+}
+
+<#
+    .DESCRIPTION
         This configuration will remove a Service Principal Name from a user account.
 #>
 Configuration MSFT_ADServicePrincipalName_RemoveUserServicePrincipalName_Config
@@ -129,7 +162,6 @@ Configuration MSFT_ADServicePrincipalName_RemoveUserServicePrincipalName_Config
         ADServicePrincipalName 'Integration_Test'
         {
             ServicePrincipalName = 'MSSQLSvc/sql01.contoso.com:1433'
-            Account              = 'SQL01Svc'
             Ensure               = 'Absent'
         }
     }
@@ -147,8 +179,7 @@ Configuration MSFT_ADServicePrincipalName_RemoveSecondUserServicePrincipalName_C
     {
         ADServicePrincipalName 'Integration_Test'
         {
-            ServicePrincipalName = 'MSSQLSvc/sql02.contoso.com:1433'
-            Account              = 'SQL01Svc'
+            ServicePrincipalName = 'MSSQLSvc/sql01dev.contoso.com:1433'
             Ensure               = 'Absent'
         }
     }
@@ -156,7 +187,7 @@ Configuration MSFT_ADServicePrincipalName_RemoveSecondUserServicePrincipalName_C
 
 <#
     .DESCRIPTION
-        This configuration will add a Service Principal Name to a computer account.
+        This configuration will remove a Service Principal Name from a computer account.
 #>
 Configuration MSFT_ADServicePrincipalName_RemoveComputerServicePrincipalName_Config
 {
@@ -167,7 +198,6 @@ Configuration MSFT_ADServicePrincipalName_RemoveComputerServicePrincipalName_Con
         ADServicePrincipalName 'Integration_Test'
         {
             ServicePrincipalName = 'HTTP/web.contoso.com'
-            Account              = 'IIS01$'
             Ensure               = 'Absent'
         }
     }
@@ -175,7 +205,7 @@ Configuration MSFT_ADServicePrincipalName_RemoveComputerServicePrincipalName_Con
 
 <#
     .DESCRIPTION
-        This configuration will remove a Computer from the domain
+        This configuration will remove the prereqs from the domain
 #>
 Configuration MSFT_ADServicePrincipalName_RemovePreReqs_Config
 {
@@ -183,16 +213,23 @@ Configuration MSFT_ADServicePrincipalName_RemovePreReqs_Config
 
     Node $AllNodes.NodeName
     {
-        ADComputer 'Integration_Test'
+        ADComputer 'IIS01'
         {
             ComputerName = 'IIS01'
             Ensure       = 'Absent'
         }
-        ADUser 'Integration_Test'
+
+        ADUser 'SQL01Svc'
         {
             DomainName = $Node.DomainDistinguishedName
             UserName   = 'SQL01Svc'
-            Password   = $Node.Password
+            Ensure     = 'Absent'
+        }
+
+        ADUser 'SQL02Svc'
+        {
+            DomainName = $Node.DomainDistinguishedName
+            UserName   = 'SQL02Svc'
             Ensure     = 'Absent'
         }
     }
