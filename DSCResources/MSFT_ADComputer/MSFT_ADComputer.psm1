@@ -831,7 +831,7 @@ function Set-TargetResource
         $replaceComputerProperties = @{}
         $removeComputerProperties = @{}
 
-        # Get all properties, other thans Path, that is not in desired state.
+        # Get all properties, other than Path, that is not in desired state.
         $propertiesNotInDesiredState = $compareTargetResourceStateResult |
             Where-Object -FilterScript {
                 $_.ParameterName -ne 'Path' -and -not $_.InDesiredState
