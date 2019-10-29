@@ -948,7 +948,8 @@ try
                     $objectParameter.Pass = $false
 
                     $testCases += @{
-                        Parameter = $incorrectParameter.Name; Value = $incorrectParameter.Value
+                        Parameter = $incorrectParameter.Name
+                        Value = $incorrectParameter.Value
                     }
                 }
 
@@ -1003,7 +1004,8 @@ try
                     $objectParameter.Pass = $false
 
                     $testCases += @{
-                        Parameter = $incorrectParameter.Name; Value = $incorrectParameter.Value
+                        Parameter = $incorrectParameter.Name
+                        Value = $incorrectParameter.Value
                     }
                 }
 
@@ -1226,7 +1228,8 @@ try
                     $objectParameter.Pass = $false
 
                     $testCases += @{
-                        Parameter = $incorrectParameter.Name; Value = $incorrectParameter.Value
+                        Parameter = $incorrectParameter.Name
+                        Value = $incorrectParameter.Value
                     }
                 }
 
