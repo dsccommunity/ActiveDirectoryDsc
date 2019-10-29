@@ -209,7 +209,7 @@ function Set-TargetResource
             $replaceParameters = @{}
 
             # build the SitesIncluded hashtable.
-            $sitesIncludedParameters = @{ }
+            $sitesIncludedParameters = @{}
             if ($SitesExcluded)
             {
                 Write-Verbose -Message ($script:localizedData.RemovingSites -f $($SiteExcluded -join ', '), $Name)
