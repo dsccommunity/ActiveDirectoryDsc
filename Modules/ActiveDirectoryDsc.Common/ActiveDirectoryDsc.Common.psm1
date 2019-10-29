@@ -926,7 +926,7 @@ function ConvertTo-TimeSpan
         $TimeSpanType
     )
 
-    $newTimeSpanParams = @{ }
+    $newTimeSpanParams = @{}
 
     switch ($TimeSpanType)
     {
@@ -1079,22 +1079,30 @@ function Get-ADCommonParameters
     {
         if ($PreferCommonName -and ($PSBoundParameters.ContainsKey('CommonName')))
         {
-            $adConnectionParameters = @{ Name = $CommonName }
+            $adConnectionParameters = @{
+                Name = $CommonName
+            }
         }
         else
         {
-            $adConnectionParameters = @{ Name = $Identity }
+            $adConnectionParameters = @{
+                Name = $Identity
+            }
         }
     }
     else
     {
         if ($PreferCommonName -and ($PSBoundParameters.ContainsKey('CommonName')))
         {
-            $adConnectionParameters = @{ Identity = $CommonName }
+            $adConnectionParameters = @{
+                Identity = $CommonName
+            }
         }
         else
         {
-            $adConnectionParameters = @{ Identity = $Identity }
+            $adConnectionParameters = @{
+                Identity = $Identity
+            }
         }
     }
 
