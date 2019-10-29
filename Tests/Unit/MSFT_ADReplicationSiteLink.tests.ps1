@@ -287,7 +287,12 @@ try
 
         Describe 'ADReplicationSiteLink\Set-TargetResource' {
             Context 'Site Link is Absent but is desired Present' {
-                Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Absent' } }
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        Ensure = 'Absent'
+                    }
+                }
+
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Set-ADReplicationSiteLink
                 Mock -CommandName Remove-ADReplicationSiteLink
@@ -302,7 +307,12 @@ try
             }
 
             Context 'Site Link is Present but desired Absent' {
-                Mock -CommandName Get-TargetResource -MockWith { @{ Ensure = 'Present' } }
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        Ensure = 'Present'
+                    }
+                }
+
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Set-ADReplicationSiteLink
                 Mock -CommandName Remove-ADReplicationSiteLink

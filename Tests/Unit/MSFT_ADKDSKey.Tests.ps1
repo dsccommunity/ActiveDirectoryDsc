@@ -595,7 +595,9 @@ try
                     $objectParameter.Expected = $incorrectParameter.Value
                     $objectParameter.Pass = $false
 
-                    $testCases += @{ Parameter = $incorrectParameter.Name; Value = $incorrectParameter.Value }
+                    $testCases += @{
+                        Parameter = $incorrectParameter.Name; Value = $incorrectParameter.Value
+                    }
                 }
 
                 Mock -CommandName Compare-TargetResourceState -MockWith {

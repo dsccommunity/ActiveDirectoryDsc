@@ -40,7 +40,8 @@
     in the `Tests/Unit/Stubs` folder ([issue #245](https://github.com/PowerShell/ActiveDirectoryDsc/issues/245)).
   - Update all unit tests removing all local stub functions in favor of
     the new stub modules.
-  - Enable PSSCriptAnalyzer default rules ([issue #491](https://github.com/PowerShell/ActiveDirectoryDsc/issues/491)).
+  - Enable PSScriptAnalyzer default rules ([issue #491](https://github.com/PowerShell/ActiveDirectoryDsc/issues/491)).
+  - Fix hashtables according to style guideline ([issue #516](https://github.com/PowerShell/ActiveDirectoryDsc/issues/516)).
 - Changes to ActiveDirectoryDsc.Common
   - Updated common helper function `Find-DomainController` with the
     optional parameter `WaitForValidCredentials` which will ignore

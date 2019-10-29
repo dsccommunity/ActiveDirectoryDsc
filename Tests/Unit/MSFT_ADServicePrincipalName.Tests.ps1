@@ -253,12 +253,17 @@ try
 
             Context 'Remove all SPNs' {
                 Mock -CommandName Set-ADObject
-                Mock -CommandName Get-ADObject -ParameterFilter { $Filter -eq ([ScriptBlock]::Create(' ServicePrincipalName -eq $ServicePrincipalName ')) } -MockWith {
-                    [PSCustomObject] @{ SamAccountName = 'User'; DistinguishedName = 'CN=User,OU=Corp,DC=contoso,DC=com' }
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $Filter -eq ([ScriptBlock]::Create(' ServicePrincipalName -eq $ServicePrincipalName '))
+                } -MockWith {
+                    [PSCustomObject] @{
+                        SamAccountName = 'User'
+                        DistinguishedName = 'CN=User,OU=Corp,DC=contoso,DC=com'
+                    }
                 }
 
                 It 'Should call the Set-ADObject' {
-                    $result = Set-TargetResource @testAbsentParams
+                    { Set-TargetResource @testAbsentParams } | Should -Not -Throw
 
                     Assert-MockCalled -CommandName Set-ADObject -Scope It -Times 1 -Exactly
                 }
