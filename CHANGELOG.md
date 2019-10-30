@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.2.0.0
+
 - Changes to ActiveDirectoryDsc
   - Resolved custom Script Analyzer rules that was added to the test framework.
   - Resolve style guideline violations for hashtables ([issue #516](https://github.com/PowerShell/ActiveDirectoryDsc/issues/516)).
