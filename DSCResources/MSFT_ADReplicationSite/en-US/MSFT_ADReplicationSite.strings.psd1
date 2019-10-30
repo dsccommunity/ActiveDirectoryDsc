@@ -8,4 +8,5 @@ ConvertFrom-StringData @'
     ReplicationSitePresent                 = Replication site '{0}' is present. (ADRS0006)
     ReplicationSiteInDesiredState          = The replication site '{0}' is in the desired state. (ADRS0007)
     ReplicationSiteNotInDesiredState       = The replication site '{0}' is not in the desired state. (ADRS0008)
+    UpdateReplicationSite                  = The replication site '{0}' needs to be updated.
 '@

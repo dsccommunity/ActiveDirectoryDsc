@@ -78,7 +78,9 @@ try
                         InheritedObjectType   = [System.Guid] '00000000-0000-0000-0000-000000000000'
                         ObjectFlags           = 'None'
                         AccessControlType     = 'Allow'
-                        IdentityReference     = [PSCustomObject] @{ Value = 'CONTOSO\User' }
+                        IdentityReference     = [PSCustomObject] @{
+                            Value = 'CONTOSO\User'
+                        }
                         IsInherited           = $false
                         InheritanceFlags      = 'None'
                         PropagationFlags      = 'None'

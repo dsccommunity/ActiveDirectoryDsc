@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 4.2.0.0
+
+- Changes to ActiveDirectoryDsc
+  - Resolved custom Script Analyzer rules that was added to the test framework.
+  - Resolve style guideline violations for hashtables ([issue #516](https://github.com/PowerShell/ActiveDirectoryDsc/issues/516)).
+- Changes to ADReplicationSite
+  - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
+  - Correct value returned for RenameDefaultFirstSiteName ([issue #502](https://github.com/PowerShell/ActiveDirectoryDsc/issues/502)).
+- Changes to ADReplicationSubnet
+  - Added 'Description' attribute parameter ([issue #503](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500))
+  - Added Integration testing ([issue #357](https://github.com/PowerShell/ActiveDirectoryDsc/issues/357))
+- Changes to ADReplicationSiteLink
+  - Added Integration testing ([issue #356](https://github.com/PowerShell/ActiveDirectoryDsc/issues/356)).
+  - Added ability to set 'Options' such as Change Notification Replication ([issue #504](https://github.com/PowerShell/ActiveDirectoryDsc/issues/504)).
+- Changes to ActiveDirectoryDsc.Common
+  - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays. ([issue #513](https://github.com/PowerShell/ActiveDirectoryDsc/issues/513))
+
 ## 4.1.0.0
 
 - Changes to ActiveDirectoryDsc
@@ -24,7 +42,7 @@
     in the `Tests/Unit/Stubs` folder ([issue #245](https://github.com/PowerShell/ActiveDirectoryDsc/issues/245)).
   - Update all unit tests removing all local stub functions in favor of
     the new stub modules.
-  - Enable PSSCriptAnalyzer default rules ([issue #491](https://github.com/PowerShell/ActiveDirectoryDsc/issues/491)).
+  - Enable PSScriptAnalyzer default rules ([issue #491](https://github.com/PowerShell/ActiveDirectoryDsc/issues/491)).
 - Changes to ActiveDirectoryDsc.Common
   - Updated common helper function `Find-DomainController` with the
     optional parameter `WaitForValidCredentials` which will ignore

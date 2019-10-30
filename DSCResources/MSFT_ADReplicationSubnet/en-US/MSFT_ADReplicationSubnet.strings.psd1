@@ -9,4 +9,5 @@ ConvertFrom-StringData @'
     ReplicationSubnetPresent           = Replication subnet '{0}' is present. (ADRS0007)
     ReplicationSubnetInDesiredState    = The replication subnet '{0}' is in the desired state. (ADRS0008)
     ReplicationSubnetNotInDesiredState = The replication subnet '{0}' is not in the desired state. (ADRS0009)
+    SetReplicationSubnetDescription    = Set the replication subnet '{0}' description to '{1}'. (ADRS0010)
 '@

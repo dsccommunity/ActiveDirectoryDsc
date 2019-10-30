@@ -112,7 +112,9 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.RemoveServicePrincipalName -f $ServicePrincipalName, $spnAccount.SamAccountName)
 
-                Set-ADObject -Identity $spnAccount.DistinguishedName -Remove @{ ServicePrincipalName = $ServicePrincipalName }
+                Set-ADObject -Identity $spnAccount.DistinguishedName -Remove @{
+                    ServicePrincipalName = $ServicePrincipalName
+                }
             }
         }
 
@@ -139,7 +141,9 @@ function Set-TargetResource
         {
             Write-Verbose -Message ($script:localizedData.RemoveServicePrincipalName -f $ServicePrincipalName, $spnAccount.SamAccountName)
 
-            Set-ADObject -Identity $spnAccount.DistinguishedName -Remove @{ ServicePrincipalName = $ServicePrincipalName }
+            Set-ADObject -Identity $spnAccount.DistinguishedName -Remove @{
+                ServicePrincipalName = $ServicePrincipalName
+            }
         }
     }
 }

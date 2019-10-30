@@ -29,7 +29,9 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     Describe 'ActiveDirectoryDsc.Common\Test-DscParameterState' -Tag TestDscParameterState {
         Context 'When passing values' {
             It 'Should return true for two identical tables' {
-                $mockDesiredValues = @{ Example = 'test' }
+                $mockDesiredValues = @{
+                    Example = 'test'
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockDesiredValues
@@ -40,8 +42,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return false when a value is different for [System.String]' {
-                $mockCurrentValues = @{ Example = [System.String] 'something' }
-                $mockDesiredValues = @{ Example = [System.String] 'test' }
+                $mockCurrentValues = @{
+                    Example = [System.String] 'something'
+                }
+
+                $mockDesiredValues = @{
+                    Example = [System.String] 'test'
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -52,8 +59,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return false when a value is different for [System.Int32]' {
-                $mockCurrentValues = @{ Example = [System.Int32] 1 }
-                $mockDesiredValues = @{ Example = [System.Int32] 2 }
+                $mockCurrentValues = @{
+                    Example = [System.Int32] 1
+                }
+
+                $mockDesiredValues = @{
+                    Example = [System.Int32] 2
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -64,8 +76,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return false when a value is different for [System.Int16]' {
-                $mockCurrentValues = @{ Example = [System.Int16] 1 }
-                $mockDesiredValues = @{ Example = [System.Int16] 2 }
+                $mockCurrentValues = @{
+                    Example = [System.Int16] 1
+                }
+
+                $mockDesiredValues = @{
+                    Example = [System.Int16] 2
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -76,8 +93,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return false when a value is different for [System.UInt16]' {
-                $mockCurrentValues = @{ Example = [System.UInt16] 1 }
-                $mockDesiredValues = @{ Example = [System.UInt16] 2 }
+                $mockCurrentValues = @{
+                    Example = [System.UInt16] 1
+                }
+
+                $mockDesiredValues = @{
+                    Example = [System.UInt16] 2
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -88,8 +110,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return false when a value is different for [System.Boolean]' {
-                $mockCurrentValues = @{ Example = [System.Boolean] $true }
-                $mockDesiredValues = @{ Example = [System.Boolean] $false }
+                $mockCurrentValues = @{
+                    Example = [System.Boolean] $true
+                }
+
+                $mockDesiredValues = @{
+                    Example = [System.Boolean] $false
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -100,8 +127,10 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return false when a value is missing' {
-                $mockCurrentValues = @{ }
-                $mockDesiredValues = @{ Example = 'test' }
+                $mockCurrentValues = @{}
+                $mockDesiredValues = @{
+                    Example = 'test'
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -152,7 +181,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return false when an empty hash table is used in the current values' {
-                $mockCurrentValues = @{ }
+                $mockCurrentValues = @{}
                 $mockDesiredValues = @{
                     Example = 'test'
                     SecondExample = 'false'
@@ -302,7 +331,10 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
         Context 'When passing invalid types for DesiredValues' {
             It 'Should throw the correct error when DesiredValues is of wrong type' {
-                $mockCurrentValues = @{ Example = 'something' }
+                $mockCurrentValues = @{
+                    Example = 'something'
+                }
+
                 $mockDesiredValues = 'NotHashTable'
 
                 $testParameters = @{
@@ -333,8 +365,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     }
                 }
 
-                $mockCurrentValues = @{ Example = New-Object -TypeName 'MockUnknownType' }
-                $mockDesiredValues = @{ Example = New-Object -TypeName 'MockUnknownType' }
+                $mockCurrentValues = @{
+                    Example = New-Object -TypeName 'MockUnknownType'
+                }
+
+                $mockDesiredValues = @{
+                    Example = New-Object -TypeName 'MockUnknownType'
+                }
 
                 $testParameters = @{
                     CurrentValues = $mockCurrentValues
@@ -349,7 +386,9 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
         Context 'When passing an CimInstance as DesiredValue and ValuesToCheck is $null' {
             It 'Should throw the correct error' {
-                $mockCurrentValues = @{ Example = 'something' }
+                $mockCurrentValues = @{
+                    Example = 'something'
+                }
 
                 $mockWin32ProcessProperties = @{
                     Handle    = 0
@@ -1805,6 +1844,51 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 }
 
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
+            }
+
+            It 'Should return false when evaluating an array, but the desired value is $null' {
+                $mockValues = @{
+                    CurrentValue = @('1','2')
+                    DesiredValue = $null
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
+            }
+
+            It 'Should return false when evaluating an array, but the current value is an empty array' {
+                $mockValues = @{
+                    CurrentValue = @()
+                    DesiredValue = @('1','2')
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
+            }
+
+            It 'Should return false when evaluating an array, but the desired value is an empty array' {
+                $mockValues = @{
+                    CurrentValue = @('1','2')
+                    DesiredValue = @()
+                }
+
+                Test-DscPropertyState -Values $mockValues | Should -BeFalse
+            }
+
+            It 'Should return true when evaluating an array, when both values are $null' {
+                $mockValues = @{
+                    CurrentValue = $null
+                    DesiredValue = $null
+                }
+
+                Test-DscPropertyState -Values $mockValues -Verbose | Should -BeTrue
+            }
+
+            It 'Should return true when evaluating an array, when both values are an empty array' {
+                $mockValues = @{
+                    CurrentValue = @()
+                    DesiredValue = @()
+                }
+
+                Test-DscPropertyState -Values $mockValues -Verbose | Should -BeTrue
             }
         }
 

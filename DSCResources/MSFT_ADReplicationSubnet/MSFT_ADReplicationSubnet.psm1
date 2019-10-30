@@ -39,7 +39,7 @@ function Get-TargetResource
     #>
     Write-Verbose -Message ($script:localizedData.GetReplicationSubnet -f $Name)
 
-    $replicationSubnet = Get-ADReplicationSubnet -Filter { Name -eq $Name }
+    $replicationSubnet = Get-ADReplicationSubnet -Filter { Name -eq $Name } -Properties Description
 
     if ($null -eq $replicationSubnet)
     {
@@ -47,10 +47,11 @@ function Get-TargetResource
         Write-Verbose -Message ($script:localizedData.ReplicationSubnetAbsent -f $Name)
 
         $returnValue = @{
-            Ensure   = 'Absent'
-            Name     = $Name
-            Site     = ''
-            Location = ''
+            Ensure      = 'Absent'
+            Name        = $Name
+            Site        = ''
+            Location    = $null
+            Description = $null
         }
     }
     else
@@ -68,10 +69,11 @@ function Get-TargetResource
         Write-Verbose -Message ($script:localizedData.ReplicationSubnetPresent -f $Name)
 
         $returnValue = @{
-            Ensure   = 'Present'
-            Name     = $Name
-            Site     = $replicationSiteName
-            Location = [System.String] $replicationSubnet.Location
+            Ensure      = 'Present'
+            Name        = $Name
+            Site        = $replicationSiteName
+            Location    = [System.String] $replicationSubnet.Location
+            Description = [System.String] $replicationSubnet.Description
         }
     }
 
@@ -116,7 +118,11 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $Location = ''
+        $Location = '',
+
+        [Parameter()]
+        [System.String]
+        $Description
     )
 
     <#
@@ -169,6 +175,16 @@ function Set-TargetResource
 
             Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Location $nullableLocation -PassThru
         }
+
+        if ($PSBoundParameters.ContainsKey('Description'))
+        {
+            if ($replicationSubnet.Description -ne $Description)
+            {
+                Write-Verbose -Message ($script:localizedData.SetReplicationSubnetDescription -f $Name, $Description)
+
+                Set-ADReplicationSubnet -Identity $replicationSubnet.DistinguishedName -Description $Description
+            }
+        }
     }
 
     if ($Ensure -eq 'Absent')
@@ -198,6 +214,9 @@ function Set-TargetResource
 
     .PARAMETER Location
         The location for the AD replication site. Default value is empty.
+
+    .PARAMETER Description
+        Specifies a description of the object. This parameter sets the value of the Description property for the object.
 #>
 function Test-TargetResource
 {
@@ -222,7 +241,11 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $Location = ''
+        $Location = '',
+
+        [Parameter()]
+        [System.String]
+        $Description
     )
 
     $currentConfiguration = Get-TargetResource -Name $Name -Site $Site
@@ -233,7 +256,8 @@ function Test-TargetResource
     {
         $desiredConfigurationMatch = $desiredConfigurationMatch -and
         $currentConfiguration.Site -eq $Site -and
-        $currentConfiguration.Location -eq $Location
+        $currentConfiguration.Location -eq $Location -and
+        $currentConfiguration.Description -eq $Description
     }
 
     if ($desiredConfigurationMatch)
