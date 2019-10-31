@@ -516,8 +516,28 @@ function Set-TargetResource
 
         if ($createNewAdServiceAccount)
         {
+            if (-not $parameters.ContainsKey('Path'))
+            {
+                # Get default MSA path as one has not been specified
+                try
+                {
+                    $domainDistinguishedName = (Get-ADDomain).DistinguishedName
+                }
+                catch
+                {
+                    $errorMessage = $script:localizedData.GettingADDomainError
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                }
+
+                $messagePath = "CN=Managed Service Accounts,$domainDistinguishedName"
+            }
+            else
+            {
+                $messagePath = $Path
+            }
+
             Write-Verbose -Message ($script:localizedData.AddingManagedServiceAccountMessage -f `
-                    $AccountType, $ServiceAccountName, $Path)
+                    $AccountType, $ServiceAccountName, $messagePath)
 
             $newAdServiceAccountParameters = Get-ADCommonParameters @parameters -UseNameParameter
 
@@ -559,28 +579,8 @@ function Set-TargetResource
             }
             catch
             {
-                if (-not $parameters.ContainsKey('Path'))
-                {
-                    # Get default MSA path as one has not been specified
-                    try
-                    {
-                        $domainDistinguishedName = (Get-ADDomain).DistinguishedName
-                    }
-                    catch
-                    {
-                        $errorMessage = $script:localizedData.GettingADDomainError
-                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-                    }
-
-                    $errorMessagePath = "CN=Managed Service Accounts,$domainDistinguishedName"
-                }
-                else
-                {
-                    $errorMessagePath = $Path
-                }
-
                 $errorMessage = $script:localizedData.AddingManagedServiceAccountError -f `
-                    $AccountType, $ServiceAccountName, $errorMessagePath
+                    $AccountType, $ServiceAccountName, $messagePath
                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
         }
