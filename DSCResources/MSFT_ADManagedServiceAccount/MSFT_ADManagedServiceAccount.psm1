@@ -247,7 +247,7 @@ function Test-TargetResource
     )
 
     # Need to set these parameters to compare if users are using the default parameter values
-    [HashTable]$parameters = $PSBoundParameters
+    [HashTable] $parameters = $PSBoundParameters
     $parameters['MembershipAttribute'] = $MembershipAttribute
 
     $getTargetResourceParameters = @{
@@ -274,7 +274,7 @@ function Test-TargetResource
         {
             # Resource should exist
             $propertiesNotInDesiredState = Compare-ResourcePropertyState `
-                -CurrentValues $getTargetResourceResult -DesiredValues $parameters -Verbose:$false | `
+                -CurrentValues $getTargetResourceResult -DesiredValues $parameters | `
                     Where-Object -Property InDesiredState -eq $false
 
             if ($propertiesNotInDesiredState)
@@ -388,7 +388,7 @@ function Set-TargetResource
     )
 
     # Need to set these to compare if not specified since user is using defaults
-    [HashTable]$parameters = $PSBoundParameters
+    [HashTable] $parameters = $PSBoundParameters
     $parameters['MembershipAttribute'] = $MembershipAttribute
     $parameters.Remove('Ensure') | Out-Null
 
