@@ -390,7 +390,7 @@ function Set-TargetResource
     # Need to set these to compare if not specified since user is using defaults
     [HashTable] $parameters = $PSBoundParameters
     $parameters['MembershipAttribute'] = $MembershipAttribute
-    $parameters.Remove('Ensure') | Out-Null
+    $parameters.Remove('Ensure')
 
     $adServiceAccountParameters = Get-ADCommonParameters @parameters
 
