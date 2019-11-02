@@ -709,7 +709,7 @@ try
                             Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 0
                         }
 
-                        Context 'When "New-AdServiceAccount" throws an exception' {
+                        Context 'When "New-AdServiceAccount" throws an unexpected exception' {
                             Mock -CommandName New-AdServiceAccount -MockWith { throw 'UnexpectedError' }
 
                             It 'Should throw the correct exception' {
@@ -766,6 +766,33 @@ try
                             Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0
                             Assert-MockCalled -CommandName Set-ADServiceAccount -Exactly -Times 0
                             Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 0
+                        }
+
+                        Context 'When "New-AdServiceAccount" throws an "ADException KDS key not found" exception' {
+                            $mockADException = [Microsoft.ActiveDirectory.Management.ADException]::new()
+                            $mockADException.ErrorCode = $script:errorCodeKdsRootKeyNotFound
+
+                            Mock -CommandName New-AdServiceAccount -MockWith { throw $mockADException }
+
+                            It 'Should throw the correct exception' {
+                                { Set-TargetResource  @setTargetResourceParametersGroup } |
+                                    Should -Throw ($script:localizedData.KdsRootKeyNotFoundError -f
+                                        $setTargetResourceParametersGroup.ServiceAccountName)
+                            }
+                        }
+
+                        Context 'When "New-AdServiceAccount" throws an unknown "ADException" exception' {
+                            $mockADException = [Microsoft.ActiveDirectory.Management.ADException]::new()
+
+                            Mock -CommandName New-AdServiceAccount -MockWith { throw $mockADException }
+
+                            It 'Should throw the correct exception' {
+                                { Set-TargetResource  @setTargetResourceParametersGroup } |
+                                    Should -Throw ($script:localizedData.AddingManagedServiceAccountError -f
+                                        $setTargetResourceParametersGroup.AccountType,
+                                        $setTargetResourceParametersGroup.ServiceAccountName,
+                                        $setTargetResourceParametersGroup.Path)
+                            }
                         }
                     }
                 }

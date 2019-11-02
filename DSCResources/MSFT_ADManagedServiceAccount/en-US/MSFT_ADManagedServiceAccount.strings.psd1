@@ -18,4 +18,5 @@ ConvertFrom-StringData @'
     RetrievingManagedServiceAccountError          = Error retrieving Account '{0}'. (MSA0016)
     RetrievingManagedPasswordPrincipalsError      = Error retrieving Principal '{0}'. (MSA0017)
     GettingADDomainError                          = Error getting Active Directory Domain details. (MSA0018)
+    KdsRootKeyNotFoundError                       = Error adding group account '{0}'. The KDS Root Key was not found. (MSA0019)
 '@

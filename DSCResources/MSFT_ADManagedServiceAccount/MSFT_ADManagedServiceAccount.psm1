@@ -6,6 +6,8 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADManagedServiceAccount'
 
+$script:errorCodeKdsRootKeyNotFound = -2146893811
+
 <#
     .SYNOPSIS
         Returns the current state of an Active Directory managed service account.
@@ -674,6 +676,21 @@ function Set-TargetResource
             try
             {
                 New-ADServiceAccount @newAdServiceAccountParameters
+            }
+            catch [Microsoft.ActiveDirectory.Management.ADException]
+            {
+                if ($_.Exception.ErrorCode -eq $script:errorCodeKdsRootKeyNotFound)
+                {
+                    $errorMessage = ($script:localizedData.KdsRootKeyNotFoundError -f
+                        $ServiceAccountName)
+                }
+                else
+                {
+                    $errorMessage = ($script:localizedData.AddingManagedServiceAccountError -f
+                    $AccountType, $ServiceAccountName, $messagePath)
+                }
+
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
             catch
             {
