@@ -16,6 +16,8 @@
   ([issue #512](https://github.com/PowerShell/ActiveDirectoryDsc/issues/512)).
   - Resource unit tests refactored to use nested contexts and follow the logic of the module.
   - Resource Integration tests added.
+- Changes to ADKDSKey
+  - Added Integration testing ([issue #351](https://github.com/PowerShell/ActiveDirectoryDsc/issues/351))
 
 ## 4.2.0.0
 
