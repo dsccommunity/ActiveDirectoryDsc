@@ -18,7 +18,7 @@ else
             @{
                 NodeName        = 'localhost'
                 CertificateFile = $env:DscPublicCertificatePath
-                EffectiveTime   = '01/01/1999 13:00:00'
+                EffectiveTime   = (Get-Date -year 1999 -month 1 -day 1 -hour 0 -Minute 0 -Second 0).ToString()
             }
         )
     }
