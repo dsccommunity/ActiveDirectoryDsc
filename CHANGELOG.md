@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Changes to ADServicePrincipalName
+  - Added Integration testing ([issue #358](https://github.com/PowerShell/ActiveDirectoryDsc/issues/358)).
+
 ## 4.2.0.0
 
 - Changes to ActiveDirectoryDsc
