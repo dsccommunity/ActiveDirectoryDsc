@@ -19,7 +19,8 @@
 
 <#
     .DESCRIPTION
-        This configuration will create a group managed service account with members.
+        This configuration will create a group managed service account with members in the default 'Managed Service
+        Accounts' container.
 #>
 Configuration ADManagedServiceAccount_CreateGroupManagedServiceAccountWithMembers_Config
 {
@@ -29,20 +30,18 @@ Configuration ADManagedServiceAccount_CreateGroupManagedServiceAccountWithMember
     {
         ADManagedServiceAccount 'AddingMembersUsingSamAccountName'
         {
-            Ensure             = 'Present'
-            ServiceAccountName = 'Service01'
-            AccountType        = 'Group'
-            Path               = 'OU=ServiceAccounts,DC=contoso,DC=com'
-            Members            = 'User01', 'Computer01$'
+            Ensure                    = 'Present'
+            ServiceAccountName        = 'Service01'
+            AccountType               = 'Group'
+            ManagedPasswordPrincipals = 'User01', 'Computer01$'
         }
 
         ADManagedServiceAccount 'AddingMembersUsingDN'
         {
-            Ensure             = 'Present'
-            ServiceAccountName = 'Service02'
-            AccountType        = 'Group'
-            Path               = 'OU=ServiceAccounts,DC=contoso,DC=com'
-            Members            = 'CN=User01,OU=Users,DC=contoso,DC=com', 'CN=Computer01,OU=Computers,DC=contoso,DC=com'
+            Ensure                    = 'Present'
+            ServiceAccountName        = 'Service02'
+            AccountType               = 'Group'
+            ManagedPasswordPrincipals = 'CN=User01,OU=Users,DC=contoso,DC=com', 'CN=Computer01,OU=Computers,DC=contoso,DC=com'
         }
     }
 }
