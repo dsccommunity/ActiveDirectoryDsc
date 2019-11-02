@@ -81,7 +81,9 @@ try
                     }
                 }
                 Mock -CommandName Get-ADObject -MockWith {
-                    [PSCustomObject] @{ Name = 'Default-First-Site-Name' }
+                    [PSCustomObject] @{
+                        Name = 'Default-First-Site-Name'
+                    }
                 }
 
                 It 'Should return present with the correct subnet' {
@@ -159,7 +161,9 @@ try
                     }
                 }
                 Mock -CommandName Get-ADObject -MockWith {
-                    [PSCustomObject] @{ Name = 'Default-First-Site-Name' }
+                    [PSCustomObject] @{
+                        Name = 'Default-First-Site-Name'
+                    }
                 }
 
                 It 'Should return true for present' {
@@ -220,7 +224,9 @@ try
 
                 Mock -CommandName Get-ADReplicationSubnet
                 Mock -CommandName Get-ADObject -MockWith {
-                    [PSCustomObject] @{ Name = 'Default-First-Site-Name' }
+                    [PSCustomObject] @{
+                        Name = 'Default-First-Site-Name'
+                    }
                 }
 
                 Mock -CommandName New-ADReplicationSubnet -MockWith {
@@ -255,7 +261,9 @@ try
                     }
                 }
                 Mock -CommandName Get-ADObject -MockWith {
-                    [PSCustomObject] @{ Name = 'Default-First-Site-Name' }
+                    [PSCustomObject] @{
+                        Name = 'Default-First-Site-Name'
+                    }
                 }
 
                 Mock -CommandName Set-ADReplicationSubnet -ParameterFilter { $Site -ne $null } -MockWith {

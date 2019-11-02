@@ -1650,7 +1650,7 @@ function Set-TargetResource
 
         $setADUserParams = Get-ADCommonParameters @PSBoundParameters
 
-        $replaceUserProperties = @{ }
+        $replaceUserProperties = @{}
         $clearUserProperties = @()
         $moveUserRequired = $false
         $renameUserRequired = $false

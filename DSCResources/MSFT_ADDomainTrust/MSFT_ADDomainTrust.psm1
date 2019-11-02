@@ -492,7 +492,7 @@ function Compare-TargetResourceState
         Copy the hashtable $PSBoundParameters and add 'Ensure' property to make
         sure it is part of the DesiredValues.
     #>
-    $desiredValues = @{ } + $PSBoundParameters
+    $desiredValues = @{} + $PSBoundParameters
     $desiredValues['Ensure'] = $Ensure
 
     $compareResourcePropertyStateParameters = @{

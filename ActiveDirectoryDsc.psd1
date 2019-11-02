@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '4.1.0.0'
+moduleVersion = '4.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
@@ -61,12 +61,29 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'We could not add the change log to the release notes due to the length of the change log. What have change in this release can be found here https://github.com/PowerShell/ActiveDirectoryDsc/blob/dev/CHANGELOG.md#4100.'
+        ReleaseNotes = '- Changes to ActiveDirectoryDsc
+  - Resolved custom Script Analyzer rules that was added to the test framework.
+  - Resolve style guideline violations for hashtables ([issue 516](https://github.com/PowerShell/ActiveDirectoryDsc/issues/516)).
+- Changes to ADReplicationSite
+  - Added "Description" attribute parameter ([issue 500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing ([issue 355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
+  - Correct value returned for RenameDefaultFirstSiteName ([issue 502](https://github.com/PowerShell/ActiveDirectoryDsc/issues/502)).
+- Changes to ADReplicationSubnet
+  - Added "Description" attribute parameter ([issue 503](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500))
+  - Added Integration testing ([issue 357](https://github.com/PowerShell/ActiveDirectoryDsc/issues/357))
+- Changes to ADReplicationSiteLink
+  - Added Integration testing ([issue 356](https://github.com/PowerShell/ActiveDirectoryDsc/issues/356)).
+  - Added ability to set "Options" such as Change Notification Replication ([issue 504](https://github.com/PowerShell/ActiveDirectoryDsc/issues/504)).
+- Changes to ActiveDirectoryDsc.Common
+  - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays. ([issue 513](https://github.com/PowerShell/ActiveDirectoryDsc/issues/513))
+
+'
 
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
 }
+
 
 
 
