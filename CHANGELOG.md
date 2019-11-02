@@ -4,21 +4,23 @@
 
 - Changes to ADServicePrincipalName
   - Added Integration testing ([issue #358](https://github.com/PowerShell/ActiveDirectoryDsc/issues/358)).
-
-## 4.2.0.0
-
-- Changes to ActiveDirectoryDsc
-  - Resolved custom Script Analyzer rules that was added to the test framework.
 - Changes to ADManagedServiceAccount
-  - KerberosEncryptionType property added.
-  - BREAKING CHANGE: AccountType parameter ValidateSet changed from ('Group', 'Single') to ('Group', 'Standalone') - Standalone is the correct terminology. ref: https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/service-accounts.
+  - KerberosEncryptionType property added. ([issue #511](https://github.com/PowerShell/ActiveDirectoryDsc/issues/511)).
+  - BREAKING CHANGE: AccountType parameter ValidateSet changed from ('Group', 'Single') to ('Group', 'Standalone') - Standalone is the correct terminology. Ref: [Service Accounts](https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/service-accounts).
+  ([issue #515](https://github.com/PowerShell/ActiveDirectoryDsc/issues/515)).
   - BREAKING CHANGE: AccountType parameter default of Single removed. - Enforce positive choice of account type.
   - BREAKING CHANGE: MembershipAttribute parameter ValidateSet member SID changed to ObjectSid to match result property of Get-AdObject. Previous code does not work if SID is specified.
   - BREAKING CHANGE: AccountTypeForce parameter removed - unnecessary complication.
   - BREAKING CHANGE: Members parameter renamed to ManagedPasswordPrincipals - to closer match Get-AdServiceAccount result property PrincipalsAllowedToRetrieveManagedPassword. This is so that a DelegateToAccountPrincipals parameter can be added later.
   - Common Compare-ResourcePropertyState function used to replace function specific Compare-TargetResourceState and code refactored.
+  ([issue #512](https://github.com/PowerShell/ActiveDirectoryDsc/issues/512)).
   - Resource unit tests refactored to use nested contexts and follow the logic of the module.
   - Resource Integration tests added.
+
+## 4.2.0.0
+
+- Changes to ActiveDirectoryDsc
+  - Resolved custom Script Analyzer rules that was added to the test framework.
 - Changes to ADReplicationSite
   - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
   - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
