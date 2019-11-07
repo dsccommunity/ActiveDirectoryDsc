@@ -1882,23 +1882,34 @@ function Test-DscPropertyState
 
 <#
     .SYNOPSIS
-        Tests if the AD PS Provider has been loaded.
+        Asserts if the AD PS Provider has been installed.
 
-    .OUTPUTS
-        System.Boolean
-
-        Returns $true of the AD PS Provider is loaded, or $false if it is not loaded.
+    .NOTES
+        Attempts to force import the ActiveDirectory module if the AD PS Provider has not been installed
+        and throws an exception if the AD PS Provider cannot be installed.
 #>
 
-function Test-ADPSProvider
+function Assert-ADPSProvider
 {
     [CmdletBinding()]
-    [OutputType([System.Boolean])]
     param()
 
     $activeDirectoryPSProvider = Get-PSProvider -PSProvider 'ActiveDirectory' -ErrorAction SilentlyContinue
 
-    return ($activeDirectoryPSProvider -and $true)
+    if ($null -eq $activeDirectoryPSProvider)
+    {
+        Write-Verbose -Message $script:localizedData.AdPsProviderNotFound -Verbose
+        Import-Module -Name 'ActiveDirectory' -Force
+        try
+        {
+            $activeDirectoryPSProvider = Get-PSProvider -PSProvider 'ActiveDirectory'
+        }
+        catch
+        {
+            $errorMessage = $script:localizedData.AdPsProviderInstallFailureError
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+        }
+    }
 }
 
 <#
@@ -1909,7 +1920,7 @@ function Test-ADPSProvider
         Specifies the AD path to which the drive is mapped.
 
     .NOTES
-        Throws an exception if the PS Drive cannot be created or the AD PS Provider can't be installed.
+        Throws an exception if the PS Drive cannot be created.
 #>
 function Assert-ADPSDrive
 {
@@ -1923,16 +1934,7 @@ function Assert-ADPSDrive
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    if (Test-ADPSProvider)
-    {
-        Write-Verbose -Message $script:localizedData.AdPsProviderNotFound -Verbose
-        Import-Module -Name 'ActiveDirectory' -Force
-        if (Test-ADPSProvider)
-        {
-            $errorMessage = $script:localizedData.AdPsProviderInstallFailureError
-            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-        }
-    }
+    Assert-ADPSProvider
 
     $activeDirectoryPSDrive = Get-PSDrive -Name AD -ErrorAction SilentlyContinue
 
