@@ -1882,13 +1882,34 @@ function Test-DscPropertyState
 
 <#
     .SYNOPSIS
+        Tests if the AD PS Provider has been loaded.
+
+    .OUTPUTS
+        System.Boolean
+
+        Returns $true of the AD PS Provider is loaded, or $false if it is not loaded.
+#>
+
+function Test-ADPSProvider
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param()
+
+    $activeDirectoryPSProvider = Get-PSProvider -PSProvider 'ActiveDirectory' -ErrorAction SilentlyContinue
+
+    return ($activeDirectoryPSProvider -and $true)
+}
+
+<#
+    .SYNOPSIS
         Asserts if the AD PS Drive has been created, and creates one if not.
 
     .PARAMETER Root
         Specifies the AD path to which the drive is mapped.
 
     .NOTES
-        Throws an exception if the PS Drive cannot be created.
+        Throws an exception if the PS Drive cannot be created or the AD PS Provider can't be installed.
 #>
 function Assert-ADPSDrive
 {
@@ -1900,7 +1921,18 @@ function Assert-ADPSDrive
         $Root = '//RootDSE/'
     )
 
-    Assert-Module -ModuleName 'ActiveDirectory' -ImportModule
+    Assert-Module -ModuleName 'ActiveDirectory'
+
+    if (Test-ADPSProvider)
+    {
+        Write-Verbose -Message $script:localizedData.AdPsProviderNotFound -Verbose
+        Import-Module -Name 'ActiveDirectory' -Force
+        if (Test-ADPSProvider)
+        {
+            $errorMessage = $script:localizedData.AdPsProviderInstallFailureError
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+        }
+    }
 
     $activeDirectoryPSDrive = Get-PSDrive -Name AD -ErrorAction SilentlyContinue
 

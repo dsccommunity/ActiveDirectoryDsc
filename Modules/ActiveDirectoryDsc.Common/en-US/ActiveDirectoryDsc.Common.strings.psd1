@@ -51,4 +51,6 @@ ConvertFrom-StringData @'
     SearchingForDomainControllerInSite  = Searching for a domain controller in the site '{0}' in the domain '{1}'. (ADCOMMON0053)
     IgnoreCredentialError               = Suppressing the credential error '{0}' with the message '{1}'. (ADCOMMON0054)
     NoObjectFoundInRecycleBin           = Did not find a restorable object in the recycle bin. (ADCOMMON0055)
+    AdPsProviderNotFound                = The Active Directory PS Provider was not found, Forcing import of the ActiveDirectory module. (ADCOMMON0056)
+    AdPsProviderInstallFailureError     = Error installing the Active Directory PS Provider. (ADCOMMON0057)
 '@
