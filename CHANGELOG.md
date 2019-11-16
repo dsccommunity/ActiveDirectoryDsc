@@ -18,6 +18,8 @@
   - Resource Integration tests added.
 - Changes to ADKDSKey
   - Added Integration testing ([issue #351](https://github.com/PowerShell/ActiveDirectoryDsc/issues/351))
+- Changes to ADObjectPermissionEntry
+  - Updated Assert-ADPSDrive with PSProvider Checks ([issue #527](https://github.com/PowerShell/ActiveDirectoryDsc/issues/527)).
 
 ## 4.2.0.0
 
