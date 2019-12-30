@@ -1498,6 +1498,14 @@ function Add-ADCommonGroupMember
                 {
                     $memberObject = Get-ADUser @commonParameters
                 }
+                elseif ($memberObjectClass -eq 'msDS-ManagedServiceAccount')
+                {
+                    $memberObject = Get-ADServiceAccount @commonParameters
+                }
+                elseif ($memberObjectClass -eq 'msDS-GroupManagedServiceAccount')
+                {
+                    $memberObject = Get-ADServiceAccount @commonParameters
+                }
 
                 Add-ADGroupMember @Parameters -Members $memberObject -ErrorAction 'Stop'
             }
