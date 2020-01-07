@@ -73,6 +73,18 @@ try
             Name        = $presentSiteName
             Description = $genericDescription
         }
+
+        $presentSiteTestPresentEmptyDescription = @{
+            Ensure      = 'Present'
+            Name        = $presentSiteName
+            Description = $null
+        }
+
+        $presentSiteTestNoDescription = @{
+            Ensure      = 'Present'
+            Name        = $presentSiteName
+        }
+
         $presentSiteTestAbsent = @{
             Ensure = 'Absent'
             Name   = $presentSiteName
@@ -222,6 +234,30 @@ try
 
                 # Assert
                 $targetResourceState | Should -BeFalse
+            }
+
+            It 'Should return true if the site exists with description set, but no description is defined' {
+
+                # Arrange
+                Mock -CommandName Get-ADReplicationSite { $presentSiteTestPresentEmptyDescription }
+
+                # Act
+                $targetResourceState = Test-TargetResource @presentSiteTestNoDescription
+
+                # Assert
+                $targetResourceState | Should -BeTrue
+            }
+
+            It 'Should return true if the site exists with no description set, and no description defined' {
+
+                # Arrange
+                Mock -CommandName Get-ADReplicationSite { $presentSiteTestPresent }
+
+                # Act
+                $targetResourceState = Test-TargetResource @presentSiteTestNoDescription
+
+                # Assert
+                $targetResourceState | Should -BeTrue
             }
         }
 
