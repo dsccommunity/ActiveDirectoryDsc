@@ -215,7 +215,7 @@ function Test-TargetResource
         if ($getTargetResourceResult.Ensure -eq $Ensure)
         {
             # Site should exist
-            if ($getTargetResourceResult.Description -ne $Description)
+            if ($PSBoundParameters.ContainsKey('Description') -and $getTargetResourceResult.Description -ne $Description)
             {
                 Write-Verbose -Message ($script:localizedData.ReplicationSiteNotInDesiredState -f $Name)
                 $configurationCompliant = $false
