@@ -1,10 +1,19 @@
 # Change log for ActiveDirectoryDsc
 
-## Unreleased
+## [Unreleased]
 
-- Changes to ADServicePrincipalName
-  - Added Integration testing ([issue #358](https://github.com/PowerShell/ActiveDirectoryDsc/issues/358)).
-- Changes to ADManagedServiceAccount
+### Added
+
+- ADServicePrincipalName
+  - Added Integration tests ([issue #358](https://github.com/PowerShell/ActiveDirectoryDsc/issues/358)).
+- ADManagedServiceAccount
+  - Added Integration tests.
+- ADKDSKey
+  - Added Integration tests ([issue #351](https://github.com/PowerShell/ActiveDirectoryDsc/issues/351)).
+
+### Changed
+
+- ADManagedServiceAccount
   - KerberosEncryptionType property added. ([issue #511](https://github.com/PowerShell/ActiveDirectoryDsc/issues/511)).
   - BREAKING CHANGE: AccountType parameter ValidateSet changed from ('Group', 'Single') to ('Group', 'Standalone') - Standalone is the correct terminology. Ref: [Service Accounts](https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/service-accounts).
   ([issue #515](https://github.com/PowerShell/ActiveDirectoryDsc/issues/515)).
@@ -15,13 +24,25 @@
   - Common Compare-ResourcePropertyState function used to replace function specific Compare-TargetResourceState and code refactored.
   ([issue #512](https://github.com/PowerShell/ActiveDirectoryDsc/issues/512)).
   - Resource unit tests refactored to use nested contexts and follow the logic of the module.
-  - Resource Integration tests added.
-- Changes to ADKDSKey
-  - Added Integration testing ([issue #351](https://github.com/PowerShell/ActiveDirectoryDsc/issues/351))
-- Changes to ADObjectPermissionEntry
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
+### Fixed
+
+- ADObjectPermissionEntry
   - Updated Assert-ADPSDrive with PSProvider Checks ([issue #527](https://github.com/PowerShell/ActiveDirectoryDsc/issues/527)).
-- Changes to ADReplicationSite
+- ADReplicationSite
   - Fixed incorrect evaluation of site configuration state when no description is defined ([issue #534](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/534)).
+
+### Security
+
+- None
 
 ## 4.2.0.0
 
