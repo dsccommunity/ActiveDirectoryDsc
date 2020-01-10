@@ -13,7 +13,7 @@ VersionedOutputDirectory: true
 ####################################################
 #       Sampler Pipeline Configuration             #
 ####################################################
-# Defining 'Workflows' (suite of InvkeBuild tasks) to be run using their alias
+# Defining 'Workflows' (suite of InvokeBuild tasks) to be run using their alias
 BuildWorkflow:
   '.': # "." is the default Invoke-Build workflow. It is called when no -Tasks is specified to the build.ps1
     - build
@@ -29,14 +29,15 @@ BuildWorkflow:
     - build
     - package_module_nupkg
 
+  hqrmtest:
+  - DscResource_Tests_Stop_On_Fail
+
   # defining test task to be run when invoking `./build.ps1 -Tasks test`
   test:
     - Pester_Tests_Stop_On_Fail
     - Pester_if_Code_Coverage_Under_Threshold
     - DscResource_Tests_Stop_On_Fail
 
-  hqrmtest:
-  - DscResource_Tests_Stop_On_Fail
 
   publish:
     - Publish_release_to_GitHub
@@ -47,21 +48,14 @@ BuildWorkflow:
 #       PESTER  Configuration                      #
 ####################################################
 
-Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
+Pester:
   OutputFormat: NUnitXML
-  # Will look at every *.ps1 & *.psm1 under ModulePath, excepts when $_.FullName -match (Join-Path $ProjectPath $ExcludeFromCodeCoverageItem)
   ExcludeFromCodeCoverage:
-    # - Template
-  # Default is to use the tests folder in the project folder or source folder (if present)
-  # can use it to prioritize: tests/QA, tests/Unit, tests/Integration
   Script:
-  # - tests/QA/module.tests.ps1
-  - tests/QA
   - tests/Unit
-  # - tests/Integration # ActiveDirectoryDsc Integration tests
   ExcludeTag:
   Tag:
-  CodeCoverageThreshold: 85 # Set to 0 to bypass
+  CodeCoverageThreshold: 85
 
 DscTest:
   ExcludeTag:
@@ -79,7 +73,7 @@ Resolve-Dependency: #Parameters for Resolve-Dependency
   #ProxyCredential:
   Gallery: 'PSGallery'
   # AllowOldPowerShellGetModule: true
-  #MinimumPSDependVersion = '0.3.0'
+  # MinimumPSDependVersion = '0.3.0'
   AllowPrerelease: false
   Verbose: false
 

@@ -2,10 +2,10 @@ TOPIC
     about_ActiveDirectoryDsc
 
 SHORT DESCRIPTION
-    Dsc Resources for deployment and configuration of Active Directory Domain Services.
+    DSC Resources for deployment and configuration of Active Directory Domain Services.
 
 LONG DESCRIPTION
-    This module contains Dsc Resources for deployment and configuration of Active Directory Domain Services.
+    This module contains DSC Resources for deployment and configuration of Active Directory Domain Services.
 
 EXAMPLES
     PS C:\> Get-DscResource -Module ActiveDirectoryDsc
@@ -21,4 +21,3 @@ SEE ALSO
 
 KEYWORDS
       DSC, DscResource, ActiveDirectory
-

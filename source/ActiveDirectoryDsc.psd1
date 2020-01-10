@@ -6,10 +6,10 @@ moduleVersion = '0.0.1'
 GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
 
 # Author of this module
-Author = 'Dsc Community'
+Author = 'DSC Community'
 
 # Company or vendor of this module
-CompanyName = 'Dsc Community'
+CompanyName = 'DSC Community'
 
 # Copyright statement for this module
 Copyright = 'Copyright the DSC Community contributors. All rights reserved.'
