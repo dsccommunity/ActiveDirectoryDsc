@@ -1,0 +1,23 @@
+TOPIC
+    about_ActiveDirectoryDsc
+
+SHORT DESCRIPTION
+    DSC Resources for deployment and configuration of Active Directory Domain Services.
+
+LONG DESCRIPTION
+    This module contains DSC Resources for deployment and configuration of Active Directory Domain Services.
+
+EXAMPLES
+    PS C:\> Get-DscResource -Module ActiveDirectoryDsc
+
+NOTE:
+    Thank you to all those who contributed to this module, by writing code, sharing opinions, and provided feedback.
+
+TROUBLESHOOTING NOTE:
+    Look out on the Github repository for issues and new releases.
+
+SEE ALSO
+  - https://github.com/dsccommunity/ActiveDirectoryDsc
+
+KEYWORDS
+      DSC, DscResource, ActiveDirectory

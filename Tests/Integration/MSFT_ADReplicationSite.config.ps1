@@ -63,6 +63,42 @@ Configuration MSFT_ADReplicationSite_RemoveSite_Config
 
 <#
     .SYNOPSIS
+        Creates a brand new Site in AD Sites and Services with no description set.
+#>
+Configuration MSFT_ADReplicationSite_CreateSiteNoDescription_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSite 'Integration_Test'
+        {
+            Name        = 'NewADSite'
+            Ensure      = 'Present'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Remove site from AD Sites and Services
+#>
+Configuration MSFT_ADReplicationSite_RemoveSiteNoDescription_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADReplicationSite 'Integration_Test'
+        {
+            Name        = 'NewADSite'
+            Ensure      = 'Absent'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
         Rename the Default Site in Active Directory
 #>
 Configuration MSFT_ADReplicationSite_RenameDefaultSite_Config
@@ -80,4 +116,3 @@ Configuration MSFT_ADReplicationSite_RenameDefaultSite_Config
         }
     }
 }
-

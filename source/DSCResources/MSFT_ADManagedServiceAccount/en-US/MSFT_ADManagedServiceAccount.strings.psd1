@@ -1,0 +1,22 @@
+# culture='en-US'
+ConvertFrom-StringData @'
+    AddingManagedServiceAccountMessage            = Adding {0} Account '{1}' to '{2}'. (MSA0001)
+    RecreatingManagedServiceAccountMessage        = Recreating {0} Account '{1}'. (MSA0002)
+    RemovingManagedServiceAccountMessage          = Removing {0} Account '{1}'. (MSA0003)
+    MovingManagedServiceAccountMessage            = Moving {0} Account '{1}' from '{2}' to '{3}'. (MSA0004)
+    ManagedServiceAccountNotFoundMessage          = {0} Account '{1}' was not found. (MSA0005)
+    RetrievingManagedServiceAccountMessage        = Retrieving Account '{0}'. (MSA0006)
+    ManagedServiceAccountInDesiredStateMessage    = {0} Account '{1}' is in the desired state. (MSA0007)
+    UpdatingManagedServiceAccountPropertyMessage  = Updating {0} Account '{1}' property '{2}' to '{3}'. (MSA0008)
+    RetrievingManagedPasswordPrincipalsMessage    = Retrieving Principals Allowed To Retrieve Managed Password based on '{0}' property. (MSA0009)
+    ResourceExistsButShouldNotMessage             = {0} Account '{1}' exists but should not. (MSA0010)
+    ResourceDoesNotExistButShouldMessage          = {0} Account '{1}' does not exist but should. (MSA0011)
+    AddingManagedServiceAccountError              = Error adding {0} Account '{1}' to '{2}'. (MSA0012)
+    RemovingManagedServiceAccountError            = Error removing {0} Account '{1}'. (MSA0013)
+    SettingManagedServiceAccountError             = Error setting {0} Account '{1}'. (MSA0014)
+    MovingManagedServiceAccountError              = Error moving {0} Account '{1}' from '{2}' to '{3}'. (MSA0015)
+    RetrievingManagedServiceAccountError          = Error retrieving Account '{0}'. (MSA0016)
+    RetrievingManagedPasswordPrincipalsError      = Error retrieving Principal '{0}'. (MSA0017)
+    GettingADDomainError                          = Error getting Active Directory Domain details. (MSA0018)
+    KdsRootKeyNotFoundError                       = Error adding group account '{0}'. The KDS Root Key was not found. (MSA0019)
+'@
