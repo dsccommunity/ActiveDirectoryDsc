@@ -35,6 +35,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Remove verbose parameters from unit tests.
   - Fix PowerShell script file formatting and culture string alignment.
   - Add the `pipelineIndentationStyle` setting to the Visual Studio Code settings file.
+  - Remove unused common function Test-DscParameterState ([issue #522](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/522)).
 
 ### Fixed
 
