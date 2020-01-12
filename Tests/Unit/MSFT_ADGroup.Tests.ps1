@@ -31,6 +31,8 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
+        Set-StrictMode -Version 1.0
+
         # Load stub cmdlets and classes.
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 

@@ -1679,8 +1679,7 @@ function Test-DscPropertyState
 
         if ($desiredType.Name -notin $supportedTypes)
         {
-            Write-Warning -Message ($script:localizedData.UnableToCompareType `
-                    -f $fieldName, $desiredType.Name)
+            Write-Warning -Message ($script:localizedData.UnableToCompareType -f $desiredType.Name)
         }
         else
         {

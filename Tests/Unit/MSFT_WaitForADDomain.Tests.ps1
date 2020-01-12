@@ -31,6 +31,8 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
+        Set-StrictMode -Version 1.0
+
         $mockUserName = 'User1'
         $mockDomainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
             $mockUserName,
