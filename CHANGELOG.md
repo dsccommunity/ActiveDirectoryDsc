@@ -29,6 +29,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Common Compare-ResourcePropertyState function used to replace function specific Compare-TargetResourceState and code refactored.
   ([issue #512](https://github.com/PowerShell/ActiveDirectoryDsc/issues/512)).
   - Resource unit tests refactored to use nested contexts and follow the logic of the module.
+- ActiveDirectoryDsc
+  - Updated PowerShell help files.
+  - Updated Wiki link in README.md.
 
 ### Fixed
 
@@ -38,6 +41,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Fixed incorrect evaluation of site configuration state when no description is defined ([issue #534](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/534)).
 - ADReplicationSiteLink
   - Fix RemovingSites verbose message ([issue #518](https://github.com/PowerShell/ActiveDirectoryDsc/issues/518)).
+- ADComputer
+  - Fixed the SamAcountName property description ([issue #529](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/529)).
 
 ## 4.2.0.0
 
