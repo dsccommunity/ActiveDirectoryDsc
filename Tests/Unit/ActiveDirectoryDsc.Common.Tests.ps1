@@ -2588,7 +2588,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     throw New-object -TypeName 'System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException'
                 }
 
-                Mock -CommandName Write -ParameterFilter {
+                Mock -CommandName Write-Verbose -ParameterFilter {
                     $Message -eq ($script:localizedData.FailedToFindDomainController -f $mockDomainName)
                 } -MockWith {
                     Write-Verbose -Message ('VERBOSE OUTPUT FROM MOCK: {0}' -f $Message)
