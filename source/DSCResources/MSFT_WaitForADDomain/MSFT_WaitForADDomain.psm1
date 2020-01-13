@@ -317,7 +317,7 @@ function Set-TargetResource
     #>
     $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
 
-    $isInDesiredState = $compareTargetResourceStateResult.Where({ $_.ParameterName -eq 'IsAvailable' }).InDesiredState
+    $isInDesiredState = $compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'IsAvailable' }).InDesiredState
 
     if (-not $isInDesiredState)
     {
@@ -384,7 +384,7 @@ function Set-TargetResource
                     )
 
                     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '',
-                    Justification = 'Set LCM DSCMachineStatus to indicate reboot required')]
+                        Justification = 'Set LCM DSCMachineStatus to indicate reboot required')]
                     $global:DSCMachineStatus = 1
                 }
             }

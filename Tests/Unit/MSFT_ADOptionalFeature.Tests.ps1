@@ -66,12 +66,12 @@ try
         $mockADForestNonDesiredState.ForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]0 # Windows2000Forest
 
         $mockADDomainDesiredState = @{
-            Name        = $forestName
-            DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]7  # Windows2016Domain
+            Name       = $forestName
+            DomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]7  # Windows2016Domain
         }
 
         $mockADDomainNonDesiredState = $mockADDomainDesiredState.Clone()
-        $mockADDomainNonDesiredState.DomainMode  = [Microsoft.ActiveDirectory.Management.ADDomainMode]0  # Windows2000Domain
+        $mockADDomainNonDesiredState.DomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]0  # Windows2000Domain
 
         $mockADRecycleBinDisabled = @{
             EnabledScopes      = @()
@@ -80,11 +80,11 @@ try
             RequiredForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]4 # Windows2008R2
         }
 
-        $mockADRecycleBinEnabled= $mockADRecycleBinDisabled.Clone()
+        $mockADRecycleBinEnabled = $mockADRecycleBinDisabled.Clone()
         $mockADRecycleBinEnabled.EnabledScopes = @(
-                "CN=Partitions,CN=Configuration,DC=contoso,DC=com",
-                "CN=NTDS Settings,CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com"
-            )
+            "CN=Partitions,CN=Configuration,DC=contoso,DC=com",
+            "CN=NTDS Settings,CN=DC01,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com"
+        )
 
         $mockTestFeatureDisabled = @{
             EnabledScopes      = @()
@@ -101,9 +101,9 @@ try
                 It 'Should return expected properties' {
                     $targetResource = Get-TargetResource @featureParameters
 
-                    $targetResource.FeatureName                                | Should -Be $featureParameters.FeatureName
-                    $targetResource.ForestFqdn                                 | Should -Be $featureParameters.ForestFqdn
-                    $targetResource.Enabled                                    | Should -BeTrue
+                    $targetResource.FeatureName | Should -Be $featureParameters.FeatureName
+                    $targetResource.ForestFqdn | Should -Be $featureParameters.ForestFqdn
+                    $targetResource.Enabled | Should -BeTrue
                     $targetResource.EnterpriseAdministratorCredential.Username | Should -Be $featureParameters.EnterpriseAdministratorCredential.Username
                     $targetResource.EnterpriseAdministratorCredential.Password | Should -BeNullOrEmpty
 
@@ -126,9 +126,9 @@ try
                 It 'Should return expected properties' {
                     $targetResource = Get-TargetResource @featureParameters
 
-                    $targetResource.FeatureName                                | Should -Be $featureParameters.FeatureName
-                    $targetResource.ForestFqdn                                 | Should -Be $featureParameters.ForestFqdn
-                    $targetResource.Enabled                                    | Should -BeFalse
+                    $targetResource.FeatureName | Should -Be $featureParameters.FeatureName
+                    $targetResource.ForestFqdn | Should -Be $featureParameters.ForestFqdn
+                    $targetResource.Enabled | Should -BeFalse
                     $targetResource.EnterpriseAdministratorCredential.Username | Should -Be $featureParameters.EnterpriseAdministratorCredential.Username
                     $targetResource.EnterpriseAdministratorCredential.Password | Should -BeNullOrEmpty
                 }

@@ -50,10 +50,10 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
 
         WaitForADDomain 'WaitForestAvailability'
         {
-            DomainName       = 'contoso.com'
-            Credential       = $Credential
+            DomainName = 'contoso.com'
+            Credential = $Credential
 
-            DependsOn        = '[WindowsFeature]RSATADPowerShell'
+            DependsOn  = '[WindowsFeature]RSATADPowerShell'
         }
 
         ADDomainController 'DomainControllerUsingExistingDNSServer'

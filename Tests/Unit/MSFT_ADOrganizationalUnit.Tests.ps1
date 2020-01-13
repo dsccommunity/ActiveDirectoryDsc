@@ -40,19 +40,19 @@ try
         )
 
         $testPresentParams = @{
-            Name = 'TestOU'
-            Path = 'OU=Fake,DC=contoso,DC=com'
+            Name        = 'TestOU'
+            Path        = 'OU=Fake,DC=contoso,DC=com'
             Description = 'Test AD OU description'
-            Ensure = 'Present'
+            Ensure      = 'Present'
         }
 
         $testAbsentParams = $testPresentParams.Clone()
         $testAbsentParams['Ensure'] = 'Absent'
 
         $protectedFakeAdOu = @{
-            Name = $testPresentParams.Name
+            Name                            = $testPresentParams.Name
             ProtectedFromAccidentalDeletion = $true
-            Description = $testPresentParams.Description
+            Description                     = $testPresentParams.Description
         }
 
         #region Function Get-TargetResource
@@ -296,7 +296,7 @@ try
             It "Calls Restore-AdCommonObject when RestoreFromRecycleBin is used" {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
-                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
+                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent' } }
                 Mock -CommandName Restore-ADCommonObject -MockWith { return [PSCustomObject] $protectedFakeAdOu }
 
                 Set-TargetResource @restoreParam
@@ -308,7 +308,7 @@ try
             It "Calls New-ADOrganizationalUnit when RestoreFromRecycleBin is used and if no object was found in the recycle bin" {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
-                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
+                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent' } }
                 Mock -CommandName New-ADOrganizationalUnit
                 Mock -CommandName Restore-ADCommonObject
 
@@ -321,11 +321,11 @@ try
             It "Throws if the object cannot be restored" {
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
-                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent'}}
+                Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent' } }
                 Mock -CommandName New-ADOrganizationalUnit
-                Mock -CommandName Restore-ADCommonObject -MockWith { throw (New-Object -TypeName System.InvalidOperationException)}
+                Mock -CommandName Restore-ADCommonObject -MockWith { throw (New-Object -TypeName System.InvalidOperationException) }
 
-                {Set-TargetResource @restoreParam;} | Should -Throw
+                { Set-TargetResource @restoreParam; } | Should -Throw
 
                 Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADOrganizationalUnit -Scope It -Exactly -Times 0

@@ -47,7 +47,7 @@ try
 
             $memStream = New-Object -TypeName 'IO.MemoryStream'
             $formatter = New-Object -TypeName 'Runtime.Serialization.Formatters.Binary.BinaryFormatter'
-            $formatter.Serialize($memStream,$DeepCopyObject)
+            $formatter.Serialize($memStream, $DeepCopyObject)
             $memStream.Position = 0
             $formatter.Deserialize($memStream)
         }
@@ -96,7 +96,7 @@ try
             KeyId             = $mockKDSRootKeyFuture.KeyId
             Ensure            = 'Present'
             DistinguishedName = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
-                                    $mockKDSRootKeyFuture.KeyId, $mockADDomain
+            $mockKDSRootKeyFuture.KeyId, $mockADDomain
         }
 
         $mockKDSRootKeyPastGet = @{
@@ -105,7 +105,7 @@ try
             KeyId             = $mockKDSRootKeyPast.KeyId
             Ensure            = 'Present'
             DistinguishedName = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
-                                    $mockKDSRootKeyPast.KeyId, $mockADDomain
+            $mockKDSRootKeyPast.KeyId, $mockADDomain
         }
 
         $mockKDSRootKeyFutureCompare = @(
@@ -161,7 +161,7 @@ try
                             return $object
                         }
 
-                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0} }
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0 } }
                     }
 
                     It "Should Call 'New-Object' and 'Get-CimInstance'" {
@@ -181,7 +181,7 @@ try
                             return $object
                         }
 
-                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 2} }
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 2 } }
                     }
 
                     It "Should Call 'New-Object' and 'Get-CimInstance'" {
@@ -204,7 +204,7 @@ try
                             return $object
                         }
 
-                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0} }
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0 } }
                     }
 
                     It "Should Call 'New-Object' and 'Get-CimInstance'" {
@@ -224,7 +224,7 @@ try
                             return $object
                         }
 
-                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0} }
+                        Mock -CommandName Get-CimInstance -MockWith { return @{ProductType = 0 } }
                     }
 
                     It "Should Call 'New-Object' and 'Get-CimInstance'" {
@@ -295,7 +295,7 @@ try
 
                     { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
                         Should -Throw ($script:localizedData.EffectiveTimeInvalid -f
-                                            $getTargetResourceParameters.EffectiveTime)
+                            $getTargetResourceParameters.EffectiveTime)
                 }
 
                 Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 0
@@ -332,7 +332,7 @@ try
 
                     { Get-TargetResource  @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
                         Should -Throw ($script:localizedData.RetrievingKDSRootKeyError -f
-                                            $getTargetResourceParameters.EffectiveTime)
+                            $getTargetResourceParameters.EffectiveTime)
 
                     Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
                     Assert-MockCalled -CommandName Get-KdsRootKey -Scope It -Exactly -Times 1
@@ -341,7 +341,7 @@ try
 
             Context -Name 'When the system is in desired state' {
                 Mock -CommandName Get-KdsRootKey -MockWith {
-                    return ,@($mockKDSRootKeyFuture)
+                    return , @($mockKDSRootKeyFuture)
                 }
 
                 It 'Should mock call to Get-KdsRootKey and return identical information' {
@@ -357,7 +357,7 @@ try
                     $getTargetResourceResult.Ensure | Should -Be 'Present'
 
                     $dn = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
-                                $mockKDSRootKeyFuture.KeyId, $mockADDomain
+                    $mockKDSRootKeyFuture.KeyId, $mockADDomain
 
                     $getTargetResourceResult.DistinguishedName | Should -Be $dn
 
@@ -369,7 +369,7 @@ try
                     Mock -CommandName Write-Warning
 
                     Mock -CommandName Get-KdsRootKey -MockWith {
-                        return @($mockKDSRootKeyFuture,$mockKDSRootKeyFuture)
+                        return @($mockKDSRootKeyFuture, $mockKDSRootKeyFuture)
                     }
 
                     It 'Should return Warning that more than one key exists and Error that two keys exist with the same dates' {
@@ -379,7 +379,7 @@ try
 
                         { Get-TargetResource @getTargetResourceParameters -ErrorAction 'SilentlyContinue' } |
                             Should -Throw ($script:localizedData.FoundKDSRootKeySameEffectiveTime -f
-                                                $getTargetResourceParameters.EffectiveTime)
+                                $getTargetResourceParameters.EffectiveTime)
 
                         Assert-MockCalled -CommandName Write-Warning -Scope It -Times 1
                         Assert-MockCalled -CommandName Assert-HasDomainAdminRights -Scope It -Exactly -Times 1
@@ -410,7 +410,7 @@ try
 
                 Context -Name 'When the KDS root key does not exist' {
                     Mock -CommandName Get-KdsRootKey -MockWith {
-                        return ,@($mockKDSRootKeyPast)
+                        return , @($mockKDSRootKeyPast)
                     }
 
                     It "Should return 'Ensure' is 'Absent'" {
@@ -548,7 +548,7 @@ try
             Context -Name "When the system is in the desired state and 'Ensure' is 'Absent'" {
                 It "Should pass when 'Ensure' is set to 'Absent" {
                     $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
+                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript { $_.Parameter -eq 'Ensure' }
                     $objectEnsure.Actual = 'Absent'
                     $objectEnsure.Pass = $true
 
@@ -577,7 +577,7 @@ try
                 }
 
                 $testCases = @()
-                foreach($incorrectParameter in $testIncorrectParameters.GetEnumerator())
+                foreach ($incorrectParameter in $testIncorrectParameters.GetEnumerator())
                 {
                     $objectParameter = $mockKDSRootKeyFutureCompareNotCompliant | Where-Object -FilterScript { $_.Parameter -eq $incorrectParameter.Name }
                     $objectParameter.Expected = $incorrectParameter.Value
@@ -585,7 +585,7 @@ try
 
                     $testCases += @{
                         Parameter = $incorrectParameter.Name
-                        Value = $incorrectParameter.Value
+                        Value     = $incorrectParameter.Value
                     }
                 }
 
@@ -651,7 +651,7 @@ try
 
             Context -Name 'When the system is in the desired state and KDS Root Key is Absent' {
                 $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
+                $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript { $_.Parameter -eq 'Ensure' }
                 $objectEnsure.Expected = 'Absent'
                 $objectEnsure.Pass = $false
 
@@ -661,7 +661,7 @@ try
 
                 $setTargetResourceParametersFuture = @{
                     EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
-                    Ensure = 'Present'
+                    Ensure        = 'Present'
                 }
 
                 It 'Should NOT take any action when all parameters are correct' {
@@ -679,7 +679,7 @@ try
             Context -Name 'When the system is NOT in the desired state and need to remove KDS Root Key' {
                 BeforeEach {
                     $mockKDSRootKeyFutureCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
+                    $objectEnsure = $mockKDSRootKeyFutureCompareEnsureAbsent | Where-Object -FilterScript { $_.Parameter -eq 'Ensure' }
                     $objectEnsure.Actual = 'Present'
                     $objectEnsure.Pass = $false
 
@@ -689,7 +689,7 @@ try
 
                     $setTargetResourceParametersFuture = @{
                         EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
-                        Ensure = 'Absent'
+                        Ensure        = 'Absent'
                     }
                 }
 
@@ -713,13 +713,13 @@ try
 
                 Context -Name 'When only one KDS root key exists' {
                     Mock -CommandName Get-KdsRootKey -MockWith {
-                        return ,@($mockKDSRootKeyFuture)
+                        return , @($mockKDSRootKeyFuture)
                     }
 
                     It "Should call NOT 'Remove-ADObject' when 'Ensure' is set to 'Present' and 'ForceRemove' is 'False'" {
                         { Set-TargetResource @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
                             Should -Throw ($script:localizedData.NotEnoughKDSRootKeysPresentNoForce -f
-                                                $setTargetResourceParametersFuture.EffectiveTime)
+                                $setTargetResourceParametersFuture.EffectiveTime)
 
                         Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
@@ -761,7 +761,7 @@ try
                     It "Should call 'Remove-ADObject' and throw an error when catching any errors" {
                         { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
                             Should -Throw ($script:localizedData.KDSRootKeyRemoveError -f
-                                                $setTargetResourceParametersFuture.EffectiveTime)
+                                $setTargetResourceParametersFuture.EffectiveTime)
 
                         Assert-MockCalled -CommandName Remove-ADObject -Scope It -Exactly -Times 1
                     }
@@ -771,7 +771,7 @@ try
             Context -Name 'When the system is NOT in the desired state and need to add KDS Root Key' {
                 BeforeEach {
                     $mockKDSRootKeyCompareEnsureAbsent = Copy-ArrayObjects $mockKDSRootKeyFutureCompare
-                    $objectEnsure = $mockKDSRootKeyCompareEnsureAbsent | Where-Object -FilterScript {$_.Parameter -eq 'Ensure'}
+                    $objectEnsure = $mockKDSRootKeyCompareEnsureAbsent | Where-Object -FilterScript { $_.Parameter -eq 'Ensure' }
                     $objectEnsure.Actual = 'Absent'
                     $objectEnsure.Pass = $false
 
@@ -783,7 +783,7 @@ try
                 It "Should call 'Add-KDSRootKey' when 'Ensure' is set to 'Present'" {
                     $setTargetResourceParametersFuture = @{
                         EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
-                        Ensure = 'Present'
+                        Ensure        = 'Present'
                     }
 
                     Set-TargetResource @setTargetResourceParametersFuture
@@ -804,7 +804,7 @@ try
 
                     { Set-TargetResource @setTargetResourceParametersPast -ErrorAction 'SilentlyContinue' } |
                         Should -Throw ($script:localizedData.AddingKDSRootKeyError -f
-                                            $setTargetResourceParametersPast.EffectiveTime)
+                            $setTargetResourceParametersPast.EffectiveTime)
 
                     Assert-MockCalled -CommandName Add-KDSRootKey -Scope It -Times 0
                     Assert-MockCalled -CommandName Remove-ADObject -Scope It -Times 0
@@ -838,7 +838,7 @@ try
 
                     { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
                         Should -Throw ($script:localizedData.EffectiveTimeInvalid -f
-                                            $setTargetResourceParametersFuture.EffectiveTime)
+                            $setTargetResourceParametersFuture.EffectiveTime)
 
                     Assert-MockCalled -CommandName Compare-TargetResourceState -ParameterFilter {
                         $mockKDSRootKeyFuture.EffectiveTime
@@ -853,12 +853,12 @@ try
                     It "Should call 'Add-KdsRootKey' and throw an error when catching any errors" {
                         $setTargetResourceParametersFuture = @{
                             EffectiveTime = ($mockKDSRootKeyFuture.EffectiveTime).ToString()
-                            Ensure = 'Present'
+                            Ensure        = 'Present'
                         }
 
                         { Set-TargetResource  @setTargetResourceParametersFuture -ErrorAction 'SilentlyContinue' } |
                             Should -Throw ($script:localizedData.KDSRootKeyAddError -f
-                                                $setTargetResourceParametersFuture.EffectiveTime)
+                                $setTargetResourceParametersFuture.EffectiveTime)
 
                         Assert-MockCalled -CommandName Add-KdsRootKey -Scope It -Exactly -Times 1
                     }

@@ -52,12 +52,12 @@ try
         $deniedAccount = 'deniedAccount'
 
         $testDefaultParams = @{
-            Credential = $testAdminCredential
+            Credential                    = $testAdminCredential
             SafeModeAdministratorPassword = $testAdminCredential
         }
 
         $testDefaultParamsRODC = @{
-            Credential = $testAdminCredential
+            Credential                    = $testAdminCredential
             SafeModeAdministratorPassword = $testAdminCredential
             ReadOnlyReplica               = $true
             SiteName                      = $correctSiteName
@@ -92,7 +92,7 @@ try
                             $domainControllerObject.Domain = $correctDomainName
                             $domainControllerObject.IsGlobalCatalog = $true
                             $domainControllerObject.IsReadOnly = $false
-                            $domainControllerObject.OperationMasterRoles = @('DomainNamingMaster','RIDMaster')
+                            $domainControllerObject.OperationMasterRoles = @('DomainNamingMaster', 'RIDMaster')
                             return $domainControllerObject
                         }
 
@@ -330,7 +330,7 @@ try
                             IsGlobalCatalog                     = $true
                             AllowPasswordReplicationAccountName = @($allowedAccount)
                             DenyPasswordReplicationAccountName  = @($deniedAccount)
-                            FlexibleSingleMasterOperationRole   = @('DomainNamingMaster','RIDMaster')
+                            FlexibleSingleMasterOperationRole   = @('DomainNamingMaster', 'RIDMaster')
                             Ensure                              = $true
                         }
                     }
@@ -411,8 +411,8 @@ try
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
-                                DomainName                          = 'WrongDomainName'
-                                Ensure                              = $false
+                                DomainName = 'WrongDomainName'
+                                Ensure     = $false
                             }
                         }
                     }
@@ -431,9 +431,9 @@ try
                         BeforeAll {
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
-                                    DomainName                          = $correctDomainName
-                                    SiteName                            = $correctSiteName
-                                    Ensure                              = $true
+                                    DomainName = $correctDomainName
+                                    SiteName   = $correctSiteName
+                                    Ensure     = $true
                                 }
                             }
                         }
@@ -452,9 +452,9 @@ try
                             BeforeAll {
                                 Mock -CommandName Get-TargetResource -MockWith {
                                     return @{
-                                        DomainName                          = $correctDomainName
-                                        IsGlobalCatalog                     = $false
-                                        Ensure                              = $true
+                                        DomainName      = $correctDomainName
+                                        IsGlobalCatalog = $false
+                                        Ensure          = $true
                                     }
                                 }
                             }
@@ -472,9 +472,9 @@ try
                             BeforeAll {
                                 Mock -CommandName Get-TargetResource -MockWith {
                                     return @{
-                                        DomainName                          = $correctDomainName
-                                        IsGlobalCatalog                     = $true
-                                        Ensure                              = $true
+                                        DomainName      = $correctDomainName
+                                        IsGlobalCatalog = $true
+                                        Ensure          = $true
                                     }
                                 }
                             }
@@ -494,7 +494,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
                                     DomainName                          = $correctDomainName
-                                    AllowPasswordReplicationAccountName = @($allowedAccount,'Member2')
+                                    AllowPasswordReplicationAccountName = @($allowedAccount, 'Member2')
                                     Ensure                              = $true
                                 }
                             }
@@ -502,7 +502,7 @@ try
 
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @('NewMember1','NewMember2')
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @('NewMember1', 'NewMember2')
                                 $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
@@ -512,7 +512,7 @@ try
 
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount,'Member2','NewMember')
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -AllowPasswordReplicationAccountName @($allowedAccount, 'Member2', 'NewMember')
                                 $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
@@ -535,16 +535,16 @@ try
                         BeforeAll {
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
-                                    DomainName                          = $correctDomainName
-                                    DenyPasswordReplicationAccountName  = @($deniedAccount,'Member2')
-                                    Ensure                              = $true
+                                    DomainName                         = $correctDomainName
+                                    DenyPasswordReplicationAccountName = @($deniedAccount, 'Member2')
+                                    Ensure                             = $true
                                 }
                             }
                         }
 
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @('NewMember1','NewMember2')
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @('NewMember1', 'NewMember2')
                                 $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
@@ -554,7 +554,7 @@ try
 
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($allowedAccount,'Member2','NewMember')
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -DenyPasswordReplicationAccountName @($allowedAccount, 'Member2', 'NewMember')
                                 $result | Should -BeFalse
 
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
@@ -577,10 +577,10 @@ try
                         BeforeAll {
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
-                                    DomainName                          = $correctDomainName
-                                    DenyPasswordReplicationAccountName  = @($deniedAccount,'Member2')
-                                    Ensure                              = $true
-                                    FlexibleSingleMasterOperationRole   = @('DomainNamingMaster')
+                                    DomainName                         = $correctDomainName
+                                    DenyPasswordReplicationAccountName = @($deniedAccount, 'Member2')
+                                    Ensure                             = $true
+                                    FlexibleSingleMasterOperationRole  = @('DomainNamingMaster')
                                 }
                             }
                         }
@@ -598,9 +598,9 @@ try
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
-                                DomainName                          = $correctDomainName
-                                SiteName                            = $correctSiteName
-                                Ensure                              = $true
+                                DomainName = $correctDomainName
+                                SiteName   = $correctSiteName
+                                Ensure     = $true
                             }
                         }
 
@@ -623,10 +623,10 @@ try
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
-                                DomainName                          = $correctDomainName
-                                SiteName                            = $null
-                                ReadOnlyReplica                     = $false
-                                Ensure                              = $false
+                                DomainName      = $correctDomainName
+                                SiteName        = $null
+                                ReadOnlyReplica = $false
+                                Ensure          = $false
                             }
                         }
                     }
@@ -644,9 +644,9 @@ try
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
-                                DomainName                          = $correctDomainName
-                                ReadOnlyReplica                     = $false
-                                Ensure                              = $true
+                                DomainName      = $correctDomainName
+                                ReadOnlyReplica = $false
+                                Ensure          = $true
                             }
                         }
                     }
@@ -965,7 +965,7 @@ try
 
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
-                                Ensure = $true
+                                Ensure                            = $true
                                 FlexibleSingleMasterOperationRole = @('DomainNamingMaster')
                             }
                         }
@@ -998,7 +998,7 @@ try
 
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
-                                Ensure = $true
+                                Ensure                            = $true
                                 FlexibleSingleMasterOperationRole = @('DomainNamingMaster')
                             }
                         }
@@ -1195,7 +1195,7 @@ try
 
                 Context 'When there more than one current member' {
                     It 'Should return the correct values' {
-                        $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('OldMember1','OldMember2')
+                        $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('OldMember1', 'OldMember2')
                         $result.MembersToAdd | Should -HaveCount 1
                         $result.MembersToAdd[0].ToString() | Should -Be 'Member1'
                         $result.MembersToRemove | Should -HaveCount 2
@@ -1244,7 +1244,7 @@ try
 
                 Context 'When there more than one current member' {
                     It 'Should return the correct values' {
-                        $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers @('OldMember1','OldMember2')
+                        $result = Get-MembersToAddAndRemove -DesiredMembers $null -CurrentMembers @('OldMember1', 'OldMember2')
                         $result.MembersToAdd | Should -BeNullOrEmpty
                         $result.MembersToRemove | Should -HaveCount 2
                         $result.MembersToRemove[0].ToString() | Should -Be 'OldMember1'
@@ -1269,7 +1269,7 @@ try
 
             Context 'When the there are more desired members than current members' {
                 Context 'When proving a collection for CurrentMembers' {
-                    $result = Get-MembersToAddAndRemove -DesiredMembers @('Member1','Member2') -CurrentMembers @('Member1')
+                    $result = Get-MembersToAddAndRemove -DesiredMembers @('Member1', 'Member2') -CurrentMembers @('Member1')
                     $result.MembersToAdd | Should -HaveCount 1
                     $result.MembersToAdd[0].ToString() | Should -Be 'Member2'
                     $result.MembersToRemove | Should -BeNullOrEmpty
@@ -1278,7 +1278,7 @@ try
 
             Context 'When the there are fewer desired members than current members' {
                 Context 'When proving a string value for CurrentMembers' {
-                    $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('Member1','Member2')
+                    $result = Get-MembersToAddAndRemove -DesiredMembers 'Member1' -CurrentMembers @('Member1', 'Member2')
                     $result.MembersToAdd | Should -BeNullOrEmpty
                     $result.MembersToRemove | Should -HaveCount 1
                     $result.MembersToRemove[0].ToString() | Should -Be 'Member2'

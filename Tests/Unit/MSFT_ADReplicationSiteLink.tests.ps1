@@ -52,34 +52,34 @@ try
         }
 
         $targetResourceParameters = @{
-            Name = 'HQSiteLink'
-            Cost = 100
-            Description = 'HQ Site'
+            Name                          = 'HQSiteLink'
+            Cost                          = 100
+            Description                   = 'HQ Site'
             ReplicationFrequencyInMinutes = 180
-            SitesIncluded = @('site1', 'site2')
-            SitesExcluded = @()
-            OptionChangeNotification = $false
-            OptionTwoWaySync = $false
-            OptionDisableCompression = $false
-            Ensure = 'Present'
+            SitesIncluded                 = @('site1', 'site2')
+            SitesExcluded                 = @()
+            OptionChangeNotification      = $false
+            OptionTwoWaySync              = $false
+            OptionDisableCompression      = $false
+            Ensure                        = 'Present'
         }
 
         $targetResourceParametersWithOptions = @{
-            Name = 'HQSiteLink'
-            Cost = 100
-            Description = 'HQ Site'
+            Name                          = 'HQSiteLink'
+            Cost                          = 100
+            Description                   = 'HQ Site'
             ReplicationFrequencyInMinutes = 180
-            SitesIncluded = @('site1', 'site2')
-            SitesExcluded = @()
-            OptionChangeNotification = $true
-            OptionTwoWaySync = $true
-            OptionDisableCompression = $true
-            Ensure = 'Present'
+            SitesIncluded                 = @('site1', 'site2')
+            SitesExcluded                 = @()
+            OptionChangeNotification      = $true
+            OptionTwoWaySync              = $true
+            OptionDisableCompression      = $true
+            Ensure                        = 'Present'
         }
 
         $targetResourceParametersSitesExcluded = $targetResourceParameters.Clone()
         $targetResourceParametersSitesExcluded['SitesIncluded'] = $null
-        $targetResourceParametersSitesExcluded['SitesExcluded'] = @('site3','site4')
+        $targetResourceParametersSitesExcluded['SitesExcluded'] = @('site3', 'site4')
 
         $mockADReplicationSiteLinkSitesExcluded = $mockGetADReplicationSiteLinkReturn.Clone()
         $mockADReplicationSiteLinkSitesExcluded['SitesIncluded'] = $null
@@ -94,16 +94,16 @@ try
 
                     $getResult = Get-TargetResource -Name HQSiteLink
 
-                    $getResult.Name                          | Should -Be $targetResourceParameters.Name
-                    $getResult.Cost                          | Should -Be $targetResourceParameters.Cost
-                    $getResult.Description                   | Should -Be $targetResourceParameters.Description
+                    $getResult.Name | Should -Be $targetResourceParameters.Name
+                    $getResult.Cost | Should -Be $targetResourceParameters.Cost
+                    $getResult.Description | Should -Be $targetResourceParameters.Description
                     $getResult.ReplicationFrequencyInMinutes | Should -Be $targetResourceParameters.ReplicationFrequencyInMinutes
-                    $getResult.SitesIncluded                 | Should -Be $targetResourceParameters.SitesIncluded
-                    $getResult.SitesExcluded                 | Should -Be $targetResourceParameters.SitesExcluded
-                    $getResult.Ensure                        | Should -Be $targetResourceParameters.Ensure
-                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParameters.OptionChangeNotification
-                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParameters.OptionTwoWaySync
-                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParameters.OptionDisableCompression
+                    $getResult.SitesIncluded | Should -Be $targetResourceParameters.SitesIncluded
+                    $getResult.SitesExcluded | Should -Be $targetResourceParameters.SitesExcluded
+                    $getResult.Ensure | Should -Be $targetResourceParameters.Ensure
+                    $getResult.OptionChangeNotification | Should -Be $targetResourceParameters.OptionChangeNotification
+                    $getResult.OptionTwoWaySync | Should -Be $targetResourceParameters.OptionTwoWaySync
+                    $getResult.OptionDisableCompression | Should -Be $targetResourceParameters.OptionDisableCompression
 
                 }
             }
@@ -117,16 +117,16 @@ try
 
                     $getResult = Get-TargetResource -Name HQSiteLink
 
-                    $getResult.Name                          | Should -Be $targetResourceParametersWithOptions.Name
-                    $getResult.Cost                          | Should -Be $targetResourceParametersWithOptions.Cost
-                    $getResult.Description                   | Should -Be $targetResourceParametersWithOptions.Description
+                    $getResult.Name | Should -Be $targetResourceParametersWithOptions.Name
+                    $getResult.Cost | Should -Be $targetResourceParametersWithOptions.Cost
+                    $getResult.Description | Should -Be $targetResourceParametersWithOptions.Description
                     $getResult.ReplicationFrequencyInMinutes | Should -Be $targetResourceParametersWithOptions.ReplicationFrequencyInMinutes
-                    $getResult.SitesIncluded                 | Should -Be $targetResourceParametersWithOptions.SitesIncluded
-                    $getResult.SitesExcluded                 | Should -Be $targetResourceParametersWithOptions.SitesExcluded
-                    $getResult.Ensure                        | Should -Be $targetResourceParametersWithOptions.Ensure
-                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParametersWithOptions.OptionChangeNotification
-                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParametersWithOptions.OptionTwoWaySync
-                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParametersWithOptions.OptionDisableCompression
+                    $getResult.SitesIncluded | Should -Be $targetResourceParametersWithOptions.SitesIncluded
+                    $getResult.SitesExcluded | Should -Be $targetResourceParametersWithOptions.SitesExcluded
+                    $getResult.Ensure | Should -Be $targetResourceParametersWithOptions.Ensure
+                    $getResult.OptionChangeNotification | Should -Be $targetResourceParametersWithOptions.OptionChangeNotification
+                    $getResult.OptionTwoWaySync | Should -Be $targetResourceParametersWithOptions.OptionTwoWaySync
+                    $getResult.OptionDisableCompression | Should -Be $targetResourceParametersWithOptions.OptionDisableCompression
 
                 }
             }
@@ -137,16 +137,16 @@ try
                 It 'Ensure Should be Absent' {
                     $getResult = Get-TargetResource -Name HQSiteLink
 
-                    $getResult.Name                          | Should -Be $targetResourceParameters.Name
-                    $getResult.Cost                          | Should -BeNullOrEmpty
-                    $getResult.Description                   | Should -BeNullOrEmpty
+                    $getResult.Name | Should -Be $targetResourceParameters.Name
+                    $getResult.Cost | Should -BeNullOrEmpty
+                    $getResult.Description | Should -BeNullOrEmpty
                     $getResult.ReplicationFrequencyInMinutes | Should -BeNullOrEmpty
-                    $getResult.SitesIncluded                 | Should -BeNullOrEmpty
-                    $getResult.SitesExcluded                 | Should -BeNullOrEmpty
-                    $getResult.Ensure                        | Should -Be 'Absent'
-                    $getResult.OptionChangeNotification      | Should -BeFalse
-                    $getResult.OptionTwoWaySync              | Should -BeFalse
-                    $getResult.OptionDisableCompression      | Should -BeFalse
+                    $getResult.SitesIncluded | Should -BeNullOrEmpty
+                    $getResult.SitesExcluded | Should -BeNullOrEmpty
+                    $getResult.Ensure | Should -Be 'Absent'
+                    $getResult.OptionChangeNotification | Should -BeFalse
+                    $getResult.OptionTwoWaySync | Should -BeFalse
+                    $getResult.OptionDisableCompression | Should -BeFalse
 
                 }
             }
@@ -163,19 +163,19 @@ try
             Context 'When Sites are excluded' {
                 Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockADReplicationSiteLinkSitesExcluded }
 
-                $getResult = Get-TargetResource -Name HQSiteLink -SitesExcluded @('site3','site4')
+                $getResult = Get-TargetResource -Name HQSiteLink -SitesExcluded @('site3', 'site4')
 
                 It 'Returns SitesExcluded' {
-                    $getResult.Name                          | Should -Be $targetResourceParametersSitesExcluded.Name
-                    $getResult.Cost                          | Should -Be $targetResourceParametersSitesExcluded.Cost
-                    $getResult.Description                   | Should -Be $targetResourceParametersSitesExcluded.Description
+                    $getResult.Name | Should -Be $targetResourceParametersSitesExcluded.Name
+                    $getResult.Cost | Should -Be $targetResourceParametersSitesExcluded.Cost
+                    $getResult.Description | Should -Be $targetResourceParametersSitesExcluded.Description
                     $getResult.ReplicationFrequencyInMinutes | Should -Be $targetResourceParametersSitesExcluded.ReplicationFrequencyInMinutes
-                    $getResult.SitesIncluded                 | Should -Be $targetResourceParametersSitesExcluded.SitesIncluded
-                    $getResult.SitesExcluded                 | Should -Be $targetResourceParametersSitesExcluded.SitesExcluded
-                    $getResult.Ensure                        | Should -Be $targetResourceParametersSitesExcluded.Ensure
-                    $getResult.OptionChangeNotification      | Should -Be $targetResourceParametersSitesExcluded.OptionChangeNotification
-                    $getResult.OptionTwoWaySync              | Should -Be $targetResourceParametersSitesExcluded.OptionTwoWaySync
-                    $getResult.OptionDisableCompression      | Should -Be $targetResourceParametersSitesExcluded.OptionDisableCompression
+                    $getResult.SitesIncluded | Should -Be $targetResourceParametersSitesExcluded.SitesIncluded
+                    $getResult.SitesExcluded | Should -Be $targetResourceParametersSitesExcluded.SitesExcluded
+                    $getResult.Ensure | Should -Be $targetResourceParametersSitesExcluded.Ensure
+                    $getResult.OptionChangeNotification | Should -Be $targetResourceParametersSitesExcluded.OptionChangeNotification
+                    $getResult.OptionTwoWaySync | Should -Be $targetResourceParametersSitesExcluded.OptionTwoWaySync
+                    $getResult.OptionDisableCompression | Should -Be $targetResourceParametersSitesExcluded.OptionDisableCompression
                 }
             }
         }
@@ -223,7 +223,7 @@ try
                 }
 
                 It 'Should return $false with Sites Included is non compliant' {
-                    $mockTargetResourceNotInDesiredState['SitesIncluded'] = @('site11','site12')
+                    $mockTargetResourceNotInDesiredState['SitesIncluded'] = @('site11', 'site12')
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
@@ -239,8 +239,8 @@ try
                 }
 
                 It 'Should return $false with Sites Excluded is non compliant' {
-                    $mockTargetResourceNotInDesiredState['SitesIncluded'] = @('site1','site2','site3','site4')
-                    $mockTargetResourceNotInDesiredState['SitesExcluded'] = @('site3','site4')
+                    $mockTargetResourceNotInDesiredState['SitesIncluded'] = @('site1', 'site2', 'site3', 'site4')
+                    $mockTargetResourceNotInDesiredState['SitesExcluded'] = @('site3', 'site4')
 
                     Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
 
@@ -329,11 +329,11 @@ try
                 }
 
                 Mock -CommandName Get-TargetResource -MockWith { @{
-                    Ensure = 'Present'
-                    SitesIncluded = 'Site0'
-                    OptionDisableCompression = $false
-                    OptionChangeNotification = $false
-                    OptionTwoWaySync = $false
+                        Ensure                   = 'Present'
+                        SitesIncluded            = 'Site0'
+                        OptionDisableCompression = $false
+                        OptionChangeNotification = $false
+                        OptionTwoWaySync         = $false
                     }
                 }
                 Mock -CommandName Set-ADReplicationSiteLink
@@ -341,7 +341,7 @@ try
                 Mock -CommandName Remove-ADReplicationSiteLink
 
                 It "Should call Set-ADReplicationSiteLink with SitesIncluded-Add when SitesInluded is populated" {
-                    Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter {$SitesIncluded -and $SitesIncluded['Add'] -eq 'Site1'}
+                    Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter { $SitesIncluded -and $SitesIncluded['Add'] -eq 'Site1' }
                     Set-TargetResource @addSitesParameters
 
                     Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
@@ -355,7 +355,7 @@ try
                 }
 
                 It 'Should call Set-ADReplicationSiteLink with SitesIncluded-Remove when SitesExcluded is populated' {
-                    Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter {$SitesIncluded -and $SitesIncluded['Remove'] -eq 'Site1'}
+                    Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter { $SitesIncluded -and $SitesIncluded['Remove'] -eq 'Site1' }
                     Set-TargetResource @removeSitesParameters
 
                     Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
@@ -376,11 +376,11 @@ try
                 }
 
                 Mock -CommandName Get-TargetResource -MockWith { @{
-                    Ensure = 'Present'
-                    SitesIncluded = 'Site0'
-                    OptionDisableCompression = $false
-                    OptionChangeNotification = $false
-                    OptionTwoWaySync = $false
+                        Ensure                   = 'Present'
+                        SitesIncluded            = 'Site0'
+                        OptionDisableCompression = $false
+                        OptionChangeNotification = $false
+                        OptionTwoWaySync         = $false
                     }
                 }
                 Mock -CommandName Set-ADReplicationSiteLink
@@ -411,8 +411,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 0
 
-                    $result.USE_NOTIFY          | Should -BeFalse
-                    $result.TWOWAY_SYNC         | Should -BeFalse
+                    $result.USE_NOTIFY | Should -BeFalse
+                    $result.TWOWAY_SYNC | Should -BeFalse
                     $result.DISABLE_COMPRESSION | Should -BeFalse
                 }
             }
@@ -421,8 +421,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 1
 
-                    $result.USE_NOTIFY          | Should -BeTrue
-                    $result.TWOWAY_SYNC         | Should -BeFalse
+                    $result.USE_NOTIFY | Should -BeTrue
+                    $result.TWOWAY_SYNC | Should -BeFalse
                     $result.DISABLE_COMPRESSION | Should -BeFalse
                 }
             }
@@ -431,8 +431,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 2
 
-                    $result.USE_NOTIFY          | Should -BeFalse
-                    $result.TWOWAY_SYNC         | Should -BeTrue
+                    $result.USE_NOTIFY | Should -BeFalse
+                    $result.TWOWAY_SYNC | Should -BeTrue
                     $result.DISABLE_COMPRESSION | Should -BeFalse
                 }
             }
@@ -441,8 +441,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 3
 
-                    $result.USE_NOTIFY          | Should -BeTrue
-                    $result.TWOWAY_SYNC         | Should -BeTrue
+                    $result.USE_NOTIFY | Should -BeTrue
+                    $result.TWOWAY_SYNC | Should -BeTrue
                     $result.DISABLE_COMPRESSION | Should -BeFalse
                 }
             }
@@ -451,8 +451,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 4
 
-                    $result.USE_NOTIFY          | Should -BeFalse
-                    $result.TWOWAY_SYNC         | Should -BeFalse
+                    $result.USE_NOTIFY | Should -BeFalse
+                    $result.TWOWAY_SYNC | Should -BeFalse
                     $result.DISABLE_COMPRESSION | Should -BeTrue
                 }
             }
@@ -461,8 +461,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 5
 
-                    $result.USE_NOTIFY          | Should -BeTrue
-                    $result.TWOWAY_SYNC         | Should -BeFalse
+                    $result.USE_NOTIFY | Should -BeTrue
+                    $result.TWOWAY_SYNC | Should -BeFalse
                     $result.DISABLE_COMPRESSION | Should -BeTrue
                 }
             }
@@ -471,8 +471,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 6
 
-                    $result.USE_NOTIFY          | Should -BeFalse
-                    $result.TWOWAY_SYNC         | Should -BeTrue
+                    $result.USE_NOTIFY | Should -BeFalse
+                    $result.TWOWAY_SYNC | Should -BeTrue
                     $result.DISABLE_COMPRESSION | Should -BeTrue
                 }
             }
@@ -481,8 +481,8 @@ try
                 It 'Should return the correct values in the hashtable' {
                     $result = Get-EnabledOptions -optionValue 7
 
-                    $result.USE_NOTIFY          | Should -BeTrue
-                    $result.TWOWAY_SYNC         | Should -BeTrue
+                    $result.USE_NOTIFY | Should -BeTrue
+                    $result.TWOWAY_SYNC | Should -BeTrue
                     $result.DISABLE_COMPRESSION | Should -BeTrue
                 }
             }

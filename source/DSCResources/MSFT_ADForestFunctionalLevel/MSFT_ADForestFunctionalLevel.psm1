@@ -42,7 +42,7 @@ function Get-TargetResource
 
     $getTargetResourceReturnValue = @{
         ForestIdentity = $ForestIdentity
-        ForestMode = $null
+        ForestMode     = $null
     }
 
     $forestObject = Get-ADForest -Identity $ForestIdentity -ErrorAction 'Stop'
@@ -135,7 +135,7 @@ function Set-TargetResource
         -not $_.InDesiredState
     }
 
-    $forestModeProperty = $propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'ForestMode' })
+    $forestModeProperty = $propertiesNotInDesiredState.Where( { $_.ParameterName -eq 'ForestMode' })
 
     if ($forestModeProperty)
     {
@@ -144,9 +144,9 @@ function Set-TargetResource
         )
 
         $setADForestModeParameters = @{
-            Identity = $ForestIdentity
+            Identity   = $ForestIdentity
             ForestMode = [Microsoft.ActiveDirectory.Management.ADForestMode]::$ForestMode
-            Confirm = $false
+            Confirm    = $false
         }
 
         Set-ADForestMode @setADForestModeParameters

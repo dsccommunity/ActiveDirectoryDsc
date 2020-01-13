@@ -35,15 +35,15 @@ try
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 
         $testPresentParams = @{
-            GroupName = 'TestGroup'
-            GroupScope = 'Global'
-            Category = 'Security'
-            Path = 'OU=Fake,DC=contoso,DC=com'
+            GroupName   = 'TestGroup'
+            GroupScope  = 'Global'
+            Category    = 'Security'
+            Path        = 'OU=Fake,DC=contoso,DC=com'
             Description = 'Test AD group description'
             DisplayName = 'Test display name'
-            Ensure = 'Present'
-            Notes = 'This is a test AD group'
-            ManagedBy = 'CN=User 1,CN=Users,DC=contoso,DC=com'
+            Ensure      = 'Present'
+            Notes       = 'This is a test AD group'
+            ManagedBy   = 'CN=User 1,CN=Users,DC=contoso,DC=com'
         }
 
         $testAbsentParams = $testPresentParams.Clone()
@@ -52,40 +52,40 @@ try
         $testPresentParamsMultiDomain.MembershipAttribute = 'DistinguishedName'
 
         $fakeADGroup = @{
-            Name = $testPresentParams.GroupName
-            Identity = $testPresentParams.GroupName
-            GroupScope = $testPresentParams.GroupScope
-            GroupCategory = $testPresentParams.Category
+            Name              = $testPresentParams.GroupName
+            Identity          = $testPresentParams.GroupName
+            GroupScope        = $testPresentParams.GroupScope
+            GroupCategory     = $testPresentParams.Category
             DistinguishedName = "CN=$($testPresentParams.GroupName),$($testPresentParams.Path)"
-            Description = $testPresentParams.Description
-            DisplayName = $testPresentParams.DisplayName
-            ManagedBy = $testPresentParams.ManagedBy
-            Info = $testPresentParams.Notes
+            Description       = $testPresentParams.Description
+            DisplayName       = $testPresentParams.DisplayName
+            ManagedBy         = $testPresentParams.ManagedBy
+            Info              = $testPresentParams.Notes
         }
 
         $fakeADUser1 = [PSCustomObject] @{
             DistinguishedName = 'CN=User 1,CN=Users,DC=contoso,DC=com'
-            ObjectGUID = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
-            SamAccountName = 'USER1'
-            SID = 'S-1-5-21-1131554080-2861379300-292325817-1106'
+            ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
+            SamAccountName    = 'USER1'
+            SID               = 'S-1-5-21-1131554080-2861379300-292325817-1106'
         }
         $fakeADUser2 = [PSCustomObject] @{
             DistinguishedName = 'CN=User 2,CN=Users,DC=contoso,DC=com'
-            ObjectGUID = 'a97cc867-0c9e-4928-8387-0dba0c883b8f'
-            SamAccountName = 'USER2'
-            SID = 'S-1-5-21-1131554080-2861379300-292325817-1107'
+            ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8f'
+            SamAccountName    = 'USER2'
+            SID               = 'S-1-5-21-1131554080-2861379300-292325817-1107'
         }
         $fakeADUser3 = [PSCustomObject] @{
             DistinguishedName = 'CN=User 3,CN=Users,DC=contoso,DC=com'
-            ObjectGUID = 'a97cc867-0c9e-4928-8387-0dba0c883b90'
-            SamAccountName = 'USER3'
-            SID = 'S-1-5-21-1131554080-2861379300-292325817-1108'
+            ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b90'
+            SamAccountName    = 'USER3'
+            SID               = 'S-1-5-21-1131554080-2861379300-292325817-1108'
         }
         $fakeADUser4 = [PSCustomObject] @{
             DistinguishedName = 'CN=User 4,CN=Users,DC=sub,DC=contoso,DC=com'
-            ObjectGUID = 'ebafa34e-b020-40cd-8652-ee7286419869'
-            SamAccountName = 'USER4'
-            SID = 'S-1-5-21-1131554080-2861379300-292325817-1109'
+            ObjectGUID        = 'ebafa34e-b020-40cd-8652-ee7286419869'
+            SamAccountName    = 'USER4'
+            SID               = 'S-1-5-21-1131554080-2861379300-292325817-1109'
         }
 
         $testDomainController = 'TESTDC'
@@ -267,7 +267,7 @@ try
                 $ModuleName -eq 'ActiveDirectory'
             }
 
-            foreach ($attribute in @('SamAccountName','DistinguishedName','ObjectGUID','SID'))
+            foreach ($attribute in @('SamAccountName', 'DistinguishedName', 'ObjectGUID', 'SID'))
             {
                 It "Passes when group 'Members' match using '$attribute'" {
                     Mock -CommandName Get-ADGroup -MockWith {
@@ -526,7 +526,7 @@ try
 
             $testProperties = @{
                 Description = 'Test AD Group description is wrong'
-                ManagedBy = $fakeADUser3.DistinguishedName
+                ManagedBy   = $fakeADUser3.DistinguishedName
                 DisplayName = 'Test DisplayName'
             }
 
@@ -1019,7 +1019,7 @@ try
                     throw (New-Object -TypeName System.InvalidOperationException)
                 }
 
-                {Set-TargetResource @restoreParam} | Should -Throw
+                { Set-TargetResource @restoreParam } | Should -Throw
 
                 Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADGroup -Scope It -Exactly -Times 0

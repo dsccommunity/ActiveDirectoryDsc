@@ -35,8 +35,8 @@ Configuration ADComputer_AddComputerAccountDisabled_Config
     {
         ADComputer 'CreateDisabled'
         {
-            ComputerName      = 'CLU_CNO01'
-            EnabledOnCreation = $false
+            ComputerName         = 'CLU_CNO01'
+            EnabledOnCreation    = $false
 
             PsDscRunAsCredential = $Credential
         }

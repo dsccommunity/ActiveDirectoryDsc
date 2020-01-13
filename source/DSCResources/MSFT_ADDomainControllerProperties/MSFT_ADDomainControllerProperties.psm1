@@ -36,7 +36,7 @@ function Get-TargetResource
 
     $getCimInstanceParameters = @{
         Namespace = 'ROOT/MicrosoftDfs'
-        Query = 'select MaxOfflineTimeInDays from DfsrMachineConfig'
+        Query     = 'select MaxOfflineTimeInDays from DfsrMachineConfig'
     }
 
     $getTargetResourceReturnValue['ContentFreshness'] = (Get-CimInstance @getCimInstanceParameters).MaxOfflineTimeInDays
@@ -140,8 +140,8 @@ function Set-TargetResource
 
         $setCimInstanceParameters = @{
             Namespace = 'ROOT/MicrosoftDfs'
-            Query = 'select MaxOfflineTimeInDays from DfsrMachineConfig'
-            Property = @{
+            Query     = 'select MaxOfflineTimeInDays from DfsrMachineConfig'
+            Property  = @{
                 MaxOfflineTimeInDays = $ContentFreshness
             }
 

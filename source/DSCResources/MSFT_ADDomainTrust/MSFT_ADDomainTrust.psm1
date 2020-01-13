@@ -195,9 +195,7 @@ function Set-TargetResource
 
     # Get all properties that are not in desired state.
     $propertiesNotInDesiredState = $compareTargetResourceStateResult |
-    Where-Object -FilterScript {
-        -not $_.InDesiredState
-    }
+        Where-Object -FilterScript { -not $_.InDesiredState }
 
     if ($propertiesNotInDesiredState.Where( { $_.ParameterName -eq 'Ensure' }))
     {

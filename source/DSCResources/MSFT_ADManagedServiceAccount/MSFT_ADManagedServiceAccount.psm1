@@ -687,7 +687,7 @@ function Set-TargetResource
                 else
                 {
                     $errorMessage = ($script:localizedData.AddingManagedServiceAccountError -f
-                    $AccountType, $ServiceAccountName, $messagePath)
+                        $AccountType, $ServiceAccountName, $messagePath)
                 }
 
                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_

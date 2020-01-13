@@ -754,7 +754,7 @@ function Remove-DuplicateMembers
         Comma make sure we return the string array as the correct type,
         and also make sure one entry is returned as a string array.
     #>
-    return ,$uniqueMembers
+    return , $uniqueMembers
 } #end function RemoveDuplicateMembers
 
 <#
@@ -1477,8 +1477,8 @@ function Add-ADCommonGroupMember
                 Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.Identity)
 
                 $commonParameters = @{
-                    Identity = $member
-                    Server = $memberDomain
+                    Identity    = $member
+                    Server      = $memberDomain
                     ErrorAction = 'Stop'
                 }
 
@@ -2018,10 +2018,10 @@ function New-CimCredentialInstance
     )
 
     $newCimInstanceParameters = @{
-        ClassName = 'MSFT_Credential'
+        ClassName  = 'MSFT_Credential'
         ClientOnly = $true
-        Namespace = 'root/microsoft/windows/desiredstateconfiguration'
-        Property = @{
+        Namespace  = 'root/microsoft/windows/desiredstateconfiguration'
+        Property   = @{
             UserName = [System.String] $Credential.UserName
             Password = [System.String] $null
         }
@@ -2151,7 +2151,7 @@ function Get-ADDirectoryContext
     }
 
     $newObjectParameters = @{
-        TypeName = $typeName
+        TypeName     = $typeName
         ArgumentList = $newObjectArgumentList
     }
 

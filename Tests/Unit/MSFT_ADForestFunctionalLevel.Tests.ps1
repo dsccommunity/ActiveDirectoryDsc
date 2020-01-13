@@ -36,7 +36,7 @@ try
 
         $mockDefaultParameters = @{
             ForestIdentity = 'contoso.com'
-            ForestMode = 'Windows2016Forest'
+            ForestMode     = 'Windows2016Forest'
         }
 
         Describe 'MSFT_ADForestFunctionalLevel\Get-TargetResource' -Tag 'Get' {
@@ -121,7 +121,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 ForestIdentity = 'contoso.com'
-                                ForestMode = $mockDefaultParameters.ForestMode
+                                ForestMode     = $mockDefaultParameters.ForestMode
                             }
                         }
                     }
@@ -147,7 +147,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 ForestIdentity = 'contoso.com'
-                                ForestMode = $mockDefaultParameters.ForestMode
+                                ForestMode     = $mockDefaultParameters.ForestMode
                             }
                         }
 
@@ -180,8 +180,8 @@ try
                             return @(
                                 @{
                                     ParameterName  = 'ForestMode'
-                                    Actual  = 'Windows2016Forest'
-                                    Expected  = 'Windows2016Forest'
+                                    Actual         = 'Windows2016Forest'
+                                    Expected       = 'Windows2016Forest'
                                     InDesiredState = $true
                                 }
                             )
@@ -205,8 +205,8 @@ try
                             return @(
                                 @{
                                     ParameterName  = 'ForestMode'
-                                    Actual  = 'Windows2016Forest'
-                                    Expected  = 'Windows2012R2Forest'
+                                    Actual         = 'Windows2016Forest'
+                                    Expected       = 'Windows2012R2Forest'
                                     InDesiredState = $false
                                 }
                             )

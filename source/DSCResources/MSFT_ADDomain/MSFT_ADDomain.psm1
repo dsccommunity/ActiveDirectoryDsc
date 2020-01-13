@@ -156,20 +156,20 @@ function Get-TargetResource
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
 
     $returnValue = @{
-        DomainName = $DomainName
-        Credential = $Credential
+        DomainName                    = $DomainName
+        Credential                    = $Credential
         SafeModeAdministratorPassword = $SafeModeAdministratorPassword
-        ParentDomainName = $null
-        DomainNetBiosName = $null
-        DnsDelegationCredential = $null
-        DatabasePath = $null
-        LogPath = $null
-        SysvolPath = $null
-        ForestMode = $null
-        DomainMode = $null
-        DomainExist = $false
-        Forest = $null
-        DnsRoot = $null
+        ParentDomainName              = $null
+        DomainNetBiosName             = $null
+        DnsDelegationCredential       = $null
+        DatabasePath                  = $null
+        LogPath                       = $null
+        SysvolPath                    = $null
+        ForestMode                    = $null
+        DomainMode                    = $null
+        DomainExist                   = $false
+        Forest                        = $null
+        DnsRoot                       = $null
     }
 
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
@@ -561,9 +561,9 @@ function Set-TargetResource
     {
         $installADDSParameters = @{
             SafeModeAdministratorPassword = $SafeModeAdministratorPassword.Password
-            NoRebootOnCompletion = $true
-            Force = $true
-            ErrorAction = 'Stop'
+            NoRebootOnCompletion          = $true
+            Force                         = $true
+            ErrorAction                   = 'Stop'
         }
 
         if ($PSBoundParameters.ContainsKey('DnsDelegationCredential'))

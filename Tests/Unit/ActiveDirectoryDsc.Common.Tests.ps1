@@ -23,7 +23,7 @@ $script:subModuleName = (Split-Path -Path $PSCommandPath -Leaf) -replace '\.Test
 $script:subModuleFile = Join-Path -Path $script:subModulesFolder -ChildPath "$($script:subModuleName)"
 
 Import-Module $script:subModuleFile -Force -ErrorAction Stop
- #endregion HEADER
+#endregion HEADER
 
 InModuleScope 'ActiveDirectoryDsc.Common' {
     # Load stub cmdlets and classes.
@@ -146,12 +146,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return true when only a specified value matches, but other non-listed values do not' {
                 $mockCurrentValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = 'true'
                 }
 
                 $mockDesiredValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = 'false'
                 }
 
@@ -166,12 +166,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return false when only specified values do not match, but other non-listed values do ' {
                 $mockCurrentValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = 'true'
                 }
 
                 $mockDesiredValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = 'false'
                 }
 
@@ -187,7 +187,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             It 'Should return false when an empty hash table is used in the current values' {
                 $mockCurrentValues = @{}
                 $mockDesiredValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = 'false'
                 }
 
@@ -201,7 +201,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return true when evaluating a table against a CimInstance' {
                 $mockCurrentValues = @{
-                    Handle = '0'
+                    Handle    = '0'
                     ProcessId = '1000'
                 }
 
@@ -230,7 +230,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return false when evaluating a table against a CimInstance and a value is wrong' {
                 $mockCurrentValues = @{
-                    Handle = '1'
+                    Handle    = '1'
                     ProcessId = '1000'
                 }
 
@@ -259,12 +259,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return true when evaluating a hash table containing an array' {
                 $mockCurrentValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = @('1', '2')
                 }
 
                 $mockDesiredValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = @('1', '2')
                 }
 
@@ -278,12 +278,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return false when evaluating a hash table containing an array with wrong values' {
                 $mockCurrentValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = @('A', 'B')
                 }
 
                 $mockDesiredValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = @('1', '2')
                 }
 
@@ -301,7 +301,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 }
 
                 $mockDesiredValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = @('1', '2')
                 }
 
@@ -315,12 +315,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return false when evaluating a hash table containing an array, but the property i CurrentValues is $null' {
                 $mockCurrentValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = $null
                 }
 
                 $mockDesiredValues = @{
-                    Example = 'test'
+                    Example       = 'test'
                     SecondExample = @('1', '2')
                 }
 
@@ -604,9 +604,9 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         Context 'When starting a process successfully' {
             It 'Should return exit code 0' {
                 $startProcessWithTimeoutParameters = @{
-                    FilePath = 'powershell.exe'
+                    FilePath     = 'powershell.exe'
                     ArgumentList = '-Command &{Start-Sleep -Seconds 2}'
-                    Timeout = 300
+                    Timeout      = 300
                 }
 
                 $processExitCode = Start-ProcessWithTimeout @startProcessWithTimeoutParameters
@@ -617,9 +617,9 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         Context 'When starting a process and the process does not finish before the timeout period' {
             It 'Should throw an error message' {
                 $startProcessWithTimeoutParameters = @{
-                    FilePath = 'powershell.exe'
+                    FilePath     = 'powershell.exe'
                     ArgumentList = '-Command &{Start-Sleep -Seconds 4}'
-                    Timeout = 2
+                    Timeout      = 2
                 }
 
                 { Start-ProcessWithTimeout @startProcessWithTimeoutParameters } | Should -Throw -ErrorId 'ProcessNotTerminated,Microsoft.PowerShell.Commands.WaitProcessCommand'
@@ -651,7 +651,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         It 'Returns "True" when domain member' {
             Mock -CommandName Get-CimInstance -MockWith {
                 return @{
-                    Name = $env:COMPUTERNAME
+                    Name         = $env:COMPUTERNAME
                     PartOfDomain = $true
                 }
             }
@@ -674,7 +674,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         It 'Returns expected domain name' {
             Mock -CommandName Get-CimInstance -MockWith {
                 return @{
-                    Name = $env:COMPUTERNAME
+                    Name   = $env:COMPUTERNAME
                     Domain = 'contoso.com'
                 }
             }
@@ -738,7 +738,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
     Describe 'ActiveDirectoryDsc.Common\Remove-DuplicateMembers' {
         It 'Should removes one duplicate' {
-            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1'
+            $members = Remove-DuplicateMembers -Members 'User1', 'User2', 'USER1'
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
@@ -747,7 +747,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
 
         It 'Should removes two duplicates' {
-            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1','USER2'
+            $members = Remove-DuplicateMembers -Members 'User1', 'User2', 'USER1', 'USER2'
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
@@ -756,7 +756,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
 
         It 'Should removes double duplicates' {
-            $members = Remove-DuplicateMembers -Members 'User1','User2','USER1','user1'
+            $members = Remove-DuplicateMembers -Members 'User1', 'User2', 'USER1', 'user1'
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
@@ -765,7 +765,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
 
         It 'Should return a string array with one one entry' {
-            $members = Remove-DuplicateMembers -Members 'User1','USER1','user1'
+            $members = Remove-DuplicateMembers -Members 'User1', 'USER1', 'user1'
             $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 1
@@ -1079,7 +1079,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             $result['Name'] | Should -Be $testIdentity
         }
 
-        foreach ($identityParam in @('UserName','GroupName','ComputerName'))
+        foreach ($identityParam in @('UserName', 'GroupName', 'ComputerName'))
         {
             It "Returns 'Identity' key when '$identityParam' alias is specified" {
                 $testIdentity = 'contoso.com'
@@ -1284,7 +1284,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             ObjectGUID        = 'd3c8b8c1-c42b-4533-af7d-3aa73ecd2216'
         }
 
-        $getAdCommonParameterReturnValue = @{Identity = 'something'}
+        $getAdCommonParameterReturnValue = @{Identity = 'something' }
         $restoreIdentity = 'SomeObjectName'
         $restoreObjectClass = 'user'
         $restoreObjectWrongClass = 'wrong'
@@ -1295,16 +1295,16 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             Mock -CommandName Restore-ADObject -Verifiable
 
             It 'Should not throw when called with the correct parameters' {
-                {Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass} | Should -Not -Throw
+                { Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass } | Should -Not -Throw
             }
 
             It 'Should return the correct restored object' {
-                Mock -CommandName Restore-ADObject -MockWith { return $restoreAdObjectReturnValue}
+                Mock -CommandName Restore-ADObject -MockWith { return $restoreAdObjectReturnValue }
                 (Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectClass).ObjectClass | Should -Be 'user'
             }
 
             It 'Should throw the correct error when invalid parameters are used' {
-                {Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectWrongClass} | Should -Throw "Cannot validate argument on parameter 'ObjectClass'"
+                { Restore-ADCommonObject -Identity $restoreIdentity -ObjectClass $restoreObjectWrongClass } | Should -Throw "Cannot validate argument on parameter 'ObjectClass'"
             }
 
             It 'Should call Get-ADObject as well as Restore-ADObject' {
@@ -1324,7 +1324,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
         Context 'When there are no objects in the recycle bin' {
             Mock -CommandName Get-ADObject
-            Mock -CommandName Get-ADCommonParameters -MockWith { return $getAdCommonParameterReturnValue}
+            Mock -CommandName Get-ADCommonParameters -MockWith { return $getAdCommonParameterReturnValue }
             Mock -CommandName Restore-ADObject
 
             It 'Should return $null' {
@@ -1384,39 +1384,39 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
         $memberData = @(
             [PSCustomObject] @{
-                Name = 'CN=Account1,DC=contoso,DC=com'
+                Name   = 'CN=Account1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Group1,DC=contoso,DC=com'
+                Name   = 'CN=Group1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Computer1,DC=contoso,DC=com'
+                Name   = 'CN=Computer1,DC=contoso,DC=com'
                 Domain = 'contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Account1,DC=a,DC=contoso,DC=com'
+                Name   = 'CN=Account1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Group1,DC=a,DC=contoso,DC=com'
+                Name   = 'CN=Group1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Computer1,DC=a,DC=contoso,DC=com'
+                Name   = 'CN=Computer1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Account1,DC=b,DC=contoso,DC=com'
+                Name   = 'CN=Account1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Group1,DC=b,DC=contoso,DC=com'
+                Name   = 'CN=Group1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
             [PSCustomObject] @{
-                Name = 'CN=Computer1,DC=b,DC=contoso,DC=com'
+                Name   = 'CN=Computer1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
         )
@@ -1467,9 +1467,15 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $objectClass = switch ($Identity)
                 {
-                    {$Identity -match 'Group'} { 'group' }
-                    {$Identity -match 'Account'} { 'user' }
-                    {$Identity -match 'Computer'} { 'computer' }
+                    { $Identity -match 'Group' }
+                    { 'group'
+                    }
+                    { $Identity -match 'Account' }
+                    { 'user'
+                    }
+                    { $Identity -match 'Computer' }
+                    { 'computer'
+                    }
                 }
 
                 return (
@@ -1484,13 +1490,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             Mock -CommandName Get-ADUser -MockWith { return 'placeholder' }
 
             It 'Should not throw an error' {
-                {Add-ADCommonGroupMember -Members $memberData.Name -Parameters $fakeParameters -MembersInMultipleDomains} | Should -Not -Throw
+                { Add-ADCommonGroupMember -Members $memberData.Name -Parameters $fakeParameters -MembersInMultipleDomains } | Should -Not -Throw
             }
 
             It 'Should have called all mocked cmdlets' {
-                Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times $memberData.Where( {$_.Name -like '*Computer*'}).Count
-                Assert-MockCalled -CommandName Get-ADUser -Exactly -Times $memberData.Where( {$_.Name -like '*Account*'}).Count
-                Assert-MockCalled -CommandName Get-ADGroup -Exactly -Times $memberData.Where( {$_.Name -like '*Group*'}).Count
+                Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times $memberData.Where( { $_.Name -like '*Computer*' }).Count
+                Assert-MockCalled -CommandName Get-ADUser -Exactly -Times $memberData.Where( { $_.Name -like '*Account*' }).Count
+                Assert-MockCalled -CommandName Get-ADGroup -Exactly -Times $memberData.Where( { $_.Name -like '*Group*' }).Count
                 Assert-MockCalled -CommandName Add-ADGroupMember -Exactly -Times $memberData.Count
             }
         }
@@ -1643,7 +1649,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 $propertyMapValue = @(
                     @{
                         ParameterName = 'ComputerName'
-                        PropertyName = 'cn'
+                        PropertyName  = 'cn'
                     },
                     @{
                         ParameterName = 'Location'
@@ -1664,7 +1670,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 $propertyMapValue = @(
                     @{
                         ParameterName = 'ComputerName'
-                        PropertyName = 'cn'
+                        PropertyName  = 'cn'
                     },
                     'Location'
                 )
@@ -1825,8 +1831,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         Context 'When comparing arrays' {
             It 'Should return true when evaluating an array' {
                 $mockValues = @{
-                    CurrentValue = @('1','2')
-                    DesiredValue = @('1','2')
+                    CurrentValue = @('1', '2')
+                    DesiredValue = @('1', '2')
                 }
 
                 Test-DscPropertyState -Values $mockValues | Should -BeTrue
@@ -1834,8 +1840,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return false when evaluating an array with wrong values' {
                 $mockValues = @{
-                    CurrentValue = @('CurrentValueA','CurrentValueB')
-                    DesiredValue = @('DesiredValue1','DesiredValue2')
+                    CurrentValue = @('CurrentValueA', 'CurrentValueB')
+                    DesiredValue = @('DesiredValue1', 'DesiredValue2')
                 }
 
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
@@ -1844,7 +1850,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             It 'Should return false when evaluating an array, but the current value is $null' {
                 $mockValues = @{
                     CurrentValue = $null
-                    DesiredValue = @('1','2')
+                    DesiredValue = @('1', '2')
                 }
 
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
@@ -1852,7 +1858,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return false when evaluating an array, but the desired value is $null' {
                 $mockValues = @{
-                    CurrentValue = @('1','2')
+                    CurrentValue = @('1', '2')
                     DesiredValue = $null
                 }
 
@@ -1862,7 +1868,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             It 'Should return false when evaluating an array, but the current value is an empty array' {
                 $mockValues = @{
                     CurrentValue = @()
-                    DesiredValue = @('1','2')
+                    DesiredValue = @('1', '2')
                 }
 
                 Test-DscPropertyState -Values $mockValues | Should -BeFalse
@@ -1870,7 +1876,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should return false when evaluating an array, but the desired value is an empty array' {
                 $mockValues = @{
-                    CurrentValue = @('1','2')
+                    CurrentValue = @('1', '2')
                     DesiredValue = @()
                 }
 
@@ -1961,12 +1967,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             BeforeAll {
                 $mockCurrentValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Sweden'
+                    Location     = 'Sweden'
                 }
 
                 $mockDesiredValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Sweden'
+                    Location     = 'Sweden'
                 }
             }
 
@@ -2019,12 +2025,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             BeforeAll {
                 $mockCurrentValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Sweden'
+                    Location     = 'Sweden'
                 }
 
                 $mockDesiredValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Europe'
+                    Location     = 'Europe'
                 }
             }
 
@@ -2077,12 +2083,12 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             BeforeAll {
                 $mockCurrentValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Sweden'
+                    Location     = 'Sweden'
                 }
 
                 $mockDesiredValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Europe'
+                    Location     = 'Europe'
                 }
             }
 
@@ -2090,7 +2096,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 $compareTargetResourceStateParameters = @{
                     CurrentValues = $mockCurrentValues
                     DesiredValues = $mockDesiredValues
-                    Properties = @(
+                    Properties    = @(
                         'ComputerName'
                     )
                 }
@@ -2108,21 +2114,21 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             BeforeAll {
                 $mockCurrentValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Sweden'
-                    Ensure = 'Present'
+                    Location     = 'Sweden'
+                    Ensure       = 'Present'
                 }
 
                 $mockDesiredValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Europe'
-                    Ensure = 'Absent'
+                    Location     = 'Europe'
+                    Ensure       = 'Absent'
                 }
             }
 
             It 'Should return the correct values' {
                 $compareTargetResourceStateParameters = @{
-                    CurrentValues = $mockCurrentValues
-                    DesiredValues = $mockDesiredValues
+                    CurrentValues    = $mockCurrentValues
+                    DesiredValues    = $mockDesiredValues
                     IgnoreProperties = @(
                         'Ensure'
                     )
@@ -2145,22 +2151,22 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             BeforeAll {
                 $mockCurrentValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Sweden'
-                    Ensure = 'Present'
+                    Location     = 'Sweden'
+                    Ensure       = 'Present'
                 }
 
                 $mockDesiredValues = @{
                     ComputerName = 'DC01'
-                    Location = 'Europe'
-                    Ensure = 'Absent'
+                    Location     = 'Europe'
+                    Ensure       = 'Absent'
                 }
             }
 
             It 'Should return and empty array' {
                 $compareTargetResourceStateParameters = @{
-                    CurrentValues = $mockCurrentValues
-                    DesiredValues = $mockDesiredValues
-                    Properties = @(
+                    CurrentValues    = $mockCurrentValues
+                    DesiredValues    = $mockDesiredValues
+                    Properties       = @(
                         'ComputerName'
                     )
                     IgnoreProperties = @(
@@ -2241,7 +2247,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     Mock -CommandName Import-Module
                     Mock -CommandName Get-PSProvider `
                         -ParameterFilter { $PSBoundParameters['ErrorAction'] -ne 'SilentlyContinue' } `
-                        -MockWith { Throw 'Error'}
+                        -MockWith { Throw 'Error' }
                 }
 
                 It 'Should throw the correct exception' {
@@ -2471,7 +2477,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                     Assert-MockCalled -CommandName New-Object -ParameterFilter {
                         $ArgumentList.Count -eq 1 `
-                        -and $ArgumentList[0] -eq 'Domain'
+                            -and $ArgumentList[0] -eq 'Domain'
                     } -Exactly -Times 1 -Scope It
                 }
             }
@@ -2484,8 +2490,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                     Assert-MockCalled -CommandName New-Object -ParameterFilter {
                         $ArgumentList.Count -eq 2 `
-                        -and $ArgumentList[0] -eq 'Domain' `
-                        -and $ArgumentList[1] -eq 'my.domain'
+                            -and $ArgumentList[0] -eq 'Domain' `
+                            -and $ArgumentList[1] -eq 'my.domain'
                     } -Exactly -Times 1 -Scope It
                 }
             }
@@ -2498,10 +2504,10 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                     Assert-MockCalled -CommandName New-Object -ParameterFilter {
                         $ArgumentList.Count -eq 4 `
-                        -and $ArgumentList[0] -eq 'Domain' `
-                        -and $ArgumentList[1] -eq 'my.domain' `
-                        -and $ArgumentList[2] -eq $mockAdministratorUser `
-                        -and $ArgumentList[3] -eq $mockAdministratorPassword
+                            -and $ArgumentList[0] -eq 'Domain' `
+                            -and $ArgumentList[1] -eq 'my.domain' `
+                            -and $ArgumentList[2] -eq $mockAdministratorUser `
+                            -and $ArgumentList[3] -eq $mockAdministratorPassword
                     } -Exactly -Times 1 -Scope It
                 }
             }
@@ -2510,7 +2516,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
     }
 
-    Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainController'  {
+    Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainController' {
         Context 'When a domain controller is found in a domain' {
             BeforeAll {
                 $mockAdministratorUser = 'admin@contoso.com'
@@ -2533,11 +2539,11 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             Context 'When the calling with only the parameter DomainName' {
                 It 'Should not throw and call the correct mocks' {
-                    { Find-DomainController -DomainName $mockDomainName  } | Should -Not -Throw
+                    { Find-DomainController -DomainName $mockDomainName } | Should -Not -Throw
 
                     Assert-MockCalled -CommandName Get-ADDirectoryContext -ParameterFilter {
                         $Name -eq $mockDomainName `
-                        -and -not $PSBoundParameters.ContainsKey('Credential')
+                            -and -not $PSBoundParameters.ContainsKey('Credential')
                     } -Exactly -Times 1 -Scope It
 
                     Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
@@ -2547,11 +2553,11 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             Context 'When the calling with the parameter SiteName' {
                 It 'Should not throw and call the correct mocks' {
-                    { Find-DomainController -DomainName $mockDomainName -SiteName 'Europe'  } | Should -Not -Throw
+                    { Find-DomainController -DomainName $mockDomainName -SiteName 'Europe' } | Should -Not -Throw
 
                     Assert-MockCalled -CommandName Get-ADDirectoryContext -ParameterFilter {
                         $Name -eq $mockDomainName `
-                        -and -not $PSBoundParameters.ContainsKey('Credential')
+                            -and -not $PSBoundParameters.ContainsKey('Credential')
                     } -Exactly -Times 1 -Scope It
 
                     Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 0 -Scope It
@@ -2561,11 +2567,11 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             Context 'When the calling with the parameter Credential' {
                 It 'Should not throw and call the correct mocks' {
-                    { Find-DomainController -DomainName $mockDomainName -Credential $mockAdministratorCredential  } | Should -Not -Throw
+                    { Find-DomainController -DomainName $mockDomainName -Credential $mockAdministratorCredential } | Should -Not -Throw
 
                     Assert-MockCalled -CommandName Get-ADDirectoryContext -ParameterFilter {
                         $Name -eq $mockDomainName `
-                        -and $PSBoundParameters.ContainsKey('Credential')
+                            -and $PSBoundParameters.ContainsKey('Credential')
                     } -Exactly -Times 1 -Scope It
 
                     Assert-MockCalled -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
@@ -2635,7 +2641,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 Mock -CommandName Find-DomainControllerFindOneWrapper -MockWith {
                     $exceptionWithInnerException = New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
-                    -ArgumentList @(
+                        -ArgumentList @(
                         $mockErrorMessage,
                         (New-Object -TypeName 'System.Security.Authentication.AuthenticationException')
                     )

@@ -27,8 +27,8 @@ Configuration ADForestFunctionalLevel_SetLevel_Config
     {
         ADForestFunctionalLevel 'ChangeForestFunctionalLevel'
         {
-            ForestIdentity          = 'contoso.com'
-            ForestMode              = 'Windows2012R2Forest'
+            ForestIdentity = 'contoso.com'
+            ForestMode     = 'Windows2012R2Forest'
         }
     }
 }
