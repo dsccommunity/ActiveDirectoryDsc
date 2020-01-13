@@ -95,8 +95,8 @@ try
             CreationTime      = $mockKDSRootKeyFuture.CreationTime
             KeyId             = $mockKDSRootKeyFuture.KeyId
             Ensure            = 'Present'
-            DistinguishedName = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
-            $mockKDSRootKeyFuture.KeyId, $mockADDomain
+            DistinguishedName = ('CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
+                $mockKDSRootKeyFuture.KeyId, $mockADDomain)
         }
 
         $mockKDSRootKeyPastGet = @{
@@ -104,8 +104,8 @@ try
             CreationTime      = $mockKDSRootKeyPast.CreationTime
             KeyId             = $mockKDSRootKeyPast.KeyId
             Ensure            = 'Present'
-            DistinguishedName = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
-            $mockKDSRootKeyPast.KeyId, $mockADDomain
+            DistinguishedName = ('CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
+                $mockKDSRootKeyPast.KeyId, $mockADDomain)
         }
 
         $mockKDSRootKeyFutureCompare = @(
@@ -244,7 +244,7 @@ try
         Describe -Name 'MSFT_ADKDSKey\Get-ADRootDomainDN' {
             BeforeAll {
                 Mock -CommandName New-Object -MockWith {
-                    $object = [PSCustomObject] @{}
+                    $object = [PSCustomObject] @{ }
                     $object | Add-Member -MemberType ScriptMethod -Name 'Get' -Value { return $mockADDomain }
 
                     return $object
@@ -356,8 +356,8 @@ try
                     $getTargetResourceResult.KeyId | Should -Be $mockKDSRootKeyFuture.KeyId
                     $getTargetResourceResult.Ensure | Should -Be 'Present'
 
-                    $dn = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
-                    $mockKDSRootKeyFuture.KeyId, $mockADDomain
+                    $dn = ('CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
+                        $mockKDSRootKeyFuture.KeyId, $mockADDomain)
 
                     $getTargetResourceResult.DistinguishedName | Should -Be $dn
 

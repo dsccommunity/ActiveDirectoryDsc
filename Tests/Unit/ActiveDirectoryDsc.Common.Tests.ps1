@@ -1468,13 +1468,16 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 $objectClass = switch ($Identity)
                 {
                     { $Identity -match 'Group' }
-                    { 'group'
+                    {
+                        'group'
                     }
                     { $Identity -match 'Account' }
-                    { 'user'
+                    {
+                        'user'
                     }
                     { $Identity -match 'Computer' }
-                    { 'computer'
+                    {
+                        'computer'
                     }
                 }
 
