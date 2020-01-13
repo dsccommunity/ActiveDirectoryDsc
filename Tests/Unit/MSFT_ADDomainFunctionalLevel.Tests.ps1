@@ -36,7 +36,7 @@ try
 
         $mockDefaultParameters = @{
             DomainIdentity = 'contoso.com'
-            DomainMode = 'Windows2016Domain'
+            DomainMode     = 'Windows2016Domain'
         }
 
         Describe 'MSFT_ADDomainFunctionalLevel\Get-TargetResource' -Tag 'Get' {
@@ -121,7 +121,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 DomainIdentity = 'contoso.com'
-                                DomainMode = $mockDefaultParameters.DomainMode
+                                DomainMode     = $mockDefaultParameters.DomainMode
                             }
                         }
                     }
@@ -147,7 +147,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 DomainIdentity = 'contoso.com'
-                                DomainMode = $mockDefaultParameters.DomainMode
+                                DomainMode     = $mockDefaultParameters.DomainMode
                             }
                         }
 
@@ -180,8 +180,8 @@ try
                             return @(
                                 @{
                                     ParameterName  = 'DomainMode'
-                                    Actual  = 'Windows2016Domain'
-                                    Expected  = 'Windows2016Domain'
+                                    Actual         = 'Windows2016Domain'
+                                    Expected       = 'Windows2016Domain'
                                     InDesiredState = $true
                                 }
                             )
@@ -206,8 +206,8 @@ try
                                 return @(
                                     @{
                                         ParameterName  = 'DomainMode'
-                                        Actual  = 'Windows2016Domain'
-                                        Expected  = 'Windows2012R2Domain'
+                                        Actual         = 'Windows2016Domain'
+                                        Expected       = 'Windows2012R2Domain'
                                         InDesiredState = $false
                                     }
                                 )
@@ -232,8 +232,8 @@ try
                                 return @(
                                     @{
                                         ParameterName  = 'DomainMode'
-                                        Actual  = 'Windows2012R2Domain'
-                                        Expected  = 'Windows2016Domain'
+                                        Actual         = 'Windows2012R2Domain'
+                                        Expected       = 'Windows2016Domain'
                                         InDesiredState = $false
                                     }
                                 )

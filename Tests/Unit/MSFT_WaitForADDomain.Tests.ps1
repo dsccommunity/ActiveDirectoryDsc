@@ -86,7 +86,7 @@ try
                                             return $mockDomainName
                                         } -PassThru -Force
                                 } -PassThru |
-                                Add-Member -MemberType NoteProperty -Name 'SiteName' -Value $mockSiteName -PassThru -Force
+                                    Add-Member -MemberType NoteProperty -Name 'SiteName' -Value $mockSiteName -PassThru -Force
                         }
 
                         $getTargetResourceParameters = $mockDefaultParameters.Clone()
@@ -452,11 +452,11 @@ try
 
                             Assert-MockCalled -CommandName Start-Job -ParameterFilter {
                                 $PSBoundParameters.ContainsKey('ArgumentList') `
-                                -and $ArgumentList[0] -eq $false `
-                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
-                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
-                                -and [System.String]::IsNullOrEmpty($ArgumentList[3]) `
-                                -and $ArgumentList[4] -eq $false
+                                    -and $ArgumentList[0] -eq $false `
+                                    -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                    -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                    -and [System.String]::IsNullOrEmpty($ArgumentList[3]) `
+                                    -and $ArgumentList[4] -eq $false
                             } -Exactly -Times 1 -Scope It
                         }
                     }
@@ -479,11 +479,11 @@ try
 
                             Assert-MockCalled -CommandName Start-Job -ParameterFilter {
                                 $PSBoundParameters.ContainsKey('ArgumentList') `
-                                -and $ArgumentList[0] -eq $false `
-                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
-                                -and $ArgumentList[2] -eq $setTargetResourceParameters.SiteName `
-                                -and [System.String]::IsNullOrEmpty($ArgumentList[3]) `
-                                -and $ArgumentList[4] -eq $false
+                                    -and $ArgumentList[0] -eq $false `
+                                    -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                    -and $ArgumentList[2] -eq $setTargetResourceParameters.SiteName `
+                                    -and [System.String]::IsNullOrEmpty($ArgumentList[3]) `
+                                    -and $ArgumentList[4] -eq $false
                             } -Exactly -Times 1 -Scope It
                         }
                     }
@@ -506,11 +506,11 @@ try
 
                             Assert-MockCalled -CommandName Start-Job -ParameterFilter {
                                 $PSBoundParameters.ContainsKey('ArgumentList') `
-                                -and $ArgumentList[0] -eq $false `
-                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
-                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
-                                -and $ArgumentList[3].UserName -eq $setTargetResourceParameters.Credential.UserName `
-                                -and $ArgumentList[4] -eq $false
+                                    -and $ArgumentList[0] -eq $false `
+                                    -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                    -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                    -and $ArgumentList[3].UserName -eq $setTargetResourceParameters.Credential.UserName `
+                                    -and $ArgumentList[4] -eq $false
                             } -Exactly -Times 1 -Scope It
                         }
                     }
@@ -533,11 +533,11 @@ try
 
                             Assert-MockCalled -CommandName Start-Job -ParameterFilter {
                                 $PSBoundParameters.ContainsKey('ArgumentList') `
-                                -and $ArgumentList[0] -eq $false `
-                                -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
-                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
-                                -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
-                                -and $ArgumentList[4] -eq $true
+                                    -and $ArgumentList[0] -eq $false `
+                                    -and $ArgumentList[1] -eq $setTargetResourceParameters.DomainName `
+                                    -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                    -and [System.String]::IsNullOrEmpty($ArgumentList[2]) `
+                                    -and $ArgumentList[4] -eq $true
                             } -Exactly -Times 1 -Scope It
                         }
                     }
@@ -549,7 +549,7 @@ try
                         }
 
                         It 'Should not throw and call the correct mocks' {
-                            { Set-TargetResource @setTagetResourceParameters  } | Should -Not -Throw
+                            { Set-TargetResource @setTagetResourceParameters } | Should -Not -Throw
 
                             $global:DSCMachineStatus | Should -Be 0
 
@@ -658,7 +658,7 @@ try
                         }
 
                         It 'Should throw the correct error message and call the correct mocks' {
-                            { Set-TargetResource @setTagetResourceParameters  } | Should -Throw $script:localizedData.NoDomainController
+                            { Set-TargetResource @setTagetResourceParameters } | Should -Throw $script:localizedData.NoDomainController
 
                             $global:DSCMachineStatus | Should -Be 1
 
@@ -713,12 +713,12 @@ try
                 Context 'When the parameter WaitForValidCredentials is set to $true' {
                     It 'Should output a warning message' {
                         Invoke-Command -ScriptBlock $script:waitForDomainControllerScriptBlock -ArgumentList @(
-                                $true # RunOnce
-                                'contoso.com' # DomainName
-                                'Europe' # SiteName
-                                $mockDomainUserCredential # Credential
-                                $true
-                            )
+                            $true # RunOnce
+                            'contoso.com' # DomainName
+                            'Europe' # SiteName
+                            $mockDomainUserCredential # Credential
+                            $true
+                        )
 
                         Assert-MockCalled -CommandName Find-DomainController -ParameterFilter {
                             $PSBoundParameters.ContainsKey('WaitForValidCredentials')

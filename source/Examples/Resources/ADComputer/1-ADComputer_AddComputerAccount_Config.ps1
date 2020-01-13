@@ -35,15 +35,15 @@ Configuration ADComputer_AddComputerAccount_Config
     {
         ADComputer 'CreateEnabled_SQL01'
         {
-            ComputerName = 'SQL01'
+            ComputerName         = 'SQL01'
 
             PsDscRunAsCredential = $Credential
         }
 
         ADComputer 'CreateEnabled_SQL02'
         {
-            ComputerName      = 'SQL02'
-            EnabledOnCreation = $true
+            ComputerName         = 'SQL02'
+            EnabledOnCreation    = $true
 
             PsDscRunAsCredential = $Credential
         }

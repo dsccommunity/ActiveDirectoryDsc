@@ -46,9 +46,9 @@ try
                 It 'Should return absent' {
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure               | Should -Be 'Absent'
+                    $result.Ensure | Should -Be 'Absent'
                     $result.ServicePrincipalName | Should -Be 'HOST/demo'
-                    $result.Account              | Should -Be ''
+                    $result.Account | Should -Be ''
                 }
             }
 
@@ -62,9 +62,9 @@ try
                 It 'Should return present with the correct account' {
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure               | Should -Be 'Present'
+                    $result.Ensure | Should -Be 'Present'
                     $result.ServicePrincipalName | Should -Be 'HOST/demo'
-                    $result.Account              | Should -Be 'User'
+                    $result.Account | Should -Be 'User'
                 }
             }
 
@@ -83,9 +83,9 @@ try
                 It 'Should return present with the multiple accounts' {
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure               | Should -Be 'Present'
+                    $result.Ensure | Should -Be 'Present'
                     $result.ServicePrincipalName | Should -Be 'HOST/demo'
-                    $result.Account              | Should -Be 'User;Computer'
+                    $result.Account | Should -Be 'User;Computer'
                 }
             }
         }
@@ -217,7 +217,7 @@ try
             Context 'Wrong SPN set' {
                 Mock -CommandName Get-ADObject -ParameterFilter { $Filter -eq ([ScriptBlock]::Create(' ServicePrincipalName -eq $ServicePrincipalName ')) } -MockWith {
                     return [PSCustomObject] @{
-                        SamAccountName = 'Computer'
+                        SamAccountName    = 'Computer'
                         DistinguishedName = 'CN=Computer,OU=Corp,DC=contoso,DC=com'
                     }
                 }
@@ -245,7 +245,7 @@ try
                     $Filter -eq ([ScriptBlock]::Create(' ServicePrincipalName -eq $ServicePrincipalName '))
                 } -MockWith {
                     [PSCustomObject] @{
-                        SamAccountName = 'User'
+                        SamAccountName    = 'User'
                         DistinguishedName = 'CN=User,OU=Corp,DC=contoso,DC=com'
                     }
                 }

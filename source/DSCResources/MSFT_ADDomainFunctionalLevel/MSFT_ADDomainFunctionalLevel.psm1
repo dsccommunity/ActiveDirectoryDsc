@@ -42,7 +42,7 @@ function Get-TargetResource
 
     $getTargetResourceReturnValue = @{
         DomainIdentity = $DomainIdentity
-        DomainMode = $null
+        DomainMode     = $null
     }
 
     $domainObject = Get-ADDomain -Identity $DomainIdentity -ErrorAction 'Stop'
@@ -136,7 +136,7 @@ function Set-TargetResource
         -not $_.InDesiredState
     }
 
-    $domainModeProperty = $propertiesNotInDesiredState.Where({ $_.ParameterName -eq 'DomainMode' })
+    $domainModeProperty = $propertiesNotInDesiredState.Where( { $_.ParameterName -eq 'DomainMode' })
 
     if ($domainModeProperty)
     {
@@ -145,9 +145,9 @@ function Set-TargetResource
         )
 
         $setADDomainModeParameters = @{
-            Identity = $DomainIdentity
+            Identity   = $DomainIdentity
             DomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]::$DomainMode
-            Confirm = $false
+            Confirm    = $false
         }
 
         Set-ADDomainMode @setADDomainModeParameters

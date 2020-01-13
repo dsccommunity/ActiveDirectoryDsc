@@ -43,10 +43,10 @@ try
         Describe 'MSFT_ADDomainTrust\Get-TargetResource' -Tag 'Get' {
             BeforeAll {
                 $mockDefaultParameters = @{
-                    SourceDomainName                    = $mockSourceDomainName
-                    TargetDomainName                    = $mockTargetDomainName
+                    SourceDomainName = $mockSourceDomainName
+                    TargetDomainName = $mockTargetDomainName
                     TargetCredential = $mockCredential
-                    TrustDirection                      = 'Outbound'
+                    TrustDirection   = 'Outbound'
                 }
             }
 
@@ -237,8 +237,8 @@ try
         Describe 'MSFT_ADDomainTrust\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 $mockDefaultParameters = @{
-                    SourceDomainName                    = $mockSourceDomainName
-                    TargetDomainName                    = $mockTargetDomainName
+                    SourceDomainName = $mockSourceDomainName
+                    TargetDomainName = $mockTargetDomainName
                     TargetCredential = $mockCredential
                 }
             }
@@ -381,30 +381,30 @@ try
         Describe 'MSFT_ADDomainTrust\Compare-TargetResourceState' -Tag 'Compare' {
             BeforeAll {
                 $mockDefaultParameters = @{
-                    SourceDomainName                    = $mockSourceDomainName
-                    TargetDomainName                    = $mockTargetDomainName
+                    SourceDomainName = $mockSourceDomainName
+                    TargetDomainName = $mockTargetDomainName
                     TargetCredential = $mockCredential
                 }
 
                 $mockGetTargetResource_Absent = {
                     return @{
-                        Ensure                              = 'Absent'
-                        SourceDomainName                    = $mockSourceDomainName
-                        TargetDomainName                    = $mockTargetDomainName
+                        Ensure           = 'Absent'
+                        SourceDomainName = $mockSourceDomainName
+                        TargetDomainName = $mockTargetDomainName
                         TargetCredential = $mockCredential
-                        TrustDirection                      = $null
-                        TrustType                           = $null
+                        TrustDirection   = $null
+                        TrustType        = $null
                     }
                 }
 
                 $mockGetTargetResource_Present = {
                     return @{
-                        Ensure                              = 'Present'
-                        SourceDomainName                    = $mockSourceDomainName
-                        TargetDomainName                    = $mockTargetDomainName
+                        Ensure           = 'Present'
+                        SourceDomainName = $mockSourceDomainName
+                        TargetDomainName = $mockTargetDomainName
                         TargetCredential = $mockCredential
-                        TrustDirection                      = 'Outbound'
-                        TrustType                           = 'External'
+                        TrustDirection   = 'Outbound'
+                        TrustType        = 'External'
                     }
                 }
             }
@@ -581,30 +581,30 @@ try
             }
         }
 
-         Describe 'MSFT_ADDomainTrust\Set-TargetResource' -Tag 'Set' {
+        Describe 'MSFT_ADDomainTrust\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 Mock -CommandName Get-TrustSourceAndTargetObject -MockWith {
                     $mockTrustSource = New-Object -TypeName Object |
                         Add-Member -MemberType ScriptMethod -Name 'CreateTrustRelationship' -Value {
                             $script:createTrustRelationshipMethodCallCount += 1
                         } -PassThru |
-                        Add-Member -MemberType ScriptMethod -Name 'DeleteTrustRelationship' -Value {
-                            $script:deleteTrustRelationshipMethodCallCount += 1
-                        } -PassThru |
-                        Add-Member -MemberType ScriptMethod -Name 'UpdateTrustRelationship' -Value {
-                            $script:updateTrustRelationshipMethodCallCount += 1
-                        } -PassThru -Force
+                            Add-Member -MemberType ScriptMethod -Name 'DeleteTrustRelationship' -Value {
+                                $script:deleteTrustRelationshipMethodCallCount += 1
+                            } -PassThru |
+                                Add-Member -MemberType ScriptMethod -Name 'UpdateTrustRelationship' -Value {
+                                    $script:updateTrustRelationshipMethodCallCount += 1
+                                } -PassThru -Force
 
                     $mockTrustTarget = New-Object -TypeName Object
 
                     return $mockTrustSource, $mockTrustTarget
                 }
 
-                  $mockDefaultParameters = @{
-                    SourceDomainName                    = $mockSourceDomainName
-                    TargetDomainName                    = $mockTargetDomainName
+                $mockDefaultParameters = @{
+                    SourceDomainName = $mockSourceDomainName
+                    TargetDomainName = $mockTargetDomainName
                     TargetCredential = $mockCredential
-                    TrustDirection                      = 'Outbound'
+                    TrustDirection   = 'Outbound'
                 }
             }
 
@@ -816,14 +816,14 @@ try
                                 return @(
                                     @{
                                         ParameterName  = 'Ensure'
-                                        Actual = 'Present'
-                                        Expected = 'Present'
+                                        Actual         = 'Present'
+                                        Expected       = 'Present'
                                         InDesiredState = $true
                                     }
                                     @{
                                         ParameterName  = 'TrustType'
-                                        Actual = 'Domain'
-                                        Expected = 'Forest'
+                                        Actual         = 'Domain'
+                                        Expected       = 'Forest'
                                         InDesiredState = $false
                                     }
                                 )
@@ -849,20 +849,20 @@ try
                                 return @(
                                     @{
                                         ParameterName  = 'Ensure'
-                                        Actual = 'Present'
-                                        Expected = 'Present'
+                                        Actual         = 'Present'
+                                        Expected       = 'Present'
                                         InDesiredState = $true
                                     }
                                     @{
                                         ParameterName  = 'TrustType'
-                                        Actual = 'Domain'
-                                        Expected = 'Forest'
+                                        Actual         = 'Domain'
+                                        Expected       = 'Forest'
                                         InDesiredState = $false
                                     }
                                     @{
                                         ParameterName  = 'TrustDirection'
-                                        Actual = 'Outbound'
-                                        Expected = 'Inbound'
+                                        Actual         = 'Outbound'
+                                        Expected       = 'Inbound'
                                         InDesiredState = $false
                                     }
                                 )
@@ -897,20 +897,20 @@ try
                                 return @(
                                     @{
                                         ParameterName  = 'Ensure'
-                                        Actual = 'Present'
-                                        Expected = 'Present'
+                                        Actual         = 'Present'
+                                        Expected       = 'Present'
                                         InDesiredState = $true
                                     }
                                     @{
                                         ParameterName  = 'TrustType'
-                                        Actual = 'Domain'
-                                        Expected = 'Domain'
+                                        Actual         = 'Domain'
+                                        Expected       = 'Domain'
                                         InDesiredState = $true
                                     }
                                     @{
                                         ParameterName  = 'TrustDirection'
-                                        Actual = 'Outbound'
-                                        Expected = 'Inbound'
+                                        Actual         = 'Outbound'
+                                        Expected       = 'Inbound'
                                         InDesiredState = $false
                                     }
                                 )
@@ -1012,10 +1012,10 @@ try
                 )
 
                 $testParameters = @{
-                    SourceDomainName                    = $mockSourceDomainName
-                    TargetDomainName                    = $mockTargetDomainName
+                    SourceDomainName = $mockSourceDomainName
+                    TargetDomainName = $mockTargetDomainName
                     TargetCredential = $mockCredential
-                    TrustType                           = $TrustType
+                    TrustType        = $TrustType
                 }
 
                 { Get-TrustSourceAndTargetObject @testParameters } | Should -Not -Throw

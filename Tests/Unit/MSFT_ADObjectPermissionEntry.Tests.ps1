@@ -45,13 +45,13 @@ try
         }
 
         $testPresentParameters = @{
-            Ensure                             = 'Present'
-            ActiveDirectoryRights              = 'GenericAll'
+            Ensure                = 'Present'
+            ActiveDirectoryRights = 'GenericAll'
         }
 
         $testAbsentParameters = @{
-            Ensure                             = 'Absent'
-            ActiveDirectoryRights              = 'GenericAll'
+            Ensure                = 'Absent'
+            ActiveDirectoryRights = 'GenericAll'
         }
 
         $mockGetAclPresent = {
@@ -75,8 +75,8 @@ try
                     }
                 )
             }
-            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value {}
-            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value {}
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value { }
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value { }
             return $mock
         }
 
@@ -86,8 +86,8 @@ try
                 Owner  = 'BUILTIN\Administrators'
                 Access = @()
             }
-            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value {}
-            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value {}
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value { }
+            $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value { }
             return $mock
         }
         #endregion
@@ -118,14 +118,14 @@ try
                     $targetResource = Get-TargetResource @testDefaultParameters
 
                     # Assert
-                    $targetResource.Ensure                             | Should -Be 'Present'
-                    $targetResource.Path                               | Should -Be $testDefaultParameters.Path
-                    $targetResource.IdentityReference                  | Should -Be $testDefaultParameters.IdentityReference
-                    $targetResource.ActiveDirectoryRights              | Should -Be 'GenericAll'
-                    $targetResource.AccessControlType                  | Should -Be $testDefaultParameters.AccessControlType
-                    $targetResource.ObjectType                         | Should -Be $testDefaultParameters.ObjectType
+                    $targetResource.Ensure | Should -Be 'Present'
+                    $targetResource.Path | Should -Be $testDefaultParameters.Path
+                    $targetResource.IdentityReference | Should -Be $testDefaultParameters.IdentityReference
+                    $targetResource.ActiveDirectoryRights | Should -Be 'GenericAll'
+                    $targetResource.AccessControlType | Should -Be $testDefaultParameters.AccessControlType
+                    $targetResource.ObjectType | Should -Be $testDefaultParameters.ObjectType
                     $targetResource.ActiveDirectorySecurityInheritance | Should -Be $testDefaultParameters.ActiveDirectorySecurityInheritance
-                    $targetResource.InheritedObjectType                | Should -Be $testDefaultParameters.InheritedObjectType
+                    $targetResource.InheritedObjectType | Should -Be $testDefaultParameters.InheritedObjectType
                 }
             }
 
@@ -143,14 +143,14 @@ try
                     $targetResource = Get-TargetResource @testDefaultParameters
 
                     # Assert
-                    $targetResource.Ensure                             | Should -Be 'Absent'
-                    $targetResource.Path                               | Should -Be $testDefaultParameters.Path
-                    $targetResource.IdentityReference                  | Should -Be $testDefaultParameters.IdentityReference
-                    $targetResource.ActiveDirectoryRights              | Should -Be ''
-                    $targetResource.AccessControlType                  | Should -Be $testDefaultParameters.AccessControlType
-                    $targetResource.ObjectType                         | Should -Be $testDefaultParameters.ObjectType
+                    $targetResource.Ensure | Should -Be 'Absent'
+                    $targetResource.Path | Should -Be $testDefaultParameters.Path
+                    $targetResource.IdentityReference | Should -Be $testDefaultParameters.IdentityReference
+                    $targetResource.ActiveDirectoryRights | Should -Be ''
+                    $targetResource.AccessControlType | Should -Be $testDefaultParameters.AccessControlType
+                    $targetResource.ObjectType | Should -Be $testDefaultParameters.ObjectType
                     $targetResource.ActiveDirectorySecurityInheritance | Should -Be $testDefaultParameters.ActiveDirectorySecurityInheritance
-                    $targetResource.InheritedObjectType                | Should -Be $testDefaultParameters.InheritedObjectType
+                    $targetResource.InheritedObjectType | Should -Be $testDefaultParameters.InheritedObjectType
                 }
             }
         }

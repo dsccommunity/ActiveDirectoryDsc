@@ -83,14 +83,14 @@ try
                 It 'Should return expected properties' {
                     $targetResource = Get-TargetResource @addRemoveParameters
 
-                    $targetResource.ServicePrincipalNameSuffix         | Should -Be $mockADForestDesiredState.SpnSuffixes
-                    $targetResource.ServicePrincipalNameSuffixToAdd    | Should -Be $addRemoveParameters.ServicePrincipalNameSuffixToAdd
+                    $targetResource.ServicePrincipalNameSuffix | Should -Be $mockADForestDesiredState.SpnSuffixes
+                    $targetResource.ServicePrincipalNameSuffixToAdd | Should -Be $addRemoveParameters.ServicePrincipalNameSuffixToAdd
                     $targetResource.ServicePrincipalNameSuffixToRemove | Should -Be $addRemoveParameters.ServicePrincipalNameSuffixToRemove
-                    $targetResource.UserPrincipalNameSuffix            | Should -Be $mockADForestDesiredState.UpnSuffixes
-                    $targetResource.UserPrincipalNameSuffixToAdd       | Should -Be $addRemoveParameters.UserPrincipalNameSuffixToAdd
-                    $targetResource.UserPrincipalNameSuffixToRemove    | Should -Be $addRemoveParameters.UserPrincipalNameSuffixToRemove
-                    $targetResource.Credential                         | Should -BeNullOrEmpty
-                    $targetResource.ForestName                         | Should -Be $mockADForestDesiredState.Name
+                    $targetResource.UserPrincipalNameSuffix | Should -Be $mockADForestDesiredState.UpnSuffixes
+                    $targetResource.UserPrincipalNameSuffixToAdd | Should -Be $addRemoveParameters.UserPrincipalNameSuffixToAdd
+                    $targetResource.UserPrincipalNameSuffixToRemove | Should -Be $addRemoveParameters.UserPrincipalNameSuffixToRemove
+                    $targetResource.Credential | Should -BeNullOrEmpty
+                    $targetResource.ForestName | Should -Be $mockADForestDesiredState.Name
                 }
             }
 
@@ -99,14 +99,14 @@ try
                 It 'Should return expected properties' {
                     $targetResource = Get-TargetResource @replaceParameters
 
-                    $targetResource.ServicePrincipalNameSuffix         | Should -Be $mockADForestDesiredState.SpnSuffixes
-                    $targetResource.ServicePrincipalNameSuffixToAdd    | Should -BeNullOrEmpty
+                    $targetResource.ServicePrincipalNameSuffix | Should -Be $mockADForestDesiredState.SpnSuffixes
+                    $targetResource.ServicePrincipalNameSuffixToAdd | Should -BeNullOrEmpty
                     $targetResource.ServicePrincipalNameSuffixToRemove | Should -BeNullOrEmpty
-                    $targetResource.UserPrincipalNameSuffix            | Should -Be $mockADForestDesiredState.UpnSuffixes
-                    $targetResource.UserPrincipalNameSuffixToAdd       | Should -BeNullOrEmpty
-                    $targetResource.UserPrincipalNameSuffixToRemove    | Should -BeNullOrEmpty
-                    $targetResource.Credential                         | Should -BeNullOrEmpty
-                    $targetResource.ForestName                         | Should -Be $mockADForestDesiredState.Name
+                    $targetResource.UserPrincipalNameSuffix | Should -Be $mockADForestDesiredState.UpnSuffixes
+                    $targetResource.UserPrincipalNameSuffixToAdd | Should -BeNullOrEmpty
+                    $targetResource.UserPrincipalNameSuffixToRemove | Should -BeNullOrEmpty
+                    $targetResource.Credential | Should -BeNullOrEmpty
+                    $targetResource.ForestName | Should -Be $mockADForestDesiredState.Name
                 }
             }
         }

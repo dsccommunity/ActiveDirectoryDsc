@@ -47,14 +47,14 @@ try
         )
 
         $fakePasswordPolicy = @{
-            ComplexityEnabled = $true
-            LockoutDuration = New-TimeSpan -Minutes 30
-            LockoutObservationWindow = New-TimeSpan -Minutes 30
-            LockoutThreshold = 3
-            MinPasswordAge = New-TimeSpan -Days 1
-            MaxPasswordAge = New-TimeSpan -Days 42
-            MinPasswordLength = 7
-            PasswordHistoryCount = 12
+            ComplexityEnabled           = $true
+            LockoutDuration             = New-TimeSpan -Minutes 30
+            LockoutObservationWindow    = New-TimeSpan -Minutes 30
+            LockoutThreshold            = 3
+            MinPasswordAge              = New-TimeSpan -Days 1
+            MaxPasswordAge              = New-TimeSpan -Days 42
+            MinPasswordLength           = 7
+            PasswordHistoryCount        = 12
             ReversibleEncryptionEnabled = $false
         }
 
@@ -128,14 +128,14 @@ try
             )
 
             $stubPasswordPolicy = @{
-                ComplexityEnabled = $true
-                LockoutDuration = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutObservationWindow = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutThreshold = 3
-                MinPasswordAge = (New-TimeSpan -Days 1).TotalMinutes
-                MaxPasswordAge = (New-TimeSpan -Days 42).TotalMinutes
-                MinPasswordLength = 7
-                PasswordHistoryCount = 12
+                ComplexityEnabled           = $true
+                LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutThreshold            = 3
+                MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
+                MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
+                MinPasswordLength           = 7
+                PasswordHistoryCount        = 12
                 ReversibleEncryptionEnabled = $true
             }
 
@@ -181,13 +181,16 @@ try
 
                     switch ($stubPasswordPolicy[$propertyName].GetType())
                     {
-                        'bool' {
+                        'bool'
+                        {
                             $propertyDefaultParams[$propertyName] = -not $stubPasswordPolicy[$propertyName]
                         }
-                        'string' {
+                        'string'
+                        {
                             $propertyDefaultParams[$propertyName] = 'not{0}' -f $stubPasswordPolicy[$propertyName]
                         }
-                        default {
+                        default
+                        {
                             $propertyDefaultParams[$propertyName] = $stubPasswordPolicy[$propertyName] + 1
                         }
                     }
@@ -216,14 +219,14 @@ try
             )
 
             $stubPasswordPolicy = @{
-                ComplexityEnabled = $true
-                LockoutDuration = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutObservationWindow = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutThreshold = 3
-                MinPasswordAge = (New-TimeSpan -Days 1).TotalMinutes
-                MaxPasswordAge = (New-TimeSpan -Days 42).TotalMinutes
-                MinPasswordLength = 7
-                PasswordHistoryCount = 12
+                ComplexityEnabled           = $true
+                LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutThreshold            = 3
+                MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
+                MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
+                MinPasswordLength           = 7
+                PasswordHistoryCount        = 12
                 ReversibleEncryptionEnabled = $true
             }
 

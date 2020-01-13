@@ -34,8 +34,8 @@ try
         # Load stub cmdlets and classes.
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 
-        $presentSiteName    = 'DemoSite'
-        $absentSiteName     = 'MissingSite'
+        $presentSiteName = 'DemoSite'
+        $absentSiteName = 'MissingSite'
         $genericDescription = "Demonstration Site Description"
 
         $presentSiteMock = [PSCustomObject] @{
@@ -69,30 +69,30 @@ try
         }
 
         $presentSiteTestNoDescription = @{
-            Ensure      = 'Present'
-            Name        = $presentSiteName
+            Ensure = 'Present'
+            Name   = $presentSiteName
         }
 
         $presentSiteTestAbsent = @{
-            Ensure = 'Absent'
-            Name   = $presentSiteName
+            Ensure      = 'Absent'
+            Name        = $presentSiteName
             Description = $genericDescription
         }
 
         $presentSiteTestMismatchDescription = @{
-            Ensure = 'Present'
-            Name   = $presentSiteName
+            Ensure      = 'Present'
+            Name        = $presentSiteName
             Description = 'Some random test description'
         }
 
         $absentSiteTestPresent = @{
-            Ensure = 'Present'
-            Name   = $absentSiteName
+            Ensure      = 'Present'
+            Name        = $absentSiteName
             Description = $genericDescription
         }
         $absentSiteTestAbsent = @{
-            Ensure = 'Absent'
-            Name   = $absentSiteName
+            Ensure      = 'Absent'
+            Name        = $absentSiteName
             Description = $genericDescription
         }
 
@@ -130,7 +130,7 @@ try
 
                 # Assert
                 $targetResource.Ensure | Should -Be 'Present'
-                $targetResource.Name   | Should -Be $presentSiteName
+                $targetResource.Name | Should -Be $presentSiteName
                 $targetResource.Description | Should -Be $genericDescription
             }
 
@@ -144,7 +144,7 @@ try
 
                 # Assert
                 $targetResource.Ensure | Should -Be 'Absent'
-                $targetResource.Name   | Should -Be $absentSiteName
+                $targetResource.Name | Should -Be $absentSiteName
                 $targetResource.Description | Should -BeNullOrEmpty
             }
         }

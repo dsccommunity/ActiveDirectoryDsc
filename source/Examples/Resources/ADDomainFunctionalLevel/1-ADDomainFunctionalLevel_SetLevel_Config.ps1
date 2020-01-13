@@ -27,8 +27,8 @@ Configuration ADDomainFunctionalLevel_SetLevel_Config
     {
         ADDomainFunctionalLevel 'ChangeDomainFunctionalLevel'
         {
-            DomainIdentity          = 'contoso.com'
-            DomainMode              = 'Windows2012R2Domain'
+            DomainIdentity = 'contoso.com'
+            DomainMode     = 'Windows2012R2Domain'
         }
     }
 }

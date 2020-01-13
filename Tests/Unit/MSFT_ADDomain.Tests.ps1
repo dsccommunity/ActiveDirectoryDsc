@@ -49,8 +49,8 @@ try
         )
 
         $mockDefaultParameters = @{
-            DomainName = $mockDomainName
-            Credential = $mockAdministratorCredential
+            DomainName                    = $mockDomainName
+            Credential                    = $mockAdministratorCredential
             SafeModeAdministratorPassword = $mockAdministratorCredential
         }
 
@@ -130,17 +130,17 @@ try
                 BeforeAll {
                     Mock -CommandName Get-ADDomain -MockWith {
                         [PSObject] @{
-                            Forest     = $mockDomainName
-                            DomainMode = $mgmtDomainMode
+                            Forest       = $mockDomainName
+                            DomainMode   = $mgmtDomainMode
                             ParentDomain = $mockDomainName
-                            NetBIOSName = $mockNetBiosName
-                            DnsRoot = $mockDnsRoot
+                            NetBIOSName  = $mockNetBiosName
+                            DnsRoot      = $mockDnsRoot
                         }
                     }
 
                     Mock -CommandName Get-ADForest -MockWith {
                         [PSObject] @{
-                            Name = $mockDomainName
+                            Name       = $mockDomainName
                             ForestMode = $mgmtForestMode
                         }
                     }
@@ -396,19 +396,19 @@ try
             )
 
             $mockDefaultParameters = @{
-                Credential = $mockAdministratorCredential
+                Credential                    = $mockAdministratorCredential
                 SafeModeAdministratorPassword = $mockAdministratorCredential
             }
 
             $stubDomain = @{
-                DnsRoot = $mockDomainName
+                DnsRoot           = $mockDomainName
                 DomainNetBIOSName = $correctDomainNetBIOSName
             }
 
             # Get-TargetResource returns the domain FQDN for .DomainName
             $stubChildDomain = @{
-                DnsRoot = "$correctChildDomainName.$parentDomainName"
-                ParentDomainName = $parentDomainName
+                DnsRoot           = "$correctChildDomainName.$parentDomainName"
+                ParentDomainName  = $parentDomainName
                 DomainNetBIOSName = $correctDomainNetBIOSName
             }
 
@@ -487,26 +487,26 @@ try
             )
 
             $newForestParams = @{
-                DomainName = $testDomainName
-                Credential = $mockAdministratorCredential
+                DomainName                    = $testDomainName
+                Credential                    = $mockAdministratorCredential
                 SafeModeAdministratorPassword = $testSafemodeCredential
             }
 
             $newDomainParams = @{
-                DomainName = $testDomainName
-                ParentDomainName = $testParentDomainName
-                Credential = $mockAdministratorCredential
+                DomainName                    = $testDomainName
+                ParentDomainName              = $testParentDomainName
+                Credential                    = $mockAdministratorCredential
                 SafeModeAdministratorPassword = $testSafemodeCredential
             }
 
             $stubTargetResource = @{
-                DomainName = $testDomainName
-                ParentDomainName = $testParentDomainName
+                DomainName        = $testDomainName
+                ParentDomainName  = $testParentDomainName
                 DomainNetBIOSName = $testDomainNetBIOSNameName
-                ForestName = $testParentDomainName
-                ForestMode = $testDomainForestMode
-                DomainMode = $testDomainForestMode
-                DomainExist = $false
+                ForestName        = $testParentDomainName
+                ForestMode        = $testDomainForestMode
+                DomainMode        = $testDomainForestMode
+                DomainExist       = $false
             }
 
             Mock -CommandName Get-TargetResource -MockWith { return $stubTargetResource }
@@ -517,7 +517,7 @@ try
 
                 Set-TargetResource @newForestParams
 
-                Assert-MockCalled -CommandName Install-ADDSForest -ParameterFilter  { $DomainName -eq $testDomainName } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSForest -ParameterFilter { $DomainName -eq $testDomainName } -Scope It
             }
 
             It 'Calls "Install-ADDSForest" with "SafeModeAdministratorPassword" when creating forest' {
@@ -533,7 +533,7 @@ try
 
                 Set-TargetResource @newForestParams -DnsDelegationCredential $testDelegationCredential
 
-                Assert-MockCalled -CommandName Install-ADDSForest -ParameterFilter  { $DnsDelegationCredential -eq $testDelegationCredential } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSForest -ParameterFilter { $DnsDelegationCredential -eq $testDelegationCredential } -Scope It
             }
 
             It 'Calls "Install-ADDSForest" with "CreateDnsDelegation" when creating forest, if specified' {
@@ -541,7 +541,7 @@ try
 
                 Set-TargetResource @newForestParams -DnsDelegationCredential $testDelegationCredential
 
-                Assert-MockCalled -CommandName Install-ADDSForest -ParameterFilter  { $CreateDnsDelegation -eq $true } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSForest -ParameterFilter { $CreateDnsDelegation -eq $true } -Scope It
             }
 
             It 'Calls "Install-ADDSForest" with "DatabasePath" when creating forest, if specified' {
@@ -602,7 +602,7 @@ try
 
                 Set-TargetResource @newDomainParams
 
-                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter  { $NewDomainName -eq $testDomainName } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter { $NewDomainName -eq $testDomainName } -Scope It
             }
 
             It 'Calls "Install-ADDSDomain" with "ParentDomainName" when creating child domain' {
@@ -610,7 +610,7 @@ try
 
                 Set-TargetResource @newDomainParams
 
-                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter  { $ParentDomainName -eq $testParentDomainName } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter { $ParentDomainName -eq $testParentDomainName } -Scope It
             }
 
             It 'Calls "Install-ADDSDomain" with "DomainType" when creating child domain' {
@@ -618,7 +618,7 @@ try
 
                 Set-TargetResource @newDomainParams
 
-                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter  { $DomainType -eq 'ChildDomain' } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter { $DomainType -eq 'ChildDomain' } -Scope It
             }
 
             It 'Calls "Install-ADDSDomain" with "SafeModeAdministratorPassword" when creating child domain' {
@@ -634,7 +634,7 @@ try
 
                 Set-TargetResource @newDomainParams
 
-                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter  { $ParentDomainName -eq $testParentDomainName } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter { $ParentDomainName -eq $testParentDomainName } -Scope It
             }
 
             It 'Calls "Install-ADDSDomain" with "ParentDomainName" when creating child domain' {
@@ -642,7 +642,7 @@ try
 
                 Set-TargetResource @newDomainParams
 
-                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter  { $ParentDomainName -eq $testParentDomainName } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter { $ParentDomainName -eq $testParentDomainName } -Scope It
             }
 
             It 'Calls "Install-ADDSDomain" with "DnsDelegationCredential" when creating child domain, if specified' {
@@ -650,7 +650,7 @@ try
 
                 Set-TargetResource @newDomainParams -DnsDelegationCredential $testDelegationCredential
 
-                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter  { $DnsDelegationCredential -eq $testDelegationCredential } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter { $DnsDelegationCredential -eq $testDelegationCredential } -Scope It
             }
 
             It 'Calls "Install-ADDSDomain" with "CreateDnsDelegation" when creating child domain, if specified' {
@@ -658,7 +658,7 @@ try
 
                 Set-TargetResource @newDomainParams -DnsDelegationCredential $testDelegationCredential
 
-                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter  { $CreateDnsDelegation -eq $true } -Scope It
+                Assert-MockCalled -CommandName Install-ADDSDomain -ParameterFilter { $CreateDnsDelegation -eq $true } -Scope It
             }
 
             It 'Calls "Install-ADDSDomain" with "DatabasePath" when creating child domain, if specified' {

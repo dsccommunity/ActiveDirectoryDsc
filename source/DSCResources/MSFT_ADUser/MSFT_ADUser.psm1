@@ -1663,9 +1663,7 @@ function Set-TargetResource
             {
                 # Find the associated AD property
                 $adProperty = $adPropertyMap |
-                Where-Object -FilterScript {
-                    $_.Parameter -eq $parameter
-                }
+                    Where-Object -FilterScript { $_.Parameter -eq $parameter }
 
                 if ($parameter -eq 'Path' -and ($PSBoundParameters.Path -ne $targetResource.Path))
                 {

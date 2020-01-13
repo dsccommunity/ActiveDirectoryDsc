@@ -37,8 +37,8 @@ try
         #region Function Get-TargetResource
         Describe 'ADReplicationSubnet\Get-TargetResource' {
             $testDefaultParameters = @{
-                Name        = '10.0.0.0/8'
-                Site        = 'Default-First-Site-Name'
+                Name = '10.0.0.0/8'
+                Site = 'Default-First-Site-Name'
             }
 
             Context 'Subnet does not exist' {
@@ -49,10 +49,10 @@ try
 
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure      | Should -Be 'Absent'
-                    $result.Name        | Should -Be $testDefaultParameters.Name
-                    $result.Site        | Should -Be ''
-                    $result.Location    | Should -BeNullOrEmpty
+                    $result.Ensure | Should -Be 'Absent'
+                    $result.Name | Should -Be $testDefaultParameters.Name
+                    $result.Site | Should -Be ''
+                    $result.Location | Should -BeNullOrEmpty
                     $result.Description | Should -BeNullOrEmpty
                 }
             }
@@ -78,9 +78,9 @@ try
 
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure   | Should -Be 'Present'
-                    $result.Name     | Should -Be $testDefaultParameters.Name
-                    $result.Site     | Should -Be 'Default-First-Site-Name'
+                    $result.Ensure | Should -Be 'Present'
+                    $result.Name | Should -Be $testDefaultParameters.Name
+                    $result.Site | Should -Be 'Default-First-Site-Name'
                     $result.Location | Should -Be 'Seattle'
                     $result.Description | Should -Be 'Default First Site Description'
                 }
@@ -101,9 +101,9 @@ try
 
                     $result = Get-TargetResource @testDefaultParameters
 
-                    $result.Ensure   | Should -Be 'Present'
-                    $result.Name     | Should -Be $testDefaultParameters.Name
-                    $result.Site     | Should -Be ''
+                    $result.Ensure | Should -Be 'Present'
+                    $result.Name | Should -Be $testDefaultParameters.Name
+                    $result.Site | Should -Be ''
                     $result.Location | Should -Be 'Seattle'
                 }
             }
@@ -203,9 +203,9 @@ try
                 Description = 'Default First Site Description'
             }
             $testAbsentParameters = @{
-                Ensure   = 'Absent'
-                Name     = '10.0.0.0/8'
-                Site     = 'Default-First-Site-Name'
+                Ensure = 'Absent'
+                Name   = '10.0.0.0/8'
+                Site   = 'Default-First-Site-Name'
             }
 
             Context 'Subnet does not exist' {

@@ -39,7 +39,7 @@ Configuration WaitForADDomain_WaitForDomainControllerUsingBuiltInCredential_Conf
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName = 'contoso.com'
+            DomainName           = 'contoso.com'
 
             PsDscRunAsCredential = $Credential
         }

@@ -6,7 +6,7 @@ ConvertFrom-StringData @'
     SetUnhandledException      = Unhandled exception setting Optional Feature status for forest '{0}'. (ADOF0004)
     ForestFunctionalLevelError = Forest functional level '{0}' does not meet minimum requirement of Windows2008R2Forest or greater. (ADOF0005)
     DomainFunctionalLevelError = Domain functional level '{0}' does not meet minimum requirement of Windows2008R2Forest or greater. (ADOF0006)
-    OptionalFeatureEnabled          = Active Directory {0} is enabled. (ADOF0007)
-    OptionalFeatureNotEnabled       = Active Directory {0} is not enabled. (ADOF0008)
-    EnablingOptionalFeature         = Enabling Active Directory {1} in the forest '{0}'. (ADOF0009)
+    OptionalFeatureEnabled     = Active Directory {0} is enabled. (ADOF0007)
+    OptionalFeatureNotEnabled  = Active Directory {0} is not enabled. (ADOF0008)
+    EnablingOptionalFeature    = Enabling Active Directory {1} in the forest '{0}'. (ADOF0009)
 '@

@@ -40,8 +40,8 @@ Configuration WaitForADDomain_WaitForDomainControllerInSite_Config
     {
         WaitForADDomain 'contoso.com'
         {
-            DomainName = 'contoso.com'
-            SiteName   = 'Europe'
+            DomainName           = 'contoso.com'
+            SiteName             = 'Europe'
 
             PsDscRunAsCredential = $Credential
         }
