@@ -1,14 +1,12 @@
 # Description
 
-This resource change the forest functional level. Functional levels can
-be read more about in the article [Forest and Domain Functional Levels](https://docs.microsoft.com/sv-se/windows-server/identity/ad-ds/active-directory-functional-levels).
+This resource changes the forest functional level. For further details, see [Forest and Domain Functional Levels](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels).
 
-**WARNING: This action might be irreversibel!** Make sure to understand
+**WARNING: This action might be irreversible!** Make sure you understand
 the consequences by changing a functional level.
 
-Read more about raising function levels and potential rolling back
-scenarios in the Active Directory documentation, for example in the
-article [Upgrade Domain Controllers to Windows Server 2016](https://docs.microsoft.com/sv-se/windows-server/identity/ad-ds/deploy/upgrade-domain-controllers).
+Read more about raising function levels and potential roll back
+scenarios in the Active Directory documentation, for example: [Upgrade Domain Controllers to Windows Server 2016](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/deploy/upgrade-domain-controllers).
 
 ## Requirements
 

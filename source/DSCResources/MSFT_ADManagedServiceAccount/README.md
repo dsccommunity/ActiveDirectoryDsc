@@ -6,4 +6,4 @@ A Single Managed Service Account can only be used on a single computer, whereas 
 ## Requirements
 
 * Target machine must be running Windows Server 2008 R2 or later.
-* Group Managed Service Accounts need at least one Windows Server 2012 Domain Controller.
+* Group Managed Service Accounts need at least one Windows Server 2008 R2 Domain Controller.

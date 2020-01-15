@@ -30,7 +30,7 @@
 .EXAMPLE 1
 
 This configuration will change the domain functional level to
-a Windows Server 2012 R2 Domain.
+a Windows Server 2008 R2 R2 Domain.
 
 Configuration ADDomainFunctionalLevel_SetLevel_Config
 {
