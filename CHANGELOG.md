@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [5.0.0] - 2020-01-14
+
 ### Added
 
 - ADServicePrincipalName
