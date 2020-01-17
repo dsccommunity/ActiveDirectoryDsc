@@ -7,6 +7,22 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- ADForestProperties
+  - Added TombstoneLifetime property ([issue #302](https://github.com/PowerShell/ActiveDirectoryDsc/issues/302)).
+  - Added Integration tests ([issue #349](https://github.com/PowerShell/ActiveDirectoryDsc/issues/349)).
+
+### Fixed
+
+- ADForestProperties
+  - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/PowerShell/ActiveDirectoryDsc/issues/548)).
+
+### Changed
+
+- ADForestProperties
+  - Refactored unit tests.
+
 ## [5.0.0] - 2020-01-14
 
 ### Added
