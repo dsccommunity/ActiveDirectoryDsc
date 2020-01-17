@@ -1,6 +1,7 @@
 # Description
 
-The ADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
+The ADForestProperties DSC resource will manage forest wide settings within an Active Directory forest.
+These include User Principal Name (UPN) suffixes, Service Principal Name (SPN) suffixes and the tombstone lifetime.
 
 ## Requirements
 
