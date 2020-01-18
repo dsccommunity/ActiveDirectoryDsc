@@ -362,14 +362,7 @@ function Set-TargetResource
 
     $targetResource = Get-TargetResource -ForestName $ForestName
 
-    $setADForestParameters = @{
-        Identity = $ForestName
-    }
-
-    if ($Credential)
-    {
-        $setADForestParameters['Credential'] = $Credential
-    }
+    $setADForestParameters = @{}
 
     # add ServicePrincipalName parameter
     if ($PSBoundParameters.ContainsKey('ServicePrincipalNameSuffix'))
@@ -467,7 +460,18 @@ function Set-TargetResource
             ($UserPrincipalNameSuffixToRemove -join ', '), $ForestName)
     }
 
-    Set-ADForest @setADForestParameters
+    # Only run Set-ADForest if a value needs updating
+    if ($setADForestParameters.count -gt 0)
+    {
+        if ($Credential)
+        {
+            $setADForestParameters['Credential'] = $Credential
+        }
+
+        $setADForestParameters['Identity'] = $ForestName
+
+        Set-ADForest @setADForestParameters
+    }
 
     if ($PSBoundParameters.ContainsKey('TombstoneLifetime') -and
         $TombstoneLifetime -ne $targetResource.TombstoneLifetime)
@@ -479,7 +483,7 @@ function Set-TargetResource
         $identity = "CN=Directory Service,CN=Windows NT,CN=Services,$configurationNamingContext"
         try
         {
-            Set-ADObject -Identity $identity -Partition $configurationNamingContext -replace @{
+            Set-ADObject -Identity $identity -Partition $configurationNamingContext -Replace @{
                 tombstonelifetime = $tombstoneLifetime
             }
         }

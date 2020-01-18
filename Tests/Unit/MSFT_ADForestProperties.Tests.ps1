@@ -101,7 +101,6 @@ try
 
             BeforeAll {
                 $getTargetResourceParameters = @{
-                    Credential = $mockCredential
                     ForestName = $mockResource.ForestName
                 }
 
@@ -134,6 +133,17 @@ try
                 Assert-MockCalled Get-ADObject `
                     -ParameterFilter { $Properties -eq 'tombstonelifetime' } `
                     -Exactly -Times 1
+            }
+
+            Context 'When the Credential parameter is specified' {
+                $getTargetResourceParameters = @{
+                    Credential = $mockCredential
+                    ForestName = $mockResource.ForestName
+                }
+
+                It 'Should not throw' {
+                    { $targetResource = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
+                }
             }
         }
 
@@ -230,7 +240,7 @@ try
 
             BeforeAll {
                 $setTargetResourceParameters = @{
-                    ForestName = $mockResource.forestName
+                    ForestName = $mockResource.ForestName
                     Credential = $mockCredential
                 }
 
@@ -255,9 +265,117 @@ try
                         Assert-MockCalled -CommandName Get-TargetResource `
                             -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Set-ADForest  `
-                            -Exactly -Times 1
+                        if ($property -eq 'TombstoneLifeTime')
+                        {
+                            Assert-MockCalled -CommandName Set-ADForest  `
+                                -Exactly -Times 0
+                            Assert-MockCalled -CommandName Set-ADObject  `
+                                -Exactly -Times 1
+                        }
+                        else
+                        {
+                            Assert-MockCalled -CommandName Set-ADForest  `
+                                -Exactly -Times 1
+                            Assert-MockCalled -CommandName Set-ADObject  `
+                                -Exactly -Times 0
+                        }
                     }
+                }
+            }
+
+            Context 'When both ServicePrincipalNameSuffixAdd and ServicePrincipalNameSuffixRemove have been specified' {
+                BeforeAll {
+                    $setChangedTargetResourceParametersProperty = $setTargetResourceParameters.Clone()
+                    $setChangedTargetResourceParametersProperty.ServicePrincipalNameSuffixToAdd = `
+                        $mockChangedAddRemoveResource.ServicePrincipalNameSuffixToAdd
+                    $setChangedTargetResourceParametersProperty.ServicePrincipalNameSuffixToRemove = `
+                        $mockChangedAddRemoveResource.ServicePrincipalNameSuffixToRemove
+                }
+
+                It 'Should not throw' {
+                    { Set-TargetResource @setChangedTargetResourceParametersProperty } | Should -Not -Throw
+                }
+
+                It 'Should call the correct mocks' {
+                    Assert-MockCalled -CommandName Get-TargetResource `
+                        -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
+                        -Exactly -Times 1
+                    Assert-MockCalled -CommandName Set-ADForest  `
+                        -Exactly -Times 1
+                }
+            }
+
+            Context 'When both UserPrincipalNameSuffixAdd and UserPrincipalNameSuffixRemove have been specified' {
+                BeforeAll {
+                    $setChangedTargetResourceParametersProperty = $setTargetResourceParameters.Clone()
+                    $setChangedTargetResourceParametersProperty.UserPrincipalNameSuffixToAdd = `
+                        $mockChangedAddRemoveResource.UserPrincipalNameSuffixToAdd
+                    $setChangedTargetResourceParametersProperty.UserPrincipalNameSuffixToRemove = `
+                        $mockChangedAddRemoveResource.UserPrincipalNameSuffixToRemove
+                }
+
+                It 'Should not throw' {
+                    { Set-TargetResource @setChangedTargetResourceParametersProperty } | Should -Not -Throw
+                }
+
+                It 'Should call the correct mocks' {
+                    Assert-MockCalled -CommandName Get-TargetResource `
+                        -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
+                        -Exactly -Times 1
+                    Assert-MockCalled -CommandName Set-ADForest  `
+                        -Exactly -Times 1
+                }
+            }
+
+            foreach ($property in $mockChangedReplaceResource.Keys)
+            {
+                Context "When $property has changed to an empty value" {
+                    BeforeAll {
+                        $setChangedTargetResourceParametersProperty = $setTargetResourceParameters.Clone()
+                        $setChangedTargetResourceParametersProperty.$property = ''
+                    }
+
+                    It 'Should not throw' {
+                        { Set-TargetResource @setChangedTargetResourceParametersProperty } | Should -Not -Throw
+                    }
+
+                    It 'Should call the correct mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource `
+                            -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
+                            -Exactly -Times 1
+                        if ($property -eq 'TombstoneLifeTime')
+                        {
+                            Assert-MockCalled -CommandName Set-ADForest  `
+                                -Exactly -Times 0
+                            Assert-MockCalled -CommandName Set-ADObject  `
+                                -Exactly -Times 1
+                        }
+                        else
+                        {
+                            Assert-MockCalled -CommandName Set-ADForest  `
+                                -Exactly -Times 1
+                            Assert-MockCalled -CommandName Set-ADObject  `
+                                -Exactly -Times 0
+                        }
+                    }
+                }
+            }
+
+            Context 'When Set-ADObject throws an exception' {
+                BeforeAll {
+                    $setTargetResourceTombstoneParameters = @{
+                        ForestName        = $mockResource.ForestName
+                        TombstoneLifetime = $mockChangedResource.TombstoneLifetime
+                        Credential        = $mockCredential
+                    }
+                    Mock -CommandName Set-ADObject  -MockWith { Throw 'Error' }
+                }
+
+                It 'Should throw the correct exception' {
+                    { Set-TargetResource @setTargetResourceTombstoneParameters } | Should -Throw (
+                        $script:localizedData.SetTombstoneLifetimeError -f
+                        $setTargetResourceTombstoneParameters.TombstoneLifetime,
+                        $setTargetResourceTombstoneParameters.ForestName )
                 }
             }
         }
