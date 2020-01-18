@@ -479,8 +479,9 @@ function Set-TargetResource
         $identity = "CN=Directory Service,CN=Windows NT,CN=Services,$configurationNamingContext"
         try
         {
-            Set-ADObject -Identity $identity -Partition $configurationNamingContext `
-                -Replace @{ tombstonelifetime = $tombstoneLifetime }
+            Set-ADObject -Identity $identity -Partition $configurationNamingContext -replace @{
+                tombstonelifetime = $tombstoneLifetime
+            }
         }
         catch
         {
