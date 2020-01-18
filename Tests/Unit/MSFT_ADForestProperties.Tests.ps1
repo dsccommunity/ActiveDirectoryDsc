@@ -231,7 +231,7 @@ try
             BeforeAll {
                 $setTargetResourceParameters = @{
                     ForestName = $mockResource.forestName
-                    Credential = $testCredential
+                    Credential = $mockCredential
                 }
 
                 Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourceResult }

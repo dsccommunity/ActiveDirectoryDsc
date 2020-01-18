@@ -19,7 +19,7 @@ Updated author, copyright notice, and URLs.
     This configuration will manage the Tombstone Lifetime setting of the
     Active Directory forest.
 #>
-Configuration ADForestProperties_AddTombstoneLifetime_Config
+Configuration ADForestProperties_TombstoneLifetime_Config
 {
     Import-DscResource -ModuleName ActiveDirectoryDsc
 

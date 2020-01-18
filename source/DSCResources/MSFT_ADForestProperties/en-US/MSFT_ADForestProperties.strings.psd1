@@ -13,4 +13,5 @@ ConvertFrom-StringData @'
     ClearUpnSuffix                     = Clearing User Principal Name Suffix for forest '{0}'. (ADFP0011)
     TombstoneLifetimeNotInDesiredState = Tombstone lifetime for forest '{0}' not in the desired state. Current: '{1}', Expected: '{2}'. (ADFP0012)
     SetTombstoneLifetime               = Setting tombstone lifetime to '{0}' for forest '{1}. (ADFP0013)
+    SetTombstoneLifetimeError          = Error setting tombstone lifetime to '{0}' for forest '{1}. (ADFP0014)
 '@

@@ -91,7 +91,8 @@ function Get-TargetResource
     {
         $cimCredential = New-CimCredentialInstance -Credential $Credential
     }
-    else {
+    else
+    {
         $cimCredential = $null
     }
 
@@ -385,7 +386,7 @@ function Set-TargetResource
         else
         {
             $setADForestParameters['SpnSuffixes'] = $null
-            Write-Verbose -Message ($script:localizedData.ClearSpnSuffixes -f $ForestName)
+            Write-Verbose -Message ($script:localizedData.ClearSpnSuffix -f $ForestName)
         }
     }
 
@@ -433,7 +434,7 @@ function Set-TargetResource
         else
         {
             $setADForestParameters['UpnSuffixes'] = $null
-            Write-Verbose -Message ($script:localizedData.ClearUpnSuffixes -f $ForestName)
+            Write-Verbose -Message ($script:localizedData.ClearUpnSuffix -f $ForestName)
         }
     }
 
@@ -479,7 +480,7 @@ function Set-TargetResource
         try
         {
             Set-ADObject -Identity $identity -Partition $configurationNamingContext `
-                -Replace @{tombstonelifetime = $tombstoneLifetime }
+                -Replace @{ tombstonelifetime = $tombstoneLifetime }
         }
         catch
         {
