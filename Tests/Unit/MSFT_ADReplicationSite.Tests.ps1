@@ -53,7 +53,7 @@ try
 
         $absentSiteDefaultRenameMock = @{
             Ensure                     = 'Absent'
-            Name                       = $presentSiteTestPresent
+            Name                       = $presentSiteName
             Description                = $null
             RenameDefaultFirstSiteName = $true
         }

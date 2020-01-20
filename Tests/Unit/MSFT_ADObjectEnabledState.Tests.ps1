@@ -103,7 +103,7 @@ try
                         return @{
                             CN          = $mockComputerNamePresent
                             Enabled     = $mockDynamicEnabledProperty
-                            ObjectClass = $mockObjectClass
+                            ObjectClass = $mockObjectClass_Computer
                         }
                     }
                 }

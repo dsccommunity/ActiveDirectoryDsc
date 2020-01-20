@@ -46,6 +46,7 @@ try
             DomainName = $mockDomainName
             Verbose    = $true
         }
+        $global:PsDscContext=$null
 
         #region Function Get-TargetResource
         Describe 'WaitForADDomain\Get-TargetResource' -Tag 'Get' {

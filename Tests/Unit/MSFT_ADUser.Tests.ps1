@@ -408,11 +408,12 @@ try
                 }
 
                 It "Passes when empty user account '$testParameter' matches empty AD account property" {
+                    $testParameterValue = ''
                     $testValidPresentParams = $testPresentParams.Clone()
                     $testValidPresentParams[$testParameter] = $testParameterValue
                     $validADUser = $testPresentParams.Clone()
                     Mock -CommandName Get-TargetResource -MockWith {
-                        $validADUser[$testParameter] = ''
+                        $validADUser[$testParameter] = $testParameterValue
                         return $validADUser
                     }
 
@@ -420,11 +421,12 @@ try
                 }
 
                 It "Passes when empty user account '$testParameter' matches null AD account property" {
+                    $testParameterValue = $null
                     $testValidPresentParams = $testPresentParams.Clone()
                     $testValidPresentParams[$testParameter] = $testParameterValue
                     $validADUser = $testPresentParams.Clone()
                     Mock -CommandName Get-TargetResource -MockWith {
-                        $validADUser[$testParameter] = $null
+                        $validADUser[$testParameter] = $testParameterValue
                         return $validADUser
                     }
 
@@ -1026,6 +1028,7 @@ try
                     $mockPreNewUserParams[$mockBoolParam] = $false
                     $mockPostNewUserParams = $mockNewADUser.Clone()
                     $mockPostNewUserParams[$mockBoolParam] = $false
+                    $script:mockNewADUserWasCalled = $false
 
                     Mock -CommandName New-ADUser -MockWith {
                         $script:mockNewADUserWasCalled = $true
