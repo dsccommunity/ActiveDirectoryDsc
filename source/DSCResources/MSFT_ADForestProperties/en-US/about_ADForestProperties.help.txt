@@ -2,7 +2,8 @@
     ADForestProperties
 
 .DESCRIPTION
-    The ADForestProperties DSC resource will manage User Principal Name (UPN) suffixes and Service Principal Name (SPN) suffixes in a forest.
+    The ADForestProperties DSC resource will manage forest wide settings within an Active Directory forest.
+    These include User Principal Name (UPN) suffixes, Service Principal Name (SPN) suffixes and the tombstone lifetime.
 
     ## Requirements
 
@@ -27,6 +28,10 @@
 .PARAMETER ServicePrincipalNameSuffixToRemove
     Write - StringArray
     Specifies the Service Principal Name (SPN) Suffix(es) to be removed from the forest. Cannot be used with ServicePrincipalNameSuffix.
+
+.PARAMETER TombStoneLifetime
+    Write - SInt32
+    Specifies the AD Tombstone lifetime which determines how long deleted items exist in Active Directory before they are purged.
 
 .PARAMETER UserPrincipalNameSuffix
     Write - StringArray
@@ -80,6 +85,25 @@ Configuration ADForestProperties_AddRemoveForestProperties_Config
             ServicePrincipalNameSuffixToRemove = 'test.com'
             UserPrincipalNameSuffixToAdd       = 'cloudapp.net', 'fabrikam.com'
             UserPrincipalNameSuffixToRemove    = 'pester.net'
+        }
+    }
+}
+
+.EXAMPLE 3
+
+This configuration will manage the Tombstone Lifetime setting of the
+Active Directory forest.
+
+Configuration ADForestProperties_AddRemoveForestProperties_Config
+{
+    Import-DscResource -ModuleName ActiveDirectoryDsc
+
+    node localhost
+    {
+        ADForestProperties 'ContosoProperties'
+        {
+            ForestName        = 'contoso.com'
+            TombstoneLifetime = 200
         }
     }
 }
