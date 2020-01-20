@@ -128,8 +128,10 @@ try
                 Assert-MockCalled -CommandName Assert-Module `
                     -ParameterFilter { $ModuleName -eq $script:psModuleName } `
                     -Exactly -Times 1
+
                 Assert-MockCalled Get-ADRootDSE `
                     -Exactly -Times 1
+
                 Assert-MockCalled Get-ADObject `
                     -ParameterFilter { $Properties -eq 'tombstonelifetime' } `
                     -Exactly -Times 1
@@ -173,6 +175,7 @@ try
                         Assert-MockCalled -CommandName Assert-Module `
                             -ParameterFilter { $ModuleName -eq $script:psModuleName } `
                             -Exactly -Times 1
+
                         Assert-MockCalled -CommandName Get-TargetResource `
                             -ParameterFilter { $ForestName -eq $testTargetResourceAddRemoveParameters.ForestName } `
                             -Exactly -Times 1
@@ -198,6 +201,7 @@ try
                         Assert-MockCalled -CommandName Assert-Module `
                             -ParameterFilter { $ModuleName -eq $script:psModuleName } `
                             -Exactly -Times 1
+
                         Assert-MockCalled -CommandName Get-TargetResource `
                             -ParameterFilter { $ForestName -eq $testTargetResourceAddRemoveParameters.ForestName } `
                             -Exactly -Times 1
@@ -226,6 +230,7 @@ try
                             Assert-MockCalled -CommandName Assert-Module `
                                 -ParameterFilter { $ModuleName -eq $script:psModuleName } `
                                 -Exactly -Times 1
+
                             Assert-MockCalled -CommandName Get-TargetResource `
                                 -ParameterFilter { $ForestName -eq `
                                     $testTargetResourceNotInDesiredStateParameters.ForestName } `
@@ -265,18 +270,21 @@ try
                         Assert-MockCalled -CommandName Get-TargetResource `
                             -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
                             -Exactly -Times 1
+
                         if ($property -eq 'TombstoneLifeTime')
                         {
-                            Assert-MockCalled -CommandName Set-ADForest  `
+                            Assert-MockCalled -CommandName Set-ADForest `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADObject  `
+
+                            Assert-MockCalled -CommandName Set-ADObject `
                                 -Exactly -Times 1
                         }
                         else
                         {
-                            Assert-MockCalled -CommandName Set-ADForest  `
+                            Assert-MockCalled -CommandName Set-ADForest `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADObject  `
+
+                            Assert-MockCalled -CommandName Set-ADObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -300,6 +308,7 @@ try
                     Assert-MockCalled -CommandName Get-TargetResource `
                         -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
                         -Exactly -Times 1
+
                     Assert-MockCalled -CommandName Set-ADForest  `
                         -Exactly -Times 1
                 }
@@ -322,6 +331,7 @@ try
                     Assert-MockCalled -CommandName Get-TargetResource `
                         -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
                         -Exactly -Times 1
+
                     Assert-MockCalled -CommandName Set-ADForest  `
                         -Exactly -Times 1
                 }
@@ -343,10 +353,12 @@ try
                         Assert-MockCalled -CommandName Get-TargetResource `
                             -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
                             -Exactly -Times 1
+
                         if ($property -eq 'TombstoneLifeTime')
                         {
                             Assert-MockCalled -CommandName Set-ADForest  `
                                 -Exactly -Times 0
+
                             Assert-MockCalled -CommandName Set-ADObject  `
                                 -Exactly -Times 1
                         }
@@ -354,6 +366,7 @@ try
                         {
                             Assert-MockCalled -CommandName Set-ADForest  `
                                 -Exactly -Times 1
+
                             Assert-MockCalled -CommandName Set-ADObject  `
                                 -Exactly -Times 0
                         }

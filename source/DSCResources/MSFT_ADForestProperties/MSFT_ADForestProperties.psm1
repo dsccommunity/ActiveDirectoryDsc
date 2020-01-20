@@ -481,11 +481,23 @@ function Set-TargetResource
 
         $configurationNamingContext = (Get-ADRootDSE).configurationNamingContext
         $identity = "CN=Directory Service,CN=Windows NT,CN=Services,$configurationNamingContext"
+
+        $setADObjectParameters = @{
+            Identity  = $identity
+            Partition = $configurationNamingContext
+            Replace   = @{
+                tombstonelifetime = $TombstoneLifetime
+            }
+        }
+
+        if ($Credential)
+        {
+            $setADObjectParameters['Credential'] = $Credential
+        }
+
         try
         {
-            Set-ADObject -Identity $identity -Partition $configurationNamingContext -Replace @{
-                tombstonelifetime = $tombstoneLifetime
-            }
+            Set-ADObject @setADObjectParameters
         }
         catch
         {
