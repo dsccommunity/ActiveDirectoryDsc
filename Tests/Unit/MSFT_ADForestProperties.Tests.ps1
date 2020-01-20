@@ -381,7 +381,7 @@ try
                         TombstoneLifetime = $mockChangedResource.TombstoneLifetime
                         Credential        = $mockCredential
                     }
-                    Mock -CommandName Set-ADObject  -MockWith { throw 'Error' }
+                    Mock -CommandName Set-ADObject -MockWith { throw 'Error' }
                 }
 
                 It 'Should throw the correct exception' {
