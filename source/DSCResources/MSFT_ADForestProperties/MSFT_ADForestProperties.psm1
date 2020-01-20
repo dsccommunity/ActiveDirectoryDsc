@@ -463,7 +463,7 @@ function Set-TargetResource
     # Only run Set-ADForest if a value needs updating
     if ($setADForestParameters.count -gt 0)
     {
-        if ($Credential)
+        if ($PSBoundParameters.ContainsKey('Credential'))
         {
             $setADForestParameters['Credential'] = $Credential
         }
@@ -490,7 +490,7 @@ function Set-TargetResource
             }
         }
 
-        if ($Credential)
+        if ($PSBoundParameters.ContainsKey('Credential'))
         {
             $setADObjectParameters['Credential'] = $Credential
         }

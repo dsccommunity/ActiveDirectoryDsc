@@ -356,18 +356,18 @@ try
 
                         if ($property -eq 'TombstoneLifeTime')
                         {
-                            Assert-MockCalled -CommandName Set-ADForest  `
+                            Assert-MockCalled -CommandName Set-ADForest `
                                 -Exactly -Times 0
 
-                            Assert-MockCalled -CommandName Set-ADObject  `
+                            Assert-MockCalled -CommandName Set-ADObject `
                                 -Exactly -Times 1
                         }
                         else
                         {
-                            Assert-MockCalled -CommandName Set-ADForest  `
+                            Assert-MockCalled -CommandName Set-ADForest `
                                 -Exactly -Times 1
 
-                            Assert-MockCalled -CommandName Set-ADObject  `
+                            Assert-MockCalled -CommandName Set-ADObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -381,7 +381,7 @@ try
                         TombstoneLifetime = $mockChangedResource.TombstoneLifetime
                         Credential        = $mockCredential
                     }
-                    Mock -CommandName Set-ADObject  -MockWith { Throw 'Error' }
+                    Mock -CommandName Set-ADObject  -MockWith { throw 'Error' }
                 }
 
                 It 'Should throw the correct exception' {
