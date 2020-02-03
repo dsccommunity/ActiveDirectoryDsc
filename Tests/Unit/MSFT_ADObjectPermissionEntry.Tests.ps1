@@ -153,6 +153,26 @@ try
                     $targetResource.InheritedObjectType | Should -Be $testDefaultParameters.InheritedObjectType
                 }
             }
+            Context 'When the desired AD object path is absent' {
+
+                Mock -CommandName 'Get-Acl' -MockWith { throw New-Object System.Management.Automation.ItemNotFoundException }
+
+                It 'Should return a valid result if the AD object path is absent and not throw an exception' {
+                    # Act / Assert
+                    $targetResource = Get-TargetResource @testDefaultParameters
+                    $targetResource.Ensure | Should -Be 'Absent'
+                }
+            }
+            Context 'When an unknown error occurs' {
+
+                $error = 'Unknown Error'
+                Mock -CommandName 'Get-Acl' -MockWith { throw $error }
+
+                It 'Should throw an exception if an unknown error occurs calling Get-Acl' {
+                    # Act / Assert
+                    { Get-TargetResource @testDefaultParameters } | Should -Throw
+                }
+            }
         }
         #endregion
 
