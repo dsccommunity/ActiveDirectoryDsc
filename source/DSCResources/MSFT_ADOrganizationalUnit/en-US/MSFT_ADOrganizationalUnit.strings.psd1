@@ -10,5 +10,5 @@ ConvertFrom-StringData @'
     OUExistsButShouldNot       = OU '{0}' exists when it should not exist. (ADOU0008)
     OUDoesNotExistButShould    = OU '{0}' does not exist when it should exist. (ADOU0009)
     OUDoesNotExistAndShouldNot = OU '{0}' does not exist and is in the desired state. (ADOU0010)
-    PathNotFoundError          = The Path '{0}' was not found. (ADOU0011)
+    OUPathIsAbsent             = The OU Path '{0}' is absent from Active Directory. (ADOU0011)
 '@

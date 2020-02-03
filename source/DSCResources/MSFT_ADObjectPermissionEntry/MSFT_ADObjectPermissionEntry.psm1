@@ -78,8 +78,19 @@ function Get-TargetResource
         InheritedObjectType                = $InheritedObjectType
     }
 
-    # Get the current acl
-    $acl = Get-Acl -Path "AD:$Path"
+    try
+    {
+        # Get the current acl
+        $acl = Get-Acl -Path "AD:$Path" -ErrorAction Stop
+    }
+    catch [System.Management.Automation.ItemNotFoundException]
+    {
+        Write-Verbose -Message ($script:localizedData.ObjectPathIsAbsent -f $Path)
+    }
+    catch
+    {
+        throw $_
+    }
 
     foreach ($access in $acl.Access)
     {
