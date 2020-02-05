@@ -114,18 +114,18 @@ try
                 $targetResource.Description | Should -BeNullOrEmpty
             }
 
-            It 'Should throw the correct error if the path does not exist' {
+            It 'Returns "Ensure" = "Absent" when OU parent path does not exist' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
-                $errorMessage = $script:localizedData.PathNotFoundError -f $testPresentParams.Path
-                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $errorMessage
+                $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
+                $targetResource.Ensure | Should -Be 'Absent'
             }
 
-            It 'Should throw the correct error if an unkwon error occurs' {
-                $error = 'Unknown Error'
+            It 'Should throw the correct error if an unknown error occurs' {
+                $errorMessage = 'Unknown Error'
                 Mock -CommandName Assert-Module
-                Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw $error }
+                Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw $errorMessage }
 
                 { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $error
             }

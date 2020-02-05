@@ -43,8 +43,7 @@ function Get-TargetResource
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        $errorMessage = $script:localizedData.PathNotFoundError -f $Path
-        New-ObjectNotFoundException -Message $errorMessage
+        Write-Verbose -Message ($script:localizedData.OUPathIsAbsent -f $Path)
     }
     catch
     {
@@ -53,10 +52,12 @@ function Get-TargetResource
 
     if ($null -eq $ou)
     {
+        Write-Verbose -Message ($script:localizedData.OUIsAbsent -f $Name)
         $ensureState = 'Absent'
     }
     else
     {
+        Write-Verbose -Message ($script:localizedData.OUIsPresent -f $Name)
         $ensureState = 'Present'
     }
 
