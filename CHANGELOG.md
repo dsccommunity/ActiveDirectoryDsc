@@ -20,6 +20,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Changed
 
+- ActiveDirectoryDsc
+  - Updated license copyright ([issue #550](https://github.com/PowerShell/ActiveDirectoryDsc/issues/550)).
 - ADForestProperties
   - Refactored unit tests.
 
