@@ -2202,8 +2202,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                         -ArgumentList @('Domain', $mockDomainName)
                 }
 
+                $mockErrorMessage = 'Mocked error'
+
                 Mock -CommandName Find-DomainControllerFindOneWrapper -MockWith {
-                    throw New-object -TypeName 'System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException'
+                    throw New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
+                        -ArgumentList @(
+                        $mockErrorMessage,
+                        (New-Object -TypeName 'System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException')
+                    )
                 }
 
                 Mock -CommandName Write-Verbose -ParameterFilter {
