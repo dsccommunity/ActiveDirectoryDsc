@@ -157,7 +157,7 @@ try
 
                 Mock -CommandName 'Get-Acl' -MockWith { throw New-Object System.Management.Automation.ItemNotFoundException }
 
-                It 'Should return a valid result if the AD object path is absent and not throw an exception' {
+                It 'Should return a valid result if the AD object path is absent' {
                     # Act / Assert
                     $targetResource = Get-TargetResource @testDefaultParameters
                     $targetResource.Ensure | Should -Be 'Absent'
