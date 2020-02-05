@@ -78,34 +78,51 @@ function Get-TargetResource
         InheritedObjectType                = $InheritedObjectType
     }
 
-    # Get the current acl
-    $acl = Get-Acl -Path "AD:$Path"
-
-    foreach ($access in $acl.Access)
+    try
     {
-        if ($access.IsInherited -eq $false)
+        # Get the current acl
+        $acl = Get-Acl -Path "AD:$Path" -ErrorAction Stop
+    }
+    catch [System.Management.Automation.ItemNotFoundException]
+    {
+        Write-Verbose -Message ($script:localizedData.ObjectPathIsAbsent -f $Path)
+    }
+    catch
+    {
+        throw $_
+    }
+
+    if ($null -ne $acl)
+    {
+        foreach ($access in $acl.Access)
         {
-            <#
-                Check if the ace does match the parameters. If yes, the target
-                ace has been found, return present with the assigned rights.
-            #>
-            if ($access.IdentityReference.Value -eq $IdentityReference -and
-                $access.AccessControlType -eq $AccessControlType -and
-                $access.ObjectType.Guid -eq $ObjectType -and
-                $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
-                $access.InheritedObjectType.Guid -eq $InheritedObjectType)
+            if ($access.IsInherited -eq $false)
             {
-                Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryFound -f $Path)
-
-                $returnValue['Ensure'] = 'Present'
-                $returnValue['ActiveDirectoryRights'] = [System.String[]] $access.ActiveDirectoryRights.ToString().Split(',').ForEach( { $_.Trim() })
-
-                return $returnValue
+                <#
+                    Check if the ace does match the parameters. If yes, the target
+                    ace has been found, return present with the assigned rights.
+                #>
+                if ($access.IdentityReference.Value -eq $IdentityReference -and
+                    $access.AccessControlType -eq $AccessControlType -and
+                    $access.ObjectType.Guid -eq $ObjectType -and
+                    $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
+                    $access.InheritedObjectType.Guid -eq $InheritedObjectType)
+                {
+                    $returnValue['Ensure'] = 'Present'
+                    $returnValue['ActiveDirectoryRights'] = [System.String[]] $access.ActiveDirectoryRights.ToString().Split(',').ForEach( { $_.Trim() })
+                }
             }
         }
     }
 
-    Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryNotFound -f $Path)
+    if ($returnValue.Ensure -eq 'Present')
+    {
+        Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryFound -f $Path)
+    }
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.ObjectPermissionEntryNotFound -f $Path)
+    }
 
     return $returnValue
 }
