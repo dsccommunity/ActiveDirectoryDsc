@@ -17,6 +17,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - ADForestProperties
   - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/PowerShell/ActiveDirectoryDsc/issues/548)).
+- ADObjectPermissionEntry
+    - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when target object path does not yet exist ([issue #552](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/552))
 - ADOrganizationalUnit
   - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when parent path does not yet exist ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553))
 
