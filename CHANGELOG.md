@@ -22,6 +22,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Changed
 
+- ActiveDirectoryDsc
+  - Updated Azure Pipeline Windows image ([issue #551](https://github.com/PowerShell/ActiveDirectoryDsc/issues/551)).
 - ADForestProperties
   - Refactored unit tests.
 
