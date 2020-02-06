@@ -127,7 +127,7 @@ try
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw $errorMessage }
 
-                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $error
+                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $errorMessage
             }
         }
         #endregion
@@ -209,6 +209,24 @@ try
 
                 Set-TargetResource @testPresentParams
                 Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -Scope It
+            }
+
+            It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and Parent Path does not exist' {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit
+                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+
+                $errorMessage = $script:localizedData.PathNotFoundError -f $testPresentParams.Path
+                { Set-TargetResource @testPresentParams } | Should -Throw $errorMessage
+            }
+
+            It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and an unknown error occurs' {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ADOrganizationalUnit
+                $errorMessage = 'Unknown Error'
+                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith { throw $errorMessage }
+
+                { Set-TargetResource @testPresentParams } | Should -Throw $errorMessage
             }
 
             It 'Calls "New-ADOrganizationalUnit" with credentials when specified' {
@@ -309,7 +327,7 @@ try
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
                 Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent' } }
-                Mock -CommandName New-ADOrganizationalUnit
+                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith {}
                 Mock -CommandName Restore-ADCommonObject
 
                 Set-TargetResource @restoreParam

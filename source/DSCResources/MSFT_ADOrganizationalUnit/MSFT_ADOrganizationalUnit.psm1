@@ -362,7 +362,19 @@ function Set-TargetResource
                 $newADOrganizationalUnitParams['Credential'] = $Credential
             }
 
-            New-ADOrganizationalUnit @newADOrganizationalUnitParams
+            try
+            {
+                New-ADOrganizationalUnit @newADOrganizationalUnitParams
+            }
+            catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+            {
+                $errorMessage = $script:localizedData.PathNotFoundError -f $Path
+                New-ObjectNotFoundException -Message $errorMessage
+            }
+            catch
+            {
+                throw $_
+            }
         }
     }
 } #end function Set-TargetResource
