@@ -103,14 +103,14 @@ stages:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
               testRunTitle: 'Unit (Windows Server Core)'
-          - task: PublishAzureCodeCoverageResults@1
+          - task: PublishCodeCoverageResults@1
             displayName: 'Publish Azure Code Coverage'
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
               summaryFileLocation: 'output/testResults/CodeCov*.xml'
               pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
-          - task: PublishCodecovTestArtifacts@1
+          - task: PublishBuildArtifacts@1
             displayName: 'Publish Codecov.io Test Artifact'
             inputs:
               pathToPublish: 'output/testResults/'
