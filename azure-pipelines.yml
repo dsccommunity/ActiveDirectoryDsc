@@ -123,6 +123,10 @@ stages:
         pool:
           vmImage: 'ubuntu 16.04'
         timeoutInMinutes: 0
+        variables:
+          buildArtifactName: output
+          testArtifactName: codecovTestResults
+
         steps:
           - pwsh: |
               $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
@@ -135,24 +139,24 @@ stages:
             inputs:
               buildType: 'current'
               downloadType: 'single'
-              artifactName: 'output'
+              artifactName: $(buildArtifactName)
               downloadPath: '$(Build.SourcesDirectory)'
           - task: DownloadBuildArtifacts@0
             displayName: 'Download Test Artifact'
             inputs:
               buildType: 'current'
               downloadType: 'single'
-              artifactName: 'codecovTestResults'
-              downloadPath: '$(Build.SourcesDirectory)/output'
+              artifactName: $(testArtifactName)
+              downloadPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
           - task: PublishCodeCoverageResults@1
             displayName: 'Publish Code Coverage'
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/testResults/JaCoCo_coverage.xml'
-              pathToSources: '$(Build.SourcesDirectory)/output/$(dscBuildVariable.RepositoryName)'
+              summaryFileLocation: '$(buildArtifactName)/$(testArtifactName)/JaCoCo_coverage.xml'
+              pathToSources: '$(Build.SourcesDirectory)/$(buildArtifactName)/$(dscBuildVariable.RepositoryName)'
           - script: |
-              bash <(curl -s https://codecov.io/bash) -f "./output/testResults/JaCoCo_coverage.xml"
+              bash <(curl -s https://codecov.io/bash) -f "./$(buildArtifactName)/$(testArtifactName)/JaCoCo_coverage.xml"
             displayName: 'Upload to Codecov.io'
             condition: succeededOrFailed()
 
