@@ -9,22 +9,24 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
+- ActiveDirectoryDsc
+  - Added [Codecov.io](https://codecov.io) support.
 - ADForestProperties
-  - Added TombstoneLifetime property ([issue #302](https://github.com/PowerShell/ActiveDirectoryDsc/issues/302)).
-  - Added Integration tests ([issue #349](https://github.com/PowerShell/ActiveDirectoryDsc/issues/349)).
+  - Added TombstoneLifetime property ([issue #302](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/302)).
+  - Added Integration tests ([issue #349](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/349)).
 
 ### Fixed
 
 - ADForestProperties
-  - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/PowerShell/ActiveDirectoryDsc/issues/548)).
+  - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/548)).
 - ADObjectPermissionEntry
     - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when target object path does not yet exist ([issue #552](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/552))
 
 ### Changed
 
 - ActiveDirectoryDsc
-  - Updated Azure Pipeline Windows image ([issue #551](https://github.com/PowerShell/ActiveDirectoryDsc/issues/551)).
-  - Updated license copyright ([issue #550](https://github.com/PowerShell/ActiveDirectoryDsc/issues/550)).
+  - Updated Azure Pipeline Windows image ([issue #551](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/551)).
+  - Updated license copyright ([issue #550](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/550)).
 - ADForestProperties
   - Refactored unit tests.
 
@@ -33,24 +35,24 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Added
 
 - ADServicePrincipalName
-  - Added Integration tests ([issue #358](https://github.com/PowerShell/ActiveDirectoryDsc/issues/358)).
+  - Added Integration tests ([issue #358](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/358)).
 - ADManagedServiceAccount
   - Added Integration tests.
 - ADKDSKey
-  - Added Integration tests ([issue #351](https://github.com/PowerShell/ActiveDirectoryDsc/issues/351)).
+  - Added Integration tests ([issue #351](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/351)).
 
 ### Changed
 
 - ADManagedServiceAccount
-  - KerberosEncryptionType property added. ([issue #511](https://github.com/PowerShell/ActiveDirectoryDsc/issues/511)).
+  - KerberosEncryptionType property added. ([issue #511](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/511)).
   - BREAKING CHANGE: AccountType parameter ValidateSet changed from ('Group', 'Single') to ('Group', 'Standalone') - Standalone is the correct terminology. Ref: [Service Accounts](https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/service-accounts).
-  ([issue #515](https://github.com/PowerShell/ActiveDirectoryDsc/issues/515)).
+  ([issue #515](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/515)).
   - BREAKING CHANGE: AccountType parameter default of Single removed. - Enforce positive choice of account type.
   - BREAKING CHANGE: MembershipAttribute parameter ValidateSet member SID changed to ObjectSid to match result property of Get-AdObject. Previous code does not work if SID is specified.
   - BREAKING CHANGE: AccountTypeForce parameter removed - unnecessary complication.
   - BREAKING CHANGE: Members parameter renamed to ManagedPasswordPrincipals - to closer match Get-AdServiceAccount result property PrincipalsAllowedToRetrieveManagedPassword. This is so that a DelegateToAccountPrincipals parameter can be added later.
   - Common Compare-ResourcePropertyState function used to replace function specific Compare-TargetResourceState and code refactored.
-  ([issue #512](https://github.com/PowerShell/ActiveDirectoryDsc/issues/512)).
+  ([issue #512](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/512)).
   - Resource unit tests refactored to use nested contexts and follow the logic of the module.
 - ActiveDirectoryDsc
   - Updated PowerShell help files.
@@ -65,11 +67,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ActiveDirectoryDsc
   - Fix tests ErrorAction on DscResource.Test Import-Module.
 - ADObjectPermissionEntry
-  - Updated Assert-ADPSDrive with PSProvider Checks ([issue #527](https://github.com/PowerShell/ActiveDirectoryDsc/issues/527)).
+  - Updated Assert-ADPSDrive with PSProvider Checks ([issue #527](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/527)).
 - ADReplicationSite
   - Fixed incorrect evaluation of site configuration state when no description is defined ([issue #534](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/534)).
 - ADReplicationSiteLink
-  - Fix RemovingSites verbose message ([issue #518](https://github.com/PowerShell/ActiveDirectoryDsc/issues/518)).
+  - Fix RemovingSites verbose message ([issue #518](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/518)).
 - ADComputer
   - Fixed the SamAcountName property description ([issue #529](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/529)).
 
@@ -78,20 +80,20 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Added
 
 - ADReplicationSite
-  - Added 'Description' attribute parameter ([issue #500](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
-  - Added Integration testing ([issue #355](https://github.com/PowerShell/ActiveDirectoryDsc/issues/355)).
+  - Added 'Description' attribute parameter ([issue #500](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing ([issue #355](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/355)).
 - ADReplicationSubnet
-  - Added 'Description' attribute parameter ([issue #503](https://github.com/PowerShell/ActiveDirectoryDsc/issues/500)).
-  - Added Integration testing ([issue #357](https://github.com/PowerShell/ActiveDirectoryDsc/issues/357)).
+  - Added 'Description' attribute parameter ([issue #503](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing ([issue #357](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/357)).
 - ADReplicationSiteLink
-  - Added Integration testing ([issue #356](https://github.com/PowerShell/ActiveDirectoryDsc/issues/356)).
-  - Added ability to set 'Options' such as Change Notification Replication ([issue #504](https://github.com/PowerShell/ActiveDirectoryDsc/issues/504)).
+  - Added Integration testing ([issue #356](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/356)).
+  - Added ability to set 'Options' such as Change Notification Replication ([issue #504](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/504)).
 
 ### Fixed
 
 - ActiveDirectoryDsc
   - Resolved custom Script Analyzer rules that was added to the test framework.
 - ActiveDirectoryDsc.Common
-  - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays. ([issue #513](https://github.com/PowerShell/ActiveDirectoryDsc/issues/513)).
+  - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays. ([issue #513](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/513)).
 - ADReplicationSite
-  - Correct value returned for RenameDefaultFirstSiteName ([issue #502](https://github.com/PowerShell/ActiveDirectoryDsc/issues/502)).
+  - Correct value returned for RenameDefaultFirstSiteName ([issue #502](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/502)).
