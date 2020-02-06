@@ -9,6 +9,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
+- ActiveDirectoryDsc
+  - Added [Codecov.io](https://codecov.io) support.
 - ADForestProperties
   - Added TombstoneLifetime property ([issue #302](https://github.com/PowerShell/ActiveDirectoryDsc/issues/302)).
   - Added Integration tests ([issue #349](https://github.com/PowerShell/ActiveDirectoryDsc/issues/349)).
