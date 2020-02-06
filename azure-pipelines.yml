@@ -7,7 +7,9 @@ trigger:
     - "v*"
     exclude:
     - "*-*"
-#variables:
+variables:
+  buildArtifactName: output
+  codecovTestArtifactName: codecovTestResults
 
 stages:
   - stage: Build
@@ -37,7 +39,7 @@ stages:
             displayName: 'Publish Build Artifact'
             inputs:
               PathtoPublish: 'output/'
-              ArtifactName: 'output'
+              ArtifactName: $(buildArtifactName)
               publishLocation: 'Container'
 
   - stage: Test
@@ -53,7 +55,7 @@ stages:
             inputs:
               buildType: 'current'
               downloadType: 'single'
-              artifactName: 'output'
+              artifactName: $(buildArtifactName)
               downloadPath: '$(Build.SourcesDirectory)'
           - task: PowerShell@2
             name: Test
@@ -67,7 +69,7 @@ stages:
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
+              testResultsFiles: '$(buildArtifactName)/testResults/NUnit*.xml'
               testRunTitle: 'HQRM'
 
       - job: Test_Unit
@@ -87,7 +89,7 @@ stages:
             inputs:
               buildType: 'current'
               downloadType: 'single'
-              artifactName: 'output'
+              artifactName: $(buildArtifactName)
               downloadPath: '$(Build.SourcesDirectory)'
           - task: PowerShell@2
             name: test
@@ -101,20 +103,20 @@ stages:
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
+              testResultsFiles: '$(buildArtifactName)/testResults/NUnit*.xml'
               testRunTitle: 'Unit (Windows Server Core)'
           - task: PublishCodeCoverageResults@1
             displayName: 'Publish Azure Code Coverage'
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/testResults/CodeCov*.xml'
-              pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
+              summaryFileLocation: '$(buildArtifactName)/testResults/CodeCov*.xml'
+              pathToSources: '$(Build.SourcesDirectory)/$(buildArtifactName)/$(DscBuildVariable.RepositoryName)'
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Codecov.io Test Artifact'
             inputs:
-              pathToPublish: 'output/testResults/'
-              artifactName: 'codecovTestResults'
+              pathToPublish: '$(buildArtifactName)/testResults/'
+              artifactName: $(codecovTestArtifactName)
               publishLocation: 'Container'
 
       - job: Codecov_Code_Coverage
@@ -123,9 +125,6 @@ stages:
         pool:
           vmImage: 'ubuntu 16.04'
         timeoutInMinutes: 0
-        variables:
-          buildArtifactName: output
-          testArtifactName: codecovTestResults
 
         steps:
           - pwsh: |
@@ -146,17 +145,17 @@ stages:
             inputs:
               buildType: 'current'
               downloadType: 'single'
-              artifactName: $(testArtifactName)
+              artifactName: $(codecovTestArtifactName)
               downloadPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
           - task: PublishCodeCoverageResults@1
             displayName: 'Publish Code Coverage'
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: '$(buildArtifactName)/$(testArtifactName)/JaCoCo_coverage.xml'
+              summaryFileLocation: '$(buildArtifactName)/$(codecovTestArtifactName)/JaCoCo_coverage.xml'
               pathToSources: '$(Build.SourcesDirectory)/$(buildArtifactName)/$(dscBuildVariable.RepositoryName)'
           - script: |
-              bash <(curl -s https://codecov.io/bash) -f "./$(buildArtifactName)/$(testArtifactName)/JaCoCo_coverage.xml"
+              bash <(curl -s https://codecov.io/bash) -f "./$(buildArtifactName)/$(codecovTestArtifactName)/JaCoCo_coverage.xml"
             displayName: 'Upload to Codecov.io'
             condition: succeededOrFailed()
 
@@ -181,7 +180,7 @@ stages:
             inputs:
               buildType: 'current'
               downloadType: 'single'
-              artifactName: 'output'
+              artifactName: $(buildArtifactName)
               downloadPath: '$(Build.SourcesDirectory)'
           - task: PowerShell@2
             name: publishRelease
