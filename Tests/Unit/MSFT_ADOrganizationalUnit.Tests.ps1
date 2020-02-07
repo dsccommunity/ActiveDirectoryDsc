@@ -116,7 +116,9 @@ try
 
             It 'Returns "Ensure" = "Absent" when OU parent path does not exist' {
                 Mock -CommandName Assert-Module
-                Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                    throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                }
 
                 $targetResource = Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path
                 $targetResource.Ensure | Should -Be 'Absent'
@@ -127,7 +129,8 @@ try
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw $errorMessage }
 
-                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } | Should -Throw $errorMessage
+                { Get-TargetResource -Name $testPresentParams.Name -Path $testPresentParams.Path } |
+                    Should -Throw $errorMessage
             }
         }
         #endregion
@@ -205,37 +208,45 @@ try
             It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and OU does not exist' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit
-                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name }
+                Mock -CommandName New-ADOrganizationalUnit
 
                 Set-TargetResource @testPresentParams
-                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter `
+                    { $Name -eq $testPresentParams.Name } -Exactly -Times 1 -Scope It
             }
 
             It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and Parent Path does not exist' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit
-                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                Mock -CommandName New-ADOrganizationalUnit -MockWith {
+                    throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                }
 
                 $errorMessage = $script:localizedData.PathNotFoundError -f $testPresentParams.Path
                 { Set-TargetResource @testPresentParams } | Should -Throw $errorMessage
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter `
+                    { $Name -eq $testPresentParams.Name } -Exactly -Times 1 -Scope It
             }
 
             It 'Calls "New-ADOrganizationalUnit" when "Ensure" = "Present" and an unknown error occurs' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit
                 $errorMessage = 'Unknown Error'
-                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith { throw $errorMessage }
+                Mock -CommandName New-ADOrganizationalUnit -MockWith { throw $errorMessage }
 
                 { Set-TargetResource @testPresentParams } | Should -Throw $errorMessage
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter `
+                    { $Name -eq $testPresentParams.Name } -Exactly -Times 1 -Scope It
             }
 
             It 'Calls "New-ADOrganizationalUnit" with credentials when specified' {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADOrganizationalUnit
-                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential }
+                Mock -CommandName New-ADOrganizationalUnit
 
                 Set-TargetResource @testPresentParams -Credential $testCredential
-                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter { $Credential -eq $testCredential } -Scope It
+                Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter `
+                    { $Credential -eq $testCredential } -Exactly -Times 1 -Scope It
             }
 
             It 'Calls "Set-ADOrganizationalUnit" when "Ensure" = "Present" and OU does exist' {
@@ -327,7 +338,7 @@ try
                 $restoreParam = $testPresentParams.Clone()
                 $restoreParam.RestoreFromRecycleBin = $true
                 Mock -CommandName Get-TargetResource -MockWith { return @{Ensure = 'Absent' } }
-                Mock -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq $testPresentParams.Name } -MockWith {}
+                Mock -CommandName New-ADOrganizationalUnit
                 Mock -CommandName Restore-ADCommonObject
 
                 Set-TargetResource @restoreParam

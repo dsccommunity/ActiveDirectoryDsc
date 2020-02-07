@@ -13,5 +13,5 @@ ConvertFrom-StringData @'
     PathNotFoundError          = The Path '{0}' was not found. (ADOU0011)
     OUIsPresent                = The OU '{0}' is present. (ADOU0012)
     OUIsAbsent                 = The OU '{0}' is absent. (ADOU0013)
-    OUPathIsAbsent             = The OU Parent Path '{0}' is absent from Active Directory. (ADOU0014)
+    OUPathIsAbsent             = The OU Parent Path '{0}' is absent. (ADOU0014)
 '@
