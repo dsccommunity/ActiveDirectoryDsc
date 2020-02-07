@@ -224,6 +224,7 @@ try
 
                 $errorMessage = $script:localizedData.PathNotFoundError -f $testPresentParams.Path
                 { Set-TargetResource @testPresentParams } | Should -Throw $errorMessage
+
                 Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter `
                     { $Name -eq $testPresentParams.Name } -Exactly -Times 1 -Scope It
             }
@@ -235,6 +236,7 @@ try
                 Mock -CommandName New-ADOrganizationalUnit -MockWith { throw $errorMessage }
 
                 { Set-TargetResource @testPresentParams } | Should -Throw $errorMessage
+
                 Assert-MockCalled -CommandName New-ADOrganizationalUnit -ParameterFilter `
                     { $Name -eq $testPresentParams.Name } -Exactly -Times 1 -Scope It
             }
