@@ -39,12 +39,12 @@ function Get-TargetResource
 
     try
     {
-        $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
+        $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path `
+            -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        $errorMessage = $script:localizedData.PathNotFoundError -f $Path
-        New-ObjectNotFoundException -Message $errorMessage
+        Write-Verbose -Message ($script:localizedData.OUPathIsAbsent -f $Path)
     }
     catch
     {
@@ -53,10 +53,12 @@ function Get-TargetResource
 
     if ($null -eq $ou)
     {
+        Write-Verbose -Message ($script:localizedData.OUIsAbsent -f $Name)
         $ensureState = 'Absent'
     }
     else
     {
+        Write-Verbose -Message ($script:localizedData.OUIsPresent -f $Name)
         $ensureState = 'Present'
     }
 
@@ -361,7 +363,19 @@ function Set-TargetResource
                 $newADOrganizationalUnitParams['Credential'] = $Credential
             }
 
-            New-ADOrganizationalUnit @newADOrganizationalUnitParams
+            try
+            {
+                New-ADOrganizationalUnit @newADOrganizationalUnitParams
+            }
+            catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+            {
+                $errorMessage = $script:localizedData.PathNotFoundError -f $Path
+                New-ObjectNotFoundException -Message $errorMessage
+            }
+            catch
+            {
+                throw $_
+            }
         }
     }
 } #end function Set-TargetResource
