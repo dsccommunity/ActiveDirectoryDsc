@@ -29,6 +29,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ActiveDirectoryDsc
   - Updated Azure Pipeline Windows image ([issue #551](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/551)).
   - Updated license copyright ([issue #550](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/550)).
+- ADDomain
+  - Change Domain Install Tracking File to NetLogon Registry Test and Refactor. ([issue #560](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/560)).
 - ADForestProperties
   - Refactored unit tests.
 
