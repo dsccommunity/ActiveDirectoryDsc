@@ -11,4 +11,7 @@ ConvertFrom-StringData @'
     OUDoesNotExistButShould    = OU '{0}' does not exist when it should exist. (ADOU0009)
     OUDoesNotExistAndShouldNot = OU '{0}' does not exist and is in the desired state. (ADOU0010)
     PathNotFoundError          = The Path '{0}' was not found. (ADOU0011)
+    OUIsPresent                = The OU '{0}' is present. (ADOU0012)
+    OUIsAbsent                 = The OU '{0}' is absent. (ADOU0013)
+    OUPathIsAbsent             = The OU Parent Path '{0}' is absent. (ADOU0014)
 '@

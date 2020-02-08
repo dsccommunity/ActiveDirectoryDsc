@@ -1,8 +1,7 @@
 codecov:
-  notify:
-    require_ci_to_pass: no
-  # dev should be the baseline for reporting
-  branch: dev
+  require_ci_to_pass: no
+  # master should be the baseline for reporting
+  branch: master
 
 comment:
   layout: "reach, diff"
@@ -24,3 +23,6 @@ coverage:
         # and let codecov.io set the goal for the code changed in the patch.
         target: auto
         threshold: 5
+
+fixes:
+  - '\d+\.\d+\.\d+\/::source/'  # move path "X.Y.Z/" => "source/"
