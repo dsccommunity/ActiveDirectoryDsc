@@ -103,7 +103,7 @@ function Get-TargetResource
             }
             catch [Microsoft.ActiveDirectory.Management.ADServerDownException]
             {
-                Write-Verbose ($script:localizedData.ADServerDownOrFault -f $domainFQDN)
+                Write-Verbose ($script:localizedData.ADServerDown -f $domainFQDN)
                 $domainFound = $false
                 # will fall into the retry mechanism.
             }
