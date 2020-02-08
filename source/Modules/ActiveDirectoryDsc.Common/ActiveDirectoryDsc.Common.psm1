@@ -1762,7 +1762,7 @@ function Assert-ADPSDrive
 
         try
         {
-            New-PSDrive -Name AD -PSProvider 'ActiveDirectory' -Root $Root -Scope Script -ErrorAction 'Stop' |
+            New-PSDrive -Name AD -PSProvider 'ActiveDirectory' -Root $Root -Scope Global -ErrorAction 'Stop' |
                 Out-Null
         }
         catch
