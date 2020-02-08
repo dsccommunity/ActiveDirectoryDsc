@@ -21,6 +21,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/548)).
 - ADObjectPermissionEntry
     - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when target object path does not yet exist ([issue #552](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/552))
+    - Fixed issue where Get-TargetResource throw an exception, `Cannot find drive. A drive with the name 'AD' does not exist`, when running soon after domain controller restart ([issue #547](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/547))
 - ADOrganizationalUnit
   - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when parent path does not yet exist ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553))
 
