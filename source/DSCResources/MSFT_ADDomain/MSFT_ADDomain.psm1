@@ -234,6 +234,12 @@ function Get-TargetResource
 
     .PARAMETER DomainMode
         The Domain Functional Level for the entire domain.
+
+    .NOTES
+        Used Functions:
+            Name               | Module
+            -------------------|--------------------------
+            Resolve-DomainFQDN | ActiveDirectoryDsc.Common
 #>
 function Test-TargetResource
 {
@@ -369,13 +375,20 @@ function Test-TargetResource
 
     .PARAMETER DomainMode
         The Domain Functional Level for the entire domain.
+
+    .NOTES
+        Used Functions:
+            Name                           | Module
+            -------------------------------|--------------------------
+            Install-ADDSDomain             | ActiveDirectory
+            Install-ADDSForest             | ActiveDirectory
 #>
 function Set-TargetResource
 {
     <#
         Suppressing this rule because $global:DSCMachineStatus is used to
         trigger a reboot for the one that was suppressed when calling
-        Install-ADDSForest or Install-ADDSDomains.
+        Install-ADDSForest or Install-ADDSDomain.
     #>
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
     [CmdletBinding()]
