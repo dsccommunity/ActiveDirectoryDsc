@@ -163,7 +163,7 @@ function Get-TargetResource
             DnsDelegationCredential       = $null
             DatabasePath                  = $serviceNTDS.'DSA Working Directory'
             LogPath                       = $serviceNTDS.'Database log files path'
-            SysvolPath                    = $serviceNETLOGON.SysVol
+            SysvolPath                    = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
             ForestMode                    = $deploymentForestMode
             DomainMode                    = $deploymentDomainMode
             DomainExist                   = $true
