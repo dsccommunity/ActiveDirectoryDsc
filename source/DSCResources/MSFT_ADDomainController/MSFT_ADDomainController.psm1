@@ -21,25 +21,14 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController
     .PARAMETER SafemodeAdministratorPassword
         Provide a password that will be used to set the DSRM password. This is a PSCredential.
 
-    .PARAMETER DatabasePath
-        Provide the path where the NTDS.dit will be created and stored.
-
-    .PARAMETER LogPath
-        Provide the path where the logs for the NTDS will be created and stored.
-
-    .PARAMETER SysvolPath
-        Provide the path where the Sysvol will be created and stored.
-
-    .PARAMETER SiteName
-        Provide the name of the site you want the Domain Controller to be added to.
-
-    .PARAMETER InstallDns
-        Specifies if the DNS Server service should be installed and configured on
-        the domain controller. If this is not set the default value of the parameter
-        InstallDns of the cmdlet Install-ADDSDomainController is used.
-        The parameter `InstallDns` is only used during the provisioning of a domain
-        controller. The parameter cannot be used to install or uninstall the DNS
-        server on an already provisioned domain controller.
+    .NOTES
+        Used Functions:
+            Name                                            | Module
+            ------------------------------------------------|--------------------------
+            Get-ADDomain                                    | ActiveDirectory
+            Get-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
+            Get-DomainControllerObject                      | ActiveDirectoryDsc.Common
+            Assert-Module                                   | ActiveDirectoryDsc.Common
 #>
 function Get-TargetResource
 {
@@ -57,47 +46,12 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $SafemodeAdministratorPassword,
-
-        [Parameter()]
-        [System.String]
-        $DatabasePath,
-
-        [Parameter()]
-        [System.String]
-        $LogPath,
-
-        [Parameter()]
-        [System.String]
-        $SysvolPath,
-
-        [Parameter()]
-        [System.String]
-        $SiteName,
-
-        [Parameter()]
-        [System.Boolean]
-        $InstallDns
+        $SafemodeAdministratorPassword
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    $getTargetResourceResult = @{
-        DomainName                          = $DomainName
-        Credential                          = $Credential
-        SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
-        Ensure                              = $false
-        IsGlobalCatalog                     = $false
-        ReadOnlyReplica                     = $false
-        AllowPasswordReplicationAccountName = $null
-        DenyPasswordReplicationAccountName  = $null
-        FlexibleSingleMasterOperationRole   = $null
-        InstallDns                          = $InstallDNs
-    }
-
-    Write-Verbose -Message (
-        $script:localizedData.ResolveDomainName -f $DomainName
-    )
+    Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
 
     try
     {
@@ -109,48 +63,68 @@ function Get-TargetResource
         New-ObjectNotFoundException -Message $errorMessage -ErrorRecord $_
     }
 
-    Write-Verbose -Message (
-        $script:localizedData.DomainPresent -f $DomainName
-    )
+    Write-Verbose -Message ($script:localizedData.DomainPresent -f $DomainName)
 
-    $domainControllerObject = Get-DomainControllerObject -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
+    $domainControllerObject = Get-DomainControllerObject `
+        -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
+
     if ($domainControllerObject)
     {
-        Write-Verbose -Message (
-            $script:localizedData.FoundDomainController -f $domainControllerObject.Name, $domainControllerObject.Domain
-        )
+        Write-Verbose -Message ($script:localizedData.IsDomainController -f
+            $domainControllerObject.Name, $domainControllerObject.Domain)
 
-        Write-Verbose -Message (
-            $script:localizedData.AlreadyDomainController -f $domainControllerObject.Name, $domainControllerObject.Domain
-        )
-
-        $allowedPasswordReplicationAccountName = [System.String[]] (Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName)
-        $deniedPasswordReplicationAccountName = [System.String[]] (Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject | ForEach-Object -MemberName sAMAccountName)
+        $allowedPasswordReplicationAccountName = (
+            Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject |
+            ForEach-Object -MemberName sAMAccountName)
+        $deniedPasswordReplicationAccountName = (
+            Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject |
+            ForEach-Object -MemberName sAMAccountName)
         $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
         $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
+        $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
 
-        $getTargetResourceResult.Ensure = $true
-        $getTargetResourceResult.DatabasePath = $serviceNTDS.'DSA Working Directory'
-        $getTargetResourceResult.LogPath = $serviceNTDS.'Database log files path'
-        $getTargetResourceResult.SysvolPath = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
-        $getTargetResourceResult.SiteName = $domainControllerObject.Site
-        $getTargetResourceResult.IsGlobalCatalog = $domainControllerObject.IsGlobalCatalog
-        $getTargetResourceResult.DomainName = $domainControllerObject.Domain
-        $getTargetResourceResult.ReadOnlyReplica = $domainControllerObject.IsReadOnly
-        $getTargetResourceResult.AllowPasswordReplicationAccountName = $allowedPasswordReplicationAccountName
-        $getTargetResourceResult.DenyPasswordReplicationAccountName = $deniedPasswordReplicationAccountName
-
-        $getTargetResourceResult.FlexibleSingleMasterOperationRole = `
-            $domainControllerObject.OperationMasterRoles -as [System.String[]]
+        $targetResource = @{
+            AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
+            Credential                          = $Credential
+            DatabasePath                        = $serviceNTDS.'DSA Working Directory'
+            DenyPasswordReplicationAccountName  = @($deniedPasswordReplicationAccountName)
+            DomainName                          = $domainControllerObject.Domain
+            Ensure                              = $true
+            FlexibleSingleMasterOperationRole   = @($domainControllerObject.OperationMasterRoles)
+            InstallationMediaPath               = $null
+            InstallDns                          = $installDns
+            IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
+            LogPath                             = $serviceNTDS.'Database log files path'
+            ReadOnlyReplica                     = $domainControllerObject.IsReadOnly
+            SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
+            SiteName                            = $domainControllerObject.Site
+            SysvolPath                          = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+        }
     }
     else
     {
-        Write-Verbose -Message (
-            $script:localizedData.NotDomainController -f $env:COMPUTERNAME
-        )
+        Write-Verbose -Message ($script:localizedData.NotDomainController -f $env:COMPUTERNAME)
+
+        $targetResource = @{
+            AllowPasswordReplicationAccountName = $null
+            Credential                          = $Credential
+            DatabasePath                        = $null
+            DenyPasswordReplicationAccountName  = $null
+            DomainName                          = $DomainName
+            Ensure                              = $false
+            FlexibleSingleMasterOperationRole   = $null
+            InstallationMediaPath               = $null
+            InstallDns                          = $false
+            IsGlobalCatalog                     = $false
+            LogPath                             = $null
+            ReadOnlyReplica                     = $false
+            SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
+            SiteName                            = $null
+            SysvolPath                          = $null
+        }
     }
 
-    return $getTargetResourceResult
+    return $targetResource
 }
 
 <#
@@ -208,6 +182,20 @@ function Get-TargetResource
         The parameter `InstallDns` is only used during the provisioning of a domain
         controller. The parameter cannot be used to install or uninstall the DNS
         server on an already provisioned domain controller.
+    .NOTES
+        Used Functions:
+            Name                                               | Module
+            ---------------------------------------------------|--------------------------
+            Install-ADDSDomainController                       | ActiveDirectory
+            Get-ADDomain                                       | ActiveDirectory
+            Get-ADForest                                       | ActiveDirectory
+            Set-ADObject                                       | ActiveDirectory
+            Move-ADDirectoryServer                             | ActiveDirectory
+            Move-ADDirectoryServerOperationMasterRole          | ActiveDirectory
+            Remove-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
+            Add-ADDomainControllerPasswordReplicationPolicy    | ActiveDirectory
+            Get-DomainControllerObject                         | ActiveDirectoryDsc.Common
+            New-InvalidOperationException                      | ActiveDirectoryDsc.Common
 #>
 function Set-TargetResource
 {
@@ -280,20 +268,17 @@ function Set-TargetResource
         $InstallDns
     )
 
-    $getTargetResourceParameters = @{} + $PSBoundParameters
-    $getTargetResourceParameters.Remove('InstallationMediaPath')
-    $getTargetResourceParameters.Remove('IsGlobalCatalog')
-    $getTargetResourceParameters.Remove('ReadOnlyReplica')
-    $getTargetResourceParameters.Remove('AllowPasswordReplicationAccountName')
-    $getTargetResourceParameters.Remove('DenyPasswordReplicationAccountName')
-    $getTargetResourceParameters.Remove('FlexibleSingleMasterOperationRole')
+    $getTargetResourceParameters = @{
+        DomainName                    = $DomainName
+        Credential                    = $Credential
+        SafeModeAdministratorPassword = $SafemodeAdministratorPassword
+    }
+
     $targetResource = Get-TargetResource @getTargetResourceParameters
 
     if ($targetResource.Ensure -eq $false)
     {
-        Write-Verbose -Message (
-            $script:localizedData.Promoting -f $env:COMPUTERNAME, $DomainName
-        )
+        Write-Verbose -Message ($script:localizedData.Promoting -f $env:COMPUTERNAME, $DomainName)
 
         # Node is not a domain controller so we promote it.
         $installADDSDomainControllerParameters = @{
@@ -316,12 +301,14 @@ function Set-TargetResource
 
         if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
         {
-            $installADDSDomainControllerParameters.Add('AllowPasswordReplicationAccountName', $AllowPasswordReplicationAccountName)
+            $installADDSDomainControllerParameters.Add('AllowPasswordReplicationAccountName',
+                $AllowPasswordReplicationAccountName)
         }
 
         if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
         {
-            $installADDSDomainControllerParameters.Add('DenyPasswordReplicationAccountName', $DenyPasswordReplicationAccountName)
+            $installADDSDomainControllerParameters.Add('DenyPasswordReplicationAccountName',
+                $DenyPasswordReplicationAccountName)
         }
 
         if ($PSBoundParameters.ContainsKey('DatabasePath'))
@@ -361,9 +348,7 @@ function Set-TargetResource
 
         Install-ADDSDomainController @installADDSDomainControllerParameters
 
-        Write-Verbose -Message (
-            $script:localizedData.Promoted -f $env:COMPUTERNAME, $DomainName
-        )
+        Write-Verbose -Message ($script:localizedData.Promoted -f $env:COMPUTERNAME, $DomainName)
 
         <#
             Signal to the LCM to reboot the node to compensate for the one we
@@ -377,14 +362,14 @@ function Set-TargetResource
     {
         # Node is a domain controller. We check if other properties are in desired state
 
-        Write-Verbose -Message (
-            $script:localizedData.IsDomainController -f $env:COMPUTERNAME, $DomainName
-        )
+        Write-Verbose -Message ($script:localizedData.IsDomainController -f $env:COMPUTERNAME, $DomainName)
 
-        $domainControllerObject = Get-DomainControllerObject -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
+        $domainControllerObject = Get-DomainControllerObject `
+            -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
 
         # Check if Node Global Catalog state is correct
-        if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and $targetResource.IsGlobalCatalog -ne $IsGlobalCatalog)
+        if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and
+            $targetResource.IsGlobalCatalog -ne $IsGlobalCatalog)
         {
             # DC is not in the expected Global Catalog state
             if ($IsGlobalCatalog)
@@ -407,12 +392,10 @@ function Set-TargetResource
 
         if ($PSBoundParameters.ContainsKey('SiteName') -and $targetResource.SiteName -ne $SiteName)
         {
-            Write-Verbose -Message (
-                $script:localizedData.IsDomainController -f $targetResource.SiteName, $SiteName
-            )
-
             # DC is not in correct site. Move it.
-            Write-Verbose -Message ($script:localizedData.MovingDomainController -f $targetResource.SiteName, $SiteName)
+            Write-Verbose -Message ($script:localizedData.MovingDomainController -f
+                $targetResource.SiteName, $SiteName)
+
             Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $Credential
         }
 
@@ -448,7 +431,8 @@ function Set-TargetResource
                         AllowedList = $adPrincipalsToRemove
                     }
 
-                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy -Confirm:$false
+                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy `
+                        -Confirm:$false
                 }
 
                 if ($null -ne $adPrincipalsToAdd)
@@ -491,18 +475,19 @@ function Set-TargetResource
                 if ($null -ne $adPrincipalsToRemove)
                 {
                     $removeADPasswordReplicationPolicy = @{
-                        Identity    = $domainControllerObject
-                        DeniedList  = $adPrincipalsToRemove
+                        Identity   = $domainControllerObject
+                        DeniedList = $adPrincipalsToRemove
                     }
 
-                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy -Confirm:$false
+                    Remove-ADDomainControllerPasswordReplicationPolicy @removeADPasswordReplicationPolicy `
+                        -Confirm:$false
                 }
 
                 if ($null -ne $adPrincipalsToAdd)
                 {
                     $addADPasswordReplicationPolicy = @{
-                        Identity    = $domainControllerObject
-                        DeniedList  = $adPrincipalsToAdd
+                        Identity   = $domainControllerObject
+                        DeniedList = $adPrincipalsToAdd
                     }
 
                     Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordReplicationPolicy
@@ -523,20 +508,19 @@ function Set-TargetResource
                             Connect to any available domain controller to get the
                             current owner for the specific role.
                         #>
-                        {$_ -in @('DomainNamingMaster', 'SchemaMaster')}
+                        { $_ -in @('DomainNamingMaster', 'SchemaMaster') }
                         {
                             $currentOwnerFullyQualifiedDomainName = (Get-ADForest).$_
                         }
 
-                        {$_ -in @('InfrastructureMaster', 'PDCEmulator', 'RIDMaster')}
+                        { $_ -in @('InfrastructureMaster', 'PDCEmulator', 'RIDMaster') }
                         {
                             $currentOwnerFullyQualifiedDomainName = (Get-ADDomain).$_
                         }
                     }
 
-                    Write-Verbose -Message (
-                        $script:localizedData.MovingFlexibleSingleMasterOperationRole -f $desiredFlexibleSingleMasterOperationRole, $currentOwnerFullyQualifiedDomainName
-                    )
+                    Write-Verbose -Message ($script:localizedData.MovingFlexibleSingleMasterOperationRole -f
+                        $desiredFlexibleSingleMasterOperationRole, $currentOwnerFullyQualifiedDomainName)
 
                     <#
                         Using the object returned from Get-ADDomainController to handle
@@ -544,10 +528,10 @@ function Set-TargetResource
                         with Fully Qualified Domain Name (FQDN) in the Identity parameter.
                     #>
                     $MoveADDirectoryServerOperationMasterRoleParameters = @{
-                        Identity = $domainControllerObject
+                        Identity            = $domainControllerObject
                         OperationMasterRole = $desiredFlexibleSingleMasterOperationRole
-                        Server = $currentOwnerFullyQualifiedDomainName
-                        ErrorAction = 'Stop'
+                        Server              = $currentOwnerFullyQualifiedDomainName
+                        ErrorAction         = 'Stop'
                     }
 
                     Move-ADDirectoryServerOperationMasterRole @MoveADDirectoryServerOperationMasterRoleParameters
@@ -614,6 +598,15 @@ function Set-TargetResource
         server on an already provisioned domain controller.
 
         Not used in Test-TargetResource.
+
+    .NOTES
+        Used Functions:
+            Name                          | Module
+            ------------------------------|--------------------------
+            Test-ADReplicationSite        | ActiveDirectoryDsc.Common
+            New-InvalidOperationException | ActiveDirectoryDsc.Common
+            New-ObjectNotFoundException   | ActiveDirectoryDsc.Common
+            Test-Members                  | ActiveDirectoryDsc.Common
 #>
 function Test-TargetResource
 {
@@ -681,9 +674,7 @@ function Test-TargetResource
         $InstallDns
     )
 
-    Write-Verbose -Message (
-        $script:localizedData.TestingConfiguration -f $env:COMPUTERNAME, $DomainName
-    )
+    Write-Verbose -Message ($script:localizedData.TestingConfiguration -f $env:COMPUTERNAME, $DomainName)
 
     if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica -eq $true)
     {
@@ -702,13 +693,12 @@ function Test-TargetResource
         }
     }
 
-    $getTargetResourceParameters = @{} + $PSBoundParameters
-    $getTargetResourceParameters.Remove('InstallationMediaPath')
-    $getTargetResourceParameters.Remove('IsGlobalCatalog')
-    $getTargetResourceParameters.Remove('ReadOnlyReplica')
-    $getTargetResourceParameters.Remove('AllowPasswordReplicationAccountName')
-    $getTargetResourceParameters.Remove('DenyPasswordReplicationAccountName')
-    $getTargetResourceParameters.Remove('FlexibleSingleMasterOperationRole')
+    $getTargetResourceParameters = @{
+        DomainName                    = $DomainName
+        Credential                    = $Credential
+        SafeModeAdministratorPassword = $SafemodeAdministratorPassword
+    }
+
     $existingResource = Get-TargetResource @getTargetResourceParameters
 
     $testTargetResourceReturnValue = $existingResource.Ensure
@@ -723,9 +713,7 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey('SiteName') -and $existingResource.SiteName -ne $SiteName)
     {
-        Write-Verbose -Message (
-            $script:localizedData.WrongSite -f $existingResource.SiteName, $SiteName
-        )
+        Write-Verbose -Message ($script:localizedData.WrongSite -f $existingResource.SiteName, $SiteName)
 
         $testTargetResourceReturnValue = $false
     }
@@ -735,21 +723,20 @@ function Test-TargetResource
     {
         if ($IsGlobalCatalog)
         {
-            Write-Verbose -Message (
-                $script:localizedData.ExpectedGlobalCatalogEnabled -f $existingResource.SiteName, $SiteName
-            )
+            Write-Verbose -Message ($script:localizedData.ExpectedGlobalCatalogEnabled -f
+                $existingResource.SiteName, $SiteName)
         }
         else
         {
-            Write-Verbose -Message (
-                $script:localizedData.ExpectedGlobalCatalogDisabled -f $existingResource.SiteName, $SiteName
-            )
+            Write-Verbose -Message ($script:localizedData.ExpectedGlobalCatalogDisabled -f
+                $existingResource.SiteName, $SiteName)
         }
 
         $testTargetResourceReturnValue = $false
     }
 
-    if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName') -and $null -ne $existingResource.AllowPasswordReplicationAccountName)
+    if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName') -and
+        $null -ne $existingResource.AllowPasswordReplicationAccountName)
     {
         $testMembersParameters = @{
             ExistingMembers = $existingResource.AllowPasswordReplicationAccountName
@@ -768,7 +755,8 @@ function Test-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName') -and $null -ne $existingResource.DenyPasswordReplicationAccountName)
+    if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName') -and
+        $null -ne $existingResource.DenyPasswordReplicationAccountName)
     {
         $testMembersParameters = @{
             ExistingMembers = $existingResource.DenyPasswordReplicationAccountName
@@ -796,9 +784,7 @@ function Test-TargetResource
         $FlexibleSingleMasterOperationRole | ForEach-Object -Process {
             if ($_ -notin $existingResource.FlexibleSingleMasterOperationRole)
             {
-                Write-Verbose -Message (
-                    $script:localizedData.NotOwnerOfFlexibleSingleMasterOperationRole -f $_
-                )
+                Write-Verbose -Message ($script:localizedData.NotOwnerOfFlexibleSingleMasterOperationRole -f $_ )
 
                 $testTargetResourceReturnValue = $false
             }
@@ -813,11 +799,11 @@ function Test-TargetResource
         Return a hashtable with members that are not present in CurrentMembers,
         and members that are present add should not be present.
 
-    .PARAMETER DatabasePath
-        Provide the path where the NTDS.dit will be created and stored.
+    .PARAMETER DesiredMembers
+        Specifies the list of desired members in the hashtable.
 
-    .PARAMETER LogPath
-        Provide the path where the logs for the NTDS will be created and stored.
+    .PARAMETER CurrentMembers
+        Specifies the list of current members in the hashtable.
 
     .OUTPUTS
         Returns a hashtable with two properties. The property MembersToAdd contains the
@@ -860,8 +846,8 @@ function Get-MembersToAddAndRemove
     }
 
     return @{
-        MembersToAdd = [Microsoft.ActiveDirectory.Management.ADPrincipal[]] $principalsToAdd
-        MembersToRemove =  [Microsoft.ActiveDirectory.Management.ADPrincipal[]] $principalsToRemove
+        MembersToAdd    = [Microsoft.ActiveDirectory.Management.ADPrincipal[]] $principalsToAdd
+        MembersToRemove = [Microsoft.ActiveDirectory.Management.ADPrincipal[]] $principalsToRemove
     }
 }
 
