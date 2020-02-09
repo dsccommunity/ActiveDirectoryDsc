@@ -15,12 +15,11 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomain'
         child domain this must be set to a single-label DNS name.
 
     .PARAMETER Credential
-        Specifies the user name and password that corresponds to the account used
-        to install the domain controller. When adding a child domain these credentials
-        need the correct permission in the parent domain. The credentials will also
-        be used to query for the existence of the domain or child domain. This will
-        not be created as a user in the new domain. The domain administrator password
-        will be the same as the password of the local Administrator of this node.
+        Specifies the user name and password that corresponds to the account used to install
+        the domain controller. These are only used when adding a child domain and these credentials
+        need the correct permission in the parent domain. This will not be created as a user in the
+        new domain. The domain administrator password will be the same as the password of the local
+        Administrator of this node.
 
     .PARAMETER SafeModeAdministratorPassword
         Password for the administrator account when the computer is started in Safe Mode.
@@ -203,12 +202,11 @@ function Get-TargetResource
         child domain this must be set to a single-label DNS name.
 
     .PARAMETER Credential
-        Specifies the user name and password that corresponds to the account used
-        to install the domain controller. When adding a child domain these credentials
-        need the correct permission in the parent domain. The credentials will also
-        be used to query for the existence of the domain or child domain. This will
-        not be created as a user in the new domain. The domain administrator password
-        will be the same as the password of the local Administrator of this node.
+        Specifies the user name and password that corresponds to the account used to install
+        the domain controller. These are only used when adding a child domain and these credentials
+        need the correct permission in the parent domain. This will not be created as a user in the
+        new domain. The domain administrator password will be the same as the password of the local
+        Administrator of this node.
 
     .PARAMETER SafeModeAdministratorPassword
         Password for the administrator account when the computer is started in Safe Mode.
@@ -339,12 +337,11 @@ function Test-TargetResource
         child domain this must be set to a single-label DNS name.
 
     .PARAMETER Credential
-        Specifies the user name and password that corresponds to the account used
-        to install the domain controller. When adding a child domain these credentials
-        need the correct permission in the parent domain. The credentials will also
-        be used to query for the existence of the domain or child domain. This will
-        not be created as a user in the new domain. The domain administrator password
-        will be the same as the password of the local Administrator of this node.
+        Specifies the user name and password that corresponds to the account used to install
+        the domain controller. These are only used when adding a child domain and these credentials
+        need the correct permission in the parent domain. This will not be created as a user in the
+        new domain. The domain administrator password will be the same as the password of the local
+        Administrator of this node.
 
     .PARAMETER SafeModeAdministratorPassword
         Password for the administrator account when the computer is started in Safe Mode.
