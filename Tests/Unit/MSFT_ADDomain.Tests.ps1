@@ -45,7 +45,7 @@ try
         $mockParentDomainName = ''
         $mockDomainFQDN = $mockDomainName
         $mockNTDSPath = 'C:\Windows\NTDS'
-        $mockSysVolPath = 'C:\Windows\SYSVOL\sysvol'
+        $mockSysVolPath = 'C:\Windows\SysVol'
         $mockDomainSysVolPath = Join-Path -Path $mockSysVolPath -ChildPath $mockDomainName
         $maxRetries = 15
         $forestMode = [Microsoft.DirectoryServices.Deployment.Types.ForestMode]::WinThreshold
