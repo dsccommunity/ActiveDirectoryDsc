@@ -11,6 +11,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - ActiveDirectoryDsc
   - Added [Codecov.io](https://codecov.io) support.
+  - Fixed miscellaneous spelling errors.
 - ADForestProperties
   - Added TombstoneLifetime property ([issue #302](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/302)).
   - Added Integration tests ([issue #349](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/349)).
