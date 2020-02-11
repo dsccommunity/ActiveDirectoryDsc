@@ -349,6 +349,8 @@ function Set-TargetResource
                 'Failed'
                 {
                     Write-Warning -Message $script:localizedData.BackgroundJobFailed
+
+                    $foundDomainController = $false
                 }
 
                 'Completed'

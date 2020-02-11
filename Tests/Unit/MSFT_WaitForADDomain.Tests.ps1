@@ -44,7 +44,6 @@ try
 
         $mockDefaultParameters = @{
             DomainName = $mockDomainName
-            Verbose    = $true
         }
         $global:PsDscContext=$null
 
@@ -144,7 +143,7 @@ try
                             $mockBuiltInCredentialName = 'BuiltInCredential'
 
                             # Mock PsDscRunAsCredential context.
-                            $PsDscContext = @{
+                            $global:PsDscContext = @{
                                 RunAsUser = $mockBuiltInCredentialName
                             }
 
@@ -599,7 +598,7 @@ try
                         $setTagetResourceParameters.Remove('Verbose')
                     }
 
-                    It 'Should not throw and call the correct mocks' {
+                    It 'Should throw and call the correct mocks' {
                         { Set-TargetResource @setTagetResourceParameters } | Should -Throw $script:localizedData.NoDomainController
 
                         $global:DSCMachineStatus | Should -Be 0
