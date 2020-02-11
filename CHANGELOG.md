@@ -61,6 +61,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     2012 R2.
 - ADForestProperties
   - Refactored unit tests.
+- ADUser
+  - Refactored Get-TargetResource Function - ([issue #488](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/488))
+  - Refactored Unit Tests - ([issue #467](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/467))
 
 ## [5.0.0] - 2020-01-14
 
