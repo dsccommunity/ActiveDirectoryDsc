@@ -174,7 +174,7 @@ try
                     }
 
                     $mockGetItemPropertyNetlogonResult = @{
-                        SysVol = $mockSysVolPath
+                        SysVol = $mockSysVolPath + '\sysvol'
                     }
 
                     Mock -CommandName Get-ItemPropertyValue `
