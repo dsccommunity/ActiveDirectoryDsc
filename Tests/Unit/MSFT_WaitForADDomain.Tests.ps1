@@ -44,6 +44,7 @@ try
 
         $mockDefaultParameters = @{
             DomainName = $mockDomainName
+            Verbose    = $true
         }
         $global:PsDscContext=$null
 
