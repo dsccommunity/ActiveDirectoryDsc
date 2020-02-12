@@ -2322,6 +2322,9 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             )
             $principalContextTypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
+            Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' `
+                -TypeName $principalContextTypeName
+
             $mockPrincipalContext = New-MockObject -Type $principalContextTypeName
 
             $testPasswordParms = @{
