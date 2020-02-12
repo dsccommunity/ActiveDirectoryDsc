@@ -2191,6 +2191,7 @@ function Get-CurrentUser
 function Test-Password
 {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -2221,9 +2222,9 @@ function Test-Password
 
     Write-Verbose -Message ($script:localizedData.CreatingADDomainConnection -f $DomainName)
 
-    $typeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
+    $principalContextTypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
-    Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName $typeName
+    Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName $principalContextTypeName
 
     <#
         If the domain name contains a distinguished name, set it to the fully
@@ -2231,10 +2232,10 @@ function Test-Password
         If the $DomainName does not contain a distinguished name the function
         Get-ADDomainNameFromDistinguishedName returns $null.
     #>
-    $fullyQualifiedDomainName = Get-ADDomainNameFromDistinguishedName -DistinguishedName $DomainName
-    if ($fullyQualifiedDomainName)
+    $ADDomainName = Get-ADDomainNameFromDistinguishedName -DistinguishedName $DomainName
+    if ($ADDomainName)
     {
-        $DomainName = $fullyQualifiedDomainName
+        $DomainName = $ADDomainName
     }
 
     if ($Credential)
@@ -2243,7 +2244,7 @@ function Test-Password
             $script:localizedData.TestPasswordUsingImpersonation -f $Credential.UserName, $UserName
         )
 
-        $principalContext = New-Object -TypeName $typeName -ArgumentList @(
+        $principalContext = New-Object -TypeName $principalContextTypeName -ArgumentList @(
             [System.DirectoryServices.AccountManagement.ContextType]::Domain,
             $DomainName,
             $Credential.UserName,
@@ -2252,7 +2253,7 @@ function Test-Password
     }
     else
     {
-        $principalContext = New-Object -TypeName $typeName -ArgumentList @(
+        $principalContext = New-Object -TypeName $principalContextTypeName -ArgumentList @(
             [System.DirectoryServices.AccountManagement.ContextType]::Domain,
             $DomainName,
             $null,
@@ -2262,9 +2263,44 @@ function Test-Password
 
     Write-Verbose -Message ($script:localizedData.CheckingADUserPassword -f $UserName)
 
+    $getPrincipalContextCredentials = @{
+        UserName               = $UserName
+        Password               = $Password
+        PrincipalContext       = $principalContext
+        PasswordAuthentication = $PasswordAuthentication
+    }
+    return Get-PrincipalContextCredentials @getPrincipalContextCredentials
+}
+
+Function Get-PrincipalContextCredentials
+{
+
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $UserName,
+
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
+
+        [Parameter(Mandatory = $true)]
+        [System.DirectoryServices.AccountManagement.PrincipalContext]
+        $PrincipalContext,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Default', 'Negotiate')]
+        [System.String]
+        $PasswordAuthentication
+    )
+
     if ($PasswordAuthentication -eq 'Negotiate')
     {
-        return $principalContext.ValidateCredentials(
+        $result = $principalContext.ValidateCredentials(
             $UserName,
             $Password.GetNetworkCredential().Password,
             [System.DirectoryServices.AccountManagement.ContextOptions]::Negotiate -bor
@@ -2275,11 +2311,13 @@ function Test-Password
     else
     {
         # Use default authentication context
-        return $principalContext.ValidateCredentials(
+        $result = $principalContext.ValidateCredentials(
             $UserName,
             $Password.GetNetworkCredential().Password
         )
     }
-} # end function Test-Password
+
+    return $result
+}
 
 $script:localizedData = Get-LocalizedData -ResourceName 'ActiveDirectoryDsc.Common' -ScriptRoot $PSScriptRoot
