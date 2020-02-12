@@ -2274,7 +2274,6 @@ function Test-Password
 
 function Get-PrincipalContextCredentials
 {
-
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
