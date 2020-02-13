@@ -183,11 +183,7 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        # Modify parameters for splatting to New-ADReplicationSiteLink.
-        $desiredParameters = $PSBoundParameters
-        $desiredParameters.Remove('Ensure')
-        $desiredParameters.Remove('SitesExcluded')
-
+        # Resource should be Present
         $currentADSiteLink = Get-TargetResource -Name $Name
 
         <#
@@ -196,50 +192,100 @@ function Set-TargetResource
         #>
         if ( $currentADSiteLink.Ensure -eq 'Absent' )
         {
+            # Resource is Absent
+
+            # Modify parameters for splatting to New-ADReplicationSiteLink.
+            $newADReplicationSiteLinkParameters = @{ } + $PSBoundParameters
+            $newADReplicationSiteLinkParameters.Remove('Ensure')
+            $newADReplicationSiteLinkParameters.Remove('SitesExcluded')
+            $newADReplicationSiteLinkParameters.Remove('OptionChangeNotification')
+            $newADReplicationSiteLinkParameters.Remove('OptionTwoWaySync')
+            $newADReplicationSiteLinkParameters.Remove('OptionDisableCompression')
+            $newADReplicationSiteLinkParameters.Remove('Verbose')
+
+            $optionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $optionChangeNotification `
+                -OptionTwoWaySync $optionTwoWaySync -OptionDisableCompression $optionDisableCompression
+
+            if ($optionsValue -gt 0)
+            {
+                $newADReplicationSiteLinkParameters['OtherAttributes'] = @{options = $optionsValue }
+            }
+
             Write-Verbose -Message ($script:localizedData.NewSiteLink -f $Name)
-            New-ADReplicationSiteLink @desiredParameters
+            New-ADReplicationSiteLink @newADReplicationSiteLinkParameters
         }
         else
         {
+            # Resource is Present
+
+            $setADReplicationSiteLinkParameters = @{ }
+            $setADReplicationSiteLinkParameters['Identity'] = $Name
+
+            $replaceParameters = @{ }
+
             # now we have to determine if we need to add or remove sites from SitesIncluded.
-            $setParameters = @{
-                Identity = $Name
-            }
-
-            $replaceParameters = @{}
-
-            # build the SitesIncluded hashtable.
-            $sitesIncludedParameters = @{}
-            if ($SitesExcluded)
+            if (-not (Test-Members -ExistingMembers $currentADSiteLink.SitesIncluded `
+                        -MembersToInclude $SitesIncluded -MembersToExclude $SitesExcluded))
             {
-                Write-Verbose -Message ($script:localizedData.RemovingSites -f $($SitesExcluded -join ', '), $Name)
+                # build the SitesIncluded hashtable.
+                $sitesIncludedParameters = @{ }
+                if ($SitesExcluded)
+                {
+                    Write-Verbose -Message ($script:localizedData.RemovingSites -f $($SitesExcluded -join ', '), $Name)
 
-                <#
+                    <#
                     Wrapped in $() as we were getting some weird results without it,
                     results were not being added into Hashtable as strings.
                 #>
-                $sitesIncludedParameters.Add('Remove', $($SitesExcluded))
-            }
+                    $sitesIncludedParameters.Add('Remove', $($SitesExcluded))
+                }
 
-            if ($SitesIncluded)
-            {
-                Write-Verbose -Message ($script:localizedData.AddingSites -f $($SitesIncluded -join ', '), $Name)
+                if ($SitesIncluded)
+                {
+                    Write-Verbose -Message ($script:localizedData.AddingSites -f $($SitesIncluded -join ', '), $Name)
 
-                <#
+                    <#
                     Wrapped in $() as we were getting some weird results without it,
                     results were not being added into Hashtable as strings.
                 #>
-                $sitesIncludedParameters.Add('Add', $($SitesIncluded))
+                    $sitesIncludedParameters.Add('Add', $($SitesIncluded))
+                }
+
+                if ($null -ne $($sitesIncludedParameters.Keys))
+                {
+                    $setADReplicationSiteLinkParameters['SitesIncluded'] = $sitesIncludedParameters
+                }
             }
 
-            if ($null -ne $($sitesIncludedParameters.Keys))
+            if ($PSBoundParameters.ContainsKey('Cost') -and `
+                    $Cost -ne $currentADSiteLink.Cost)
             {
-                $setParameters.Add('SitesIncluded', $sitesIncludedParameters)
+                Write-Verbose -Message ($script:localizedData.SettingProperty -f
+                    'Cost', $Cost, $Name)
+                $setADReplicationSiteLinkParameters['Cost'] = $Cost
             }
 
-            # Calculate the Options value for Change Notification replication
-            if ($PSBoundParameters.ContainsKey('OptionChangeNotification'))
+            if ($PSBoundParameters.ContainsKey('Description') -and `
+                    $Description -ne $currentADSiteLink.Description)
             {
+                Write-Verbose -Message ($script:localizedData.SettingProperty -f
+                    'Description', $Description, $Name)
+                $setADReplicationSiteLinkParameters['Description'] = $Description
+            }
+
+            if ($PSBoundParameters.ContainsKey('ReplicationFrequencyInMinutes') -and `
+                    $ReplicationFrequencyInMinutes -ne $currentADSiteLink.ReplicationFrequencyInMinutes)
+            {
+                Write-Verbose -Message ($script:localizedData.SettingProperty -f
+                    'ReplicationFrequencyInMinutes', $ReplicationFrequencyInMinutes, $Name)
+                $setADReplicationSiteLinkParameters['ReplicationFrequencyInMinutes'] = $ReplicationFrequencyInMinutes
+            }
+
+            if ($PSBoundParameters.ContainsKey('OptionChangeNotification') -and `
+                    $OptionChangeNotification -ne $currentADSiteLink.OptionChangeNotification)
+            {
+                Write-Verbose -Message ($script:localizedData.SettingProperty -f
+                    'OptionChangeNotification', $OptionChangeNotification, $Name)
                 $changeNotification = $OptionChangeNotification
             }
             else
@@ -247,8 +293,11 @@ function Set-TargetResource
                 $changeNotification = $currentADSiteLink.OptionChangeNotification
             }
 
-            if ($PSBoundParameters.ContainsKey('OptionTwoWaySync'))
+            if ($PSBoundParameters.ContainsKey('OptionTwoWaySync') -and `
+                    $OptionTwoWaySync -ne $currentADSiteLink.OptionTwoWaySync)
             {
+                Write-Verbose -Message ($script:localizedData.SettingProperty -f
+                    'TwoWaySync', $TwoWaySync, $Name)
                 $twoWaySync = $OptionTwoWaySync
             }
             else
@@ -256,8 +305,11 @@ function Set-TargetResource
                 $twoWaySync = $currentADSiteLink.OptionTwoWaySync
             }
 
-            if ($PSBoundParameters.ContainsKey('OptionDisableCompression'))
+            if ($PSBoundParameters.ContainsKey('OptionDisableCompression') -and `
+                    $OptionDisableCompression -ne $currentADSiteLink.OptionDisableCompression)
             {
+                Write-Verbose -Message ($script:localizedData.SettingProperty -f
+                    'OptionDisableCompression', $OptionDisableCompression, $Name)
                 $disableCompression = $OptionDisableCompression
             }
             else
@@ -265,36 +317,30 @@ function Set-TargetResource
                 $disableCompression = $currentADSiteLink.OptionDisableCompression
             }
 
-            $optionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $changeNotification -OptionTwoWaySync $twoWaySync -OptionDisableCompression $disableCompression
+            $optionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $changeNotification `
+                -OptionTwoWaySync $twoWaySync -OptionDisableCompression $disableCompression
 
-            if ($optionsValue -eq 0)
+            if ($optionsValue -gt 0)
             {
-                $setParameters.Add('Clear', 'Options')
+                $setADReplicationSiteLinkParameters.Add('Clear', 'Options')
             }
             else
             {
                 $replaceParameters.Add('Options', $optionsValue)
             }
 
-            # Add the rest of the parameters.
-            foreach ($parameter in $PSBoundParameters.Keys)
-            {
-                if ($parameter -notmatch 'SitesIncluded|SitesExcluded|Name|Ensure|OptionChangeNotification|OptionTwoWaySync|OptionDisableCompression')
-                {
-                    $setParameters.Add($parameter, $PSBoundParameters[$parameter])
-                }
-            }
-
             if ($replaceParameters.Count -gt 0)
             {
-                $setParameters.Add('Replace', $replaceParameters)
+                $setADReplicationSiteLinkParameters.Add('Replace', $replaceParameters)
             }
 
-            Set-ADReplicationSiteLink @setParameters
+            Set-ADReplicationSiteLink @setADReplicationSiteLinkParameters
         }
     }
     else
     {
+        # Resource should be absent
+
         Write-Verbose -Message ($script:localizedData.RemoveSiteLink -f $Name)
 
         Remove-ADReplicationSiteLink -Identity $Name
