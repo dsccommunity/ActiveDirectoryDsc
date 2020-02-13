@@ -92,6 +92,7 @@ function Get-TargetResource
             Ensure                              = $true
             FlexibleSingleMasterOperationRole   = @($domainControllerObject.OperationMasterRoles)
             InstallationMediaPath               = $null
+            InstallDns                          = $null
             IsDnsServer                         = $isDnsServer
             IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
             LogPath                             = $serviceNTDS.'Database log files path'
@@ -114,7 +115,7 @@ function Get-TargetResource
             Ensure                              = $false
             FlexibleSingleMasterOperationRole   = $null
             InstallationMediaPath               = $null
-            InstallDns                          = $false
+            InstallDns                          = $null
             IsDnsServer                         = $isDnsServer
             IsGlobalCatalog                     = $false
             LogPath                             = $null
