@@ -39,18 +39,6 @@ function Get-TargetResource
     {
         Write-Verbose -Message ($script:localizedData.SiteLinkNotFound -f $Name)
 
-        $returnValue = @{
-            Name                          = $Name
-            Cost                          = $null
-            Description                   = $null
-            ReplicationFrequencyInMinutes = $null
-            SitesIncluded                 = $null
-            SitesExcluded                 = $SitesExcluded
-            OptionChangeNotification      = $false
-            OptionTwoWaySync              = $false
-            OptionDisableCompression      = $false
-            Ensure                        = 'Absent'
-        }
         $siteLink = $null
     }
     catch
@@ -94,6 +82,21 @@ function Get-TargetResource
             OptionTwoWaySync              = $siteLinkOptions.TWOWAY_SYNC
             OptionDisableCompression      = $siteLinkOptions.DISABLE_COMPRESSION
             Ensure                        = 'Present'
+        }
+    }
+    else
+    {
+        $returnValue = @{
+            Name                          = $Name
+            Cost                          = $null
+            Description                   = $null
+            ReplicationFrequencyInMinutes = $null
+            SitesIncluded                 = $null
+            SitesExcluded                 = $SitesExcluded
+            OptionChangeNotification      = $false
+            OptionTwoWaySync              = $false
+            OptionDisableCompression      = $false
+            Ensure                        = 'Absent'
         }
     }
 
