@@ -37,6 +37,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADOrganizationalUnit
   - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when parent path does not yet exist
     ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553))
+- ADReplicationSiteLink
+  - Fixed issue creating a Site Link with options specified
+    ([issue #571](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/571))
 
 ### Changed
 
@@ -60,6 +63,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Updated NewChildDomain example to clarify the contents of the credential parameter and use Windows 2016 rather than
     2012 R2.
 - ADForestProperties
+  - Refactored unit tests.
+- ADReplicationSiteLink
   - Refactored unit tests.
 
 ## [5.0.0] - 2020-01-14
