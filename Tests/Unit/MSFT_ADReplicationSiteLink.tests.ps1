@@ -36,110 +36,140 @@ try
         # Load stub cmdlets and classes.
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 
-        $mockGetADReplicationSiteLinkReturn = @{
-            Name                          = 'HQSiteLink'
-            Cost                          = 100
-            Description                   = 'HQ Site'
-            ReplicationFrequencyInMinutes = 180
-            SitesIncluded                 = @('CN=SITE1,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com', 'CN=SITE2,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com')
-        }
+        $mockSiteName = 'HQSiteLink'
+        $mockSite1 = 'site1'
+        $mockSite2 = 'site2'
+        $mockSite3 = 'site3'
+        $mockSite4 = 'site4'
 
-        $mockGetADReplicationSiteLinkOptionsReturn = @{
-            Name                          = 'HQSiteLink'
+        $mockResource = @{
+            Name                          = $mockSiteName
             Cost                          = 100
             Description                   = 'HQ Site'
             ReplicationFrequencyInMinutes = 180
-            SitesIncluded                 = @('CN=SITE1,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com', 'CN=SITE2,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com')
-            Options                       = 7
-        }
-
-        $targetResourceParameters = @{
-            Name                          = 'HQSiteLink'
-            Cost                          = 100
-            Description                   = 'HQ Site'
-            ReplicationFrequencyInMinutes = 180
-            SitesIncluded                 = @('site1', 'site2')
+            SitesIncluded                 = $mockSite1, $mockSite2
             SitesExcluded                 = @()
             OptionChangeNotification      = $false
             OptionTwoWaySync              = $false
             OptionDisableCompression      = $false
-            Ensure                        = 'Present'
         }
 
-        $targetResourceParametersWithOptions = @{
-            Name                          = 'HQSiteLink'
-            Cost                          = 100
-            Description                   = 'HQ Site'
-            ReplicationFrequencyInMinutes = 180
-            SitesIncluded                 = @('site1', 'site2')
-            SitesExcluded                 = @()
+        $mockChangedResource = @{
+            Cost                          = 1
+            Description                   = 'My Changed Description'
+            ReplicationFrequencyInMinutes = 1
+            SitesIncluded                 = 'site11', 'site12'
+            SitesExcluded                 = $mockResource.SitesIncluded
             OptionChangeNotification      = $true
             OptionTwoWaySync              = $true
             OptionDisableCompression      = $true
-            Ensure                        = 'Present'
         }
 
-        $targetResourceParametersSitesExcluded = $targetResourceParameters.Clone()
-        $targetResourceParametersSitesExcluded['SitesIncluded'] = $null
-        $targetResourceParametersSitesExcluded['SitesExcluded'] = @('site3', 'site4')
+        $mockGetADReplicationSiteLinkReturn = @{
+            Name                          = $mockResource.Name
+            Cost                          = $mockResource.Cost
+            Description                   = $mockResource.Description
+            ReplicationFrequencyInMinutes = $mockResource.ReplicationFrequencyInMinutes
+            SitesIncluded                 = @(
+                "CN=$mockSite1,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com",
+                "CN=$mockSite2,CN=Sites,CN=Configuration,DC=corp,DC=contoso,DC=com"
+            )
+        }
+
+        $mockGetADReplicationSiteLinkOptionsReturn = $mockGetADReplicationSiteLinkReturn.Clone()
+        $mockGetADReplicationSiteLinkOptionsReturn['Options'] = 7
+
+        $mockGetTargetResourcePresentResult = $mockResource.Clone()
+        $mockGetTargetResourcePresentResult.Ensure = 'Present'
+
+        $mockGetTargetResourceAbsentResult = $mockResource.Clone()
+        $mockGetTargetResourceAbsentResult.Ensure = 'Absent'
 
         $mockADReplicationSiteLinkSitesExcluded = $mockGetADReplicationSiteLinkReturn.Clone()
         $mockADReplicationSiteLinkSitesExcluded['SitesIncluded'] = $null
 
         Describe 'ADReplicationSiteLink\Get-TargetResource' {
             Context 'When sites are included' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockGetADReplicationSiteLinkReturn }
+                BeforeAll {
+                    Mock -CommandName Get-ADReplicationSiteLink `
+                        -MockWith { $mockGetADReplicationSiteLinkReturn }
+                    Mock -CommandName Resolve-SiteLinkName `
+                        -MockWith { $mockSite1 } `
+                        -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkReturn.SitesIncluded[0] }
+                    Mock -CommandName Resolve-SiteLinkName `
+                        -MockWith { $mockSite2 } `
+                        -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkReturn.SitesIncluded[1] }
+                }
 
-                It 'Ensure should be Present' {
-                    Mock -CommandName Resolve-SiteLinkName -MockWith { 'site1' } -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkReturn.SitesIncluded[0] }
-                    Mock -CommandName Resolve-SiteLinkName -MockWith { 'site2' } -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkReturn.SitesIncluded[1] }
+                It 'Should return the expected results' {
+                    $getResult = Get-TargetResource -Name $mockSiteName
 
-                    $getResult = Get-TargetResource -Name HQSiteLink
+                    $getResult.Name | Should -Be $mockGetADReplicationSiteLinkReturn.Name
+                    $getResult.Cost | Should -Be $mockGetADReplicationSiteLinkReturn.Cost
+                    $getResult.Description | Should -Be $mockGetADReplicationSiteLinkReturn.Description
+                    $getResult.ReplicationFrequencyInMinutes |
+                        Should -Be $mockGetADReplicationSiteLinkReturn.ReplicationFrequencyInMinutes
+                    $getResult.SitesIncluded | Should -Be $mockSite1, $mockSite2
+                    $getResult.SitesExcluded | Should -BeNullOrEmpty
+                    $getResult.Ensure | Should -Be 'Present'
+                    $getResult.OptionChangeNotification | Should -BeFalse
+                    $getResult.OptionTwoWaySync | Should -BeFalse
+                    $getResult.OptionDisableCompression | Should -BeFalse
+                }
 
-                    $getResult.Name | Should -Be $targetResourceParameters.Name
-                    $getResult.Cost | Should -Be $targetResourceParameters.Cost
-                    $getResult.Description | Should -Be $targetResourceParameters.Description
-                    $getResult.ReplicationFrequencyInMinutes | Should -Be $targetResourceParameters.ReplicationFrequencyInMinutes
-                    $getResult.SitesIncluded | Should -Be $targetResourceParameters.SitesIncluded
-                    $getResult.SitesExcluded | Should -Be $targetResourceParameters.SitesExcluded
-                    $getResult.Ensure | Should -Be $targetResourceParameters.Ensure
-                    $getResult.OptionChangeNotification | Should -Be $targetResourceParameters.OptionChangeNotification
-                    $getResult.OptionTwoWaySync | Should -Be $targetResourceParameters.OptionTwoWaySync
-                    $getResult.OptionDisableCompression | Should -Be $targetResourceParameters.OptionDisableCompression
-
+                It 'Should call the expected mocks' {
+                    Assert-MockCalled -CommandName Get-ADReplicationSiteLink `
+                        -Exactly -Times 1
+                    Assert-MockCalled -CommandName Resolve-SiteLinkName `
+                        -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkReturn.SitesIncluded[0] } `
+                        -Exactly -Times 1
+                    Assert-MockCalled -CommandName Resolve-SiteLinkName `
+                        -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkReturn.SitesIncluded[1] } `
+                        -Exactly -Times 1
                 }
             }
 
             Context 'When site link options are enabled' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockGetADReplicationSiteLinkOptionsReturn }
+                BeforeAll {
+                    Mock -CommandName Get-ADReplicationSiteLink `
+                        -MockWith { $mockGetADReplicationSiteLinkOptionsReturn }
+                    Mock -CommandName Resolve-SiteLinkName `
+                        -MockWith { $mockSite1 } `
+                        -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkOptionsReturn.SitesIncluded[0] }
+                    Mock -CommandName Resolve-SiteLinkName `
+                        -MockWith { $mockSite2 } `
+                        -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkOptionsReturn.SitesIncluded[1] }
+                }
 
-                It 'All parameters should match' {
-                    Mock -CommandName Resolve-SiteLinkName -MockWith { 'site1' } -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkOptionsReturn.SitesIncluded[0] }
-                    Mock -CommandName Resolve-SiteLinkName -MockWith { 'site2' } -ParameterFilter { $SiteName -eq $mockGetADReplicationSiteLinkOptionsReturn.SitesIncluded[1] }
+                It 'Should return the expected results' {
+                    $getResult = Get-TargetResource -Name $mockSiteName
 
-                    $getResult = Get-TargetResource -Name HQSiteLink
-
-                    $getResult.Name | Should -Be $targetResourceParametersWithOptions.Name
-                    $getResult.Cost | Should -Be $targetResourceParametersWithOptions.Cost
-                    $getResult.Description | Should -Be $targetResourceParametersWithOptions.Description
-                    $getResult.ReplicationFrequencyInMinutes | Should -Be $targetResourceParametersWithOptions.ReplicationFrequencyInMinutes
-                    $getResult.SitesIncluded | Should -Be $targetResourceParametersWithOptions.SitesIncluded
-                    $getResult.SitesExcluded | Should -Be $targetResourceParametersWithOptions.SitesExcluded
-                    $getResult.Ensure | Should -Be $targetResourceParametersWithOptions.Ensure
-                    $getResult.OptionChangeNotification | Should -Be $targetResourceParametersWithOptions.OptionChangeNotification
-                    $getResult.OptionTwoWaySync | Should -Be $targetResourceParametersWithOptions.OptionTwoWaySync
-                    $getResult.OptionDisableCompression | Should -Be $targetResourceParametersWithOptions.OptionDisableCompression
-
+                    $getResult.Name | Should -Be $mockGetADReplicationSiteLinkOptionsReturn.Name
+                    $getResult.Cost | Should -Be $mockGetADReplicationSiteLinkOptionsReturn.Cost
+                    $getResult.Description | Should -Be $mockGetADReplicationSiteLinkOptionsReturn.Description
+                    $getResult.ReplicationFrequencyInMinutes |
+                        Should -Be $mockGetADReplicationSiteLinkOptionsReturn.ReplicationFrequencyInMinutes
+                    $getResult.SitesIncluded | Should -Be $mockSite1, $mockSite2
+                    $getResult.SitesExcluded | Should -BeNullOrEmpty
+                    $getResult.Ensure | Should -Be 'Present'
+                    $getResult.OptionChangeNotification | Should -BeTrue
+                    $getResult.OptionTwoWaySync | Should -BeTrue
+                    $getResult.OptionDisableCompression | Should -BeTrue
                 }
             }
 
             Context 'When AD Replication Sites do not exist' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw (New-Object -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException) }
+                BeforeAll {
+                    $ADIdentityNotFoundException = New-Object `
+                        -TypeName Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+                    Mock -CommandName Get-ADReplicationSiteLink `
+                        -MockWith { throw $ADIdentityNotFoundException }
+                }
 
-                It 'Ensure Should be Absent' {
-                    $getResult = Get-TargetResource -Name HQSiteLink
+                It 'Should return the expected results' {
+                    $getResult = Get-TargetResource -Name $mockSiteName
 
-                    $getResult.Name | Should -Be $targetResourceParameters.Name
+                    $getResult.Name | Should -Be $mockSiteName
                     $getResult.Cost | Should -BeNullOrEmpty
                     $getResult.Description | Should -BeNullOrEmpty
                     $getResult.ReplicationFrequencyInMinutes | Should -BeNullOrEmpty
@@ -149,268 +179,293 @@ try
                     $getResult.OptionChangeNotification | Should -BeFalse
                     $getResult.OptionTwoWaySync | Should -BeFalse
                     $getResult.OptionDisableCompression | Should -BeFalse
-
                 }
             }
 
             Context 'When Get-ADReplicationSiteLink throws an unexpected error' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw }
+                BeforeAll {
+                    Mock -CommandName Get-ADReplicationSiteLink -MockWith { throw }
+                }
 
-                It 'Should throw the correct error' {
-                    { Get-TargetResource -Name HQSiteLink } | Should -Throw ($script:localizedData.GetSiteLinkUnexpectedError -f 'HQSiteLink')
+                It 'Should throw the correct exception' {
+                    { Get-TargetResource -Name $mockSiteName } | `
+                            Should -Throw ($script:localizedData.GetSiteLinkUnexpectedError -f $mockSiteName)
                 }
             }
 
-
             Context 'When Sites are excluded' {
-                Mock -CommandName Get-ADReplicationSiteLink -MockWith { $mockADReplicationSiteLinkSitesExcluded }
+                BeforeAll {
+                    Mock -CommandName Get-ADReplicationSiteLink `
+                        -MockWith { $mockADReplicationSiteLinkSitesExcluded }
+                }
 
-                $getResult = Get-TargetResource -Name HQSiteLink -SitesExcluded @('site3', 'site4')
+                It 'Should return the expected results' {
+                    $getResult = Get-TargetResource -Name $mockSiteName -SitesExcluded $mockSite3, $mockSite4
 
-                It 'Returns SitesExcluded' {
-                    $getResult.Name | Should -Be $targetResourceParametersSitesExcluded.Name
-                    $getResult.Cost | Should -Be $targetResourceParametersSitesExcluded.Cost
-                    $getResult.Description | Should -Be $targetResourceParametersSitesExcluded.Description
-                    $getResult.ReplicationFrequencyInMinutes | Should -Be $targetResourceParametersSitesExcluded.ReplicationFrequencyInMinutes
-                    $getResult.SitesIncluded | Should -Be $targetResourceParametersSitesExcluded.SitesIncluded
-                    $getResult.SitesExcluded | Should -Be $targetResourceParametersSitesExcluded.SitesExcluded
-                    $getResult.Ensure | Should -Be $targetResourceParametersSitesExcluded.Ensure
-                    $getResult.OptionChangeNotification | Should -Be $targetResourceParametersSitesExcluded.OptionChangeNotification
-                    $getResult.OptionTwoWaySync | Should -Be $targetResourceParametersSitesExcluded.OptionTwoWaySync
-                    $getResult.OptionDisableCompression | Should -Be $targetResourceParametersSitesExcluded.OptionDisableCompression
+                    $getResult.Name | Should -Be $mockADReplicationSiteLinkSitesExcluded.Name
+                    $getResult.Cost | Should -Be $mockADReplicationSiteLinkSitesExcluded.Cost
+                    $getResult.Description | Should -Be $mockADReplicationSiteLinkSitesExcluded.Description
+                    $getResult.ReplicationFrequencyInMinutes |
+                        Should -Be $mockADReplicationSiteLinkSitesExcluded.ReplicationFrequencyInMinutes
+                    $getResult.SitesIncluded | Should -BeNullOrEmpty
+                    $getResult.SitesExcluded | Should -Be $mockSite3, $mockSite4
+                    $getResult.Ensure | Should -Be 'Present'
+                    $getResult.OptionChangeNotification | Should -Be $false
+                    $getResult.OptionTwoWaySync | Should -Be $false
+                    $getResult.OptionDisableCompression | Should -Be $false
                 }
             }
         }
 
         Describe 'ADReplicationSiteLink\Test-TargetResource' {
-            Context 'When target resource in desired state' {
-                Mock -CommandName Get-TargetResource -MockWith { $targetResourceParameters }
+            BeforeAll {
+                $testTargetResourcePresentParameters = $mockResource.Clone()
+                $testTargetResourcePresentParameters.Ensure = 'Present'
 
-                It 'Should return $true when sites included' {
-                    Test-TargetResource @targetResourceParameters | Should -BeTrue
-                }
-
-                It 'Should return $true when sites excluded' {
-                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -BeTrue
-                }
+                $testTargetResourceAbsentParameters = $mockResource.Clone()
+                $testTargetResourceAbsentParameters.Ensure = 'Absent'
             }
 
-            Context 'When target resource is not in desired state' {
-                BeforeEach {
-                    $mockTargetResourceNotInDesiredState = $targetResourceParameters.clone()
+            Context 'When the Resource is Present' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourcePresentResult }
                 }
 
-                It 'Should return $false with Cost is non compliant' {
-                    $mockTargetResourceNotInDesiredState['Cost'] = 1
+                Context 'When the Resource should be Present' {
 
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
+                    Context 'When the resource is in the desired state' {
 
-                    Test-TargetResource @targetResourceParameters | Should -BeFalse
+                        It 'Should return the expected result' {
+                            Test-TargetResource @testTargetResourcePresentParameters | Should -BeTrue
+                        }
+
+                        Context 'When the "SitesExcluded" property is specified' {
+                            BeforeAll {
+                                $testtargetResourcePresentSitesExcludedParameters = `
+                                    $testTargetResourcePresentParameters.Clone()
+                                $testtargetResourcePresentSitesExcludedParameters['SitesIncluded'] = $null
+                                $testtargetResourcePresentSitesExcludedParameters['SitesExcluded'] = `
+                                    $mockSite3, $mockSite4
+                            }
+
+                            It 'Should return the expected result' {
+                                Test-TargetResource @testtargetResourcePresentSitesExcludedParameters | Should -BeTrue
+                            }
+                        }
+                    }
+
+                    foreach ($property in $mockChangedResource.Keys)
+                    {
+                        Context "When the $property resource property is not in the desired state" {
+                            BeforeAll {
+                                $testTargetResourceNotInDesiredStateParameters = `
+                                    $testTargetResourcePresentParameters.clone()
+                                $testTargetResourceNotInDesiredStateParameters[$property] = `
+                                    $mockChangedResource.$property
+                            }
+
+                            It 'Should return the expected result' {
+                                Test-TargetResource @testTargetResourceNotInDesiredStateParameters | Should -BeFalse
+                            }
+                        }
+                    }
                 }
 
-                It 'Should return $false with Description is non compliant' {
-                    $mockTargetResourceNotInDesiredState['Description'] = 'MyIncorrectDescription'
+                Context 'When the Resource should be Absent' {
+                    It 'Should return the desired result' {
+                        Test-TargetResource @testTargetResourceAbsentParameters | Should -Be $false
+                    }
 
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
-
-                    Test-TargetResource @targetResourceParameters | Should -BeFalse
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource `
+                            -ParameterFilter { $Name -eq $testTargetResourceAbsentParameters.Name } `
+                            -Exactly -Times 1
+                    }
                 }
 
-                It 'Should return $false with Replication Frequency In Minutes is non compliant' {
-                    $mockTargetResourceNotInDesiredState['ReplicationFrequencyInMinutes'] = 1
+                Context 'When the Resource is Absent' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourceAbsentResult }
+                    }
 
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
+                    Context 'When the Resource should be Present' {
+                        It 'Should return the desired result' {
+                            Test-TargetResource @testTargetResourcePresentParameters | Should -Be $false
+                        }
 
-                    Test-TargetResource @targetResourceParameters | Should -BeFalse
-                }
+                        It 'Should call the expected mocks' {
+                            Assert-MockCalled -CommandName Get-TargetResource `
+                                -ParameterFilter { $Name -eq $testTargetResourcePresentParameters.Name } `
+                                -Exactly -Times 1
+                        }
+                    }
 
-                It 'Should return $false with Sites Included is non compliant' {
-                    $mockTargetResourceNotInDesiredState['SitesIncluded'] = @('site11', 'site12')
+                    Context 'When the Resource should be Absent' {
+                        It 'Should return the desired result' {
+                            Test-TargetResource @testTargetResourceAbsentParameters | Should -Be $true
+                        }
 
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
-
-                    Test-TargetResource @targetResourceParameters | Should -BeFalse
-                }
-
-                It 'Should return $false with Ensure is non compliant' {
-                    $mockTargetResourceNotInDesiredState['Ensure'] = 'Absent'
-
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
-
-                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -BeFalse
-                }
-
-                It 'Should return $false with Sites Excluded is non compliant' {
-                    $mockTargetResourceNotInDesiredState['SitesIncluded'] = @('site1', 'site2', 'site3', 'site4')
-                    $mockTargetResourceNotInDesiredState['SitesExcluded'] = @('site3', 'site4')
-
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
-
-                    Test-TargetResource @targetResourceParametersSitesExcluded | Should -BeFalse
-                }
-
-                It 'Should return $false with OptionChangeNotification $true is non compliant' {
-                    $mockTargetResourceNotInDesiredState['OptionChangeNotification'] = $true
-
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
-
-                    Test-TargetResource @targetResourceParameters | Should -BeFalse
-                }
-
-                It 'Should return $false with OptionTwoWaySync $true is non compliant' {
-                    $mockTargetResourceNotInDesiredState['OptionTwoWaySync'] = $true
-
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
-
-                    Test-TargetResource @targetResourceParameters | Should -BeFalse
-                }
-
-                It 'Should return $false with OptionDisableCompression $true is non compliant' {
-                    $mockTargetResourceNotInDesiredState['OptionDisableCompression'] = $true
-
-                    Mock -CommandName Get-TargetResource -MockWith { $mockTargetResourceNotInDesiredState }
-
-                    Test-TargetResource @targetResourceParameters | Should -BeFalse
+                        It 'Should call the expected mocks' {
+                            Assert-MockCalled -CommandName Get-TargetResource `
+                                -ParameterFilter { $Name -eq $testTargetResourceAbsentParameters.Name } `
+                                -Exactly -Times 1
+                        }
+                    }
                 }
             }
         }
 
         Describe 'ADReplicationSiteLink\Set-TargetResource' {
-            Context 'Site Link is Absent but is desired Present' {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    @{
-                        Ensure = 'Absent'
-                    }
-                }
+            BeforeAll {
+
+                $setTargetResourcePresentParameters = $mockResource.Clone()
+                $setTargetResourcePresentParameters['Ensure'] = 'Present'
+
+                $setTargetResourceAbsentParameters = $mockResource.Clone()
+                $setTargetResourceAbsentParameters['Ensure'] = 'Absent'
 
                 Mock -CommandName New-ADReplicationSiteLink
                 Mock -CommandName Set-ADReplicationSiteLink
                 Mock -CommandName Remove-ADReplicationSiteLink
+            }
 
-                It 'Should assert mock calls when Present' {
-                    Set-TargetResource -Name 'TestSiteLink' -Ensure 'Present'
+            Context 'When the Resource is Present' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourcePresentResult }
+                }
 
-                    Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 1 -Exactly
-                    Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 0 -Exactly
-                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly
+                Context 'When the Resource should be Present' {
+                    BeforeAll {
+
+                    }
+
+                    foreach ($property in $mockChangedResource.Keys)
+                    {
+                        Context "When $property has changed" {
+                            BeforeAll {
+                                $setTargetResourceParametersChangedProperty = $setTargetResourcePresentParameters.Clone()
+                                $setTargetResourceParametersChangedProperty.$property = $mockChangedResource.$property
+                                if ($property -eq 'SitesExcluded')
+                                {
+                                    $setTargetResourceParametersChangedProperty['SitesIncluded'] = ''
+                                }
+                            }
+
+                            It 'Should not throw' {
+                                { Set-TargetResource @setTargetResourceParametersChangedProperty } | Should -Not -Throw
+                            }
+
+                            It 'Should call the correct mocks' {
+                                Assert-MockCalled -CommandName Get-TargetResource `
+                                    -ParameterFilter { `
+                                        $Name -eq $setTargetResourceParametersChangedProperty.Name } `
+                                    -Exactly -Times 1
+                            }
+                        }
+                    }
+                }
+
+                Context 'When the Resource should be Absent' {
+                    It 'Should not throw' {
+                        { Set-TargetResource @setTargetResourceAbsentParameters } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Remove-ADReplicationSiteLink `
+                            -ParameterFilter { $Identity -eq $mockSiteName } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName New-ADReplicationSiteLink  `
+                            -Exactly -Times 0
+                        Assert-MockCalled -CommandName Set-ADReplicationSiteLink `
+                            -Exactly -Times 0
+                    }
                 }
             }
 
-            Context 'Site Link is Present but desired Absent' {
-                Mock -CommandName Get-TargetResource -MockWith {
-                    @{
-                        Ensure = 'Present'
+            Context 'When the Resource is Absent' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourceAbsentResult }
+                }
+
+                Context 'When the Resource should be Present' {
+                    It 'Should not throw' {
+                        { Set-TargetResource @setTargetResourcePresentParameters } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName New-ADReplicationSiteLink `
+                            -ParameterFilter { $Name -eq $mockSiteName } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName Set-ADReplicationSiteLink `
+                            -Exactly -Times 0
+                        Assert-MockCalled -CommandName Remove-ADReplicationSiteLink `
+                            -Exactly -Times 0
+                    }
+
+                    Context 'When an Option parameter has been specified' {
+                        BeforeAll {
+                            $setTargetResourcePresentOptionParameters = $setTargetResourcePresentParameters.Clone()
+                            $setTargetResourcePresentOptionParameters['OptionChangeNotification'] = $true
+                        }
+
+                        It 'Should not throw' {
+                            { Set-TargetResource @setTargetResourcePresentOptionParameters } | Should -Not -Throw
+                        }
+
+                        It 'Should call the expected mocks' {
+                            Assert-MockCalled -CommandName New-ADReplicationSiteLink `
+                                -ParameterFilter { $Name -eq $mockSiteName } `
+                                -Exactly -Times 1
+                            Assert-MockCalled -CommandName Set-ADReplicationSiteLink `
+                                -Exactly -Times 0
+                            Assert-MockCalled -CommandName Remove-ADReplicationSiteLink `
+                                -Exactly -Times 0
+                        }
                     }
                 }
 
-                Mock -CommandName New-ADReplicationSiteLink
-                Mock -CommandName Set-ADReplicationSiteLink
-                Mock -CommandName Remove-ADReplicationSiteLink
-
-                It 'Should assert mock calls when Absent' {
-                    Set-TargetResource -Name 'TestSiteLink' -Ensure 'Absent'
-
-                    Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
-                    Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 0 -Exactly
-                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 1 -Exactly
-                }
-            }
-
-            Context 'Site Link is Present and Should be but not in a desired state' {
-                $addSitesParameters = @{
-                    Name                          = 'TestSite'
-                    SitesIncluded                 = 'Site1'
-                    Ensure                        = 'Present'
-                    ReplicationFrequencyInMinutes = 15
-                }
-
-                $removeSitesParameters = @{
-                    Name          = 'TestSite'
-                    SitesExcluded = 'Site1'
-                    Ensure        = 'Present'
-                }
-
-                Mock -CommandName Get-TargetResource -MockWith { @{
-                        Ensure                   = 'Present'
-                        SitesIncluded            = 'Site0'
-                        OptionDisableCompression = $false
-                        OptionChangeNotification = $false
-                        OptionTwoWaySync         = $false
+                Context 'When the Resource should be Absent' {
+                    It 'Should not throw' {
+                        { Set-TargetResource @setTargetResourceAbsentParameters } | Should -Not -Throw
                     }
-                }
-                Mock -CommandName Set-ADReplicationSiteLink
-                Mock -CommandName New-ADReplicationSiteLink
-                Mock -CommandName Remove-ADReplicationSiteLink
 
-                It "Should call Set-ADReplicationSiteLink with SitesIncluded-Add when SitesInluded is populated" {
-                    Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter { $SitesIncluded -and $SitesIncluded['Add'] -eq 'Site1' }
-                    Set-TargetResource @addSitesParameters
-
-                    Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
-                    Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 1 -Exactly
-                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly -ParameterFilter {
-                        $ReplicationFrequencyInMinutes -eq 15
-                        $Name -eq 'TestSite'
-                        $Ensure -eq 'Present'
-                        $SitesIncluded -eq 'Site1'
-                    }
-                }
-
-                It 'Should call Set-ADReplicationSiteLink with SitesIncluded-Remove when SitesExcluded is populated' {
-                    Mock -CommandName Set-ADReplicationSiteLink -ParameterFilter { $SitesIncluded -and $SitesIncluded['Remove'] -eq 'Site1' }
-                    Set-TargetResource @removeSitesParameters
-
-                    Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
-                    Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 1 -Exactly
-                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly
-                }
-            }
-
-            Context 'Site Link is Present and now enabling Site Link Options' {
-                $addSitesParameters = @{
-                    Name                          = 'TestSite'
-                    SitesIncluded                 = 'Site1'
-                    Ensure                        = 'Present'
-                    ReplicationFrequencyInMinutes = 15
-                    OptionChangeNotification      = $true
-                    OptionDisableCompression      = $true
-                    OptionTwoWaySync              = $true
-                }
-
-                Mock -CommandName Get-TargetResource -MockWith { @{
-                        Ensure                   = 'Present'
-                        SitesIncluded            = 'Site0'
-                        OptionDisableCompression = $false
-                        OptionChangeNotification = $false
-                        OptionTwoWaySync         = $false
-                    }
-                }
-                Mock -CommandName Set-ADReplicationSiteLink
-                Mock -CommandName New-ADReplicationSiteLink
-                Mock -CommandName Remove-ADReplicationSiteLink
-
-                It "Should call Set-ADReplicationSiteLink" {
-                    Mock -CommandName Set-ADReplicationSiteLink
-                    Set-TargetResource @addSitesParameters
-
-                    Assert-MockCalled -CommandName New-ADReplicationSiteLink -Scope It -Times 0 -Exactly
-                    Assert-MockCalled -CommandName Set-ADReplicationSiteLink -Scope It -Times 1 -Exactly
-                    Assert-MockCalled -CommandName Remove-ADReplicationSiteLink -Scope It -Times 0 -Exactly -ParameterFilter {
-                        $ReplicationFrequencyInMinutes -eq 15
-                        $Name -eq 'TestSite'
-                        $Ensure -eq 'Present'
-                        $SitesIncluded -eq 'Site1'
-                        $OptionChangeNotification -eq $true
-                        $OptionDisableCompression -eq $true
-                        $OptionTwoWaySync -eq $true
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Remove-ADReplicationSiteLink `
+                            -ParameterFilter { $Identity -eq $mockSiteName } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName New-ADReplicationSiteLink `
+                            -Exactly -Times 0
+                        Assert-MockCalled -CommandName Set-ADReplicationSiteLink `
+                            -Exactly -Times 0
                     }
                 }
             }
         }
 
+        Describe 'ADReplicationSiteLink\ResolveSiteLinkName' {
+            BeforeAll {
+                $mockSiteName = $mockSite1
+                $resolveSiteLinkParms = @{
+                    SiteName = $mockSiteName
+                }
+                Mock -CommandName Get-ADReplicationSite
+            }
+
+            It 'Should not throw' {
+                { Resolve-SiteLinkName @resolveSiteLinkParms } | Should -Not -Throw
+            }
+
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName Get-ADReplicationSite `
+                    -ParameterFilter { $Identity -eq $resolveSiteLinkParms.SiteName } `
+                    -Exactly -Times 1
+            }
+        }
+
         Describe 'ADReplicationSiteLink\Get-EnabledOptions' {
+
             Context 'When all options are disabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 0
 
                     $result.USE_NOTIFY | Should -BeFalse
@@ -420,7 +475,7 @@ try
             }
 
             Context 'When Change Notification Replication is enabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 1
 
                     $result.USE_NOTIFY | Should -BeTrue
@@ -430,7 +485,7 @@ try
             }
 
             Context 'When Two Way Sync Replication is enabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 2
 
                     $result.USE_NOTIFY | Should -BeFalse
@@ -440,7 +495,7 @@ try
             }
 
             Context 'When Change Notification and Two Way Sync Replication are enabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 3
 
                     $result.USE_NOTIFY | Should -BeTrue
@@ -450,7 +505,7 @@ try
             }
 
             Context 'When Disable Compression is enabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 4
 
                     $result.USE_NOTIFY | Should -BeFalse
@@ -460,7 +515,7 @@ try
             }
 
             Context 'When Change Notification and Disable Compression Replication are enabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 5
 
                     $result.USE_NOTIFY | Should -BeTrue
@@ -470,7 +525,7 @@ try
             }
 
             Context 'When Disable Compression and Two Way Sync Replication are enabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 6
 
                     $result.USE_NOTIFY | Should -BeFalse
@@ -480,7 +535,7 @@ try
             }
 
             Context 'When all options are enabled' {
-                It 'Should return the correct values in the hashtable' {
+                It 'Should return the expected results' {
                     $result = Get-EnabledOptions -optionValue 7
 
                     $result.USE_NOTIFY | Should -BeTrue
@@ -491,13 +546,17 @@ try
         }
 
         Describe 'ADReplicationSiteLink\ConvertTo-EnabledOptions' {
+
             Context 'When all options are disabled' {
-                It 'Should return 0' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $false
                         OptionDisableCompression = $false
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 0
@@ -505,12 +564,15 @@ try
             }
 
             Context 'When Change Notification Replication is enabled' {
-                It 'Should return 1' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $false
                         OptionDisableCompression = $false
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 1
@@ -518,12 +580,15 @@ try
             }
 
             Context 'When Two Way Sync is enabled' {
-                It 'Should return 2' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $true
                         OptionDisableCompression = $false
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 2
@@ -531,12 +596,15 @@ try
             }
 
             Context 'When Change Notification Replication and Two Way Sync are enabled' {
-                It 'Should return 3' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $true
                         OptionDisableCompression = $false
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 3
@@ -544,12 +612,15 @@ try
             }
 
             Context 'When Disable Compression is enabled' {
-                It 'Should return 4' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $false
                         OptionDisableCompression = $true
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 4
@@ -557,12 +628,15 @@ try
             }
 
             Context 'When Change Notification Replication and Disable Compression are enabled' {
-                It 'Should return 5' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $false
                         OptionDisableCompression = $true
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 5
@@ -570,12 +644,15 @@ try
             }
 
             Context 'When Disable Compression and Two Way Sync are enabled' {
-                It 'Should return 6' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $false
                         OptionTwoWaySync         = $true
                         OptionDisableCompression = $true
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 6
@@ -583,12 +660,15 @@ try
             }
 
             Context 'When all options are enabled' {
-                It 'Should return 7' {
+                BeforeAll {
                     $testParameters = @{
                         OptionChangeNotification = $true
                         OptionTwoWaySync         = $true
                         OptionDisableCompression = $true
                     }
+                }
+
+                It 'Should return the expected result' {
                     $result = ConvertTo-EnabledOptions @testParameters
 
                     $result | Should -Be 7
