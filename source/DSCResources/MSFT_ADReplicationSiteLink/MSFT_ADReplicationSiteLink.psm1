@@ -211,7 +211,9 @@ function Set-TargetResource
 
             if ($optionsValue -gt 0)
             {
-                $newADReplicationSiteLinkParameters['OtherAttributes'] = @{options = $optionsValue }
+                $newADReplicationSiteLinkParameters['OtherAttributes'] = @{
+                    options = $optionsValue
+                }
             }
 
             Write-Verbose -Message ($script:localizedData.NewSiteLink -f $Name)
