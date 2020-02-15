@@ -4,7 +4,7 @@ ConvertFrom-StringData @'
     UpdatingOU                 = Updating OU '{0}'. (ADOU0002)
     DeletingOU                 = Deleting OU '{0}'. (ADOU0003)
     CreatingOU                 = Creating OU '{0}'. (ADOU0004)
-    RestoringOU                = Attempting to restore the organizational unit object {0} from the recycle bin. (ADOU0005)
+    RestoringOU                = Attempting to restore the organizational unit object' {0}' from the recycle bin. (ADOU0005)
     OUInDesiredState           = OU '{0}' exists and is in the desired state. (ADOU0006)
     OUNotInDesiredState        = OU '{0}' exists but is not in the desired state. (ADOU0007)
     OUExistsButShouldNot       = OU '{0}' exists when it should not exist. (ADOU0008)
@@ -14,4 +14,8 @@ ConvertFrom-StringData @'
     OUIsPresent                = The OU '{0}' is present. (ADOU0012)
     OUIsAbsent                 = The OU '{0}' is absent. (ADOU0013)
     OUPathIsAbsent             = The OU Parent Path '{0}' is absent. (ADOU0014)
+    GetResourceError           = Error getting OU '{0}'. (ADOU0015)
+    NewResourceError           = Error adding OU '{0}'. (ADOU0016)
+    SetResourceError           = Error updating OU '{0}'. (ADOU0017)
+    RemoveResourceError        = Error removing OU '{0}'. (ADOU0018)
 '@
