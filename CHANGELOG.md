@@ -60,6 +60,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     2012 R2.
 - ADForestProperties
   - Refactored unit tests.
+- ADOrganizationalUnit
+  - Refactored unit tests.
 
 ## [5.0.0] - 2020-01-14
 
