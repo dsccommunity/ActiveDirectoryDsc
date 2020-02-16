@@ -1134,7 +1134,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
             It 'Should throw the correct error' {
                 { Get-DomainControllerObject -DomainName 'contoso.com' } |
-                    Should -Throw $localizedData.FailedEvaluatingDomainController
+                    Should -Throw $script:localizedData.FailedEvaluatingDomainController
 
                 Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
             }
