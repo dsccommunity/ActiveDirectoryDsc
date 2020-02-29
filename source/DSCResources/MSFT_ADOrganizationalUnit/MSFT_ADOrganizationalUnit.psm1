@@ -45,6 +45,7 @@ function Get-TargetResource
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
         Write-Verbose -Message ($script:localizedData.OUPathIsAbsent -f $Path)
+        $ou = $null
     }
     catch
     {

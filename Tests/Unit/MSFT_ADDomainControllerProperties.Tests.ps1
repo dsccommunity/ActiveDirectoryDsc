@@ -31,6 +31,8 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
+        Set-StrictMode -Version 1.0
+
         $mockDefaultParameters = @{
             IsSingleInstance = 'Yes'
         }

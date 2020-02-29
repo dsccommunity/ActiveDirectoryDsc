@@ -12,6 +12,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ActiveDirectoryDsc
   - Added [Codecov.io](https://codecov.io) support.
   - Fixed miscellaneous spelling errors.
+  - Added Strict-Mode v1.0 to all unit tests.
 - ADDomain
   - Added integration tests
     ([issue #302](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/302)).

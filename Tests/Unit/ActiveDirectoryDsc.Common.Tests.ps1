@@ -26,6 +26,8 @@ Import-Module $script:subModuleFile -Force -ErrorAction Stop
 #endregion HEADER
 
 InModuleScope 'ActiveDirectoryDsc.Common' {
+    Set-StrictMode -Version 1.0
+
     # Load stub cmdlets and classes.
     Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
     Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ADDSDeployment_2019.psm1') -Force
@@ -1131,7 +1133,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should throw the correct error' {
-                { Get-DomainControllerObject -DomainName 'contoso.com' } | Should -Throw $localizedString.FailedEvaluatingDomainController
+                { Get-DomainControllerObject -DomainName 'contoso.com' } |
+                    Should -Throw $script:localizedData.FailedEvaluatingDomainController
 
                 Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
             }
@@ -1291,7 +1294,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             It 'Should throw the correct error' {
                 {
                     Convert-PropertyMapToObjectProperties $propertyMapValue
-                } | Should -Throw $localizedString.PropertyMapArrayIsWrongType
+                } | Should -Throw $script:localizedData.PropertyMapArrayIsWrongType
             }
         }
     }
@@ -1915,7 +1918,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 }
 
                 It 'Should throw the correct error' {
-                    { Assert-ADPSDrive } | Should -Throw $script:localizedString.CreatingNewADPSDriveError
+                    { Assert-ADPSDrive } | Should -Throw $script:localizedData.CreatingNewADPSDriveError
                 }
 
                 It 'Should call the expected mocks' {
