@@ -86,6 +86,7 @@ function Get-TargetResource
     catch [System.Management.Automation.ItemNotFoundException]
     {
         Write-Verbose -Message ($script:localizedData.ObjectPathIsAbsent -f $Path)
+        $acl = $null
     }
     catch
     {

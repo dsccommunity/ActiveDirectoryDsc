@@ -61,10 +61,10 @@ function Get-TargetResource
 
     if ($null -ne $siteLink)
     {
+        $siteCommonNames = @()
+
         if ($siteLink.SitesIncluded)
         {
-            $siteCommonNames = @()
-
             foreach ($siteDN in $siteLink.SitesIncluded)
             {
                 $siteCommonNames += Resolve-SiteLinkName -SiteName $siteDn

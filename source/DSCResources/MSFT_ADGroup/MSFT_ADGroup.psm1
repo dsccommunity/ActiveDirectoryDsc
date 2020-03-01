@@ -593,6 +593,8 @@ function Set-TargetResource
 
     Assert-MemberParameters @assertMemberParameters
 
+    $membersInMultipleDomains = $false
+
     if ($MembershipAttribute -eq 'DistinguishedName')
     {
         $allMembers = $Members + $MembersToInclude + $MembersToExclude

@@ -100,6 +100,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message ($script:localizedData.ManagedServiceAccountNotFoundMessage -f
             $AccountType, $ServiceAccountName)
+        $adServiceAccount = $null
     }
     catch
     {
@@ -110,6 +111,8 @@ function Get-TargetResource
     if ($adServiceAccount)
     {
         # Resource exists
+        $managedPasswordPrincipals = @()
+
         if ($adServiceAccount.ObjectClass -eq 'msDS-ManagedServiceAccount')
         {
             $existingAccountType = 'Standalone'
@@ -120,8 +123,6 @@ function Get-TargetResource
 
             Write-Verbose -Message ($script:localizedData.RetrievingManagedPasswordPrincipalsMessage -f
                 $MembershipAttribute)
-
-            $managedPasswordPrincipals = @()
 
             foreach ($identity in $adServiceAccount.PrincipalsAllowedToRetrieveManagedPassword)
             {

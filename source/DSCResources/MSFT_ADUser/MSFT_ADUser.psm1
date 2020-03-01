@@ -272,6 +272,7 @@ function Get-TargetResource
     {
         Write-Verbose -Message ($script:localizedData.ADUserNotPresent -f $UserName, $DomainName)
 
+        $adUser = $null
         $ensure = 'Absent'
     }
     catch
