@@ -81,7 +81,7 @@ function Get-TargetResource
             ForEach-Object -MemberName sAMAccountName)
         $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
         $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
-        $isDnsServer = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
+        $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
 
         $targetResource = @{
             AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
@@ -92,8 +92,7 @@ function Get-TargetResource
             Ensure                              = $true
             FlexibleSingleMasterOperationRole   = @($domainControllerObject.OperationMasterRoles)
             InstallationMediaPath               = $null
-            InstallDns                          = $null
-            IsDnsServer                         = $isDnsServer
+            InstallDns                          = $installDns
             IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
             LogPath                             = $serviceNTDS.'Database log files path'
             ReadOnlyReplica                     = $domainControllerObject.IsReadOnly
@@ -115,8 +114,7 @@ function Get-TargetResource
             Ensure                              = $false
             FlexibleSingleMasterOperationRole   = $null
             InstallationMediaPath               = $null
-            InstallDns                          = $null
-            IsDnsServer                         = $isDnsServer
+            InstallDns                          = $false
             IsGlobalCatalog                     = $false
             LogPath                             = $null
             ReadOnlyReplica                     = $false
