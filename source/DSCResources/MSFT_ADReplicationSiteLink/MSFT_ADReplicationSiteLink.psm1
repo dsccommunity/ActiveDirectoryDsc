@@ -302,7 +302,7 @@ function Set-TargetResource
                     $OptionTwoWaySync -ne $currentADSiteLink.OptionTwoWaySync)
             {
                 Write-Verbose -Message ($script:localizedData.SettingProperty -f
-                    'TwoWaySync', $TwoWaySync, $Name)
+                    'TwoWaySync', $OptionTwoWaySync, $Name)
                 $twoWaySync = $OptionTwoWaySync
             }
             else
