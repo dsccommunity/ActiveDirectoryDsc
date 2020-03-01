@@ -109,7 +109,6 @@ try
                     Mock -CommandName Get-ItemProperty `
                         -ParameterFilter { $Path -eq $nTDSRegistryPath } `
                         -MockWith { $mockGetItemPropertyNTDSResult }
-
                     Mock -CommandName Get-ItemProperty `
                         -ParameterFilter { $Path -eq $netlogonRegistryPath } `
                         -MockWith { $mockGetItemPropertyNetlogonResult }
@@ -135,7 +134,7 @@ try
                         $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
                         $result.DomainName | Should -Be $correctDomainName
-                        $result.IsDnsServer | Should -BeTrue
+                        $result.InstallDns | Should -BeTrue
                     }
 
                     It 'Should call the expected mocks' {
@@ -185,7 +184,7 @@ try
                         $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
 
                         $result.DomainName | Should -Be $correctDomainName
-                        $result.IsDnsServer | Should -BeFalse
+                        $result.InstallDns | Should -BeFalse
                     }
 
                     It 'Should call the expected mocks' {
@@ -259,7 +258,7 @@ try
                         $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
-                        $result.IsDnsServer | Should -BeFalse
+                        $result.InstallDns | Should -BeFalse
                     }
 
                     It 'Should call the expected mocks' {
