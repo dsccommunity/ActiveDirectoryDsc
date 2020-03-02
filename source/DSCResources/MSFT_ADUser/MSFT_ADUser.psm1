@@ -96,7 +96,7 @@ function Get-TargetResource
         Write-Verbose -Message ($script:localizedData.ADUserIsPresent -f $UserName, $DomainName)
 
         $targetResource = @{
-            DistinguishedName = $adUser.DistinguishedName; # Read-only property
+            DistinguishedName = $adUser.DistinguishedName # Read-only property
             DomainController  = $DomainController
             DomainName        = $DomainName
             Ensure            = 'Present'
