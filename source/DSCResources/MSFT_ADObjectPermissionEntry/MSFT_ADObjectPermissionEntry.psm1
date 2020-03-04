@@ -207,13 +207,19 @@ function Set-TargetResource
     Assert-ADPSDrive
 
     # Get the current acl
-    $acl = Get-Acl -Path "AD:$Path"
+    $acl = [adsi]"LDAP://$path"
+    $modified = $false
 
     if ($Ensure -eq 'Present')
     {
         Write-Verbose -Message ($script:localizedData.AddingObjectPermissionEntry -f $Path)
 
         $ntAccount = New-Object -TypeName 'System.Security.Principal.NTAccount' -ArgumentList $IdentityReference
+        $ace = New-Object -TypeName 'System.DirectoryServices.ActiveDirectoryAccessRule' -ArgumentList $ntAccount, $ActiveDirectoryRights, $AccessControlType, $ObjectType, $ActiveDirectorySecurityInheritance, $InheritedObjectType
+
+        $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$modified)
+
+        <#$ntAccount = New-Object -TypeName 'System.Security.Principal.NTAccount' -ArgumentList $IdentityReference
 
         $ace = New-Object -TypeName 'System.DirectoryServices.ActiveDirectoryAccessRule' -ArgumentList @(
             $ntAccount,
@@ -224,7 +230,7 @@ function Set-TargetResource
             $InheritedObjectType
         )
 
-        $acl.AddAccessRule($ace)
+        $acl.AddAccessRule($ace)#>
     }
     else
     {
@@ -244,15 +250,19 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message ($script:localizedData.RemovingObjectPermissionEntry -f $Path)
 
-                    $acl.RemoveAccessRule($access)
+                    $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::RemoveSpecific,$access,[ref]$modified)
+                    #$acl.RemoveAccessRule($access)
                 }
             }
         }
     }
 
     # Set the updated acl to the object
-    $acl |
-        Set-Acl -Path "AD:$Path"
+    if($modified)
+    {
+        $acl.CommitChanges()
+    }
+    #$acl | Set-Acl -Path "AD:$Path"
 }
 
 <#
