@@ -30,6 +30,9 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADObjectPermission
     .PARAMETER InheritedObjectType
         The schema GUID of the child object type that can inherit this access
         rule.
+
+    .PARAMETER Credential
+        Specifies the user account credentials to use to perform the task.
 #>
 function Get-TargetResource
 {
@@ -61,10 +64,14 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $InheritedObjectType
-    )
+        $InheritedObjectType,
 
-    Assert-ADPSDrive
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
+    )
 
     # Return object, by default representing an absent ace
     $returnValue = @{
@@ -81,38 +88,33 @@ function Get-TargetResource
     try
     {
         # Get the current acl
-        $acl = Get-Acl -Path "AD:$Path" -ErrorAction Stop
+        $DirectoryEntry = New-Object -TypeName System.DirectoryServices.DirectoryEntry -ArgumentList @("LDAP://$Path", $Credential.UserName, $Credential.GetNetworkCredential().Password)
     }
     catch [System.Management.Automation.ItemNotFoundException]
     {
         Write-Verbose -Message ($script:localizedData.ObjectPathIsAbsent -f $Path)
-        $acl = $null
+        $DirectoryEntry = $null
     }
     catch
     {
         throw $_
     }
 
-    if ($null -ne $acl)
+    if ($null -ne $DirectoryEntry)
     {
-        foreach ($access in $acl.Access)
+        $FoundEntry = $DirectoryEntry.ObjectSecurity.Access | Where-Object {
+            $_.IsInherited -eq $false -and
+            $_.IdentityReference.Value -eq $IdentityReference -and
+            $_.AccessControlType -eq $AccessControlType -and
+            $_.ObjectType.Guid -eq $ObjectType -and
+            $_.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
+            $_.InheritedObjectType.Guid -eq $InheritedObjectType
+        }
+
+        if($null -ne $FoundEntry)
         {
-            if ($access.IsInherited -eq $false)
-            {
-                <#
-                    Check if the ace does match the parameters. If yes, the target
-                    ace has been found, return present with the assigned rights.
-                #>
-                if ($access.IdentityReference.Value -eq $IdentityReference -and
-                    $access.AccessControlType -eq $AccessControlType -and
-                    $access.ObjectType.Guid -eq $ObjectType -and
-                    $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
-                    $access.InheritedObjectType.Guid -eq $InheritedObjectType)
-                {
-                    $returnValue['Ensure'] = 'Present'
-                    $returnValue['ActiveDirectoryRights'] = [System.String[]] $access.ActiveDirectoryRights.ToString().Split(',').ForEach( { $_.Trim() })
-                }
-            }
+            $returnValue['Ensure'] = 'Present'
+            $returnValue['ActiveDirectoryRights'] = [System.String[]] $FoundEntry.ActiveDirectoryRights.ToString().Split(',').ForEach( { $_.Trim() })
         }
     }
 
@@ -161,6 +163,9 @@ function Get-TargetResource
     .PARAMETER InheritedObjectType
         The schema GUID of the child object type that can inherit this access
         rule.
+
+    .PARAMETER Credential
+        Specifies the user account credentials to use to perform the task.
 #>
 function Set-TargetResource
 {
@@ -201,28 +206,40 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $InheritedObjectType
+        $InheritedObjectType,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
 
-    Assert-ADPSDrive
-
-    # Get the current acl
-    $acl = [adsi]"LDAP://$path"
-    $modified = $false
+    try
+    {
+        # Get the current acl
+        $DirectoryEntry = New-Object -TypeName System.DirectoryServices.DirectoryEntry -ArgumentList @("LDAP://$Path", $Credential.UserName, $Credential.GetNetworkCredential().Password)
+    }
+    catch [System.Management.Automation.ItemNotFoundException]
+    {
+        Write-Verbose -Message ($script:localizedData.ObjectPathIsAbsent -f $Path)
+        $DirectoryEntry = $null
+    }
+    catch
+    {
+        throw $_
+    }
 
     if ($Ensure -eq 'Present')
     {
-        $record = $null
-        foreach ($access in $acl.ObjectSecurity.Access)
-        {
-            if ($access.IdentityReference.Value -eq $IdentityReference -and
-                $access.AccessControlType -eq $AccessControlType -and
-                $access.ObjectType.Guid -eq $ObjectType -and
-                $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
-                $access.InheritedObjectType.Guid -eq $InheritedObjectType)
-            {
-                $record = $access
-            }
+        $FoundEntry = $null
+        $FoundEntry = $DirectoryEntry.ObjectSecurity.Access | Where-Object {
+            $_.IsInherited -eq $false -and
+            $_.IdentityReference.Value -eq $IdentityReference -and
+            $_.AccessControlType -eq $AccessControlType -and
+            $_.ObjectType.Guid -eq $ObjectType -and
+            $_.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
+            $_.InheritedObjectType.Guid -eq $InheritedObjectType
         }
         Write-Verbose -Message ($script:localizedData.AddingObjectPermissionEntry -f $Path)
 
@@ -230,13 +247,13 @@ function Set-TargetResource
         $ntAccount = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier])
         $ace = New-Object -TypeName 'System.DirectoryServices.ActiveDirectoryAccessRule' -ArgumentList $ntAccount, $ActiveDirectoryRights, $AccessControlType, $ObjectType, $ActiveDirectorySecurityInheritance, $InheritedObjectType
 
-        if ($null -ne $record)
+        if ($null -ne $FoundEntry)
         {
             #Remove the existing record and create a new record with the updated permissions
-            if ($record.ActiveDirectoryRights -ne $ActiveDirectoryRights)
+            if ($FoundEntry.ActiveDirectoryRights -ne $ActiveDirectoryRights)
             {
-                $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::RemoveSpecific,$record,[ref]$modified)
-                $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$modified)
+                $DirectoryEntry.ObjectSecurity.RemoveAccessRule($FoundEntry)
+                $DirectoryEntry.ObjectSecurity.AddAccessRule($ace)
             }
             else
             {
@@ -245,7 +262,7 @@ function Set-TargetResource
         }
         else
         {
-            $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$modified)
+            $DirectoryEntry.ObjectSecurity.AddAccessRule($ace)
         }
     }
     else
@@ -254,29 +271,25 @@ function Set-TargetResource
             Iterate through all ace entries to find the desired ace, which
             should be absent. If found, remove the ace from the acl.
         #>
-        foreach ($access in $acl.ObjectSecurity.Access)
+        $FoundEntry = $null
+        $FoundEntry = $DirectoryEntry.ObjectSecurity.Access | Where-Object {
+            $_.IsInherited -eq $false -and
+            $_.IdentityReference.Value -eq $IdentityReference -and
+            $_.AccessControlType -eq $AccessControlType -and
+            $_.ObjectType.Guid -eq $ObjectType -and
+            $_.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
+            $_.InheritedObjectType.Guid -eq $InheritedObjectType
+        }
+        if($null -ne $FoundEntry)
         {
-            if ($access.IsInherited -eq $false)
-            {
-                if ($access.IdentityReference.Value -eq $IdentityReference -and
-                    $access.AccessControlType -eq $AccessControlType -and
-                    $access.ObjectType.Guid -eq $ObjectType -and
-                    $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
-                    $access.InheritedObjectType.Guid -eq $InheritedObjectType)
-                {
-                    Write-Verbose -Message ($script:localizedData.RemovingObjectPermissionEntry -f $Path)
+            Write-Verbose -Message ($script:localizedData.RemovingObjectPermissionEntry -f $Path)
 
-                    $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::RemoveSpecific,$access,[ref]$modified)
-                }
-            }
+            $DirectoryEntry.ObjectSecurity.RemoveAccessRuleSpecific($FoundEntry)
         }
     }
 
     # Update the acl on the object
-    if ($modified)
-    {
-        $acl.CommitChanges()
-    }
+    $DirectoryEntry.CommitChanges()
 }
 
 <#
@@ -312,6 +325,9 @@ function Set-TargetResource
     .PARAMETER InheritedObjectType
         The schema GUID of the child object type that can inherit this access
         rule.
+
+    .PARAMETER Credential
+        Specifies the user account credentials to use to perform the task.
 #>
 function Test-TargetResource
 {
@@ -353,7 +369,13 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $InheritedObjectType
+        $InheritedObjectType,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
 
     # Get the current state
@@ -364,6 +386,7 @@ function Test-TargetResource
         ObjectType                         = $ObjectType
         ActiveDirectorySecurityInheritance = $ActiveDirectorySecurityInheritance
         InheritedObjectType                = $InheritedObjectType
+        Credential                         = $Credential
     }
     $currentState = Get-TargetResource @getTargetResourceSplat
 

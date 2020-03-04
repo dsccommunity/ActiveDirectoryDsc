@@ -9,4 +9,5 @@ class MSFT_ADObjectPermissionEntry : OMI_BaseResource
     [Key, Description("The schema GUID of the object to which the access rule applies. If the permission entry shouldn't be restricted to a specific object type, use the zero guid (00000000-0000-0000-0000-000000000000).")] String ObjectType;
     [Key, Description("One of the 'ActiveDirectorySecurityInheritance' enumeration values that specifies the inheritance type of the access rule."), ValueMap{"All", "Children", "Descendents", "None", "SelfAndChildren"}, Values{"All", "Children", "Descendents", "None", "SelfAndChildren"}] String ActiveDirectorySecurityInheritance;
     [Key, Description("The schema GUID of the child object type that can inherit this access rule. If the permission entry shouldn't be restricted to a specific inherited object type, use the zero guid (00000000-0000-0000-0000-000000000000).")] String InheritedObjectType;
+    [Write, Description("Specifies the user account credentials to use to perform the task."), EmbeddedInstance("MSFT_Credential")] String Credential;
 };
