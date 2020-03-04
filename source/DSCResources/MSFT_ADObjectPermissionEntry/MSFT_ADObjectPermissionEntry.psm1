@@ -111,7 +111,7 @@ function Get-TargetResource
             $_.InheritedObjectType.Guid -eq $InheritedObjectType
         }
 
-        if($null -ne $FoundEntry)
+        if ($null -ne $FoundEntry)
         {
             $returnValue['Ensure'] = 'Present'
             $returnValue['ActiveDirectoryRights'] = [System.String[]] $FoundEntry.ActiveDirectoryRights.ToString().Split(',').ForEach( { $_.Trim() })
@@ -280,7 +280,7 @@ function Set-TargetResource
             $_.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
             $_.InheritedObjectType.Guid -eq $InheritedObjectType
         }
-        if($null -ne $FoundEntry)
+        if ($null -ne $FoundEntry)
         {
             Write-Verbose -Message ($script:localizedData.RemovingObjectPermissionEntry -f $Path)
 
