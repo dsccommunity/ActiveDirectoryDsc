@@ -34,6 +34,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Fixed issue where Get-TargetResource throw an exception, `Cannot find drive. A drive with the name 'AD' does not
     exist`, when running soon after domain controller restart
     ([issue #547](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/547))
+  - Fixed issue where Set-TargetResource requires Domain Admin access in order to update the ACL
+    ([issue #575](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/575))
 - ADOrganizationalUnit
   - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when parent path does not yet exist
     ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553))
