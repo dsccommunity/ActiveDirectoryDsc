@@ -212,25 +212,41 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
+        $record = $null
+        foreach ($access in $acl.ObjectSecurity.Access)
+        {
+            if ($access.IdentityReference.Value -eq $IdentityReference -and
+                $access.AccessControlType -eq $AccessControlType -and
+                $access.ObjectType.Guid -eq $ObjectType -and
+                $access.InheritanceType -eq $ActiveDirectorySecurityInheritance -and
+                $access.InheritedObjectType.Guid -eq $InheritedObjectType)
+            {
+                $record = $access
+            }
+        }
         Write-Verbose -Message ($script:localizedData.AddingObjectPermissionEntry -f $Path)
 
         $ntAccount = New-Object -TypeName 'System.Security.Principal.NTAccount' -ArgumentList $IdentityReference
+        $ntAccount = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier])
         $ace = New-Object -TypeName 'System.DirectoryServices.ActiveDirectoryAccessRule' -ArgumentList $ntAccount, $ActiveDirectoryRights, $AccessControlType, $ObjectType, $ActiveDirectorySecurityInheritance, $InheritedObjectType
 
-        $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$modified)
-
-        <#$ntAccount = New-Object -TypeName 'System.Security.Principal.NTAccount' -ArgumentList $IdentityReference
-
-        $ace = New-Object -TypeName 'System.DirectoryServices.ActiveDirectoryAccessRule' -ArgumentList @(
-            $ntAccount,
-            $ActiveDirectoryRights,
-            $AccessControlType,
-            $ObjectType,
-            $ActiveDirectorySecurityInheritance,
-            $InheritedObjectType
-        )
-
-        $acl.AddAccessRule($ace)#>
+        if($null -ne $record)
+        {
+            #Remove the existing record and create a new record with the updated permissions
+            if($record.ActiveDirectoryRights -ne $ActiveDirectoryRights)
+            {
+                $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::RemoveSpecific,$record,[ref]$modified)
+                $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$modified)
+            }
+            else
+            {
+                #Record already exists and is correct
+            }
+        }
+        else
+        {
+            $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$modified)
+        }
     }
     else
     {
@@ -238,7 +254,7 @@ function Set-TargetResource
             Iterate through all ace entries to find the desired ace, which
             should be absent. If found, remove the ace from the acl.
         #>
-        foreach ($access in $acl.Access)
+        foreach ($access in $acl.ObjectSecurity.Access)
         {
             if ($access.IsInherited -eq $false)
             {
@@ -250,19 +266,17 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message ($script:localizedData.RemovingObjectPermissionEntry -f $Path)
 
-                    $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::RemoveSpecific,$access,[ref]$modified)
-                    #$acl.RemoveAccessRule($access)
+                    $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::RemoveSpecific,$access,[ref]$modified)
                 }
             }
         }
     }
 
-    # Set the updated acl to the object
+    # Update the acl on the object
     if($modified)
     {
         $acl.CommitChanges()
     }
-    #$acl | Set-Acl -Path "AD:$Path"
 }
 
 <#
