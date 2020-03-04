@@ -230,10 +230,10 @@ function Set-TargetResource
         $ntAccount = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier])
         $ace = New-Object -TypeName 'System.DirectoryServices.ActiveDirectoryAccessRule' -ArgumentList $ntAccount, $ActiveDirectoryRights, $AccessControlType, $ObjectType, $ActiveDirectorySecurityInheritance, $InheritedObjectType
 
-        if($null -ne $record)
+        if ($null -ne $record)
         {
             #Remove the existing record and create a new record with the updated permissions
-            if($record.ActiveDirectoryRights -ne $ActiveDirectoryRights)
+            if ($record.ActiveDirectoryRights -ne $ActiveDirectoryRights)
             {
                 $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::RemoveSpecific,$record,[ref]$modified)
                 $result = $acl.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$modified)
@@ -273,7 +273,7 @@ function Set-TargetResource
     }
 
     # Update the acl on the object
-    if($modified)
+    if ($modified)
     {
         $acl.CommitChanges()
     }
