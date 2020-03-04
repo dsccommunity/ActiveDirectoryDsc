@@ -35,6 +35,7 @@ try
 
         # Load stub cmdlets and classes.
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
+        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath '..\..\source\Modules\ActiveDirectoryDsc.Common\ActiveDirectoryDsc.Common.psm1') -Force
 
         #region Pester Test Initialization
         $mockCredentialUserName = 'COMPANY\User'
@@ -67,22 +68,24 @@ try
             $mock = [PSCustomObject] @{
                 Path   = 'AD:CN=PC01,CN=Computers,DC=contoso,DC=com'
                 Owner  = 'BUILTIN\Administrators'
-                Access = @(
-                    [PSCustomObject] @{
-                        ActiveDirectoryRights = 'GenericAll'
-                        InheritanceType       = 'None'
-                        ObjectType            = [System.Guid] '00000000-0000-0000-0000-000000000000'
-                        InheritedObjectType   = [System.Guid] '00000000-0000-0000-0000-000000000000'
-                        ObjectFlags           = 'None'
-                        AccessControlType     = 'Allow'
-                        IdentityReference     = [PSCustomObject] @{
-                            Value = 'CONTOSO\User'
+                ObjectSecurity = [PSCustomObject]@{
+                    Access = @(
+                        [PSCustomObject] @{
+                            ActiveDirectoryRights = 'GenericAll'
+                            InheritanceType       = 'None'
+                            ObjectType            = [System.Guid] '00000000-0000-0000-0000-000000000000'
+                            InheritedObjectType   = [System.Guid] '00000000-0000-0000-0000-000000000000'
+                            ObjectFlags           = 'None'
+                            AccessControlType     = 'Allow'
+                            IdentityReference     = [PSCustomObject] @{
+                                Value = 'CONTOSO\User'
+                            }
+                            IsInherited           = $false
+                            InheritanceFlags      = 'None'
+                            PropagationFlags      = 'None'
                         }
-                        IsInherited           = $false
-                        InheritanceFlags      = 'None'
-                        PropagationFlags      = 'None'
-                    }
-                )
+                    )
+                }
             }
             $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value { }
             $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value { }
@@ -107,7 +110,7 @@ try
 
             Context 'When the desired ace is present' {
 
-                Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
+                Mock -CommandName 'Get-DirectoryEntry' -MockWith $mockGetAclPresent
 
                 It 'Should return a "System.Collections.Hashtable" object type' {
                     # Act
@@ -135,7 +138,7 @@ try
 
             Context 'When the desired ace is absent' {
 
-                Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
+                Mock -CommandName 'Get-DirectoryEntry' -MockWith $mockGetAclAbsent
 
                 It 'Should return a valid result if the ace is absent' {
                     # Act
@@ -154,7 +157,7 @@ try
             }
             Context 'When the desired AD object path is absent' {
 
-                Mock -CommandName 'Get-Acl' -MockWith { throw New-Object System.Management.Automation.ItemNotFoundException }
+                Mock -CommandName 'Get-DirectoryEntry' -MockWith { throw New-Object System.Management.Automation.ItemNotFoundException }
 
                 It 'Should return a valid result if the AD object path is absent' {
                     # Act / Assert
@@ -165,7 +168,7 @@ try
             Context 'When an unknown error occurs' {
 
                 $errormsg = 'Unknown Error'
-                Mock -CommandName 'Get-Acl' -MockWith { throw $errormsg }
+                Mock -CommandName 'Get-DirectoryEntry' -MockWith { throw $errormsg }
 
                 It 'Should throw an exception if an unknown error occurs calling Get-Acl' {
                     # Act / Assert
@@ -181,7 +184,7 @@ try
 
             Context 'When the desired ace is present' {
 
-                Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
+                Mock -CommandName 'Get-DirectoryEntry' -MockWith $mockGetAclPresent
 
                 It 'Should return a "System.Boolean" object type' {
                     # Act
@@ -210,7 +213,7 @@ try
 
             Context 'When the desired ace is absent' {
 
-                Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
+                Mock -CommandName 'Get-DirectoryEntry' -MockWith $mockGetAclAbsent
 
                 It 'Should return $false if the ace desired state is present' {
                     # Act

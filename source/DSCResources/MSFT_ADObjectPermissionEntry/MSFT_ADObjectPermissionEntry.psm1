@@ -88,7 +88,7 @@ function Get-TargetResource
     try
     {
         # Get the current acl
-        $DirectoryEntry = New-Object -TypeName System.DirectoryServices.DirectoryEntry -ArgumentList @("LDAP://$Path", $Credential.UserName, $Credential.GetNetworkCredential().Password)
+        $DirectoryEntry = Get-DirectoryEntry -Path $Path -Credential $Credential
     }
     catch [System.Management.Automation.ItemNotFoundException]
     {
@@ -218,7 +218,7 @@ function Set-TargetResource
     try
     {
         # Get the current acl
-        $DirectoryEntry = New-Object -TypeName System.DirectoryServices.DirectoryEntry -ArgumentList @("LDAP://$Path", $Credential.UserName, $Credential.GetNetworkCredential().Password)
+        $DirectoryEntry = Get-DirectoryEntry -Path $Path -Credential $Credential
     }
     catch [System.Management.Automation.ItemNotFoundException]
     {

@@ -2166,4 +2166,44 @@ function Get-CurrentUser
     return [System.Security.Principal.WindowsIdentity]::GetCurrent()
 }
 
+<#
+    .SYNOPSIS
+        This returns a the Active Directory Entry so ADObjectPermissionEntry can
+        manage the permissions.
+
+    .PARAMETER DirectoryContext
+        The Active Directory context from which the forest object is returned.
+        Calling the Get-ADDirectoryContext gets a value that can be provided in
+        this parameter.
+
+    .PARAMETER SiteName
+        Specifies the site in the domain where to look for a domain controller.
+
+    .NOTES
+        This is a wrapper to enable unit testing of the function Find-DomainController.
+        It is not possible to make a stub class to mock these, since these classes
+        are loaded into the PowerShell session when it starts.
+
+        This function is not exported.
+#>
+function Get-DirectoryEntry
+{
+    [CmdletBinding()]
+    [OutputType([System.DirectoryServices.ActiveDirectory.DomainController])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Path,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
+    )
+
+    return New-Object -TypeName System.DirectoryServices.DirectoryEntry -ArgumentList @("LDAP://$Path", $Credential.UserName, $Credential.GetNetworkCredential().Password)
+}
+
 $script:localizedData = Get-LocalizedData -ResourceName 'ActiveDirectoryDsc.Common' -ScriptRoot $PSScriptRoot
