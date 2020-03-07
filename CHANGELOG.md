@@ -62,6 +62,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADForestProperties
   - Refactored unit tests.
 - ADOrganizationalUnit
+  - Replaced throws with `New-InvalidOperationException`.
+  - Refactored `Get-TargetResource` to not reference properties of a `$null` object
+  - Fixed organization references to organizational.
+  - Refactored `Test-TargetResource` to use `Compare-ResourcePropertyState` common function.
+  - Reformatted code to keep line lengths to less than 120 characters.
+  - Removed redundant `Assert-Module` and `Get-ADOrganizationalUnit` function calls from `Set-TargetResource`.
+  - Wrapped `Set-ADOrganizationalUnit` and `Remove-ADOrganizationalUnit` with try/catch blocks and used common exception
+    function.
+  - Added `DistinguishedName` read-only property.
   - Refactored unit tests.
 
 ## [5.0.0] - 2020-01-14
