@@ -65,7 +65,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADForestProperties
   - Refactored unit tests.
 - ADReplicationSiteLink
-  - Refactored unit tests.
+  - Refactored the `Set-TargetResource` function so that properties are only set if they have been changed.
+  - Refactored the resource unit tests.
+  - Added quotes to all the variables in the localised string data.
 
 ## [5.0.0] - 2020-01-14
 
