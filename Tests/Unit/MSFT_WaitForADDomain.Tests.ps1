@@ -31,6 +31,8 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
+        Set-StrictMode -Version 1.0
+
         $mockUserName = 'User1'
         $mockDomainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
             $mockUserName,
@@ -44,6 +46,7 @@ try
             DomainName = $mockDomainName
             Verbose    = $true
         }
+        $global:PsDscContext=$null
 
         #region Function Get-TargetResource
         Describe 'WaitForADDomain\Get-TargetResource' -Tag 'Get' {
@@ -141,7 +144,7 @@ try
                             $mockBuiltInCredentialName = 'BuiltInCredential'
 
                             # Mock PsDscRunAsCredential context.
-                            $PsDscContext = @{
+                            $global:PsDscContext = @{
                                 RunAsUser = $mockBuiltInCredentialName
                             }
 
@@ -596,7 +599,7 @@ try
                         $setTagetResourceParameters.Remove('Verbose')
                     }
 
-                    It 'Should not throw and call the correct mocks' {
+                    It 'Should throw and call the correct mocks' {
                         { Set-TargetResource @setTagetResourceParameters } | Should -Throw $script:localizedData.NoDomainController
 
                         $global:DSCMachineStatus | Should -Be 0

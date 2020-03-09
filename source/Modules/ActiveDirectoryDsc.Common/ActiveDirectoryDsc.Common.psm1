@@ -1679,8 +1679,7 @@ function Test-DscPropertyState
 
         if ($desiredType.Name -notin $supportedTypes)
         {
-            Write-Warning -Message ($script:localizedData.UnableToCompareType `
-                    -f $fieldName, $desiredType.Name)
+            Write-Warning -Message ($script:localizedData.UnableToCompareType -f $desiredType.Name)
         }
         else
         {
@@ -2169,6 +2168,181 @@ function Get-CurrentUser
     param ()
 
     return [System.Security.Principal.WindowsIdentity]::GetCurrent()
+}
+
+<#
+    .SYNOPSIS
+        Test the validity of a user's password.
+
+    .PARAMETER DomainName
+        Name of the domain where the user account is located (only used if
+        password is managed).
+
+    .PARAMETER UserName
+        Specifies the Security Account Manager (SAM) account name of the user
+        (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER Password
+        Specifies a new password value for the account.
+
+    .PARAMETER Credential
+        Specifies the user account credentials to use to perform this task.
+
+    .PARAMETER PasswordAuthentication
+        Specifies the authentication context type used when testing passwords.
+        Default value is 'Default'.
+#>
+function Test-Password
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $UserName,
+
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
+        # Specifies the authentication context type when testing user passwords #61
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Default', 'Negotiate')]
+        [System.String]
+        $PasswordAuthentication
+    )
+
+    Write-Verbose -Message ($script:localizedData.CreatingADDomainConnection -f $DomainName)
+
+    $principalContextTypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
+
+    Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName $principalContextTypeName
+
+    <#
+        If the domain name contains a distinguished name, set it to the fully
+        qualified domain name (FQDN) instead.
+        If the $DomainName does not contain a distinguished name the function
+        Get-ADDomainNameFromDistinguishedName returns $null.
+    #>
+    $ADDomainName = Get-ADDomainNameFromDistinguishedName -DistinguishedName $DomainName
+    if ($ADDomainName)
+    {
+        $DomainName = $ADDomainName
+    }
+
+    if ($Credential)
+    {
+        Write-Verbose -Message (
+            $script:localizedData.TestPasswordUsingImpersonation -f $Credential.UserName, $UserName
+        )
+
+        $principalContext = New-Object -TypeName $principalContextTypeName -ArgumentList @(
+            [System.DirectoryServices.AccountManagement.ContextType]::Domain,
+            $DomainName,
+            $Credential.UserName,
+            $Credential.GetNetworkCredential().Password
+        )
+    }
+    else
+    {
+        $principalContext = New-Object -TypeName $principalContextTypeName -ArgumentList @(
+            [System.DirectoryServices.AccountManagement.ContextType]::Domain,
+            $DomainName,
+            $null,
+            $null
+        )
+    }
+
+    Write-Verbose -Message ($script:localizedData.CheckingADUserPassword -f $UserName)
+
+    $getPrincipalContextCredentials = @{
+        UserName               = $UserName
+        Password               = $Password
+        PrincipalContext       = $principalContext
+        PasswordAuthentication = $PasswordAuthentication
+    }
+    return Test-PrincipalContextCredentials @getPrincipalContextCredentials
+}
+
+<#
+    .SYNOPSIS
+        Test the validity of credentials using a PrincipalContext
+
+    .PARAMETER UserName
+        Specifies the Security Account Manager (SAM) account name of the user
+        (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER Password
+        Specifies a new password value for the account.
+
+    .PARAMETER PrincipalContext
+        Specifies the PrincipalContext object that the credential test will be
+        performed using.
+
+    .PARAMETER PasswordAuthentication
+        Specifies the authentication context type used when testing passwords.
+        Default value is 'Default'.
+
+    .NOTES
+        We are putting this in a function so we can mock it with pester.
+#>
+function Test-PrincipalContextCredentials
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $UserName,
+
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Password,
+
+        [Parameter(Mandatory = $true)]
+        [System.DirectoryServices.AccountManagement.PrincipalContext]
+        $PrincipalContext,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Default', 'Negotiate')]
+        [System.String]
+        $PasswordAuthentication
+    )
+
+    if ($PasswordAuthentication -eq 'Negotiate')
+    {
+        $result = $principalContext.ValidateCredentials(
+            $UserName,
+            $Password.GetNetworkCredential().Password,
+            [System.DirectoryServices.AccountManagement.ContextOptions]::Negotiate -bor
+            [System.DirectoryServices.AccountManagement.ContextOptions]::Signing -bor
+            [System.DirectoryServices.AccountManagement.ContextOptions]::Sealing
+        )
+    }
+    else
+    {
+        # Use default authentication context
+        $result = $principalContext.ValidateCredentials(
+            $UserName,
+            $Password.GetNetworkCredential().Password
+        )
+    }
+
+    return $result
 }
 
 $script:localizedData = Get-LocalizedData -ResourceName 'ActiveDirectoryDsc.Common' -ScriptRoot $PSScriptRoot

@@ -61,13 +61,13 @@ function Get-TargetResource
         Add or remove the service principal name.
 
     .PARAMETER Ensure
-        Specifies if the service principal name should be added or remove.
+        Specifies if the service principal name should be added or removed.
 
     .PARAMETER ServicePrincipalName
         The full SPN to add or remove, e.g. HOST/LON-DC1.
 
     .PARAMETER Account
-        The user or computer account to add or remove the SPN, e.b. User1 or
+        The user or computer account to add or remove the SPN to , e.g. User1 or
         LON-DC1$.
 #>
 function Set-TargetResource
@@ -153,13 +153,13 @@ function Set-TargetResource
         Tests the service principal name.
 
     .PARAMETER Ensure
-        Specifies if the service principal name should be added or remove.
+        Specifies if the service principal name should be added or removed.
 
     .PARAMETER ServicePrincipalName
         The full SPN to add or remove, e.g. HOST/LON-DC1.
 
     .PARAMETER Account
-        The user or computer account to add or remove the SPN, e.b. User1 or
+        The user or computer account to add or remove the SPN to, e.g. User1 or
         LON-DC1$.
 #>
 function Test-TargetResource
