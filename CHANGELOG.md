@@ -37,6 +37,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADOrganizationalUnit
   - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when parent path does not yet exist
     ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553))
+- ADReplicationSiteLink
+  - Fixed issue creating a Site Link with options specified
+    ([issue #571](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/571))
 - ADDomain
   - Added additional Get-ADDomain retry exceptions
     ([issue #574](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/574)).
@@ -69,6 +72,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
       ([issue #490](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/490)).
 - ADForestProperties
   - Refactored unit tests.
+- ADReplicationSiteLink
+  - Refactored the `Set-TargetResource` function so that properties are only set if they have been changed.
+  - Refactored the resource unit tests.
+  - Added quotes to all the variables in the localised string data.
 - ADOrganizationalUnit
   - Replaced throws with `New-InvalidOperationException`.
   - Refactored `Get-TargetResource` to not reference properties of a `$null` object
