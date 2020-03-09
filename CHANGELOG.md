@@ -69,6 +69,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
       ([issue #490](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/490)).
 - ADForestProperties
   - Refactored unit tests.
+- ADUser
+  - Improve Try/Catch blocks to only cover cmdlet calls.
+  - Move the Test-Password function to the ActiveDirectoryDsc.Common module and add unit tests.
+  - Reformat code to keep line lengths to less than 120 characters.
+  - Fix Password parameter processing when PasswordNeverResets is $true.
+  - Remove unnecessary Enabled parameter check.
+  - Remove unnecessary Clear explicit parameter check.
+  - Add check to only call Set-ADUser if there are properties to change.
+  - Refactored Unit Tests - ([issue #467](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/467))
 
 ## [5.0.0] - 2020-01-14
 
