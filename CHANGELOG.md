@@ -37,6 +37,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADOrganizationalUnit
   - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when parent path does not yet exist
     ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553))
+- ADDomain
+  - Added additional Get-ADDomain retry exceptions
+    ([issue #574](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/574)).
 
 ### Changed
 
