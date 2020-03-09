@@ -100,9 +100,11 @@ function Get-TargetResource
             {
                 $domain = Get-ADDomain -Identity $domainFQDN -Server localhost -ErrorAction Stop
             }
-            catch [Microsoft.ActiveDirectory.Management.ADServerDownException]
+            catch [Microsoft.ActiveDirectory.Management.ADServerDownException], `
+                [System.Security.Authentication.AuthenticationException], `
+                [System.InvalidOperationException]
             {
-                Write-Verbose ($script:localizedData.ADServerDown -f $domainFQDN)
+                Write-Verbose ($script:localizedData.ADServerNotReady -f $domainFQDN)
                 $domainFound = $false
                 # will fall into the retry mechanism.
             }
