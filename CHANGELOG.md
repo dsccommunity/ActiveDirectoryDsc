@@ -69,6 +69,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Refactored unit tests.
   - Updated NewChildDomain example to clarify the contents of the credential parameter and use Windows 2016 rather than
     2012 R2.
+- ADDomainController
+  - Updated the Get-TargetResource function with the following:
+    - Removed unused parameters.
+    - Added IsDnsServer read-only property
+      ([issue #490](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/490)).
 - ADForestProperties
   - Refactored unit tests.
 - ADReplicationSiteLink
