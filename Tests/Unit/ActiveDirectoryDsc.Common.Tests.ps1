@@ -2305,4 +2305,95 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
         }
     }
+
+    Describe 'ActiveDirectoryDsc.Common\Test-Password' {
+        BeforeAll {
+            $mockDomainName = 'contoso.com'
+            $mockFQDN = 'DC=' + $mockDomainName.replace('.',',DC=')
+            $mockUserName = 'JohnDoe'
+            $mockPassword = 'mockpassword'
+            $mockPasswordCredential = [System.Management.Automation.PSCredential]::new(
+                $mockUserName,
+                (ConvertTo-SecureString -String $mockPassword -AsPlainText -Force)
+            )
+            $mockCredential = [System.Management.Automation.PSCredential]::new(
+                $mockUserName,
+                (ConvertTo-SecureString -String $mockPassword -AsPlainText -Force)
+            )
+            $principalContextTypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
+
+            Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' `
+                -TypeName $principalContextTypeName
+
+            $mockPrincipalContext = New-MockObject -Type $principalContextTypeName
+
+            $testPasswordParms = @{
+                DomainName             = $mockDomainName
+                UserName               = $mockUserName
+                Password               = $mockPasswordCredential
+                PasswordAuthentication = 'Default'
+            }
+
+            Mock -CommandName New-Object -MockWith { $mockPrincipalContext }
+            Mock -CommandName Test-PrincipalContextCredentials
+        }
+
+        Context 'When the "DomainName" parameter is an FQDN' {
+            BeforeAll {
+                $testPasswordFQDNParms = $testPasswordParms.Clone()
+                $testPasswordFQDNParms['DomainName'] = $mockFQDN
+            }
+
+            It 'Should not throw' {
+                { Test-Password @testPasswordFQDNParms } | Should -Not -Throw
+            }
+
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName New-Object `
+                    -ParameterFilter { $TypeName -eq $principalContextTypeName -and `
+                        $ArgumentList -contains $mockDomainName } `
+                    -Exactly -Times 1
+                Assert-MockCalled -CommandName Test-PrincipalContextCredentials `
+                    -ParameterFilter { $UserName -eq $testPasswordFQDNParms.UserName } `
+                    -Exactly -Times 1
+            }
+        }
+
+        Context 'When the "Credential" parameter is not specified' {
+            It 'Should not throw' {
+                { Test-Password @testPasswordParms } | Should -Not -Throw
+            }
+
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName New-Object `
+                    -ParameterFilter { $TypeName -eq $principalContextTypeName -and `
+                        $ArgumentList -contains $null } `
+                    -Exactly -Times 1
+                Assert-MockCalled -CommandName Test-PrincipalContextCredentials `
+                    -ParameterFilter { $UserName -eq $testPasswordParms.UserName } `
+                    -Exactly -Times 1
+            }
+        }
+
+        Context 'When the "Credential" parameter is specified' {
+            BeforeAll {
+                $testPasswordCredentialParms = $testPasswordParms.Clone()
+                $testPasswordCredentialParms['Credential'] = $mockCredential
+            }
+
+            It 'Should not throw' {
+                { Test-Password @testPasswordCredentialParms } | Should -Not -Throw
+            }
+
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName New-Object `
+                    -ParameterFilter { $TypeName -eq $principalContextTypeName -and `
+                        $ArgumentList -contains $testPasswordCredentialParms.Credential.UserName } `
+                    -Exactly -Times 1
+                Assert-MockCalled -CommandName Test-PrincipalContextCredentials `
+                    -ParameterFilter { $UserName -eq $testPasswordCredentialParms.UserName } `
+                    -Exactly -Times 1
+            }
+        }
+    }
 }

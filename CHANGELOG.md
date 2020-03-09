@@ -40,6 +40,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADReplicationSiteLink
   - Fixed issue creating a Site Link with options specified
     ([issue #571](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/571))
+- ADDomain
+  - Added additional Get-ADDomain retry exceptions
+    ([issue #574](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/574)).
 
 ### Changed
 
@@ -68,6 +71,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Refactored the `Set-TargetResource` function so that properties are only set if they have been changed.
   - Refactored the resource unit tests.
   - Added quotes to all the variables in the localised string data.
+- ADUser
+  - Improve Try/Catch blocks to only cover cmdlet calls.
+  - Move the Test-Password function to the ActiveDirectoryDsc.Common module and add unit tests.
+  - Reformat code to keep line lengths to less than 120 characters.
+  - Fix Password parameter processing when PasswordNeverResets is $true.
+  - Remove unnecessary Enabled parameter check.
+  - Remove unnecessary Clear explicit parameter check.
+  - Add check to only call Set-ADUser if there are properties to change.
+  - Refactored Unit Tests - ([issue #467](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/467))
 
 ## [5.0.0] - 2020-01-14
 
