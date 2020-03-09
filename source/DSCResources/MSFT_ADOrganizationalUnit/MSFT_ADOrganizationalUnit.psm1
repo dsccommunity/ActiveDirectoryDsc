@@ -8,15 +8,21 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADOrganizationalUn
 
 <#
     .SYNOPSIS
-        Gets the Organization Unit (OU) from Active Directory
+        Gets the Organizational Unit (OU) from Active Directory
 
     .PARAMETER Name
-        The name of Organization Unit (OU).
+        Specifies the name of the Organizational Unit (OU).
 
     .PARAMETER Path
-        Specifies the X.500 path of the Organization Unit (OU) or container
-        where the new object is created.
+        Specifies the X.500 path of the OrganizationalUnit (OU) or container where the new object is created.
 
+    .NOTES
+        Used Functions:
+            Name                          | Module
+            ------------------------------|--------------------------
+            Get-ADOrganizationalUnit      | ActiveDirectory
+            Assert-Module                 | ActiveDirectoryDsc.Common
+            New-InvalidOperationException | ActiveDirectoryDsc.Common
 #>
 function Get-TargetResource
 {
@@ -39,7 +45,7 @@ function Get-TargetResource
 
     try
     {
-        $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path `
+        $ou = Get-ADOrganizationalUnit -Filter "Name -eq '$Name'" -SearchBase $Path `
             -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
@@ -49,59 +55,70 @@ function Get-TargetResource
     }
     catch
     {
-        throw $_
+        $errorMessage = $script:localizedData.GetResourceError -f $Name
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
-    if ($null -eq $ou)
+    if ($ou)
     {
-        Write-Verbose -Message ($script:localizedData.OUIsAbsent -f $Name)
-        $ensureState = 'Absent'
+        Write-Verbose -Message ($script:localizedData.OUIsPresent -f $Name)
+
+        $targetResource = @{
+            Name                            = $Name
+            Path                            = $Path
+            ProtectedFromAccidentalDeletion = $ou.ProtectedFromAccidentalDeletion
+            Description                     = $ou.Description
+            DistinguishedName               = $ou.DistinguishedName
+            Ensure                          = 'Present'
+        }
     }
     else
     {
-        Write-Verbose -Message ($script:localizedData.OUIsPresent -f $Name)
-        $ensureState = 'Present'
+        Write-Verbose -Message ($script:localizedData.OUIsAbsent -f $Name)
+
+        $targetResource = @{
+            Name                            = $Name
+            Path                            = $Path
+            ProtectedFromAccidentalDeletion = $null
+            Description                     = $null
+            DistinguishedName               = $null
+            Ensure                          = 'Absent'
+        }
     }
 
-    return @{
-        Name                            = $Name
-        Path                            = $Path
-        Ensure                          = $ensureState
-        ProtectedFromAccidentalDeletion = $ou.ProtectedFromAccidentalDeletion
-        Description                     = $ou.Description
-    }
+    return $targetResource
 } # end function Get-TargetResource
 
 <#
     .SYNOPSIS
-        Tests the state of the specified Organization Unit (OU).
+        Tests the state of the specified Organizational Unit (OU).
 
     .PARAMETER Name
-        The name of Organization Unit (OU).
+        Specifies the name of the Organizational Unit (OU).
 
     .PARAMETER Path
-        Specifies the X.500 path of the Organization Unit (OU) or container
-        where the new object is created.
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
 
     .PARAMETER Ensure
-        Specifies whether the Organization Unit (OU) is present or absent.
-        Default value is 'Present'.
+        Specifies whether the Organizational Unit (OU) should be present or absent. Default value is 'Present'.
 
     .PARAMETER Credential
         The credential to be used to perform the operation on Active Directory.
 
     .PARAMETER ProtectedFromAccidentalDeletion
-        Specifies if the Organization Unit (OU) container should be protected
-        from deletion. Default value is $true.
+        Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true.
 
     .PARAMETER Description
-        The description of the Organization Unit (OU). Default value is empty
-        ('') description.
+        Specifies the description of the Organizational Unit (OU). Default value is empty ('').
 
     .PARAMETER RestoreFromRecycleBin
-        Try to restore the Organization Unit (OU) from the recycle bin before
-        creating a new one.
+        Try to restore the Organizational Unit (OU) from the recycle bin before creating a new one.
 
+    .NOTES
+        Used Functions:
+            Name                          | Module
+            ------------------------------|--------------------------
+            Compare-ResourcePropertyState | ActiveDirectoryDsc.Common
 #>
 function Test-TargetResource
 {
@@ -148,87 +165,91 @@ function Test-TargetResource
 
     if ($targetResource.Ensure -eq 'Present')
     {
+        # Resource exists
         if ($Ensure -eq 'Present')
         {
-            # Organizational unit exists
-            if ([System.String]::IsNullOrEmpty($Description))
-            {
-                $isCompliant = (($targetResource.Name -eq $Name) -and
-                    ($targetResource.Path -eq $Path) -and
-                    ($targetResource.ProtectedFromAccidentalDeletion -eq $ProtectedFromAccidentalDeletion))
-            }
-            else
-            {
-                $isCompliant = (($targetResource.Name -eq $Name) -and
-                    ($targetResource.Path -eq $Path) -and
-                    ($targetResource.ProtectedFromAccidentalDeletion -eq $ProtectedFromAccidentalDeletion) -and
-                    ($targetResource.Description -eq $Description))
-            }
+            # Resource should exist
+            $propertiesNotInDesiredState = (
+                Compare-ResourcePropertyState -CurrentValue $targetResource -DesiredValues $PSBoundParameters |
+                    Where-Object -Property InDesiredState -eq $false)
 
-            if ($isCompliant)
+            if ($propertiesNotInDesiredState)
             {
-                Write-Verbose ($script:localizedData.OUInDesiredState -f $targetResource.Name)
+                $inDesiredState = $false
             }
             else
             {
-                Write-Verbose ($script:localizedData.OUNotInDesiredState -f $targetResource.Name)
+                # Resource is in the desired state
+                Write-Verbose ($script:localizedData.OUInDesiredState -f $Name)
+
+                $inDesiredState = $true
             }
         }
         else
         {
-            $isCompliant = $false
-            Write-Verbose ($script:localizedData.OUExistsButShouldNot -f $targetResource.Name)
+            # Resource should not exist
+            Write-Verbose ($script:localizedData.OUExistsButShouldNot -f $Name)
+
+            $inDesiredState = $false
         }
     }
     else
     {
-        # Organizational unit does not exist
+        # Resource does not exist
         if ($Ensure -eq 'Present')
         {
-            $isCompliant = $false
-            Write-Verbose ($script:localizedData.OUDoesNotExistButShould -f $targetResource.Name)
+            # Resource should exist
+            Write-Verbose ($script:localizedData.OUDoesNotExistButShould -f $Name)
+
+            $inDesiredState = $false
         }
         else
         {
-            $isCompliant = $true
-            Write-Verbose ($script:localizedData.OUDoesNotExistAndShouldNot -f $targetResource.Name)
+            # Resource should not exist
+            Write-Verbose ($script:localizedData.OUDoesNotExistAndShouldNot -f $Name)
+
+            $inDesiredState = $true
         }
     }
 
-    return $isCompliant
-
+    return $inDesiredState
 } #end function Test-TargetResource
 
 <#
     .SYNOPSIS
-        Sets the state of the Organization Unit (OU) in Active Directory.
+        Sets the state of the Organizational Unit (OU) in Active Directory.
 
     .PARAMETER Name
-        The name of Organization Unit (OU).
+        Specifies the name of the Organizational Unit (OU).
 
     .PARAMETER Path
-        Specifies the X.500 path of the Organization Unit (OU) or container
-        where the new object is created.
+        Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
 
     .PARAMETER Ensure
-        Specifies whether the Organization Unit (OU) is present or absent.
-        Default value is 'Present'.
+        Specifies whether the Organizational Unit (OU) should be present or absent. Default value is 'Present'.
 
     .PARAMETER Credential
         The credential to be used to perform the operation on Active Directory.
 
     .PARAMETER ProtectedFromAccidentalDeletion
-        Specifies if the Organization Unit (OU) container should be protected
-        from deletion. Default value is $true.
+        Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true.
 
     .PARAMETER Description
-        The description of the Organization Unit (OU). Default value is empty
-        ('') description.
+        Specifies the description of the Organizational Unit (OU). Default value is empty ('').
 
     .PARAMETER RestoreFromRecycleBin
-        Try to restore the Organization Unit (OU) from the recycle bin before
-        creating a new one.
+        Try to restore the Organizational Unit (OU) from the recycle bin before creating a new one.
 
+    .NOTES
+        Used Functions:
+            Name                          | Module
+            ------------------------------|--------------------------
+            New-ADOrganizationalUnit      | ActiveDirectory
+            Set-ADOrganizationalUnit      | ActiveDirectory
+            Remove-ADOrganizationalUnit   | ActiveDirectory
+            New-InvalidOperationException | ActiveDirectoryDsc.Common
+            Restore-ADCommonObject        | ActiveDirectoryDsc.Common
+            New-ObjectNotFoundException   | ActiveDirectoryDsc.Common
 #>
 function Set-TargetResource
 {
@@ -270,20 +291,16 @@ function Set-TargetResource
         $RestoreFromRecycleBin
     )
 
-    Assert-Module -ModuleName 'ActiveDirectory'
-
     $targetResource = Get-TargetResource -Name $Name -Path $Path
 
     if ($targetResource.Ensure -eq 'Present')
     {
-        $ou = Get-ADOrganizationalUnit -Filter { Name -eq $Name } -SearchBase $Path -SearchScope OneLevel
-
         if ($Ensure -eq 'Present')
         {
-            Write-Verbose ($script:localizedData.UpdatingOU -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.UpdatingOU -f $Name)
 
             $setADOrganizationalUnitParams = @{
-                Identity                        = $ou
+                Identity                        = $targetResource.DistinguishedName
                 Description                     = $Description
                 ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
             }
@@ -293,17 +310,27 @@ function Set-TargetResource
                 $setADOrganizationalUnitParams['Credential'] = $Credential
             }
 
-            Set-ADOrganizationalUnit @setADOrganizationalUnitParams
+            try
+            {
+                Set-ADOrganizationalUnit @setADOrganizationalUnitParams
+            }
+            catch
+            {
+                $errorMessage = $script:localizedData.SetResourceError -f $Name
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+            }
+
         }
         else
         {
-            Write-Verbose ($script:localizedData.DeletingOU -f $targetResource.Name)
+            Write-Verbose ($script:localizedData.DeletingOU -f $Name)
 
+            # Disable 'ProtectedFromAccidentalDeletion' if it is set.
             if ($targetResource.ProtectedFromAccidentalDeletion)
             {
                 $setADOrganizationalUnitParams = @{
-                    Identity                        = $ou
-                    ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
+                    Identity                        = $targetResource.DistinguishedName
+                    ProtectedFromAccidentalDeletion = $false
                 }
 
                 if ($Credential)
@@ -311,11 +338,19 @@ function Set-TargetResource
                     $setADOrganizationalUnitParams['Credential'] = $Credential
                 }
 
-                Set-ADOrganizationalUnit @setADOrganizationalUnitParams
+                try
+                {
+                    Set-ADOrganizationalUnit @setADOrganizationalUnitParams
+                }
+                catch
+                {
+                    $errorMessage = $script:localizedData.SetResourceError -f $Name
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                }
             }
 
             $removeADOrganizationalUnitParams = @{
-                Identity = $ou
+                Identity = $targetResource.DistinguishedName
             }
 
             if ($Credential)
@@ -323,59 +358,69 @@ function Set-TargetResource
                 $removeADOrganizationalUnitParams['Credential'] = $Credential
             }
 
-            Remove-ADOrganizationalUnit @removeADOrganizationalUnitParams
-        }
-
-        return # return from Set method to make it easier to test for a successful restore
-    }
-    else
-    {
-        if ($RestoreFromRecycleBin)
-        {
-            Write-Verbose -Message ($script:localizedData.RestoringOu -f $Name)
-
-            $restoreParams = @{
-                Identity    = $Name
-                ObjectClass = 'OrganizationalUnit'
-                ErrorAction = 'Stop'
-            }
-
-            if ($Credential)
-            {
-                $restoreParams['Credential'] = $Credential
-            }
-
-            $restoreSuccessful = Restore-ADCommonObject @restoreParams
-        }
-
-        if (-not $RestoreFromRecycleBin -or ($RestoreFromRecycleBin -and -not $restoreSuccessful))
-        {
-            Write-Verbose ($script:localizedData.CreatingOU -f $targetResource.Name)
-
-            $newADOrganizationalUnitParams = @{
-                Name                            = $Name
-                Path                            = $Path
-                Description                     = $Description
-                ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
-            }
-
-            if ($Credential)
-            {
-                $newADOrganizationalUnitParams['Credential'] = $Credential
-            }
-
             try
             {
-                New-ADOrganizationalUnit @newADOrganizationalUnitParams
-            }
-            catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
-            {
-                $errorMessage = $script:localizedData.PathNotFoundError -f $Path
-                New-ObjectNotFoundException -Message $errorMessage
+                Remove-ADOrganizationalUnit @removeADOrganizationalUnitParams
             }
             catch
             {
-                throw $_
+                $errorMessage = $script:localizedData.RemoveResourceError -f $Name
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+            }
+        }
+    }
+    else
+    {
+        if ($Ensure -eq 'Present')
+        {
+            if ($RestoreFromRecycleBin)
+            {
+                Write-Verbose -Message ($script:localizedData.RestoringOu -f $Name)
+
+                $restoreParams = @{
+                    Identity    = $Name
+                    ObjectClass = 'OrganizationalUnit'
+                    ErrorAction = 'Stop'
+                }
+
+                if ($Credential)
+                {
+                    $restoreParams['Credential'] = $Credential
+                }
+
+                $restoreSuccessful = Restore-ADCommonObject @restoreParams
+            }
+
+            if (-not $RestoreFromRecycleBin -or ($RestoreFromRecycleBin -and -not $restoreSuccessful))
+            {
+                Write-Verbose ($script:localizedData.CreatingOU -f $Name)
+
+                $newADOrganizationalUnitParams = @{
+                    Name                            = $Name
+                    Path                            = $Path
+                    Description                     = $Description
+                    ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
+                }
+
+                if ($Credential)
+                {
+                    $newADOrganizationalUnitParams['Credential'] = $Credential
+                }
+
+                try
+                {
+                    New-ADOrganizationalUnit @newADOrganizationalUnitParams
+                }
+                catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+                {
+                    $errorMessage = $script:localizedData.PathNotFoundError -f $Path
+                    New-ObjectNotFoundException -Message $errorMessage
+                }
+                catch
+                {
+                    $errorMessage = $script:localizedData.NewResourceError -f $Name
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                }
             }
         }
     }
