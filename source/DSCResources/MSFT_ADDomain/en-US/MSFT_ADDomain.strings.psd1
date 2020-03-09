@@ -1,7 +1,7 @@
 # culture="en-US"
 ConvertFrom-StringData @'
     QueryDomain                        = Querying for domain '{0}'. (ADD0001)
-    ADServerDown                       = The AD Server for domain '{0}' is currently down. (ADD0002)
+    ADServerNotReady                   = The AD Server for domain '{0}' is currently not ready. (ADD0002)
     DomainFound                        = Active Directory domain '{0}' found. (ADD0003)
     CreatingChildDomain                = Creating domain '{0}' as a child of domain '{1}'. (ADD0004)
     CreatedChildDomain                 = Child domain '{0}' created. (ADD0005)
