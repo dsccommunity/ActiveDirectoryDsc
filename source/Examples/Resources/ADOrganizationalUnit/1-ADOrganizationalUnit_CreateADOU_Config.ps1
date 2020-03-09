@@ -16,8 +16,7 @@ Updated author, copyright notice, and URLs.
 
 <#
     .DESCRIPTION
-        This configuration will add an Active Directory organizational unit to the
-        domain.
+        This configuration will add an Active Directory organizational unit to the domain.
 #>
 Configuration ADOrganizationalUnit_CreateADOU_Config
 {

@@ -71,6 +71,17 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Refactored the `Set-TargetResource` function so that properties are only set if they have been changed.
   - Refactored the resource unit tests.
   - Added quotes to all the variables in the localised string data.
+- ADOrganizationalUnit
+  - Replaced throws with `New-InvalidOperationException`.
+  - Refactored `Get-TargetResource` to not reference properties of a `$null` object
+  - Fixed organization references to organizational.
+  - Refactored `Test-TargetResource` to use `Compare-ResourcePropertyState` common function.
+  - Reformatted code to keep line lengths to less than 120 characters.
+  - Removed redundant `Assert-Module` and `Get-ADOrganizationalUnit` function calls from `Set-TargetResource`.
+  - Wrapped `Set-ADOrganizationalUnit` and `Remove-ADOrganizationalUnit` with try/catch blocks and used common exception
+    function.
+  - Added `DistinguishedName` read-only property.
+  - Refactored unit tests.
 - ADUser
   - Improve Try/Catch blocks to only cover cmdlet calls.
   - Move the Test-Password function to the ActiveDirectoryDsc.Common module and add unit tests.
