@@ -2067,6 +2067,10 @@ function Find-DomainController
                 $script:localizedData.IgnoreCredentialError -f $_.FullyQualifiedErrorId, $_.Exception.Message
             )
         }
+        elseif ($_.Exception.InnerException -is [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException])
+        {
+            Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName) -Verbose
+        }
         else
         {
             throw $_

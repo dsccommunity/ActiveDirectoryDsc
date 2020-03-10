@@ -25,6 +25,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Fixed
 
 - ADForestProperties
+  - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/PowerShell/ActiveDirectoryDsc/issues/548)).
+- WaitForADDomain
+  - Fixed `Find-DomainController` to correctly handle an exception thrown when a domain controller is not ready ([issue #530](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/530)).
+  - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/548)).
   - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix`
     ([issue #548](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/548)).
 - ADObjectPermissionEntry
