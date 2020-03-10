@@ -15,7 +15,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Added Strict-Mode v1.0 to all unit tests.
 - ADDomain
   - Added integration tests
-    ([issue #302](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/302)).
+    ([issue #345](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/345)).
+- ADGroup
+  - Added support for Managed Service Accounts
+    ([issue #532](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/532)).
 - ADForestProperties
   - Added TombstoneLifetime property
     ([issue #302](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/302)).
@@ -25,25 +28,24 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Fixed
 
 - ADForestProperties
-  - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/PowerShell/ActiveDirectoryDsc/issues/548)).
-- WaitForADDomain
-  - Fixed `Find-DomainController` to correctly handle an exception thrown when a domain controller is not ready ([issue #530](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/530)).
-  - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix` ([issue #548](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/548)).
   - Fixed ability to clear `ServicePrincipalNameSuffix` and `UserPrincipalNameSuffix`
-    ([issue #548](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/548)).
+    ([issue #548](https://github.com/PowerShell/ActiveDirectoryDsc/issues/548)).
+- WaitForADDomain
+  - Fixed `Find-DomainController` to correctly handle an exception thrown when a domain controller is not ready
+    ([issue #530](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/530)).
 - ADObjectPermissionEntry
   - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when target object path does not
     yet exist
-    ([issue #552](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/552))
+    ([issue #552](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/552)).
   - Fixed issue where Get-TargetResource throw an exception, `Cannot find drive. A drive with the name 'AD' does not
     exist`, when running soon after domain controller restart
-    ([issue #547](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/547))
+    ([issue #547](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/547)).
 - ADOrganizationalUnit
-  - Fixed issue where Get-DscConfiguration / Test-DscConfiguration throw an exception when parent path does not yet exist
-    ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553))
+  - Fixed issue where Get-DscConfiguration/Test-DscConfiguration throws an exception when parent path does not yet exist
+    ([issue #553](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/553)).
 - ADReplicationSiteLink
   - Fixed issue creating a Site Link with options specified
-    ([issue #571](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/571))
+    ([issue #571](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/571)).
 - ADDomain
   - Added additional Get-ADDomain retry exceptions
     ([issue #574](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/574)).
