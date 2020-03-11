@@ -12,12 +12,7 @@ Get-Module -Name 'ActiveDirectoryDsc.Common' -All | Remove-Module -Force
 $script:projectPath = "$PSScriptRoot\..\.." | Convert-Path
 $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Where-Object -FilterScript {
         ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
-        $(try
-            { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
-            }
-            catch
-            { $false
-            })
+        $(try { Test-ModuleManifest -Path $_.FullName -ErrorAction Stop } catch { $false })
     }).BaseName
 
 $script:parentModule = Get-Module -Name $script:projectName -ListAvailable | Select-Object -First 1
