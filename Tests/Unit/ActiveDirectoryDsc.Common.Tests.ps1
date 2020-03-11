@@ -1007,6 +1007,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Domain = 'contoso.com'
             }
             [PSCustomObject] @{
+                Name   = 'CN=Msa1,DC=contoso,DC=com'
+                Domain = 'contoso.com'
+            }
+            [PSCustomObject] @{
+                Name   = 'CN=Gmsa1,DC=contoso,DC=com'
+                Domain = 'contoso.com'
+            }
+            [PSCustomObject] @{
                 Name   = 'CN=Account1,DC=a,DC=contoso,DC=com'
                 Domain = 'a.contoso.com'
             }
@@ -1019,6 +1027,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Domain = 'a.contoso.com'
             }
             [PSCustomObject] @{
+                Name   = 'CN=Msa1,DC=a,DC=contoso,DC=com'
+                Domain = 'a.contoso.com'
+            }
+            [PSCustomObject] @{
+                Name   = 'CN=Gmsa1,DC=a,DC=contoso,DC=com'
+                Domain = 'a.contoso.com'
+            }
+            [PSCustomObject] @{
                 Name   = 'CN=Account1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
@@ -1028,6 +1044,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
             [PSCustomObject] @{
                 Name   = 'CN=Computer1,DC=b,DC=contoso,DC=com'
+                Domain = 'b.contoso.com'
+            }
+            [PSCustomObject] @{
+                Name   = 'CN=Msa1,DC=b,DC=contoso,DC=com'
+                Domain = 'b.contoso.com'
+            }
+            [PSCustomObject] @{
+                Name   = 'CN=Gmsa1,DC=b,DC=contoso,DC=com'
                 Domain = 'b.contoso.com'
             }
         )
@@ -1043,13 +1067,17 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
 
         Context 'When all members are in the same domain' {
-            Mock -CommandName Add-ADGroupMember
-            $groupCount = 0
+            BeforeAll {
+                Mock -CommandName Add-ADGroupMember
+                $groupCount = 0
+            }
+
             foreach ($domainGroup in ($memberData | Group-Object -Property Domain))
             {
                 $groupCount ++
-                It 'Should not throw an error when calling Add-ADCommonGroupMember' {
-                    Add-ADCommonGroupMember -Members $domainGroup.Group.Name -Parameters $fakeParameters
+                It "Should not throw an error for $($domainGroup.Name)" {
+                    { Add-ADCommonGroupMember -Members $domainGroup.Group.Name -Parameters $fakeParameters } |
+                        Should -Not -Throw
                 }
             }
 
@@ -1059,67 +1087,89 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
 
         Context 'When members are in different domains' {
-            Mock -CommandName Add-ADGroupMember
-            Mock -CommandName Get-ADObject -MockWith {
-                param
-                (
-                    [Parameter()]
-                    [System.String]
-                    $Identity,
+            BeforeAll {
+                Mock -CommandName Add-ADGroupMember
+                Mock -CommandName Get-ADObject -MockWith {
+                    param
+                    (
+                        [Parameter()]
+                        [System.String]
+                        $Identity,
 
-                    [Parameter()]
-                    [System.String]
-                    $Server,
+                        [Parameter()]
+                        [System.String]
+                        $Server,
 
-                    [Parameter()]
-                    [System.String[]]
-                    $Properties
-                )
+                        [Parameter()]
+                        [System.String[]]
+                        $Properties
+                    )
 
-                $objectClass = switch ($Identity)
-                {
-                    { $Identity -match 'Group' }
+                    $objectClass = switch ($Identity)
                     {
-                        'group'
+                        { $Identity -match 'Group' }
+                        {
+                            'group'
+                        }
+                        { $Identity -match 'Account' }
+                        {
+                            'user'
+                        }
+                        { $Identity -match 'Computer' }
+                        {
+                            'computer'
+                        }
+                        { $Identity -match 'msa' }
+                        {
+                            'msDS-ManagedServiceAccount'
+                        }
+                        { $Identity -match 'gmsa' }
+                        {
+                            'msDS-GroupManagedServiceAccount'
+                        }
                     }
-                    { $Identity -match 'Account' }
-                    {
-                        'user'
-                    }
-                    { $Identity -match 'Computer' }
-                    {
-                        'computer'
-                    }
+
+                    return (
+                        @{
+                            objectClass = $objectClass
+                        }
+                    )
                 }
-
-                return (
-                    [PSCustomObject] @{
-                        objectClass = $objectClass
-                    }
-                )
+                # Mocks should return something that is used with Add-ADGroupMember
+                Mock -CommandName Get-ADComputer -MockWith { 'placeholder' }
+                Mock -CommandName Get-ADGroup -MockWith { 'placeholder' }
+                Mock -CommandName Get-ADUser -MockWith { 'placeholder' }
+                Mock -CommandName Get-ADServiceAccount -MockWith { 'placeholder' }
             }
-            # Mocks should return something that is used with Add-ADGroupMember
-            Mock -CommandName Get-ADComputer -MockWith { return 'placeholder' }
-            Mock -CommandName Get-ADGroup -MockWith { return 'placeholder' }
-            Mock -CommandName Get-ADUser -MockWith { return 'placeholder' }
 
             It 'Should not throw an error' {
-                { Add-ADCommonGroupMember -Members $memberData.Name -Parameters $fakeParameters -MembersInMultipleDomains } | Should -Not -Throw
+                { Add-ADCommonGroupMember -Members $memberData.Name -Parameters $fakeParameters `
+                        -MembersInMultipleDomains } | Should -Not -Throw
             }
 
-            It 'Should have called all mocked cmdlets' {
-                Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times $memberData.Where( { $_.Name -like '*Computer*' }).Count
-                Assert-MockCalled -CommandName Get-ADUser -Exactly -Times $memberData.Where( { $_.Name -like '*Account*' }).Count
-                Assert-MockCalled -CommandName Get-ADGroup -Exactly -Times $memberData.Where( { $_.Name -like '*Group*' }).Count
-                Assert-MockCalled -CommandName Add-ADGroupMember -Exactly -Times $memberData.Count
+            It 'Should have called the expected mocks' {
+                Assert-MockCalled -CommandName Get-ADComputer `
+                    -Exactly -Times $memberData.Where( { $_.Name -like '*Computer*' }).Count
+                Assert-MockCalled -CommandName Get-ADUser `
+                    -Exactly -Times $memberData.Where( { $_.Name -like '*Account*' }).Count
+                Assert-MockCalled -CommandName Get-ADGroup `
+                    -Exactly -Times $memberData.Where( { $_.Name -like '*Group*' }).Count
+                Assert-MockCalled -CommandName Get-ADServiceAccount `
+                    -Exactly -Times $memberData.Where( { $_.Name -like '*msa*' }).Count
+                Assert-MockCalled -CommandName Add-ADGroupMember `
+                    -Exactly -Times $memberData.Count
             }
         }
 
         Context 'When the domain name cannot be determined' {
+            BeforeAll {
+                $emptyDomainError = ($script:localizedData.EmptyDomainError -f
+                    $invalidMemberData[0], $fakeParameters.Identity)
+            }
+
             It 'Should throw the correct error' {
-                {
-                    Add-ADCommonGroupMember -Members $invalidMemberData -Parameters $fakeParameters -MembersInMultipleDomains
-                } | Should -Throw ($script:localizedData.EmptyDomainError -f $invalidMemberData[0], $fakeParameters.Identity)
+                { Add-ADCommonGroupMember -Members $invalidMemberData -Parameters $fakeParameters `
+                        -MembersInMultipleDomains } | Should -Throw $emptyDomainError
             }
         }
     }
@@ -2315,7 +2365,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     Describe 'ActiveDirectoryDsc.Common\Test-Password' {
         BeforeAll {
             $mockDomainName = 'contoso.com'
-            $mockFQDN = 'DC=' + $mockDomainName.replace('.',',DC=')
+            $mockFQDN = 'DC=' + $mockDomainName.replace('.', ',DC=')
             $mockUserName = 'JohnDoe'
             $mockPassword = 'mockpassword'
             $mockPasswordCredential = [System.Management.Automation.PSCredential]::new(
