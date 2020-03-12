@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.0.0] - 2020-03-12
+
 ### Added
 
 - ActiveDirectoryDsc
