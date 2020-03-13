@@ -10,8 +10,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Changed
 
 - ActiveDirectoryDsc
-  - When just merging changed to CHANGELOG.md the CI pipeline will not
-    run.
+  - When merging a commit with changes only to CHANGELOG.md the CI pipeline
+    will not run.
 
 ## [6.0.0] - 2020-03-12
 
