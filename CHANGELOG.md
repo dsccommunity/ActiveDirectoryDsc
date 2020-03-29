@@ -7,6 +7,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Changed
+
+- ActiveDirectoryDsc
+  - When merging a commit with changes only to CHANGELOG.md the CI pipeline
+    will not run.
+
 ## [6.0.0] - 2020-03-12
 
 ### Added
