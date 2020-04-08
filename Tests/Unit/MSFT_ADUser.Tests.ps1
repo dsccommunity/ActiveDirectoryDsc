@@ -567,74 +567,223 @@ try
                         }
                     }
 
-                    Context 'When the "Credential", "Password" and "PasswordNeverResets" properties are specified' {
-                        It 'Should not throw' {
-                            { Test-TargetResource @testTargetResourcePresentParams `
-                                    -Credential $testCredential -Password $testCredential `
-                                    -PasswordNeverResets $false } | Should -Not -Throw
+                    Context 'When the "Password" parameter is specified' {
+                        Context 'When the specified Password has changed' {
+                            BeforeAll {
+                                Mock -CommandName Test-Password -MockWith { $false }
+                            }
+
+                            Context 'When the "PasswordNeverResets" parameter is False' {
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordNeverResets $false | Should -BeFalse
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential } `
+                                        -Exactly -Times 1
+                                }
+                            }
+
+                            Context 'When the "PasswordNeverResets" parameter is True' {
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordNeverResets $true | Should -BeTrue
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -Exactly -Times 0
+                                }
+                            }
+
+                            Context 'When the "Credential" parameter is specified' {
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Credential $testCredential `
+                                        -Password $testCredential | Should -BeFalse
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $Credential -eq $testCredential } `
+                                        -Exactly -Times 1
+                                }
+                            }
+
+                            Context 'When the "PasswordAuthentication" parameter is specified as "Default"' {
+                                BeforeAll {
+                                    $testPasswordAuthentication = 'Default'
+                                }
+
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordAuthentication $testPasswordAuthentication | Should -BeFalse
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                        -Exactly -Times 1
+                                }
+                            }
+
+                            Context 'When the "PasswordAuthentication" parameter is specified as "Negotiate"' {
+                                BeforeAll {
+                                    $testPasswordAuthentication = 'Negotiate'
+                                }
+
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordAuthentication $testPasswordAuthentication | Should -BeFalse
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                        -Exactly -Times 1
+                                }
+                            }
                         }
 
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Credential -eq $testCredential } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
-                                -Exactly -Times 1
-                        }
-                    }
+                        Context 'When the specified Password has not changed' {
+                            BeforeAll {
+                                Mock -CommandName Test-Password -MockWith { $true }
+                            }
 
-                    Context 'When password does not match, "Password" is specified and "PasswordNeverResets" is True' {
-                        BeforeAll {
-                            Mock -CommandName Test-Password -MockWith { $false }
-                        }
+                            Context 'When the "PasswordNeverResets" parameter is False' {
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordNeverResets $false | Should -BeTrue
+                                }
 
-                        It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential -PasswordNeverResets $true | Should -BeTrue
-                        }
-                    }
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential } `
+                                        -Exactly -Times 1
+                                }
+                            }
 
-                    Context 'When password does not match, "Password" is specified and "PasswordNeverResets" is False' {
-                        BeforeAll {
-                            Mock -CommandName Test-Password -MockWith { $false }
-                        }
+                            Context 'When the "PasswordNeverResets" parameter is True' {
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordNeverResets $true | Should -BeTrue
+                                }
 
-                        It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential -PasswordNeverResets $false | Should -BeFalse
-                        }
-                    }
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -Exactly -Times 0
+                                }
+                            }
 
-                    Context 'When the "PasswordAuthentication" parameter is "Default"' {
-                        BeforeAll {
-                            Mock -CommandName Test-Password -MockWith { $true }
-                        }
+                            Context 'When the "Credential" parameter is specified' {
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Credential $testCredential `
+                                        -Password $testCredential | Should -BeTrue
+                                }
 
-                        It 'Should not throw' {
-                            { Test-TargetResource @testTargetResourcePresentParams -Password $testCredential } |
-                                Should -Not -Throw
-                        }
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $Credential -eq $testCredential } `
+                                        -Exactly -Times 1
+                                }
+                            }
 
-                        It 'should call the expected mocks' {
-                            Assert-MockCalled -CommandName Test-Password `
-                                -ParameterFilter { $PasswordAuthentication -eq 'Default' }
-                        }
-                    }
+                            Context 'When the "PasswordAuthentication" parameter is specified as "Default"' {
+                                BeforeAll {
+                                    $testPasswordAuthentication = 'Default'
+                                }
 
-                    Context 'When the "PasswordAuthentication" parameter is "Negotiate"' {
-                        BeforeAll {
-                            Mock -CommandName Test-Password -MockWith { $false }
-                        }
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordAuthentication $testPasswordAuthentication | Should -BeTrue
+                                }
 
-                        It 'Should not throw' {
-                            { Test-TargetResource @testTargetResourcePresentParams `
-                                    -Password $testCredential -PasswordAuthentication 'Negotiate' } |
-                                Should -Not -Throw
-                        }
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                        -Exactly -Times 1
+                                }
+                            }
 
-                        It 'should call the expected mocks' {
-                            Assert-MockCalled -CommandName Test-Password `
-                                -ParameterFilter { $PasswordAuthentication -eq 'Negotiate' }
+                            Context 'When the "PasswordAuthentication" parameter is specified as "Negotiate"' {
+                                BeforeAll {
+                                    $testPasswordAuthentication = 'Negotiate'
+                                }
+
+                                It 'Should return the desired result' {
+                                    Test-TargetResource @testTargetResourcePresentParams `
+                                        -Password $testCredential `
+                                        -PasswordAuthentication $testPasswordAuthentication | Should -BeTrue
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $testTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                        -Exactly -Times 1
+                                }
+                            }
                         }
                     }
                 }
@@ -973,110 +1122,371 @@ try
                         }
                     }
 
-                    Context 'When the "Password" parameter is specified and "PasswordNeverResets" is False' {
-                        BeforeAll {
-                            Mock -CommandName Test-Password -MockWith { $false }
-                        }
+                    Context 'When the "Password" parameter is specified' {
+                        Context 'When the specified Password has changed' {
+                            BeforeAll {
+                                Mock -CommandName Test-Password -MockWith { $false }
+                            }
 
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentParams `
-                                    -Password $testCredential `
-                                    -PasswordNeverResets $false } | Should -Not -Throw
-                        }
+                            Context 'When the "PasswordNeverResets" parameter is False' {
 
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { `
-                                    $Name -eq $setTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
-                                -ParameterFilter { $NewPassword -eq $testCredential.Password } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
-                                -ParameterFilter { $UserName -eq $setTargetResourcePresentParams.UserName } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Rename-ADObject `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
-                                -Exactly -Times 0
-                        }
-                    }
+                                It 'Should not throw' {
+                                    { Set-TargetResource @setTargetResourcePresentParams `
+                                            -Password $testCredential `
+                                            -PasswordNeverResets $false } | Should -Not -Throw
+                                }
 
-                    Context 'When the "Password" parameter is specified and "PasswordNeverResets" is True' {
-                        BeforeAll {
-                        }
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                        -ParameterFilter { $NewPassword -eq $testCredential.Password } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Rename-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Move-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Set-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Remove-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName New-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                        -Exactly -Times 0
+                                }
+                            }
 
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentParams `
-                                    -Password $testCredential `
-                                    -PasswordNeverResets $true } | Should -Not -Throw
-                        }
+                            Context 'When the "PasswordNeverResets" parameter is True' {
+                                It 'Should not throw' {
+                                    { Set-TargetResource @setTargetResourcePresentParams `
+                                            -Password $testCredential `
+                                            -PasswordNeverResets $true } | Should -Not -Throw
+                                }
 
-                        It "Should call the expected mocks" {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { `
-                                    $Name -eq $setTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Test-Password `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
-                                -Exactly -Times 0
-                        }
-                    }
+                                It "Should call the expected mocks" {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Rename-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Move-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Set-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Remove-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName New-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                        -Exactly -Times 0
+                                }
+                            }
 
-                    Context 'When the "Password" and "Credential" parameters are specified' {
-                        BeforeAll {
-                            Mock -CommandName Test-Password -MockWith { $true }
-                        }
+                            Context 'When the "Credential" parameter is specified' {
+                                It 'Should not throw' {
+                                    { Set-TargetResource @setTargetResourcePresentParams `
+                                            -Password $testCredential `
+                                            -Credential $testCredential } | Should -Not -Throw
+                                }
 
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentParams `
-                                    -Password $testCredential `
-                                    -Credential $testCredential } | Should -Not -Throw
-                        }
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $Credential -eq $testCredential } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                        -ParameterFilter { $NewPassword -eq $testCredential.Password } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Rename-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Move-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Set-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Remove-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName New-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                        -Exactly -Times 0
+                                }
+                            }
 
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { `
-                                    $Name -eq $setTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
-                                -ParameterFilter { $Credential -eq $testCredential } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
-                                -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
-                                -Exactly -Times 0
+                            Context 'When the "PasswordAuthentication" parameter is specified as "Default"' {
+                                BeforeAll {
+                                    $testPasswordAuthentication = 'Default'
+                                }
+
+                                It 'Should not throw' {
+                                    { Set-TargetResource @setTargetResourcePresentParams `
+                                            -Password $testCredential `
+                                            -PasswordAuthentication $testPasswordAuthentication } | Should -Not -Throw
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                        -ParameterFilter { $NewPassword -eq $testCredential.Password } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Rename-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Move-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Set-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Remove-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName New-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                        -Exactly -Times 0
+                                }
+                            }
+
+                            Context 'When the "PasswordAuthentication" parameter is specified as "Negotiate"' {
+                                BeforeAll {
+                                    $testPasswordAuthentication = 'Negotiate'
+                                }
+
+                                It 'Should not throw' {
+                                    { Set-TargetResource @setTargetResourcePresentParams `
+                                            -Password $testCredential `
+                                            -PasswordAuthentication $testPasswordAuthentication } | Should -Not -Throw
+                                }
+
+                                It 'Should call the expected mocks' {
+                                    Assert-MockCalled -CommandName Get-TargetResource `
+                                        -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Test-Password `
+                                        -ParameterFilter { `
+                                            $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                            $Password -eq $testCredential -and `
+                                            $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                        -ParameterFilter { $NewPassword -eq $testCredential.Password } `
+                                        -Exactly -Times 1
+                                    Assert-MockCalled -CommandName Rename-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Move-ADObject `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Set-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Remove-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName New-ADUser `
+                                        -Exactly -Times 0
+                                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                        -Exactly -Times 0
+                                }
+                            }
+
+                            Context 'When the specified Password has not changed' {
+                                BeforeAll {
+                                    Mock -CommandName Test-Password -MockWith { $true }
+                                }
+
+                                Context 'When the "PasswordNeverResets" parameter is False' {
+
+                                    It 'Should not throw' {
+                                        { Set-TargetResource @setTargetResourcePresentParams `
+                                                -Password $testCredential `
+                                                -PasswordNeverResets $false } | Should -Not -Throw
+                                    }
+
+                                    It 'Should call the expected mocks' {
+                                        Assert-MockCalled -CommandName Get-TargetResource `
+                                            -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Test-Password `
+                                            -ParameterFilter { `
+                                                $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                                $Password -eq $testCredential } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Rename-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Move-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Set-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Remove-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName New-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                            -Exactly -Times 0
+                                    }
+                                }
+
+                                Context 'When the "PasswordNeverResets" parameter is True' {
+                                    It 'Should not throw' {
+                                        { Set-TargetResource @setTargetResourcePresentParams `
+                                                -Password $testCredential `
+                                                -PasswordNeverResets $true } | Should -Not -Throw
+                                    }
+
+                                    It "Should call the expected mocks" {
+                                        Assert-MockCalled -CommandName Get-TargetResource `
+                                            -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Rename-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Move-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Set-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Test-Password `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Remove-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName New-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                            -Exactly -Times 0
+                                    }
+                                }
+
+                                Context 'When the "Credential" parameter are specified' {
+                                    It 'Should not throw' {
+                                        { Set-TargetResource @setTargetResourcePresentParams `
+                                                -Password $testCredential `
+                                                -Credential $testCredential } | Should -Not -Throw
+                                    }
+
+                                    It 'Should call the expected mocks' {
+                                        Assert-MockCalled -CommandName Get-TargetResource `
+                                            -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Test-Password `
+                                            -ParameterFilter { `
+                                                $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                                $Password -eq $testCredential -and `
+                                                $Credential -eq $testCredential } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Rename-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Move-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Set-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Remove-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName New-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                            -Exactly -Times 0
+                                    }
+                                }
+
+                                Context 'When the "PasswordAuthentication" parameter is specified as "Default"' {
+                                    BeforeAll {
+                                        $testPasswordAuthentication = 'Default'
+                                    }
+
+                                    It 'Should not throw' {
+                                        { Set-TargetResource @setTargetResourcePresentParams `
+                                                -Password $testCredential `
+                                                -PasswordAuthentication $testPasswordAuthentication } |
+                                            Should -Not -Throw
+                                    }
+
+                                    It 'Should call the expected mocks' {
+                                        Assert-MockCalled -CommandName Get-TargetResource `
+                                            -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Test-Password `
+                                            -ParameterFilter { `
+                                                $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                                $Password -eq $testCredential -and `
+                                                $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Rename-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Move-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Set-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Remove-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName New-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                            -Exactly -Times 0
+                                    }
+                                }
+
+                                Context 'When the "PasswordAuthentication" parameter is specified as "Negotiate"' {
+                                    BeforeAll {
+                                        $testPasswordAuthentication = 'Negotiate'
+                                    }
+
+                                    It 'Should not throw' {
+                                        { Set-TargetResource @setTargetResourcePresentParams `
+                                                -Password $testCredential `
+                                                -PasswordAuthentication $testPasswordAuthentication } |
+                                            Should -Not -Throw
+                                    }
+
+                                    It 'Should call the expected mocks' {
+                                        Assert-MockCalled -CommandName Get-TargetResource `
+                                            -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Test-Password `
+                                            -ParameterFilter { `
+                                                $UserName -eq $setTargetResourcePresentParams.UserName -and `
+                                                $Password -eq $testCredential -and `
+                                                $PasswordAuthentication -eq $testPasswordAuthentication } `
+                                            -Exactly -Times 1
+                                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Rename-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Move-ADObject `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Set-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Remove-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName New-ADUser `
+                                            -Exactly -Times 0
+                                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                            -Exactly -Times 0
+                                    }
+                                }
+                            }
                         }
                     }
 
