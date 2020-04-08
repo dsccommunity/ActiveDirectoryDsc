@@ -50,6 +50,7 @@ DscResourcesToExport = @(
     'ADDomainController'
     'ADDomainControllerProperties'
     'ADDomainDefaultPasswordPolicy'
+    'ADFineGrainedPasswordPolicy'
     'ADDomainFunctionalLevel'
     'ADDomainTrust'
     'ADForestFunctionalLevel'
