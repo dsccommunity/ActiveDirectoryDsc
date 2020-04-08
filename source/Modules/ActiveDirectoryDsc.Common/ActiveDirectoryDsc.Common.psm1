@@ -218,32 +218,16 @@ function Assert-MemberParameters
         }
     }
 
-    if ($PSBoundParameters.ContainsKey('MembersToInclude'))
-    {
-        $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
-    }
+    $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
+    $MembersToExclude = Remove-DuplicateMembers -Members $MembersToExclude
 
-    if ($PSBoundParameters.ContainsKey('MembersToExclude'))
+    # Check if MembersToInclude and MembersToExclude have common principals.
+    foreach ($member in $MembersToInclude)
     {
-        $MembersToExclude = Remove-DuplicateMembers -Members $MembersToExclude
-    }
-
-    if (($PSBoundParameters.ContainsKey('MembersToInclude')) -and ($PSBoundParameters.ContainsKey('MembersToExclude')))
-    {
-        if (($MembersToInclude.Length -eq 0) -and ($MembersToExclude.Length -eq 0))
+        if ($member -in $MembersToExclude)
         {
-            $errorMessage = $script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude'
+            $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude'
             New-InvalidArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
-        }
-
-        # Both MembersToInclude and MembersToExclude were provided. Check if they have common principals.
-        foreach ($member in $MembersToInclude)
-        {
-            if ($member -in $MembersToExclude)
-            {
-                $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude'
-                New-InvalidArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
-            }
         }
     }
 
@@ -282,16 +266,16 @@ function Remove-DuplicateMembers
 
     if ($null -eq $Members -or $Members.Count -eq 0)
     {
-        $uniqueMembers = [System.String[]] @()
+        $uniqueMembers = @()
     }
     else
     {
-        $uniqueMembers = [System.String[]] ($members | Sort-Object -Unique)
+        $uniqueMembers = @($members | Sort-Object -Unique)
     }
 
     <#
-        Comma make sure we return the string array as the correct type,
-        and also make sure one entry is returned as a string array.
+        Comma makes sure we return the string array as the correct type,
+        and also makes sure one entry is returned as a string array.
     #>
     return , $uniqueMembers
 }
@@ -490,7 +474,7 @@ function ConvertTo-TimeSpan
         $TimeSpanType
     )
 
-    $newTimeSpanParams = @{}
+    $newTimeSpanParams = @{ }
 
     switch ($TimeSpanType)
     {

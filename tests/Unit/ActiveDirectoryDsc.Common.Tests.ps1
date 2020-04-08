@@ -106,53 +106,53 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     }
 
     Describe 'ActiveDirectoryDsc.Common\Remove-DuplicateMembers' {
-        It 'Should removes one duplicate' {
+        It 'Should remove one duplicate' {
             $members = Remove-DuplicateMembers -Members 'User1', 'User2', 'USER1'
-            $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
             $members -contains 'User1' | Should -BeTrue
             $members -contains 'User2' | Should -BeTrue
+            $members -is [System.Array] | Should -BeTrue
         }
 
-        It 'Should removes two duplicates' {
+        It 'Should remove two duplicates' {
             $members = Remove-DuplicateMembers -Members 'User1', 'User2', 'USER1', 'USER2'
-            $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
             $members -contains 'User1' | Should -BeTrue
             $members -contains 'User2' | Should -BeTrue
+            $members -is [System.Array] | Should -BeTrue
         }
 
-        It 'Should removes double duplicates' {
+        It 'Should remove double duplicates' {
             $members = Remove-DuplicateMembers -Members 'User1', 'User2', 'USER1', 'user1'
-            $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 2
             $members -contains 'User1' | Should -BeTrue
             $members -contains 'User2' | Should -BeTrue
+            $members -is [System.Array] | Should -BeTrue
         }
 
         It 'Should return a string array with one one entry' {
             $members = Remove-DuplicateMembers -Members 'User1', 'USER1', 'user1'
-            $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 1
             $members -contains 'User1' | Should -BeTrue
+            $members -is [System.Array] | Should -BeTrue
         }
 
-        It 'Should return empty collection when passed a $null value' {
+        It 'Should return an empty collection when passed a $null value' {
             $members = Remove-DuplicateMembers -Members $null
-            $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 0
+            $members -is [System.Array] | Should -BeTrue
         }
 
-        It 'Should return empty collection when passed an empty collection' {
+        It 'Should return an empty collection when passed an empty collection' {
             $members = Remove-DuplicateMembers -Members @()
-            $members -is [System.String[]] | Should -BeTrue
 
             $members.Count | Should -Be 0
+            $members -is [System.Array] | Should -BeTrue
         }
     }
 
@@ -309,28 +309,78 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     }
 
     Describe 'ActiveDirectoryDsc.Common\Assert-MemberParameters' {
-        It 'Should throws if both parameters Members and MembersToInclude are specified' {
-            {
-                Assert-MemberParameters -Members @('User1') -MembersToInclude @('User2')
-            } | Should -Throw ($script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude')
+        Context 'When only the Members parameter is specified' {
+            BeforeAll {
+                $assertMemberParameters = @{
+                    Members = 'User1'
+                }
+            }
+            It 'Should not throw' {
+                { Assert-MemberParameters @AssertMemberParameters } | Should -Not -Throw
+            }
         }
 
-        It 'Should throw if both parameters Members and MembersToExclude are specified' {
-            {
-                Assert-MemberParameters -Members @('User1') -MembersToExclude @('User2')
-            } | Should -Throw ($script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude')
+        Context 'When both the Members and MembersToInclude parameters are specified' {
+            BeforeAll {
+                $assertMemberParameters = @{
+                    Members          = 'User1', 'User2'
+                    MembersToInclude = 'User2', 'User3'
+                }
+                $expectedError = ($script:localizedData.MembersAndIncludeExcludeError -f
+                    'Members', 'MembersToInclude', 'MembersToExclude')
+            }
+
+            It 'Should throw the expected error' {
+                { Assert-MemberParameters @AssertMemberParameters } |
+                    Should -Throw $expectedError
+            }
         }
 
-        It 'Should throws if the both parameters MembersToInclude and MembersToExclude contain the same member' {
-            {
-                Assert-MemberParameters -MembersToExclude @('user1') -MembersToInclude @('USER1')
-            } | Should -Throw ($errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f 'user1', 'MembersToInclude', 'MembersToExclude')
+        Context 'When both the Members and MembersToExclude parameters are specified' {
+            BeforeAll {
+                $assertMemberParameters = @{
+                    Members          = 'User1', 'User2'
+                    MembersToExclude = 'User3', 'User4'
+                }
+                $expectedError = ($script:localizedData.MembersAndIncludeExcludeError -f
+                    'Members', 'MembersToInclude', 'MembersToExclude')
+            }
+
+            It 'Should throw the expected error' {
+                { Assert-MemberParameters @AssertMemberParameters } |
+                    Should -Throw $expectedError
+            }
         }
 
-        It 'Should throw if both parameters MembersToInclude and MembersToExclude contains no members (are empty)' {
-            {
-                Assert-MemberParameters -MembersToExclude @() -MembersToInclude @()
-            } | Should -Throw ($script:localizedData.IncludeAndExcludeAreEmptyError -f 'MembersToInclude', 'MembersToExclude')
+        Context 'When both the MembersToInclude and MembersToExclude parameters contain different members' {
+            BeforeAll {
+                $assertMemberParameters = @{
+                    MembersToInclude = 'User1', 'User2'
+                    MembersToExclude = 'User3', 'User4'
+                }
+            }
+
+            It 'Should not throw' {
+                { Assert-MemberParameters @AssertMemberParameters } |
+                    Should -Not -Throw
+            }
+        }
+
+        Context 'When both the MembersToInclude and MembersToExclude parameters contain the same member' {
+            BeforeAll {
+                $testMember = 'user1'
+                $assertMemberParameters = @{
+                    MembersToInclude = $testMember
+                    MembersToExclude = $testMember
+                }
+                $expectedError = ($script:localizedData.IncludeAndExcludeConflictError -f
+                    $testMember, 'MembersToInclude', 'MembersToExclude')
+            }
+
+            It 'Should throw the expected error' {
+                { Assert-MemberParameters @AssertMemberParameters } |
+                    Should -Throw $expectedError
+            }
         }
     }
 

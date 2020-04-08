@@ -16,52 +16,16 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER GroupName
          Name of the Active Directory group.
 
-    .PARAMETER GroupScope
-        Active Directory group scope. Default value is 'Global'.
-
-    .PARAMETER Category
-        Active Directory group category. Default value is 'Security'.
-
-    .PARAMETER Path
-        Location of the group within Active Directory expressed as a Distinguished Name.
-
-    .PARAMETER Ensure
-        Specifies if this Active Directory group should be present or absent.
-        Default value is 'Present'.
-
-    .PARAMETER Description
-        Description of the Active Directory group.
-
-    .PARAMETER DisplayName
-        Display name of the Active Directory group.
-
     .PARAMETER Credential
         Credentials used to enact the change upon.
 
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
 
-    .PARAMETER Members
-        Active Directory group membership should match membership exactly.
-
-    .PARAMETER MembersToInclude
-        Active Directory group should include these members.
-
-    .PARAMETER MembersToExclude
-        Active Directory group should NOT include these members.
-
-    .PARAMETER MembershipAttribute
+        .PARAMETER MembershipAttribute
         Active Directory attribute used to perform membership operations.
         Default value is 'SamAccountName'.
 
-    .PARAMETER ManagedBy
-        Active Directory managed by attribute specified as a DistinguishedName.
-
-    .PARAMETER Notes
-        Active Directory group notes field.
-
-    .PARAMETER RestoreFromRecycleBin
-        Try to restore the group from the recycle bin before creating a new one.
 #>
 function Get-TargetResource
 {
@@ -75,36 +39,6 @@ function Get-TargetResource
         $GroupName,
 
         [Parameter()]
-        [ValidateSet('DomainLocal', 'Global', 'Universal')]
-        [System.String]
-        $GroupScope = 'Global',
-
-        [Parameter()]
-        [ValidateSet('Security', 'Distribution')]
-        [System.String]
-        $Category = 'Security',
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
-
-        [Parameter()]
-        [ValidateSet('Present', 'Absent')]
-        [System.String]
-        $Ensure = 'Present',
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Description,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DisplayName,
-
-        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
@@ -116,158 +50,140 @@ function Get-TargetResource
         $DomainController,
 
         [Parameter()]
-        [System.String[]]
-        $Members,
-
-        [Parameter()]
-        [System.String[]]
-        $MembersToInclude,
-
-        [Parameter()]
-        [System.String[]]
-        $MembersToExclude,
-
-        [Parameter()]
         [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
         [System.String]
-        $MembershipAttribute = 'SamAccountName',
-
-        # This must be the user's DN
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ManagedBy,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Notes,
-
-        [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $RestoreFromRecycleBin
+        $MembershipAttribute = 'SamAccountName'
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    $getTargetResourceReturnValue = @{
-        Ensure              = 'Absent'
-        GroupName           = $GroupName
-        GroupScope          = $null
-        Category            = $null
-        Path                = $null
-        Description         = $null
-        DisplayName         = $null
-        Members             = @()
-        MembersToInclude    = $MembersToInclude
-        MembersToExclude    = $MembersToExclude
-        MembershipAttribute = $MembershipAttribute
-        ManagedBy           = $null
-        Notes               = $null
-        DistinguishedName   = $null
-    }
-
     $commonParameters = Get-ADCommonParameters @PSBoundParameters
+
+    Write-Verbose -Message ($script:localizedData.RetrievingADGroup -f $GroupName, $DomainName)
+
+    $getADGroupProperties = ('Name', 'GroupScope', 'GroupCategory', 'DistinguishedName', 'Description', 'DisplayName',
+        'ManagedBy', 'Info')
 
     try
     {
-        $adGroup = Get-ADGroup @commonParameters -Properties @(
-            'Name',
-            'GroupScope',
-            'GroupCategory',
-            'DistinguishedName',
-            'Description',
-            'DisplayName',
-            'ManagedBy',
-            'Members',
-            'Info'
-        )
-
-        Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
-
-        if ($adGroup)
-        {
-            try
-            {
-                [System.Array] $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
-            }
-            catch
-            {
-                # This FullyQualifiedErrorId is indicative of a failure to retrieve members with Get-ADGroupMember
-                # for a one-way trust
-                $oneWayTrustFullyQualifiedErrorId = `
-                    'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
-
-                if ($_.FullyQualifiedErrorId -eq $oneWayTrustFullyQualifiedErrorId)
-                {
-                    # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
-                    if ($MembershipAttribute -eq 'SID')
-                    {
-                        $selectProperty = 'ObjectSID'
-                    }
-                    else
-                    {
-                        $selectProperty = $MembershipAttribute
-                    }
-
-                    # Use the same results from Get-ADCommonParameters but remove the Identity
-                    # for usage with Get-ADObject
-                    $getADObjectParameters = $commonParameters.Clone()
-                    $getADObjectParameters.Remove('Identity')
-
-                    # Retrieve the current list of members, returning the specified membership attribute
-                    [System.Array] $adGroupMembers = $adGroup.Members | ForEach-Object -Process {
-                        # Adding a Filter and additional Properties for the AD object retrieval
-                        $getADObjectParameters['Filter'] = "DistinguishedName -eq '$($_)'"
-                        $getADObjectParameters['Properties'] = @(
-                            'SamAccountName',
-                            'ObjectSID'
-                        )
-
-                        $adObject = Get-ADObject @getADObjectParameters
-
-                        # Perform SID translation to a readable name as the SamAccountName if the member is
-                        # of objectClass "foreignSecurityPrincipal"
-                        $classMatchForResolve = $adObject.objectClass -eq 'foreignSecurityPrincipal'
-                        $attributeMatchForResolve = $MembershipAttribute -eq 'SamAccountName'
-
-                        if ($classMatchForResolve -and $attributeMatchForResolve)
-                        {
-                            Resolve-SamAccountName -ObjectSid $adObject.objectSid
-                        }
-                        else
-                        {
-                            $adObject.$selectProperty
-                        }
-                    }
-                }
-                else
-                {
-                    $errorMessage = $script:localizedData.RetrievingGroupMembersError -f $GroupName
-                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-                }
-            }
-
-            $getTargetResourceReturnValue['Ensure'] = 'Present'
-            $getTargetResourceReturnValue['GroupName'] = $adGroup.Name
-            $getTargetResourceReturnValue['GroupScope'] = $adGroup.GroupScope
-            $getTargetResourceReturnValue['Category'] = $adGroup.GroupCategory
-            $getTargetResourceReturnValue['DistinguishedName'] = $adGroup.DistinguishedName
-            $getTargetResourceReturnValue['Path'] = Get-ADObjectParentDN -DN $adGroup.DistinguishedName
-            $getTargetResourceReturnValue['Description'] = $adGroup.Description
-            $getTargetResourceReturnValue['DisplayName'] = $adGroup.DisplayName
-            $getTargetResourceReturnValue['Members'] = $adGroupMembers
-            $getTargetResourceReturnValue['ManagedBy'] = $adGroup.ManagedBy
-            $getTargetResourceReturnValue['Notes'] = $adGroup.Info
-        }
+        $adGroup = Get-ADGroup @commonParameters -Properties $getADGroupProperties
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
-        Write-Verbose -Message ($script:localizedData.GroupNotFound -f $GroupName)
+        Write-Verbose -Message ($script:localizedData.ADUserNotPresent -f $GroupName, $DomainName)
+
+        $adGroup = $null
+    }
+    catch
+    {
+        $errorMessage = $script:localizedData.RetrievingADGroupError -f $GroupName, $DomainName
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
-    return $getTargetResourceReturnValue
+    if ($adGroup)
+    {
+        Write-Verbose -Message ($script:localizedData.ADGroupIsPresent -f $GroupName, $DomainName)
+        Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
+
+        try
+        {
+            [System.Array] $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
+        }
+        catch
+        {
+            # This FullyQualifiedErrorId is indicative of a failure to retrieve members with Get-ADGroupMember
+            # for a one-way trust
+            $oneWayTrustFullyQualifiedErrorId = `
+                'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
+
+            if ($_.FullyQualifiedErrorId -eq $oneWayTrustFullyQualifiedErrorId)
+            {
+                # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
+                if ($MembershipAttribute -eq 'SID')
+                {
+                    $selectProperty = 'ObjectSID'
+                }
+                else
+                {
+                    $selectProperty = $MembershipAttribute
+                }
+
+                # Use the same results from Get-ADCommonParameters but remove the Identity
+                # for usage with Get-ADObject
+                $getADObjectParameters = $commonParameters.Clone()
+                $getADObjectParameters.Remove('Identity')
+
+                # Retrieve the current list of members, returning the specified membership attribute
+                [System.Array] $adGroupMembers = $adGroup.Members | ForEach-Object -Process {
+                    # Adding a Filter and additional Properties for the AD object retrieval
+                    $getADObjectParameters['Filter'] = "DistinguishedName -eq '$($_)'"
+                    $getADObjectParameters['Properties'] = @(
+                        'SamAccountName',
+                        'ObjectSID'
+                    )
+
+                    $adObject = Get-ADObject @getADObjectParameters
+
+                    # Perform SID translation to a readable name as the SamAccountName if the member is
+                    # of objectClass "foreignSecurityPrincipal"
+                    $classMatchForResolve = $adObject.objectClass -eq 'foreignSecurityPrincipal'
+                    $attributeMatchForResolve = $MembershipAttribute -eq 'SamAccountName'
+
+                    if ($classMatchForResolve -and $attributeMatchForResolve)
+                    {
+                        Resolve-SamAccountName -ObjectSid $adObject.objectSid
+                    }
+                    else
+                    {
+                        $adObject.$selectProperty
+                    }
+                }
+            }
+            else
+            {
+                $errorMessage = $script:localizedData.RetrievingGroupMembersError -f $GroupName
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+            }
+        }
+
+        $targetResource = @{
+            Ensure              = 'Present'
+            GroupName           = $adGroup.Name
+            GroupScope          = $adGroup.GroupScope
+            Category            = $adGroup.GroupCategory
+            DistinguishedName   = $adGroup.DistinguishedName
+            Path                = Get-ADObjectParentDN -DN $adGroup.DistinguishedName
+            Description         = $adGroup.Description
+            DisplayName         = $adGroup.DisplayName
+            Members             = $adGroupMembers
+            MembersToInclude    = $null
+            MembersToExclude    = $null
+            MembershipAttribute = $MembershipAttribute
+            ManagedBy           = $adGroup.ManagedBy
+            Notes               = $adGroup.Info
+        }
+    }
+    else
+    {
+        $targetResource = @{
+            Ensure              = 'Absent'
+            GroupName           = $GroupName
+            GroupScope          = $null
+            Category            = $null
+            DistinguishedName   = $null
+            Path                = $null
+            Description         = $null
+            DisplayName         = $null
+            Members             = @()
+            MembersToInclude    = $null
+            MembersToExclude    = $null
+            MembershipAttribute = $MembershipAttribute
+            ManagedBy           = $null
+            Notes               = $null
+        }
+    }
+
+return $targetResource
 } #end function Get-TargetResource
 
 <#
@@ -437,43 +353,50 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey('GroupScope') -and $targetResource.GroupScope -ne $GroupScope)
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'GroupScope', $GroupScope, $targetResource.GroupScope)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'GroupScope', $GroupScope, $targetResource.GroupScope)
         $targetResourceInCompliance = $false
     }
 
     if ($PSBoundParameters.ContainsKey('Category') -and $targetResource.Category -ne $Category)
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'Category', $Category, $targetResource.Category)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'Category', $Category, $targetResource.Category)
         $targetResourceInCompliance = $false
     }
 
     if ($Path -and ($targetResource.Path -ne $Path))
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'Path', $Path, $targetResource.Path)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'Path', $Path, $targetResource.Path)
         $targetResourceInCompliance = $false
     }
 
     if ($Description -and ($targetResource.Description -ne $Description))
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'Description', $Description, $targetResource.Description)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'Description', $Description, $targetResource.Description)
         $targetResourceInCompliance = $false
     }
 
     if ($DisplayName -and ($targetResource.DisplayName -ne $DisplayName))
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'DisplayName', $DisplayName, $targetResource.DisplayName)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'DisplayName', $DisplayName, $targetResource.DisplayName)
         $targetResourceInCompliance = $false
     }
 
     if ($ManagedBy -and ($targetResource.ManagedBy -ne $ManagedBy))
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'ManagedBy', $ManagedBy, $targetResource.ManagedBy)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'ManagedBy', $ManagedBy, $targetResource.ManagedBy)
         $targetResourceInCompliance = $false
     }
 
     if ($Notes -and ($targetResource.Notes -ne $Notes))
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'Notes', $Notes, $targetResource.Notes)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'Notes', $Notes, $targetResource.Notes)
         $targetResourceInCompliance = $false
     }
 
@@ -486,7 +409,8 @@ function Test-TargetResource
 
     if ($targetResource.Ensure -ne $Ensure)
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f 'Ensure', $Ensure, $targetResource.Ensure)
+        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
+            'Ensure', $Ensure, $targetResource.Ensure)
         $targetResourceInCompliance = $false
     }
 
@@ -698,8 +622,12 @@ function Set-TargetResource
 
             if ($PSBoundParameters.ContainsKey('GroupScope') -and $GroupScope -ne $getTargetResourceResult.GroupScope)
             {
-                # Cannot change DomainLocal to Global or vice versa directly. Need to change them to a Universal group first!
-                Set-ADGroup -Identity $getTargetResourceResult.DistinguishedName -GroupScope 'Universal' -ErrorAction 'Stop'
+                <#
+                  Cannot change DomainLocal to Global or vice versa directly.
+                  Need to change them to a Universal group first!
+                #>
+                Set-ADGroup -Identity $getTargetResourceResult.DistinguishedName -GroupScope 'Universal' `
+                    -ErrorAction 'Stop'
 
                 Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope)
 
@@ -837,7 +765,8 @@ function Set-TargetResource
                         # We can only remove members if there are members already in the group!
                         if ($adGroupMembers.Count -gt 0)
                         {
-                            Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $adGroupMembers.Count, $GroupName)
+                            Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f
+                                $adGroupMembers.Count, $GroupName)
 
                             $setADCommonGroupMemberParms = @{
                                 Members             = $adGroupMembers
@@ -848,7 +777,8 @@ function Set-TargetResource
                             Set-ADCommonGroupMember @setADCommonGroupMemberParms
                         }
 
-                        Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
+                        Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f
+                            $Members.Count, $GroupName)
 
                         $setADCommonGroupMemberParms = @{
                             Members             = $Members
@@ -859,11 +789,13 @@ function Set-TargetResource
                         Set-ADCommonGroupMember @setADCommonGroupMemberParms
                     }
 
-                    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+                    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and
+                        -not [System.String]::IsNullOrEmpty($MembersToInclude))
                     {
                         $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
 
-                        Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
+                        Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f
+                            $MembersToInclude.Count, $GroupName)
 
                         $setADCommonGroupMemberParms = @{
                             Members             = $MembersToInclude
@@ -874,11 +806,13 @@ function Set-TargetResource
                         Set-ADCommonGroupMember @setADCommonGroupMemberParms
                     }
 
-                    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
+                    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and
+                        -not [System.String]::IsNullOrEmpty($MembersToExclude))
                     {
                         $MembersToExclude = Remove-DuplicateMembers -Members $MembersToExclude
 
-                        Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $MembersToExclude.Count, $GroupName)
+                        Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f
+                            $MembersToExclude.Count, $GroupName)
 
                         $setADCommonGroupMemberParms = @{
                             Members             = $MembersToExclude
@@ -989,11 +923,13 @@ function Set-TargetResource
                 }
                 Set-ADCommonGroupMember @setADCommonGroupMemberParms
             }
-            elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+            elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and
+                -not [System.String]::IsNullOrEmpty($MembersToInclude))
             {
                 $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
 
-                Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
+                Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f
+                    $MembersToInclude.Count, $GroupName)
 
                 $setADCommonGroupMemberParms = @{
                     Members             = $MembersToInclude
