@@ -53,10 +53,15 @@ $mutablePropertyMap = @(
 <#
     .SYNOPSIS
         Returns the current state of an Active Directory fine grained password
-        policy.
+        policy.  This function does not use the parameters Precedence, DomainController,
+        or Credential, but leaving in case changes with the Active Directory module will
+        require it in the future.  As a result, splatting is not reliable for now.
 
     .PARAMETER Name
         Name of the fine grained password policy to be applied.
+
+    .PARAMETER Precedence
+        The rank the policy is to be applied.
 
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
@@ -250,7 +255,8 @@ function Test-TargetResource
     )
 
     $getTargetResourceParams = @{
-        Name = $Name
+        Name       = $Name
+        Precedence = $Precedence
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -416,7 +422,8 @@ function Set-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
 
     $getTargetResourceParams = @{
-        Name = $Name
+        Name       = $Name
+        Precedence = $Precedence
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
