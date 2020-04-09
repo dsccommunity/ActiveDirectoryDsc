@@ -74,6 +74,10 @@ function Get-TargetResource
         [System.String]
         $Name,
 
+        [Parameter(Mandatory = $true)]
+        [System.UInt32]
+        $Precedence,
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -89,7 +93,7 @@ function Get-TargetResource
 
     Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
 
-    $policy = Get-ADFineGrainedPasswordPolicy -Filter {name -eq $Name} 
+    $policy = Get-ADFineGrainedPasswordPolicy -Filter {name -eq $Name}
 
     if ($policy)
     {
