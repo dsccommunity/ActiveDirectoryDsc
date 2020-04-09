@@ -7,6 +7,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- ADFineGrainedPasswordPolicy
+  - New resource for creating and updating Fine Grained Password Policies for AD Group objects
+    ([issue #584](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/584))
+
 ### Fixed
 
 - ActiveDirectoryDsc
