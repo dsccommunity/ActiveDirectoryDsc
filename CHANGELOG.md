@@ -19,6 +19,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - When merging a commit with changes only to CHANGELOG.md the CI pipeline
     will not run.
 
+### Fixed
+
+- ADUser
+  - Fixed PasswordAuthentication parameter handling
+  ([issue #582](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/582)).
+
 ## [6.0.0] - 2020-03-12
 
 ### Added
