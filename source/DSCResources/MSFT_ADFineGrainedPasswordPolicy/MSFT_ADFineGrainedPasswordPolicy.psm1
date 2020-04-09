@@ -87,7 +87,7 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    Write-Verbose -Message ($script:localizedData.QueryingDomainFineGrainedPasswordPolicy -f $Name)
+    Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
 
     $policy = Get-ADFineGrainedPasswordPolicy -Filter {name -eq $Name} 
 
