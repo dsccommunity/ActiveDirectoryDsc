@@ -19,13 +19,19 @@ used to create the one or more servers to run tests on.
 
 >**Note:** All these steps are expected to be run in the same elevated
 >PowerShell prompt. It also expect that you have downloaded the appropriate
->installation media, for example from [Windows Server Evaluations](https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2019).
+>installation media, for example from [Windows Server Evaluations](https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2019)
+>or the [direct link to the ISO](https://software-download.microsoft.com/download/pr/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso).
 
 <!-- markdownlint-disable MD031 - Fenced code blocks should be surrounded by blank lines -->
 1. Create a Hyper-VM (Generation 2). In an elevated PowerShell prompt run
    this.
    ```powershell
-   $pathWindowsServerIso = 'C:\_images\17763.379.190312-0539.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso'
+   $windowsServerIsoPath = 'C:\_images\17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso'
+   if (-not (Test-Path -Path $windowsServerIsoPath))
+   {
+       throw 'ISO path cannot be found.'
+   }
+
    $virtualHardDiskPath = Get-VMHost | Select-Object -ExpandProperty 'VirtualHardDiskPath'
 
    $newVmParameters = @{
@@ -42,15 +48,17 @@ used to create the one or more servers to run tests on.
     $vmDiskPath = Join-Path -Path $virtualHardDiskPath -ChildPath 'DSCAD-template.vhdx'
     $vhd = New-VHD -Path $vmDiskPath -SizeBytes 40GB -Dynamic
     Add-VMHardDiskDrive -VM $vm -Path $vhd.Path
-    Get-VMDvdDrive -VM $vm | Set-VMDvdDrive -Path $pathWindowsServerIso
+    Get-VMDvdDrive -VM $vm | Set-VMDvdDrive -Path $windowsServerIsoPath
     Start-VM -VM $vm
     ```
 1. Continue the installation as normal in the Hyper-V Virtual Machine
    Connection.
-   1. You don't need to provide a product key.
+   - You don't need to provide a product key.
+   - You can set any password you like for the template, it will be re-set
+     for each new VM that is deployed later.
 1. (Optional) Install any updates.
-1. (Optional) Make any personal modifications, if they will stick after
-   a SysPrep.
+1. (Optional) Make any personal modifications (if they will stick after
+   the SysPrep we will do next).
 1. In an elevated PowerShell prompt run this to
   [Sysprep generalize](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/sysprep--generalize--a-windows-installation)
   and return the VM (image) to the out-of-the-box-experience.
@@ -90,7 +98,7 @@ memory (~32GB) and disk (~60GB) on the PC that will host the virtual machines.
    _than once will create more than one virtual switch with the same name._
    ```powershell
    $virtualSwitchName = 'DSCADLabPrivate'
-   if (-not (Get-VMSwitch -Name $virtualSwitchName))
+   if (-not (Get-VMSwitch -Name $virtualSwitchName -ErrorAction 'SilentlyContinue'))
    {
        New-VMSwitch -Name $virtualSwitchName -SwitchType 'Private'
    }
@@ -119,7 +127,7 @@ memory (~32GB) and disk (~60GB) on the PC that will host the virtual machines.
        Get-VMNetworkAdapter -VM $vm | Connect-VMNetworkAdapter -SwitchName $virtualSwitchName
    }
 
-   Get-VM -Name $vmnames | Start-VM -Verbose
+   Get-VM -Name $vmNames | Start-VM -Verbose
    ```
 1. On each started VM finish the installation by configure the following
    in the Hyper-V Virtual Machine Connection.
@@ -127,7 +135,7 @@ memory (~32GB) and disk (~60GB) on the PC that will host the virtual machines.
    - (Optional) Product key
    - Accept license terms
    - Set local administrator password to `adminP@ssw0rd1`. _**Note:** This_
-     _password must be the same as the one used in the integration test._
+     _password **must** be the same as the one used in the integration test._
 <!-- markdownlint-enable MD031 -->
 
 ### Test prerequisites
