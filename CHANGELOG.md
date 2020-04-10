@@ -14,6 +14,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     `GitVersion.yml` was changed to only raise minor version when the
     commit message contain the word `add`, `adds`, `minor`, `feature`,
     or `features` ([issue #588](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/588)).
+  - Rename folder 'Tests' to folder 'tests' (lower-case).
 - ADDomain
   - Added additional Get-ADDomain retry exceptions
     ([issue #581](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/581)).
