@@ -109,6 +109,7 @@ memory (~32GB) and disk (~60GB) on the PC that will host the virtual machines.
    $templateName = 'DSCAD-template'
    $templatesPath = 'C:\Hyper-V\Templates'
    $virtualMachinesPath = 'C:\Hyper-V\Virtual Machines'
+   $virtualSwitchName = 'DSCADLabPrivate'
 
    $vmTemplatePath = (Get-ChildItem -Path (Join-Path -Path $templatesPath -ChildPath $templateName) -Recurse -Filter '*.vmcx').FullName
 
@@ -124,6 +125,8 @@ memory (~32GB) and disk (~60GB) on the PC that will host the virtual machines.
        $vm = Import-VM -Path $vmTemplatePath -Copy -GenerateNewId -VirtualMachinePath $vmPath -VhdDestinationPath  $vmPath -SnapshotFilePath $vmPath -SmartPagingFilePath $vmPath
        Set-VM -VM $vm -NewVMName $vmName -DynamicMemory
        Set-VM -VM $vm -AutomaticCheckpointsEnabled $false
+       # TODO: This can be resolved by removing the ISO prior to exporting the template
+       Get-VMDvdDrive -VM $vm | Set-VMDvdDrive -Path $null
        Get-VMNetworkAdapter -VM $vm | Connect-VMNetworkAdapter -SwitchName $virtualSwitchName
    }
 
@@ -140,22 +143,22 @@ memory (~32GB) and disk (~60GB) on the PC that will host the virtual machines.
 
 ### Test prerequisites
 
-The below steps assumes the virtual machines does not have access to the
-Internet.
+The host for the virtual machines must have access to Internet. The
+below steps assumes the virtual machines that should run the integration
+test are only connect to a private virtual switch and does not have access
+to the Internet.
+
+The blow steps *must* be run in a elevated PowerShell console.
 
 <!-- markdownlint-disable MD031 - Fenced code blocks should be surrounded by blank lines -->
-1. Install the dependent DSC resource modules on the node that hosts your
-   virtual machines, the same as from where the integration tests will be run.
+1. Change to folder to root of your local working repository
+   folder, e.g. cd 'c:\source\ActiveDirectoryDsc'.
    ```powershell
-   $dependentModules = @(
-       'Pester',
-       'PSDepend',
-       'PSDscResources',
-       'ComputerManagementDsc',
-       'NetworkingDsc'
-   )
-
-   Install-Module -Name $dependentModules
+   cd c:\source\ActiveDirectoryDsc
+   ```
+1. Resolve dependencies and build the repository.
+   ```powershell
+   .\build.ps1 -ResolveDependency -Tasks build
    ```
 1. Open a PowerShell Direct session to each virtual machine.
    ```powershell
@@ -176,43 +179,63 @@ Internet.
    $dc02Session = New-PSSession -VMName 'dc02' -Credential $localAdminCredential
    $dc03Session = New-PSSession -VMName 'dc03' -Credential $localAdminCredential
    ```
-1. Copy the dependent modules to each of the virtual machines.
+1. Copy the tests and the output folder to each of the virtual machines.
    ```powershell
-   $dependentModule = Get-Module -ListAvailable -Name $dependentModules |
-    Sort-Object -Property 'Version' |
-    Sort-Object -Unique
+   $destinationPath = 'c:\projects'
 
-   foreach ($module in $dependentModule)
-   {
-       $sourceModulePath = $module.ModuleBase
-       $moduleVersionFolder = Split-Path -Path $module.ModuleBase -Leaf
-       $destinationModulePath = Join-Path -Path (Join-Path -Path 'C:\Program Files\WindowsPowerShell\Modules' -ChildPath $module.Name) -ChildPath $moduleVersionFolder
-
-       Copy-Item -ToSession $dc01Session -Path $sourceModulePath -Destination $destinationModulePath -Recurse -Force
-       Copy-Item -ToSession $dc02Session -Path $sourceModulePath -Destination $destinationModulePath -Recurse -Force
-       Copy-Item -ToSession $dc03Session -Path $sourceModulePath -Destination $destinationModulePath -Recurse -Force
-   }
+   Copy-Item -ToSession $dc01Session -Path '.' -Destination $destinationPath -Recurse -Force
+   Copy-Item -ToSession $dc02Session -Path '.' -Destination $destinationPath -Recurse -Force
+   Copy-Item -ToSession $dc03Session -Path '.' -Destination $destinationPath -Recurse -Force
    ```
-1. **Important!** Change to folder to root of your local working repository
-   folder, e.g. cd 'c:\source\xActiveDirectory'.
-1. Create the configuration .mof and the metadata .mof file on the respective
-   nodes.
+1. Prepare the test environment in the remote session by running `build.ps1`
+   with the task `noop` against each of the virtual machines.
    ```powershell
-   Invoke-Command -Session $dc01Session -FilePath '.\Tests\TestHelpers\Prepare-DscLab-dc01.ps1'
-   Invoke-Command -Session $dc02Session -FilePath '.\Tests\TestHelpers\Prepare-DscLab-dc02.ps1'
-   Invoke-Command -Session $dc03Session -FilePath '.\Tests\TestHelpers\Prepare-DscLab-dc03.ps1'
+   $scriptBlock = {
+      cd c:\projects\ActiveDirectoryDsc
+      .\build.ps1 -Tasks noop
+      #Write-Verbose -Message ('PSModulePath is now set to: ''{0}''' -f $env:PSModulePath) -Verbose
+   }
+
+   Invoke-Command -Session $dc01Session -ScriptBlock $scriptBlock
+   Invoke-Command -Session $dc02Session -ScriptBlock $scriptBlock
+   Invoke-Command -Session $dc02Session -ScriptBlock $scriptBlock
+   ```
+1. Configure prerequisites like computer name, IP address, and Windows features
+   that is needed to promote a node to a domain controller. This creates
+   the configuration .mof and the metadata .mof file on the respective
+   nodes which will be executed in next steps.
+   ```powershell
+   $dc01ScriptBlock = {
+      .\tests\TestHelpers\Prepare-DscLab-dc01.ps1
+   }
+
+   Invoke-Command -Session $dc01Session -ScriptBlock $dc01ScriptBlock
+   Invoke-Command -Session $dc02Session -FilePath '.\tests\TestHelpers\Prepare-DscLab-dc02.ps1'
+   Invoke-Command -Session $dc03Session -FilePath '.\tests\TestHelpers\Prepare-DscLab-dc03.ps1'
    ```
 1. Configure the DSC Local Configuration Manager (LCM) on each virtual
    machine using the metadata .mof created in previous step.
    ```powershell
-   Invoke-Command -Session $dc01Session,$dc02Session,$dc03Session -ScriptBlock {
-       Set-DscLocalConfigurationManager -Path 'C:\DSC\Configuration' -ComputerName 'localhost' -Verbose -Force
+   $vmPSSessions = @(
+      $dc01Session
+      #$dc02Session
+      #$dc03Session
+   )
+   Invoke-Command -Session $vmPSSessions -ScriptBlock {
+      Set-DscLocalConfigurationManager -Path 'C:\DSC\Configuration' -ComputerName 'localhost' -Verbose -Force
    }
    ```
 1. Run the configuration on each virtual machine to set up all the
    prerequisites. **The virtual machine will reboot during this.**
    ```powershell
-   Invoke-Command -Session $dc01Session,$dc02Session,$dc03Session -ScriptBlock {
+   $vmPSSessions = @(
+       $dc01Session
+       #$dc02Session
+       #$dc03Session
+   )
+   Invoke-Command -Session $vmPSSessions -ScriptBlock {
+       $env:PSModulePath
+       [System.Environment]::GetEnvironmentVariable('PSModulePath', [System.EnvironmentVariableTarget]::Machine)
        Start-DscConfiguration -Path "C:\DSC\Configuration\" -ComputerName 'localhost' -Wait -Force -Verbose
    }
    ```
@@ -225,7 +248,13 @@ Internet.
    $dc02Session = New-PSSession -VMName 'dc02' -Credential $localAdminCredential
    $dc03Session = New-PSSession -VMName 'dc03' -Credential $localAdminCredential
 
-   Invoke-Command -Session $dc01Session,$dc02Session,$dc03Session -ScriptBlock {
+   $vmPSSessions = @(
+       $dc01Session
+       #$dc02Session
+       #$dc03Session
+   )
+
+   Invoke-Command -Session $vmPSSessions -ScriptBlock {
        Get-DscConfigurationStatus
    }
    ```
