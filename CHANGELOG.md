@@ -23,18 +23,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADDomain
   - Added additional Get-ADDomain retry exceptions
     ([issue #581](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/581)).
+- ADUser
+  - Fixed PasswordAuthentication parameter handling
+  ([issue #582](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/582)).
 
 ### Changed
 
 - ActiveDirectoryDsc
   - Only run CI pipeline on branch `master` when there are changes to files
     inside the `source` folder.
-
-### Fixed
-
-- ADUser
-  - Fixed PasswordAuthentication parameter handling
-  ([issue #582](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/582)).
 
 ## [6.0.0] - 2020-03-12
 
