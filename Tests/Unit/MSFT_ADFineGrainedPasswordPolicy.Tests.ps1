@@ -36,30 +36,23 @@ try
         # Load stub cmdlets and classes.
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 
-        $testDomainName = 'contoso.com'
+        $testFineGrainedPasswordPolicyName = 'Administrators'
         $testDefaultParams = @{
-            DomainName = $testDomainName
+            Name = $testFineGrainedPasswordPolicyName
         }
-        $testDomainController = 'testserver.contoso.com'
-
-        $testPassword = ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force
-        $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-            'Safemode',
-            $testPassword
-        )
 
         $fakeFineGrainedPasswordPolicy = @{
-            Name                        = "Administrators"
-            ComplexityEnabled           = $true
-            LockoutDuration             = New-TimeSpan -Minutes 30
-            LockoutObservationWindow    = New-TimeSpan -Minutes 30
-            LockoutThreshold            = 3
-            MinPasswordAge              = New-TimeSpan -Days 1
-            MaxPasswordAge              = New-TimeSpan -Days 42
-            MinPasswordLength           = 7
-            PasswordHistoryCount        = 12
-            ReversibleEncryptionEnabled = $false
-            Exists                      = $false
+            Name                            = "Administrators"
+            DisplayName                     = "Administrators"
+            ComplexityEnabled               = $true
+            LockoutDuration                 = New-TimeSpan -Minutes 30
+            LockoutObservationWindow        = New-TimeSpan -Minutes 30
+            LockoutThreshold                = 3
+            MinPasswordAge                  = New-TimeSpan -Days 1
+            MaxPasswordAge                  = New-TimeSpan -Days 42
+            MinPasswordLength               = 7
+            PasswordHistoryCount            = 12
+            ReversibleEncryptionEnabled     = $false
         }
 
         #region Function Get-TargetResource
@@ -81,47 +74,14 @@ try
 
                 $result -is [System.Collections.Hashtable] | Should -BeTrue
             }
-
-            It 'Calls "Get-ADFineGrainedPasswordPolicy" without credentials by default' {
-                Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Credential -eq $null } -MockWith { return $fakeFineGrainedPasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Credential -eq $null } -Scope It
-            }
-
-            It 'Calls "Get-ADFineGrainedPasswordPolicy" with credentials when specified' {
-                Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Credential -eq $testCredential } -MockWith { return $fakeFineGrainedPasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams -Credential $testCredential
-
-                Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Credential -eq $testCredential } -Scope It
-            }
-
-            It 'Calls "Get-ADFineGrainedPasswordPolicy" without server by default' {
-                Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Server -eq $null } -MockWith { return $fakeFineGrainedPasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Server -eq $null } -Scope It
-            }
-
-            It 'Calls "Get-ADFineGrainedPasswordPolicy" with server when specified' {
-                Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Server -eq $testDomainController } -MockWith { return $fakeFineGrainedPasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams -DomainController $testDomainController
-
-                Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter { $Server -eq $testDomainController } -Scope It
-            }
-
         }
         #endregion
 
         #region Function Test-TargetResource
         Describe 'ADFineGrainedPasswordPolicy\Test-TargetResource' {
-            $testDomainName = 'contoso.com'
+            $testFineGrainedPasswordPolicyName = 'Administrators'
             $testDefaultParams = @{
-                DomainName = $testDomainName
+                Name = $testFineGrainedPasswordPolicyName
             }
             $testDomainController = 'testserver.contoso.com'
 
@@ -132,16 +92,17 @@ try
             )
 
             $stubFineGrainedPasswordPolicy = @{
-                ComplexityEnabled           = $true
-                LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutThreshold            = 3
-                MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
-                MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
-                MinPasswordLength           = 7
-                PasswordHistoryCount        = 12
-                ReversibleEncryptionEnabled = $true
-                Exists                      = $true
+                ComplexityEnabled               = $true
+                LockoutDuration                 = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutObservationWindow        = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutThreshold                = 3
+                MinPasswordAge                  = (New-TimeSpan -Days 1).TotalMinutes
+                MaxPasswordAge                  = (New-TimeSpan -Days 42).TotalMinutes
+                MinPasswordLength               = 7
+                PasswordHistoryCount            = 12
+                ReversibleEncryptionEnabled     = $true
+                ProtectedFromAccidentalDeletion = $true
+                Precedence                      = 10
             }
 
             It 'Returns "System.Boolean" object type' {
@@ -211,9 +172,9 @@ try
 
         #region Function Set-TargetResource
         Describe 'ADFineGrainedPasswordPolicy\Set-TargetResource' {
-            $testDomainName = 'contoso.com'
+            $testFineGrainedPasswordPolicyName = 'Administrators'
             $testDefaultParams = @{
-                DomainName = $testDomainName
+                Name = $testFineGrainedPasswordPolicyName
             }
             $testDomainController = 'testserver.contoso.com'
 
@@ -224,19 +185,30 @@ try
             )
 
             $stubFineGrainedPasswordPolicy = @{
-                ComplexityEnabled           = $true
-                LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutThreshold            = 3
-                MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
-                MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
-                MinPasswordLength           = 7
-                PasswordHistoryCount        = 12
-                ReversibleEncryptionEnabled = $true
-                Exists                      = $false
+                Name                            = "Administrators"
+                DisplayName                     = "Administrators"
+                ComplexityEnabled               = $true
+                LockoutDuration                 = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutObservationWindow        = (New-TimeSpan -Minutes 30).TotalMinutes
+                LockoutThreshold                = 3
+                MinPasswordAge                  = (New-TimeSpan -Days 1).TotalMinutes
+                MaxPasswordAge                  = (New-TimeSpan -Days 42).TotalMinutes
+                MinPasswordLength               = 7
+                PasswordHistoryCount            = 12
+                ReversibleEncryptionEnabled     = $true
+                ProtectedFromAccidentalDeletion = $true
+                Precedence                      = 10
             }
 
             Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+            It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                Mock -CommandName Get-ADFineGrainedPasswordPolicy { return $fakeFineGrainedPasswordPolicy; }
+
+                $result = Get-TargetResource @testDefaultParams
+
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It
+            }
 
             It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
                 Mock -CommandName Set-ADFineGrainedPasswordPolicy
@@ -280,14 +252,25 @@ try
 
             foreach ($propertyName in $stubFineGrainedPasswordPolicy.Keys)
             {
-                It "Calls 'Set-ADFineGrainedPasswordPolicy' with '$propertyName' parameter when specified" {
-                    $propertyDefaultParams = $testDefaultParams.Clone()
-                    $propertyDefaultParams[$propertyName] = $stubFineGrainedPasswordPolicy[$propertyName]
-                    Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) }
+                if (-not ($propertyName -eq "Name"))
+                {
+                    It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                        Mock -CommandName Get-ADFineGrainedPasswordPolicy { return $fakeFineGrainedPasswordPolicy; }
 
-                    $result = Set-TargetResource @propertyDefaultParams
+                        $result = Get-TargetResource @testDefaultParams
 
-                    Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) } -Scope It
+                        Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                    }
+
+                    It "Calls 'Set-ADFineGrainedPasswordPolicy' with '$propertyName' parameter when specified" {
+                        $propertyDefaultParams = $testDefaultParams.Clone()
+                        $propertyDefaultParams[$propertyName] = $stubFineGrainedPasswordPolicy[$propertyName]
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) }
+
+                        $result = Set-TargetResource @propertyDefaultParams
+
+                        Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) } -Scope It
+                    }
                 }
 
             } #end foreach property name

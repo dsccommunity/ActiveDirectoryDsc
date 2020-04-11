@@ -79,10 +79,6 @@ function Get-TargetResource
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]
-        [System.UInt32]
-        $Precedence,
-
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -239,7 +235,7 @@ function Test-TargetResource
         [System.Boolean]
         $ProtectedFromAccidentalDeletion,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.UInt32]
         $Precedence,
 
@@ -255,8 +251,7 @@ function Test-TargetResource
     )
 
     $getTargetResourceParams = @{
-        Name       = $Name
-        Precedence = $Precedence
+        Name = $Name
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -404,7 +399,7 @@ function Set-TargetResource
         [System.Boolean]
         $ProtectedFromAccidentalDeletion,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.UInt32]
         $Precedence,
 
@@ -422,8 +417,7 @@ function Set-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
 
     $getTargetResourceParams = @{
-        Name       = $Name
-        Precedence = $Precedence
+        Name = $Name
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
