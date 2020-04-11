@@ -179,26 +179,23 @@ The blow steps *must* be run in a elevated PowerShell console.
    $dc02Session = New-PSSession -VMName 'dc02' -Credential $localAdminCredential
    $dc03Session = New-PSSession -VMName 'dc03' -Credential $localAdminCredential
    ```
-1. Copy the tests and the output folder to each of the virtual machines.
+1. Copy the required modules to each of the virtual machines.
    ```powershell
-   $destinationPath = 'c:\projects'
+   $dependentModulePaths = @(
+       '.\output\RequiredModules\Pester'
+       '.\output\RequiredModules\PSDscResources'
+       '.\output\RequiredModules\ComputerManagementDsc'
+       '.\output\RequiredModules\NetworkingDsc'
+   )
 
-   Copy-Item -ToSession $dc01Session -Path '.' -Destination $destinationPath -Recurse -Force
-   Copy-Item -ToSession $dc02Session -Path '.' -Destination $destinationPath -Recurse -Force
-   Copy-Item -ToSession $dc03Session -Path '.' -Destination $destinationPath -Recurse -Force
-   ```
-1. Prepare the test environment in the remote session by running `build.ps1`
-   with the task `noop` against each of the virtual machines.
-   ```powershell
-   $scriptBlock = {
-      cd c:\projects\ActiveDirectoryDsc
-      .\build.ps1 -Tasks noop
-      #Write-Verbose -Message ('PSModulePath is now set to: ''{0}''' -f $env:PSModulePath) -Verbose
+   $destinationPath = 'C:\Program Files\WindowsPowerShell\Modules'
+
+   foreach ($dependentModulePath in $dependentModulePaths)
+   {
+       Copy-Item -ToSession $dc01Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
+       #Copy-Item -ToSession $dc02Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
+       #Copy-Item -ToSession $dc03Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
    }
-
-   Invoke-Command -Session $dc01Session -ScriptBlock $scriptBlock
-   Invoke-Command -Session $dc02Session -ScriptBlock $scriptBlock
-   Invoke-Command -Session $dc02Session -ScriptBlock $scriptBlock
    ```
 1. Configure prerequisites like computer name, IP address, and Windows features
    that is needed to promote a node to a domain controller. This creates
@@ -206,12 +203,25 @@ The blow steps *must* be run in a elevated PowerShell console.
    nodes which will be executed in next steps.
    ```powershell
    $dc01ScriptBlock = {
+      cd 'c:\projects\ActiveDirectoryDsc'
       .\tests\TestHelpers\Prepare-DscLab-dc01.ps1
    }
 
    Invoke-Command -Session $dc01Session -ScriptBlock $dc01ScriptBlock
-   Invoke-Command -Session $dc02Session -FilePath '.\tests\TestHelpers\Prepare-DscLab-dc02.ps1'
-   Invoke-Command -Session $dc03Session -FilePath '.\tests\TestHelpers\Prepare-DscLab-dc03.ps1'
+
+   $dc02ScriptBlock = {
+      cd 'c:\projects\ActiveDirectoryDsc'
+      .\tests\TestHelpers\Prepare-DscLab-dc02.ps1
+   }
+
+   Invoke-Command -Session $dc02Session -ScriptBlock $dc02ScriptBlock
+
+   $dc03ScriptBlock = {
+      cd 'c:\projects\ActiveDirectoryDsc'
+      .\tests\TestHelpers\Prepare-DscLab-dc03.ps1
+   }
+
+   Invoke-Command -Session $dc03Session -ScriptBlock $dc03ScriptBlock
    ```
 1. Configure the DSC Local Configuration Manager (LCM) on each virtual
    machine using the metadata .mof created in previous step.
@@ -233,9 +243,8 @@ The blow steps *must* be run in a elevated PowerShell console.
        #$dc02Session
        #$dc03Session
    )
+
    Invoke-Command -Session $vmPSSessions -ScriptBlock {
-       $env:PSModulePath
-       [System.Environment]::GetEnvironmentVariable('PSModulePath', [System.EnvironmentVariableTarget]::Machine)
        Start-DscConfiguration -Path "C:\DSC\Configuration\" -ComputerName 'localhost' -Wait -Force -Verbose
    }
    ```
@@ -258,11 +267,18 @@ The blow steps *must* be run in a elevated PowerShell console.
        Get-DscConfigurationStatus
    }
    ```
-1. Clone the latest test framework into the local repository folder. _**Note:**_
-   _This requires `git`. The test framework will also be cloned when running_
-   _a unit test._
+1. Set the execution policy to bypass. This makes the script certificate check
+   faster when running Pester.
    ```powershell
-   .\Assert-TestEnvironment.ps1
+   $vmPSSessions = @(
+       $dc01Session
+       #$dc02Session
+       #$dc03Session
+   )
+
+   Invoke-Command -Session $vmPSSessions -ScriptBlock {
+       Set-ExecutionPolicy -ExecutionPolicy 'Bypass' -Scope 'LocalMachine'
+   }
    ```
 1. At this point it would be good to checkpoint the servers.
    ```powershell
@@ -275,31 +291,56 @@ By reverting to the checkpoint created before, these tests can be run
 several times. The integration tests that depend on an already existing
 domain can be run several times without reverting to the checkpoint. The
 resources that need a clean environment are the resources that configures
-the domain, e.g. `xADDomain` and `xADDomainController`.
+the domain, e.g. `ADDomain` and `ADDomainController`.
 
-1. **Important!** Change to folder to root of your local working repository
-   folder, e.g. cd 'c:\source\xActiveDirectory'.
-1. Copy resource module code to a local folder on each virtual machine,
-   e.g. `C:\source\xActiveDirectory`.
-   _**NOTE:** Do not copy the resource being tested to a path that exist_
-   _in `$env:PSModulePath`, that will generate an error that multiple_
-   _modules exist on the node when running the integration tests._
+1. Change to folder to root of your local working repository
+   folder, e.g. cd 'c:\source\ActiveDirectoryDsc'.
    ```powershell
-   $sourceRepositoryPath = '.'
-   $destinationRepositoryPath = 'C:\Source\xActiveDirectory'
+   cd 'c:\source\ActiveDirectoryDsc'
+   ```
+1. Reconnect the sessions after we created the checkpoint which make the
+   session to disconnect.
+   ```powershell
+   $localAdminPassword = ConvertTo-SecureString 'adminP@ssw0rd1' -AsPlainText -Force
+   $localAdminUsername = 'Administrator'
 
-    # This way we skip the hidden folder '.git'.
-   Get-ChildItem -Path $sourceRepositoryPath | Copy-Item -ToSession $dc01Session -Destination $destinationRepositoryPath -Recurse -Force
-   Get-ChildItem -Path $sourceRepositoryPath | Copy-Item -ToSession $dc02Session -Destination $destinationRepositoryPath -Recurse -Force
-   Get-ChildItem -Path $sourceRepositoryPath | Copy-Item -ToSession $dc03Session -Destination $destinationRepositoryPath -Recurse -Force
+   $newObjectParameters = @{
+       TypeName = 'System.Management.Automation.PSCredential'
+       ArgumentList = @(
+           $localAdminUsername,
+           $localAdminPassword
+       )
+   }
+
+   $localAdminCredential = New-Object @newObjectParameters
+
+   $dc01Session = New-PSSession -VMName 'dc01' -Credential $localAdminCredential
+   $dc02Session = New-PSSession -VMName 'dc02' -Credential $localAdminCredential
+   $dc03Session = New-PSSession -VMName 'dc03' -Credential $localAdminCredential
+   ```
+1. Copy resource module output folder to the system PowerShell modules folder.
+   ```powershell
+   cd 'c:\source\ActiveDirectoryDsc'
+
+   $dscModuleOutputPath = '.\output\ActiveDirectoryDsc'
+   $destinationPath = 'C:\Program Files\WindowsPowerShell\Modules'
+
+   Copy-Item -ToSession $dc01Session -Path $dscModuleOutputPath -Destination $destinationPath -Recurse -Force
+   ```
+1. Copy the tests and the required modules to each of the virtual machines.
+   ```powershell
+   cd 'c:\source\ActiveDirectoryDsc'
+
+   Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc01Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+   #Copy-Item -ToSession $dc02Session -Path '.\tests' -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+   #Copy-Item -ToSession $dc02Session -Path '.\tests' -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    ```
 1. This runs the actual integration tests.
    ```powershell
    Invoke-Command -Session $dc01Session -ScriptBlock {
-        cd 'c:\source\xActiveDirectory'
-        .\Assert-TestEnvironment.ps1 -Tags 'LoadDscResourceKitTypes'
+       cd 'c:\projects\ActiveDirectoryDsc'
 
-       Invoke-Pester -Path '.\Tests\Integration\MSFT_xADComputer.Integration.Tests.ps1'
+       Invoke-Pester -Path '.\Tests\Integration\MSFT_ADComputer.Integration.Tests.ps1'
    }
    ```
 <!-- markdownlint-enable MD031 -->

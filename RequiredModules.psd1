@@ -18,7 +18,6 @@
     'DscResource.AnalyzerRules' = 'latest'
     xDscResourceDesigner        = 'latest'
     MarkdownLinkCheck           = 'latest'
-    PSDepend                    = 'latest'
 
     # Modules required to compile examples.
     xFailoverCluster            = '1.14.1'
