@@ -28,3 +28,16 @@
        Copy-Item -ToSession $dc03Session -Path $sourceModulePath -Destination $destinationModulePath -Recurse -Force
    }
    ```
+1. Prepare the test environment in the remote session by running `build.ps1`
+   with the task `noop` against each of the virtual machines.
+   ```powershell
+   $scriptBlock = {
+      cd c:\projects\ActiveDirectoryDsc
+      .\build.ps1 -Tasks noop
+      #Write-Verbose -Message ('PSModulePath is now set to: ''{0}''' -f $env:PSModulePath) -Verbose
+   }
+
+   Invoke-Command -Session $dc01Session -ScriptBlock $scriptBlock
+   Invoke-Command -Session $dc02Session -ScriptBlock $scriptBlock
+   Invoke-Command -Session $dc02Session -ScriptBlock $scriptBlock
+   ```

@@ -1,21 +1,21 @@
-$script:dscModuleName = 'ActiveDirectoryDsc'
+# $script:dscModuleName = 'ActiveDirectoryDsc'
 $script:dscResourceFriendlyName = 'ADComputer'
 $script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
 
-try
-{
-    Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
-}
-catch [System.IO.FileNotFoundException]
-{
-    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-}
+# try
+# {
+#     Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+# }
+# catch [System.IO.FileNotFoundException]
+# {
+#     throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+# }
 
-$script:testEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:dscModuleName `
-    -DSCResourceName $script:dscResourceName `
-    -ResourceType 'Mof' `
-    -TestType 'Integration'
+# $script:testEnvironment = Initialize-TestEnvironment `
+#     -DSCModuleName $script:dscModuleName `
+#     -DSCResourceName $script:dscResourceName `
+#     -ResourceType 'Mof' `
+#     -TestType 'Integration'
 
 try
 {
@@ -381,7 +381,7 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-    #endregion
+    # #region FOOTER
+    # Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+    # #endregion
 }
