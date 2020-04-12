@@ -163,7 +163,7 @@ The blow steps *must* be run in a elevated PowerShell console.
 1. Open a PowerShell Direct session to each virtual machine.
    ```powershell
    $localAdminPassword = ConvertTo-SecureString 'adminP@ssw0rd1' -AsPlainText -Force
-   $localAdminUsername = 'Administrator'
+   $localAdminUsername = '.\Administrator'
 
    $newObjectParameters = @{
        TypeName = 'System.Management.Automation.PSCredential'
@@ -302,7 +302,7 @@ the domain, e.g. `ADDomain` and `ADDomainController`.
    session to disconnect.
    ```powershell
    $localAdminPassword = ConvertTo-SecureString 'adminP@ssw0rd1' -AsPlainText -Force
-   $localAdminUsername = 'Administrator'
+   $localAdminUsername = '.\Administrator'
 
    $newObjectParameters = @{
        TypeName = 'System.Management.Automation.PSCredential'
@@ -335,12 +335,41 @@ the domain, e.g. `ADDomain` and `ADDomainController`.
    #Copy-Item -ToSession $dc02Session -Path '.\tests' -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    #Copy-Item -ToSession $dc02Session -Path '.\tests' -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    ```
-1. This runs the actual integration tests.
+1. This runs the tests on the first domain controller.
    ```powershell
    Invoke-Command -Session $dc01Session -ScriptBlock {
        cd 'c:\projects\ActiveDirectoryDsc'
 
-       Invoke-Pester -Path '.\Tests\Integration\MSFT_ADComputer.Integration.Tests.ps1'
+       $testParameters = @{
+           Verbose = $true
+       }
+
+       Invoke-pester -Script @(
+           @{
+               Path = '.\tests\Integration\MSFT_ADDomain.Root.Integration.Tests.ps1'
+               Parameters = $testParameters
+           }
+           @{
+               Path = '.\tests\Integration\MSFT_ADOptionalFeature.Integration.Tests.ps1'
+               Parameters = $testParameters
+           }
+           @{
+               Path = '.\tests\Integration\MSFT_ADComputer.Integration.Tests.ps1'
+               Parameters = $testParameters
+           }
+       )
    }
+   ```
+   This test need to run twice because of a required reboot. When the test
+   finishes it will print a warning message asking for a reboot of the note.
+   Restart the node manually or use this
+   ```powershell
+   Restart-VM -Name 'dc01' -Type Reboot -Wait -For Heartbeat -Force
+   ```
+   After the node has restarted and finished (takes ~a minute), reconnect
+   the session and then run the integration tests again to verify the
+   installation.
+   ```powershell
+   $dc01Session = New-PSSession -VMName 'dc01' -Credential $localAdminCredential
    ```
 <!-- markdownlint-enable MD031 -->
