@@ -17,7 +17,7 @@ else
         AllNodes = @(
             @{
                 NodeName           = 'localhost'
-                CertificateFile    = $env:DscPublicCertificatePath
+                #CertificateFile    = $env:DscPublicCertificatePath
                 CredentialUserName = 'Administrator'
                 CredentialPassword = 'adminP@ssw0rd1'
                 SafeModePassword   = 'SafemodePassword@1'

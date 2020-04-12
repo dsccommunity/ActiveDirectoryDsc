@@ -193,43 +193,42 @@ The blow steps *must* be run in a elevated PowerShell console.
    foreach ($dependentModulePath in $dependentModulePaths)
    {
        Copy-Item -ToSession $dc01Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
-       #Copy-Item -ToSession $dc02Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
-       #Copy-Item -ToSession $dc03Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
+       Copy-Item -ToSession $dc02Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
+       Copy-Item -ToSession $dc03Session -Path $dependentModulePath -Destination $destinationPath -Recurse -Force
    }
+   ```
+1. Copy the tests and the required modules to each of the virtual machines.
+   ```powershell
+   cd 'c:\source\ActiveDirectoryDsc'
+
+   Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc01Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc02Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc03Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    ```
 1. Configure prerequisites like computer name, IP address, and Windows features
    that is needed to promote a node to a domain controller. This creates
    the configuration .mof and the metadata .mof file on the respective
    nodes which will be executed in next steps.
    ```powershell
-   $dc01ScriptBlock = {
-      cd 'c:\projects\ActiveDirectoryDsc'
-      .\tests\TestHelpers\Prepare-DscLab-dc01.ps1
+   Invoke-Command -Session $dc01Session -ScriptBlock {
+      c:\projects\ActiveDirectoryDsc\tests\TestHelpers\Prepare-DscLab-dc01.ps1
    }
 
-   Invoke-Command -Session $dc01Session -ScriptBlock $dc01ScriptBlock
-
-   $dc02ScriptBlock = {
-      cd 'c:\projects\ActiveDirectoryDsc'
-      .\tests\TestHelpers\Prepare-DscLab-dc02.ps1
+   Invoke-Command -Session $dc02Session -ScriptBlock {
+      c:\projects\ActiveDirectoryDsc\tests\TestHelpers\Prepare-DscLab-dc02.ps1
    }
 
-   Invoke-Command -Session $dc02Session -ScriptBlock $dc02ScriptBlock
-
-   $dc03ScriptBlock = {
-      cd 'c:\projects\ActiveDirectoryDsc'
-      .\tests\TestHelpers\Prepare-DscLab-dc03.ps1
+   Invoke-Command -Session $dc03Session -ScriptBlock {
+      c:\projects\ActiveDirectoryDsc\tests\TestHelpers\Prepare-DscLab-dc03.ps1
    }
-
-   Invoke-Command -Session $dc03Session -ScriptBlock $dc03ScriptBlock
    ```
 1. Configure the DSC Local Configuration Manager (LCM) on each virtual
    machine using the metadata .mof created in previous step.
    ```powershell
    $vmPSSessions = @(
       $dc01Session
-      #$dc02Session
-      #$dc03Session
+      $dc02Session
+      $dc03Session
    )
    Invoke-Command -Session $vmPSSessions -ScriptBlock {
       Set-DscLocalConfigurationManager -Path 'C:\DSC\Configuration' -ComputerName 'localhost' -Verbose -Force
@@ -240,15 +239,20 @@ The blow steps *must* be run in a elevated PowerShell console.
    ```powershell
    $vmPSSessions = @(
        $dc01Session
-       #$dc02Session
-       #$dc03Session
+       $dc02Session
+       $dc03Session
    )
 
    Invoke-Command -Session $vmPSSessions -ScriptBlock {
        Start-DscConfiguration -Path "C:\DSC\Configuration\" -ComputerName 'localhost' -Wait -Force -Verbose
    }
    ```
-1. Wait until the node has been restarted and the rest of the configuration
+   A reboot will be required then the same configuration must be run again.
+   Restart the node manually or use this
+   ```powershell
+   Restart-VM -Name 'dc01','dc02','dc03' -Type Reboot -Wait -For Heartbeat -Force
+   ```
+1. Wait until the node has been restarted and then verify that the configuration
    has been applied. This should report the status *Success* once the
    configuration is finished. _**Note:** Since the virtual machines rebooted_
    _we need to reconnect to the sessions._
@@ -259,8 +263,8 @@ The blow steps *must* be run in a elevated PowerShell console.
 
    $vmPSSessions = @(
        $dc01Session
-       #$dc02Session
-       #$dc03Session
+       $dc02Session
+       $dc03Session
    )
 
    Invoke-Command -Session $vmPSSessions -ScriptBlock {
@@ -272,8 +276,8 @@ The blow steps *must* be run in a elevated PowerShell console.
    ```powershell
    $vmPSSessions = @(
        $dc01Session
-       #$dc02Session
-       #$dc03Session
+       $dc02Session
+       $dc03Session
    )
 
    Invoke-Command -Session $vmPSSessions -ScriptBlock {
@@ -318,7 +322,7 @@ the domain, e.g. `ADDomain` and `ADDomainController`.
    $dc02Session = New-PSSession -VMName 'dc02' -Credential $localAdminCredential
    $dc03Session = New-PSSession -VMName 'dc03' -Credential $localAdminCredential
    ```
-1. Copy resource module output folder to the system PowerShell modules folder.
+1. Copy the ActiveDirectoryDsc module to each of the virtual machines.
    ```powershell
    cd 'c:\source\ActiveDirectoryDsc'
 
@@ -326,14 +330,16 @@ the domain, e.g. `ADDomain` and `ADDomainController`.
    $destinationPath = 'C:\Program Files\WindowsPowerShell\Modules'
 
    Copy-Item -ToSession $dc01Session -Path $dscModuleOutputPath -Destination $destinationPath -Recurse -Force
+   Copy-Item -ToSession $dc02Session -Path $dscModuleOutputPath -Destination $destinationPath -Recurse -Force
+   Copy-Item -ToSession $dc03Session -Path $dscModuleOutputPath -Destination $destinationPath -Recurse -Force
    ```
-1. Copy the tests and the required modules to each of the virtual machines.
+1. Copy the tests to each of the virtual machines.
    ```powershell
    cd 'c:\source\ActiveDirectoryDsc'
 
    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc01Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
-   #Copy-Item -ToSession $dc02Session -Path '.\tests' -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
-   #Copy-Item -ToSession $dc02Session -Path '.\tests' -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+   Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc02Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+   Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc03Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    ```
 1. This runs the tests on the first domain controller.
    ```powershell
@@ -355,6 +361,10 @@ the domain, e.g. `ADDomain` and `ADDomainController`.
            }
            @{
                Path = '.\tests\Integration\MSFT_ADComputer.Integration.Tests.ps1'
+               Parameters = $testParameters
+           }
+           @{
+               Path = '.\tests\Integration\MSFT_ADDomainControllerProperties.Integration.Tests.ps1'
                Parameters = $testParameters
            }
        )
