@@ -40,6 +40,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
+- ActiveDirectoryDsc
+  - Documentation and steps to setup a lab in Hyper-V to be able to run
+    the integration tests.
 - ADManagedServiceAccount
   - Added support for setting a common name to a Managed Service Account for a longer more friendly name than
     the SAM account name which has a 15 character limit.
