@@ -37,7 +37,7 @@ used to create the one or more servers to run tests on.
    $newVmParameters = @{
         Name = 'DSCAD-template'
         BootDevice = 'CD'
-        MemoryStartupBytes = 4GB
+        MemoryStartupBytes = 2GB
         NoVHD = $true
         Generation = 2
         SwitchName = 'Default Switch'
@@ -46,7 +46,7 @@ used to create the one or more servers to run tests on.
     $vm = New-VM @newVmParameters
     Set-VM -VM $vm -AutomaticCheckpointsEnabled $false -DynamicMemory
     $vmDiskPath = Join-Path -Path $virtualHardDiskPath -ChildPath 'DSCAD-template.vhdx'
-    $vhd = New-VHD -Path $vmDiskPath -SizeBytes 40GB -Dynamic
+    $vhd = New-VHD -Path $vmDiskPath -SizeBytes 25GB -Dynamic
     Add-VMHardDiskDrive -VM $vm -Path $vhd.Path
     Get-VMDvdDrive -VM $vm | Set-VMDvdDrive -Path $windowsServerIsoPath
     Start-VM -VM $vm
@@ -341,6 +341,35 @@ the domain, e.g. `ADDomain` and `ADDomainController`.
    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc02Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc03Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    ```
+1. This runs the tests on the first domain controller. This test need to
+   run twice because of a required reboot (see next step).
+   ```powershell
+   Invoke-Command -Session $dc01Session -ScriptBlock {
+       cd 'c:\projects\ActiveDirectoryDsc'
+
+       $testParameters = @{
+           Verbose = $true
+       }
+
+       Invoke-pester -Script @(
+           @{
+               Path = '.\tests\Integration\MSFT_ADDomain.Root.Integration.Tests.ps1'
+               Parameters = $testParameters
+           }
+       )
+   }
+   ```
+   When the test finishes it will print a warning message asking for a reboot
+   of the note. Restart the node manually or use this:
+   ```powershell
+   Restart-VM -Name 'dc01' -Type Reboot -Wait -For Heartbeat -Force
+   ```
+   After the node has restarted and finished (takes ~a minute), reconnect
+   the session and then run the integration tests again by running the next
+   step.
+   ```powershell
+   $dc01Session = New-PSSession -VMName 'dc01' -Credential $localAdminCredential
+   ```
 1. This runs the tests on the first domain controller.
    ```powershell
    Invoke-Command -Session $dc01Session -ScriptBlock {
@@ -369,17 +398,5 @@ the domain, e.g. `ADDomain` and `ADDomainController`.
            }
        )
    }
-   ```
-   This test need to run twice because of a required reboot. When the test
-   finishes it will print a warning message asking for a reboot of the note.
-   Restart the node manually or use this
-   ```powershell
-   Restart-VM -Name 'dc01' -Type Reboot -Wait -For Heartbeat -Force
-   ```
-   After the node has restarted and finished (takes ~a minute), reconnect
-   the session and then run the integration tests again to verify the
-   installation.
-   ```powershell
-   $dc01Session = New-PSSession -VMName 'dc01' -Credential $localAdminCredential
    ```
 <!-- markdownlint-enable MD031 -->

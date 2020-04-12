@@ -21,7 +21,7 @@ else
         AllNodes = @(
             @{
                 NodeName        = 'localhost'
-                CertificateFile = $env:DscPublicCertificatePath
+                #CertificateFile = $env:DscPublicCertificatePath
 
                 ForestFullyQualifiedDomainName = $ForestFullyQualifiedDomainName
 
