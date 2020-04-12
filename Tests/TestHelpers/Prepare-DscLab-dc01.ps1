@@ -30,7 +30,7 @@ configuration LCMConfig
         Settings
         {
             RefreshMode = 'Push'
-            RebootNodeIfNeeded = $true
+            RebootNodeIfNeeded = $false
             ConfigurationMode = 'ApplyOnly'
             CertificateId = $node.Thumbprint
             AllowModuleOverwrite = $true

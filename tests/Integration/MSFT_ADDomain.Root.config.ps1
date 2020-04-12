@@ -18,14 +18,14 @@ else
             @{
                 NodeName           = 'localhost'
                 CertificateFile    = $env:DscPublicCertificatePath
-                CredentialUserName = 'administrator'
-                CredentialPassword = 'ContosoAdmin@1'
+                CredentialUserName = 'Administrator'
+                CredentialPassword = 'adminP@ssw0rd1'
                 SafeModePassword   = 'SafemodePassword@1'
                 Tests              = [Ordered]@{
                     FeatureInstall   = @{ }
                     ForestRootDomain = @{
-                        DomainName        = 'contoso.com'
-                        DomainNetbiosName = 'CONTOSO'
+                        DomainName        = 'dscadlab.com'
+                        DomainNetbiosName = 'DSCADLAB'
                         DatabasePath      = 'C:\NTDS'
                         LogPath           = 'C:\NTDS'
                         SysvolPath        = 'C:\SysVol'
@@ -33,6 +33,8 @@ else
                         DomainMode        = 'WinThreshold'
                     }
                 }
+
+                PsDscAllowPlainTextPassword = $true
             }
         )
     }
