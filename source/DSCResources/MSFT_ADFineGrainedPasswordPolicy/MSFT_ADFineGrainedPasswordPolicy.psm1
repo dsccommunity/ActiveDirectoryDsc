@@ -109,7 +109,7 @@ function Get-TargetResource
             MinPasswordLength           = $policy.MinPasswordLength
             PasswordHistoryCount        = $policy.PasswordHistoryCount
             ReversibleEncryptionEnabled = $policy.ReversibleEncryptionEnabled
-            Exists                      = $true
+            Ensure                      = 'Present'
         }
     }
     else
@@ -125,7 +125,7 @@ function Get-TargetResource
             MinPasswordLength           = $null
             PasswordHistoryCount        = $null
             ReversibleEncryptionEnabled = $null
-            Exists                      = $false
+            Ensure                      = 'Absent'
         }
     }
 } #end Get-TargetResource
@@ -140,6 +140,9 @@ function Get-TargetResource
 
     .PARAMETER DisplayName
         Display name of the fine grained password policy to be applied.
+
+    .PARAMETER Ensure
+        Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
 
     .PARAMETER ComplexityEnabled
         Whether password complexity is enabled for the password policy.
@@ -196,15 +199,26 @@ function Test-TargetResource
         $DisplayName,
 
         [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure = 'Present',
+
+        [Parameter()]
         [System.Boolean]
         $ComplexityEnabled,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 30)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+        })]
+        [String]
         $LockoutDuration,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 30)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+        })]
+        [String]
         $LockoutObservationWindow,
 
         [Parameter()]
@@ -212,11 +226,17 @@ function Test-TargetResource
         $LockoutThreshold,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+        })]
+        [String]
         $MinPasswordAge,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+        })]
+        [String]
         $MaxPasswordAge,
 
         [Parameter()]
@@ -265,22 +285,32 @@ function Test-TargetResource
     }
 
     $targetResource = Get-TargetResource @getTargetResourceParams
-
     $inDesiredState = $true
-    foreach ($property in $mutablePropertyMap)
+
+    if ($targetResource.Ensure -ne $Ensure)
     {
-        $propertyName = $property.Name
-
-        if ($PSBoundParameters.ContainsKey($propertyName))
+        $inDesiredState = $false
+    }
+    else
+    {
+        if ($targetResource.Ensure -eq 'Present')
         {
-            $expectedValue = $PSBoundParameters[$propertyName]
-            $actualValue = $targetResource[$propertyName]
-
-            if ($expectedValue -ne $actualValue)
+            foreach ($property in $mutablePropertyMap)
             {
-                $valueIncorrectMessage = $script:localizedData.ResourcePropertyValueIncorrect -f $propertyName, $expectedValue, $actualValue
-                Write-Verbose -Message $valueIncorrectMessage
-                $inDesiredState = $false
+                $propertyName = $property.Name
+
+                if ($PSBoundParameters.ContainsKey($propertyName))
+                {
+                    $expectedValue = $PSBoundParameters[$propertyName]
+                    $actualValue = $targetResource[$propertyName]
+
+                    if ($expectedValue -ne $actualValue)
+                    {
+                        $valueIncorrectMessage = $script:localizedData.ResourcePropertyValueIncorrect -f $propertyName, $expectedValue, $actualValue
+                        Write-Verbose -Message $valueIncorrectMessage
+                        $inDesiredState = $false
+                    }
+                }
             }
         }
     }
@@ -306,6 +336,9 @@ function Test-TargetResource
 
     .PARAMETER DisplayName
         Display name of the fine grained password policy to be applied.
+
+    .PARAMETER Ensure
+        Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
 
     .PARAMETER ComplexityEnabled
         Whether password complexity is enabled for the password policy.
@@ -360,15 +393,26 @@ function Set-TargetResource
         $DisplayName,
 
         [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure = 'Present',
+
+        [Parameter()]
         [System.Boolean]
         $ComplexityEnabled,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 30)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+        })]
+        [String]
         $LockoutDuration,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 30)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+        })]
+        [String]
         $LockoutObservationWindow,
 
         [Parameter()]
@@ -376,11 +420,17 @@ function Set-TargetResource
         $LockoutThreshold,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+        })]
+        [String]
         $MinPasswordAge,
 
         [Parameter()]
-        [System.UInt32]
+        [ValidateScript({
+            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+        })]
+        [String]
         $MaxPasswordAge,
 
         [Parameter()]
@@ -434,44 +484,88 @@ function Set-TargetResource
 
     $PSBoundParameters['Identity'] = $Name
 
-    if (-not $targetResource.Exists)
-    {
-        $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
-    }
-    else
+    if ($targetResource.Ensure -eq 'Present')
     {
         $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters
     }
+    else
+    {
+        $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
+    }
+
 
     foreach ($property in $mutablePropertyMap)
     {
-        $propertyName = $property.Name
+            $propertyName = $property.Name
 
-        if ($PSBoundParameters.ContainsKey($propertyName))
-        {
-            $propertyValue = $PSBoundParameters[$propertyName]
-
-            if ($property.IsTimeSpan -eq $true)
+            if ($PSBoundParameters.ContainsKey($propertyName))
             {
-                $propertyValue = ConvertTo-TimeSpan -TimeSpan $propertyValue -TimeSpanType Minutes
+                $propertyValue = $PSBoundParameters[$propertyName]
+
+                if ($property.IsTimeSpan -eq $true)
+                {
+                    $propertyValue = ConvertTo-TimeSpan -TimeSpan $propertyValue -TimeSpanType Minutes
+                }
+
+                $setADFineGrainedPasswordPolicyParams[$propertyName] = $propertyValue
+
+                Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f $propertyName, $propertyValue)
             }
+    }
 
-            $setADFineGrainedPasswordPolicyParams[$propertyName] = $propertyValue
 
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f $propertyName, $propertyValue)
+    if (($targetResource.Ensure -eq 'Absent') -and ($Ensure -eq 'Present'))
+    {
+        Write-Verbose -Message ($script:localizedData.CreatingFineGrainedPasswordPolicy -f $Name)
+
+        try
+        {
+            [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Name
+        }
+        catch
+        {
+            Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
         }
     }
-
-    Write-Verbose -Message ($script:localizedData.UpdatingFineGrainedPasswordPolicy -f $Name)
-
-    if (-not $targetResource.Exists)
+    elseif (($targetResource.Ensure -eq 'Present') -and ($Ensure -eq 'Present'))
     {
-        [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
-        [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Name
+        Write-Verbose -Message ($script:localizedData.UpdatingFineGrainedPasswordPolicy -f $Name)
+
+        try
+        {
+            [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+        }
+        catch
+        {
+            Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
+        }
     }
-    else
+    elseif (($targetResource.Ensure -eq 'Present') -and ($Ensure -eq 'Absent'))
     {
-        [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+        Write-Verbose -Message ($script:localizedData.RemovingFineGrainedPasswordPolicy -f $Name)
+
+        try
+        {
+            if ($PSBoundParameters.ContainsKey('ProtectedFromAccidentalDeletion') -and (-not $ProtectedFromAccidentalDeletion))
+            {
+                Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
+                'Attempting to remove the protection for accidental deletion')
+                [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            }
+            else
+            {
+                Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
+                'ProtectedFromAccidentalDeletion is not defined or set to true, delete may fail if not explicitly set false')
+            }
+
+            [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Name
+            [ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
+        }
+        catch
+        {
+            Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
+        }
     }
 } #end Set-TargetResource
 
