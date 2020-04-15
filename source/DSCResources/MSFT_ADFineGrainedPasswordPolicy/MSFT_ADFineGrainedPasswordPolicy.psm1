@@ -15,23 +15,19 @@ $mutablePropertyMap = @(
         Name = 'DisplayName'
     }
     @{
-        Name       = 'LockoutDuration'
-        IsTimeSpan = $true
+        Name = 'LockoutDuration'
     }
     @{
-        Name       = 'LockoutObservationWindow'
-        IsTimeSpan = $true
+        Name = 'LockoutObservationWindow'
     }
     @{
         Name = 'LockoutThreshold'
     }
     @{
-        Name       = 'MinPasswordAge'
-        IsTimeSpan = $true
+        Name = 'MinPasswordAge'
     }
     @{
-        Name       = 'MaxPasswordAge'
-        IsTimeSpan = $true
+        Name = 'MaxPasswordAge'
     }
     @{
         Name = 'MinPasswordLength'
@@ -101,11 +97,11 @@ function Get-TargetResource
         return @{
             Name                        = $Name
             ComplexityEnabled           = $policy.ComplexityEnabled
-            LockoutDuration             = ConvertFrom-Timespan -Timespan $policy.LockoutDuration -TimeSpanType Minutes
-            LockoutObservationWindow    = ConvertFrom-Timespan -Timespan $policy.LockoutObservationWindow -TimeSpanType Minutes
+            LockoutDuration             = $policy.LockoutDuration
+            LockoutObservationWindow    = $policy.LockoutObservationWindow
             LockoutThreshold            = $policy.LockoutThreshold
-            MinPasswordAge              = ConvertFrom-Timespan -Timespan $policy.MinPasswordAge -TimeSpanType Minutes
-            MaxPasswordAge              = ConvertFrom-Timespan -Timespan $policy.MaxPasswordAge -TimeSpanType Minutes
+            MinPasswordAge              = $policy.MinPasswordAge
+            MaxPasswordAge              = $policy.MaxPasswordAge
             MinPasswordLength           = $policy.MinPasswordLength
             PasswordHistoryCount        = $policy.PasswordHistoryCount
             ReversibleEncryptionEnabled = $policy.ReversibleEncryptionEnabled
@@ -157,10 +153,10 @@ function Get-TargetResource
         Number of unsuccessful login attempts that are permitted before an account is locked out.
 
     .PARAMETER MinPasswordAge
-        Minimum length of time that you can have the same password (minutes).
+        Minimum length of time that you can have the same password (days).
 
     .PARAMETER MaxPasswordAge
-        Maximum length of time that you can have the same password (minutes).
+        Maximum length of time that you can have the same password (days).
 
     .PARAMETER MinPasswordLength
         Minimum number of characters that a password must contain.
@@ -353,10 +349,10 @@ function Test-TargetResource
         Number of unsuccessful login attempts that are permitted before an account is locked out.
 
     .PARAMETER MinPasswordAge
-        Minimum length of time that you can have the same password (minutes).
+        Minimum length of time that you can have the same password (days).
 
     .PARAMETER MaxPasswordAge
-        Maximum length of time that you can have the same password (minutes).
+        Maximum length of time that you can have the same password (days).
 
     .PARAMETER MinPasswordLength
         Minimum number of characters that a password must contain.
@@ -496,21 +492,16 @@ function Set-TargetResource
 
     foreach ($property in $mutablePropertyMap)
     {
-            $propertyName = $property.Name
+        $propertyName = $property.Name
 
-            if ($PSBoundParameters.ContainsKey($propertyName))
-            {
-                $propertyValue = $PSBoundParameters[$propertyName]
+        if ($PSBoundParameters.ContainsKey($propertyName))
+        {
+            $propertyValue = $PSBoundParameters[$propertyName]
 
-                if ($property.IsTimeSpan -eq $true)
-                {
-                    $propertyValue = ConvertTo-TimeSpan -TimeSpan $propertyValue -TimeSpanType Minutes
-                }
+            $setADFineGrainedPasswordPolicyParams[$propertyName] = $propertyValue
 
-                $setADFineGrainedPasswordPolicyParams[$propertyName] = $propertyValue
-
-                Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f $propertyName, $propertyValue)
-            }
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f $propertyName, $propertyValue)
+        }
     }
 
 
