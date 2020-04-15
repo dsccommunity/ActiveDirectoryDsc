@@ -206,6 +206,16 @@ try
                 Ensure                          = 'Present'
             }
 
+            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+            It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                Mock -CommandName Get-ADFineGrainedPasswordPolicy { return $fakeFineGrainedPasswordPolicy; }
+
+                $result = Get-TargetResource @testDefaultParams
+
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It
+            }
+
             It 'Calls "Set-ADFineGrainedPasswordPolicy" without "Credential" parameter by default' {
                 Mock -CommandName Get-ADFineGrainedPasswordPolicy { return $fakeFineGrainedPasswordPolicy; }
                 Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter { $Credential -eq $null }
