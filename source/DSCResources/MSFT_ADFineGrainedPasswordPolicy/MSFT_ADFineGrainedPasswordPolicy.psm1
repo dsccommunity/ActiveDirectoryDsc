@@ -54,7 +54,7 @@ $mutablePropertyMap = @(
         require it in the future.  As a result, splatting is not reliable for now.
 
     .PARAMETER Name
-        Name of the fine grained password policy to be applied.
+        Name of the fine grained password policy to be applied. Name must be exactly matching the subject to be applied to.
 
     .PARAMETER Precedence
         The rank the policy is to be applied.
@@ -74,6 +74,10 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
+
+        [Parameter(Mandatory = $true)]
+        [System.UInt32]
+        $Precedence,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -132,10 +136,13 @@ function Get-TargetResource
         the desired state
 
     .PARAMETER Name
-        Name of the fine grained password policy to be applied.
+        Name of the fine grained password policy to be applied. Name must be exactly matching the subject to be applied to.
 
     .PARAMETER DisplayName
         Display name of the fine grained password policy to be applied.
+
+    .PARAMETER Subjects
+        The ADPrinciple names the policy is to be applied to.
 
     .PARAMETER Ensure
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
@@ -195,6 +202,10 @@ function Test-TargetResource
         $DisplayName,
 
         [Parameter()]
+        [System.String[]]
+        $Subjects,
+
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
@@ -251,7 +262,7 @@ function Test-TargetResource
         [System.Boolean]
         $ProtectedFromAccidentalDeletion,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.UInt32]
         $Precedence,
 
@@ -267,7 +278,8 @@ function Test-TargetResource
     )
 
     $getTargetResourceParams = @{
-        Name = $Name
+        Name       = $Name
+        Precedence = $Precedence
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -325,13 +337,16 @@ function Test-TargetResource
 
 <#
     .SYNOPSIS
-        Modifies the Active Directory fine grained password policy.
+        Modifies the Active Directory fine grained password policy. Name must be exactly matching the subject to be applied to.
 
     .PARAMETER Name
         Name of the fine grained password policy to be applied.
 
     .PARAMETER DisplayName
         Display name of the fine grained password policy to be applied.
+
+    .PARAMETER Subjects
+        The ADPrinciple names the policy is to be applied to.
 
     .PARAMETER Ensure
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
@@ -387,6 +402,10 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $DisplayName,
+
+        [Parameter()]
+        [System.String[]]
+        $Subjects,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -445,7 +464,7 @@ function Set-TargetResource
         [System.Boolean]
         $ProtectedFromAccidentalDeletion,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.UInt32]
         $Precedence,
 
@@ -463,7 +482,8 @@ function Set-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
 
     $getTargetResourceParams = @{
-        Name = $Name
+        Name       = $Name
+        Precedence = $Precedence
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -489,7 +509,6 @@ function Set-TargetResource
         $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
     }
 
-
     foreach ($property in $mutablePropertyMap)
     {
         $propertyName = $property.Name
@@ -504,7 +523,6 @@ function Set-TargetResource
         }
     }
 
-
     if (($targetResource.Ensure -eq 'Absent') -and ($Ensure -eq 'Present'))
     {
         Write-Verbose -Message ($script:localizedData.CreatingFineGrainedPasswordPolicy -f $Name)
@@ -512,7 +530,11 @@ function Set-TargetResource
         try
         {
             [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
-            [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Name
+
+            if ($Subjects)
+            {
+                [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
+            }
         }
         catch
         {
@@ -526,6 +548,11 @@ function Set-TargetResource
         try
         {
             [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+
+            if ($Subjects)
+            {
+                [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
+            }
         }
         catch
         {
@@ -550,7 +577,6 @@ function Set-TargetResource
                 'ProtectedFromAccidentalDeletion is not defined or set to true, delete may fail if not explicitly set false')
             }
 
-            [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Name
             [ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
         }
         catch

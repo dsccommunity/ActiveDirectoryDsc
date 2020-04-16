@@ -38,7 +38,8 @@ try
 
         $testFineGrainedPasswordPolicyName = 'Administrators'
         $testDefaultParams = @{
-            Name = $testFineGrainedPasswordPolicyName
+            Name       = $testFineGrainedPasswordPolicyName
+            Precedence = 100
         }
 
         $fakeFineGrainedPasswordPolicy = @{
@@ -82,7 +83,8 @@ try
         Describe 'ADFineGrainedPasswordPolicy\Test-TargetResource' {
             $testFineGrainedPasswordPolicyName = 'Administrators'
             $testDefaultParams = @{
-                Name = $testFineGrainedPasswordPolicyName
+                Name       = $testFineGrainedPasswordPolicyName
+                Precedence = 10
             }
             $testDomainController = 'testserver.contoso.com'
 
@@ -179,7 +181,8 @@ try
         Describe 'ADFineGrainedPasswordPolicy\Set-TargetResource' {
             $testFineGrainedPasswordPolicyName = 'Administrators'
             $testDefaultParams = @{
-                Name = $testFineGrainedPasswordPolicyName
+                Name       = $testFineGrainedPasswordPolicyName
+                Precedence = 10
             }
             $testDomainController = 'testserver.contoso.com'
 
