@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.0.1] - 2020-04-16
+
 ### Fixed
 
 - ActiveDirectoryDsc
@@ -15,6 +17,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     commit message contain the word `add`, `adds`, `minor`, `feature`,
     or `features` ([issue #588](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/588)).
   - Rename folder 'Tests' to folder 'tests' (lower-case).
+  - Moved oldest changelog details to historic changelog.
 - ADDomain
   - Added additional Get-ADDomain retry exceptions
     ([issue #581](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/581)).
@@ -184,34 +187,3 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADComputer
   - Fixed the SamAcountName property description
     ([issue #529](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/529)).
-
-## 4.2.0.0
-
-### Added
-
-- ADReplicationSite
-  - Added 'Description' attribute parameter
-    ([issue #500](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/500)).
-  - Added Integration testing
-    ([issue #355](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/355)).
-- ADReplicationSubnet
-  - Added 'Description' attribute parameter
-    ([issue #503](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/500)).
-  - Added Integration testing
-    ([issue #357](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/357)).
-- ADReplicationSiteLink
-  - Added Integration testing
-    ([issue #356](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/356)).
-  - Added ability to set 'Options' such as Change Notification Replication
-    ([issue #504](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/504)).
-
-### Fixed
-
-- ActiveDirectoryDsc
-  - Resolved custom Script Analyzer rules that was added to the test framework.
-- ActiveDirectoryDsc.Common
-  - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays.
-    ([issue #513](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/513)).
-- ADReplicationSite
-  - Correct value returned for RenameDefaultFirstSiteName
-    ([issue #502](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/502)).
