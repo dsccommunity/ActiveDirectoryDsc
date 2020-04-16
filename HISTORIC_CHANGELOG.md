@@ -5,6 +5,37 @@ characters. Due to a bug in the CI deploy pipeline this is not handled.
 This file is to temporary move the older change log history to keep the
 change log short.
 
+## 4.2.0.0
+
+### Added
+
+- ADReplicationSite
+  - Added 'Description' attribute parameter
+    ([issue #500](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing
+    ([issue #355](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/355)).
+- ADReplicationSubnet
+  - Added 'Description' attribute parameter
+    ([issue #503](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/500)).
+  - Added Integration testing
+    ([issue #357](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/357)).
+- ADReplicationSiteLink
+  - Added Integration testing
+    ([issue #356](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/356)).
+  - Added ability to set 'Options' such as Change Notification Replication
+    ([issue #504](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/504)).
+
+### Fixed
+
+- ActiveDirectoryDsc
+  - Resolved custom Script Analyzer rules that was added to the test framework.
+- ActiveDirectoryDsc.Common
+  - Fix `Test-DscPropertyState` Failing when Comparing $Null and Arrays.
+    ([issue #513](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/513)).
+- ADReplicationSite
+  - Correct value returned for RenameDefaultFirstSiteName
+    ([issue #502](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/502)).
+
 ## 4.1.0.0
 
 - Changes to ActiveDirectoryDsc
