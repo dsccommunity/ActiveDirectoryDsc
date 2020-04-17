@@ -130,8 +130,10 @@ function Get-TargetResource
 
     if ($PSBoundParameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
     {
-        if (Compare-Object -ReferenceObject $SubjectsToInclude -DifferenceObject $subjects -IncludeEqual | `
-            Where-Object { $_.SideIndicator -eq "<=" })
+        if (Compare-Object -ReferenceObject $SubjectsToInclude -DifferenceObject $subjects -IncludeEqual | Where-Object `
+            {
+                $_.SideIndicator -eq "<="
+            })
         {
             $SubjectsDifferent = $true
         }
@@ -139,8 +141,10 @@ function Get-TargetResource
 
     if ($PSBoundParameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
     {
-        if (Compare-Object -ReferenceObject $SubjectsToExclude -DifferenceObject $subjects -IncludeEqual | `
-            Where-Object { $_.SideIndicator -eq "==" })
+        if (Compare-Object -ReferenceObject $SubjectsToExclude -DifferenceObject $subjects -IncludeEqual | Where-Object `
+            {
+                $_.SideIndicator -eq "=="
+            })
         {
             $SubjectsDifferent = $true
         }
