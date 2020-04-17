@@ -7,6 +7,14 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.0.2] - 2020-04-17
+
+### Added
+
+- ADFineGrainedPasswordPolicy
+  - New resource for creating and updating Fine Grained Password Policies for AD principle subjects
+    ([issue #584](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/584))
+
 ## [6.0.1] - 2020-04-16
 
 ### Fixed
