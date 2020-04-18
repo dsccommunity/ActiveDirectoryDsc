@@ -37,7 +37,6 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
             Get-ADDomain                   | ActiveDirectory
             Get-ADForest                   | ActiveDirectory
             Assert-Module                  | DscResource.Common
-            New-InvalidOperationException  | DscResource.Common
             Resolve-DomainFQDN             | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentForestMode | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentDomainMode | ActiveDirectoryDsc.Common
@@ -65,7 +64,9 @@ function Get-TargetResource
         $ParentDomainName
     )
 
-    Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
+    Assert-Module -ModuleName 'ADDSDeployment'
+    Import-Module -Name 'ADDSDeployment'
+
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
 
     # If the domain has been installed then the Netlogon SysVol registry item will exist.

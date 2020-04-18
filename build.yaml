@@ -8,7 +8,6 @@ CopyDirectories:
   - Modules
 Encoding: UTF8 # With BOM in WinPS, noBOM in PSCore.
 VersionedOutputDirectory: true
-
 NestedModule:
   DscResource.Common:
     CopyOnly: true

@@ -130,7 +130,8 @@ function Get-TargetResource
         $EnabledOnCreation
     )
 
-    Assert-Module -ModuleName 'ActiveDirectory' -ImportModule
+    Assert-Module -ModuleName 'ActiveDirectory'
+    Import-Module -Name 'ActiveDirectory'
 
     <#
         These are properties that have no corresponding property in a
