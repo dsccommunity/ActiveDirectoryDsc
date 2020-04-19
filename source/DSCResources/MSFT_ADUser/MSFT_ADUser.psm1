@@ -1863,7 +1863,24 @@ function Get-ThumbnailByteArray
         if (Test-Path -Path $ThumbnailPhoto)
         {
             Write-Verbose -Message ($script:localizedData.LoadingThumbnailFromFile -f $ThumbnailPhoto)
-            $thumbnailPhotoAsByteArray = Get-Content -Path $ThumbnailPhoto -Encoding Byte
+            $getContentParms = @{
+                Path = $ThumbnailPhoto
+            }
+
+            # Use Get-Content Encoding Byte for PowerShell Desktop and AsByteStream for PowerShell Core
+            if ($PSVersionTable.PSEdition -eq 'Desktop')
+            {
+                $getContentParms += @{
+                    Encoding = 'Byte'
+                }
+            }
+            else
+            {
+                $getContentParms += @{
+                    AsByteStream = $true
+                }
+            }
+            $thumbnailPhotoAsByteArray = Get-Content @getContentParms
         }
         else
         {
