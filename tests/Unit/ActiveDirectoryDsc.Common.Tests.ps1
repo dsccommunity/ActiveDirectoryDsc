@@ -1555,13 +1555,13 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
         Context 'When using parameter Properties and IgnoreProperties to compare desired values' {
             BeforeAll {
-                $mockCurrentValues = @{
+                $mockCurrentValues = [Ordered]@{
                     ComputerName = 'DC01'
                     Location     = 'Sweden'
                     Ensure       = 'Present'
                 }
 
-                $mockDesiredValues = @{
+                $mockDesiredValues = [Ordered]@{
                     ComputerName = 'DC01'
                     Location     = 'Europe'
                     Ensure       = 'Absent'
@@ -1579,14 +1579,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                 $compareTargetResourceStateResult | Should -HaveCount 2
-                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
-                $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
-                $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
-                $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
+                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'Location'
+                $compareTargetResourceStateResult[0].Expected | Should -Be 'Europe'
+                $compareTargetResourceStateResult[0].Actual | Should -Be 'Sweden'
+                $compareTargetResourceStateResult[0].InDesiredState | Should -BeFalse
+                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'ComputerName'
+                $compareTargetResourceStateResult[1].Expected | Should -Be 'DC01'
+                $compareTargetResourceStateResult[1].Actual | Should -Be 'DC01'
+                $compareTargetResourceStateResult[1].InDesiredState | Should -BeTrue
             }
         }
 
