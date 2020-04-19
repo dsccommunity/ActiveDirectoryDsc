@@ -124,6 +124,9 @@ Update the stub class `ADPrincipal` constructor and add the method like this.
     }
 ```
 
+Replace all occurences of `System.Security.Principal.SecurityIdentifier` with
+`System.Object` as this property is not currently implemented in PowerShell 7.
+
 Add `-WarningAction SilentlyContinue` to the `Add-Type` command to suppress
 warnings in PowerShell 7.
 
