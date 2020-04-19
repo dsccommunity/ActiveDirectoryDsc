@@ -2075,7 +2075,8 @@ function Get-ByteContent
 {
     [CmdletBinding()]
     [OutputType([System.Byte[]])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         [System.String]
         $Path
