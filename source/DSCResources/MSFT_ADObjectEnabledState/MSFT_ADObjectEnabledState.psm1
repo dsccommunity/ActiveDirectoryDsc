@@ -71,7 +71,7 @@ function Get-TargetResource
         $Credential
     )
 
-    Assert-Module -ModuleName 'ActiveDirectory'
+    Assert-Module -ModuleName 'ActiveDirectory' -ImportModule
     Import-Module -Name 'ActiveDirectory'
 
     <#
