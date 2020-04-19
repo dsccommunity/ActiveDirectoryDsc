@@ -56,44 +56,6 @@ function Start-ProcessWithTimeout
 
 <#
     .SYNOPSIS
-        Assert if the role specific module is installed or not and optionally
-        import it.
-
-    .PARAMETER ModuleName
-        The name of the module to assert is installed.
-
-    .PARAMETER ImportModule
-        This switch causes the module to be imported if it is installed.
-#>
-function Assert-Module
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ModuleName = 'ActiveDirectory',
-
-        [Parameter()]
-        [System.Management.Automation.SwitchParameter]
-        $ImportModule
-    )
-
-    if (-not (Get-Module -Name $ModuleName -ListAvailable))
-    {
-        $errorMessage = $script:localizedData.ModuleNotFoundError -f $moduleName
-        New-ObjectNotFoundException -Message $errorMessage
-    }
-
-    if ($ImportModule)
-    {
-        Import-Module -Name $ModuleName
-    }
-} #end function Assert-Module
-
-<#
-    .SYNOPSIS
         Tests whether this computer is a member of a domain.
 #>
 function Test-DomainMember
