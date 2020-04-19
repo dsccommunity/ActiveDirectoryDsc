@@ -81,7 +81,6 @@ function Get-TargetResource
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
-
     $adServiceAccountParameters = Get-ADCommonParameters @PSBoundParameters
 
     Write-Verbose -Message ($script:localizedData.RetrievingManagedServiceAccountMessage -f

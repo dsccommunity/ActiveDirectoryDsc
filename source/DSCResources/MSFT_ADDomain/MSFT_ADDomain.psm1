@@ -37,6 +37,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
             Get-ADDomain                   | ActiveDirectory
             Get-ADForest                   | ActiveDirectory
             Assert-Module                  | DscResource.Common
+            New-InvalidOperationException  | DscResource.Common
             Resolve-DomainFQDN             | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentForestMode | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentDomainMode | ActiveDirectoryDsc.Common

@@ -321,7 +321,6 @@ function Test-TargetResource
             Set-ADForest                  | ActiveDirectory
             Set-ODObject                  | ActiveDirectory
 #>
-
 function Set-TargetResource
 {
     [CmdletBinding()]
