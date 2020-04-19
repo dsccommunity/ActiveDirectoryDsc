@@ -2063,3 +2063,32 @@ function Test-PrincipalContextCredentials
 
     return $result
 }
+
+<#
+    .SYNOPSIS
+        Returns the contents of a file as a byte array
+
+    .PARAMETER Path
+        Specifies the path to an item.
+#>
+function Get-ByteContent
+{
+    [CmdletBinding()]
+    [OutputType([System.Byte[]])]
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Path
+    )
+
+    if ($PSVersionTable.PSEdition -eq 'Core')
+    {
+        $content = Get-Content -Path $Path -AsByteStream
+    }
+    else
+    {
+        $content = Get-Content -Path $Path -Encoding 'Byte'
+    }
+
+    return $content
+}
