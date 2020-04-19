@@ -1,10 +1,14 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
-Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
+$aDCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
+Import-Module -Name $aDCommonModulePath
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADForestProperties'
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
+
 $script:psModuleName = 'ActiveDirectory'
 
 <#
@@ -33,7 +37,8 @@ $script:psModuleName = 'ActiveDirectory'
         Used Functions:
             Name                          | Module
             ------------------------------|--------------------------
-            Assert-Module                 | ActiveDirectoryDsc.Common
+            Assert-Module                 | DscResource.Common
+            New-CimCredentialInstance     | ActiveDirectoryDsc.Common
             Get-ADForest                  | ActiveDirectory
             Get-ADObject                  | ActiveDirectory
             Get-ADRootDSE                 | ActiveDirectory
@@ -148,7 +153,7 @@ function Get-TargetResource
             Name                          | Module
             ------------------------------|--------------------------
             Assert-MemberParameters       | ActiveDirectoryDsc.Common
-            Assert-Module                 | ActiveDirectoryDsc.Common
+            Assert-Module                 | DscResource.Common
             Test-Members                  | ActiveDirectoryDsc.Common
 #>
 function Test-TargetResource
@@ -310,9 +315,9 @@ function Test-TargetResource
         Used Functions:
             Name                          | Module
             ------------------------------|--------------------------
-            Assert-Module                 | ActiveDirectoryDsc.Common
+            Assert-Module                 | DscResource.Common
+            New-InvalidOperationException | DscResource.Common
             Get-ADRootDSE                 | ActiveDirectory
-            New-InvalidOperationException | ActiveDirectoryDsc.Common
             Set-ADForest                  | ActiveDirectory
             Set-ODObject                  | ActiveDirectory
 #>
