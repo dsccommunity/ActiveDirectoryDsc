@@ -9,7 +9,7 @@ the cmdlet or function installed.
 ## How to
 
 >**NOTE!** The stubs have been altered after that the modules have been
->generated. How they were altered is describe in the below procedure.
+>generated. How they were altered is described in the below procedure.
 
 Install the module 'Indented.StubCommand' from PowerShell Gallery.
 
@@ -24,35 +24,41 @@ Add-WindowsFeature AD-Domain-Services
 Add-WindowsFeature RSAT-AD-PowerShell
 ```
 
-Create the stub modules in output folder 'c:\projects\stub' (can be any
-folder).
+Create the stub modules in the module's `tests/Unit/Stubs` folder:
 
 ```powershell
-$destinationFolder = 'c:\projects\stubs\'
+$destinationFolder = 'tests/Unit/Stubs'
 
 $functionBody = {
     throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
 }
 
-New-StubModule -FromModule 'ActiveDirectory' -Path $destinationFolder -FunctionBody $functionBody -ReplaceTypeDefinition @(
+$adTypeDefinition = @(
     @{
         ReplaceType = 'System\.Nullable`1\[Microsoft\.ActiveDirectory\.Management\.\w*\]'
-        WithType = 'System.Object'
+        WithType    = 'System.Object'
     },
     @{
         ReplaceType = 'Microsoft\.ActiveDirectory\.Management\.Commands\.\w*'
-        WithType = 'System.Object'
+        WithType    = 'System.Object'
     },
     @{
         ReplaceType = 'Microsoft\.ActiveDirectory\.Management\.\w*'
-        WithType = 'System.Object'
+        WithType    = 'System.Object'
     }
 )
 
+New-StubModule -FromModule 'ActiveDirectory' -Path $destinationFolder -FunctionBody $functionBody `
+    -ReplaceTypeDefinition $adTypeDefinition
+
 New-StubModule -FromModule 'ADDSDeployment' -Path $destinationFolder -FunctionBody $functionBody
+
+New-StubModule -FromModule 'Kds' -Path $destinationFolder -FunctionBody $functionBody
 ```
 
-Some types that is referenced by the code is not automatically create with
+### ActiveDirectory Stub Customisation
+
+Some types that are referenced are not automatically created with
 the cmdlet `New-StubModule`. Run the following, then the stub classes that
 are outputted should be copied into the ActiveDirectory stub module that
 was generated above, inside the namespace `Microsoft.ActiveDirectory.Management`.
@@ -77,7 +83,7 @@ public class ADIdentityNotFoundException : System.Exception
 ```
 
 The stub class `Microsoft.ActiveDirectory.Management.ADDomainController`
-can not be generated fully since all properties that are returned from
+cannot be generated fully since all properties that are returned from
 `Get-ADDomainController` are not shown when using the type directly, e.g.
 `$a = New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADDomainController'`.
 To workaround this these properties below must be added manually to the stub
@@ -117,3 +123,11 @@ Update the stub class `ADPrincipal` constructor and add the method like this.
         }
     }
 ```
+
+Add `-WarningAction SilentlyContinue` to the `Add-Type` command to suppress
+warnings in PowerShell 7.
+
+### Kds Stub Customisation
+
+The type definition created for the `Kds` module is not valid, and needs all
+occurences of `_KDS_CONFIGURATION*` replacing with `_KDS_CONFIGURATION`.

@@ -2,7 +2,7 @@
 # Version: 1.0.1.0
 # CreatedOn: 2019-08-12 11:47:22Z
 
-Add-Type -IgnoreWarnings -TypeDefinition @'
+Add-Type -IgnoreWarnings -WarningAction SilentlyContinue -TypeDefinition @'
 namespace Microsoft.ActiveDirectory.Management
 {
     public class ADAccount
