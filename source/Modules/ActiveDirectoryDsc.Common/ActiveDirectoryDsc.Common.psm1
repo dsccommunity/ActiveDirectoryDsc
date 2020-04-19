@@ -2101,5 +2101,3 @@ function Test-PrincipalContextCredentials
 
     return $result
 }
-
-$script:localizedData = Get-LocalizedData -ResourceName 'ActiveDirectoryDsc.Common' -ScriptRoot $PSScriptRoot
