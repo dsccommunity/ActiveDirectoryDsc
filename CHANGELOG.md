@@ -7,6 +7,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Changed
+
+- ActiveDirectoryDsc
+  - Migrated to DscResource.Common Module.
+
 ## [6.0.1] - 2020-04-16
 
 ### Fixed
