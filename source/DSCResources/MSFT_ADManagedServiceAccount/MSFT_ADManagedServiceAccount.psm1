@@ -1,10 +1,13 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
-Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
+$aDCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
+Import-Module -Name $aDCommonModulePath
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADManagedServiceAccount'
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 $script:errorCodeKdsRootKeyNotFound = -2146893811
 
@@ -39,10 +42,10 @@ $script:errorCodeKdsRootKeyNotFound = -2146893811
             ------------------------------|--------------------------
             Get-ADObject                  | ActiveDirectory
             Get-ADServiceAccount          | ActiveDirectory
-            Assert-Module                 | ActiveDirectoryDsc.Common
+            Assert-Module                 | DscResource.Common
+            New-InvalidOperationException | DscResource.Common
             Get-ADCommonParameters        | ActiveDirectoryDsc.Common
             Get-ADObjectParentDN          | ActiveDirectoryDsc.Common
-            New-InvalidOperationException | ActiveDirectoryDsc.Common
 #>
 function Get-TargetResource
 {
@@ -426,7 +429,7 @@ function Test-TargetResource
             Compare-ResourcePropertyState | ActiveDirectoryDsc.Common
             Get-ADCommonParameters        | ActiveDirectoryDsc.Common
             Get-DomainName                | ActiveDirectoryDsc.Common
-            New-InvalidOperationException | ActiveDirectoryDsc.Common
+            New-InvalidOperationException | DscResource.Common
 #>
 
 function Set-TargetResource

@@ -9,6 +9,12 @@ CopyDirectories:
 Encoding: UTF8 # With BOM in WinPS, noBOM in PSCore.
 VersionedOutputDirectory: true
 
+NestedModule:
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #       Sampler Pipeline Configuration             #
@@ -49,6 +55,7 @@ BuildWorkflow:
 Pester:
   OutputFormat: NUnitXML
   ExcludeFromCodeCoverage:
+    - Modules/DscResource.Common
   Script:
   - tests/Unit
   ExcludeTag:
@@ -64,8 +71,7 @@ DscTest:
   ExcludeSourceFile:
     - output
   ExcludeModuleFile:
-  #  - Templates
-  #  - Modules/DscResource.Common
+    - Modules/DscResource.Common
 
 Resolve-Dependency: #Parameters for Resolve-Dependency
   #PSDependTarget: ./output/modules
