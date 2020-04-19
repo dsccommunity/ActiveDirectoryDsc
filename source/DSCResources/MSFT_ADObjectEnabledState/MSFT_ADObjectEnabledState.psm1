@@ -72,7 +72,6 @@ function Get-TargetResource
     )
 
     Assert-Module -ModuleName 'ActiveDirectory' -ImportModule
-    Import-Module -Name 'ActiveDirectory'
 
     <#
         These are properties that have no corresponding property in a
