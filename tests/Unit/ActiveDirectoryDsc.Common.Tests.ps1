@@ -1427,14 +1427,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                 $compareTargetResourceStateResult | Should -HaveCount 2
-                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
-                $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
-                $compareTargetResourceStateResult[1].Expected | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].InDesiredState | Should -BeTrue
+                $computerNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'ComputerName'
+                $computerNameResult.Expected | Should -Be 'DC01'
+                $computerNameResult.Actual | Should -Be 'DC01'
+                $computerNameResult.InDesiredState | Should -BeTrue
+                $locationNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'Location'
+                $locationNameResult.Expected | Should -Be 'Sweden'
+                $locationNameResult.Actual | Should -Be 'Sweden'
+                $locationNameResult.InDesiredState | Should -BeTrue
             }
         }
 
@@ -1485,14 +1485,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                 $compareTargetResourceStateResult | Should -HaveCount 2
-                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
-                $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
-                $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
-                $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
+                $computerNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'ComputerName'
+                $computerNameResult.Expected | Should -Be 'DC01'
+                $computerNameResult.Actual | Should -Be 'DC01'
+                $computerNameResult.InDesiredState | Should -BeTrue
+                $locationNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'Location'
+                $locationNameResult.Expected | Should -Be 'Europe'
+                $locationNameResult.Actual | Should -Be 'Sweden'
+                $locationNameResult.InDesiredState | Should -BeFalse
             }
         }
 
@@ -1579,14 +1579,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                 $compareTargetResourceStateResult | Should -HaveCount 2
-                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
-                $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
-                $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
-                $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
+                $computerNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'ComputerName'
+                $computerNameResult.Expected | Should -Be 'DC01'
+                $computerNameResult.Actual | Should -Be 'DC01'
+                $computerNameResult.InDesiredState | Should -BeTrue
+                $locationNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'Location'
+                $locationNameResult.Expected | Should -Be 'Europe'
+                $locationNameResult.Actual | Should -Be 'Sweden'
+                $locationNameResult.InDesiredState | Should -BeFalse
             }
         }
 
