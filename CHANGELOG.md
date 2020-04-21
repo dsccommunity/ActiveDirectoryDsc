@@ -12,6 +12,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ActiveDirectoryDsc
   - Migrated to DscResource.Common Module.
   - Testing HQRM and Unit Tests on PowerShell 7
+  - Fixed the pipeline paths trigger.
 
 ## [6.0.1] - 2020-04-16
 
