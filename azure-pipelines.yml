@@ -58,7 +58,7 @@ stages:
             inputs:
               buildType: 'current'
               artifactName: $(buildArtifactName)
-              targetPath: '$(Build.SourcesDirectory)'
+              targetPath: '$(Build.SourcesDirectory)/output'
           - task: PowerShell@2
             name: Test
             displayName: 'Run HQRM Test'
