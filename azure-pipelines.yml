@@ -40,7 +40,7 @@ stages:
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Pipeline Artifact'
             inputs:
-              targetPath: 'output'
+              targetPath: 'output/'
               artifact: $(buildArtifactName)
               publishLocation: 'pipeline'
               parallel: true
