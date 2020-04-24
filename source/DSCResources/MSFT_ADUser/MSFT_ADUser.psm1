@@ -1863,7 +1863,7 @@ function Get-ThumbnailByteArray
         if (Test-Path -Path $ThumbnailPhoto)
         {
             Write-Verbose -Message ($script:localizedData.LoadingThumbnailFromFile -f $ThumbnailPhoto)
-            $thumbnailPhotoAsByteArray = Get-Content -Path $ThumbnailPhoto -Encoding Byte
+            $thumbnailPhotoAsByteArray = Get-ByteContent -Path $ThumbnailPhoto
         }
         else
         {

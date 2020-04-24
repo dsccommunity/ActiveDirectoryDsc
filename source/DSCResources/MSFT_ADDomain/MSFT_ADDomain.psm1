@@ -66,6 +66,7 @@ function Get-TargetResource
     )
 
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
+
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
 
     # If the domain has been installed then the Netlogon SysVol registry item will exist.

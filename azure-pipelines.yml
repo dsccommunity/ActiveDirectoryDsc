@@ -66,7 +66,7 @@ stages:
             inputs:
               filePath: './build.ps1'
               arguments: '-Tasks hqrmtest'
-              pwsh: false
+              pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: succeededOrFailed()
@@ -100,7 +100,7 @@ stages:
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks test -PesterScript 'tests/Unit'"
-              pwsh: false
+              pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: succeededOrFailed()
