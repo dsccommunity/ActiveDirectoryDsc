@@ -19,6 +19,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADDomainTrust
   - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
     into the `ActiveDirectoryDsc.Common` module.
+- ADReplicationSiteLink
+  - Refactor Test-TargetResource Function.
 
 ## [6.0.1] - 2020-04-16
 
