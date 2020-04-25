@@ -15,6 +15,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline.
   - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact.
 
+- ADDomainTrust
+  - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
+    into `ActiveDirectoryDsc.Common` module.
+
 ## [6.0.1] - 2020-04-16
 
 ### Fixed
