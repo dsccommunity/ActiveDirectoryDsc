@@ -437,53 +437,99 @@ function Test-TargetResource
         $Ensure = 'Present'
     )
 
-    $isCompliant = $true
-    $currentSiteLink = Get-TargetResource -Name $Name
+    $parameters = @{} + $PSBoundParameters
+    $parameters.Remove('Ensure')
+    $parameters.Remove('Verbose')
+    $parameters.Remove('Debug')
 
-    # Test for Ensure.
-    if ($Ensure -ne $currentSiteLink.Ensure)
-    {
-        return $false
-    }
-    elseif ($Ensure -eq 'Absent')
-    {
-        return $true
-    }
+    # Add parameters with default values as they may not be explicitly passed
+    $parameters['OptionChangeNotification'] = $OptionChangeNotification
+    $parameters['OptionTwoWaySync'] = $OptionTwoWaySync
+    $parameters['OptionDisableCompression'] = $OptionDisableCompression
 
-    # Test for SitesIncluded.
-    foreach ($desiredIncludedSite in $SitesIncluded)
+    $targetResource = Get-TargetResource -Name $Name
+
+    $inDesiredState = $true
+
+    if ($targetResource.Ensure -eq 'Present')
     {
-        if ($desiredIncludedSite -notin $currentSiteLink.SitesIncluded)
+        # Resource is Present
+        if ($Ensure -eq 'Present')
         {
-            Write-Verbose -Message ($script:localizedData.SiteNotFound -f $desiredIncludedSite, $($currentSiteLink.SitesIncluded -join ', '))
-            $isCompliant = $false
-        }
-    }
-
-    # Test for SitesExcluded.
-    foreach ($desiredExcludedSite in $SitesExcluded)
-    {
-        if ($desiredExcludedSite -in $currentSiteLink.SitesIncluded)
-        {
-            Write-Verbose -Message ($script:localizedData.SiteFoundInExcluded -f $desiredExcludedSite, $($currentSiteLink.SitesIncluded -join ', '))
-            $isCompliant = $false
-        }
-    }
-
-    foreach ($parameter in $PSBoundParameters.Keys)
-    {
-        # Test for Description|ReplicationFrequencyInMinutes|Cost.
-        if ($parameter -match 'Description|ReplicationFrequencyInMinutes|Cost|OptionChangeNotification|OptionTwoWaySync|OptionDisableCompression')
-        {
-            if ($PSBoundParameters[$parameter] -ne $currentSiteLink[$parameter])
+            # Resource Should be Present
+            foreach ($parameter in $PSBoundParameters.Keys)
             {
-                Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameter, $($currentSiteLink[$parameter]), $($PSBoundParameters[$parameter]))
-                $isCompliant = $false
+                if ($parameter -eq 'SitesIncluded')
+                {
+                    foreach ($desiredIncludedSite in $SitesIncluded)
+                    {
+                        if ($desiredIncludedSite -notin $targetResource.SitesIncluded)
+                        {
+                            Write-Verbose -Message ($script:localizedData.SiteNotFound -f
+                                $desiredIncludedSite, $($targetResource.SitesIncluded -join ', '))
+                            $inDesiredState = $false
+                        }
+                    }
+                }
+                elseif ($parameter -eq 'SitesExcluded')
+                {
+                    foreach ($desiredExcludedSite in $SitesExcluded)
+                    {
+                        if ($desiredExcludedSite -in $targetResource.SitesIncluded)
+                        {
+                            Write-Verbose -Message ($script:localizedData.SiteFoundInExcluded -f
+                                $desiredExcludedSite, $($targetResource.SitesIncluded -join ', '))
+                            $inDesiredState = $false
+                        }
+                    }
+                }
+                elseif ($PSBoundParameters[$parameter] -ne $targetResource[$parameter])
+                {
+                    Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f
+                        $parameter, $($targetResource[$parameter]), $($PSBoundParameters[$parameter]))
+                    $inDesiredState = $false
+                }
+            }
+
+            if ($inDesiredState)
+            {
+                # Resource is in desired state
+                Write-Verbose -Message ($script:localizedData.ADSiteInDesiredState -f $Name)
+            }
+            else
+            {
+                # Resource is not in the desired state
+                Write-Verbose -Message ($script:localizedData.ADSiteNotInDesiredState -f $Name)
             }
         }
+        else
+        {
+            # Resource Should be Absent
+            Write-Verbose -Message ($script:localizedData.ADSiteIsPresentButShouldBeAbsent -f $Name)
+
+            $inDesiredState = $false
+        }
+    }
+    else
+    {
+        # Resource is Absent
+        if ($Ensure -eq 'Present')
+        {
+            # Resource Should be Present
+            Write-Verbose -Message ($script:localizedData.ADSiteIsAbsentButShouldBePresent -f $Name)
+
+            $inDesiredState = $false
+        }
+        else
+        {
+            # Resource should be Absent
+            Write-Verbose ($script:localizedData.ADSiteInDesiredState -f $Name)
+
+            $inDesiredState = $true
+        }
     }
 
-    return $isCompliant
+    return $inDesiredState
 }
 
 <#
