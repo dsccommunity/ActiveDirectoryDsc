@@ -17,7 +17,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - ADDomainTrust
   - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
-    into `ActiveDirectoryDsc.Common` module.
+    into the `ActiveDirectoryDsc.Common` module.
 
 ## [6.0.1] - 2020-04-16
 
