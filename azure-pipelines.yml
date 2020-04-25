@@ -4,7 +4,7 @@ trigger:
     - master
   paths:
     include:
-    - source/**/*
+    - source/*
   tags:
     include:
     - "v*"

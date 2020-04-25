@@ -11,8 +11,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - ActiveDirectoryDsc
   - Migrated to DscResource.Common Module.
-  - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline
-  - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact
+  - Fixed the pipeline paths trigger.
+  - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline.
+  - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact.
 
 ## [6.0.1] - 2020-04-16
 
@@ -31,6 +32,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADUser
   - Fixed PasswordAuthentication parameter handling
   ([issue #582](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/582)).
+- ADReplicationSiteLink
+  - Fix Test-TargetResource when Ensure is Absent and other attributes are set
+    ([issue #593](https://github.com/PowerShell/ActiveDirectoryDsc/issues/593)).
+
+### Fixed
 
 ### Changed
 

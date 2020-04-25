@@ -445,6 +445,10 @@ function Test-TargetResource
     {
         return $false
     }
+    elseif ($Ensure -eq 'Absent')
+    {
+        return $true
+    }
 
     # Test for SitesIncluded.
     foreach ($desiredIncludedSite in $SitesIncluded)
