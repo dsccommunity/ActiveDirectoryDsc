@@ -11,8 +11,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - ActiveDirectoryDsc
   - Migrated to DscResource.Common Module.
-  - Testing HQRM and Unit Tests on PowerShell 7
   - Fixed the pipeline paths trigger.
+  - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline.
+  - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact.
 
 ## [6.0.1] - 2020-04-16
 
