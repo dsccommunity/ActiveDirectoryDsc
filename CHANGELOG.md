@@ -16,6 +16,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact.
   - Removed redundant common functions `Resolve-DomainFQDN` and `Set-DscADComputer`.
 
+- ADDomainTrust
+  - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
+    into the `ActiveDirectoryDsc.Common` module.
+
 ## [6.0.1] - 2020-04-16
 
 ### Fixed
