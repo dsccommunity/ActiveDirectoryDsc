@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Find-DomainController
 
@@ -32,7 +26,7 @@ Find-DomainController -DomainName contoso.com -SiteName Default -WaitForValidCre
 ## PARAMETERS
 
 ### -Credential
-Specifies the credentials that are used when accessing the domain, or uses the current user if not specified.
+Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
 ```yaml
 Type: System.Management.Automation.PSCredential

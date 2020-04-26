@@ -580,14 +580,29 @@ function ConvertFrom-TimeSpan
         The Get-ADCommonParameters function is used to get a common AD cmdlet connection parameter for splatting. A
         hashtable is returned containing the derived connection parameters.
 
+    .PARAMETER Identity
+        Specifies the identity to use as the Identity or Name connection parameter. Aliases are 'UserName',
+        'GroupName', 'ComputerName' and 'ServiceAccountName'.
+
     .PARAMETER CommonName
         When specified, a CommonName overrides the Identity used as the Name key. For example, the Get-ADUser,
         Set-ADUser and Remove-ADUser cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the Name
         parameter.
 
+    .PARAMETER Credential
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
+
+    .PARAMETER Server
+        Specifies the name of the domain controller to use when accessing the domain. If not specified, a domain
+        controller is discovered using the standard Active Directory discovery process.
+
     .PARAMETER UseNameParameter
         Returns the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and Remove-ADUser cmdlets
         take an Identity parameter, but the New-ADUser cmdlet uses the Name parameter.
+
+    .PARAMETER PreferCommonName
+        If specified along with a CommonName parameter, The CommonName will be used as the Identity or Name connection
+        parameter instead of the Identity parameter.
 
     .EXAMPLE
         Get-CommonADParameters @PSBoundParameters
@@ -709,7 +724,7 @@ function Get-ADCommonParameters
         The domain name containing the replication site.
 
     .PARAMETER Credential
-        The credential to use to access the replication site.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .INPUTS
         None
@@ -757,9 +772,12 @@ function Test-ADReplicationSite
         Converts a ModeId or ADForestMode object to a ForestMode object.
 
     .DESCRIPTION
-        The ConvertTo-DeploymentForestMode function is used to convert a ModeId or
-        Microsoft.ActiveDirectory.Management.ADForestMode to a Microsoft.DirectoryServices.Deployment.Types.ForestMode
-        object.
+        The ConvertTo-DeploymentForestMode function is used to convert a
+        Microsoft.ActiveDirectory.Management.ADForestMode object or a ModeId to a
+        Microsoft.DirectoryServices.Deployment.Types.ForestMode object.
+
+    .EXAMPLE
+        ConvertTo-DeploymentForestMode -Mode $adForestMode
 
     .PARAMETER ModeId
         The ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
@@ -819,9 +837,12 @@ function ConvertTo-DeploymentForestMode
         Converts a ModeId or ADDomainMode object to a DomainMode object.
 
     .DESCRIPTION
-        The ConvertTo-DeploymentDomainMode function is used to convert a ModeId or
-        Microsoft.ActiveDirectory.Management.ADDomainMode object to a
+        The ConvertTo-DeploymentDomainMode function is used to convert a
+        Microsoft.ActiveDirectory.Management.ADDomainMode object or a ModeId to a
         Microsoft.DirectoryServices.Deployment.Types.DomainMode object.
+
+    .EXAMPLE
+        ConvertTo-DeploymentDomainMode -Mode $adDomainMode
 
     .PARAMETER ModeId
         The ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
@@ -894,11 +915,11 @@ function ConvertTo-DeploymentDomainMode
         The type of the AD object to restore.
 
     .PARAMETER Credential
-        The credential to use to restore the object in the Active
-        Directory.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .PARAMETER Server
-        The name of the domain controller use to restore the object.
+        Specifies the name of the domain controller to use when accessing the domain. If not specified, a domain
+        controller is discovered using the standard Active Directory discovery process.
 
     .INPUTS
         None
@@ -1052,8 +1073,7 @@ function Get-ADDomainNameFromDistinguishedName
         group.
 
     .EXAMPLE
-        Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' `
-            -Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc-com}
+        Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' -Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc=com}
 
     .PARAMETER Members
         The members to add to the group. These may be in the same domain as the group or in alternate domains.
@@ -1159,16 +1179,19 @@ function Add-ADCommonGroupMember
 
     .DESCRIPTION
         The Get-DomainControllerObject function is used to get the domain controller object if the node is a domain
-        controller, otherwise it return $null.
+        controller, otherwise it returns $null.
 
     .EXAMPLE
         Get-DomainControllerObject -DomainName contoso.com
 
     .PARAMETER DomainName
-        The name of the domain that should contain the domain controller.
+        Specifies the name of the domain that should contain the domain controller.
 
     .PARAMETER ComputerName
-        The name of the node to return the domain controller object for.
+        Specifies the name of the node to return the domain controller object for.
+
+    .PARAMETER Credential
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .OUTPUTS
         If the domain controller is not found, an empty object ($null) is returned.
@@ -1274,18 +1297,7 @@ function Test-IsDomainController
         Properties.
 
     .EXAMPLE
-        $computerObjectPropertyMap = @(
-            @{
-                ParameterName = 'ComputerName'
-                PropertyName  = 'cn'
-            },
-            @{
-                ParameterName = 'Location'
-            }
-        )
-
-        $computerObjectProperties = Convert-PropertyMapToObjectProperties $computerObjectPropertyMap
-        $getADComputerResult = Get-ADComputer -Identity 'APP01' -Properties $computerObjectProperties
+        Convert-PropertyMapToObjectProperties -PropertyMap $computerObjectPropertyMap
 
     .PARAMETER PropertyMap
         The property map, as an array of hashtables, to convert to a properties array.
@@ -1358,6 +1370,9 @@ function Convert-PropertyMapToObjectProperties
     .PARAMETER Properties
         An array of property names, from the keys provided in DesiredValues, that will be compared. If this parameter
         is left out, all the keys in the DesiredValues will be compared.
+
+    .PARAMETER IgnoreProperties
+        Specifies an array of property names to ignore in the comparison.
 
     .INPUTS
         None
@@ -1474,23 +1489,16 @@ function Compare-ResourcePropertyState
 
     .DESCRIPTION
         The Test-DscPropertyState function is used to compare the current and the desired value of a property. A
-        boolean is returned the represent the result of the comparison.
+        boolean is returned that represents the result of the comparison.
 
     .EXAMPLE
-        Test-DscPropertyState -Values @{
-            CurrentValue = 'John'
-            DesiredValue = 'Alice'
-        }
+        Test-DscPropertyState -Values @{CurrentValue = 'John'; DesiredValue = 'Alice'}
 
     .EXAMPLE
-        Test-DscPropertyState -Values @{
-            CurrentValue = 1
-            DesiredValue = 2
-        }
+        Test-DscPropertyState -Values @{CurrentValue = 1; DesiredValue = 2}
 
     .PARAMETER Values
-        This is set to a hash table with the current value (the CurrentValue key) and desired value (the DesiredValue
-        key).
+        Specifies a hash table with the current value (the CurrentValue key) and desired value (the DesiredValue key).
 
     .INPUTS
         None
@@ -1749,8 +1757,7 @@ function New-CimCredentialInstance
         if the type is missing.
 
     .EXAMPLE
-        Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' `
-            -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext'
+        Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
     .PARAMETER AssemblyName
         The assembly to load into the PowerShell session.
@@ -1825,6 +1832,9 @@ function Add-TypeAssembly
         An optional parameter for the target of the directory context. For the correct format for this parameter
         depending on context type, see the article
         https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.directorycontext?view=netframework-4.8
+
+    .PARAMETER Credential
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .INPUTS
         None
@@ -1911,7 +1921,7 @@ function Get-ADDirectoryContext
         Specifies the site in the domain where to look for a domain controller.
 
     .PARAMETER Credential
-        Specifies the credentials that are used when accessing the domain, or uses the current user if not specified.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .PARAMETER WaitForValidCredentials
         Specifies if authentication exceptions should be ignored.
@@ -2158,7 +2168,7 @@ function Get-CurrentUser
         Specifies a new password value for the account.
 
     .PARAMETER Credential
-        Specifies the user account credentials to use to perform this task.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .PARAMETER PasswordAuthentication
         Specifies the authentication context type used when testing passwords.
@@ -2262,7 +2272,7 @@ function Test-Password
         PrincipalContext. A boolean is returned that represents the validity of the password.
 
     .EXAMPLE
-        Test-PrincipalContextCredentials -UserName 'user1' -Password $cred -PrincialContext $context
+        Test-PrincipalContextCredentials -UserName 'user1' -Password $cred -PrincipalContext $context
 
     .PARAMETER UserName
         Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
@@ -2283,7 +2293,7 @@ function Test-Password
         System.Boolean
 
     .NOTES
-        This is a wrapper to allow test mocking of the calling function.
+        This is a internal wrapper function to allow test mocking of the calling function.
 #>
 function Test-PrincipalContextCredentials
 {

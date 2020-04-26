@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Test-IsDomainController
 
@@ -17,9 +11,8 @@ Test-IsDomainController [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The Test-IsDomainController function tests if the computer is a domain controller.
-A boolean is returned that
-represents whether the computer is a domain controller.
+The Test-IsDomainController function tests if the computer is a domain controller. A boolean is returned that represents
+whether the computer is a domain controller.
 
 ## EXAMPLES
 

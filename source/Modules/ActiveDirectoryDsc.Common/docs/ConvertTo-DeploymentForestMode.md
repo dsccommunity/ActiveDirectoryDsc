@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # ConvertTo-DeploymentForestMode
 
@@ -23,18 +17,16 @@ ConvertTo-DeploymentForestMode -Mode <ADForestMode> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The ConvertTo-DeploymentForestMode function is used to convert a ModeId or
-Microsoft.ActiveDirectory.Management.ADForestMode to a Microsoft.DirectoryServices.Deployment.Types.ForestMode
-object.
+The ConvertTo-DeploymentForestMode function is used to convert a
+Microsoft.ActiveDirectory.Management.ADForestMode object or a ModeId to a
+Microsoft.DirectoryServices.Deployment.Types.ForestMode object.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
 ```
-
-{{ Add example description here }}
+ConvertTo-DeploymentForestMode -Mode $adForestMode
+```
 
 ## PARAMETERS
 

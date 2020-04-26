@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Get-DomainControllerObject
 
@@ -19,7 +13,7 @@ Get-DomainControllerObject [-DomainName] <String> [[-ComputerName] <String>] [[-
 
 ## DESCRIPTION
 The Get-DomainControllerObject function is used to get the domain controller object if the node is a domain
-controller, otherwise it return $null.
+controller, otherwise it returns $null.
 
 ## EXAMPLES
 
@@ -31,7 +25,7 @@ Get-DomainControllerObject -DomainName contoso.com
 ## PARAMETERS
 
 ### -ComputerName
-The name of the node to return the domain controller object for.
+Specifies the name of the node to return the domain controller object for.
 
 ```yaml
 Type: System.String
@@ -46,7 +40,7 @@ Accept wildcard characters: False
 ```
 
 ### -Credential
-{{ Fill Credential Description }}
+Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
 ```yaml
 Type: System.Management.Automation.PSCredential
@@ -61,7 +55,7 @@ Accept wildcard characters: False
 ```
 
 ### -DomainName
-The name of the domain that should contain the domain controller.
+Specifies the name of the domain that should contain the domain controller.
 
 ```yaml
 Type: System.String

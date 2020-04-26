@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Add-ADCommonGroupMember
 
@@ -25,10 +19,8 @@ group.
 
 ### EXAMPLE 1
 ```
-Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' `
+Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' -Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc=com}
 ```
-
--Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc-com}
 
 ## PARAMETERS
 

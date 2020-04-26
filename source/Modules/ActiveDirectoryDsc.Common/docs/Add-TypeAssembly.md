@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Add-TypeAssembly
 
@@ -24,10 +18,8 @@ if the type is missing.
 
 ### EXAMPLE 1
 ```
-Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' `
+Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext'
 ```
-
--TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
 ## PARAMETERS
 

@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Test-Password
 
@@ -32,7 +26,7 @@ Test-Password -DomainName contoso.com -UserName 'user1' -Password $cred
 ## PARAMETERS
 
 ### -Credential
-Specifies the user account credentials to use to perform this task.
+Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
 ```yaml
 Type: System.Management.Automation.PSCredential

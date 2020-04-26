@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Get-ADCommonParameters
 
@@ -60,7 +54,7 @@ Accept wildcard characters: False
 ```
 
 ### -Credential
-{{ Fill Credential Description }}
+Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
 ```yaml
 Type: System.Management.Automation.PSCredential
@@ -75,7 +69,9 @@ Accept wildcard characters: False
 ```
 
 ### -Identity
-{{ Fill Identity Description }}
+Specifies the identity to use as the Identity or Name connection parameter.
+Aliases are 'UserName',
+'GroupName', 'ComputerName' and 'ServiceAccountName'.
 
 ```yaml
 Type: System.String
@@ -90,7 +86,8 @@ Accept wildcard characters: False
 ```
 
 ### -PreferCommonName
-{{ Fill PreferCommonName Description }}
+If specified along with a CommonName parameter, The CommonName will be used as the Identity or Name connection
+parameter instead of the Identity parameter.
 
 ```yaml
 Type: System.Management.Automation.SwitchParameter
@@ -120,7 +117,9 @@ Accept wildcard characters: False
 ```
 
 ### -Server
-{{ Fill Server Description }}
+Specifies the name of the domain controller to use when accessing the domain.
+If not specified, a domain
+controller is discovered using the standard Active Directory discovery process.
 
 ```yaml
 Type: System.String

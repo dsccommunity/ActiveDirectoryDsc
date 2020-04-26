@@ -1,10 +1,3 @@
----
-Module Name: ActiveDirectoryDsc.Common
-Module Guid: a4af6d71-e828-4ec3-8a05-6083b8d5d4c2
-Download Help Link: {{ Update Download Link }}
-Help Version: 1.0.0
-Locale: en-US
----
 
 # ActiveDirectoryDsc.Common Module
 ## Description
@@ -95,9 +88,6 @@ Tests Active Directory replication site availablity.
 ### [Test-DomainMember](docs/Test-DomainMember.md)
 Tests whether this computer is a member of a domain.
 
-### [Test-DscPropertyState](docs/Test-DscPropertyState.md)
-Compares the current and the desired value of a property.
-
 ### [Test-IsDomainController](docs/Test-IsDomainController.md)
 Tests if the computer is a domain controller.
 
@@ -106,7 +96,4 @@ Tests Members of an array.
 
 ### [Test-Password](docs/Test-Password.md)
 Tests the validity of a user's password.
-
-### [Test-PrincipalContextCredentials](docs/Test-PrincipalContextCredentials.md)
-Tests the validity of credentials using a PrincipalContext.
 

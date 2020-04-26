@@ -27,14 +27,55 @@ param
 
     [Parameter()]
     [System.String]
-    $StubModulePath = "$ModuleRootPath\tests\Unit\Stubs"
+    $StubModulePath = "$ModuleRootPath\tests\Unit\Stubs",
+
+    [Parameter()]
+    [System.String]
+    $Description = "The $CommonModuleName module is a PowerShell module that contains a set of functions that are " + `
+        "common across the $ModuleName Module"
 )
+
+Function Remove-MetaData
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [System.String[]]
+        $Content
+    )
+
+    $inMetadataBlock = $false
+    $newContent = @()
+    foreach ($line in $Content)
+    {
+        if ($line -eq '---')
+        {
+            if ($inMetadataBlock)
+            {
+                $inMetadataBlock = $false
+            }
+            else
+            {
+                $inMetadataBlock = $true
+            }
+        }
+        else
+        {
+            if (!$inMetadataBlock)
+            {
+                $newContent += $line
+            }
+        }
+    }
+
+    return $newContent
+}
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 1.0
 
 $descriptionMarker = '{{ Fill in the Description }}'
-$description = "The $CommonModuleName module is a PowerShell module that contains a set of functions that are common across the $ModuleName Module"
 
 Write-Verbose -Message "Building the resource module"
 & "$ModuleRootPath\build.ps1" -Tasks build -Verbose:$false
@@ -61,16 +102,31 @@ If (Test-Path -Path $Path)
 
 Write-Verbose -Message "Creating the new module markdown help files in $Path"
 New-MarkdownHelp -Module $CommonModuleName -OutputFolder $Path -UseFullTypeName -AlphabeticParamsOrder `
-    -WithModulePage -ModulePagePath $modulePagePath -HelpVersion $HelpVersion -Force
-Update-MarkdownHelpModule -path $Path -RefreshModulePage -ModulePagePath $modulePagePath -AlphabeticParamsOrder `
-     -UseFullTypeName | Out-Null
+    -WithModulePage -ModulePagePath $modulePagePath -HelpVersion $HelpVersion -Force -FwLink 'N/A'
+Update-MarkdownHelpModule -Path $Path -RefreshModulePage -ModulePagePath $modulePagePath -AlphabeticParamsOrder `
+    -UseFullTypeName | Out-Null
 
+Write-Verbose -Message "Getting contents of $ModulePagePath file"
 $modulePageContent = Get-Content -Path $ModulePagePath
 
-Write-Verbose 'Fixing README Markdown link paths'
-$modulePageContent = $modulePageContent.Replace('(','(docs/')
+Write-Verbose -Message 'Fixing README Markdown link paths'
+$modulePageContent = $modulePageContent.Replace('(', '(docs/')
 
-Write-Verbose 'Updating module description'
-$modulePageContent = $modulePageContent.Replace($descriptionMarker,$description)
+Write-Verbose -Message 'Updating README module description'
+$modulePageContent = $modulePageContent.Replace($descriptionMarker, $description)
 
-$modulePageContent | Out-File $ModulePagePath -Encoding ascii
+Write-Verbose -Message 'Removing README Metadata'
+$newModulePageContent = Remove-MetaData -Content $modulePageContent
+
+Write-Verbose -Message "Writing updated $ModulePagePath file"
+$newModulePageContent | Out-File -FilePath $ModulePagePath -Encoding ascii
+
+Write-Verbose -Message 'Removing Metadata from function markdown files'
+$functionMdFiles = Get-ChildItem -Path $Path -Filter '*.md'
+foreach ($functionMdFile in $functionMdFiles)
+{
+    $functionMdFileContent = Get-Content -Path $functionMdFile.FullName
+    $newFunctionMdFileContent = Remove-MetaData -Content $functionMdFileContent
+
+    $newFunctionMdFileContent | Out-File -FilePath $functionMdFile.FullName -Encoding ascii
+}

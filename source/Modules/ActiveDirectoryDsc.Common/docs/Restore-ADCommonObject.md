@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Restore-ADCommonObject
 
@@ -32,8 +26,7 @@ Restore-ADCommonObject -Identity User1 -ObjectClass User
 ## PARAMETERS
 
 ### -Credential
-The credential to use to restore the object in the Active
-Directory.
+Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
 ```yaml
 Type: System.Management.Automation.PSCredential
@@ -78,7 +71,9 @@ Accept wildcard characters: False
 ```
 
 ### -Server
-The name of the domain controller use to restore the object.
+Specifies the name of the domain controller to use when accessing the domain.
+If not specified, a domain
+controller is discovered using the standard Active Directory discovery process.
 
 ```yaml
 Type: System.String

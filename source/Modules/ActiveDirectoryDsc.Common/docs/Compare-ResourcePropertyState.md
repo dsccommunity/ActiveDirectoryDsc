@@ -1,9 +1,3 @@
----
-external help file: ActiveDirectoryDsc.Common-help.xml
-Module Name: ActiveDirectoryDsc.Common
-online version:
-schema: 2.0.0
----
 
 # Compare-ResourcePropertyState
 
@@ -71,7 +65,7 @@ Accept wildcard characters: False
 ```
 
 ### -IgnoreProperties
-{{ Fill IgnoreProperties Description }}
+Specifies an array of property names to ignore in the comparison.
 
 ```yaml
 Type: System.String[]
