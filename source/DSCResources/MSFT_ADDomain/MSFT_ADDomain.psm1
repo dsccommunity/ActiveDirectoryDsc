@@ -38,6 +38,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
             Get-ADForest                   | ActiveDirectory
             Assert-Module                  | DscResource.Common
             New-InvalidOperationException  | DscResource.Common
+            Resolve-DomainFQDN             | MSFT_ADDomain
             ConvertTo-DeploymentForestMode | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentDomainMode | ActiveDirectoryDsc.Common
 #>
@@ -240,6 +241,12 @@ function Get-TargetResource
 
     .PARAMETER DomainMode
         The Domain Functional Level for the entire domain.
+
+    .NOTES
+        Used Functions:
+            Name               | Module
+            -------------------|--------------------------
+            Resolve-DomainFQDN | MSFT_ADDomain
 #>
 function Test-TargetResource
 {
