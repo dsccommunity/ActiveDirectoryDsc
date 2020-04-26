@@ -554,6 +554,44 @@ try
                 }
             }
         }
+
+        Describe 'ADDomain\Resolve-DomainFQDN' {
+            BeforeAll {
+                $testDomainName = 'contoso.com'
+            }
+
+            Context 'When the "ParentDomainName" Parameter is not supplied' {
+                BeforeAll {
+                    $result = Resolve-DomainFQDN -DomainName $testDomainName
+                }
+
+                It 'Should return the correct result' {
+                    $result | Should -Be $testDomainName
+                }
+            }
+
+            Context 'When the "ParentDomainName" Parameter is $null' {
+                BeforeAll {
+                    $testParentDomainName = $null
+                    $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
+                }
+
+                It 'Should return the correct result' {
+                    $result | Should -Be $testDomainName
+                }
+            }
+
+            Context 'When the "ParentDomainName" Parameter is supplied' {
+                BeforeAll {
+                    $testParentDomainName = 'contoso.com'
+                    $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
+                }
+
+                It 'Should return the correct result' {
+                    $result | Should -Be "$testDomainName.$testParentDomainName"
+                }
+            }
+        }
     }
 }
 finally

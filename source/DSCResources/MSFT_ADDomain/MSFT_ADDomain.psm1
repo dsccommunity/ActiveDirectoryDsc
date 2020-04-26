@@ -66,7 +66,7 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
 
-    $domainFQDN = "$DomainName.$ParentDomainName"
+    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
 
     # If the domain has been installed then the Netlogon SysVol registry item will exist.
     $domainShouldBePresent = $true
@@ -316,7 +316,7 @@ function Test-TargetResource
 
     $targetResource = Get-TargetResource @getTargetResourceParameters
 
-    $domainFQDN = "$DomainName.$ParentDomainName"
+    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
 
     if ($targetResource.DomainExist)
     {
@@ -548,5 +548,45 @@ function Set-TargetResource
         $global:DSCMachineStatus = 1
     }
 } #end function Set-TargetResource
+
+<#
+    .SYNOPSIS
+        Assemble a fully qualified domain name.
+
+    .DESCRIPTION
+        The Resolve-DomainFQN function is used to assemble a fully qualified domain name by appending the domain name
+        to the parent domain name if the parent domain name has been specified. Otherwise the domain name is returned.
+
+    .PARAMETER DomainName
+        The domain name.
+
+    .PARAMETER ParentDomainName
+        The parent domain name.
+#>
+function Resolve-DomainFQDN
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+
+        [Parameter()]
+        [System.String]
+        $ParentDomainName
+    )
+
+    if ($ParentDomainName)
+    {
+        $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName
+    }
+    else {
+        $domainFQDN = $DomainName
+    }
+
+    return $domainFQDN
+}
 
 Export-ModuleMember -Function *-TargetResource
