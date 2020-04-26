@@ -38,7 +38,6 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
             Get-ADForest                   | ActiveDirectory
             Assert-Module                  | DscResource.Common
             New-InvalidOperationException  | DscResource.Common
-            Resolve-DomainFQDN             | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentForestMode | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentDomainMode | ActiveDirectoryDsc.Common
 #>
@@ -67,7 +66,7 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
 
-    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
+    $domainFQDN = "$DomainName.$ParentDomainName"
 
     # If the domain has been installed then the Netlogon SysVol registry item will exist.
     $domainShouldBePresent = $true
@@ -241,12 +240,6 @@ function Get-TargetResource
 
     .PARAMETER DomainMode
         The Domain Functional Level for the entire domain.
-
-    .NOTES
-        Used Functions:
-            Name               | Module
-            -------------------|--------------------------
-            Resolve-DomainFQDN | ActiveDirectoryDsc.Common
 #>
 function Test-TargetResource
 {
@@ -323,7 +316,7 @@ function Test-TargetResource
 
     $targetResource = Get-TargetResource @getTargetResourceParameters
 
-    $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
+    $domainFQDN = "$DomainName.$ParentDomainName"
 
     if ($targetResource.DomainExist)
     {

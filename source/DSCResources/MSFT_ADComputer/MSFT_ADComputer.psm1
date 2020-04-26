@@ -886,7 +886,7 @@ function Set-TargetResource
                 $setADComputerParameters['Remove'] = $removeComputerProperties
             }
 
-            Set-DscADComputer -Parameters $setADComputerParameters
+            Set-ADComputer @setADComputerParameters
 
             Write-Verbose -Message (
                 $script:localizedData.UpdatedComputerAccount -f $ComputerName
