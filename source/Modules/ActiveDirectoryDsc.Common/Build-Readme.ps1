@@ -75,11 +75,8 @@ Function Remove-MetaData
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 1.0
 
-$descriptionMarker = '{{ Fill in the Description }}'
-
 Write-Verbose -Message "Building the resource module"
 & "$ModuleRootPath\build.ps1" -Tasks build -Verbose:$false
-
 
 Write-Verbose -Message "Importing the test Stub Modules"
 $stubModules = Get-ChildItem -Path $StubModulePath -Filter '*.psm1'
@@ -113,6 +110,7 @@ Write-Verbose -Message 'Fixing README Markdown link paths'
 $modulePageContent = $modulePageContent.Replace('(', '(docs/')
 
 Write-Verbose -Message 'Updating README module description'
+$descriptionMarker = '{{ Fill in the Description }}'
 $modulePageContent = $modulePageContent.Replace($descriptionMarker, $description)
 
 Write-Verbose -Message 'Removing README Metadata'
