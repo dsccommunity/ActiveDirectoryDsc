@@ -1,3 +1,44 @@
+<#
+    .SYNOPSIS
+        Builds the markdown documentation for the common module.
+
+    .DESCRIPTION
+        The Build-ReadMe script is used to build the markdown documentation for the common module. this uses functions
+        from the PlatyPS PowerShell Module to build the markdown from the PowerShell comment based help in the module.
+
+    .EXAMPLE
+        Build-ReadMe
+
+    .PARAMETER Path
+        Specifies the output path for the function markdown files.
+
+    .PARAMETER ModulePagePath
+        Specifies the output path for the main module markdown file.
+
+    .PARAMETER HelpVersion
+        Specifies the version of the help files.
+
+    .PARAMETER ModuleName
+        Specifies the name of the main module.
+
+    .PARAMETER CommonModuleName
+        Specifies the name of the common module.
+
+    .PARAMETER ModuleRootPath
+        Specifies the path of the root of the main module.
+
+    .PARAMETER StubModulePath
+        Specifies the path of the stub modules.
+
+    .PARAMETER Description
+        Specifies the description for the common module.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.IO.FileInfo[]
+#>
 [CmdletBinding()]
 param
 (

@@ -11,8 +11,9 @@ Test-IsDomainController [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The Test-IsDomainController function tests if the computer is a domain controller. A boolean is returned that represents
-whether the computer is a domain controller.
+The Test-IsDomainController function tests if the computer is a domain controller.
+A boolean is returned that
+represents whether the computer is a domain controller.
 
 ## EXAMPLES
 
