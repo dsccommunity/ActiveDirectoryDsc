@@ -2105,7 +2105,7 @@ function Get-ByteContent
         this parameter.
 
     .NOTES
-        This is a wrapper to enable unit testing of this resource.
+        This is a wrapper to allow test mocking of the calling function.
         see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
         for more information.
 #>
@@ -2134,7 +2134,7 @@ function Get-ActiveDirectoryDomain
         this parameter.
 
     .NOTES
-        This is a wrapper to enable unit testing of this resource.
+        This is a wrapper to allow test mocking of the calling function.
         see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
         for more information.
 #>
