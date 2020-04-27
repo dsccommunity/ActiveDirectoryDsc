@@ -360,6 +360,11 @@ try
                                     -ParameterFilter { `
                                         $Name -eq $setTargetResourceParametersChangedProperty.Name } `
                                     -Exactly -Times 1
+                                Assert-MockCalled -CommandName Set-ADReplicationSiteLink `
+                                    -ParameterFilter { $PSBoundParameters.Keys.Count -eq 2 } `
+                                    -Exactly -Times 1
+                                Assert-MockCalled -CommandName New-ADReplicationSiteLink  `
+                                    -Exactly -Times 0
                             }
                         }
                     }
