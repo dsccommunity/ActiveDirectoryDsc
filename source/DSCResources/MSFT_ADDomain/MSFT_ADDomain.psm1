@@ -589,7 +589,8 @@ function Resolve-DomainFQDN
     {
         $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName
     }
-    else {
+    else
+    {
         $domainFQDN = $DomainName
     }
 
