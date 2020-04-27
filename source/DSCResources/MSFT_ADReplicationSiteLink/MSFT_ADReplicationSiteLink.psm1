@@ -457,7 +457,7 @@ function Test-TargetResource
         if ($Ensure -eq 'Present')
         {
             # Resource Should be Present
-            foreach ($parameter in $PSBoundParameters.Keys)
+            foreach ($parameter in $parameters.Keys)
             {
                 if ($parameter -eq 'SitesIncluded')
                 {
@@ -483,10 +483,10 @@ function Test-TargetResource
                         }
                     }
                 }
-                elseif ($PSBoundParameters[$parameter] -ne $targetResource[$parameter])
+                elseif ($parameters[$parameter] -ne $targetResource[$parameter])
                 {
                     Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f
-                        $parameter, $($targetResource[$parameter]), $($PSBoundParameters[$parameter]))
+                        $parameter, $targetResource[$parameter], $parameters[$parameter])
                     $inDesiredState = $false
                 }
             }
