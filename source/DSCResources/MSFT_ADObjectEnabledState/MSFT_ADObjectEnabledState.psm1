@@ -286,7 +286,7 @@ function Set-TargetResource
                 $setADComputerParameters = $commonParameters.Clone()
                 $setADComputerParameters['Enabled'] = $Enabled
 
-                Set-DscADComputer -Parameters $setADComputerParameters
+                Set-ADComputer @setADComputerParameters
 
                 if ($Enabled)
                 {

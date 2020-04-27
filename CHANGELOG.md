@@ -14,6 +14,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Fixed the pipeline paths trigger.
   - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline.
   - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact.
+  - Removed redundant common functions `Resolve-DomainFQDN` and `Set-DscADComputer`.
 
 - ADDomainTrust
   - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions

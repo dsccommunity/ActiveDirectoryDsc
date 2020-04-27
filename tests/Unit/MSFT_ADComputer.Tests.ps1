@@ -612,7 +612,7 @@ try
             Context 'When the system is in the desired state' {
                 BeforeAll {
                     Mock -CommandName Remove-ADComputer
-                    Mock -CommandName Set-DscADComputer
+                    Mock -CommandName Set-ADComputer
                     Mock -CommandName New-ADComputer
                     Mock -CommandName Move-ADObject
                 }
@@ -631,7 +631,7 @@ try
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                     }
@@ -655,7 +655,7 @@ try
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                     }
@@ -675,7 +675,7 @@ try
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                     }
@@ -685,7 +685,7 @@ try
             Context 'When the system is not in the desired state' {
                 BeforeAll {
                     Mock -CommandName Remove-ADComputer
-                    Mock -CommandName Set-DscADComputer
+                    Mock -CommandName Set-ADComputer
                     Mock -CommandName Move-ADObject
                     Mock -CommandName New-ADComputer -MockWith {
                         $script:mockNewADComputerWasCalled = $true
@@ -727,7 +727,7 @@ try
                             { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                             Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
                             Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                         }
@@ -746,7 +746,7 @@ try
                             { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                             Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
                             Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                         }
@@ -767,7 +767,7 @@ try
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                     }
@@ -787,7 +787,7 @@ try
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
                             $PSBoundParameters.ContainsKey('Enabled') -and $Enabled -eq $true
                         } -Exactly -Times 1 -Scope It
@@ -809,7 +809,7 @@ try
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -ParameterFilter {
                             $PSBoundParameters.ContainsKey('Enabled') -and $Enabled -eq $false
                         } -Exactly -Times 1 -Scope It
@@ -866,7 +866,7 @@ try
 
                         Assert-MockCalled -CommandName Start-ProcessWithTimeout -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                     }
@@ -897,7 +897,7 @@ try
                         { Set-TargetResource @setTargetResourceParameters } | Should -Throw ($script:localizedData.FailedToCreateOfflineDomainJoinRequest -f $mockComputerNamePresent, $mockExitCode)
 
                         Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                         Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
                     }
@@ -969,8 +969,8 @@ try
                             Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
-                            Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
-                                $Parameters.Replace.ContainsKey($PropertyName) -eq $true
+                            Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
+                                $Replace.ContainsKey($PropertyName) -eq $true
                             } -Exactly -Times 1 -Scope It
                         }
                     }
@@ -1035,8 +1035,8 @@ try
                             Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 0 -Scope It
-                            Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
-                                $Parameters.Remove.ContainsKey($PropertyName) -eq $true
+                            Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
+                                $Remove.ContainsKey($PropertyName) -eq $true
                             } -Exactly -Times 1 -Scope It
                         }
                     }
@@ -1054,7 +1054,7 @@ try
 
                             Assert-MockCalled -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 0 -Scope It
-                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                             Assert-MockCalled -CommandName Move-ADObject -Exactly -Times 1 -Scope It
                         }
                     }
@@ -1103,7 +1103,7 @@ try
 
                             Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
                             Assert-MockCalled -CommandName New-ADComputer -Times 0 -Exactly -Scope It
-                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         }
                     }
 
@@ -1117,7 +1117,7 @@ try
 
                             Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 1 -Scope It
                             Assert-MockCalled -CommandName New-ADComputer -Exactly -Times 1 -Scope It
-                            Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                            Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                         }
                     }
 
@@ -1135,7 +1135,7 @@ try
 
                             Assert-MockCalled -CommandName Restore-ADCommonObject -Scope It -Exactly -Times 1
                             Assert-MockCalled -CommandName New-ADComputer -Scope It -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-DscADComputer -Scope It -Exactly -Times 0
+                            Assert-MockCalled -CommandName Set-ADComputer -Scope It -Exactly -Times 0
                         }
                     }
                 }

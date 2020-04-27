@@ -91,43 +91,6 @@ function Get-DomainName
 
 <#
     .SYNOPSIS
-        Assemble a fully qualifies domain name by appending the domain name
-        to the parent domain name.
-
-    .PARAMETER DomainName
-        The domain name to append to the ParentDomainName.
-
-    .PARAMETER ParentDomainName
-        The parent domain name.
-#>
-function Resolve-DomainFQDN
-{
-    [CmdletBinding()]
-    [OutputType([System.String])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $DomainName,
-
-        [Parameter()]
-        [AllowNull()]
-        [System.String]
-        $ParentDomainName
-    )
-
-    $domainFQDN = $DomainName
-
-    if ($ParentDomainName)
-    {
-        $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName
-    }
-
-    return $domainFQDN
-}
-
-<#
-    .SYNOPSIS
         Get an Active Directory object's parent distinguished name.
 
     .PARAMETER DN
@@ -1489,31 +1452,6 @@ function Assert-ADPSDrive
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
     }
-}
-
-<#
-    .SYNOPSIS
-        This is a wrapper for Set-ADComputer.
-
-    .PARAMETER Parameters
-        A hash table containing all parameters that will be passed trough to
-        Set-ADComputer.
-
-    .NOTES
-        This is needed because of how Pester is unable to handle mocking the
-        cmdlet Set-ADComputer. Therefor there are no unit test for this function.
-#>
-function Set-DscADComputer
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Collections.Hashtable]
-        $Parameters
-    )
-
-    Set-ADComputer @Parameters | Out-Null
 }
 
 <#

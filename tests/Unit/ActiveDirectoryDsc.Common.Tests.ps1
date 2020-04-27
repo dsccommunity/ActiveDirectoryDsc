@@ -59,26 +59,6 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
     }
 
-    Describe 'ActiveDirectoryDsc.Common\Resolve-DomainFQDN' {
-        It 'Returns "DomainName" when "ParentDomainName" not supplied' {
-            $testDomainName = 'contoso.com'
-            $testParentDomainName = $null
-
-            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
-
-            $result | Should -Be $testDomainName
-        }
-
-        It 'Returns compound "DomainName.ParentDomainName" when "ParentDomainName" supplied' {
-            $testDomainName = 'subdomain'
-            $testParentDomainName = 'contoso.com'
-
-            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
-
-            $result | Should -Be ('{0}.{1}' -f $testDomainName, $testParentDomainName)
-        }
-    }
-
     Describe 'ActiveDirectoryDsc.Common\Test-DomainMember' {
         It 'Returns "True" when domain member' {
             Mock -CommandName Get-CimInstance -MockWith {
