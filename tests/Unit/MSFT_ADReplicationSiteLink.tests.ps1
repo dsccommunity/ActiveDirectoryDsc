@@ -340,29 +340,35 @@ try
                     {
                         Context "When $property has changed" {
                             BeforeAll {
-                                $setTargetResourceParametersChangedProperty = $setTargetResourcePresentParameters.Clone()
+                                $setTargetResourceParametersChangedProperty = `
+                                    $setTargetResourcePresentParameters.Clone()
                                 $setTargetResourceParametersChangedProperty.$property = $mockChangedResource.$property
 
                                 if ($property -eq 'Cost')
                                 {
-                                    $setParameterFilter = { $Cost -eq $setTargetResourceParametersChangedProperty.Cost }
+                                    $setParameterFilter = `
+                                    { $Cost -eq $setTargetResourceParametersChangedProperty.Cost }
                                 }
                                 elseif ($property -eq 'Description')
                                 {
-                                    $setParameterFilter = { $Description -eq $setTargetResourceParametersChangedProperty.Description }
+                                    $setParameterFilter = { $Description -eq
+                                        $setTargetResourceParametersChangedProperty.Description }
                                 }
                                 elseif ($property -eq 'ReplicationFrequencyInMinutes')
                                 {
-                                    $setParameterFilter = { $ReplicationFrequencyInMinutes -eq $setTargetResourceParametersChangedProperty.ReplicationFrequencyInMinutes }
+                                    $setParameterFilter = { $ReplicationFrequencyInMinutes -eq
+                                        $setTargetResourceParametersChangedProperty.ReplicationFrequencyInMinutes }
                                 }
                                 elseif ($property -eq 'SitesIncluded')
                                 {
-                                    $setParameterFilter = { $SitesIncluded.Add -eq $setTargetResourceParametersChangedProperty.SitesIncluded }
+                                    $setParameterFilter = { $SitesIncluded.Add -eq
+                                        $setTargetResourceParametersChangedProperty.SitesIncluded }
                                 }
                                 elseif ($property -eq 'SitesExcluded')
                                 {
                                     $setTargetResourceParametersChangedProperty['SitesIncluded'] = ''
-                                    $setParameterFilter = { $SitesIncluded.Remove -eq $setTargetResourceParametersChangedProperty.SitesExcluded }
+                                    $setParameterFilter = { $SitesIncluded.Remove -eq
+                                        $setTargetResourceParametersChangedProperty.SitesExcluded }
                                 }
                                 elseif ($property -eq 'OptionChangeNotification')
                                 {
