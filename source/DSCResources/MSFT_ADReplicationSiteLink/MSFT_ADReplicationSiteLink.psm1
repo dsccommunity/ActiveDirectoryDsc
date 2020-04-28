@@ -289,52 +289,58 @@ function Set-TargetResource
                 $setADReplicationSiteLinkParameters['ReplicationFrequencyInMinutes'] = $ReplicationFrequencyInMinutes
             }
 
-            if ($PSBoundParameters.ContainsKey('OptionChangeNotification') -and `
-                    $OptionChangeNotification -ne $currentADSiteLink.OptionChangeNotification)
+            if ($OptionChangeNotification -ne $currentADSiteLink.OptionChangeNotification)
             {
                 Write-Verbose -Message ($script:localizedData.SettingProperty -f
                     'OptionChangeNotification', $OptionChangeNotification, $Name)
-                $changeNotification = $OptionChangeNotification
+                $desiredChangeNotification = $OptionChangeNotification
             }
             else
             {
-                $changeNotification = $currentADSiteLink.OptionChangeNotification
+                $desiredChangeNotification = $currentADSiteLink.OptionChangeNotification
             }
 
-            if ($PSBoundParameters.ContainsKey('OptionTwoWaySync') -and `
-                    $OptionTwoWaySync -ne $currentADSiteLink.OptionTwoWaySync)
+            if ($OptionTwoWaySync -ne $currentADSiteLink.OptionTwoWaySync)
             {
                 Write-Verbose -Message ($script:localizedData.SettingProperty -f
                     'TwoWaySync', $OptionTwoWaySync, $Name)
-                $twoWaySync = $OptionTwoWaySync
+                $desiredTwoWaySync = $OptionTwoWaySync
             }
             else
             {
-                $twoWaySync = $currentADSiteLink.OptionTwoWaySync
+                $desiredTwoWaySync = $currentADSiteLink.OptionTwoWaySync
             }
 
-            if ($PSBoundParameters.ContainsKey('OptionDisableCompression') -and `
-                    $OptionDisableCompression -ne $currentADSiteLink.OptionDisableCompression)
+            if ($OptionDisableCompression -ne $currentADSiteLink.OptionDisableCompression)
             {
                 Write-Verbose -Message ($script:localizedData.SettingProperty -f
                     'OptionDisableCompression', $OptionDisableCompression, $Name)
-                $disableCompression = $OptionDisableCompression
+                $desiredDisableCompression = $OptionDisableCompression
             }
             else
             {
-                $disableCompression = $currentADSiteLink.OptionDisableCompression
+                $desiredDisableCompression = $currentADSiteLink.OptionDisableCompression
             }
 
-            $optionsValue = ConvertTo-EnabledOptions -OptionChangeNotification $changeNotification `
-                -OptionTwoWaySync $twoWaySync -OptionDisableCompression $disableCompression
+            $currentOptionsValue = ConvertTo-EnabledOptions `
+                -OptionChangeNotification $currentADSiteLink.OptionChangeNotification `
+                -OptionTwoWaySync $currentADSiteLink.OptionTwoWaySync `
+                -OptionDisableCompression $currentADSiteLink.OptionDisableCompression
+            $desiredOptionsValue = ConvertTo-EnabledOptions `
+                -OptionChangeNotification $desiredChangeNotification `
+                -OptionTwoWaySync $desiredTwoWaySync `
+                -OptionDisableCompression $desiredDisableCompression
 
-            if ($optionsValue -gt 0)
+            if ($currentOptionsValue -ne $desiredOptionsValue)
             {
-                $setADReplicationSiteLinkParameters.Add('Clear', 'Options')
-            }
-            else
-            {
-                $replaceParameters.Add('Options', $optionsValue)
+                if ($desiredoptionsValue -eq 0)
+                {
+                    $setADReplicationSiteLinkParameters.Add('Clear', 'Options')
+                }
+                else
+                {
+                    $replaceParameters.Add('Options', $desiredOptionsValue)
+                }
             }
 
             if ($replaceParameters.Count -gt 0)
