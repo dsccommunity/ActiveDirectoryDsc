@@ -77,7 +77,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### None
 ## OUTPUTS
 
-### If the domain controller is not found, an empty object ($null) is returned.
 ### Microsoft.ActiveDirectory.Management.ADDomainController
 ## NOTES
 Throws an exception of Microsoft.ActiveDirectory.Management.ADServerDownException if the domain cannot be

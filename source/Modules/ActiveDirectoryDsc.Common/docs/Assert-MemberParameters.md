@@ -26,7 +26,7 @@ Assert-MemberParameters -Members fred, bill
 ## PARAMETERS
 
 ### -Members
-The Members to validate.
+Specifies the Members to validate.
 
 ```yaml
 Type: System.String[]
@@ -41,7 +41,7 @@ Accept wildcard characters: False
 ```
 
 ### -MembersToExclude
-The MembersToExclude to validate.
+Specifies the MembersToExclude to validate.
 
 ```yaml
 Type: System.String[]
@@ -56,7 +56,7 @@ Accept wildcard characters: False
 ```
 
 ### -MembersToInclude
-The MembersToInclude to validate.
+Specifies the MembersToInclude to validate.
 
 ```yaml
 Type: System.String[]

@@ -2,7 +2,7 @@
 # Get-ADObjectParentDN
 
 ## SYNOPSIS
-Gets an Active Directory object parent's distinguished name.
+Get an Active Directory object's parent distinguished name.
 
 ## SYNTAX
 
@@ -25,7 +25,7 @@ Returns CN=Users,DC=contoso,DC=com
 ## PARAMETERS
 
 ### -DN
-The distinguished name of the object to return the parent from.
+Specifies the distinguished name of the object to return the parent from.
 
 ```yaml
 Type: System.String

@@ -24,7 +24,7 @@ Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -Typ
 ## PARAMETERS
 
 ### -AssemblyName
-The assembly to load into the PowerShell session.
+Specifies the assembly to load into the PowerShell session.
 
 ```yaml
 Type: System.String
@@ -39,7 +39,7 @@ Accept wildcard characters: False
 ```
 
 ### -TypeName
-An optional parameter to check if the type exist, if it exist then the assembly is not loaded again.
+Specifies an optional parameter to check if the type exist, if it exist then the assembly is not loaded again.
 
 ```yaml
 Type: System.String

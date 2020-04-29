@@ -40,9 +40,9 @@ Accept wildcard characters: False
 ```
 
 ### -DirectoryContextType
-The context type of the object to return.
-Valid values are 'Domain', 'Forest', 'ApplicationPartition',
-'ConfigurationSet' or 'DirectoryServer'.
+Specifies the context type of the object to return.
+Valid values are 'Domain', 'Forest',
+'ApplicationPartition', 'ConfigurationSet' or 'DirectoryServer'.
 
 ```yaml
 Type: System.String

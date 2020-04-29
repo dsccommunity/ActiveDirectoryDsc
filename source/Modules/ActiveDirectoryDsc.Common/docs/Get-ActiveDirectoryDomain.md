@@ -24,9 +24,9 @@ Get-ActiveDirectoryDomain -DirectoryContext $context
 ## PARAMETERS
 
 ### -DirectoryContext
-The Active Directory context from which the domain object is returned.
-Calling the Get-ADDirectoryContext gets
-a value that can be provided in this parameter.
+Specifies the Active Directory context from which the domain object is returned.
+Calling the
+Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
 ```yaml
 Type: System.DirectoryServices.ActiveDirectory.DirectoryContext

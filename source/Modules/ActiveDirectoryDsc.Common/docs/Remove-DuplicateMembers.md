@@ -26,7 +26,7 @@ Remove-DuplicateMembers -Members fred, bill, bill
 ## PARAMETERS
 
 ### -Members
-The array of members to remove duplicates from.
+Specifies the array of members to remove duplicates from.
 
 ```yaml
 Type: System.String[]

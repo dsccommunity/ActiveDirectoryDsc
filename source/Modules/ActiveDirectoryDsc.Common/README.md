@@ -53,7 +53,7 @@ Gets an Active Directory DirectoryContext object.
 Converts an Active Directory distinguished name into a fully qualified domain name.
 
 ### [Get-ADObjectParentDN](docs/Get-ADObjectParentDN.md)
-Gets an Active Directory object parent's distinguished name.
+Get an Active Directory object's parent distinguished name.
 
 ### [Get-ByteContent](docs/Get-ByteContent.md)
 Gets the contents of a file as a byte array.
@@ -72,9 +72,6 @@ Creates a new MSFT_Credential CIM instance credential object.
 
 ### [Remove-DuplicateMembers](docs/Remove-DuplicateMembers.md)
 Removes duplicate members from a string array.
-
-### [Resolve-DomainFQDN](docs/Resolve-DomainFQDN.md)
-Resolves a fully qualified domain name.
 
 ### [Restore-ADCommonObject](docs/Restore-ADCommonObject.md)
 Restores an AD object from the AD recyle bin.

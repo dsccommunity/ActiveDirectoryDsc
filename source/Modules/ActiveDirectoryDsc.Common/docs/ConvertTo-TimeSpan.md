@@ -24,7 +24,7 @@ ConvertTo-TimeSpan -TimeSpan 60 -TimeSpanType Minutes
 ## PARAMETERS
 
 ### -TimeSpan
-The length of time to use for the time span.
+Specifies the length of time to use for the time span.
 
 ```yaml
 Type: System.UInt32
@@ -39,7 +39,7 @@ Accept wildcard characters: False
 ```
 
 ### -TimeSpanType
-The units of measure in the TimeSpan parameter.
+Specifies the units of measure in the TimeSpan parameter.
 
 ```yaml
 Type: System.String

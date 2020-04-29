@@ -25,7 +25,7 @@ Convert-PropertyMapToObjectProperties -PropertyMap $computerObjectPropertyMap
 ## PARAMETERS
 
 ### -PropertyMap
-The property map, as an array of hashtables, to convert to a properties array.
+Specifies the property map, as an array of hashtables, to convert to a properties array.
 
 ```yaml
 Type: System.Array

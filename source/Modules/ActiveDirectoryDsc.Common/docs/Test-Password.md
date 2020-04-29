@@ -41,7 +41,7 @@ Accept wildcard characters: False
 ```
 
 ### -DomainName
-Name of the domain where the user account is located (only used if password is managed).
+Specifies the name of the domain where the user account is located (only used if password is managed).
 
 ```yaml
 Type: System.String

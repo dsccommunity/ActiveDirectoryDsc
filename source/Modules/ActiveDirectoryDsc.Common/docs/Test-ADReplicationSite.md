@@ -41,7 +41,7 @@ Accept wildcard characters: False
 ```
 
 ### -DomainName
-The domain name containing the replication site.
+Specifies the domain name containing the replication site.
 
 ```yaml
 Type: System.String
@@ -56,7 +56,7 @@ Accept wildcard characters: False
 ```
 
 ### -SiteName
-The replication site name to test the availability of.
+Specifies the replication site name to test the availability of.
 
 ```yaml
 Type: System.String

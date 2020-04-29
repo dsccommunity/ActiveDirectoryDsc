@@ -26,7 +26,7 @@ New-CimCredentialInstance -Credential $Cred
 ## PARAMETERS
 
 ### -Credential
-The PSCredential object to return as a MSFT_Credential CIM instance credential object.
+Specifies the PSCredential object to return as a MSFT_Credential CIM instance credential object.
 
 ```yaml
 Type: System.Management.Automation.PSCredential
@@ -54,15 +54,15 @@ When returning a PSCredential object from Get-TargetResource, the credential obj
 username.
 The object is empty.
 
-Password UserName PSComputerName
--------- -------- --------------
-                  localhost
+| Password | UserName | PSComputerName |
+| -------- | -------- | -------------- |
+|          |          | localhost      |
 
 When the MSFT_Credential CIM instance credential object is returned by the Get-TargetResource then the
 credential object contains the values provided in the object.
 
-Password UserName             PSComputerName
--------- --------             --------------
-         COMPANY\TestAccount  localhost
+| Password | UserName           | PSComputerName |
+| -------- | ------------------ | -------------- |
+|          |COMPANY\TestAccount | localhost      |
 
 ## RELATED LINKS

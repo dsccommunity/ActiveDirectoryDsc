@@ -24,7 +24,7 @@ Get-ADDomainNameFromDistinguishedName -DistinguishedName 'CN=ExampleObject,OU=Ex
 ## PARAMETERS
 
 ### -DistinguishedName
-The distinguished name to convert into the FQDN.
+Specifies the distinguished name to convert into the FQDN.
 
 ```yaml
 Type: System.String
@@ -50,6 +50,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 Author: Robert D.
 Biddle (https://github.com/RobBiddle)
-Created: December.20.2017
 
 ## RELATED LINKS

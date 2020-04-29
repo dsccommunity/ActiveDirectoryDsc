@@ -31,7 +31,7 @@ ConvertTo-DeploymentForestMode -Mode $adForestMode
 ## PARAMETERS
 
 ### -Mode
-The Microsoft.ActiveDirectory.Management.ADForestMode value to convert to a
+Specifies the Microsoft.ActiveDirectory.Management.ADForestMode value to convert to a
 Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
 
 ```yaml
@@ -47,7 +47,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModeId
-The ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
+Specifies the ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
 
 ```yaml
 Type: System.UInt16

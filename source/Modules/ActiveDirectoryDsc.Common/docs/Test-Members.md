@@ -27,7 +27,7 @@ Test-Members -ExistingMembers fred, bill -Members fred, bill
 ## PARAMETERS
 
 ### -ExistingMembers
-Existing array members.
+Specifies existing array members.
 
 ```yaml
 Type: System.String[]
@@ -42,7 +42,7 @@ Accept wildcard characters: False
 ```
 
 ### -Members
-Explicit array members.
+Specifies explicit array members.
 
 ```yaml
 Type: System.String[]
@@ -57,7 +57,7 @@ Accept wildcard characters: False
 ```
 
 ### -MembersToExclude
-Excluded array members.
+Specifies excluded array members.
 
 ```yaml
 Type: System.String[]
@@ -72,7 +72,7 @@ Accept wildcard characters: False
 ```
 
 ### -MembersToInclude
-Compulsory array members.
+Specifies compulsory array members.
 
 ```yaml
 Type: System.String[]

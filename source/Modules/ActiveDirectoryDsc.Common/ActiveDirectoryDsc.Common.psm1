@@ -12,19 +12,19 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
     .DESCRIPTION
         The Start-ProcessWithTimeout function is used to start a process with a timeout. An Int32 object is returned
-        representing the exit code of the started process
+        representing the exit code of the started process.
 
     .EXAMPLE
         Start-ProcessWithTimeout -FilePath notepad.exe -ArgumentList test.txt -Timeout 60
 
     .PARAMETER FilePath
-        String containing the path to the executable to start.
+        Specifies the path to the executable to start.
 
     .PARAMETER ArgumentList
-        The arguments that should be passed to the executable.
+        Specifies he arguments that should be passed to the executable.
 
     .PARAMETER Timeout
-        The timeout in seconds to wait for the process to finish.
+        Specifies the timeout in seconds to wait for the process to finish.
 
     .INPUTS
         None
@@ -129,8 +129,16 @@ function Get-DomainName
     .SYNOPSIS
         Get an Active Directory object's parent distinguished name.
 
+    .DESCRIPTION
+        The Get-ADObjectParentDN function is used to get an Active Directory object parent's distinguished name.
+
+    .EXAMPLE
+        Get-ADObjectParentDN -DN CN=User1,CN=Users,DC=contoso,DC=com
+
+        Returns CN=Users,DC=contoso,DC=com
+
     .PARAMETER DN
-        The distinguished name of the object to return the parent from.
+        Specifies the distinguished name of the object to return the parent from.
 
     .INPUTS
         None
@@ -166,13 +174,13 @@ function Get-ADObjectParentDN
         Assert-MemberParameters -Members fred, bill
 
     .PARAMETER Members
-        The Members to validate.
+        Specifies the Members to validate.
 
     .PARAMETER MembersToInclude
-        The MembersToInclude to validate.
+        Specifies the MembersToInclude to validate.
 
     .PARAMETER MembersToExclude
-        The MembersToExclude to validate.
+        Specifies the MembersToExclude to validate.
 
     .INPUTS
         None
@@ -253,7 +261,7 @@ function Assert-MemberParameters
         Remove-DuplicateMembers -Members fred, bill, bill
 
     .PARAMETER Members
-        The array of members to remove duplicates from.
+        Specifies the array of members to remove duplicates from.
 
     .INPUTS
         None
@@ -301,16 +309,16 @@ function Remove-DuplicateMembers
         Test-Members -ExistingMembers fred, bill -Members fred, bill
 
     .PARAMETER ExistingMembers
-        Existing array members.
+        Specifies existing array members.
 
     .PARAMETER Members
-        Explicit array members.
+        Specifies explicit array members.
 
     .PARAMETER MembersToInclude
-       Compulsory array members.
+      Specifies compulsory array members.
 
     .PARAMETER MembersToExclude
-       Excluded array members.
+       Specifies excluded array members.
 
     .INPUTS
         None
@@ -454,10 +462,10 @@ function Test-Members
         ConvertTo-TimeSpan -TimeSpan 60 -TimeSpanType Minutes
 
     .PARAMETER TimeSpan
-        The length of time to use for the time span.
+        Specifies the length of time to use for the time span.
 
     .PARAMETER TimeSpanType
-        The units of measure in the TimeSpan parameter.
+        Specifies the units of measure in the TimeSpan parameter.
 
     .INPUTS
         None
@@ -597,8 +605,8 @@ function ConvertFrom-TimeSpan
         controller is discovered using the standard Active Directory discovery process.
 
     .PARAMETER UseNameParameter
-        Returns the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and Remove-ADUser cmdlets
-        take an Identity parameter, but the New-ADUser cmdlet uses the Name parameter.
+        Specifies to return the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and Remove-ADUser
+        cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the Name parameter.
 
     .PARAMETER PreferCommonName
         If specified along with a CommonName parameter, The CommonName will be used as the Identity or Name connection
@@ -718,10 +726,10 @@ function Get-ADCommonParameters
         Test-ADReplicationSite -SiteName Default -DomainName contoso.com
 
     .PARAMETER SiteName
-        The replication site name to test the availability of.
+        Specifies the replication site name to test the availability of.
 
     .PARAMETER DomainName
-        The domain name containing the replication site.
+        Specifies the domain name containing the replication site.
 
     .PARAMETER Credential
         Specifies the credentials to use when accessing the domain, or use the current user if not specified.
@@ -780,10 +788,10 @@ function Test-ADReplicationSite
         ConvertTo-DeploymentForestMode -Mode $adForestMode
 
     .PARAMETER ModeId
-        The ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
+        Specifies the ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
 
     .PARAMETER Mode
-        The Microsoft.ActiveDirectory.Management.ADForestMode value to convert to a
+        Specifies the Microsoft.ActiveDirectory.Management.ADForestMode value to convert to a
         Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
 
     .INPUTS
@@ -845,10 +853,10 @@ function ConvertTo-DeploymentForestMode
         ConvertTo-DeploymentDomainMode -Mode $adDomainMode
 
     .PARAMETER ModeId
-        The ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
+        Specifies the ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
 
     .PARAMETER Mode
-        The Microsoft.ActiveDirectory.Management.ADDomainMode value to convert to a
+        Specifies the Microsoft.ActiveDirectory.Management.ADDomainMode value to convert to a
         Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
 
     .INPUTS
@@ -909,10 +917,10 @@ function ConvertTo-DeploymentDomainMode
         Restore-ADCommonObject -Identity User1 -ObjectClass User
 
     .PARAMETER Identity
-        The identity of the object to restore.
+        Specifies the identity of the object to restore.
 
     .PARAMETER ObjectClass
-        The type of the AD object to restore.
+        Specifies the type of the AD object to restore.
 
     .PARAMETER Credential
         Specifies the credentials to use when accessing the domain, or use the current user if not specified.
@@ -1021,7 +1029,7 @@ function Restore-ADCommonObject
         Get-ADDomainNameFromDistinguishedName -DistinguishedName 'CN=ExampleObject,OU=ExampleOU,DC=example,DC=com'
 
     .PARAMETER DistinguishedName
-        The distinguished name to convert into the FQDN.
+        Specifies the distinguished name to convert into the FQDN.
 
     .INPUTS
         None
@@ -1031,7 +1039,6 @@ function Restore-ADCommonObject
 
     .NOTES
         Author: Robert D. Biddle (https://github.com/RobBiddle)
-        Created: December.20.2017
 #>
 function Get-ADDomainNameFromDistinguishedName
 {
@@ -1076,14 +1083,15 @@ function Get-ADDomainNameFromDistinguishedName
         Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' -Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc=com}
 
     .PARAMETER Members
-        The members to add to the group. These may be in the same domain as the group or in alternate domains.
+        Specifies the members to add to the group. These may be in the same domain as the group or in alternate
+        domains.
 
     .PARAMETER Parameters
-        The parameters to pass to the Add-ADGroupMember cmdlet when adding the members to the group. This should
-        include the group identity.
+        Specifies the parameters to pass to the Add-ADGroupMember cmdlet when adding the members to the group. This
+        should include the group identity.
 
     .PARAMETER MembersInMultipleDomains
-        Setting this switch indicates that there are members from alternate domains. This triggers the identities of
+        Setting this switch specifies that there are members from alternate domains. This triggers the identities of
         the members to be looked up in the alternate domain.
 
     .INPUTS
@@ -1193,9 +1201,6 @@ function Add-ADCommonGroupMember
     .PARAMETER Credential
         Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
-    .OUTPUTS
-        If the domain controller is not found, an empty object ($null) is returned.
-
     .INPUTS
         None
 
@@ -1300,7 +1305,7 @@ function Test-IsDomainController
         Convert-PropertyMapToObjectProperties -PropertyMap $computerObjectPropertyMap
 
     .PARAMETER PropertyMap
-        The property map, as an array of hashtables, to convert to a properties array.
+        Specifies the property map, as an array of hashtables, to convert to a properties array.
 
     .INPUTS
         None
@@ -1360,16 +1365,16 @@ function Convert-PropertyMapToObjectProperties
         Compare-ResourcePropertyState -CurrentValues $targetResource -DesiredValues $PSBoundParameters
 
     .PARAMETER CurrentValues
-        The current values that should be compared to to desired values. Normally the values returned from
+        Specifies the current values that should be compared to to desired values. Normally the values returned from
         Get-TargetResource.
 
     .PARAMETER DesiredValues
-        The values set in the configuration and is provided in the call to the functions *-TargetResource, and that
-        will be compared against current values. Normally set to $PSBoundParameters.
+        Specifies the values set in the configuration and is provided in the call to the functions *-TargetResource,
+        and that will be compared against current values. Normally set to $PSBoundParameters.
 
     .PARAMETER Properties
-        An array of property names, from the keys provided in DesiredValues, that will be compared. If this parameter
-        is left out, all the keys in the DesiredValues will be compared.
+        Specifies an array of property names, from the keys provided in DesiredValues, that will be compared. If this
+        parameter is not set, all the keys in the DesiredValues will be compared.
 
     .PARAMETER IgnoreProperties
         Specifies an array of property names to ignore in the comparison.
@@ -1701,7 +1706,7 @@ function Assert-ADPSDrive
         New-CimCredentialInstance -Credential $Cred
 
     .PARAMETER Credential
-        The PSCredential object to return as a MSFT_Credential CIM instance credential object.
+        Specifies the PSCredential object to return as a MSFT_Credential CIM instance credential object.
 
     .INPUTS
         None
@@ -1713,16 +1718,16 @@ function Assert-ADPSDrive
         When returning a PSCredential object from Get-TargetResource, the credential object does not contain the
         username. The object is empty.
 
-        Password UserName PSComputerName
-        -------- -------- --------------
-                          localhost
+        | Password | UserName | PSComputerName |
+        | -------- | -------- | -------------- |
+        |          |          | localhost      |
 
         When the MSFT_Credential CIM instance credential object is returned by the Get-TargetResource then the
         credential object contains the values provided in the object.
 
-        Password UserName             PSComputerName
-        -------- --------             --------------
-                 COMPANY\TestAccount  localhost
+        | Password | UserName           | PSComputerName |
+        | -------- | ------------------ | -------------- |
+        |          |COMPANY\TestAccount | localhost      |
 #>
 function New-CimCredentialInstance
 {
@@ -1760,10 +1765,10 @@ function New-CimCredentialInstance
         Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
     .PARAMETER AssemblyName
-        The assembly to load into the PowerShell session.
+        Specifies the assembly to load into the PowerShell session.
 
     .PARAMETER TypeName
-        An optional parameter to check if the type exist, if it exist then the assembly is not loaded again.
+        Specifies an optional parameter to check if the type exist, if it exist then the assembly is not loaded again.
 
     .INPUTS
         None
@@ -1825,8 +1830,8 @@ function Add-TypeAssembly
         Get-ADDirectoryContext -DirectoryContextType 'Forest' -Name contoso.com
 
     .PARAMETER DirectoryContextType
-        The context type of the object to return. Valid values are 'Domain', 'Forest', 'ApplicationPartition',
-        'ConfigurationSet' or 'DirectoryServer'.
+        Specifies the context type of the object to return. Valid values are 'Domain', 'Forest',
+        'ApplicationPartition', 'ConfigurationSet' or 'DirectoryServer'.
 
     .PARAMETER Name
         An optional parameter for the target of the directory context. For the correct format for this parameter
@@ -2043,7 +2048,7 @@ function Find-DomainController
         Find-DomainControllerFindOneWrapper -DirectoryContext $directoryContext
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the donmain controller object is returned. Calling the
+        Specifies the Active Directory context from which the donmain controller object is returned. Calling the
         Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
     .INPUTS
@@ -2085,7 +2090,7 @@ function Find-DomainControllerFindOneWrapper
         Find-DomainControllerFindOneWrapper -DirectoryContext $directoryContext -SiteName 'Default'
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the donmain controller object is returned. Calling the
+        Specifies the Active Directory context from which the donmain controller object is returned. Calling the
         Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
     .INPUTS
@@ -2159,7 +2164,7 @@ function Get-CurrentUser
         Test-Password -DomainName contoso.com -UserName 'user1' -Password $cred
 
     .PARAMETER DomainName
-        Name of the domain where the user account is located (only used if password is managed).
+        Specifies the name of the domain where the user account is located (only used if password is managed).
 
     .PARAMETER UserName
         Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
@@ -2396,8 +2401,8 @@ function Get-ByteContent
         Get-ActiveDirectoryDomain -DirectoryContext $context
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the domain object is returned. Calling the Get-ADDirectoryContext gets
-        a value that can be provided in this parameter.
+        Specifies the Active Directory context from which the domain object is returned. Calling the
+        Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
     .INPUTS
         None
@@ -2435,8 +2440,8 @@ function Get-ActiveDirectoryDomain
         Get-ActiveDirectoryForest -DirectoryContext $context
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the forest object is returned. Calling the Get-ADDirectoryContext gets
-        a value that can be provided in this parameter.
+        Specifies the Active Directory context from which the forest object is returned. Calling the
+        Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
     .INPUTS
         None

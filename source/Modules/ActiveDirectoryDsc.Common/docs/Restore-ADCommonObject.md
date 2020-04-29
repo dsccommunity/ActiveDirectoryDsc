@@ -41,7 +41,7 @@ Accept wildcard characters: False
 ```
 
 ### -Identity
-The identity of the object to restore.
+Specifies the identity of the object to restore.
 
 ```yaml
 Type: System.String
@@ -56,7 +56,7 @@ Accept wildcard characters: False
 ```
 
 ### -ObjectClass
-The type of the AD object to restore.
+Specifies the type of the AD object to restore.
 
 ```yaml
 Type: System.String

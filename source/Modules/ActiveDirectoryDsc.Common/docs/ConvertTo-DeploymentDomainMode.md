@@ -31,7 +31,7 @@ ConvertTo-DeploymentDomainMode -Mode $adDomainMode
 ## PARAMETERS
 
 ### -Mode
-The Microsoft.ActiveDirectory.Management.ADDomainMode value to convert to a
+Specifies the Microsoft.ActiveDirectory.Management.ADDomainMode value to convert to a
 Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
 
 ```yaml
@@ -47,7 +47,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModeId
-The ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
+Specifies the ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
 
 ```yaml
 Type: System.UInt16

@@ -25,8 +25,9 @@ Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' -Paramete
 ## PARAMETERS
 
 ### -Members
-The members to add to the group.
-These may be in the same domain as the group or in alternate domains.
+Specifies the members to add to the group.
+These may be in the same domain as the group or in alternate
+domains.
 
 ```yaml
 Type: System.String[]
@@ -41,7 +42,7 @@ Accept wildcard characters: False
 ```
 
 ### -MembersInMultipleDomains
-Setting this switch indicates that there are members from alternate domains.
+Setting this switch specifies that there are members from alternate domains.
 This triggers the identities of
 the members to be looked up in the alternate domain.
 
@@ -58,9 +59,9 @@ Accept wildcard characters: False
 ```
 
 ### -Parameters
-The parameters to pass to the Add-ADGroupMember cmdlet when adding the members to the group.
-This should
-include the group identity.
+Specifies the parameters to pass to the Add-ADGroupMember cmdlet when adding the members to the group.
+This
+should include the group identity.
 
 ```yaml
 Type: System.Collections.Hashtable

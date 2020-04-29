@@ -14,7 +14,7 @@ Start-ProcessWithTimeout [-FilePath] <String> [[-ArgumentList] <String[]>] [-Tim
 ## DESCRIPTION
 The Start-ProcessWithTimeout function is used to start a process with a timeout.
 An Int32 object is returned
-representing the exit code of the started process
+representing the exit code of the started process.
 
 ## EXAMPLES
 
@@ -26,7 +26,7 @@ Start-ProcessWithTimeout -FilePath notepad.exe -ArgumentList test.txt -Timeout 6
 ## PARAMETERS
 
 ### -ArgumentList
-The arguments that should be passed to the executable.
+Specifies he arguments that should be passed to the executable.
 
 ```yaml
 Type: System.String[]
@@ -41,7 +41,7 @@ Accept wildcard characters: False
 ```
 
 ### -FilePath
-String containing the path to the executable to start.
+Specifies the path to the executable to start.
 
 ```yaml
 Type: System.String
@@ -56,7 +56,7 @@ Accept wildcard characters: False
 ```
 
 ### -Timeout
-The timeout in seconds to wait for the process to finish.
+Specifies the timeout in seconds to wait for the process to finish.
 
 ```yaml
 Type: System.UInt32

@@ -31,7 +31,7 @@ Compare-ResourcePropertyState -CurrentValues $targetResource -DesiredValues $PSB
 ## PARAMETERS
 
 ### -CurrentValues
-The current values that should be compared to to desired values.
+Specifies the current values that should be compared to to desired values.
 Normally the values returned from
 Get-TargetResource.
 
@@ -48,8 +48,8 @@ Accept wildcard characters: False
 ```
 
 ### -DesiredValues
-The values set in the configuration and is provided in the call to the functions *-TargetResource, and that
-will be compared against current values.
+Specifies the values set in the configuration and is provided in the call to the functions *-TargetResource,
+and that will be compared against current values.
 Normally set to $PSBoundParameters.
 
 ```yaml
@@ -80,9 +80,9 @@ Accept wildcard characters: False
 ```
 
 ### -Properties
-An array of property names, from the keys provided in DesiredValues, that will be compared.
-If this parameter
-is left out, all the keys in the DesiredValues will be compared.
+Specifies an array of property names, from the keys provided in DesiredValues, that will be compared.
+If this
+parameter is not set, all the keys in the DesiredValues will be compared.
 
 ```yaml
 Type: System.String[]
