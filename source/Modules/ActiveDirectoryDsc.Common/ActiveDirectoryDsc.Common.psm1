@@ -2,7 +2,7 @@ $resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) 
 $modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
 
 $dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
-Import-Module -Name $dscResourceCommonModulePath
+#Import-Module -Name $dscResourceCommonModulePath
 
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
@@ -10,18 +10,32 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .SYNOPSIS
         Starts a process with a timeout.
 
+    .DESCRIPTION
+        The Start-ProcessWithTimeout function is used to start a process with a timeout. An Int32 object is returned
+        representing the exit code of the started process.
+
+    .EXAMPLE
+        Start-ProcessWithTimeout -FilePath 'djoin.exe' -ArgumentList '/PROVISION /DOMAIN contoso.com /MACHINE SRV1' -Timeout 300
+
     .PARAMETER FilePath
-        String containing the path to the executable to start.
+        Specifies the path to the executable to start.
 
     .PARAMETER ArgumentList
-        The arguments that should be passed to the executable.
+        Specifies he arguments that should be passed to the executable.
 
     .PARAMETER Timeout
-        The timeout in seconds to wait for the process to finish.
+        Specifies the timeout in seconds to wait for the process to finish.
 
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Int32
 #>
 function Start-ProcessWithTimeout
 {
+    [CmdletBinding()]
+    [OutputType([System.Int32])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -45,26 +59,37 @@ function Start-ProcessWithTimeout
         ErrorAction  = 'Stop'
     }
 
-    $sqlSetupProcess = Start-Process @startProcessParameters
+    $process = Start-Process @startProcessParameters
 
-    Write-Verbose -Message ($script:localizedData.StartProcess -f $sqlSetupProcess.Id, $startProcessParameters.FilePath, $Timeout) -Verbose
+    Write-Verbose -Message ($script:localizedData.StartProcess -f $process.Id, $FilePath, $Timeout) -Verbose
 
-    Wait-Process -InputObject $sqlSetupProcess -Timeout $Timeout -ErrorAction 'Stop'
+    Wait-Process -InputObject $process -Timeout $Timeout -ErrorAction 'Stop'
 
-    return $sqlSetupProcess.ExitCode
+    return $process.ExitCode
 }
 
 <#
     .SYNOPSIS
         Tests whether this computer is a member of a domain.
+
+    .DESCRIPTION
+        The Test-DomainMember function is used to test whether this computer is a member of a domain. A boolean is
+        returned indicating the domain membership of the computer.
+
+    .EXAMPLE
+        Test-DomainMember
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Boolean
 #>
 function Test-DomainMember
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param
-    (
-    )
+    param ()
 
     $isDomainMember = [System.Boolean] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).PartOfDomain
 
@@ -74,51 +99,52 @@ function Test-DomainMember
 
 <#
     .SYNOPSIS
-        Get the domain name of this computer.
+        Gets the domain name of this computer.
+
+    .DESCRIPTION
+        The Get-DomainName function is used to get the name of the Active Directory domain that the computer is a
+        member of.
+
+    .EXAMPLE
+        Get-DomainName
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.String
 #>
 function Get-DomainName
 {
     [CmdletBinding()]
     [OutputType([System.String])]
-    param
-    (
-    )
+    param ()
 
     $domainName = [System.String] (Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false).Domain
 
     return $domainName
-} # function Get-DomainName
+}
 
 <#
     .SYNOPSIS
         Get an Active Directory object's parent distinguished name.
 
+    .DESCRIPTION
+        The Get-ADObjectParentDN function is used to get an Active Directory object parent's distinguished name.
+
+    .EXAMPLE
+        Get-ADObjectParentDN -DN CN=User1,CN=Users,DC=contoso,DC=com
+
+        Returns CN=Users,DC=contoso,DC=com
+
     .PARAMETER DN
-        The distinguished name of the object to return the parent from.
+        Specifies the distinguished name of the object to return the parent from.
 
-    .NOTES
-        Copyright (c) 2016 The University Of Vermont
-        All rights reserved.
+    .INPUTS
+        None
 
-        Redistribution and use in source and binary forms, with or without modification, are permitted provided that
-        the following conditions are met:
-
-        1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
-           following disclaimer.
-        2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
-           following disclaimer in the documentation and/or other materials provided with the distribution.
-        3. Neither the name of the University nor the names of its contributors may be used to endorse or promote
-           products derived from this software without specific prior written permission.
-
-        THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-        LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-        IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-        CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-        OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-        CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-        THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-        http://www.uvm.edu/~gcd/code-license/
+    .OUTPUTS
+        System.String
 #>
 function Get-ADObjectParentDN
 {
@@ -134,21 +160,33 @@ function Get-ADObjectParentDN
     # https://www.uvm.edu/~gcd/2012/07/listing-parent-of-ad-object-in-powershell/
     $distinguishedNameParts = $DN -split '(?<![\\]),'
     return $distinguishedNameParts[1..$($distinguishedNameParts.Count - 1)] -join ','
-} #end function GetADObjectParentDN
+}
 
 <#
     .SYNOPSIS
-        Validates the Members, MembersToInclude and MembersToExclude combination
-        is valid. If the combination is invalid, an InvalidArgumentError is raised.
+        Assert the Members, MembersToInclude and MembersToExclude combination is valid.
+
+    .DESCRIPTION
+        The Assert-MemberParameters function is used to assert the Members, MembersToInclude and MembersToExclude
+        combination is valid. If the combination is invalid, an InvalidArgumentError is raised.
+
+    .EXAMPLE
+        Assert-MemberParameters -Members fred, bill
 
     .PARAMETER Members
-        The Members to validate.
+        Specifies the Members to validate.
 
     .PARAMETER MembersToInclude
-        The MembersToInclude to validate.
+        Specifies the MembersToInclude to validate.
 
     .PARAMETER MembersToExclude
-        The MembersToExclude to validate.
+        Specifies the MembersToExclude to validate.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        None
 #>
 function Assert-MemberParameters
 {
@@ -209,18 +247,27 @@ function Assert-MemberParameters
         }
     }
 
-} #end function Assert-MemberParameters
+}
 
 <#
     .SYNOPSIS
-        Remove duplicate members from a string array. The comparison is
-        case insensitive.
+        Removes duplicate members from a string array.
+
+    .DESCRIPTION
+        The Remove-DuplicateMembers function is used to remove duplicate members from a string array. The comparison
+        is case insensitive. A string array is returned containing the resultant members.
+
+    .EXAMPLE
+        Remove-DuplicateMembers -Members fred, bill, bill
 
     .PARAMETER Members
-        The array of members to remove duplicates from.
+        Specifies the array of members to remove duplicates from.
+
+    .INPUTS
+        None
 
     .OUTPUTS
-        A string array with the unique members-
+        System.String[]
 #>
 function Remove-DuplicateMembers
 {
@@ -247,24 +294,37 @@ function Remove-DuplicateMembers
         and also make sure one entry is returned as a string array.
     #>
     return , $uniqueMembers
-} #end function RemoveDuplicateMembers
+}
 
 <#
     .SYNOPSIS
-        Test whether the existing array members match the defined explicit array
-        and include/exclude the specified members.
+        Tests Members of an array.
+
+    .DESCRIPTION
+        The Test-Members function is used to test whether the existing array members match the defined explicit array
+        and include/exclude the specified members. A boolean is returned that represents if the existing array members
+        match.
+
+    .EXAMPLE
+        Test-Members -ExistingMembers fred, bill -Members fred, bill
 
     .PARAMETER ExistingMembers
-        Existing array members.
+        Specifies existing array members.
 
     .PARAMETER Members
-        Explicit array members.
+        Specifies explicit array members.
 
     .PARAMETER MembersToInclude
-       Compulsory array members.
+      Specifies compulsory array members.
 
     .PARAMETER MembersToExclude
-       Excluded array members.
+       Specifies excluded array members.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Boolean
 #>
 function Test-Members
 {
@@ -388,18 +448,30 @@ function Test-Members
 
     Write-Verbose -Message $script:localizedData.MembershipInDesiredState
     return $true
-} #end function Test-Membership
+}
 
 <#
     .SYNOPSIS
-        Convert a specified time period in seconds, minutes, hours or days into
-        a time span object.
+        Converts a specified time period into a TimeSpan object.
+
+    .DESCRIPTION
+        The ConvertTo-TimeSpan function is used to convert a specified time period in seconds, minutes, hours or days
+        into a TimeSpan object.
+
+    .EXAMPLE
+        ConvertTo-TimeSpan -TimeSpan 60 -TimeSpanType Minutes
 
     .PARAMETER TimeSpan
-        The length of time to use for the time span.
+        Specifies the length of time to use for the time span.
 
     .PARAMETER TimeSpanType
-        The units of measure in the TimeSpan parameter.
+        Specifies the units of measure in the TimeSpan parameter.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.TimeSpan
 #>
 function ConvertTo-TimeSpan
 {
@@ -443,22 +515,32 @@ function ConvertTo-TimeSpan
         }
     }
     return (New-TimeSpan @newTimeSpanParams)
-} #end function ConvertTo-TimeSpan
+}
 
 <#
     .SYNOPSIS
-        Converts a System.TimeSpan into the number of seconds, minutes, hours or days.
+        Converts a TimeSpan object into the number of seconds, minutes, hours or days.
 
-    .PARAMETER TimeSpan
-        TimeSpan to convert into an integer
-
-    .PARAMETER TimeSpanType
-        Convert timespan into the total number of seconds, minutes, hours or days.
+    .DESCRIPTION
+        The ConvertFrom-TimeSpan function is used to Convert a TimeSpan object into an Integer containing the number of
+        seconds, minutes, hours or days within the timespan.
 
     .EXAMPLE
         ConvertFrom-TimeSpan -TimeSpan (New-TimeSpan -Days 15) -TimeSpanType Seconds
 
         Returns the number of seconds in 15 days.
+
+    .PARAMETER TimeSpan
+        Specifies the TimeSpan object to convert into an integer.
+
+    .PARAMETER TimeSpanType
+        Specifies the unit of measure to be used in the conversion.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Int32
 #>
 function ConvertFrom-TimeSpan
 {
@@ -500,30 +582,51 @@ function ConvertFrom-TimeSpan
 
 <#
     .SYNOPSIS
-        Returns common AD cmdlet connection parameter for splatting.
+        Gets a common AD cmdlet connection parameter for splatting.
+
+    .DESCRIPTION
+        The Get-ADCommonParameters function is used to get a common AD cmdlet connection parameter for splatting. A
+        hashtable is returned containing the derived connection parameters.
+
+    .PARAMETER Identity
+        Specifies the identity to use as the Identity or Name connection parameter. Aliases are 'UserName',
+        'GroupName', 'ComputerName' and 'ServiceAccountName'.
 
     .PARAMETER CommonName
-        When specified, a CommonName overrides theUsed by the ADUser
-        cmdletReturns the Identity as the Name key. For example, the
-        Get-ADUser, Set-ADUser and Remove-ADUser cmdlets take an Identity
-        parameter, but the New-ADUser cmdlet uses the Name parameter.
+        When specified, a CommonName overrides the Identity used as the Name key. For example, the Get-ADUser,
+        Set-ADUser and Remove-ADUser cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the Name
+        parameter.
+
+    .PARAMETER Credential
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
+
+    .PARAMETER Server
+        Specifies the name of the domain controller to use when accessing the domain. If not specified, a domain
+        controller is discovered using the standard Active Directory discovery process.
 
     .PARAMETER UseNameParameter
-        Returns the Identity as the Name key. For example, the Get-ADUser,
-        Set-ADUser and Remove-ADUser cmdlets take an Identity parameter,
-        but the New-ADUser cmdlet uses the Name parameter.
+        Specifies to return the Identity as the Name key. For example, the Get-ADUser, Set-ADUser and Remove-ADUser
+        cmdlets take an Identity parameter, but the New-ADUser cmdlet uses the Name parameter.
+
+    .PARAMETER PreferCommonName
+        If specified along with a CommonName parameter, The CommonName will be used as the Identity or Name connection
+        parameter instead of the Identity parameter.
 
     .EXAMPLE
-        $getADUserParams = Get-CommonADParameters @PSBoundParameters
+        Get-CommonADParameters @PSBoundParameters
 
-        Returns connection parameters suitable for Get-ADUser using the
-        splatted cmdlet parameters.
+        Returns connection parameters suitable for Get-ADUser using the splatted cmdlet parameters.
 
     .EXAMPLE
-        $newADUserParams = Get-CommonADParameters @PSBoundParameters -UseNameParameter
+        Get-CommonADParameters @PSBoundParameters -UseNameParameter
 
-        Returns connection parameters suitable for New-ADUser using
-        the splatted cmdlet parameters.
+        Returns connection parameters suitable for New-ADUser using the splatted cmdlet parameters.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Collections.Hashtable
 #>
 function Get-ADCommonParameters
 {
@@ -609,20 +712,33 @@ function Get-ADCommonParameters
     }
 
     return $adConnectionParameters
-} #end function Get-ADCommonParameters
+}
 
 <#
     .SYNOPSIS
-        Test Active Directory replication site availablity.
+        Tests Active Directory replication site availablity.
+
+    .DESCRIPTION
+        The Test-ADReplicationSite function is used to test Active Directory replication site availablity. A boolean is
+        returned that represents the replication site availability.
+
+    .EXAMPLE
+        Test-ADReplicationSite -SiteName Default -DomainName contoso.com
 
     .PARAMETER SiteName
-        The replication site name to test the availability of.
+        Specifies the replication site name to test the availability of.
 
     .PARAMETER DomainName
-        The domain name containing the replication site.
+        Specifies the domain name containing the replication site.
 
     .PARAMETER Credential
-        The credential to use to access the replication site.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Boolean
 #>
 function Test-ADReplicationSite
 {
@@ -661,16 +777,28 @@ function Test-ADReplicationSite
 
 <#
     .SYNOPSIS
-        Convert a ModeId or Microsoft.ActiveDirectory.Management.ADForestMode to
-        a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
+        Converts a ModeId or ADForestMode object to a ForestMode object.
+
+    .DESCRIPTION
+        The ConvertTo-DeploymentForestMode function is used to convert a
+        Microsoft.ActiveDirectory.Management.ADForestMode object or a ModeId to a
+        Microsoft.DirectoryServices.Deployment.Types.ForestMode object.
+
+    .EXAMPLE
+        ConvertTo-DeploymentForestMode -Mode $adForestMode
 
     .PARAMETER ModeId
-        The ModeId value to convert to a
-        Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
+        Specifies the ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
 
     .PARAMETER Mode
-        The Microsoft.ActiveDirectory.Management.ADForestMode value to convert
-        to a Microsoft.DirectoryServices.Deployment.Types.ForestMode type
+        Specifies the Microsoft.ActiveDirectory.Management.ADForestMode value to convert to a
+        Microsoft.DirectoryServices.Deployment.Types.ForestMode type.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        Microsoft.DirectoryServices.Deployment.Types.ForestMode
 #>
 function ConvertTo-DeploymentForestMode
 {
@@ -714,16 +842,28 @@ function ConvertTo-DeploymentForestMode
 
 <#
     .SYNOPSIS
-        Convert a ModeId or Microsoft.ActiveDirectory.Management.ADDomainMode to
-        a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
+        Converts a ModeId or ADDomainMode object to a DomainMode object.
+
+    .DESCRIPTION
+        The ConvertTo-DeploymentDomainMode function is used to convert a
+        Microsoft.ActiveDirectory.Management.ADDomainMode object or a ModeId to a
+        Microsoft.DirectoryServices.Deployment.Types.DomainMode object.
+
+    .EXAMPLE
+        ConvertTo-DeploymentDomainMode -Mode $adDomainMode
 
     .PARAMETER ModeId
-        The ModeId value to convert to a
-        Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
+        Specifies the ModeId value to convert to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
 
     .PARAMETER Mode
-        The Microsoft.ActiveDirectory.Management.ADDomainMode value to convert
-        to a Microsoft.DirectoryServices.Deployment.Types.DomainMode type
+        Specifies the Microsoft.ActiveDirectory.Management.ADDomainMode value to convert to a
+        Microsoft.DirectoryServices.Deployment.Types.DomainMode type.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        Microsoft.DirectoryServices.Deployment.Types.DomainMode
 #>
 function ConvertTo-DeploymentDomainMode
 {
@@ -767,20 +907,33 @@ function ConvertTo-DeploymentDomainMode
 
 <#
     .SYNOPSIS
-        Restore and AD object from the AD recyle bin.
+        Restores an AD object from the AD recyle bin.
+
+    .DESCRIPTION
+        The Restore-ADCommonObject function is used to Restore an AD object from the AD recyle bin. An ADObject is
+        returned that represents the restored object.
+
+    .EXAMPLE
+        Restore-ADCommonObject -Identity User1 -ObjectClass User
 
     .PARAMETER Identity
-        The identity of the object to restore.
+        Specifies the identity of the object to restore.
 
     .PARAMETER ObjectClass
-        The type of the AD object to restore.
+        Specifies the type of the AD object to restore.
 
     .PARAMETER Credential
-        The credential to use to restore the object in the Active
-        Directory.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .PARAMETER Server
-        The name of the domain controller use to restore the object.
+        Specifies the name of the domain controller to use when accessing the domain. If not specified, a domain
+        controller is discovered using the standard Active Directory discovery process.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        Microsoft.ActiveDirectory.Management.ADObject
 #>
 function Restore-ADCommonObject
 {
@@ -811,7 +964,8 @@ function Restore-ADCommonObject
         $Server
     )
 
-    $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f $Identity, $ObjectClass
+    $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f
+        $Identity, $ObjectClass
     Write-Verbose -Message ($script:localizedData.FindInRecycleBin -f $restoreFilter) -Verbose
 
     <#
@@ -834,7 +988,8 @@ function Restore-ADCommonObject
 
     if ($restorableObject)
     {
-        Write-Verbose -Message ($script:localizedData.FoundRestoreTargetInRecycleBin -f $Identity, $ObjectClass, $restorableObject.DistinguishedName) -Verbose
+        Write-Verbose -Message ($script:localizedData.FoundRestoreTargetInRecycleBin -f
+            $Identity, $ObjectClass, $restorableObject.DistinguishedName) -Verbose
 
         try
         {
@@ -844,7 +999,8 @@ function Restore-ADCommonObject
             $restoreParams['Identity'] = $restorableObject.DistinguishedName
             $restoredObject = Restore-ADObject @restoreParams
 
-            Write-Verbose -Message ($script:localizedData.RecycleBinRestoreSuccessful -f $Identity, $ObjectClass) -Verbose
+            Write-Verbose -Message ($script:localizedData.RecycleBinRestoreSuccessful -f
+                $Identity, $ObjectClass) -Verbose
         }
         catch [Microsoft.ActiveDirectory.Management.ADException]
         {
@@ -863,26 +1019,31 @@ function Restore-ADCommonObject
 
 <#
     .SYNOPSIS
-        Converts an Active Directory distinguished name into a fully
-        qualified domain name.
+        Converts an Active Directory distinguished name into a fully qualified domain name.
 
     .DESCRIPTION
-        Takes an Active Directory distinguished name as input, returns
-        the domain FQDN.
-
-    .PARAMETER DistinguishedName
-        The distinguished name to convert into the FQDN.
+        The Get-ADDomainNameFromDistinguishedName function is used to convert an Active Directory distinguished name
+        into a fully qualified domain name.
 
     .EXAMPLE
         Get-ADDomainNameFromDistinguishedName -DistinguishedName 'CN=ExampleObject,OU=ExampleOU,DC=example,DC=com'
 
+    .PARAMETER DistinguishedName
+        Specifies the distinguished name to convert into the FQDN.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.String
+
     .NOTES
         Author: Robert D. Biddle (https://github.com/RobBiddle)
-        Created: December.20.2017
 #>
 function Get-ADDomainNameFromDistinguishedName
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter()]
@@ -908,25 +1069,36 @@ function Get-ADDomainNameFromDistinguishedName
 
     return $domainName
 
-} #end function Get-ADDomainNameFromDistinguishedName
+}
 
 <#
     .SYNOPSIS
-        Add group member from current or different domain.
+        Adds a member to an AD group.
+
+    .DESCRIPTION
+        The Add-ADCommonGroupMember function is used to add a member from the current or a different domain to an AD
+        group.
+
+    .EXAMPLE
+        Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' -Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc=com}
 
     .PARAMETER Members
-        The members to add to the group. These may be in the same
-        domain as the group or in alternate domains.
+        Specifies the members to add to the group. These may be in the same domain as the group or in alternate
+        domains.
 
     .PARAMETER Parameters
-        The parameters to pass to the Add-ADGroupMember cmdlet when
-        adding the members to the group. This should include the group
-        identity.
+        Specifies the parameters to pass to the Add-ADGroupMember cmdlet when adding the members to the group. This
+        should include the group identity.
 
     .PARAMETER MembersInMultipleDomains
-        Setting this switch indicates that there are members from
-        alternate domains. This triggers the identities of the members
-        to be looked up in the alternate domain.
+        Setting this switch specifies that there are members from alternate domains. This triggers the identities of
+        the members to be looked up in the alternate domain.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        None
 
     .NOTES
         Author original code: Robert D. Biddle (https://github.com/RobBiddle)
@@ -1011,26 +1183,39 @@ function Add-ADCommonGroupMember
 
 <#
     .SYNOPSIS
-        Returns the domain controller object if the node is a domain controller,
-        otherwise it return $null.
+        Gets the domain controller object if the node is a domain controller.
+
+    .DESCRIPTION
+        The Get-DomainControllerObject function is used to get the domain controller object if the node is a domain
+        controller, otherwise it returns $null.
+
+    .EXAMPLE
+        Get-DomainControllerObject -DomainName contoso.com
 
     .PARAMETER DomainName
-        The name of the domain that should contain the domain controller.
+        Specifies the name of the domain that should contain the domain controller.
 
     .PARAMETER ComputerName
-        The name of the node to return the domain controller object for.
-        Defaults to $env:COMPUTERNAME.
+        Specifies the name of the node to return the domain controller object for.
+
+    .PARAMETER Credential
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
+
+    .INPUTS
+        None
 
     .OUTPUTS
-        If the domain controller is not found, an empty object ($null) is returned.
+        Microsoft.ActiveDirectory.Management.ADDomainController
 
     .NOTES
-        Throws an exception of Microsoft.ActiveDirectory.Management.ADServerDownException
-        if the domain cannot be contacted.
+        Throws an exception of Microsoft.ActiveDirectory.Management.ADServerDownException if the domain cannot be
+        contacted.
 #>
 function Get-DomainControllerObject
 {
     [CmdletBinding()]
+    [OutputType([Microsoft.ActiveDirectory.Management.ADDomainController])]
+
     param
     (
         [Parameter(Mandatory = $true)]
@@ -1081,15 +1266,26 @@ function Get-DomainControllerObject
 
 <#
     .SYNOPSIS
-        Returns $true if the node is a domain controller, otherwise it returns
-        $false
+        Tests if the computer is a domain controller.
+
+    .DESCRIPTION
+        The Test-IsDomainController function tests if the computer is a domain controller. A boolean is returned that
+        represents whether the computer is a domain controller.
+
+    .EXAMPLE
+        Test-IsDomainController
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Boolean
 #>
 function Test-IsDomainController
 {
     [CmdletBinding()]
-    param
-    (
-    )
+    [OutputType([System.Boolean])]
+    param ()
 
     $operatingSystemInformation = Get-CimInstance -ClassName 'Win32_OperatingSystem'
 
@@ -1098,26 +1294,24 @@ function Test-IsDomainController
 
 <#
     .SYNOPSIS
-        Converts a hashtable containing the parameter to property mappings to
-        an array of properties that can be used to call cmdlets that supports the
-        parameter Properties.
+        Converts a hashtable containing the parameter to property mappings to an array of properties.
 
-    .PARAMETER PropertyMap
-        The property map, as an array of hashtables, to convert to a properties array.
+    .DESCRIPTION
+        The Convert-PropertyMapToObjectProperties function is used to convert a hashtable containing the parameter to
+        property mappings to an array of properties that can be used to call cmdlets that supports the parameter
+        Properties.
 
     .EXAMPLE
-        $computerObjectPropertyMap = @(
-            @{
-                ParameterName = 'ComputerName'
-                PropertyName  = 'cn'
-            },
-            @{
-                ParameterName = 'Location'
-            }
-        )
+        Convert-PropertyMapToObjectProperties -PropertyMap $computerObjectPropertyMap
 
-        $computerObjectProperties = Convert-PropertyMapToObjectProperties $computerObjectPropertyMap
-        $getADComputerResult = Get-ADComputer -Identity 'APP01' -Properties $computerObjectProperties
+    .PARAMETER PropertyMap
+        Specifies the property map, as an array of hashtables, to convert to a properties array.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Array
 #>
 function Convert-PropertyMapToObjectProperties
 {
@@ -1156,22 +1350,40 @@ function Convert-PropertyMapToObjectProperties
 
 <#
     .SYNOPSIS
-        This function is used to compare current and desired values for any DSC
-        resource, and return a hashtable with the result from the comparison.
+        Compares current and desired values for any DSC resource.
+
+    .DESCRIPTION
+        The Compare-ResourcePropertyState function is used to compare current and desired values for any DSC resource,
+        and return a hashtable with the result of the comparison. An array of hashtables is returned containing the
+        results of the comparison with the following properties:
+
+        - ParameterName - The name of the parameter
+        - Expected - The expected value of the parameter
+        - Actual - The actual value of the parameter
+
+    .EXAMPLE
+        Compare-ResourcePropertyState -CurrentValues $targetResource -DesiredValues $PSBoundParameters
 
     .PARAMETER CurrentValues
-        The current values that should be compared to to desired values. Normally
-        the values returned from Get-TargetResource.
+        Specifies the current values that should be compared to to desired values. Normally the values returned from
+        Get-TargetResource.
 
     .PARAMETER DesiredValues
-        The values set in the configuration and is provided in the call to the
-        functions *-TargetResource, and that will be compared against current
-        values. Normally set to $PSBoundParameters.
+        Specifies the values set in the configuration and is provided in the call to the functions *-TargetResource,
+        and that will be compared against current values. Normally set to $PSBoundParameters.
 
     .PARAMETER Properties
-        An array of property names, from the keys provided in DesiredValues, that
-        will be compared. If this parameter is left out, all the keys in the
-        DesiredValues will be compared.
+        Specifies an array of property names, from the keys provided in DesiredValues, that will be compared. If this
+        parameter is not set, all the keys in the DesiredValues will be compared.
+
+    .PARAMETER IgnoreProperties
+        Specifies an array of property names to ignore in the comparison.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Collections.Hashtable[]
 #>
 function Compare-ResourcePropertyState
 {
@@ -1278,23 +1490,26 @@ function Compare-ResourcePropertyState
 
 <#
     .SYNOPSIS
-        This function is used to compare the current and the desired value of a
-        property.
+        Compares the current and the desired value of a property.
+
+    .DESCRIPTION
+        The Test-DscPropertyState function is used to compare the current and the desired value of a property. A
+        boolean is returned that represents the result of the comparison.
+
+    .EXAMPLE
+        Test-DscPropertyState -Values @{CurrentValue = 'John'; DesiredValue = 'Alice'}
+
+    .EXAMPLE
+        Test-DscPropertyState -Values @{CurrentValue = 1; DesiredValue = 2}
 
     .PARAMETER Values
-        This is set to a hash table with the current value (the CurrentValue key)
-        and desired value (the DesiredValue key).
+        Specifies a hash table with the current value (the CurrentValue key) and desired value (the DesiredValue key).
 
-    .EXAMPLE
-        Test-DscPropertyState -Values @{
-            CurrentValue = 'John'
-            DesiredValue = 'Alice'
-        }
-    .EXAMPLE
-        Test-DscPropertyState -Values @{
-            CurrentValue = 1
-            DesiredValue = 2
-        }
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Boolean
 #>
 function Test-DscPropertyState
 {
@@ -1383,9 +1598,21 @@ function Test-DscPropertyState
     .SYNOPSIS
         Asserts if the AD PS Provider has been installed.
 
+    .DESCRIPTION
+        The Assert-ADPSProvider function is used to assert if the AD PS Provider has been installed.
+
+    .Example
+        Assert-ADPSProvider
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        None
+
     .NOTES
-        Attempts to force import the ActiveDirectory module if the AD PS Provider has not been installed
-        and throws an exception if the AD PS Provider cannot be installed.
+        Attempts to force import the ActiveDirectory module if the AD PS Provider has not been installed and throws an
+        exception if the AD PS Provider cannot be installed.
 #>
 
 function Assert-ADPSProvider
@@ -1415,8 +1642,20 @@ function Assert-ADPSProvider
     .SYNOPSIS
         Asserts if the AD PS Drive has been created, and creates one if not.
 
+    .DESCRIPTION
+        The Assert-ADPSDrive function is used to assert if the AD PS Drive has been created, and creates one if not.
+
+    .EXAMPLE
+        Assert-ADPSDrive
+
     .PARAMETER Root
         Specifies the AD path to which the drive is mapped.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        None
 
     .NOTES
         Throws an exception if the PS Drive cannot be created.
@@ -1456,29 +1695,39 @@ function Assert-ADPSDrive
 
 <#
     .SYNOPSIS
-        This returns a new MSFT_Credential CIM instance credential object to be
-        used when returning credential objects from Get-TargetResource.
-        This returns a credential object without the password.
+        Creates a new MSFT_Credential CIM instance credential object.
+
+    .Description
+        The New-CimCredentialInstance function is used to create a new MSFT_Credential CIM instance credential object
+        to be used when returning credential objects from Get-TargetResource. This creates a credential object without
+        the password.
+
+    .EXAMPLE
+        New-CimCredentialInstance -Credential $Cred
 
     .PARAMETER Credential
-        The PSCredential object to return as a MSFT_Credential CIM instance
-        credential object.
+        Specifies the PSCredential object to return as a MSFT_Credential CIM instance credential object.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        Microsoft.Management.Infrastructure.CimInstance
 
     .NOTES
-        When returning a PSCredential object from Get-TargetResource, the
-        credential object does not contain the username. The object is empty.
+        When returning a PSCredential object from Get-TargetResource, the credential object does not contain the
+        username. The object is empty.
 
-        Password UserName PSComputerName
-        -------- -------- --------------
-                          localhost
+        | Password | UserName | PSComputerName |
+        | -------- | -------- | -------------- |
+        |          |          | localhost      |
 
-        When the MSFT_Credential CIM instance credential object is returned by
-        the Get-TargetResource then the credential object contains the values
-        provided in the object.
+        When the MSFT_Credential CIM instance credential object is returned by the Get-TargetResource then the
+        credential object contains the values provided in the object.
 
-        Password UserName             PSComputerName
-        -------- --------             --------------
-                 COMPANY\TestAccount  localhost
+        | Password | UserName           | PSComputerName |
+        | -------- | ------------------ | -------------- |
+        |          |COMPANY\TestAccount | localhost      |
 #>
 function New-CimCredentialInstance
 {
@@ -1506,15 +1755,26 @@ function New-CimCredentialInstance
 
 <#
     .SYNOPSIS
-        This loads the assembly type, optionally after a check
-        if the type is missing in the PowerShell session.
+        Adds the assembly to the PowerShell session.
+
+    .DESCRIPTION
+        The Add-TypeAssembly function is used to Add the assembly to the PowerShell session, optionally after a check
+        if the type is missing.
+
+    .EXAMPLE
+        Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
     .PARAMETER AssemblyName
-        The assembly to load into the PowerShell session.
+        Specifies the assembly to load into the PowerShell session.
 
     .PARAMETER TypeName
-        An optional parameter to check if the type exist, if it exist then the
-        assembly is not loaded again.
+        Specifies an optional parameter to check if the type exist, if it exist then the assembly is not loaded again.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        None
 #>
 function Add-TypeAssembly
 {
@@ -1560,16 +1820,32 @@ function Add-TypeAssembly
 
 <#
     .SYNOPSIS
-        This returns a new object of the type System.DirectoryServices.ActiveDirectory.DirectoryContext.
+        Gets an Active Directory DirectoryContext object.
+
+    .Description
+        The Get-ADDirectoryContext function is used to get an Active Directory DirectoryContext object that represents
+        the desired context.
+
+    .EXAMPLE
+        Get-ADDirectoryContext -DirectoryContextType 'Forest' -Name contoso.com
 
     .PARAMETER DirectoryContextType
-        The context type of the object to return. Valid values are 'Domain', 'Forest',
+        Specifies the context type of the object to return. Valid values are 'Domain', 'Forest',
         'ApplicationPartition', 'ConfigurationSet' or 'DirectoryServer'.
 
     .PARAMETER Name
-        An optional parameter for the target of the directory context.
-        For the correct format for this parameter depending on context type, see
-        the article https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.directorycontext?view=netframework-4.8
+        An optional parameter for the target of the directory context. For the correct format for this parameter
+        depending on context type, see the article
+        https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.directorycontext?view=netframework-4.8
+
+    .PARAMETER Credential
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.DirectoryServices.ActiveDirectory.DirectoryContext
 #>
 function Get-ADDirectoryContext
 {
@@ -1634,24 +1910,36 @@ function Get-ADDirectoryContext
 
 <#
     .SYNOPSIS
-        Gets the specified Active Directory domain
+        Finds an Active Directory domain controller.
+
+    .DESCRIPTION
+        The Find-DomainController function is used to find an Active Directory domain controller. It returns a
+        DomainController object that represents the found domain controller.
+
+    .EXAMPLE
+        Find-DomainController -DomainName contoso.com -SiteName Default -WaitForValidCredentials
 
     .PARAMETER DomainName
-        Specifies the fully qualified domain name to wait for..
+        Specifies the fully qualified domain name.
 
-    .PARAMETER DomainName
+    .PARAMETER SiteName
         Specifies the site in the domain where to look for a domain controller.
 
     .PARAMETER Credential
-        Specifies the credentials that are used when accessing the domain,
-        or uses the current user if not specified.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .PARAMETER WaitForValidCredentials
         Specifies if authentication exceptions should be ignored.
 
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.DirectoryServices.ActiveDirectory.DomainController
+
     .NOTES
-        This function is designed so that it can run on any computer without
-        having the ActiveDirectory module installed.
+        This function is designed so that it can run on any computer without having the ActiveDirectory module
+        installed.
 #>
 function Find-DomainController
 {
@@ -1677,7 +1965,8 @@ function Find-DomainController
 
     if ($PSBoundParameters.ContainsKey('SiteName'))
     {
-        Write-Verbose -Message ($script:localizedData.SearchingForDomainControllerInSite -f $SiteName, $DomainName) -Verbose
+        Write-Verbose -Message ($script:localizedData.SearchingForDomainControllerInSite -f
+            $SiteName, $DomainName) -Verbose
     }
     else
     {
@@ -1686,7 +1975,8 @@ function Find-DomainController
 
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
-        $adDirectoryContext = Get-ADDirectoryContext -DirectoryContextType 'Domain' -Name $DomainName -Credential $Credential
+        $adDirectoryContext = Get-ADDirectoryContext -DirectoryContextType 'Domain' -Name $DomainName `
+            -Credential $Credential
     }
     else
     {
@@ -1699,9 +1989,11 @@ function Find-DomainController
     {
         if ($PSBoundParameters.ContainsKey('SiteName'))
         {
-            $domainControllerObject = Find-DomainControllerFindOneInSiteWrapper -DirectoryContext $adDirectoryContext -SiteName $SiteName
+            $domainControllerObject = Find-DomainControllerFindOneInSiteWrapper -DirectoryContext $adDirectoryContext `
+                -SiteName $SiteName
 
-            Write-Verbose -Message ($script:localizedData.FoundDomainControllerInSite -f $SiteName, $DomainName) -Verbose
+            Write-Verbose -Message ($script:localizedData.FoundDomainControllerInSite -f
+                $SiteName, $DomainName) -Verbose
         }
         else
         {
@@ -1716,7 +2008,8 @@ function Find-DomainController
     }
     catch [System.Management.Automation.MethodInvocationException]
     {
-        $isTypeNameToSuppress = $_.Exception.InnerException -is [System.Security.Authentication.AuthenticationException]
+        $isTypeNameToSuppress = $_.Exception.InnerException -is `
+            [System.Security.Authentication.AuthenticationException]
 
         if ($WaitForValidCredentials.IsPresent -and $isTypeNameToSuppress)
         {
@@ -1724,7 +2017,8 @@ function Find-DomainController
                 $script:localizedData.IgnoreCredentialError -f $_.FullyQualifiedErrorId, $_.Exception.Message
             )
         }
-        elseif ($_.Exception.InnerException -is [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException])
+        elseif ($_.Exception.InnerException -is `
+            [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException])
         {
             Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName) -Verbose
         }
@@ -1743,18 +2037,29 @@ function Find-DomainController
 
 <#
     .SYNOPSIS
-        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Forest
-        which is a class that represents an Active Directory Domain Services forest.
+        Returns a System.DirectoryServices.ActiveDirectory.DomainController object.
+
+    .DESCRIPTION
+        The Find-DomainControllerFindOneWrapper function is used to return a
+        System.DirectoryServices.ActiveDirectory.DomainController object which is a class that represents an Active
+        Directory Domain Controller.
+
+    .EXAMPLE
+        Find-DomainControllerFindOneWrapper -DirectoryContext $directoryContext
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the forest object is returned.
-        Calling the Get-ADDirectoryContext gets a value that can be provided in
-        this parameter.
+        Specifies the Active Directory context from which the donmain controller object is returned. Calling the
+        Get-ADDirectoryContext gets a value that can be provided in this parameter.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.DirectoryServices.ActiveDirectory.DomainController
 
     .NOTES
-        This is a wrapper to enable unit testing of the function Find-DomainController.
-        It is not possible to make a stub class to mock these, since these classes
-        are loaded into the PowerShell session when it starts.
+        This is a wrapper to enable unit testing of the function Find-DomainController. It is not possible to make a
+        stub class to mock these, since these classes are loaded into the PowerShell session when it starts.
 
         This function is not exported.
 #>
@@ -1774,21 +2079,29 @@ function Find-DomainControllerFindOneWrapper
 
 <#
     .SYNOPSIS
-        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Forest
-        which is a class that represents an Active Directory Domain Services forest.
+        Returns a System.DirectoryServices.ActiveDirectory.DomainController object for a particular site.
+
+    .DESCRIPTION
+        The Find-DomainControllerFindOneWrapper function is used to return a
+        System.DirectoryServices.ActiveDirectory.DomainController object for a particular site which is a class that
+        represents an Active Directory Domain Controller.
+
+    .EXAMPLE
+        Find-DomainControllerFindOneWrapper -DirectoryContext $directoryContext -SiteName 'Default'
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the forest object is returned.
-        Calling the Get-ADDirectoryContext gets a value that can be provided in
-        this parameter.
+        Specifies the Active Directory context from which the donmain controller object is returned. Calling the
+        Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
-    .PARAMETER SiteName
-        Specifies the site in the domain where to look for a domain controller.
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.DirectoryServices.ActiveDirectory.DomainController
 
     .NOTES
-        This is a wrapper to enable unit testing of the function Find-DomainController.
-        It is not possible to make a stub class to mock these, since these classes
-        are loaded into the PowerShell session when it starts.
+        This is a wrapper to enable unit testing of the function Find-DomainController. It is not possible to make a
+        stub class to mock these, since these classes are loaded into the PowerShell session when it starts.
 
         This function is not exported.
 #>
@@ -1812,16 +2125,28 @@ function Find-DomainControllerFindOneInSiteWrapper
 
 <#
     .SYNOPSIS
-        This is used to get the current user context when the resource
-        script runs.
+        Gets the current user identity.
+
+    .DESCRIPTION
+        The Get-CurrentUser function is used to get the current user identity. A WindowsIdentity object is returned
+        that represents the current user.
+
+    .EXAMPLE
+        Get-CurrentUser
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Security.Principal.WindowsIdentity
 
     .NOTES
-        We are putting this in a function so we can mock it with pester
+        This is a wrapper to allow test mocking of the calling function.
 #>
 function Get-CurrentUser
 {
     [CmdletBinding()]
-    [OutputType([System.String])]
+    [OutputType([System.Security.Principal.WindowsIdentity])]
     param ()
 
     return [System.Security.Principal.WindowsIdentity]::GetCurrent()
@@ -1829,25 +2154,35 @@ function Get-CurrentUser
 
 <#
     .SYNOPSIS
-        Test the validity of a user's password.
+        Tests the validity of a user's password.
+
+    .DESCRIPTION
+        The Test-Password funtion is used to test the validity of a user's password. A boolean is returned that
+        represents the validity of the password.
+
+    .EXAMPLE
+        Test-Password -DomainName contoso.com -UserName 'user1' -Password $cred
 
     .PARAMETER DomainName
-        Name of the domain where the user account is located (only used if
-        password is managed).
+        Specifies the name of the domain where the user account is located (only used if password is managed).
 
     .PARAMETER UserName
-        Specifies the Security Account Manager (SAM) account name of the user
-        (ldapDisplayName 'sAMAccountName').
+        Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
 
     .PARAMETER Password
         Specifies a new password value for the account.
 
     .PARAMETER Credential
-        Specifies the user account credentials to use to perform this task.
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
 
     .PARAMETER PasswordAuthentication
         Specifies the authentication context type used when testing passwords.
-        Default value is 'Default'.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Boolean
 #>
 function Test-Password
 {
@@ -1935,25 +2270,35 @@ function Test-Password
 
 <#
     .SYNOPSIS
-        Test the validity of credentials using a PrincipalContext
+        Tests the validity of credentials using a PrincipalContext.
+
+    .DESCRIPTION
+        The Test-PrincipalContextCredentials function is used to test the validity of credentials using a
+        PrincipalContext. A boolean is returned that represents the validity of the password.
+
+    .EXAMPLE
+        Test-PrincipalContextCredentials -UserName 'user1' -Password $cred -PrincipalContext $context
 
     .PARAMETER UserName
-        Specifies the Security Account Manager (SAM) account name of the user
-        (ldapDisplayName 'sAMAccountName').
+        Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
 
     .PARAMETER Password
         Specifies a new password value for the account.
 
     .PARAMETER PrincipalContext
-        Specifies the PrincipalContext object that the credential test will be
-        performed using.
+        Specifies the PrincipalContext object that the credential test will be performed using.
 
     .PARAMETER PasswordAuthentication
-        Specifies the authentication context type used when testing passwords.
-        Default value is 'Default'.
+        Specifies the authentication context type to be used when testing the password.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.Boolean
 
     .NOTES
-        We are putting this in a function so we can mock it with pester.
+        This is a internal wrapper function to allow test mocking of the calling function.
 #>
 function Test-PrincipalContextCredentials
 {
@@ -2004,10 +2349,22 @@ function Test-PrincipalContextCredentials
 
 <#
     .SYNOPSIS
-        Returns the contents of a file as a byte array
+        Gets the contents of a file as a byte array.
+
+    .DESCRIPTION
+        The Get-ByteContent function is used to get the contents of a file as a byte array.
+
+    .EXAMPLE
+        Get-ByteContent -Path $path
 
     .PARAMETER Path
         Specifies the path to an item.
+
+    .INPUTS
+        none
+
+    .OUTPUTS
+        System.Byte[]
 #>
 function Get-ByteContent
 {
@@ -2034,18 +2391,28 @@ function Get-ByteContent
 
 <#
     .SYNOPSIS
-        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Domain
-        which is a class that represents an Active Directory Domain Services domain.
+        Gets a Domain object for the specified context.
+
+    .DESCRIPTION
+        The Get-ActiveDirectoryDomain function is used to get a System.DirectoryServices.ActiveDirectory.Domain object
+        for the specified context, which is a class that represents an Active Directory Domain Services domain.
+
+    .EXAMPLE
+        Get-ActiveDirectoryDomain -DirectoryContext $context
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the domain object is returned.
-        Calling the Get-ADDirectoryContext gets a value that can be provided in
-        this parameter.
+        Specifies the Active Directory context from which the domain object is returned. Calling the
+        Get-ADDirectoryContext gets a value that can be provided in this parameter.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.DirectoryServices.ActiveDirectory.Domain
 
     .NOTES
         This is a wrapper to allow test mocking of the calling function.
-        see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
-        for more information.
+        See issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324 for more information.
 #>
 function Get-ActiveDirectoryDomain
 {
@@ -2063,18 +2430,28 @@ function Get-ActiveDirectoryDomain
 
 <#
     .SYNOPSIS
-        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Forest
-        which is a class that represents an Active Directory Domain Services forest.
+        Gets a Forest object for the specified context.
+
+    .DESCRIPTION
+        The Get-ActiveDirectoryForest function is used to get a System.DirectoryServices.ActiveDirectory.Forest object
+        for the specified context. which is a class that represents an Active Directory Domain Services forest.
+
+    .EXAMPLE
+        Get-ActiveDirectoryForest -DirectoryContext $context
 
     .PARAMETER DirectoryContext
-        The Active Directory context from which the forest object is returned.
-        Calling the Get-ADDirectoryContext gets a value that can be provided in
-        this parameter.
+        Specifies the Active Directory context from which the forest object is returned. Calling the
+        Get-ADDirectoryContext gets a value that can be provided in this parameter.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.DirectoryServices.ActiveDirectory.Forest
 
     .NOTES
         This is a wrapper to allow test mocking of the calling function.
-        see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
-        for more information.
+        See issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324 for more information.
 #>
 function Get-ActiveDirectoryForest
 {
