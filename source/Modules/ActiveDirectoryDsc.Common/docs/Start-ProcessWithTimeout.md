@@ -20,7 +20,7 @@ representing the exit code of the started process.
 
 ### EXAMPLE 1
 ```
-Start-ProcessWithTimeout -FilePath notepad.exe -ArgumentList test.txt -Timeout 60
+Start-ProcessWithTimeout -FilePath 'djoin.exe' -ArgumentList '/PROVISION /DOMAIN contoso.com /MACHINE SRV1' -Timeout 300
 ```
 
 ## PARAMETERS
