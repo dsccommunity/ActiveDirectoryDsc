@@ -193,8 +193,8 @@ function Set-TargetResource
         $currentADSiteLink = Get-TargetResource -Name $Name
 
         <#
-            Since Set and New have different parameters we have to test if the
-            site link exists to determine what cmdlet we need to use.
+            Since Set and New have different parameters we have to test if the site link exists to determine what
+            cmdlet we need to use.
         #>
         if ( $currentADSiteLink.Ensure -eq 'Absent' )
         {
