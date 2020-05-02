@@ -26,6 +26,16 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Active Directory attribute used to perform membership operations.
         Default value is 'SamAccountName'.
 
+    .NOTES
+        Used Functions:
+            Name                          | Module
+            ------------------------------|--------------------------
+            Get-ADGroup                   | ActiveDirectory
+            Get-ADGroupMember             | ActiveDirectory
+            Assert-Module                 | ActiveDirectoryDsc.Common
+            Get-ADCommonParameters        | ActiveDirectoryDsc.Common
+            Get-ADObjectParentDN          | ActiveDirectoryDsc.Common
+            New-InvalidOperationException | ActiveDirectoryDsc.Common
 #>
 function Get-TargetResource
 {
@@ -183,8 +193,8 @@ function Get-TargetResource
         }
     }
 
-return $targetResource
-} #end function Get-TargetResource
+    return $targetResource
+}
 
 <#
     .SYNOPSIS
@@ -327,7 +337,7 @@ function Test-TargetResource
     )
 
     # Validate parameters before we even attempt to retrieve anything
-    $assertMemberParameters = @{}
+    $assertMemberParameters = @{ }
 
     # Members parameter should always be tested to enforce an empty group (issue #189)
     if ($PSBoundParameters.ContainsKey('Members'))
@@ -347,79 +357,89 @@ function Test-TargetResource
 
     Assert-MemberParameters @assertMemberParameters
 
-    $targetResource = Get-TargetResource @PSBoundParameters
+    [HashTable] $parameters = $PSBoundParameters
+    $parameters['MembershipAttribute'] = $MembershipAttribute
 
-    $targetResourceInCompliance = $true
-
-    if ($PSBoundParameters.ContainsKey('GroupScope') -and $targetResource.GroupScope -ne $GroupScope)
-    {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'GroupScope', $GroupScope, $targetResource.GroupScope)
-        $targetResourceInCompliance = $false
+    $getTargetResourceParameters = @{
+        GroupName           = $GroupName
+        AccountType         = $AccountType
+        DomainController    = $DomainController
+        MembershipAttribute = $MembershipAttribute
     }
 
-    if ($PSBoundParameters.ContainsKey('Category') -and $targetResource.Category -ne $Category)
+    @($getTargetResourceParameters.Keys) |
+        ForEach-Object {
+            if (-not $parameters.ContainsKey($_))
+            {
+                $getTargetResourceParameters.Remove($_)
+            }
+        }
+
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+
+    if ($getTargetResourceResult.Ensure -eq 'Present')
     {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'Category', $Category, $targetResource.Category)
-        $targetResourceInCompliance = $false
+        # Resource exists
+        if ($Ensure -eq 'Present')
+        {
+            # Resource should exist
+
+            # Test group members match passed membership parameters
+            if (-not (Test-Members @assertMemberParameters -ExistingMembers $targetResource.Members))
+            {
+                Write-Verbose -Message $script:localizedData.GroupMembershipNotDesiredState
+                $membersInDesiredState = $false
+            }
+            else
+            {
+                $membersInDesiredState = $true
+            }
+
+            $propertiesNotInDesiredState = (
+                Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
+                    -IgnoreProperties 'DomainController', 'Credential' | Where-Object -Property InDesiredState -eq $false)
+
+            if ($propertiesNotInDesiredState -or $membersInDesiredState -eq $false)
+            {
+                $inDesiredState = $false
+            }
+            else
+            {
+                # Resource is in desired state
+                Write-Verbose -Message ($script:localizedData.ResourceInDesiredStateMessage -f $GroupName)
+                $inDesiredState = $true
+            }
+        }
+        else
+        {
+            # Resource should not exist
+            Write-Verbose -Message ($script:localizedData.ResourceExistsButShouldNotMessage -f $GroupName)
+            $inDesiredState = $false
+        }
+    }
+    else
+    {
+        # Resource does not exist
+        if ($Ensure -eq 'Present')
+        {
+            # Resource should exist
+            Write-Verbose -Message ($script:localizedData.ResourceDoesNotExistButShouldMessage -f $GroupName)
+            $inDesiredState = $false
+        }
+        else
+        {
+            # Resource should not exist
+            Write-Verbose -Message ($script:localizedData.ResourceInDesiredStateMessage -f $GroupName)
+            $inDesiredState = $true
+        }
     }
 
-    if ($Path -and ($targetResource.Path -ne $Path))
-    {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'Path', $Path, $targetResource.Path)
-        $targetResourceInCompliance = $false
-    }
-
-    if ($Description -and ($targetResource.Description -ne $Description))
-    {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'Description', $Description, $targetResource.Description)
-        $targetResourceInCompliance = $false
-    }
-
-    if ($DisplayName -and ($targetResource.DisplayName -ne $DisplayName))
-    {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'DisplayName', $DisplayName, $targetResource.DisplayName)
-        $targetResourceInCompliance = $false
-    }
-
-    if ($ManagedBy -and ($targetResource.ManagedBy -ne $ManagedBy))
-    {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'ManagedBy', $ManagedBy, $targetResource.ManagedBy)
-        $targetResourceInCompliance = $false
-    }
-
-    if ($Notes -and ($targetResource.Notes -ne $Notes))
-    {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'Notes', $Notes, $targetResource.Notes)
-        $targetResourceInCompliance = $false
-    }
-
-    # Test group members match passed membership parameters
-    if (-not (Test-Members @assertMemberParameters -ExistingMembers $targetResource.Members))
-    {
-        Write-Verbose -Message $script:localizedData.GroupMembershipNotDesiredState
-        $targetResourceInCompliance = $false
-    }
-
-    if ($targetResource.Ensure -ne $Ensure)
-    {
-        Write-Verbose -Message ($script:localizedData.NotDesiredPropertyState -f
-            'Ensure', $Ensure, $targetResource.Ensure)
-        $targetResourceInCompliance = $false
-    }
-
-    return $targetResourceInCompliance
-} #end function Test-TargetResource
+    return $inDesiredState
+}
 
 <#
     .SYNOPSIS
-        Creates, removes or modifies the Active Directory group.
+        Sets the state of an Active Directory group.
 
     .PARAMETER GroupName
          Name of the Active Directory group.
@@ -557,9 +577,7 @@ function Set-TargetResource
 
     )
 
-    Assert-Module -ModuleName 'ActiveDirectory'
-
-    $assertMemberParameters = @{}
+    $assertMemberParameters = @{ }
 
     # Members parameter should always be added to enforce an empty group (issue #189)
     if ($PSBoundParameters.ContainsKey('Members'))
@@ -601,86 +619,80 @@ function Set-TargetResource
         }
     }
 
-    $commonParameters = Get-ADCommonParameters @PSBoundParameters
+    $getTargetResourceParameters = @{
+        GroupName           = $GroupName
+        AccountType         = $AccountType
+        DomainController    = $DomainController
+        MembershipAttribute = $MembershipAttribute
+    }
 
-    $getTargetResourceResult = Get-TargetResource @PSBoundParameters
+    @($getTargetResourceParameters.Keys) |
+        ForEach-Object {
+            if (-not $parameters.ContainsKey($_))
+            {
+                $getTargetResourceParameters.Remove($_)
+            }
+        }
 
-    if ($getTargetResourceResult.Ensure -eq 'Present')
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+
+    if ($Ensure -eq 'Present')
     {
-        if ($Ensure -eq 'Present')
+        # Resource should be present
+        if ($getTargetResourceResult.Ensure -eq 'Present')
         {
-            $setADGroupParams = $commonParameters.Clone()
-            $setADGroupParams['Identity'] = $getTargetResourceResult.DistinguishedName
-
-            # Update existing group properties
-            if ($PSBoundParameters.ContainsKey('Category') -and $Category -ne $getTargetResourceResult.Category)
+            # Resource is present
+            $propertiesNotInDesiredState = (
+                Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
+                    -IgnoreProperties 'DomainController', 'Credential' | Where-Object -Property InDesiredState -eq $false)
+            if ($propertiesNotInDesiredState)
             {
-                Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'Category', $Category)
+                $setADGroupParams = $commonParameters.Clone()
+                $setADGroupParams['Identity'] = $getTargetResourceResult.DistinguishedName
+                $SetAdGroupRequired = $false
+                $moveAdGroupRequired = $false
 
-                $setADGroupParams['GroupCategory'] = $Category
-            }
+                foreach ($property in $propertiesNotInDesiredState)
+                {
+                    if ($property.ParameterName -eq 'Path')
+                    {
+                        # The path has changed, so the account needs moving, but not until after any other changes
+                        $moveAdGroupRequired = $true
+                    }
+                    elseif ($property.ParameterName -eq 'GroupScope')
+                    {
+                        #  Cannot change DomainLocal <-> Global directly, so need to change to a Universal group first
+                        Set-ADGroup -Identity $getTargetResourceResult.DistinguishedName -GroupScope 'Universal' `
+                            -ErrorAction 'Stop'
 
-            if ($PSBoundParameters.ContainsKey('GroupScope') -and $GroupScope -ne $getTargetResourceResult.GroupScope)
-            {
-                <#
-                  Cannot change DomainLocal to Global or vice versa directly.
-                  Need to change them to a Universal group first!
-                #>
-                Set-ADGroup -Identity $getTargetResourceResult.DistinguishedName -GroupScope 'Universal' `
-                    -ErrorAction 'Stop'
+                        Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
+                            $GroupName, $property.ParameterName, $property.Expected)
 
-                Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'GroupScope', $GroupScope)
+                        $SetAdGroupParameters.Add($property.ParameterName, $property.Expected)
+                    }
+                    else
+                    {
+                        $setAdGroupRequired = $true
 
-                $setADGroupParams['GroupScope'] = $GroupScope
-            }
+                        Write-Verbose -Message ($script:localizedData.UpdatingResourcePropertyMessage -f
+                            $GroupName, $property.ParameterName, ($property.Expected -join ', '))
 
-            if ($Description -and ($Description -ne $getTargetResourceResult.Description))
-            {
-                Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'Description', $Description)
-
-                $setADGroupParams['Description'] = $Description
-            }
-
-            if ($DisplayName -and ($DisplayName -ne $getTargetResourceResult.DisplayName))
-            {
-                Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'DisplayName', $DisplayName)
-
-                $setADGroupParams['DisplayName'] = $DisplayName
-            }
-
-            if ($ManagedBy -and ($ManagedBy -ne $getTargetResourceResult.ManagedBy))
-            {
-                Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'ManagedBy', $ManagedBy)
-
-                $setADGroupParams['ManagedBy'] = $ManagedBy
-            }
-
-            if ($Notes -and ($Notes -ne $getTargetResourceResult.Notes))
-            {
-                Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'Notes', $Notes)
-
-                $setADGroupParams['Replace'] = @{
-                    Info = $Notes
+                        $SetAdGroupParameters.Add($property.ParameterName, $property.Expected)
+                    }
                 }
-            }
 
-            Write-Verbose -Message ($script:localizedData.UpdatingGroup -f $GroupName)
-
-            Set-ADGroup @setADGroupParams -ErrorAction 'Stop'
-
-            $groupParentDistinguishedName = Get-ADObjectParentDN -DN $getTargetResourceResult.DistinguishedName
-
-            # Move group if the path is not correct
-            if ($Path -and $Path -ne $groupParentDistinguishedName)
-            {
-                Write-Verbose -Message ($script:localizedData.MovingGroup -f $GroupName, $Path)
-
-                $moveADObjectParams = $commonParameters.Clone()
-                $moveADObjectParams['Identity'] = $getTargetResourceResult.DistinguishedName
-                $moveADObjectParams['TargetPath'] = $Path
-                $moveADObjectParams['ErrorAction'] = 'Stop'
-
-                Move-ADObject @moveADObjectParams
+                if ($setAdGroupRequired)
+                {
+                    try
+                    {
+                        Set-ADGroup @setADGroupParameters
+                    }
+                    catch
+                    {
+                        $errorMessage = ($script:localizedData.SettingResourceError -f $GroupName)
+                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                    }
+                }
             }
 
             if ($assertMemberParameters.Count -gt 0)
@@ -824,20 +836,29 @@ function Set-TargetResource
                     }
                 }
             }
-        }
-        elseif ($Ensure -eq 'Absent')
-        {
-            # Remove existing group
-            Write-Verbose -Message ($script:localizedData.RemovingGroup -f $GroupName)
 
-            Remove-ADGroup @commonParameters -Confirm:$false -ErrorAction 'Stop'
+            if ($moveAdGroupRequired)
+            {
+                Write-Verbose -Message ($script:localizedData.MovingGroup -f $GroupName, $Path)
+
+                $moveADObjectParams = $commonParameters.Clone()
+                $moveADObjectParams['Identity'] = $getTargetResourceResult.DistinguishedName
+
+                try
+                {
+                    Move-ADObject @moveADObjectParams -TargetPath $Path
+                }
+                catch
+                {
+                    $errorMessage = ($script:localizedData.MovingResourceError -f
+                        $GroupName, $getTargetResourceResult.Path, $Path)
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                }
+            }
         }
-    }
-    else
-    {
-        # The Active Directory group does not exist, check if it should.
-        if ($Ensure -eq 'Present')
+        else
         {
+            # Resource is absent
             $commonParametersUsingName = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
 
             $newAdGroupParameters = $commonParametersUsingName.Clone()
@@ -864,6 +885,13 @@ function Set-TargetResource
                 $newAdGroupParameters['Path'] = $Path
             }
 
+            if ($PSBoundParameters.ContainsKey('Notes'))
+            {
+                $newAdGroupParameters['OtherAttributes'] = @{
+                    Notes = $Notes
+                }
+            }
+
             $adGroup = $null
 
             # Create group. Try to restore account first if it exists.
@@ -876,36 +904,20 @@ function Set-TargetResource
                 $adGroup = Restore-ADCommonObject @restoreParams -ObjectClass 'Group'
             }
 
-            <#
-                Check if the Active Directory group was restored, if not create
-                the group.
-            #>
+            # Check if the Active Directory group was restored, if not create the group.
             if (-not $adGroup)
             {
                 Write-Verbose -Message ($script:localizedData.AddingGroup -f $GroupName)
 
-                $adGroup = New-ADGroup @newAdGroupParameters -PassThru -ErrorAction 'Stop'
-            }
-
-            <#
-                Only the New-ADGroup cmdlet takes a -Name parameter. Refresh
-                the parameters with the -Identity parameter rather than -Name.
-            #>
-            $commonParameters = Get-ADCommonParameters @PSBoundParameters
-
-            if ($PSBoundParameters.ContainsKey('Notes'))
-            {
-                # Can't set the Notes field when creating the group
-                Write-Verbose -Message ($script:localizedData.UpdatingGroupProperty -f 'Notes', $Notes)
-
-                $setADGroupParams = $commonParameters.Clone()
-                $setADGroupParams['Identity'] = $adGroup.DistinguishedName
-                $setADGroupParams['ErrorAction'] = 'Stop'
-                $setADGroupParams['Add'] = @{
-                    Info = $Notes
+                try
+                {
+                    $adGroup = New-ADGroup @newAdGroupParameters -PassThru -ErrorAction 'Stop'
                 }
-
-                Set-ADGroup @setADGroupParams
+                catch
+                {
+                    $errorMessage = ($script:localizedData.AddingResourceError -f $GroupName)
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                }
             }
 
             # Add the required members
@@ -940,7 +952,31 @@ function Set-TargetResource
                 Set-ADCommonGroupMember @setADCommonGroupMemberParms
             }
         }
-    } #end catch
-} #end function Set-TargetResource
+    }
+    else
+    {
+        # Resource should be absent
+        if ($getTargetResourceResult.Ensure -eq 'Present')
+        {
+            # Resource is present
+            Write-Verbose -Message ($script:localizedData.RemovingResourceMessage -f $GroupName)
+
+            try
+            {
+                Remove-ADGroup @commonParameters -Confirm:$false
+            }
+            catch
+            {
+                $errorMessage = ($script:localizedData.RemovingResourceError -f $GroupName)
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+            }
+        }
+        else
+        {
+            # Resource is absent
+            Write-Verbose -Message ($script:localizedData.ResourceInDesiredStateMessage -f $GroupName)
+        }
+    }
+}
 
 Export-ModuleMember -Function *-TargetResource

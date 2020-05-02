@@ -14,4 +14,6 @@ ConvertFrom-StringData @'
     UpdatingGroupProperty          = Updating AD Group property '{0}' to '{1}'. (ADG0012)
     GroupMembershipMultipleDomains = Group membership objects are in '{0}' different AD Domains. (ADG0013)
     RetrievingGroupMembersError    = Error retrieving membership for AD Group '{0}'. (ADG0014)
+    ResourceExistsButShouldNotMessage             = AD Group '{0}' exists but should not. (ADG0014)
+    ResourceDoesNotExistButShouldMessage          = AD Group '{0}' does not exist but should. (ADG0015)
 '@
