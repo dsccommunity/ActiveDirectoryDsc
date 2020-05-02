@@ -21,6 +21,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
     into the `ActiveDirectoryDsc.Common` module.
 
+### Fixed
+
+- ADReplicationSiteLink
+  - Fixed setting options after the resource is initially created
+    ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).
+
 ## [6.0.1] - 2020-04-16
 
 ### Fixed
