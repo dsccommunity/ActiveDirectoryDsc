@@ -15,7 +15,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         representing the exit code of the started process.
 
     .EXAMPLE
-        Start-ProcessWithTimeout -FilePath notepad.exe -ArgumentList test.txt -Timeout 60
+        Start-ProcessWithTimeout -FilePath 'djoin.exe' -ArgumentList '/PROVISION /DOMAIN contoso.com /MACHINE SRV1' -Timeout 300
 
     .PARAMETER FilePath
         Specifies the path to the executable to start.
