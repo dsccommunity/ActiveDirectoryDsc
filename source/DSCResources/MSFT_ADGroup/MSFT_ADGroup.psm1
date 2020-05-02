@@ -707,7 +707,7 @@ function Set-TargetResource
 
                 $assertMemberParameters['ExistingMembers'] = $adGroupMembers
 
-                # Return $false if the members mismatch.
+                # Return $false if the members mismatch
                 if (-not (Test-Members @assertMemberParameters))
                 {
                     # Members parameter should always be enforce if it is bound (issue #189)
