@@ -7,13 +7,33 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
-## [6.0.2] - 2020-04-17
-
 ### Added
 
 - ADFineGrainedPasswordPolicy
   - New resource for creating and updating Fine Grained Password Policies for AD principle subjects
     ([issue #584](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/584))
+
+### Changed
+
+- ActiveDirectoryDsc
+  - Migrated to DscResource.Common Module.
+  - Fixed the pipeline paths trigger.
+  - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline.
+  - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact.
+  - Removed redundant common functions `Resolve-DomainFQDN` and `Set-DscADComputer`.
+  - Added ActiveDirectoryDsc.Common Module markdown help.
+
+- ADDomainTrust
+  - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
+    into the `ActiveDirectoryDsc.Common` module.
+- ADReplicationSiteLink
+  - Refactor Test-TargetResource Function.
+
+### Fixed
+
+- ADReplicationSiteLink
+  - Fixed setting options after the resource is initially created
+    ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).
 
 ## [6.0.1] - 2020-04-16
 
