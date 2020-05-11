@@ -15,7 +15,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Specifies an Active Directory fine-grained password policy object name.
 
     .PARAMETER Precedence
-        The rank the policy is to be applied.
+        Specifies a value that defines the precedence of a fine-grained password policy among all fine-grained password policies.
 
     .PARAMETER SubjectsToInclude
         The ADPrinciple names to add to the policy, does not overwrite.
@@ -153,15 +153,14 @@ function Get-TargetResource
 
 <#
     .SYNOPSIS
-        Determines if the Active Directory default domain password policy is in
+        Determines if the Active Directory fine-grained password policy is in
         the desired state
 
     .PARAMETER Name
-        Name of the fine grained password policy to be applied. Name must be exactly
-        matching the subject to be applied to.
+        Specifies an Active Directory fine-grained password policy object name.
 
     .PARAMETER DisplayName
-        Display name of the fine grained password policy to be applied.
+        Specifies the display name of the object.
 
     .PARAMETER Subjects
         The ADPrinciple names the policy is to be applied to, overwrites all existing
@@ -177,37 +176,37 @@ function Get-TargetResource
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
 
     .PARAMETER ComplexityEnabled
-        Whether password complexity is enabled for the password policy.
+        Specifies whether password complexity is enabled for the password policy.
 
     .PARAMETER LockoutDuration
-        Length of time that an account is locked after the number of failed login attempts (minutes).
+        Specifies the length of time that an account is locked after the number of failed login attempts exceeds the lockout threshold (timespan minutes).
 
     .PARAMETER LockoutObservationWindow
-        Maximum time between two unsuccessful login attempts before the counter is reset to 0 (minutes).
+        Specifies the maximum time interval between two unsuccessful login attempts before the number of unsuccessful login attempts is reset to 0 (timespan minutes).
 
     .PARAMETER LockoutThreshold
-        Number of unsuccessful login attempts that are permitted before an account is locked out.
+        Specifies the number of unsuccessful login attempts that are permitted before an account is locked out.
 
     .PARAMETER MinPasswordAge
-        Minimum length of time that you can have the same password (days).
+        Specifies the minimum length of time before you can change a password (timespan days).
 
     .PARAMETER MaxPasswordAge
-        Maximum length of time that you can have the same password (days).
+        Specifies the maximum length of time that you can have the same password (timespan days).
 
     .PARAMETER MinPasswordLength
-        Minimum number of characters that a password must contain.
+        Specifies the minimum number of characters that a password must contain.
 
     .PARAMETER PasswordHistoryCount
-        Number of previous passwords to remember.
+        Specifies the number of previous passwords to save.
 
     .PARAMETER ReversibleEncryptionEnabled
-        Whether the directory must store passwords using reversible encryption.
+        Specifies whether the directory must store passwords using reversible encryption.
 
     .PARAMETER ProtectedFromAccidentalDeletion
-        Whether to protect the poliicy from accidental deletion.
+        Specifies whether to prevent the object from being deleted.
 
     .PARAMETER Precedence
-        The rank the policy is to be applied.
+        Specifies a value that defines the precedence of a fine-grained password policy among all fine-grained password policies.
 
     .NOTES
         Used Functions:
@@ -408,14 +407,13 @@ function Test-TargetResource
 
 <#
     .SYNOPSIS
-        Modifies the Active Directory fine grained password policy. Name must be exactly matching
-        the subject to be applied to.
+        Modifies the Active Directory fine-grained password policy.
 
     .PARAMETER Name
-        Name of the fine grained password policy to be applied.
+        Specifies an Active Directory fine-grained password policy object name.
 
     .PARAMETER DisplayName
-        Display name of the fine grained password policy to be applied.
+        Specifies the display name of the object.
 
     .PARAMETER Subjects
         The ADPrinciple names the policy is to be applied to, overwrites all existing and overrides
@@ -431,43 +429,43 @@ function Test-TargetResource
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
 
     .PARAMETER ComplexityEnabled
-        Whether password complexity is enabled for the password policy.
+        Specifies whether password complexity is enabled for the password policy.
 
     .PARAMETER LockoutDuration
-        Length of time that an account is locked after the number of failed login attempts (minutes).
+        Specifies the length of time that an account is locked after the number of failed login attempts exceeds the lockout threshold (timespan minutes).
 
     .PARAMETER LockoutObservationWindow
-        Maximum time between two unsuccessful login attempts before the counter is reset to 0 (minutes).
+        Specifies the maximum time interval between two unsuccessful login attempts before the number of unsuccessful login attempts is reset to 0 (timespan minutes).
 
     .PARAMETER LockoutThreshold
-        Number of unsuccessful login attempts that are permitted before an account is locked out.
+        Specifies the number of unsuccessful login attempts that are permitted before an account is locked out.
 
     .PARAMETER MinPasswordAge
-        Minimum length of time that you can have the same password (days).
+        Specifies the minimum length of time before you can change a password (timespan days).
 
     .PARAMETER MaxPasswordAge
-        Maximum length of time that you can have the same password (days).
+        Specifies the maximum length of time that you can have the same password (timespan days).
 
     .PARAMETER MinPasswordLength
-        Minimum number of characters that a password must contain.
+        Specifies the minimum number of characters that a password must contain.
 
     .PARAMETER PasswordHistoryCount
-        Number of previous passwords to remember.
+        Specifies the number of previous passwords to save.
 
     .PARAMETER ReversibleEncryptionEnabled
-        Whether the directory must store passwords using reversible encryption.
+        Specifies whether the directory must store passwords using reversible encryption.
 
     .PARAMETER ProtectedFromAccidentalDeletion
-        Whether to protect the poliicy from accidental deletion.
+        Specifies whether to prevent the object from being deleted.
 
     .PARAMETER Precedence
-        The rank the policy is to be applied.
+        Specifies a value that defines the precedence of a fine-grained password policy among all fine-grained password policies.
 
     .PARAMETER DomainController
-        Active Directory domain controller to enact the change upon.
+        Specifies the Active Directory Domain Services instance to connect to.
 
     .PARAMETER Credential
-        Credentials used to access the domain.
+        Specifies the user account credentials to use to perform this task.
 #>
 function Set-TargetResource
 {
