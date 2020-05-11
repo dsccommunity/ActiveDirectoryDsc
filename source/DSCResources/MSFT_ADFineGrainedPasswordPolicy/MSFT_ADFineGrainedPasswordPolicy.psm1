@@ -6,48 +6,13 @@ Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath '
 
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADFineGrainedPasswordPolicy'
 
-# List of changeable policy properties
-$mutablePropertyMap = @(
-    @{
-        Name = 'ComplexityEnabled'
-    }
-    @{
-        Name = 'LockoutDuration'
-    }
-    @{
-        Name = 'LockoutObservationWindow'
-    }
-    @{
-        Name = 'LockoutThreshold'
-    }
-    @{
-        Name = 'MinPasswordAge'
-    }
-    @{
-        Name = 'MaxPasswordAge'
-    }
-    @{
-        Name = 'MinPasswordLength'
-    }
-    @{
-        Name = 'PasswordHistoryCount'
-    }
-    @{
-        Name = 'ReversibleEncryptionEnabled'
-    }
-    @{
-        Name = 'Precedence'
-    }
-)
-
 <#
     .SYNOPSIS
-        Returns the current state of an Active Directory fine grained password
+        Returns the current state of an Active Directory fine-grained password
         policy.
 
     .PARAMETER Name
-        Name of the fine grained password policy to be applied. Name must be
-        exactly matching the subject to be applied to.
+        Specifies an Active Directory fine-grained password policy object name.
 
     .PARAMETER Precedence
         The rank the policy is to be applied.
@@ -57,12 +22,6 @@ $mutablePropertyMap = @(
 
     .PARAMETER SubjectsToExclude
         The ADPrinciple names to remove from the policy, does not overwrite.
-
-    .PARAMETER DomainController
-        Active Directory domain controller to enact the change upon.
-
-    .PARAMETER Credential
-        Credentials used to access the domain.
 #>
 function Get-TargetResource
 {
@@ -88,17 +47,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.String[]]
-        $SubjectsToExclude,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DomainController,
-
-        [Parameter()]
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.CredentialAttribute()]
-        $Credential
+        $SubjectsToExclude
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
@@ -106,31 +55,43 @@ function Get-TargetResource
     Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
 
     $SubjectsDifferent = $false
-    $getTargetResourceParams = @{
-        Identity = $Name
-    }
 
-    if ($PSBoundParameters.ContainsKey('Credential'))
+    try
     {
-        $getTargetResourceParams['Credential'] = $Credential
+        $policy = Get-ADFineGrainedPasswordPolicy -Filter { name -eq $Name }
     }
-
-    if ($PSBoundParameters.ContainsKey('DomainController'))
+    catch
     {
-        $getTargetResourceParams['DomainController'] = $DomainController
+        $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicyError -f $Name
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
-    $policy = Get-ADFineGrainedPasswordPolicy -Filter { name -eq $Name }
-    $subjects = (Get-ADFineGrainedPasswordPolicySubject -Identity $Name).Name
+    try
+    {
+        $policySubjects = (Get-ADFineGrainedPasswordPolicySubject -Identity $Name).Name
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        Write-Verbose -Message ($script:localizedData.FineGrainedPasswordPolicySubjectNotFoundMessage -f $Name)
+        $policySubjects = $null
+    }
+    catch
+    {
+        $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicySubjectError -f $Name
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+    }
+
 
     if ($PSBoundParameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
     {
         $SubjectsDifferent = $true
     }
 
-    if ($PSBoundParameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
+    if ($PSBoundParameters.ContainsKey('SubjectsToInclude') -and `
+        -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
     {
-        if (Compare-Object -ReferenceObject $SubjectsToInclude -DifferenceObject $subjects -IncludeEqual | Where-Object `
+        if (Compare-Object -ReferenceObject $SubjectsToInclude -DifferenceObject $policySubjects `
+            -IncludeEqual | Where-Object `
             {
                 $_.SideIndicator -eq "<="
             })
@@ -139,9 +100,11 @@ function Get-TargetResource
         }
     }
 
-    if ($PSBoundParameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
+    if ($PSBoundParameters.ContainsKey('SubjectsToExclude') -and `
+        -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
     {
-        if (Compare-Object -ReferenceObject $SubjectsToExclude -DifferenceObject $subjects -IncludeEqual | Where-Object `
+        if (Compare-Object -ReferenceObject $SubjectsToExclude -DifferenceObject $policySubjects `
+            -IncludeEqual | Where-Object `
             {
                 $_.SideIndicator -eq "=="
             })
@@ -246,11 +209,11 @@ function Get-TargetResource
     .PARAMETER Precedence
         The rank the policy is to be applied.
 
-    .PARAMETER DomainController
-        Active Directory domain controller to enact the change upon.
-
-    .PARAMETER Credential
-        Credentials used to access the domain.
+    .NOTES
+        Used Functions:
+            Name                          | Module
+            ------------------------------|--------------------------
+            Compare-ResourcePropertyState | ActiveDirectoryDsc.Common
 #>
 function Test-TargetResource
 {
@@ -258,7 +221,6 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-
         [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
@@ -351,71 +313,84 @@ function Test-TargetResource
         $Credential
     )
 
+    # Need to set these parameters to compare if users are using the default parameter values
+    [HashTable] $parameters = $PSBoundParameters
+
     $getTargetResourceParams = @{
         Name       = $Name
         Precedence = $Precedence
     }
 
-    if ($PSBoundParameters.ContainsKey('Credential'))
-    {
-        $getTargetResourceParams['Credential'] = $Credential
-    }
-
-    if ($PSBoundParameters.ContainsKey('DomainController'))
-    {
-        $getTargetResourceParams['DomainController'] = $DomainController
-    }
-
-    if ($PSBoundParameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
+    # Build parameters needed to get resource properties
+    if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
     {
         $getTargetResourceParams['Subjects'] = $Subjects
     }
 
-    if ($PSBoundParameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
+    if ($parameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
     {
         $getTargetResourceParams['SubjectsToInclude'] = $SubjectsToInclude
     }
 
-    if ($PSBoundParameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
+    if ($parameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
     {
         $getTargetResourceParams['SubjectsToExclude'] = $SubjectsToExclude
     }
 
-    $targetResource = Get-TargetResource @getTargetResourceParams
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParams
     $inDesiredState = $true
 
-    if ($targetResource.Ensure -ne $Ensure)
+    if ($getTargetResourceResult.Ensure -eq 'Present')
     {
-        $inDesiredState = $false
+        if ($Ensure -eq 'Present')
+        {
+            # Resource should exist
+            $propertiesNotInDesiredState = (
+                Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
+                    -IgnoreProperties 'DisplayName', 'Subjects', 'SubjectsToInclude', 'SubjectsToExclude', `
+                        'SubjectsDifferent', 'ProtectedFromAccidentalDeletion' | `
+                            Where-Object -Property InDesiredState -eq $false)
+
+            if ($propertiesNotInDesiredState)
+            {
+                $inDesiredState = $false
+            }
+            else
+            {
+                # Resource is in desired state
+                Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f
+                    $Name)
+                $inDesiredState = $true
+            }
+        }
+        else
+        {
+            # Resource should not exist
+            Write-Verbose -Message ($script:localizedData.ResourceExistsButShouldNotMessage -f
+                $Name)
+            $inDesiredState = $false
+        }
     }
     else
     {
-        if ($targetResource.Ensure -eq 'Present')
+        # Resource does not exist
+        if ($Ensure -eq 'Present')
         {
-            foreach ($property in $mutablePropertyMap)
-            {
-                $propertyName = $property.Name
-
-                if ($PSBoundParameters.ContainsKey($propertyName))
-                {
-                    $expectedValue = $PSBoundParameters[$propertyName]
-                    $actualValue = $targetResource[$propertyName]
-
-                    if ($expectedValue -ne $actualValue)
-                    {
-                        Write-Verbose -Message ($script:localizedData.ResourcePropertyValueIncorrect -f `
-                        $propertyName, $expectedValue, $actualValue)
-                        $inDesiredState = $false
-                    }
-                }
-            }
+            # Resource should exist
+            Write-Verbose -Message ($script:localizedData.ResourceDoesNotExistButShouldMessage -f $Name)
+            $inDesiredState = $false
+        }
+        else
+        {
+            # Resource should not exist
+            $inDesiredState = $true
         }
     }
 
-    if ($targetResource.SubjectsDifferent)
+    if ($getTargetResourceResult.SubjectsDifferent)
     {
         Write-Verbose -Message ($script:localizedData.ResourcePropertyValueIncorrect -f `
-        'Subjects are different', $false, $targetResource.SubjectsDifferent)
+        'Subjects are different', $false, $getTargetResourceResult.SubjectsDifferent)
         $inDesiredState = $false
     }
 
@@ -591,6 +566,9 @@ function Set-TargetResource
         $Credential
     )
 
+    # Need to set these to compare if not specified since user is using defaults
+    [HashTable] $parameters = $PSBoundParameters
+
     Assert-Module -ModuleName 'ActiveDirectory'
 
     $getTargetResourceParams = @{
@@ -598,54 +576,130 @@ function Set-TargetResource
         Precedence = $Precedence
     }
 
-    if ($PSBoundParameters.ContainsKey('Credential'))
-    {
-        $getTargetResourceParams['Credential'] = $Credential
-    }
-
-    if ($PSBoundParameters.ContainsKey('DomainController'))
-    {
-        $getTargetResourceParams['DomainController'] = $DomainController
-    }
-
-    if ($PSBoundParameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
+    # Build parameters needed to get resource properties
+    if ($parameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
     {
         $getTargetResourceParams['SubjectsToInclude'] = $SubjectsToInclude
     }
 
-    if ($PSBoundParameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
+    if ($parameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
     {
         $getTargetResourceParams['SubjectsToExclude'] = $SubjectsToExclude
     }
 
-    $targetResource = Get-TargetResource @getTargetResourceParams
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParams
 
-    $PSBoundParameters['Identity'] = $Name
+    $parameters['Identity'] = $Name
 
-    if ($targetResource.Ensure -eq 'Present')
+    if ($getTargetResourceResult.Ensure -eq 'Present')
     {
-        $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters
+        $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
     }
     else
     {
-        $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @PSBoundParameters -UseNameParameter
+        $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters -UseNameParameter
     }
 
-    foreach ($property in $mutablePropertyMap)
+    # Build parameters needed to set resource properties
+    if ($parameters.ContainsKey('ComplexityEnabled') -and `
+        -not [System.String]::IsNullOrEmpty($ComplexityEnabled))
     {
-        $propertyName = $property.Name
-
-        if ($PSBoundParameters.ContainsKey($propertyName))
-        {
-            $propertyValue = $PSBoundParameters[$propertyName]
-
-            $setADFineGrainedPasswordPolicyParams[$propertyName] = $propertyValue
-
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f $propertyName, $propertyValue)
-        }
+        $setADFineGrainedPasswordPolicyParams['ComplexityEnabled'] = $ComplexityEnabled
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'ComplexityEnabled', $ComplexityEnabled)
     }
 
-    if (($targetResource.Ensure -eq 'Absent') -and ($Ensure -eq 'Present'))
+    if ($parameters.ContainsKey('LockoutDuration') -and `
+        -not [System.String]::IsNullOrEmpty($LockoutDuration))
+    {
+        $setADFineGrainedPasswordPolicyParams['LockoutDuration'] = $LockoutDuration
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'LockoutDuration', $LockoutDuration)
+    }
+
+    if ($parameters.ContainsKey('LockoutObservationWindow') -and `
+        -not [System.String]::IsNullOrEmpty($LockoutObservationWindow))
+    {
+        $setADFineGrainedPasswordPolicyParams['LockoutObservationWindow'] = $LockoutObservationWindow
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'LockoutObservationWindow', $LockoutObservationWindow)
+    }
+
+    if ($parameters.ContainsKey('LockoutThreshold') -and `
+        -not [System.String]::IsNullOrEmpty($LockoutThreshold))
+    {
+        $setADFineGrainedPasswordPolicyParams['LockoutThreshold'] = $LockoutThreshold
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'LockoutThreshold', $LockoutThreshold)
+    }
+
+    if ($parameters.ContainsKey('MinPasswordAge') -and `
+        -not [System.String]::IsNullOrEmpty($MinPasswordAge))
+    {
+        $setADFineGrainedPasswordPolicyParams['MinPasswordAge'] = $MinPasswordAge
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'MinPasswordAge', $MinPasswordAge)
+    }
+
+    if ($parameters.ContainsKey('MaxPasswordAge') -and `
+        -not [System.String]::IsNullOrEmpty($MaxPasswordAge))
+    {
+        $setADFineGrainedPasswordPolicyParams['MaxPasswordAge'] = $MaxPasswordAge
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'MaxPasswordAge', $MaxPasswordAge)
+    }
+
+    if ($parameters.ContainsKey('MinPasswordLength') -and `
+        -not [System.String]::IsNullOrEmpty($MinPasswordLength))
+    {
+        $setADFineGrainedPasswordPolicyParams['MinPasswordLength'] = $MinPasswordLength
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'MinPasswordLength', $MinPasswordLength)
+    }
+
+    if ($parameters.ContainsKey('PasswordHistoryCount') -and `
+        -not [System.String]::IsNullOrEmpty($PasswordHistoryCount))
+    {
+        $setADFineGrainedPasswordPolicyParams['PasswordHistoryCount'] = $PasswordHistoryCount
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'PasswordHistoryCount', $PasswordHistoryCount)
+    }
+
+    if ($parameters.ContainsKey('ReversibleEncryptionEnabled') -and `
+        -not [System.String]::IsNullOrEmpty($ReversibleEncryptionEnabled))
+    {
+        $setADFineGrainedPasswordPolicyParams['ReversibleEncryptionEnabled'] = $ReversibleEncryptionEnabled
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'ReversibleEncryptionEnabled', $ReversibleEncryptionEnabled)
+    }
+
+    if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion') -and -not [System.String]::IsNullOrEmpty($ProtectedFromAccidentalDeletion))
+    {
+        $setADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'ProtectedFromAccidentalDeletion', $ProtectedFromAccidentalDeletion)
+    }
+
+    if ($parameters.ContainsKey('Precedence') -and -not [System.String]::IsNullOrEmpty($Precedence))
+    {
+        $setADFineGrainedPasswordPolicyParams['Precedence'] = $Precedence
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'Precedence', $Precedence)
+    }
+
+    if ($parameters.ContainsKey('Credential') -and -not [System.String]::IsNullOrEmpty($Credential))
+    {
+        $setADFineGrainedPasswordPolicyParams['Credential'] = $Credential
+    }
+
+    if ($parameters.ContainsKey('DomainController') -and `
+        -not [System.String]::IsNullOrEmpty($DomainController))
+    {
+        $setADFineGrainedPasswordPolicyParams['Server'] = $DomainController
+    }
+
+    # Resource is absent and should be present
+    if (($getTargetResourceResult.Ensure -eq 'Absent') -and ($Ensure -eq 'Present'))
     {
         Write-Verbose -Message ($script:localizedData.CreatingFineGrainedPasswordPolicy -f $Name)
 
@@ -653,7 +707,7 @@ function Set-TargetResource
         {
             [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
 
-            if ($PSBoundParameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
+            if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
             {
                 [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
             }
@@ -663,7 +717,8 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
         }
     }
-    elseif (($targetResource.Ensure -eq 'Present') -and ($Ensure -eq 'Present'))
+    # Resource is present not in desired state
+    elseif (($getTargetResourceResult.Ensure -eq 'Present') -and ($Ensure -eq 'Present'))
     {
         Write-Verbose -Message ($script:localizedData.UpdatingFineGrainedPasswordPolicy -f $Name)
 
@@ -671,8 +726,8 @@ function Set-TargetResource
         {
             [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
 
-
-            if ($PSBoundParameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
+            # Add the exclusive subjects to policy (removes all others)
+            if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
             {
                 $getExistingSubjectsToRemove = Get-ADFineGrainedPasswordPolicySubject -Identity $Name
 
@@ -681,7 +736,15 @@ function Set-TargetResource
                     Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
                     "Removing existing subjects count: $($getExistingSubjectsToRemove.Count)")
 
-                    [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $getExistingSubjectsToRemove -Confirm:$false
+                    try
+                    {
+                        [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
+                            $getExistingSubjectsToRemove -Confirm:$false
+                    }
+                    catch
+                    {
+                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
+                    }
                 }
 
                 foreach ($subject in $Subjects)
@@ -695,13 +758,13 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, `
-                        'ADPrinciple subject not found or other non-fatal error')
+                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, $_)
                     }
                 }
             }
 
-            if ($PSBoundParameters.ContainsKey('SubjectsToInclude') -and [System.String]::IsNullOrEmpty($Subjects))
+            # Add the specific subjects to policy
+            if ($parameters.ContainsKey('SubjectsToInclude') -and [System.String]::IsNullOrEmpty($Subjects))
             {
                 foreach ($subject in $SubjectsToInclude)
                 {
@@ -714,13 +777,13 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, `
-                        'ADPrinciple subject not found or other non-fatal error')
+                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, $_)
                     }
                 }
             }
 
-            if ($PSBoundParameters.ContainsKey('SubjectsToExclude') -and [System.String]::IsNullOrEmpty($Subjects))
+            # Remove the specific subjects from policy
+            if ($parameters.ContainsKey('SubjectsToExclude') -and [System.String]::IsNullOrEmpty($Subjects))
             {
                 foreach ($subject in $SubjectsToExclude)
                 {
@@ -729,12 +792,12 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
                         "Removing subject: $($subject)")
 
-                        [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject -Confirm:$false
+                        [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject `
+                            -Confirm:$false
                     }
                     catch
                     {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, `
-                        'ADPrinciple subject not found or other non-fatal error')
+                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, $_)
                     }
                 }
             }
@@ -744,13 +807,15 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
         }
     }
-    elseif (($targetResource.Ensure -eq 'Present') -and ($Ensure -eq 'Absent'))
+    # Resource is present but should be absent
+    elseif (($getTargetResourceResult.Ensure -eq 'Present') -and ($Ensure -eq 'Absent'))
     {
         Write-Verbose -Message ($script:localizedData.RemovingFineGrainedPasswordPolicy -f $Name)
 
         try
         {
-            if ($PSBoundParameters.ContainsKey('ProtectedFromAccidentalDeletion') -and (-not $ProtectedFromAccidentalDeletion))
+            if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion') -and `
+                -not $ProtectedFromAccidentalDeletion)
             {
                 Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
                 'Attempting to remove the protection for accidental deletion')
@@ -759,7 +824,7 @@ function Set-TargetResource
             else
             {
                 Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                'ProtectedFromAccidentalDeletion is not defined or set to true, delete may fail if not explicitly set false')
+                'ProtectedFromAccidentalDeletion is not defined to false, delete may fail if not explicitly set false')
             }
 
             [ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
