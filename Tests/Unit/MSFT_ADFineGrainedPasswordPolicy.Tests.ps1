@@ -531,6 +531,20 @@ try
             }
 
             Context 'When the Resource does not exist and needs to be created' {
+                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+                It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+
+                    $result = Get-TargetResource @testGetDefaultParams
+
+                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter `
+                        { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                }
+
                 It "Calls 'New-ADFineGrainedPasswordPolicy' and 'Add-ADFineGrainedPasswordPolicySubject' cmdlets" {
                     $newFineGrainedParametersPolicy = $stubFineGrainedPasswordPolicy.Clone()
                     $newFineGrainedParametersPolicy['Precedence'] = 10
@@ -559,6 +573,20 @@ try
             }
 
             Context 'When the Resource exists and needs to be deleted' {
+                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+                It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+
+                    $result = Get-TargetResource @testGetDefaultParams
+
+                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter `
+                        { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                }
+
                 It "Calls 'Remove-ADFineGrainedPasswordPolicy' and 'Set-ADFineGrainedPasswordPolicy' cmdlets" {
                     $removeFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
                     $removeFineGrainedParametersPolicy['ProtectedFromAccidentalDeletion'] = $false
@@ -583,6 +611,20 @@ try
             }
 
             Context 'When the Resource exists and subjects to be appended' {
+                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+                It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+
+                    $result = Get-TargetResource @testGetDefaultParams
+
+                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter `
+                        { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                }
+
                 It "Calls 'Add-ADFineGrainedPasswordPolicySubject' with subjects to include" {
                     $addSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
                     $addSubjectsFineGrainedParametersPolicy['SubjectsToInclude'] = 'Domain Admins'
@@ -602,6 +644,20 @@ try
             }
 
             Context 'When the Resource exists and subjects to be explicitly set' {
+                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+                It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+
+                    $result = Get-TargetResource @testGetDefaultParams
+
+                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter `
+                        { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                }
+
                 It "Calls 'Add-ADFineGrainedPasswordPolicySubject' with subjects to set" {
                     $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
                     $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Users'
@@ -621,6 +677,20 @@ try
             }
 
             Context 'When the Resource exists and some subjects to be removed' {
+                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+                It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+
+                    $result = Get-TargetResource @testGetDefaultParams
+
+                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter `
+                        { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                }
+
                 It "Calls 'Remove-ADFineGrainedPasswordPolicySubject' with subjects to remove" {
                     $removeSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
                     $removeSubjectsFineGrainedParametersPolicy['SubjectsToExclude'] = 'Domain Users'
