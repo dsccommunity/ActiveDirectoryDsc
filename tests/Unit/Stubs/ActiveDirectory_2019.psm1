@@ -2,7 +2,7 @@
 # Version: 1.0.1.0
 # CreatedOn: 2019-08-12 11:47:22Z
 
-Add-Type -IgnoreWarnings -TypeDefinition @'
+Add-Type -IgnoreWarnings -WarningAction SilentlyContinue -TypeDefinition @'
 namespace Microsoft.ActiveDirectory.Management
 {
     public class ADAccount
@@ -11,14 +11,14 @@ namespace Microsoft.ActiveDirectory.Management
         public ADAccount() { }
         public ADAccount(System.String identity) { }
         public ADAccount(System.Guid guid) { }
-        public ADAccount(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADAccount(System.Object sid) { }
         public ADAccount(Microsoft.ActiveDirectory.Management.ADObject identity) { }
 
         // Property
         public System.String UserPrincipalName { get; set; }
         public System.Boolean Enabled { get; set; }
         public System.String SamAccountName { get; set; }
-        public System.Security.Principal.SecurityIdentifier SID { get; set; }
+        public System.Object SID { get; set; }
         public System.String DistinguishedName { get; set; }
         public System.String Name { get; set; }
         public System.String ObjectClass { get; set; }
@@ -196,14 +196,14 @@ namespace Microsoft.ActiveDirectory.Management
         public ADComputer(Microsoft.ActiveDirectory.Management.ADObject identity) { }
         public ADComputer(System.String identity) { }
         public ADComputer(System.Guid guid) { }
-        public ADComputer(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADComputer(System.Object sid) { }
 
         // Property
         public System.String DNSHostName { get; set; }
         public System.String UserPrincipalName { get; set; }
         public System.Boolean Enabled { get; set; }
         public System.String SamAccountName { get; set; }
-        public System.Security.Principal.SecurityIdentifier SID { get; set; }
+        public System.Object SID { get; set; }
         public System.String DistinguishedName { get; set; }
         public System.String Name { get; set; }
         public System.String ObjectClass { get; set; }
@@ -272,11 +272,11 @@ namespace Microsoft.ActiveDirectory.Management
         public ADDomain() { }
         public ADDomain(System.String identity) { }
         public ADDomain(System.Guid guid) { }
-        public ADDomain(System.Security.Principal.SecurityIdentifier sid) { }
+       public ADDomain(System.Object sid) { }
         public ADDomain(Microsoft.ActiveDirectory.Management.ADObject adobject) { }
 
         // Property
-        public System.Security.Principal.SecurityIdentifier DomainSID { get; set; }
+        public System.Object DomainSID { get; set; }
         public Microsoft.ActiveDirectory.Management.ADPropertyValueCollection AllowedDNSSuffixes { get; set; }
         public System.Nullable<System.TimeSpan> LastLogonReplicationInterval { get; set; }
         public System.Nullable<Microsoft.ActiveDirectory.Management.ADDomainMode> DomainMode { get; set; }
@@ -320,7 +320,7 @@ namespace Microsoft.ActiveDirectory.Management
         public ADDomainController() { }
         public ADDomainController(System.String identity) { }
         public ADDomainController(System.Guid guid) { }
-        public ADDomainController(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADDomainController(System.Object sid) { }
         public ADDomainController(Microsoft.ActiveDirectory.Management.ADObject identity) { }
 
         // Property
@@ -414,7 +414,7 @@ namespace Microsoft.ActiveDirectory.Management
         public ADForest() { }
         public ADForest(System.String identity) { }
         public ADForest(System.Guid guid) { }
-        public ADForest(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADForest(System.Object sid) { }
         public ADForest(Microsoft.ActiveDirectory.Management.ADObject adobject) { }
 
         // Property
@@ -458,14 +458,14 @@ namespace Microsoft.ActiveDirectory.Management
         public ADGroup() { }
         public ADGroup(System.String identity) { }
         public ADGroup(System.Guid guid) { }
-        public ADGroup(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADGroup(System.Object sid) { }
         public ADGroup(Microsoft.ActiveDirectory.Management.ADObject identity) { }
 
         // Property
         public System.Nullable<Microsoft.ActiveDirectory.Management.ADGroupScope> GroupScope { get; set; }
         public System.Nullable<Microsoft.ActiveDirectory.Management.ADGroupCategory> GroupCategory { get; set; }
         public System.String SamAccountName { get; set; }
-        public System.Security.Principal.SecurityIdentifier SID { get; set; }
+        public System.Object SID { get; set; }
         public System.String DistinguishedName { get; set; }
         public System.String Name { get; set; }
         public System.String ObjectClass { get; set; }
@@ -606,12 +606,12 @@ namespace Microsoft.ActiveDirectory.Management
         public ADPrincipal() { }
         public ADPrincipal(System.String identity) { SamAccountName = identity; }
         public ADPrincipal(System.Guid guid) { }
-        public ADPrincipal(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADPrincipal(System.Object sid) { }
         public ADPrincipal(Microsoft.ActiveDirectory.Management.ADObject adobject) { }
 
         // Property
         public System.String SamAccountName { get; set; }
-        public System.Security.Principal.SecurityIdentifier SID { get; set; }
+        public System.Object SID { get; set; }
         public System.String DistinguishedName { get; set; }
         public System.String Name { get; set; }
         public System.String ObjectClass { get; set; }
@@ -828,14 +828,14 @@ namespace Microsoft.ActiveDirectory.Management
         public ADServiceAccount(Microsoft.ActiveDirectory.Management.ADObject identity) { }
         public ADServiceAccount(System.String identity) { }
         public ADServiceAccount(System.Guid guid) { }
-        public ADServiceAccount(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADServiceAccount(System.Object sid) { }
 
         // Property
         public System.String[] ServicePrincipalNames { get; set; }
         public System.String UserPrincipalName { get; set; }
         public System.Boolean Enabled { get; set; }
         public System.String SamAccountName { get; set; }
-        public System.Security.Principal.SecurityIdentifier SID { get; set; }
+        public System.Object SID { get; set; }
         public System.String DistinguishedName { get; set; }
         public System.String Name { get; set; }
         public System.String ObjectClass { get; set; }
@@ -905,7 +905,7 @@ namespace Microsoft.ActiveDirectory.Management
         public ADUser() { }
         public ADUser(System.String identity) { }
         public ADUser(System.Guid guid) { }
-        public ADUser(System.Security.Principal.SecurityIdentifier sid) { }
+        public ADUser(System.Object sid) { }
         public ADUser(Microsoft.ActiveDirectory.Management.ADObject identity) { }
 
         // Property
@@ -914,7 +914,7 @@ namespace Microsoft.ActiveDirectory.Management
         public System.String UserPrincipalName { get; set; }
         public System.Boolean Enabled { get; set; }
         public System.String SamAccountName { get; set; }
-        public System.Security.Principal.SecurityIdentifier SID { get; set; }
+        public System.Object SID { get; set; }
         public System.String DistinguishedName { get; set; }
         public System.String Name { get; set; }
         public System.String ObjectClass { get; set; }

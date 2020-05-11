@@ -1,10 +1,13 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
-Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
+$aDCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
+Import-Module -Name $aDCommonModulePath
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController'
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
     .SYNOPSIS
@@ -28,7 +31,8 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainController
             Get-ADDomain                                    | ActiveDirectory
             Get-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
             Get-DomainControllerObject                      | ActiveDirectoryDsc.Common
-            Assert-Module                                   | ActiveDirectoryDsc.Common
+            Assert-Module                                   | DscResource.Common
+            New-ObjectNotFoundException                     | DscResource.Common
 #>
 function Get-TargetResource
 {
@@ -195,7 +199,7 @@ function Get-TargetResource
             Remove-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
             Add-ADDomainControllerPasswordReplicationPolicy    | ActiveDirectory
             Get-DomainControllerObject                         | ActiveDirectoryDsc.Common
-            New-InvalidOperationException                      | ActiveDirectoryDsc.Common
+            New-InvalidOperationException                      | DscResource.Common
 #>
 function Set-TargetResource
 {
@@ -604,9 +608,9 @@ function Set-TargetResource
             Name                          | Module
             ------------------------------|--------------------------
             Test-ADReplicationSite        | ActiveDirectoryDsc.Common
-            New-InvalidOperationException | ActiveDirectoryDsc.Common
-            New-ObjectNotFoundException   | ActiveDirectoryDsc.Common
             Test-Members                  | ActiveDirectoryDsc.Common
+            New-InvalidOperationException | DscResource.Common
+            New-ObjectNotFoundException   | DscResource.Common
 #>
 function Test-TargetResource
 {

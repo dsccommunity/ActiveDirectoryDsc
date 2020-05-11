@@ -58,8 +58,8 @@ try
             Cost                          = 1
             Description                   = 'My Changed Description'
             ReplicationFrequencyInMinutes = 1
-            SitesIncluded                 = 'site11', 'site12'
-            SitesExcluded                 = $mockResource.SitesIncluded
+            SitesIncluded                 = $mockSite3
+            SitesExcluded                 = $mockSite1
             OptionChangeNotification      = $true
             OptionTwoWaySync              = $true
             OptionDisableCompression      = $true
@@ -335,19 +335,52 @@ try
                 }
 
                 Context 'When the Resource should be Present' {
-                    BeforeAll {
-
-                    }
 
                     foreach ($property in $mockChangedResource.Keys)
                     {
                         Context "When $property has changed" {
                             BeforeAll {
-                                $setTargetResourceParametersChangedProperty = $setTargetResourcePresentParameters.Clone()
+                                $setTargetResourceParametersChangedProperty = `
+                                    $setTargetResourcePresentParameters.Clone()
                                 $setTargetResourceParametersChangedProperty.$property = $mockChangedResource.$property
-                                if ($property -eq 'SitesExcluded')
+
+                                if ($property -eq 'Cost')
+                                {
+                                    $setParameterFilter = `
+                                    { $Cost -eq $setTargetResourceParametersChangedProperty.Cost }
+                                }
+                                elseif ($property -eq 'Description')
+                                {
+                                    $setParameterFilter = { $Description -eq
+                                        $setTargetResourceParametersChangedProperty.Description }
+                                }
+                                elseif ($property -eq 'ReplicationFrequencyInMinutes')
+                                {
+                                    $setParameterFilter = { $ReplicationFrequencyInMinutes -eq
+                                        $setTargetResourceParametersChangedProperty.ReplicationFrequencyInMinutes }
+                                }
+                                elseif ($property -eq 'SitesIncluded')
+                                {
+                                    $setParameterFilter = { $SitesIncluded.Add -eq
+                                        $setTargetResourceParametersChangedProperty.SitesIncluded }
+                                }
+                                elseif ($property -eq 'SitesExcluded')
                                 {
                                     $setTargetResourceParametersChangedProperty['SitesIncluded'] = ''
+                                    $setParameterFilter = { $SitesIncluded.Remove -eq
+                                        $setTargetResourceParametersChangedProperty.SitesExcluded }
+                                }
+                                elseif ($property -eq 'OptionChangeNotification')
+                                {
+                                    $setParameterFilter = { $Replace.Options -eq 1 }
+                                }
+                                elseif ($property -eq 'OptionTwoWaySync')
+                                {
+                                    $setParameterFilter = { $Replace.Options -eq 2 }
+                                }
+                                elseif ($property -eq 'OptionDisableCompression')
+                                {
+                                    $setParameterFilter = { $Replace.Options -eq 4 }
                                 }
                             }
 
@@ -360,6 +393,11 @@ try
                                     -ParameterFilter { `
                                         $Name -eq $setTargetResourceParametersChangedProperty.Name } `
                                     -Exactly -Times 1
+                                Assert-MockCalled -CommandName Set-ADReplicationSiteLink `
+                                    -ParameterFilter $setParameterFilter `
+                                    -Exactly -Times 1
+                                Assert-MockCalled -CommandName New-ADReplicationSiteLink  `
+                                    -Exactly -Times 0
                             }
                         }
                     }

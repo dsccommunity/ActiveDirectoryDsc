@@ -347,7 +347,7 @@ try
         Describe 'MSFT_ADObjectEnabledState\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 Mock -CommandName Assert-Module
-                Mock -CommandName Set-DscADComputer
+                Mock -CommandName Set-ADComputer
 
                 $mockGetTargetResource_Enabled = {
                     return @{
@@ -385,7 +385,7 @@ try
                     It 'Should not call any mocks that changes state' {
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                     }
                 }
 
@@ -403,7 +403,7 @@ try
                     It 'Should not call any mocks that changes state' {
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Set-DscADComputer -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
                     }
                 }
             }
@@ -423,9 +423,9 @@ try
                     It 'Should call the correct mocks' {
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
-                            $PSBoundParameters.ContainsKey('Enabled') -and $Enabled -eq $true
-                        } -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $true
+                        } -Exactly -Times 1 -Scope It
                     }
                 }
 
@@ -443,9 +443,9 @@ try
                     It 'Should call the correct mocks' {
                         { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Set-DscADComputer -ParameterFilter {
-                            $PSBoundParameters.ContainsKey('Enabled') -and $Enabled -eq $false
-                        } -Exactly -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
+                            $Enabled -eq $false
+                        } -Exactly -Times 1 -Scope It
                     }
                 }
             }

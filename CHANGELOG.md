@@ -46,6 +46,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADUser
   - Fixed PasswordAuthentication parameter handling
   ([issue #582](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/582)).
+- ADReplicationSiteLink
+  - Fix Test-TargetResource when Ensure is Absent and other attributes are set
+    ([issue #593](https://github.com/PowerShell/ActiveDirectoryDsc/issues/593)).
+
+### Fixed
 
 ### Changed
 

@@ -1,10 +1,13 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
-Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
+$aDCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
+Import-Module -Name $aDCommonModulePath
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomainTrust'
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
     .SYNOPSIS
@@ -500,64 +503,6 @@ function Compare-TargetResourceState
     }
 
     return Compare-ResourcePropertyState @compareResourcePropertyStateParameters
-}
-
-<#
-    .SYNOPSIS
-        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Domain
-        which is a class that represents an Active Directory Domain Services domain.
-
-    .PARAMETER DirectoryContext
-        The Active Directory context from which the domain object is returned.
-        Calling the Get-ADDirectoryContext gets a value that can be provided in
-        this parameter.
-
-    .NOTES
-        This is a wrapper to enable unit testing of this resource.
-        see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
-        for more information.
-#>
-function Get-ActiveDirectoryDomain
-{
-    [CmdletBinding()]
-    [OutputType([System.DirectoryServices.ActiveDirectory.Domain])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.DirectoryServices.ActiveDirectory.DirectoryContext]
-        $DirectoryContext
-    )
-
-    return [System.DirectoryServices.ActiveDirectory.Domain]::GetDomain($DirectoryContext)
-}
-
-<#
-    .SYNOPSIS
-        This returns a new object of the type System.DirectoryServices.ActiveDirectory.Forest
-        which is a class that represents an Active Directory Domain Services forest.
-
-    .PARAMETER DirectoryContext
-        The Active Directory context from which the forest object is returned.
-        Calling the Get-ADDirectoryContext gets a value that can be provided in
-        this parameter.
-
-    .NOTES
-        This is a wrapper to enable unit testing of this resource.
-        see issue https://github.com/PowerShell/ActiveDirectoryDsc/issues/324
-        for more information.
-#>
-function Get-ActiveDirectoryForest
-{
-    [CmdletBinding()]
-    [OutputType([System.DirectoryServices.ActiveDirectory.Forest])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.DirectoryServices.ActiveDirectory.DirectoryContext]
-        $DirectoryContext
-    )
-
-    return [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($DirectoryContext)
 }
 
 <#

@@ -4,7 +4,7 @@ trigger:
     - master
   paths:
     include:
-    - source/**/*
+    - source/*
   tags:
     include:
     - "v*"
@@ -37,13 +37,13 @@ stages:
               pwsh: true
             env:
               ModuleVersion: $(GitVersion.Informationalversion)
-
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Build Artifact'
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Pipeline Artifact'
             inputs:
-              PathtoPublish: 'output/'
-              ArtifactName: $(buildArtifactName)
-              publishLocation: 'Container'
+              targetPath: 'output/'
+              artifact: $(buildArtifactName)
+              publishLocation: 'pipeline'
+              parallel: true
 
   - stage: Test
     dependsOn: Build
@@ -54,19 +54,18 @@ stages:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
         steps:
-          - task: DownloadBuildArtifacts@0
+          - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: $(buildArtifactName)
-              downloadPath: '$(Build.SourcesDirectory)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
           - task: PowerShell@2
             name: Test
             displayName: 'Run HQRM Test'
             inputs:
               filePath: './build.ps1'
               arguments: '-Tasks hqrmtest'
-              pwsh: false
+              pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: succeededOrFailed()
@@ -87,20 +86,19 @@ stages:
               echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
             name: dscBuildVariable
             displayName: 'Set Environment Variables'
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: $(buildArtifactName)
-              downloadPath: '$(Build.SourcesDirectory)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
           - task: PowerShell@2
             name: test
             displayName: 'Run Unit Test'
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks test -PesterScript 'tests/Unit'"
-              pwsh: false
+              pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: succeededOrFailed()
@@ -115,12 +113,12 @@ stages:
               codeCoverageTool: 'JaCoCo'
               summaryFileLocation: '$(buildArtifactName)/testResults/CodeCov*.xml'
               pathToSources: '$(Build.SourcesDirectory)/$(buildArtifactName)/$(DscBuildVariable.RepositoryName)'
-          - task: PublishBuildArtifacts@1
+          - task: PublishPipelineArtifact@1
             displayName: 'Publish Codecov.io Test Artifact'
             inputs:
-              pathToPublish: '$(buildArtifactName)/testResults/'
+              targetPath: '$(buildArtifactName)/testResults/'
               artifactName: $(codecovTestArtifactName)
-              publishLocation: 'Container'
+              parallel: true
 
       - job: Codecov_Code_Coverage
         displayName: 'Publish Codecov.io Code Coverage'
@@ -136,20 +134,18 @@ stages:
               echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
             name: dscBuildVariable
             displayName: 'Set Environment Variables'
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: $(buildArtifactName)
-              downloadPath: '$(Build.SourcesDirectory)'
-          - task: DownloadBuildArtifacts@0
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
+          - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: $(codecovTestArtifactName)
-              downloadPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)/$(codecovTestArtifactName)'
           - task: PublishCodeCoverageResults@1
             displayName: 'Publish Code Coverage'
             condition: succeededOrFailed()
@@ -178,13 +174,12 @@ stages:
         pool:
           vmImage: 'ubuntu 16.04'
         steps:
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Pipeline Artifact'
             inputs:
               buildType: 'current'
-              downloadType: 'single'
               artifactName: $(buildArtifactName)
-              downloadPath: '$(Build.SourcesDirectory)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
           - task: PowerShell@2
             name: publishRelease
             displayName: 'Publish Release'

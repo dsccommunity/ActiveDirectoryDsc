@@ -32,185 +32,6 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
     Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ADDSDeployment_2019.psm1') -Force
 
-    Describe 'ActiveDirectoryDsc.Common\Get-LocalizedData' {
-        $mockTestPath = {
-            return $mockTestPathReturnValue
-        }
-
-        $mockImportLocalizedData = {
-            $BaseDirectory | Should -Be $mockExpectedLanguagePath
-        }
-
-        BeforeEach {
-            Mock -CommandName Test-Path -MockWith $mockTestPath -Verifiable
-            Mock -CommandName Import-LocalizedData -MockWith $mockImportLocalizedData -Verifiable
-        }
-
-        Context 'When loading localized data for Swedish' {
-            $mockExpectedLanguagePath = 'sv-SE'
-            $mockTestPathReturnValue = $true
-
-            It 'Should call Import-LocalizedData with sv-SE language' {
-                Mock -CommandName Join-Path -MockWith {
-                    return 'sv-SE'
-                } -Verifiable
-
-                { Get-LocalizedData -ResourceName 'DummyResource' } | Should -Not -Throw
-
-                Assert-MockCalled -CommandName Join-Path -Exactly -Times 3 -Scope It
-                Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
-                Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
-            }
-
-            $mockExpectedLanguagePath = 'en-US'
-            $mockTestPathReturnValue = $false
-
-            It 'Should call Import-LocalizedData and fallback to en-US if sv-SE language does not exist' {
-                Mock -CommandName Join-Path -MockWith {
-                    return $ChildPath
-                } -Verifiable
-
-                { Get-LocalizedData -ResourceName 'DummyResource' } | Should -Not -Throw
-
-                Assert-MockCalled -CommandName Join-Path -Exactly -Times 4 -Scope It
-                Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
-                Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
-            }
-
-            Context 'When $ScriptRoot is set to a path' {
-                $mockExpectedLanguagePath = 'sv-SE'
-                $mockTestPathReturnValue = $true
-
-                It 'Should call Import-LocalizedData with sv-SE language' {
-                    Mock -CommandName Join-Path -MockWith {
-                        return 'sv-SE'
-                    } -Verifiable
-
-                    { Get-LocalizedData -ResourceName 'DummyResource' -ScriptRoot '.' } | Should -Not -Throw
-
-                    Assert-MockCalled -CommandName Join-Path -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
-                }
-
-                $mockExpectedLanguagePath = 'en-US'
-                $mockTestPathReturnValue = $false
-
-                It 'Should call Import-LocalizedData and fallback to en-US if sv-SE language does not exist' {
-                    Mock -CommandName Join-Path -MockWith {
-                        return $ChildPath
-                    } -Verifiable
-
-                    { Get-LocalizedData -ResourceName 'DummyResource' -ScriptRoot '.' } | Should -Not -Throw
-
-                    Assert-MockCalled -CommandName Join-Path -Exactly -Times 2 -Scope It
-                    Assert-MockCalled -CommandName Test-Path -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Import-LocalizedData -Exactly -Times 1 -Scope It
-                }
-            }
-        }
-
-        Context 'When loading localized data for English' {
-            Mock -CommandName Join-Path -MockWith {
-                return 'en-US'
-            } -Verifiable
-
-            $mockExpectedLanguagePath = 'en-US'
-            $mockTestPathReturnValue = $true
-
-            It 'Should call Import-LocalizedData with en-US language' {
-                { Get-LocalizedData -ResourceName 'DummyResource' } | Should -Not -Throw
-            }
-        }
-
-        Assert-VerifiableMock
-    }
-
-    Describe 'ActiveDirectoryDsc.Common\New-InvalidResultException' {
-        Context 'When calling with Message parameter only' {
-            It 'Should throw the correct error' {
-                $mockErrorMessage = 'Mocked error'
-
-                { New-InvalidResultException -Message $mockErrorMessage } | Should -Throw $mockErrorMessage
-            }
-        }
-
-        Context 'When calling with both the Message and ErrorRecord parameter' {
-            It 'Should throw the correct error' {
-                $mockErrorMessage = 'Mocked error'
-                $mockExceptionErrorMessage = 'Mocked exception error message'
-
-                $mockException = New-Object -TypeName 'System.Exception' -ArgumentList $mockExceptionErrorMessage
-                $mockErrorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @($mockException, $null, 'InvalidResult', $null)
-
-                { New-InvalidResultException -Message $mockErrorMessage -ErrorRecord $mockErrorRecord } | Should -Throw ('System.Exception: {0} ---> System.Exception: {1}' -f $mockErrorMessage, $mockExceptionErrorMessage)
-            }
-        }
-
-        Assert-VerifiableMock
-    }
-
-    Describe 'ActiveDirectoryDsc.Common\New-ObjectNotFoundException' {
-        Context 'When calling with Message parameter only' {
-            It 'Should throw the correct error' {
-                $mockErrorMessage = 'Mocked error'
-
-                { New-ObjectNotFoundException -Message $mockErrorMessage } | Should -Throw $mockErrorMessage
-            }
-        }
-
-        Context 'When calling with both the Message and ErrorRecord parameter' {
-            It 'Should throw the correct error' {
-                $mockErrorMessage = 'Mocked error'
-                $mockExceptionErrorMessage = 'Mocked exception error message'
-
-                $mockException = New-Object -TypeName 'System.Exception' -ArgumentList $mockExceptionErrorMessage
-                $mockErrorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @($mockException, $null, 'InvalidResult', $null)
-
-                { New-ObjectNotFoundException -Message $mockErrorMessage -ErrorRecord $mockErrorRecord } | Should -Throw ('System.Exception: {0} ---> System.Exception: {1}' -f $mockErrorMessage, $mockExceptionErrorMessage)
-            }
-        }
-
-        Assert-VerifiableMock
-    }
-
-    Describe 'ActiveDirectoryDsc.Common\New-InvalidOperationException' {
-        Context 'When calling with Message parameter only' {
-            It 'Should throw the correct error' {
-                $mockErrorMessage = 'Mocked error'
-
-                { New-InvalidOperationException -Message $mockErrorMessage } | Should -Throw $mockErrorMessage
-            }
-        }
-
-        Context 'When calling with both the Message and ErrorRecord parameter' {
-            It 'Should throw the correct error' {
-                $mockErrorMessage = 'Mocked error'
-                $mockExceptionErrorMessage = 'Mocked exception error message'
-
-                $mockException = New-Object -TypeName 'System.Exception' -ArgumentList $mockExceptionErrorMessage
-                $mockErrorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @($mockException, $null, 'InvalidResult', $null)
-
-                { New-InvalidOperationException -Message $mockErrorMessage -ErrorRecord $mockErrorRecord } | Should -Throw ('System.InvalidOperationException: {0} ---> System.Exception: {1}' -f $mockErrorMessage, $mockExceptionErrorMessage)
-            }
-        }
-
-        Assert-VerifiableMock
-    }
-
-    Describe 'ActiveDirectoryDsc.Common\New-InvalidArgumentException' {
-        Context 'When calling with both the Message and ArgumentName parameter' {
-            It 'Should throw the correct error' {
-                $mockErrorMessage = 'Mocked error'
-                $mockArgumentName = 'MockArgument'
-
-                { New-InvalidArgumentException -Message $mockErrorMessage -ArgumentName $mockArgumentName } | Should -Throw ('Parameter name: {0}' -f $mockArgumentName)
-            }
-        }
-
-        Assert-VerifiableMock
-    }
-
     Describe 'DscResource.Common\Start-ProcessWithTimeout' {
         Context 'When starting a process successfully' {
             It 'Should return exit code 0' {
@@ -235,26 +56,6 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 { Start-ProcessWithTimeout @startProcessWithTimeoutParameters } | Should -Throw -ErrorId 'ProcessNotTerminated,Microsoft.PowerShell.Commands.WaitProcessCommand'
             }
-        }
-    }
-
-    Describe 'ActiveDirectoryDsc.Common\Resolve-DomainFQDN' {
-        It 'Returns "DomainName" when "ParentDomainName" not supplied' {
-            $testDomainName = 'contoso.com'
-            $testParentDomainName = $null
-
-            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
-
-            $result | Should -Be $testDomainName
-        }
-
-        It 'Returns compound "DomainName.ParentDomainName" when "ParentDomainName" supplied' {
-            $testDomainName = 'subdomain'
-            $testParentDomainName = 'contoso.com'
-
-            $result = Resolve-DomainFQDN -DomainName $testDomainName -ParentDomainName $testParentDomainName
-
-            $result | Should -Be ('{0}.{1}' -f $testDomainName, $testParentDomainName)
         }
     }
 
@@ -291,49 +92,6 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             Get-DomainName | Should -Be 'contoso.com'
-        }
-    }
-
-    Describe 'ActiveDirectoryDsc.Common\Assert-Module' {
-        BeforeAll {
-            $testModuleName = 'TestModule'
-        }
-
-        Context 'When module is not installed' {
-            BeforeAll {
-                Mock -CommandName Get-Module
-            }
-
-            It 'Should throw the correct error' {
-                { Assert-Module -ModuleName $testModuleName } | Should -Throw ($script:localizedData.RoleNotFoundError -f $testModuleName)
-            }
-        }
-
-        Context 'When module is available' {
-            BeforeAll {
-                Mock -CommandName Import-Module
-                Mock -CommandName Get-Module -MockWith {
-                    return @{
-                        Name = $testModuleName
-                    }
-                }
-            }
-
-            Context 'When module should not be imported' {
-                It 'Should not throw an error' {
-                    { Assert-Module -ModuleName $testModuleName } | Should -Not -Throw
-
-                    Assert-MockCalled -CommandName Import-Module -Exactly -Times 0 -Scope It
-                }
-            }
-
-            Context 'When module should be imported' {
-                It 'Should not throw an error' {
-                    { Assert-Module -ModuleName $testModuleName -ImportModule } | Should -Not -Throw
-
-                    Assert-MockCalled -CommandName Import-Module -Exactly -Times 1 -Scope It
-                }
-            }
         }
     }
 
@@ -1649,14 +1407,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                 $compareTargetResourceStateResult | Should -HaveCount 2
-                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
-                $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
-                $compareTargetResourceStateResult[1].Expected | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].InDesiredState | Should -BeTrue
+                $computerNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'ComputerName'
+                $computerNameResult.Expected | Should -Be 'DC01'
+                $computerNameResult.Actual | Should -Be 'DC01'
+                $computerNameResult.InDesiredState | Should -BeTrue
+                $locationNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'Location'
+                $locationNameResult.Expected | Should -Be 'Sweden'
+                $locationNameResult.Actual | Should -Be 'Sweden'
+                $locationNameResult.InDesiredState | Should -BeTrue
             }
         }
 
@@ -1707,14 +1465,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                 $compareTargetResourceStateResult | Should -HaveCount 2
-                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
-                $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
-                $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
-                $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
+                $computerNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'ComputerName'
+                $computerNameResult.Expected | Should -Be 'DC01'
+                $computerNameResult.Actual | Should -Be 'DC01'
+                $computerNameResult.InDesiredState | Should -BeTrue
+                $locationNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'Location'
+                $locationNameResult.Expected | Should -Be 'Europe'
+                $locationNameResult.Actual | Should -Be 'Sweden'
+                $locationNameResult.InDesiredState | Should -BeFalse
             }
         }
 
@@ -1801,14 +1559,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 $compareTargetResourceStateResult = Compare-ResourcePropertyState @compareTargetResourceStateParameters
                 $compareTargetResourceStateResult | Should -HaveCount 2
-                $compareTargetResourceStateResult[0].ParameterName | Should -Be 'ComputerName'
-                $compareTargetResourceStateResult[0].Expected | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].Actual | Should -Be 'DC01'
-                $compareTargetResourceStateResult[0].InDesiredState | Should -BeTrue
-                $compareTargetResourceStateResult[1].ParameterName | Should -Be 'Location'
-                $compareTargetResourceStateResult[1].Expected | Should -Be 'Europe'
-                $compareTargetResourceStateResult[1].Actual | Should -Be 'Sweden'
-                $compareTargetResourceStateResult[1].InDesiredState | Should -BeFalse
+                $computerNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'ComputerName'
+                $computerNameResult.Expected | Should -Be 'DC01'
+                $computerNameResult.Actual | Should -Be 'DC01'
+                $computerNameResult.InDesiredState | Should -BeTrue
+                $locationNameResult = $compareTargetResourceStateResult | Where-Object -Property ParameterName -eq 'Location'
+                $locationNameResult.Expected | Should -Be 'Europe'
+                $locationNameResult.Actual | Should -Be 'Sweden'
+                $locationNameResult.InDesiredState | Should -BeFalse
             }
         }
 

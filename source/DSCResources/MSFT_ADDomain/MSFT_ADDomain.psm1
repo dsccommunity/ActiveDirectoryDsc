@@ -1,10 +1,13 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
-Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
+$aDCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
+Import-Module -Name $aDCommonModulePath
 
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomain'
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
     .SYNOPSIS
@@ -33,9 +36,9 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADDomain'
             -------------------------------|--------------------------
             Get-ADDomain                   | ActiveDirectory
             Get-ADForest                   | ActiveDirectory
-            Assert-Module                  | ActiveDirectoryDsc.Common
-            Resolve-DomainFQDN             | ActiveDirectoryDsc.Common
-            New-InvalidOperationException  | ActiveDirectoryDsc.Common
+            Assert-Module                  | DscResource.Common
+            New-InvalidOperationException  | DscResource.Common
+            Resolve-DomainFQDN             | MSFT_ADDomain
             ConvertTo-DeploymentForestMode | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentDomainMode | ActiveDirectoryDsc.Common
 #>
@@ -63,6 +66,7 @@ function Get-TargetResource
     )
 
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
+
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
 
     # If the domain has been installed then the Netlogon SysVol registry item will exist.
@@ -242,7 +246,7 @@ function Get-TargetResource
         Used Functions:
             Name               | Module
             -------------------|--------------------------
-            Resolve-DomainFQDN | ActiveDirectoryDsc.Common
+            Resolve-DomainFQDN | MSFT_ADDomain
 #>
 function Test-TargetResource
 {
@@ -551,5 +555,46 @@ function Set-TargetResource
         $global:DSCMachineStatus = 1
     }
 } #end function Set-TargetResource
+
+<#
+    .SYNOPSIS
+        Assemble a fully qualified domain name.
+
+    .DESCRIPTION
+        The Resolve-DomainFQN function is used to assemble a fully qualified domain name by appending the domain name
+        to the parent domain name if the parent domain name has been specified. Otherwise the domain name is returned.
+
+    .PARAMETER DomainName
+        The domain name.
+
+    .PARAMETER ParentDomainName
+        The parent domain name.
+#>
+function Resolve-DomainFQDN
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DomainName,
+
+        [Parameter()]
+        [System.String]
+        $ParentDomainName
+    )
+
+    if ($ParentDomainName)
+    {
+        $domainFQDN = '{0}.{1}' -f $DomainName, $ParentDomainName
+    }
+    else
+    {
+        $domainFQDN = $DomainName
+    }
+
+    return $domainFQDN
+}
 
 Export-ModuleMember -Function *-TargetResource
