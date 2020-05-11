@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 1.0.1
-.GUID 78858ff6-a4dc-4cfb-8af5-07113f6b900a
+.GUID d1d88021-930b-4928-8f1f-7a002e374847
 .AUTHOR DSC Community
 .COMPANYNAME DSC Community
 .COPYRIGHT DSC Community contributors. All rights reserved.
@@ -16,11 +16,10 @@ Updated author, copyright notice, and URLs.
 
 <#
     .DESCRIPTION
-        This configuration will create an Active Directory domain fine-grained password
-        policy with default settings.
+        This configuration will remove an Active Directory domain fine-grained password policy.
 #>
 
-Configuration ADFineGrainedPasswordPolicy_ConfigureFineGrainedPasswordPolicyWithDefaults_Config
+Configuration ADFineGrainedPasswordPolicy_RemovePolicy_Config
 {
     Param
     (
@@ -30,7 +29,11 @@ Configuration ADFineGrainedPasswordPolicy_ConfigureFineGrainedPasswordPolicyWith
 
         [Parameter(Mandatory = $true)]
         [System.UInt32]
-        $Precedence
+        $Precedence,
+
+        [Parameter()]
+        [System.String]
+        $Ensure = 'Absent'
     )
 
     Import-DscResource -Module ActiveDirectoryDsc
@@ -41,6 +44,7 @@ Configuration ADFineGrainedPasswordPolicy_ConfigureFineGrainedPasswordPolicyWith
         {
             Name       = $Name
             Precedence = $Precedence
+            Ensure     = $Ensure
         }
     }
 }

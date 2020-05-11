@@ -20,7 +20,7 @@ Updated author, copyright notice, and URLs.
         policy with specific settings settings.
 #>
 
-Configuration ADFineGrainedPasswordPolicy_ConfigureFineGrainedPasswordPolicyWithSpecifics_Config
+Configuration ADFineGrainedPasswordPolicy_ConfigurePolicyWithSpecifics_Config
 {
     Param
     (
