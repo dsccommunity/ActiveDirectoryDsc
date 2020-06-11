@@ -70,7 +70,6 @@ function Get-TargetResource
 
     try
     {
-        #$policy = Get-ADFineGrainedPasswordPolicy -Filter { name -eq $Name }
         $policy = Get-ADFineGrainedPasswordPolicy @getADFineGrainedPasswordPolicyParams
     }
     catch
@@ -81,7 +80,6 @@ function Get-TargetResource
 
     try
     {
-        #$policySubjects = (Get-ADFineGrainedPasswordPolicySubject -Identity $Name).Name
         $policySubjects = (Get-ADFineGrainedPasswordPolicySubject @getADFineGrainedPasswordPolicySubjectParams).Name
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
