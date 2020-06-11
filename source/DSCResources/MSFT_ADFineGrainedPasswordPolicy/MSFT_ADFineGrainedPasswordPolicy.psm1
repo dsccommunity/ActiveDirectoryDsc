@@ -4,7 +4,8 @@ $script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPat
 $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
-$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
+#$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADFineGrainedPasswordPolicy'
 
 <#
     .SYNOPSIS
@@ -17,11 +18,11 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER Precedence
         Specifies a value that defines the precedence of a fine-grained password policy among all fine-grained password policies.
 
-    .PARAMETER SubjectsToInclude
-        The ADPrinciple names to add to the policy, does not overwrite.
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to connect to.
 
-    .PARAMETER SubjectsToExclude
-        The ADPrinciple names to remove from the policy, does not overwrite.
+    .PARAMETER Credential
+        Specifies the user account credentials to use to perform this task.
 #>
 function Get-TargetResource
 {
@@ -38,27 +39,39 @@ function Get-TargetResource
         $Precedence,
 
         [Parameter()]
-        [System.String[]]
-        $Subjects,
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DomainController,
 
         [Parameter()]
-        [System.String[]]
-        $SubjectsToInclude,
-
-        [Parameter()]
-        [System.String[]]
-        $SubjectsToExclude
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
+    [HashTable] $parameters = $PSBoundParameters
+
+    $parameters['Identity'] = $Name
+
     Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
 
-    $SubjectsDifferent = $false
+    #$SubjectsDifferent = $false
+
+    $getADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
+    $getADFineGrainedPasswordPolicySubjectParams = Get-ADCommonParameters @parameters
+
+    # Set the filter parameter and remove items not needed
+    $getADFineGrainedPasswordPolicyParams["Filter"] = "name -eq `'$Name`'"
+    $getADFineGrainedPasswordPolicyParams.Remove('Identity')
+    $getADFineGrainedPasswordPolicyParams.Remove('Precedence')
+    $getADFineGrainedPasswordPolicySubjectParams.Remove('Precedence')
 
     try
     {
-        $policy = Get-ADFineGrainedPasswordPolicy -Filter { name -eq $Name }
+        #$policy = Get-ADFineGrainedPasswordPolicy -Filter { name -eq $Name }
+        $policy = Get-ADFineGrainedPasswordPolicy @getADFineGrainedPasswordPolicyParams
     }
     catch
     {
@@ -68,7 +81,8 @@ function Get-TargetResource
 
     try
     {
-        $policySubjects = (Get-ADFineGrainedPasswordPolicySubject -Identity $Name).Name
+        #$policySubjects = (Get-ADFineGrainedPasswordPolicySubject -Identity $Name).Name
+        $policySubjects = (Get-ADFineGrainedPasswordPolicySubject @getADFineGrainedPasswordPolicySubjectParams).Name
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
@@ -79,38 +93,6 @@ function Get-TargetResource
     {
         $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicySubjectError -f $Name
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-    }
-
-
-    if ($PSBoundParameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
-    {
-        $SubjectsDifferent = $true
-    }
-
-    if ($PSBoundParameters.ContainsKey('SubjectsToInclude') -and `
-        -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
-    {
-        if (Compare-Object -ReferenceObject $SubjectsToInclude -DifferenceObject $policySubjects `
-            -IncludeEqual | Where-Object `
-            {
-                $_.SideIndicator -eq "<="
-            })
-        {
-            $SubjectsDifferent = $true
-        }
-    }
-
-    if ($PSBoundParameters.ContainsKey('SubjectsToExclude') -and `
-        -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
-    {
-        if (Compare-Object -ReferenceObject $SubjectsToExclude -DifferenceObject $policySubjects `
-            -IncludeEqual | Where-Object `
-            {
-                $_.SideIndicator -eq "=="
-            })
-        {
-            $SubjectsDifferent = $true
-        }
     }
 
     if ($policy)
@@ -128,7 +110,7 @@ function Get-TargetResource
             ReversibleEncryptionEnabled = $policy.ReversibleEncryptionEnabled
             Precedence                  = $policy.Precedence
             Ensure                      = 'Present'
-            SubjectsDifferent           = $SubjectsDifferent
+            Subjects                    = @($policySubjects)
         }
     }
     else
@@ -146,7 +128,7 @@ function Get-TargetResource
             ReversibleEncryptionEnabled = $null
             Precedence                  = $null
             Ensure                      = 'Absent'
-            SubjectsDifferent           = $false
+            Subjects                    = @()
         }
     }
 } #end Get-TargetResource
@@ -163,14 +145,7 @@ function Get-TargetResource
         Specifies the display name of the object.
 
     .PARAMETER Subjects
-        The ADPrinciple names the policy is to be applied to, overwrites all existing
-        and overrides SubjectsToInclude and SubjectsToExclude.
-
-    .PARAMETER SubjectsToInclude
-        The ADPrinciple names to add to the policy, does not overwrite.
-
-    .PARAMETER SubjectsToExclude
-        The ADPrinciple names to remove from the policy, does not overwrite.
+        The ADPrincipal names the policy is to be applied to, overwrites all existing.
 
     .PARAMETER Ensure
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
@@ -208,6 +183,12 @@ function Get-TargetResource
     .PARAMETER Precedence
         Specifies a value that defines the precedence of a fine-grained password policy among all fine-grained password policies.
 
+    .PARAMETER DomainController
+        Specifies the Active Directory Domain Services instance to connect to.
+
+    .PARAMETER Credential
+        Specifies the user account credentials to use to perform this task.
+
     .NOTES
         Used Functions:
             Name                          | Module
@@ -231,14 +212,6 @@ function Test-TargetResource
         [Parameter()]
         [System.String[]]
         $Subjects,
-
-        [Parameter()]
-        [System.String[]]
-        $SubjectsToInclude,
-
-        [Parameter()]
-        [System.String[]]
-        $SubjectsToExclude,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -321,23 +294,24 @@ function Test-TargetResource
     }
 
     # Build parameters needed to get resource properties
-    if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
+    if ($parameters.ContainsKey('Credential') -and -not [System.String]::IsNullOrEmpty($Credential))
     {
-        $getTargetResourceParams['Subjects'] = $Subjects
+        $getTargetResourceParams['Credential'] = $Credential
     }
 
-    if ($parameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
+    if ($parameters.ContainsKey('DomainController') -and `
+        -not [System.String]::IsNullOrEmpty($DomainController))
     {
-        $getTargetResourceParams['SubjectsToInclude'] = $SubjectsToInclude
-    }
-
-    if ($parameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
-    {
-        $getTargetResourceParams['SubjectsToExclude'] = $SubjectsToExclude
+        $getTargetResourceParams['Server'] = $DomainController
     }
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParams
     $inDesiredState = $true
+
+    if (-not ($getTargetResourceResult.Subjects))
+    {
+        $getTargetResourceResult.Subjects = @("empty")
+    }
 
     if ($getTargetResourceResult.Ensure -eq 'Present')
     {
@@ -346,8 +320,7 @@ function Test-TargetResource
             # Resource should exist
             $propertiesNotInDesiredState = (
                 Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
-                    -IgnoreProperties 'DisplayName', 'Subjects', 'SubjectsToInclude', 'SubjectsToExclude', `
-                        'SubjectsDifferent', 'ProtectedFromAccidentalDeletion' | `
+                    -IgnoreProperties 'DisplayName', 'ProtectedFromAccidentalDeletion' | `
                             Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)
@@ -386,13 +359,6 @@ function Test-TargetResource
         }
     }
 
-    if ($getTargetResourceResult.SubjectsDifferent)
-    {
-        Write-Verbose -Message ($script:localizedData.ResourcePropertyValueIncorrect -f `
-        'Subjects are different', $false, $getTargetResourceResult.SubjectsDifferent)
-        $inDesiredState = $false
-    }
-
     if ($inDesiredState)
     {
         Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
@@ -416,14 +382,7 @@ function Test-TargetResource
         Specifies the display name of the object.
 
     .PARAMETER Subjects
-        The ADPrinciple names the policy is to be applied to, overwrites all existing and overrides
-        SubjectsToInclude and SubjectsToExclude.
-
-    .PARAMETER SubjectsToInclude
-        The ADPrinciple names to add to the policy, does not overwrite.
-
-    .PARAMETER SubjectsToExclude
-        The ADPrinciple names to remove from the policy, does not overwrite.
+        The ADPrincipal names the policy is to be applied to, overwrites all existing.
 
     .PARAMETER Ensure
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
@@ -483,14 +442,6 @@ function Set-TargetResource
         [Parameter()]
         [System.String[]]
         $Subjects,
-
-        [Parameter()]
-        [System.String[]]
-        $SubjectsToInclude,
-
-        [Parameter()]
-        [System.String[]]
-        $SubjectsToExclude,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -572,17 +523,6 @@ function Set-TargetResource
     $getTargetResourceParams = @{
         Name       = $Name
         Precedence = $Precedence
-    }
-
-    # Build parameters needed to get resource properties
-    if ($parameters.ContainsKey('SubjectsToInclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToInclude))
-    {
-        $getTargetResourceParams['SubjectsToInclude'] = $SubjectsToInclude
-    }
-
-    if ($parameters.ContainsKey('SubjectsToExclude') -and -not [System.String]::IsNullOrEmpty($SubjectsToExclude))
-    {
-        $getTargetResourceParams['SubjectsToExclude'] = $SubjectsToExclude
     }
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParams
@@ -753,45 +693,6 @@ function Set-TargetResource
                         "Adding new subject: $($subject)")
 
                         [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
-                    }
-                    catch
-                    {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, $_)
-                    }
-                }
-            }
-
-            # Add the specific subjects to policy
-            if ($parameters.ContainsKey('SubjectsToInclude') -and [System.String]::IsNullOrEmpty($Subjects))
-            {
-                foreach ($subject in $SubjectsToInclude)
-                {
-                    try
-                    {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                        "Adding new subject: $($subject)")
-
-                        [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
-                    }
-                    catch
-                    {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, $_)
-                    }
-                }
-            }
-
-            # Remove the specific subjects from policy
-            if ($parameters.ContainsKey('SubjectsToExclude') -and [System.String]::IsNullOrEmpty($Subjects))
-            {
-                foreach ($subject in $SubjectsToExclude)
-                {
-                    try
-                    {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                        "Removing subject: $($subject)")
-
-                        [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject `
-                            -Confirm:$false
                     }
                     catch
                     {
