@@ -50,17 +50,17 @@ try
             Precedence = 100
         }
 
-        $getTargetResourceParametersPolicyIncludeSubjects = @{
-            Name              = $testFineGrainedPasswordPolicyName
-            Precedence        = 100
-            SubjectsToInclude = 'Domain Admins'
-        }
+        # $getTargetResourceParametersPolicyIncludeSubjects = @{
+        #     Name              = $testFineGrainedPasswordPolicyName
+        #     Precedence        = 100
+        #     SubjectsToInclude = 'Domain Admins'
+        # }
 
-        $getTargetResourceParametersPolicyExcludeSubjects = @{
-            Name              = $testFineGrainedPasswordPolicyName
-            Precedence        = 100
-            SubjectsToExclude = $testFineGrainedPasswordPolicyName
-        }
+        # $getTargetResourceParametersPolicyExcludeSubjects = @{
+        #     Name              = $testFineGrainedPasswordPolicyName
+        #     Precedence        = 100
+        #     SubjectsToExclude = $testFineGrainedPasswordPolicyName
+        # }
 
         $fakeGetFineGrainedPasswordPolicy = @{
             Name                        = $testFineGrainedPasswordPolicyName
@@ -82,17 +82,17 @@ try
             SamAccountName = $testFineGrainedPasswordPolicyName
         }
 
-        $fakeGetFineGrainedPasswordPolicySubjectInclude = @{
-            Name           = $testFineGrainedPasswordPolicyName
-            ObjectClass    = 'group'
-            SamAccountName = 'Domain Admins'
-        }
+        # $fakeGetFineGrainedPasswordPolicySubjectInclude = @{
+        #     Name           = $testFineGrainedPasswordPolicyName
+        #     ObjectClass    = 'group'
+        #     SamAccountName = 'Domain Admins'
+        # }
 
-        $fakeGetFineGrainedPasswordPolicySubjectExclude = @{
-            Name           = $testFineGrainedPasswordPolicyName
-            ObjectClass    = 'group'
-            SamAccountName = $testFineGrainedPasswordPolicyName
-        }
+        # $fakeGetFineGrainedPasswordPolicySubjectExclude = @{
+        #     Name           = $testFineGrainedPasswordPolicyName
+        #     ObjectClass    = 'group'
+        #     SamAccountName = $testFineGrainedPasswordPolicyName
+        # }
 
         $fakeGetFineGrainedPasswordPolicySubjectAbsent = $null
         $fakeGetFineGrainedPasswordPolicyAbsent = $null
@@ -117,7 +117,7 @@ try
             ReversibleEncryptionEnabled = $fakeGetFineGrainedPasswordPolicy.ReversibleEncryptionEnabled
             Precedence                  = $getTargetResourceParametersPolicy['Precedence']
             Ensure                      = 'Present'
-            SubjectsDifferent           = $false
+            Subjects                    = @()
         }
 
         $mockGetResourceFineGrainedPasswordPolicyAbsent = @{
@@ -133,7 +133,7 @@ try
             ReversibleEncryptionEnabled = $null
             Precedence                  = $null
             Ensure                      = 'Absent'
-            SubjectsDifferent           = $false
+            Subjects                    = @()
         }
 
         #region Function Get-TargetResource
@@ -145,9 +145,12 @@ try
 
             Context 'When the resource is Present' {
                 Context 'When the Resouce has all same input values' {
+                    #$fakeGetFineGrainedPasswordPolicyWithSubjects = $fakeGetFineGrainedPasswordPolicy.Clone()
+                    #$fakeGetFineGrainedPasswordPolicyWithSubjects.Subjects = $fakeGetFineGrainedPasswordPolicy.Name
 
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                         -MockWith { $fakeGetFineGrainedPasswordPolicy }
+                        #-MockWith { $fakeGetFineGrainedPasswordPolicyWithSubjects }
 
                     $result = Get-TargetResource @getTargetResourceParametersPolicy
 
@@ -173,77 +176,77 @@ try
                     }
                 }
 
-                Context 'When the Resource has subjects to include' {
-                    $fakeGetFineGrainedPasswordPolicyIncludeSubjects = $fakeGetFineGrainedPasswordPolicy.Clone()
-                    $fakeGetFineGrainedPasswordPolicyIncludeSubjects.SubjectsDifferent = $true
-                    $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects = $mockGetResourceFineGrainedPasswordPolicy.Clone()
-                    $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects.SubjectsDifferent = $true
+                # Context 'When the Resource has subjects to include' {
+                #     $fakeGetFineGrainedPasswordPolicyIncludeSubjects = $fakeGetFineGrainedPasswordPolicy.Clone()
+                #     $fakeGetFineGrainedPasswordPolicyIncludeSubjects.SubjectsDifferent = $true
+                #     $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects = $mockGetResourceFineGrainedPasswordPolicy.Clone()
+                #     $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects.SubjectsDifferent = $true
 
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        -MockWith { $fakeGetFineGrainedPasswordPolicyIncludeSubjects }
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                #         -MockWith { $fakeGetFineGrainedPasswordPolicyIncludeSubjects }
 
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        -MockWith { $fakeGetFineGrainedPasswordPolicySubjectInclude }
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                #         -MockWith { $fakeGetFineGrainedPasswordPolicySubjectInclude }
 
-                    $result = Get-TargetResource @getTargetResourceParametersPolicyIncludeSubjects
+                #     $result = Get-TargetResource @getTargetResourceParametersPolicyIncludeSubjects
 
-                    foreach ($property in $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects.Keys)
-                    {
-                        It "Should return the correct $property property" {
-                            $result.$property | Should -Be $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects.$property
-                        }
-                    }
+                #     foreach ($property in $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects.Keys)
+                #     {
+                #         It "Should return the correct $property property" {
+                #             $result.$property | Should -Be $mockGetResourceFineGrainedPasswordPolicyIncludeSubjects.$property
+                #         }
+                #     }
 
-                    It 'Should return the correct Ensure property' {
-                        $result.Ensure | Should -Be 'Present'
-                    }
+                #     It 'Should return the correct Ensure property' {
+                #         $result.Ensure | Should -Be 'Present'
+                #     }
 
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Assert-Module `
-                            -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Times 1
-                        Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                            -ParameterFilter { $Identity -eq $getTargetResourceParametersPolicy.Name } `
-                            -Exactly -Times 1
-                    }
-                }
+                #     It 'Should call the expected mocks' {
+                #         Assert-MockCalled -CommandName Assert-Module `
+                #             -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                #             -Exactly -Times 1
+                #         Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Times 1
+                #         Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                #             -ParameterFilter { $Identity -eq $getTargetResourceParametersPolicy.Name } `
+                #             -Exactly -Times 1
+                #     }
+                # }
 
-                Context 'When the Resource has subjects to exclude' {
-                    $fakeGetFineGrainedPasswordPolicyExcludeSubjects = $fakeGetFineGrainedPasswordPolicy.Clone()
-                    $fakeGetFineGrainedPasswordPolicyExcludeSubjects.SubjectsDifferent = $true
-                    $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects = $mockGetResourceFineGrainedPasswordPolicy.Clone()
-                    $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects.SubjectsDifferent = $true
+                # Context 'When the Resource has subjects to exclude' {
+                #     $fakeGetFineGrainedPasswordPolicyExcludeSubjects = $fakeGetFineGrainedPasswordPolicy.Clone()
+                #     $fakeGetFineGrainedPasswordPolicyExcludeSubjects.SubjectsDifferent = $true
+                #     $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects = $mockGetResourceFineGrainedPasswordPolicy.Clone()
+                #     $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects.SubjectsDifferent = $true
 
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        -MockWith { $fakeGetFineGrainedPasswordPolicyExcludeSubjects }
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                #         -MockWith { $fakeGetFineGrainedPasswordPolicyExcludeSubjects }
 
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        -MockWith { $fakeGetFineGrainedPasswordPolicySubjectExclude }
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                #         -MockWith { $fakeGetFineGrainedPasswordPolicySubjectExclude }
 
-                    $result = Get-TargetResource @getTargetResourceParametersPolicyExcludeSubjects
+                #     $result = Get-TargetResource @getTargetResourceParametersPolicyExcludeSubjects
 
-                    foreach ($property in $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects.Keys)
-                    {
-                        It "Should return the correct $property property" {
-                            $result.$property | Should -Be $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects.$property
-                        }
-                    }
+                #     foreach ($property in $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects.Keys)
+                #     {
+                #         It "Should return the correct $property property" {
+                #             $result.$property | Should -Be $mockGetResourceFineGrainedPasswordPolicyExcludeSubjects.$property
+                #         }
+                #     }
 
-                    It 'Should return the correct Ensure property' {
-                        $result.Ensure | Should -Be 'Present'
-                    }
+                #     It 'Should return the correct Ensure property' {
+                #         $result.Ensure | Should -Be 'Present'
+                #     }
 
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Assert-Module `
-                            -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Times 1
-                        Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                            -ParameterFilter { $Identity -eq $getTargetResourceParametersPolicy.Name } `
-                            -Exactly -Times 1
-                    }
-                }
+                #     It 'Should call the expected mocks' {
+                #         Assert-MockCalled -CommandName Assert-Module `
+                #             -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                #             -Exactly -Times 1
+                #         Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Times 1
+                #         Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                #             -ParameterFilter { $Identity -eq $getTargetResourceParametersPolicy.Name } `
+                #             -Exactly -Times 1
+                #     }
+                # }
 
             }
 
@@ -625,22 +628,22 @@ try
                         { $ModuleName -eq 'ActiveDirectory' } -Scope It
                 }
 
-                It "Calls 'Add-ADFineGrainedPasswordPolicySubject' with subjects to include" {
-                    $addSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                    $addSubjectsFineGrainedParametersPolicy['SubjectsToInclude'] = 'Domain Admins'
-                    $addSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+                # It "Calls 'Add-ADFineGrainedPasswordPolicySubject' with subjects to include" {
+                #     $addSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                #     $addSubjectsFineGrainedParametersPolicy['SubjectsToInclude'] = 'Domain Admins'
+                #     $addSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
 
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        { return $fakeGetFineGrainedPasswordPolicy; }
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        { return $fakeGetFineGrainedPasswordPolicySubject; }
-                    Mock -CommandName Set-ADFineGrainedPasswordPolicy
-                    Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                #         { return $fakeGetFineGrainedPasswordPolicy; }
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                #         { return $fakeGetFineGrainedPasswordPolicySubject; }
+                #     Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                #     Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
 
-                    $result = Set-TargetResource @addSubjectsFineGrainedParametersPolicy
+                #     $result = Set-TargetResource @addSubjectsFineGrainedParametersPolicy
 
-                    Assert-MockCalled -CommandName Add-ADFineGrainedPasswordPolicySubject
-                }
+                #     Assert-MockCalled -CommandName Add-ADFineGrainedPasswordPolicySubject
+                # }
             }
 
             Context 'When the Resource exists and subjects to be explicitly set' {
@@ -691,22 +694,22 @@ try
                         { $ModuleName -eq 'ActiveDirectory' } -Scope It
                 }
 
-                It "Calls 'Remove-ADFineGrainedPasswordPolicySubject' with subjects to remove" {
-                    $removeSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                    $removeSubjectsFineGrainedParametersPolicy['SubjectsToExclude'] = 'Domain Users'
-                    $removeSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+                # It "Calls 'Remove-ADFineGrainedPasswordPolicySubject' with subjects to remove" {
+                #     $removeSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                #     $removeSubjectsFineGrainedParametersPolicy['SubjectsToExclude'] = 'Domain Users'
+                #     $removeSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
 
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        { return $fakeGetFineGrainedPasswordPolicy; }
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        { return $fakeGetFineGrainedPasswordPolicySubject; }
-                    Mock -CommandName Set-ADFineGrainedPasswordPolicy
-                    Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                #         { return $fakeGetFineGrainedPasswordPolicy; }
+                #     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                #         { return $fakeGetFineGrainedPasswordPolicySubject; }
+                #     Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                #     Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
 
-                    $result = Set-TargetResource @removeSubjectsFineGrainedParametersPolicy
+                #     $result = Set-TargetResource @removeSubjectsFineGrainedParametersPolicy
 
-                    Assert-MockCalled -CommandName Remove-ADFineGrainedPasswordPolicySubject
-                }
+                #     Assert-MockCalled -CommandName Remove-ADFineGrainedPasswordPolicySubject
+                # }
             }
         }
         #endregion
