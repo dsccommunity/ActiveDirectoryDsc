@@ -5,7 +5,6 @@ $script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -Chil
 Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
 
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
-#$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_ADFineGrainedPasswordPolicy'
 
 <#
     .SYNOPSIS
@@ -23,6 +22,16 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
+
+    .NOTES
+        Used Functions:
+            Name                                   | Module
+            ---------------------------------------|--------------------------
+            Get-ADFineGrainedPasswordPolicy        | ActiveDirectory
+            Get-ADFineGrainedPasswordPolicySubject | ActiveDirectory
+            Assert-Module                          | DscResource.Common
+            New-InvalidOperationException          | DscResource.Common
+            Get-ADCommonParameters                 | DscResource.Common
 #>
 function Get-TargetResource
 {
@@ -56,8 +65,6 @@ function Get-TargetResource
     $parameters['Identity'] = $Name
 
     Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
-
-    #$SubjectsDifferent = $false
 
     $getADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
     $getADFineGrainedPasswordPolicySubjectParams = Get-ADCommonParameters @parameters
@@ -143,7 +150,7 @@ function Get-TargetResource
         Specifies the display name of the object.
 
     .PARAMETER Subjects
-        The ADPrincipal names the policy is to be applied to, overwrites all existing.
+        Specifies the ADPrincipal names the policy is to be applied to, overwrites all existing.
 
     .PARAMETER Ensure
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
@@ -380,7 +387,7 @@ function Test-TargetResource
         Specifies the display name of the object.
 
     .PARAMETER Subjects
-        The ADPrincipal names the policy is to be applied to, overwrites all existing.
+        Specifies the ADPrincipal names the policy is to be applied to, overwrites all existing.
 
     .PARAMETER Ensure
         Specifies whether the fine grained password policy should be present or absent. Default value is 'Present'.
@@ -423,6 +430,19 @@ function Test-TargetResource
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
+
+    .NOTES
+        Used Functions:
+            Name                                      | Module
+            ------------------------------------------|--------------------------
+            New-ADFineGrainedPasswordPolicy           | ActiveDirectory
+            Set-ADFineGrainedPasswordPolicy           | ActiveDirectory
+            Remove-ADFineGrainedPasswordPolicy        | ActiveDirectory
+            Add-ADFineGrainedPasswordPolicySubject    | ActiveDirectory
+            Remove-ADFineGrainedPasswordPolicySubject | ActiveDirectory
+            Assert-Module                             | DscResource.Common
+            New-InvalidOperationException             | DscResource.Common
+            Get-ADCommonParameters                    | DscResource.Common
 #>
 function Set-TargetResource
 {
@@ -641,16 +661,19 @@ function Set-TargetResource
 
         try
         {
-            [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            #[ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
 
             if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
             {
-                [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
+                #[ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
+                Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
             }
         }
         catch
         {
-            Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
+            $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
     }
     # Resource is present not in desired state
@@ -660,7 +683,8 @@ function Set-TargetResource
 
         try
         {
-            [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            #[ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
 
             # Add the exclusive subjects to policy (removes all others)
             if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
@@ -674,12 +698,15 @@ function Set-TargetResource
 
                     try
                     {
-                        [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
+                        # [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
+                        #     $getExistingSubjectsToRemove -Confirm:$false
+                        Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
                             $getExistingSubjectsToRemove -Confirm:$false
                     }
                     catch
                     {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
+                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                     }
                 }
 
@@ -690,18 +717,21 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
                         "Adding new subject: $($subject)")
 
-                        [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
+                        #[ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
+                        Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
                     }
                     catch
                     {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $subject, $_)
+                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $subject
+                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                     }
                 }
             }
         }
         catch
         {
-            Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
+            $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
     }
     # Resource is present but should be absent
@@ -716,7 +746,8 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
                 'Attempting to remove the protection for accidental deletion')
-                [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+                #[ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+                Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
             }
             else
             {
@@ -724,11 +755,13 @@ function Set-TargetResource
                 'ProtectedFromAccidentalDeletion is not defined to false, delete may fail if not explicitly set false')
             }
 
-            [ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
+            #[ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
+            Remove-ADFineGrainedPasswordPolicy -Identity $Name
         }
         catch
         {
-            Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, $_)
+            $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
     }
 } #end Set-TargetResource

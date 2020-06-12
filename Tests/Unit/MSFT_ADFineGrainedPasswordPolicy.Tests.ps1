@@ -93,7 +93,7 @@ try
             ReversibleEncryptionEnabled = $fakeGetFineGrainedPasswordPolicy.ReversibleEncryptionEnabled
             Precedence                  = $getTargetResourceParametersPolicy['Precedence']
             Ensure                      = 'Present'
-            Subjects                    = @()
+            Subjects                    = @($fakeGetFineGrainedPasswordPolicy.Name)
         }
 
         $mockGetResourceFineGrainedPasswordPolicyAbsent = @{
@@ -123,6 +123,8 @@ try
                 Context 'When the Resouce has all same input values' {
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                         -MockWith { $fakeGetFineGrainedPasswordPolicy }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        -MockWith { $fakeGetFineGrainedPasswordPolicySubject }
 
                     $result = Get-TargetResource @getTargetResourceParametersPolicy
 
@@ -177,6 +179,30 @@ try
                     Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
                         -ParameterFilter { $Identity -eq $getTargetResourceParametersPolicy.Name } `
                         -Exactly -Times 1
+                }
+            }
+
+            Context 'When Get-ADFineGrainedPasswordPolicy throws an unexpected error' {
+                Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                    -MockWith { throw 'UnexpectedError' }
+
+                It 'Should throw the correct exception' {
+                    { Get-TargetResource @getTargetResourceParametersPolicy } |
+                        Should -Throw ($script:localizedData.RetrieveFineGrainedPasswordPolicyError -f
+                            $getTargetResourceParametersPolicy.Name)
+                }
+            }
+
+            Context 'When Get-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
+                Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                    -MockWith { $fakeGetFineGrainedPasswordPolicyAbsent }
+                Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                    -MockWith { throw 'UnexpectedError' }
+
+                It 'Should throw the correct exception' {
+                    { Get-TargetResource @getTargetResourceParametersPolicy } |
+                        Should -Throw ($script:localizedData.RetrieveFineGrainedPasswordPolicySubjectError -f
+                            $getTargetResourceParametersPolicy.Name)
                 }
             }
         }
@@ -316,10 +342,12 @@ try
         #region Function Set-TargetResource
         Describe 'ADFineGrainedPasswordPolicy\Set-TargetResource' {
             $testFineGrainedPasswordPolicyName = 'Domain Users'
+
             $testGetDefaultParams = @{
                 Name                            = $testFineGrainedPasswordPolicyName
                 Precedence                      = 10
             }
+
             $testSetDefaultParams = @{
                 Name                            = $testFineGrainedPasswordPolicyName
                 Precedence                      = 10
@@ -358,10 +386,10 @@ try
                 }
 
                 It 'Calls "Set-ADFineGrainedPasswordPolicy" without "Credential" parameter by default' {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        { return $fakeGetFineGrainedPasswordPolicy; }
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $Credential -eq $null } { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
+                        { $Credential -eq $null } { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $Credential -eq $null }
 
@@ -372,8 +400,10 @@ try
                 }
 
                 It 'Calls "Set-ADFineGrainedPasswordPolicy" with "Credential" parameter when specified' {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $Credential -eq $testCredential } { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
+                        { $Credential -eq $testCredential } { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $Credential -eq $testCredential }
 
@@ -384,10 +414,10 @@ try
                 }
 
                 It 'Calls "Set-ADFineGrainedPasswordPolicy" without "DomainController" parameter by default' {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        { return $fakeGetFineGrainedPasswordPolicy; }
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
+                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $DomainController -eq $null }
 
@@ -398,8 +428,10 @@ try
                 }
 
                 It 'Calls "Set-ADFineGrainedPasswordPolicy" with "DomainController" parameter when specified' {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
+                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $Server -eq $testDomainController }
 
@@ -428,6 +460,21 @@ try
                             Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                                 { $PSBoundParameters.ContainsKey($propertyName) } -Scope It
                         }
+                    }
+                }
+
+                Context 'When Set-ADFineGrainedPasswordPolicy throws an unexpected error' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Set-ADFineGrainedPasswordPolicy `
+                        -MockWith { throw 'UnexpectedError' }
+
+                    It 'Should throw the correct exception' {
+                        { Set-TargetResource @testSetDefaultParams } |
+                            Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                $testSetDefaultParams.Name)
                     }
                 }
             }
@@ -472,6 +519,28 @@ try
                         { $Identity -eq $newFineGrainedParametersPolicy['Name'] -and `
                             $Subjects -eq $newFineGrainedParametersPolicy['Subjects'] } -Scope It
                 }
+
+                Context 'When New-ADFineGrainedPasswordPolicy throws an unexpected error' {
+                    Mock -CommandName New-ADFineGrainedPasswordPolicy `
+                        -MockWith { throw 'UnexpectedError' }
+
+                    It 'Should throw the correct exception' {
+                        { Set-TargetResource @stubFineGrainedPasswordPolicy } |
+                            Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                $stubFineGrainedPasswordPolicy.Name)
+                    }
+                }
+
+                Context 'When Add-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
+                    Mock -CommandName Add-ADFineGrainedPasswordPolicySubject `
+                        -MockWith { throw 'UnexpectedError' }
+
+                    It 'Should throw the correct exception' {
+                        { Set-TargetResource @stubFineGrainedPasswordPolicy } |
+                            Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                $stubFineGrainedPasswordPolicy.Name)
+                    }
+                }
             }
 
             Context 'When the Resource exists and needs to be deleted' {
@@ -510,21 +579,46 @@ try
                     Assert-MockCalled -CommandName Remove-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $Identity -eq $removeFineGrainedParametersPolicy['Name'] } -Scope It
                 }
-            }
 
-            Context 'When the Resource exists and subjects to be appended' {
-                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+                It "Calls 'Remove-ADFineGrainedPasswordPolicy' but does not specify to remove delete protection" {
+                    $removeFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                    $removeFineGrainedParametersPolicy['Ensure'] = 'Absent'
 
-                It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                         { return $fakeGetFineGrainedPasswordPolicy; }
                     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
                         { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $removeFineGrainedParametersPolicy }
+                    Mock -CommandName Remove-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $Identity -eq $removeFineGrainedParametersPolicy['Name'] }
 
-                    $result = Get-TargetResource @testGetDefaultParams
+                    $result = Set-TargetResource @removeFineGrainedParametersPolicy
 
-                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter `
-                        { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                    Assert-MockCalled -CommandName Remove-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $Identity -eq $removeFineGrainedParametersPolicy['Name'] } -Scope It
+                }
+
+                Context 'When Remove-ADFineGrainedPasswordPolicy throws an unexpected error' {
+                    $removeFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                    $removeFineGrainedParametersPolicy['ProtectedFromAccidentalDeletion'] = $false
+                    $removeFineGrainedParametersPolicy['Ensure'] = 'Absent'
+
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
+                        { $removeFineGrainedParametersPolicy }
+                    Mock -CommandName Remove-ADFineGrainedPasswordPolicy -ParameterFilter `
+                    { $Identity -eq $removeFineGrainedParametersPolicy['Name'] } `
+                        -MockWith { throw 'UnexpectedError' }
+
+                    It 'Should throw the correct exception' {
+                        { Set-TargetResource @removeFineGrainedParametersPolicy } |
+                            Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                $removeFineGrainedParametersPolicy.Name)
+                    }
                 }
             }
 
@@ -553,32 +647,37 @@ try
                     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
                         { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                    Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
                     Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
 
                     $result = Set-TargetResource @setSubjectsFineGrainedParametersPolicy
 
                     Assert-MockCalled -CommandName Add-ADFineGrainedPasswordPolicySubject
                 }
-            }
 
-            Context 'When the Resource exists and some subjects to be removed' {
-                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+                Context 'When Remove-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
+                    $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                    $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Users'
+                    $setSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
 
-                It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                         { return $fakeGetFineGrainedPasswordPolicy; }
                     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
                         { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                    Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
+                    Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject `
+                        -MockWith { throw 'UnexpectedError' }
 
-                    $result = Get-TargetResource @testGetDefaultParams
-
-                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter `
-                        { $ModuleName -eq 'ActiveDirectory' } -Scope It
+                    It 'Should throw the correct exception' {
+                        { Set-TargetResource @setSubjectsFineGrainedParametersPolicy } |
+                            Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                $setSubjectsFineGrainedParametersPolicy.Name)
+                    }
                 }
             }
         }
         #endregion
-
     }
     #endregion
 }
