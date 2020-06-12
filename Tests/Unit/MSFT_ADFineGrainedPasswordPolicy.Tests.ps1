@@ -131,9 +131,6 @@ try
 
                     $result = Get-TargetResource @getTargetResourceParametersPolicy -Credential $testCredential
 
-                    # Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
-                    #     { $Credential -eq $testCredential } -Scope It
-
                     Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Scope It
 
                     Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject -Scope It
@@ -147,9 +144,6 @@ try
                         -MockWith { $fakeGetFineGrainedPasswordPolicySubject }
 
                     $result = Get-TargetResource @getTargetResourceParametersPolicy -DomainController $testDomainController
-
-                    # Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
-                    #     { $Server -eq $testDomainController } -Scope It
 
                     Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Scope It
 
