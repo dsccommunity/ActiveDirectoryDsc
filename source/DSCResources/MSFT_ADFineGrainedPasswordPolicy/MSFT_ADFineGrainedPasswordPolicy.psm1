@@ -307,7 +307,7 @@ function Test-TargetResource
     if ($parameters.ContainsKey('DomainController') -and `
         -not [System.String]::IsNullOrEmpty($DomainController))
     {
-        $getTargetResourceParams['Server'] = $DomainController
+        $getTargetResourceParams['DomainController'] = $DomainController
     }
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParams
@@ -539,8 +539,19 @@ function Set-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
 
     $getTargetResourceParams = @{
-        Name       = $Name
-        Precedence = $Precedence
+        Name             = $Name
+        Precedence       = $Precedence
+    }
+
+    if ($parameters.ContainsKey('Credential') -and -not [System.String]::IsNullOrEmpty($Credential))
+    {
+        $getTargetResourceParams['Credential'] = $Credential
+    }
+
+    if ($parameters.ContainsKey('DomainController') -and `
+        -not [System.String]::IsNullOrEmpty($DomainController))
+    {
+        $getTargetResourceParams['DomainController'] = $DomainController
     }
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParams
@@ -629,7 +640,8 @@ function Set-TargetResource
             'ReversibleEncryptionEnabled', $ReversibleEncryptionEnabled)
     }
 
-    if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion') -and -not [System.String]::IsNullOrEmpty($ProtectedFromAccidentalDeletion))
+    if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion') -and `
+        -not [System.String]::IsNullOrEmpty($ProtectedFromAccidentalDeletion))
     {
         $setADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
         Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
@@ -641,17 +653,6 @@ function Set-TargetResource
         $setADFineGrainedPasswordPolicyParams['Precedence'] = $Precedence
         Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
             'Precedence', $Precedence)
-    }
-
-    if ($parameters.ContainsKey('Credential') -and -not [System.String]::IsNullOrEmpty($Credential))
-    {
-        $setADFineGrainedPasswordPolicyParams['Credential'] = $Credential
-    }
-
-    if ($parameters.ContainsKey('DomainController') -and `
-        -not [System.String]::IsNullOrEmpty($DomainController))
-    {
-        $setADFineGrainedPasswordPolicyParams['Server'] = $DomainController
     }
 
     # Resource is absent and should be present

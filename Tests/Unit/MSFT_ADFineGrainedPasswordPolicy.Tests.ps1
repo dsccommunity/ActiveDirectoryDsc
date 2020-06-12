@@ -120,6 +120,44 @@ try
             }
 
             Context 'When the resource is Present' {
+
+
+                It 'Calls "Get-ADFineGrainedPasswordPolicy" and "Get-ADFineGrainedPasswordPolicySubject" with `
+                    "Credential" parameter when specified' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        -MockWith { $fakeGetFineGrainedPasswordPolicy }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        -MockWith { $fakeGetFineGrainedPasswordPolicySubject }
+
+                    $result = Get-TargetResource @getTargetResourceParametersPolicy -Credential $testCredential
+
+                    # Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
+                    #     { $Credential -eq $testCredential } -Scope It
+
+                    Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Scope It
+
+                    Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject -Scope It
+                }
+
+                It 'Calls "Get-ADFineGrainedPasswordPolicy" and "Get-ADFineGrainedPasswordPolicySubject" with `
+                    "DomainController" parameter when specified' {
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        -MockWith { $fakeGetFineGrainedPasswordPolicy }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        -MockWith { $fakeGetFineGrainedPasswordPolicySubject }
+
+                    $result = Get-TargetResource @getTargetResourceParametersPolicy -DomainController $testDomainController
+
+                    # Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
+                    #     { $Server -eq $testDomainController } -Scope It
+
+                    Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Scope It
+
+                    Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject -Scope It
+                }
+
+
+
                 Context 'When the Resouce has all same input values' {
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                         -MockWith { $fakeGetFineGrainedPasswordPolicy }
@@ -243,7 +281,9 @@ try
                             -ParameterFilter { `
                                 $Name -eq $testTargetResourceParametersPolicy.Name
                                 $Precedence -eq $testTargetResourceParametersPolicy.Precedence
-                                $Subjects -eq $testTargetResourceParametersPolicy.Name } `
+                                $Subjects -eq $testTargetResourceParametersPolicy.Name
+                                $Credential -eq $testCredential
+                                $DomainController -eq $testDomainController } `
                             -Exactly -times 1
                     }
 
@@ -386,10 +426,10 @@ try
                 }
 
                 It 'Calls "Set-ADFineGrainedPasswordPolicy" without "Credential" parameter by default' {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
-                        { $Credential -eq $null } { return $fakeGetFineGrainedPasswordPolicy; }
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
-                        { $Credential -eq $null } { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $Credential -eq $null }
 
@@ -414,24 +454,24 @@ try
                 }
 
                 It 'Calls "Set-ADFineGrainedPasswordPolicy" without "DomainController" parameter by default' {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
-                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicy; }
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
-                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
-                        { $DomainController -eq $null }
+                        { $Server -eq $null }
 
                     $result = Set-TargetResource @testSetDefaultParams
 
                     Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
-                        { $DomainController -eq $null } -Scope It
+                        { $Server -eq $null } -Scope It
                 }
 
                 It 'Calls "Set-ADFineGrainedPasswordPolicy" with "DomainController" parameter when specified' {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
-                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicy; }
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
-                        { $DomainController -eq $null } { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $Server -eq $testDomainController }
 
