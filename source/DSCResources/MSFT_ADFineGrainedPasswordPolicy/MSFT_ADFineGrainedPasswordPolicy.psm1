@@ -661,13 +661,11 @@ function Set-TargetResource
 
         try
         {
-            #[ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
-            New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
 
             if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
             {
-                #[ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
-                Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
+                [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
             }
         }
         catch
@@ -683,8 +681,7 @@ function Set-TargetResource
 
         try
         {
-            #[ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
-            Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
 
             # Add the exclusive subjects to policy (removes all others)
             if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
@@ -698,9 +695,7 @@ function Set-TargetResource
 
                     try
                     {
-                        # [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
-                        #     $getExistingSubjectsToRemove -Confirm:$false
-                        Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
+                        [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
                             $getExistingSubjectsToRemove -Confirm:$false
                     }
                     catch
@@ -717,8 +712,7 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
                         "Adding new subject: $($subject)")
 
-                        #[ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
-                        Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
+                        [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
                     }
                     catch
                     {
@@ -746,8 +740,7 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
                 'Attempting to remove the protection for accidental deletion')
-                #[ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
-                Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+                [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
             }
             else
             {
@@ -755,8 +748,7 @@ function Set-TargetResource
                 'ProtectedFromAccidentalDeletion is not defined to false, delete may fail if not explicitly set false')
             }
 
-            #[ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
-            Remove-ADFineGrainedPasswordPolicy -Identity $Name
+            [ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
         }
         catch
         {
