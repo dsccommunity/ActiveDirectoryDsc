@@ -325,7 +325,7 @@ function Test-TargetResource
             # Resource should exist
             $propertiesNotInDesiredState = (
                 Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
-                    -IgnoreProperties 'DisplayName', 'ProtectedFromAccidentalDeletion' | `
+                    -IgnoreProperties 'DisplayName', 'ProtectedFromAccidentalDeletion', 'Credential', 'DomainController' | `
                             Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)

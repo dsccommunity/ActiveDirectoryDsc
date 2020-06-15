@@ -225,6 +225,18 @@ try
                 }
             }
 
+            Context 'When Get-ADFineGrainedPasswordPolicySubject throws an expected identity not found error' {
+                Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                    -MockWith { $fakeGetFineGrainedPasswordPolicyAbsent }
+                Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                    -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+
+                It 'Should not throw and continue on' {
+                    { Get-TargetResource @getTargetResourceParametersPolicy } |
+                        Should -Not -Throw
+                }
+            }
+
             Context 'When Get-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
                 Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                     -MockWith { $fakeGetFineGrainedPasswordPolicyAbsent }
@@ -267,7 +279,8 @@ try
                 Context 'When the Resource should be Present' {
 
                     It 'Should not throw' {
-                        { Test-TargetResource @testTargetResourceParametersPolicy } | Should -Not -Throw
+                        { Test-TargetResource @testTargetResourceParametersPolicy -Credential $testCredential `
+                            -DomainController $testDomainController }  | Should -Not -Throw
                     }
 
                     It 'Should call the expected mocks' {
@@ -288,7 +301,8 @@ try
                             $testTargetResourceParametersDesired['Precedence'] = 100
                             $testTargetResourceParametersDesired['ReversibleEncryptionEnabled'] = $false
 
-                            Test-TargetResource @testTargetResourceParametersDesired | Should -Be $true
+                            Test-TargetResource @testTargetResourceParametersDesired -Credential $testCredential `
+                                -DomainController $testDomainController | Should -Be $true
                         }
                     }
 
@@ -317,7 +331,9 @@ try
                             -ParameterFilter {
                                 $Name -eq $testTargetResourceParametersPolicy.Name
                                 $Precedence -eq $testTargetResourceParametersPolicy.Precedence
-                                $Subjects -eq $testTargetResourceParametersPolicy.Subjects } `
+                                $Subjects -eq $testTargetResourceParametersPolicy.Subjects
+                                $Credential -eq $testCredential
+                                $DomainController -eq $testDomainController } `
                             -Exactly -times 1
                     }
 
@@ -341,7 +357,9 @@ try
                             -ParameterFilter {
                                 $Name -eq $testTargetResourceParametersPolicy.Name
                                 $Precedence -eq $testTargetResourceParametersPolicy.Precedence
-                                $Subjects -eq $testTargetResourceParametersPolicy.Subjects } `
+                                $Subjects -eq $testTargetResourceParametersPolicy.Subjects
+                                $Credential -eq $testCredential
+                                $DomainController -eq $testDomainController } `
                             -Exactly -times 1
                     }
 
@@ -361,7 +379,9 @@ try
                             -ParameterFilter { `
                                 $Name -eq $testTargetResourceParametersPolicyAbsent.Name
                                 $Precedence -eq $testTargetResourceParametersPolicyAbsent.Precedence
-                                $Subjects -eq $testTargetResourceParametersPolicyAbsent.Subjects } `
+                                $Subjects -eq $testTargetResourceParametersPolicyAbsent.Subjects
+                                $Credential -eq $testCredential
+                                $DomainController -eq $testDomainController } `
                             -Exactly -times 1
                     }
 
@@ -701,6 +721,27 @@ try
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy
                     Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
                     Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject `
+                        -MockWith { throw 'UnexpectedError' }
+
+                    It 'Should throw the correct exception' {
+                        { Set-TargetResource @setSubjectsFineGrainedParametersPolicy } |
+                            Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                $setSubjectsFineGrainedParametersPolicy.Name)
+                    }
+                }
+
+                Context 'When Add-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
+                    $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                    $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Users'
+                    $setSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
+                        { return $fakeGetFineGrainedPasswordPolicy; }
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                    Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
+                    Mock -CommandName Add-ADFineGrainedPasswordPolicySubject `
                         -MockWith { throw 'UnexpectedError' }
 
                     It 'Should throw the correct exception' {
