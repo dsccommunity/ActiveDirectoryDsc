@@ -443,6 +443,7 @@ function Test-TargetResource
             Assert-Module                             | DscResource.Common
             New-InvalidOperationException             | DscResource.Common
             Get-ADCommonParameters                    | DscResource.Common
+            Compare-ResourcePropertyState             | ActiveDirectoryDsc.Common
 #>
 function Set-TargetResource
 {
@@ -655,106 +656,142 @@ function Set-TargetResource
             'Precedence', $Precedence)
     }
 
-    # Resource is absent and should be present
-    if (($getTargetResourceResult.Ensure -eq 'Absent') -and ($Ensure -eq 'Present'))
+    if ($Ensure -eq 'Present')
     {
-        Write-Verbose -Message ($script:localizedData.CreatingFineGrainedPasswordPolicy -f $Name)
-
-        try
+        # Resource should be present and set correctly
+        if ($getTargetResourceResult.Ensure -eq 'Present')
         {
-            [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+            # Resource exists and should be in desired state
+            $propertiesNotInDesiredState = (
+                Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
+                    -IgnoreProperties 'DisplayName', 'ProtectedFromAccidentalDeletion', 'Credential', 'DomainController' | `
+                            Where-Object -Property InDesiredState -eq $false)
 
-            if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
+            if ($propertiesNotInDesiredState)
             {
-                [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
-            }
-        }
-        catch
-        {
-            $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
-            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-        }
-    }
-    # Resource is present not in desired state
-    elseif (($getTargetResourceResult.Ensure -eq 'Present') -and ($Ensure -eq 'Present'))
-    {
-        Write-Verbose -Message ($script:localizedData.UpdatingFineGrainedPasswordPolicy -f $Name)
+                # Resource is present not in desired state
 
-        try
-        {
-            [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+                Write-Verbose -Message ($script:localizedData.UpdatingFineGrainedPasswordPolicy -f $Name)
 
-            # Add the exclusive subjects to policy (removes all others)
-            if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
-            {
-                $getExistingSubjectsToRemove = Get-ADFineGrainedPasswordPolicySubject -Identity $Name
-
-                if ($getExistingSubjectsToRemove)
+                try
                 {
-                    Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                    "Removing existing subjects count: $($getExistingSubjectsToRemove.Count)")
+                    [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
 
-                    try
+                    # Add the exclusive subjects to policy (removes all others)
+                    if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
                     {
-                        [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
-                            $getExistingSubjectsToRemove -Confirm:$false
-                    }
-                    catch
-                    {
-                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
-                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                        $getExistingSubjectsToRemove = Get-ADFineGrainedPasswordPolicySubject -Identity $Name
+
+                        if ($getExistingSubjectsToRemove)
+                        {
+                            Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
+                            "Removing existing subjects count: $($getExistingSubjectsToRemove.Count)")
+
+                            try
+                            {
+                                [ref] $null = Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
+                                    $getExistingSubjectsToRemove -Confirm:$false
+                            }
+                            catch
+                            {
+                                $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+                                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                            }
+                        }
+
+                        foreach ($subject in $Subjects)
+                        {
+                            try
+                            {
+                                Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
+                                "Adding new subject: $($subject)")
+
+                                [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
+                            }
+                            catch
+                            {
+                                $errorMessage = $script:localizedData.ResourceConfigurationError -f $subject
+                                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                            }
+                        }
                     }
                 }
-
-                foreach ($subject in $Subjects)
+                catch
                 {
-                    try
-                    {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                        "Adding new subject: $($subject)")
-
-                        [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
-                    }
-                    catch
-                    {
-                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $subject
-                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-                    }
+                    $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                 }
-            }
-        }
-        catch
-        {
-            $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
-            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-        }
-    }
-    # Resource is present but should be absent
-    elseif (($getTargetResourceResult.Ensure -eq 'Present') -and ($Ensure -eq 'Absent'))
-    {
-        Write-Verbose -Message ($script:localizedData.RemovingFineGrainedPasswordPolicy -f $Name)
-
-        try
-        {
-            if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion') -and `
-                -not $ProtectedFromAccidentalDeletion)
-            {
-                Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                'Attempting to remove the protection for accidental deletion')
-                [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
             }
             else
             {
-                Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                'ProtectedFromAccidentalDeletion is not defined to false, delete may fail if not explicitly set false')
+                # Resource is in desired state
+                Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
             }
-
-            [ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
         }
+        else
+        {
+            # Resource should exist
+            Write-Verbose -Message ($script:localizedData.ResourceDoesNotExistButShouldMessage -f $Name)
+
+            try
+            {
+                Write-Verbose -Message ($script:localizedData.CreatingFineGrainedPasswordPolicy -f $Name)
+
+                [ref] $null = New-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+
+                if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
+                {
+                    [ref] $null = Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
+                }
+            }
         catch
         {
             $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+        }
+        }
+    }
+    else
+    {
+        # Resource should not exist
+
+        if ($getTargetResourceResult.Ensure -eq 'Present')
+        {
+            # Resource exists but shouldn't
+
+            Write-Verbose -Message ($script:localizedData.ResourceExistsButShouldNotMessage -f $Name)
+
+            try
+            {
+                if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion') -and `
+                    -not $ProtectedFromAccidentalDeletion)
+                {
+                    Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
+                    'Attempting to remove the protection for accidental deletion')
+                    [ref] $null = Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+                }
+                else
+                {
+                    Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
+                    'ProtectedFromAccidentalDeletion is not defined to false, delete may fail if not `
+                        explicitly set false')
+                }
+
+                Write-Verbose -Message ($script:localizedData.RemovingFineGrainedPasswordPolicy -f $Name)
+
+                [ref] $null = Remove-ADFineGrainedPasswordPolicy -Identity $Name
+            }
+            catch
+            {
+                $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+            }
+        }
+        else
+        {
+            # Resource should not and does not exist
+
+            Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
         }
     }
 } #end Set-TargetResource
