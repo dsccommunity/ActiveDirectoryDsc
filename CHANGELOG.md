@@ -22,6 +22,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Changed CI pipeline to use PublishPipelineArtifact & DownloadPipelineArtifact.
   - Removed redundant common functions `Resolve-DomainFQDN` and `Set-DscADComputer`.
   - Added ActiveDirectoryDsc.Common Module markdown help.
+  - Updated the `DscResource.Common` module to `v0.9.0`.
 
 - ADDomainTrust
   - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
@@ -31,6 +32,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Fixed
 
+- ActiveDirectoryDsc
+  - Fixed the CI pipeline by pinning the `Pester` module to `v4.10.1`
+  - Restored importing the `DscResource.Common` module import in the `ActiveDirectoryDsc.Common` module that was
+    incorrectly disabled.
+    ([issue #612](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/612)).
 - ADReplicationSiteLink
   - Fixed setting options after the resource is initially created
     ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).
