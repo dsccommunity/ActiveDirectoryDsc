@@ -191,10 +191,7 @@ function Get-TargetResource
             # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
             if ($MembershipAttribute -eq 'SID')
             {
-                $selectProperty = @{
-                    Name = 'SID'
-                    Expression = { $_.ObjectSID }
-                }
+                $selectProperty = 'ObjectSID'
             }
             else
             {
@@ -205,12 +202,17 @@ function Get-TargetResource
             $commonParametersClone = $commonParameters.Clone()
             $null = $commonParametersClone.Remove('Identity')
 
+            # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
+            # This allows for a single Get-ADObject call instead of multiple calls in a loop
+            $adObjectFilter = @(
+                "(DistinguishedName -eq '",
+                ($adGroup.Members -join "') -or (DistinguishedName -eq '"),
+                "')"
+            ) -join ''
+
             # Retrieve the current list of members, returning the specified membership attribute
-            [System.Array] $adGroupMembers = $adGroup.Members |
-                ForEach-Object -Process {
-                    Get-ADObject -Identity $_ -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone
-                } |
-                Select-Object -ExpandProperty $selectProperty -Unique
+            [System.Array] $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone |
+                Select-Object -ExpandProperty $selectProperty
 
             $getTargetResourceReturnValue['Ensure'] = 'Present'
             $getTargetResourceReturnValue['GroupName'] = $adGroup.Name
@@ -728,10 +730,7 @@ function Set-TargetResource
                 # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
                 if ($MembershipAttribute -eq 'SID')
                 {
-                    $selectProperty = @{
-                        Name = 'SID'
-                        Expression = { $_.ObjectSID }
-                    }
+                    $selectProperty = 'ObjectSID'
                 }
                 else
                 {
@@ -742,11 +741,17 @@ function Set-TargetResource
                 $commonParametersClone = $commonParameters.Clone()
                 $null = $commonParametersClone.Remove('Identity')
 
-                $adGroupMembers = (Get-ADGroup @commonParameters -Properties Members).Members |
-                    ForEach-Object -Process {
-                        Get-ADObject -Identity $_ -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone
-                    } |
-                    Select-Object -ExpandProperty $selectProperty -Unique
+                # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
+                # This allows for a single Get-ADObject call instead of multiple calls in a loop
+                $adObjectFilter = @(
+                    "(DistinguishedName -eq '",
+                    ((Get-ADGroup @commonParameters -Properties Members).Members -join "') -or (DistinguishedName -eq '"),
+                    "')"
+                ) -join ''
+
+                # Retrieve the current list of members, returning the specified membership attribute
+                $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone |
+                    Select-Object -ExpandProperty $selectProperty
 
                 $assertMemberParameters['ExistingMembers'] = $adGroupMembers
 
