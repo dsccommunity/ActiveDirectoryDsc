@@ -180,6 +180,7 @@ function Get-TargetResource
             'Description',
             'DisplayName',
             'ManagedBy',
+            'Members',
             'Info'
         )
 
@@ -187,8 +188,13 @@ function Get-TargetResource
 
         if ($adGroup)
         {
+            $selectProperty = $MembershipAttribute
+            if ($MembershipAttribute -eq 'SID') { $selectProperty = @{ Name = 'SID'; Expression = {$_.ObjectSID} } }
+
             # Retrieve the current list of members, returning the specified membership attribute
-            [System.Array] $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
+            [System.Array] $adGroupMembers = $adGroup.Members |
+                ForEach-Object -Process { Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID } |
+                Select-Object -ExpandProperty $selectProperty
 
             $getTargetResourceReturnValue['Ensure'] = 'Present'
             $getTargetResourceReturnValue['GroupName'] = $adGroup.Name
@@ -703,7 +709,12 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
-                $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
+                $selectProperty = $MembershipAttribute
+                if ($MembershipAttribute -eq 'SID') { $selectProperty = @{ Name = 'SID'; Expression = {$_.ObjectSID} } }
+
+                $adGroupMembers = (Get-ADGroup @commonParameters -Properties Members).Members |
+                    ForEach-Object -Process { Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID } |
+                    Select-Object -ExpandProperty $selectProperty
 
                 $assertMemberParameters['ExistingMembers'] = $adGroupMembers
 
