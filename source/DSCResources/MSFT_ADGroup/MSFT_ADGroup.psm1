@@ -188,6 +188,7 @@ function Get-TargetResource
 
         if ($adGroup)
         {
+            # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
             if ($MembershipAttribute -eq 'SID')
             {
                 $selectProperty = @{
@@ -200,12 +201,16 @@ function Get-TargetResource
                 $selectProperty = $MembershipAttribute
             }
 
+            # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
+            $commonParametersClone = $commonParameters.Clone()
+            $null = $commonParametersClone.Remove('Identity')
+
             # Retrieve the current list of members, returning the specified membership attribute
             [System.Array] $adGroupMembers = $adGroup.Members |
                 ForEach-Object -Process {
-                    Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID
+                    Get-ADObject -Identity $_ -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone
                 } |
-                Select-Object -ExpandProperty $selectProperty
+                Select-Object -ExpandProperty $selectProperty -Unique
 
             $getTargetResourceReturnValue['Ensure'] = 'Present'
             $getTargetResourceReturnValue['GroupName'] = $adGroup.Name
@@ -720,6 +725,7 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
+                # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
                 if ($MembershipAttribute -eq 'SID')
                 {
                     $selectProperty = @{
@@ -732,11 +738,15 @@ function Set-TargetResource
                     $selectProperty = $MembershipAttribute
                 }
 
+                # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
+                $commonParametersClone = $commonParameters.Clone()
+                $null = $commonParametersClone.Remove('Identity')
+
                 $adGroupMembers = (Get-ADGroup @commonParameters -Properties Members).Members |
                     ForEach-Object -Process {
-                        Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID
+                        Get-ADObject -Identity $_ -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone
                     } |
-                    Select-Object -ExpandProperty $selectProperty
+                    Select-Object -ExpandProperty $selectProperty -Unique
 
                 $assertMemberParameters['ExistingMembers'] = $adGroupMembers
 
