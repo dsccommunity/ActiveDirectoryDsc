@@ -26,6 +26,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Fixed
 
+- ADGroup
+  - Fixed issue with retrieving group members with `Get-ADGroupMember` when group members are from another domain.
+    Switched to pulling the 'Members' property from `Get-ADGroup` and sending those members to `Get-ADObject`.
+    ([issue #616](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/616)).
 - ActiveDirectoryDsc
   - Fixed the CI pipeline by pinning the `Pester` module to `v4.10.1`
   - Restored importing the `DscResource.Common` module import in the `ActiveDirectoryDsc.Common` module that was

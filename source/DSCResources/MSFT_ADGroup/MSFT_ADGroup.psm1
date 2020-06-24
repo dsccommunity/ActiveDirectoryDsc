@@ -188,12 +188,23 @@ function Get-TargetResource
 
         if ($adGroup)
         {
-            $selectProperty = $MembershipAttribute
-            if ($MembershipAttribute -eq 'SID') { $selectProperty = @{ Name = 'SID'; Expression = {$_.ObjectSID} } }
+            if ($MembershipAttribute -eq 'SID')
+            {
+                $selectProperty = @{
+                    Name = 'SID'
+                    Expression = { $_.ObjectSID }
+                }
+            }
+            else
+            {
+                $selectProperty = $MembershipAttribute
+            }
 
             # Retrieve the current list of members, returning the specified membership attribute
             [System.Array] $adGroupMembers = $adGroup.Members |
-                ForEach-Object -Process { Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID } |
+                ForEach-Object -Process {
+                    Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID
+                } |
                 Select-Object -ExpandProperty $selectProperty
 
             $getTargetResourceReturnValue['Ensure'] = 'Present'
@@ -709,11 +720,22 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
-                $selectProperty = $MembershipAttribute
-                if ($MembershipAttribute -eq 'SID') { $selectProperty = @{ Name = 'SID'; Expression = {$_.ObjectSID} } }
+                if ($MembershipAttribute -eq 'SID')
+                {
+                    $selectProperty = @{
+                        Name = 'SID'
+                        Expression = { $_.ObjectSID }
+                    }
+                }
+                else
+                {
+                    $selectProperty = $MembershipAttribute
+                }
 
                 $adGroupMembers = (Get-ADGroup @commonParameters -Properties Members).Members |
-                    ForEach-Object -Process { Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID } |
+                    ForEach-Object -Process {
+                        Get-ADObject -Identity $_ -Properties SamAccountName, ObjectSID
+                    } |
                     Select-Object -ExpandProperty $selectProperty
 
                 $assertMemberParameters['ExistingMembers'] = $adGroupMembers
