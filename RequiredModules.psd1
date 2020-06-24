@@ -14,7 +14,7 @@
     ModuleBuilder               = '1.0.0'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
-    'DscResource.Common'        = '0.5.0'
+    'DscResource.Common'        = '0.9.0'
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
     xDscResourceDesigner        = 'latest'
