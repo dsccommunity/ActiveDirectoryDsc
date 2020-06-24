@@ -22,25 +22,14 @@ Updated author, copyright notice, and URLs.
 
 Configuration ADFineGrainedPasswordPolicy_ConfigurePolicyWithDefaults_Config
 {
-    Param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [Parameter(Mandatory = $true)]
-        [System.UInt32]
-        $Precedence
-    )
-
     Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
         ADFineGrainedPasswordPolicy 'FineGrainedPasswordPolicy'
         {
-            Name       = $Name
-            Precedence = $Precedence
+            Name       = 'DomainUsers'
+            Precedence = 10
         }
     }
 }

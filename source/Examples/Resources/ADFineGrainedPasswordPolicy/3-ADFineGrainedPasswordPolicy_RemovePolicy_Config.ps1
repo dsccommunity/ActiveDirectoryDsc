@@ -21,30 +21,15 @@ Updated author, copyright notice, and URLs.
 
 Configuration ADFineGrainedPasswordPolicy_RemovePolicy_Config
 {
-    Param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [Parameter(Mandatory = $true)]
-        [System.UInt32]
-        $Precedence,
-
-        [Parameter()]
-        [System.String]
-        $Ensure = 'Absent'
-    )
-
     Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
         ADFineGrainedPasswordPolicy 'FineGrainedPasswordPolicy'
         {
-            Name       = $Name
-            Precedence = $Precedence
-            Ensure     = $Ensure
+            Name       = 'DomainUsers'
+            Precedence = 10
+            Ensure     = 'Absent'
         }
     }
 }

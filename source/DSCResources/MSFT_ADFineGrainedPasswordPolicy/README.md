@@ -4,4 +4,4 @@ The ADFineGrainedPasswordPolicy DSC resource will manage an Active Directory dom
 
 ## Requirements
 
-* Target machine must be running Windows Server 2008 R2 or later.
+* Target machine must be running Windows Server 2012 or later.

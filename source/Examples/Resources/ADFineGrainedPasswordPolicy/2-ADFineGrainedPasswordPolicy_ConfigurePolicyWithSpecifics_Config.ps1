@@ -22,85 +22,26 @@ Updated author, copyright notice, and URLs.
 
 Configuration ADFineGrainedPasswordPolicy_ConfigurePolicyWithSpecifics_Config
 {
-    Param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $Name,
-
-        [Parameter()]
-        [System.String]
-        $DisplayName,
-
-        [Parameter()]
-        [System.String[]]
-        $Subjects,
-
-        [Parameter()]
-        [System.Boolean]
-        $ComplexityEnabled,
-
-        [Parameter()]
-        [String]
-        $LockoutDuration,
-
-        [Parameter()]
-        [String]
-        $LockoutObservationWindow,
-
-        [Parameter()]
-        [System.UInt32]
-        $LockoutThreshold,
-
-        [Parameter()]
-        [String]
-        $MinPasswordAge,
-
-        [Parameter()]
-        [String]
-        $MaxPasswordAge,
-
-        [Parameter()]
-        [System.UInt32]
-        $MinPasswordLength,
-
-        [Parameter()]
-        [System.UInt32]
-        $PasswordHistoryCount,
-
-        [Parameter()]
-        [System.Boolean]
-        $ReversibleEncryptionEnabled,
-
-        [Parameter()]
-        [System.Boolean]
-        $ProtectedFromAccidentalDeletion,
-
-        [Parameter(Mandatory = $true)]
-        [System.UInt32]
-        $Precedence
-    )
-
     Import-DscResource -Module ActiveDirectoryDsc
 
     Node localhost
     {
         ADFineGrainedPasswordPolicy 'FineGrainedPasswordPolicy'
         {
-            Name                            = $Name
-            DisplayName                     = $DisplayName
-            Subjects                        = $Subjects
-            ComplexityEnabled               = $ComplexityEnabled
-            LockoutDuration                 = $LockoutDuration
-            LockoutObservationWindow        = $LockoutObservationWindow
-            LockoutThreshold                = $LockoutThreshold
-            MaxPasswordAge                  = $MaxPasswordAge
-            MinPasswordAge                  = $MinPasswordAge
-            MinPasswordLength               = $MinPasswordLength
-            PasswordHistoryCount            = $PasswordHistoryCount
-            ReversibleEncryptionEnabled     = $ReversibleEncryptionEnabled
-            ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
-            Precedence                      = $Precedence
+            Name                            = 'DomainUsers'
+            DisplayName                     = 'Domain Users Fine Grained Password Policy'
+            Subjects                        = 'Domain Users'
+            ComplexityEnabled               = $true
+            LockoutDuration                 = '00:30:00'
+            LockoutObservationWindow        = '00:30:00'
+            LockoutThreshold                = 5
+            MaxPasswordAge                  = '42.00:00:00'
+            MinPasswordAge                  = '1.00:00:00'
+            MinPasswordLength               = 15
+            PasswordHistoryCount            = 24
+            ReversibleEncryptionEnabled     = $false
+            ProtectedFromAccidentalDeletion = $true
+            Precedence                      = 10
         }
     }
 }
