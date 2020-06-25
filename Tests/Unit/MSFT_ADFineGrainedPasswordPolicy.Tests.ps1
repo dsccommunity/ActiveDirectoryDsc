@@ -528,11 +528,13 @@ try
                     $testSetDefaultParamsDiff = $testSetDefaultParams.Clone()
                     $testSetDefaultParamsDiff['MinPasswordLength'] = 20
 
-                    Mock -CommandName Get-TargetResource
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourceFineGrainedPasswordPolicy }
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { return $fakeGetFineGrainedPasswordPolicy; }
                     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject -ParameterFilter `
                         { return $fakeGetFineGrainedPasswordPolicySubject; }
+                    Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
+                    Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
                     Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
                         { $testSetDefaultParamsDiff } `
                         -MockWith { throw 'UnexpectedError' }
