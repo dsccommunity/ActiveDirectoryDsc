@@ -117,6 +117,13 @@ try
                     return $fakeADGroup
                 }
 
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
+
                 Mock -CommandName Get-ADObject -MockWith {
                     return @(
                         $fakeADUser1,
@@ -134,6 +141,13 @@ try
             It 'Returns the correct values when group exists' {
                 Mock -CommandName Get-ADGroup -MockWith {
                     return $fakeADGroup
+                }
+
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
                 }
 
                 Mock -CommandName Get-ADObject -MockWith {
@@ -192,6 +206,13 @@ try
                     return $fakeADGroup
                 }
 
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
+
                 Mock -CommandName Get-ADObject -MockWith {
                     return @(
                         $fakeADUser1,
@@ -213,6 +234,13 @@ try
                     return $fakeADGroup
                 }
 
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
+
                 Mock -CommandName Get-ADObject -MockWith {
                     return @(
                         $fakeADUser1,
@@ -227,9 +255,69 @@ try
                 } -Scope It
             }
 
-            It "Calls 'Get-ADObject' with 'Server' parameter when 'DomainController' specified" {
+            It "Calls 'Get-ADGroupMember' with 'Server' parameter when 'DomainController' specified" {
                 Mock -CommandName Get-ADGroup -MockWith {
                     return $fakeADGroup
+                }
+
+                Mock -CommandName Get-ADGroupMember -ParameterFilter {
+                    $Server -eq $testDomainController
+                } -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
+
+                Mock -CommandName Get-ADObject -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
+
+                Get-TargetResource @testPresentParams -DomainController $testDomainController
+
+                Assert-MockCalled -CommandName Get-ADGroupMember -ParameterFilter {
+                    $Server -eq $testDomainController
+                } -Scope It
+            }
+
+            It "Calls 'Get-ADGroupMember' with 'Credential' parameter when specified" {
+                Mock -CommandName Get-ADGroup -MockWith {
+                    return $fakeADGroup
+                }
+
+                Mock -CommandName Get-ADGroupMember -ParameterFilter {
+                    $Credential -eq $testCredentials
+                } -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
+
+                Mock -CommandName Get-ADObject -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
+
+                Get-TargetResource @testPresentParams -Credential $testCredentials
+
+                Assert-MockCalled -CommandName Get-ADGroupMember -ParameterFilter {
+                    $Credential -eq $testCredentials
+                } -Scope It
+            }
+
+            It "Calls 'Get-ADObject' with 'Server' parameter when 'DomainController' specified and 'Get-ADGroupMember' fails due to one-way trust" {
+                Mock -CommandName Get-ADGroup -MockWith {
+                    return $fakeADGroup
+                }
+
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    throw "The server was unable to process the request due to an internal error.  For more information about the error, either turn on IncludeExceptionDetailInFaults (either from ServiceBehaviorAttribute or from the <serviceDebug> configuration behavior) on the server in order to send the exception information back to the client, or turn on tracing as per the Microsoft .NET Framework SDK documentation and inspect the server trace logs."
                 }
 
                 Mock -CommandName Get-ADObject -ParameterFilter {
@@ -248,9 +336,13 @@ try
                 } -Scope It
             }
 
-            It "Calls 'Get-ADObject' with 'Credential' parameter when specified" {
+            It "Calls 'Get-ADObject' with 'Credential' parameter when specified and 'Get-ADGroupMember' fails due to one-way trust" {
                 Mock -CommandName Get-ADGroup -MockWith {
                     return $fakeADGroup
+                }
+
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    throw "The server was unable to process the request due to an internal error.  For more information about the error, either turn on IncludeExceptionDetailInFaults (either from ServiceBehaviorAttribute or from the <serviceDebug> configuration behavior) on the server in order to send the exception information back to the client, or turn on tracing as per the Microsoft .NET Framework SDK documentation and inspect the server trace logs."
                 }
 
                 Mock -CommandName Get-ADObject -ParameterFilter {
@@ -285,6 +377,13 @@ try
                         return $fakeADGroup
                     }
 
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        return @(
+                            $fakeADUser1,
+                            $fakeADUser2
+                        )
+                    }
+
                     Mock -CommandName Get-ADObject -MockWith {
                         return @(
                             $fakeADUser1,
@@ -302,6 +401,12 @@ try
                         return $fakeADGroup
                     }
 
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        return @(
+                            $fakeADUser1
+                        )
+                    }
+
                     Mock -CommandName Get-ADObject -MockWith {
                         return @(
                             $fakeADUser1
@@ -316,6 +421,13 @@ try
                 It "Fails when group 'Members' do not match using '$attribute'" {
                     Mock -CommandName Get-ADGroup -MockWith {
                         return $fakeADGroup
+                    }
+
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        return @(
+                            $fakeADUser1,
+                            $fakeADUser2
+                        )
                     }
 
                     Mock -CommandName Get-ADObject -MockWith {
@@ -335,6 +447,13 @@ try
                         return $fakeADGroup
                     }
 
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        return @(
+                            $fakeADUser1,
+                            $fakeADUser2
+                        )
+                    }
+
                     Mock -CommandName Get-ADObject -MockWith {
                         return @(
                             $fakeADUser1,
@@ -350,6 +469,13 @@ try
                 It "Fails when specified 'MembersToInclude' are missing using '$attribute'" {
                     Mock -CommandName Get-ADGroup -MockWith {
                         return $fakeADGroup
+                    }
+
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        return @(
+                            $fakeADUser1,
+                            $fakeADUser2
+                        )
                     }
 
                     Mock -CommandName Get-ADObject -MockWith {
@@ -369,6 +495,13 @@ try
                         return $fakeADGroup
                     }
 
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        return @(
+                            $fakeADUser1,
+                            $fakeADUser2
+                        )
+                    }
+
                     Mock -CommandName Get-ADObject -MockWith {
                         return @(
                             $fakeADUser1,
@@ -384,6 +517,13 @@ try
                 It "Fails when when specified 'MembersToExclude' match using '$attribute'" {
                     Mock -CommandName Get-ADGroup -MockWith {
                         return $fakeADGroup
+                    }
+
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        return @(
+                            $fakeADUser1,
+                            $fakeADUser2
+                        )
                     }
 
                     Mock -CommandName Get-ADObject -MockWith {
@@ -545,6 +685,7 @@ try
             {
                 It "Calls 'Set-ADGroup' when 'Ensure' is 'Present' and '$property' is specified" {
                     Mock -CommandName Set-ADGroup
+                    Mock -CommandName Get-ADGroupMember
                     Mock -CommandName Get-ADObject
                     Mock -CommandName Get-ADGroup -MockWith {
                         $duffADGroup = $fakeADGroup.Clone()
@@ -564,6 +705,7 @@ try
                     $GroupCategory -eq $testPresentParams.Category
                 }
 
+                Mock -CommandName Get-ADGroupMember
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Get-ADGroup -MockWith {
                     $duffADGroup = $fakeADGroup.Clone()
@@ -582,6 +724,7 @@ try
                     $Replace -ne $null
                 }
 
+                Mock -CommandName Get-ADGroupMember
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Get-ADGroup {
                     $duffADGroup = $fakeADGroup.Clone()
@@ -597,6 +740,7 @@ try
 
             It "Calls 'Set-ADGroup' twice when 'Ensure' is 'Present', the group exists but the 'Scope' has changed" {
                 Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Get-ADGroup -MockWith {
                     $duffADGroup = $fakeADGroup.Clone()
@@ -722,6 +866,7 @@ try
 
             It "Moves group when 'Ensure' is 'Present', the group exists but the 'Path' has changed" {
                 Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Move-ADObject
                 Mock -CommandName Get-ADGroup -MockWith {
@@ -742,6 +887,12 @@ try
                 }
 
                 Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
                 Mock -CommandName Get-ADObject -MockWith {
                     return @(
                         $fakeADUser1,
@@ -764,6 +915,7 @@ try
                 }
 
                 Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Remove-ADGroupMember
 
@@ -778,6 +930,12 @@ try
                 }
 
                 Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
                 Mock -CommandName Get-ADObject -MockWith {
                     return @(
                         $fakeADUser1,
@@ -798,6 +956,12 @@ try
                 }
 
                 Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    return @(
+                        $fakeADUser1,
+                        $fakeADUser2
+                    )
+                }
                 Mock -CommandName Get-ADObject -MockWith {
                     return @(
                         $fakeADUser1,
@@ -833,6 +997,7 @@ try
                     return [PSCustomObject] $fakeADGroup
                 }
 
+                Mock -CommandName Get-ADGroupMember
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Set-ADGroup -ParameterFilter {
                     $Credential -eq $testCredentials
@@ -867,6 +1032,7 @@ try
 
             It "Calls 'Move-ADObject' with credentials when specified (#106)" {
                 Mock -CommandName Set-ADGroup
+                Mock -CommandName Get-ADGroupMember
                 Mock -CommandName Get-ADObject
                 Mock -CommandName Move-ADObject -ParameterFilter {
                     $Credential -eq $testCredentials

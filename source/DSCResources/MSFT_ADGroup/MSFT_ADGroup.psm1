@@ -188,31 +188,47 @@ function Get-TargetResource
 
         if ($adGroup)
         {
-            # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
-            if ($MembershipAttribute -eq 'SID')
+            try
             {
-                $selectProperty = 'ObjectSID'
+                [System.Array] $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
             }
-            else
+            catch
             {
-                $selectProperty = $MembershipAttribute
+                $oneWayTrustErrorMessage = "The server was unable to process the request due to an internal error.  For more information about the error, either turn on IncludeExceptionDetailInFaults (either from ServiceBehaviorAttribute or from the <serviceDebug> configuration behavior) on the server in order to send the exception information back to the client, or turn on tracing as per the Microsoft .NET Framework SDK documentation and inspect the server trace logs."
+
+                if ($_.Exception.Message -eq $oneWayTrustErrorMessage)
+                {
+                    # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
+                    if ($MembershipAttribute -eq 'SID')
+                    {
+                        $selectProperty = 'ObjectSID'
+                    }
+                    else
+                    {
+                        $selectProperty = $MembershipAttribute
+                    }
+
+                    # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
+                    $commonParametersClone = $commonParameters.Clone()
+                    $null = $commonParametersClone.Remove('Identity')
+
+                    # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
+                    # This allows for a single Get-ADObject call instead of multiple calls in a loop
+                    $adObjectFilter = @(
+                        "(DistinguishedName -eq '",
+                        ($adGroup.Members -join "') -or (DistinguishedName -eq '"),
+                        "')"
+                    ) -join ''
+
+                    # Retrieve the current list of members, returning the specified membership attribute
+                    [System.Array] $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone |
+                        Select-Object -ExpandProperty $selectProperty
+                }
+                else
+                {
+                    Write-Error -Exception $_.Exception
+                }
             }
-
-            # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
-            $commonParametersClone = $commonParameters.Clone()
-            $null = $commonParametersClone.Remove('Identity')
-
-            # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
-            # This allows for a single Get-ADObject call instead of multiple calls in a loop
-            $adObjectFilter = @(
-                "(DistinguishedName -eq '",
-                ($adGroup.Members -join "') -or (DistinguishedName -eq '"),
-                "')"
-            ) -join ''
-
-            # Retrieve the current list of members, returning the specified membership attribute
-            [System.Array] $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone |
-                Select-Object -ExpandProperty $selectProperty
 
             $getTargetResourceReturnValue['Ensure'] = 'Present'
             $getTargetResourceReturnValue['GroupName'] = $adGroup.Name
@@ -727,31 +743,47 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
-                # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
-                if ($MembershipAttribute -eq 'SID')
+                try
                 {
-                    $selectProperty = 'ObjectSID'
+                    $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
                 }
-                else
+                catch
                 {
-                    $selectProperty = $MembershipAttribute
+                    $oneWayTrustErrorMessage = "The server was unable to process the request due to an internal error.  For more information about the error, either turn on IncludeExceptionDetailInFaults (either from ServiceBehaviorAttribute or from the <serviceDebug> configuration behavior) on the server in order to send the exception information back to the client, or turn on tracing as per the Microsoft .NET Framework SDK documentation and inspect the server trace logs."
+
+                    if ($_.Exception.Message -eq $oneWayTrustErrorMessage)
+                    {
+                        # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
+                        if ($MembershipAttribute -eq 'SID')
+                        {
+                            $selectProperty = 'ObjectSID'
+                        }
+                        else
+                        {
+                            $selectProperty = $MembershipAttribute
+                        }
+
+                        # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
+                        $commonParametersClone = $commonParameters.Clone()
+                        $null = $commonParametersClone.Remove('Identity')
+
+                        # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
+                        # This allows for a single Get-ADObject call instead of multiple calls in a loop
+                        $adObjectFilter = @(
+                            "(DistinguishedName -eq '",
+                            ((Get-ADGroup @commonParameters -Properties Members).Members -join "') -or (DistinguishedName -eq '"),
+                            "')"
+                        ) -join ''
+
+                        # Retrieve the current list of members, returning the specified membership attribute
+                        $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone |
+                            Select-Object -ExpandProperty $selectProperty
+                    }
+                    else
+                    {
+                        Write-Error -Exception $_.Exception
+                    }
                 }
-
-                # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
-                $commonParametersClone = $commonParameters.Clone()
-                $null = $commonParametersClone.Remove('Identity')
-
-                # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
-                # This allows for a single Get-ADObject call instead of multiple calls in a loop
-                $adObjectFilter = @(
-                    "(DistinguishedName -eq '",
-                    ((Get-ADGroup @commonParameters -Properties Members).Members -join "') -or (DistinguishedName -eq '"),
-                    "')"
-                ) -join ''
-
-                # Retrieve the current list of members, returning the specified membership attribute
-                $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone |
-                    Select-Object -ExpandProperty $selectProperty
 
                 $assertMemberParameters['ExistingMembers'] = $adGroupMembers
 
