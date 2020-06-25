@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.1
+.VERSION 1.0.0
 .GUID d1d88021-930b-4928-8f1f-7a002e374847
 .AUTHOR DSC Community
 .COMPANYNAME DSC Community
@@ -9,7 +9,6 @@
 .PROJECTURI https://github.com/dsccommunity/ActiveDirectoryDsc
 .ICONURI https://dsccommunity.org/images/DSC_Logo_300p.png
 .RELEASENOTES
-Updated author, copyright notice, and URLs.
 #>
 
 #Requires -Module ActiveDirectoryDsc
