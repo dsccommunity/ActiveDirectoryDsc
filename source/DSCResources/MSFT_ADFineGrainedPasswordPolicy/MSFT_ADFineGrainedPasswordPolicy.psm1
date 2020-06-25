@@ -330,8 +330,8 @@ function Test-TargetResource
             # Resource should exist
             $propertiesNotInDesiredState = (
                 Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
-                    -IgnoreProperties 'Identity', 'DisplayName', 'ProtectedFromAccidentalDeletion', 'Credential', `
-                    'DomainController' | Where-Object -Property InDesiredState -eq $false)
+                    -IgnoreProperties 'Name', 'Identity', 'DisplayName', 'ProtectedFromAccidentalDeletion', `
+                    'Credential', 'DomainController' | Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)
             {
@@ -667,8 +667,8 @@ function Set-TargetResource
             # Resource exists and should be in desired state
             $propertiesNotInDesiredState = (
                 Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult -DesiredValues $parameters `
-                    -IgnoreProperties 'Identity', 'DisplayName', 'ProtectedFromAccidentalDeletion', 'Credential', `
-                    'DomainController' | Where-Object -Property InDesiredState -eq $false)
+                    -IgnoreProperties 'Name', 'Identity', 'DisplayName', 'ProtectedFromAccidentalDeletion', `
+                    'Credential', 'DomainController' | Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)
             {
