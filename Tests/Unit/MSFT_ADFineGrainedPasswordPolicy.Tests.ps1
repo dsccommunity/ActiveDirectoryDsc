@@ -859,7 +859,7 @@ try
                     It 'Should throw the correct exception' {
                         { Set-TargetResource @setSubjectsFineGrainedParametersPolicy } |
                             Should -Throw ($script:localizedData.ResourceConfigurationError -f
-                                $setSubjectsFineGrainedParametersPolicy.Subjects)
+                                $setSubjectsFineGrainedParametersPolicy.Name)
                     }
                 }
             }

@@ -738,7 +738,7 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $subject
+                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
                         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                     }
                 }
