@@ -14,4 +14,8 @@ ConvertFrom-StringData @'
     RetrieveFineGrainedPasswordPolicySubjectError   = Error retrieving fine grained password policy subject '{0}'. (ADFGPP0012)
     ResourceExistsButShouldNotMessage               = Fine grained password policy '{0}' exists but should not. (ADFGPP0013)
     ResourceDoesNotExistButShouldMessage            = Fine grained password policy '{0}' does not exist but should. (ADFGPP0014)
+    ProtectedFromAccidentalDeletionRemove           = Attempting to remove the protection for accidental deletion. (ADFGPP0015)
+    ProtectedFromAccidentalDeletionUndefined        = ProtectedFromAccidentalDeletion is not defined to false, delete may fail if not explicitly set false. (ADFGPP0016)
+    AddingNewSubjects                               = Adding new subjects to policy '{0}', count '{1}'. (ADFGPP0017)
+    RemovingExistingSubjects                        = Removing existing subjects from policy '{0}', count '{1}'. (ADFGPP0018)
 '@

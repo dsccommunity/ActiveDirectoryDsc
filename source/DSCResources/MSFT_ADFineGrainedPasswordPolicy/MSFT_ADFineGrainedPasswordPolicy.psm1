@@ -63,8 +63,10 @@ function Get-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
 
     [HashTable] $parameters = $PSBoundParameters
+    [String[]] $policySubjects = ""
 
     $parameters['Identity'] = $Name
+    $parameters.Remove('Precedence')
 
     Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
 
@@ -72,10 +74,8 @@ function Get-TargetResource
     $getADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
     $getADFineGrainedPasswordPolicyParams["Filter"] = "name -eq `'$Name`'"
     $getADFineGrainedPasswordPolicyParams.Remove('Identity')
-    $getADFineGrainedPasswordPolicyParams.Remove('Precedence')
 
     $getADFineGrainedPasswordPolicySubjectParams = Get-ADCommonParameters @parameters
-    $getADFineGrainedPasswordPolicySubjectParams.Remove('Precedence')
 
     try
     {
@@ -89,12 +89,13 @@ function Get-TargetResource
 
     try
     {
-        $policySubjects = (Get-ADFineGrainedPasswordPolicySubject @getADFineGrainedPasswordPolicySubjectParams).Name
+        [String[]] $policySubjects = (Get-ADFineGrainedPasswordPolicySubject `
+            @getADFineGrainedPasswordPolicySubjectParams).Name
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
         Write-Verbose -Message ($script:localizedData.FineGrainedPasswordPolicySubjectNotFoundMessage -f $Name)
-        $policySubjects = $null
+        [String[]] $policySubjects = ""
     }
     catch
     {
@@ -117,7 +118,7 @@ function Get-TargetResource
             ReversibleEncryptionEnabled = $policy.ReversibleEncryptionEnabled
             Precedence                  = $policy.Precedence
             Ensure                      = 'Present'
-            Subjects                    = @($policySubjects)
+            Subjects                    = $policySubjects
         }
     }
     else
@@ -135,7 +136,7 @@ function Get-TargetResource
             ReversibleEncryptionEnabled = $null
             Precedence                  = $null
             Ensure                      = 'Absent'
-            Subjects                    = @()
+            Subjects                    = $policySubjects
         }
     }
 } #end Get-TargetResource
@@ -317,11 +318,6 @@ function Test-TargetResource
 
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParams
     $inDesiredState = $true
-
-    if (-not ($getTargetResourceResult.Subjects))
-    {
-        $getTargetResourceResult.Subjects = @("empty")
-    }
 
     if ($getTargetResourceResult.Ensure -eq 'Present')
     {
@@ -576,91 +572,115 @@ function Set-TargetResource
         $setADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters -UseNameParameter
     }
 
-    # Build parameters needed to set resource properties
-    if ($parameters.ContainsKey('ComplexityEnabled'))
-    {
-        $setADFineGrainedPasswordPolicyParams['ComplexityEnabled'] = $ComplexityEnabled
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'ComplexityEnabled', $ComplexityEnabled)
-    }
-
-    if ($parameters.ContainsKey('LockoutDuration') -and `
-        -not [System.String]::IsNullOrEmpty($LockoutDuration))
-    {
-        $setADFineGrainedPasswordPolicyParams['LockoutDuration'] = $LockoutDuration
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'LockoutDuration', $LockoutDuration)
-    }
-
-    if ($parameters.ContainsKey('LockoutObservationWindow') -and `
-        -not [System.String]::IsNullOrEmpty($LockoutObservationWindow))
-    {
-        $setADFineGrainedPasswordPolicyParams['LockoutObservationWindow'] = $LockoutObservationWindow
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'LockoutObservationWindow', $LockoutObservationWindow)
-    }
-
-    if ($parameters.ContainsKey('LockoutThreshold') -and `
-        -not [System.String]::IsNullOrEmpty($LockoutThreshold))
-    {
-        $setADFineGrainedPasswordPolicyParams['LockoutThreshold'] = $LockoutThreshold
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'LockoutThreshold', $LockoutThreshold)
-    }
-
-    if ($parameters.ContainsKey('MinPasswordAge') -and `
-        -not [System.String]::IsNullOrEmpty($MinPasswordAge))
-    {
-        $setADFineGrainedPasswordPolicyParams['MinPasswordAge'] = $MinPasswordAge
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'MinPasswordAge', $MinPasswordAge)
-    }
-
-    if ($parameters.ContainsKey('MaxPasswordAge') -and `
-        -not [System.String]::IsNullOrEmpty($MaxPasswordAge))
-    {
-        $setADFineGrainedPasswordPolicyParams['MaxPasswordAge'] = $MaxPasswordAge
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'MaxPasswordAge', $MaxPasswordAge)
-    }
-
-    if ($parameters.ContainsKey('MinPasswordLength'))
-    {
-        $setADFineGrainedPasswordPolicyParams['MinPasswordLength'] = $MinPasswordLength
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'MinPasswordLength', $MinPasswordLength)
-    }
-
-    if ($parameters.ContainsKey('PasswordHistoryCount'))
-    {
-        $setADFineGrainedPasswordPolicyParams['PasswordHistoryCount'] = $PasswordHistoryCount
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'PasswordHistoryCount', $PasswordHistoryCount)
-    }
-
-    if ($parameters.ContainsKey('ReversibleEncryptionEnabled'))
-    {
-        $setADFineGrainedPasswordPolicyParams['ReversibleEncryptionEnabled'] = $ReversibleEncryptionEnabled
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'ReversibleEncryptionEnabled', $ReversibleEncryptionEnabled)
-    }
-
-    if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion'))
-    {
-        $setADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'ProtectedFromAccidentalDeletion', $ProtectedFromAccidentalDeletion)
-    }
-
-    if ($parameters.ContainsKey('Precedence'))
-    {
-        $setADFineGrainedPasswordPolicyParams['Precedence'] = $Precedence
-        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-            'Precedence', $Precedence)
-    }
+    $commonADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
 
     if ($Ensure -eq 'Present')
     {
+        # Build parameters needed to set resource properties
+        if ($parameters.ContainsKey('Precedence'))
+        {
+            $setADFineGrainedPasswordPolicyParams['Precedence'] = $Precedence
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'Precedence', $Precedence)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('Precedence')
+        }
+
+        if ($parameters.ContainsKey('ComplexityEnabled'))
+        {
+            $setADFineGrainedPasswordPolicyParams['ComplexityEnabled'] = $ComplexityEnabled
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'ComplexityEnabled', $ComplexityEnabled)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('ComplexityEnabled')
+        }
+
+        if ($parameters.ContainsKey('LockoutDuration') -and `
+            -not [System.String]::IsNullOrEmpty($LockoutDuration))
+        {
+            $setADFineGrainedPasswordPolicyParams['LockoutDuration'] = $LockoutDuration
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'LockoutDuration', $LockoutDuration)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('LockoutDuration')
+        }
+
+        if ($parameters.ContainsKey('LockoutObservationWindow') -and `
+            -not [System.String]::IsNullOrEmpty($LockoutObservationWindow))
+        {
+            $setADFineGrainedPasswordPolicyParams['LockoutObservationWindow'] = $LockoutObservationWindow
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'LockoutObservationWindow', $LockoutObservationWindow)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('LockoutObservationWindow')
+        }
+
+        if ($parameters.ContainsKey('LockoutThreshold') -and `
+            -not [System.String]::IsNullOrEmpty($LockoutThreshold))
+        {
+            $setADFineGrainedPasswordPolicyParams['LockoutThreshold'] = $LockoutThreshold
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'LockoutThreshold', $LockoutThreshold)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('LockoutThreshold')
+        }
+
+        if ($parameters.ContainsKey('MinPasswordAge') -and `
+            -not [System.String]::IsNullOrEmpty($MinPasswordAge))
+        {
+            $setADFineGrainedPasswordPolicyParams['MinPasswordAge'] = $MinPasswordAge
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'MinPasswordAge', $MinPasswordAge)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('MinPasswordAge')
+        }
+
+        if ($parameters.ContainsKey('MaxPasswordAge') -and `
+            -not [System.String]::IsNullOrEmpty($MaxPasswordAge))
+        {
+            $setADFineGrainedPasswordPolicyParams['MaxPasswordAge'] = $MaxPasswordAge
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'MaxPasswordAge', $MaxPasswordAge)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('MaxPasswordAge')
+        }
+
+        if ($parameters.ContainsKey('MinPasswordLength'))
+        {
+            $setADFineGrainedPasswordPolicyParams['MinPasswordLength'] = $MinPasswordLength
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'MinPasswordLength', $MinPasswordLength)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('MinPasswordLength')
+        }
+
+        if ($parameters.ContainsKey('PasswordHistoryCount'))
+        {
+            $setADFineGrainedPasswordPolicyParams['PasswordHistoryCount'] = $PasswordHistoryCount
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'PasswordHistoryCount', $PasswordHistoryCount)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('PasswordHistoryCount')
+        }
+
+        if ($parameters.ContainsKey('ReversibleEncryptionEnabled'))
+        {
+            $setADFineGrainedPasswordPolicyParams['ReversibleEncryptionEnabled'] = $ReversibleEncryptionEnabled
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'ReversibleEncryptionEnabled', $ReversibleEncryptionEnabled)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('ReversibleEncryptionEnabled')
+        }
+
+        if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion'))
+        {
+            $setADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
+            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                'ProtectedFromAccidentalDeletion', $ProtectedFromAccidentalDeletion)
+
+            $commonADFineGrainedPasswordPolicyParams.Remove('ProtectedFromAccidentalDeletion')
+        }
+
         # Resource should be present and set correctly
         if ($getTargetResourceResult.Ensure -eq 'Present')
         {
@@ -689,17 +709,18 @@ function Set-TargetResource
                 # Add the exclusive subjects to policy (removes all others)
                 if ($parameters.ContainsKey('Subjects') -and -not [System.String]::IsNullOrEmpty($Subjects))
                 {
-                    $getExistingSubjectsToRemove = Get-ADFineGrainedPasswordPolicySubject -Identity $Name
+                    $getExistingSubjectsToRemove = Get-ADFineGrainedPasswordPolicySubject `
+                        @commonADFineGrainedPasswordPolicyParams
 
                     if ($getExistingSubjectsToRemove)
                     {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                            "Removing existing subjects count: $($getExistingSubjectsToRemove.Count)")
+                        Write-Verbose -Message ($script:localizedData.RemovingExistingSubjects -f $Name, `
+                            $($getExistingSubjectsToRemove.Count))
 
                         try
                         {
-                            Remove-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects `
-                                $getExistingSubjectsToRemove -Confirm:$false
+                            Remove-ADFineGrainedPasswordPolicySubject @commonADFineGrainedPasswordPolicyParams `
+                                -Subjects $getExistingSubjectsToRemove -Confirm:$false
                         }
                         catch
                         {
@@ -708,20 +729,17 @@ function Set-TargetResource
                         }
                     }
 
-                    foreach ($subject in $Subjects)
-                    {
-                        Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                            "Adding new subject: $($subject)")
+                    Write-Verbose -Message ($script:localizedData.AddingNewSubjects -f $Name, $($Subjects.Count))
 
-                        try
-                        {
-                            Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $subject
-                        }
-                        catch
-                        {
-                            $errorMessage = $script:localizedData.ResourceConfigurationError -f $subject
-                            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-                        }
+                    try
+                    {
+                        Add-ADFineGrainedPasswordPolicySubject @commonADFineGrainedPasswordPolicyParams `
+                            -Subjects $Subjects
+                    }
+                    catch
+                    {
+                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $subject
+                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                     }
                 }
             }
@@ -752,7 +770,7 @@ function Set-TargetResource
             {
                 try
                 {
-                    Add-ADFineGrainedPasswordPolicySubject -Identity $Name -Subjects $Subjects
+                    Add-ADFineGrainedPasswordPolicySubject @commonADFineGrainedPasswordPolicyParams -Subjects $Subjects
                 }
                 catch
                 {
@@ -775,8 +793,7 @@ function Set-TargetResource
             if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion') -and `
                 -not $ProtectedFromAccidentalDeletion)
             {
-                Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                    'Attempting to remove the protection for accidental deletion')
+                Write-Verbose -Message ($script:localizedData.ProtectedFromAccidentalDeletionRemove)
 
                 try
                 {
@@ -790,16 +807,14 @@ function Set-TargetResource
             }
             else
             {
-                Write-Verbose -Message ($script:localizedData.ResourceConfiguration -f $Name, `
-                    'ProtectedFromAccidentalDeletion is not defined to false, delete may fail if not `
-                    explicitly set false')
+                Write-Verbose -Message ($script:localizedData.ProtectedFromAccidentalDeletionUndefined)
             }
 
             Write-Verbose -Message ($script:localizedData.RemovingFineGrainedPasswordPolicy -f $Name)
 
             try
             {
-                Remove-ADFineGrainedPasswordPolicy -Identity $Name
+                Remove-ADFineGrainedPasswordPolicy @commonADFineGrainedPasswordPolicyParams
             }
             catch
             {
