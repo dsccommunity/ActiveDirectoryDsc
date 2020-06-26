@@ -797,7 +797,8 @@ function Set-TargetResource
 
                 try
                 {
-                    Set-ADFineGrainedPasswordPolicy @setADFineGrainedPasswordPolicyParams
+                    Set-ADFineGrainedPasswordPolicy @commonADFineGrainedPasswordPolicyParams `
+                        -ProtectedFromAccidentalDeletion $ProtectedFromAccidentalDeletion
                 }
                 catch
                 {
