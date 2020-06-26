@@ -51,6 +51,10 @@
     Write - String
     Active Directory domain controller to enact the change upon.
 
+.PARAMETER IgnoreMembership
+    Write - Boolean
+    Active Directory group membership should match membership evaluation should be ignored.
+
 .PARAMETER Members
     Write - StringArray
     Active Directory group membership should match membership exactly.

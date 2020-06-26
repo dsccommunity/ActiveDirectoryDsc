@@ -21,15 +21,18 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADDomainTrust
   - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
     into the `ActiveDirectoryDsc.Common` module.
+- ADGroup
+  - Adding new resource property `IgnoreMembership` to allow for ignoring any membership aspects for the group.
+    This will allow for use cases where people want to manage group properties and security tied to them, but
+    another team may be delegated to manage the group membership. This also allows for bypassing a problem where
+    an error is thrown when gathering group membership with `Get-ADGroupMember` and members are from a one-way
+    trusted domain.
+    ([issue #616](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/616)).
 - ADReplicationSiteLink
   - Refactor Test-TargetResource Function.
 
 ### Fixed
 
-- ADGroup
-  - Fixed issue with retrieving group members with `Get-ADGroupMember` when group members are from another domain.
-    Switched to pulling the 'Members' property from `Get-ADGroup` and sending those members to `Get-ADObject`.
-    ([issue #616](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/616)).
 - ActiveDirectoryDsc
   - Fixed the CI pipeline by pinning the `Pester` module to `v4.10.1`
   - Restored importing the `DscResource.Common` module import in the `ActiveDirectoryDsc.Common` module that was
