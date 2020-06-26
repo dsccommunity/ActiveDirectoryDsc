@@ -574,113 +574,113 @@ function Set-TargetResource
 
     $commonADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
 
+    # Build parameters needed to set resource properties
+    if ($parameters.ContainsKey('Precedence'))
+    {
+        $setADFineGrainedPasswordPolicyParams['Precedence'] = $Precedence
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'Precedence', $Precedence)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('Precedence')
+    }
+
+    if ($parameters.ContainsKey('ComplexityEnabled'))
+    {
+        $setADFineGrainedPasswordPolicyParams['ComplexityEnabled'] = $ComplexityEnabled
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'ComplexityEnabled', $ComplexityEnabled)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('ComplexityEnabled')
+    }
+
+    if ($parameters.ContainsKey('LockoutDuration') -and `
+        -not [System.String]::IsNullOrEmpty($LockoutDuration))
+    {
+        $setADFineGrainedPasswordPolicyParams['LockoutDuration'] = $LockoutDuration
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'LockoutDuration', $LockoutDuration)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('LockoutDuration')
+    }
+
+    if ($parameters.ContainsKey('LockoutObservationWindow') -and `
+        -not [System.String]::IsNullOrEmpty($LockoutObservationWindow))
+    {
+        $setADFineGrainedPasswordPolicyParams['LockoutObservationWindow'] = $LockoutObservationWindow
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'LockoutObservationWindow', $LockoutObservationWindow)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('LockoutObservationWindow')
+    }
+
+    if ($parameters.ContainsKey('LockoutThreshold') -and `
+        -not [System.String]::IsNullOrEmpty($LockoutThreshold))
+    {
+        $setADFineGrainedPasswordPolicyParams['LockoutThreshold'] = $LockoutThreshold
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'LockoutThreshold', $LockoutThreshold)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('LockoutThreshold')
+    }
+
+    if ($parameters.ContainsKey('MinPasswordAge') -and `
+        -not [System.String]::IsNullOrEmpty($MinPasswordAge))
+    {
+        $setADFineGrainedPasswordPolicyParams['MinPasswordAge'] = $MinPasswordAge
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'MinPasswordAge', $MinPasswordAge)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('MinPasswordAge')
+    }
+
+    if ($parameters.ContainsKey('MaxPasswordAge') -and `
+        -not [System.String]::IsNullOrEmpty($MaxPasswordAge))
+    {
+        $setADFineGrainedPasswordPolicyParams['MaxPasswordAge'] = $MaxPasswordAge
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'MaxPasswordAge', $MaxPasswordAge)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('MaxPasswordAge')
+    }
+
+    if ($parameters.ContainsKey('MinPasswordLength'))
+    {
+        $setADFineGrainedPasswordPolicyParams['MinPasswordLength'] = $MinPasswordLength
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'MinPasswordLength', $MinPasswordLength)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('MinPasswordLength')
+    }
+
+    if ($parameters.ContainsKey('PasswordHistoryCount'))
+    {
+        $setADFineGrainedPasswordPolicyParams['PasswordHistoryCount'] = $PasswordHistoryCount
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'PasswordHistoryCount', $PasswordHistoryCount)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('PasswordHistoryCount')
+    }
+
+    if ($parameters.ContainsKey('ReversibleEncryptionEnabled'))
+    {
+        $setADFineGrainedPasswordPolicyParams['ReversibleEncryptionEnabled'] = $ReversibleEncryptionEnabled
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'ReversibleEncryptionEnabled', $ReversibleEncryptionEnabled)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('ReversibleEncryptionEnabled')
+    }
+
+    if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion'))
+    {
+        $setADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
+        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+            'ProtectedFromAccidentalDeletion', $ProtectedFromAccidentalDeletion)
+
+        $commonADFineGrainedPasswordPolicyParams.Remove('ProtectedFromAccidentalDeletion')
+    }
+
     if ($Ensure -eq 'Present')
     {
-        # Build parameters needed to set resource properties
-        if ($parameters.ContainsKey('Precedence'))
-        {
-            $setADFineGrainedPasswordPolicyParams['Precedence'] = $Precedence
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'Precedence', $Precedence)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('Precedence')
-        }
-
-        if ($parameters.ContainsKey('ComplexityEnabled'))
-        {
-            $setADFineGrainedPasswordPolicyParams['ComplexityEnabled'] = $ComplexityEnabled
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'ComplexityEnabled', $ComplexityEnabled)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('ComplexityEnabled')
-        }
-
-        if ($parameters.ContainsKey('LockoutDuration') -and `
-            -not [System.String]::IsNullOrEmpty($LockoutDuration))
-        {
-            $setADFineGrainedPasswordPolicyParams['LockoutDuration'] = $LockoutDuration
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'LockoutDuration', $LockoutDuration)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('LockoutDuration')
-        }
-
-        if ($parameters.ContainsKey('LockoutObservationWindow') -and `
-            -not [System.String]::IsNullOrEmpty($LockoutObservationWindow))
-        {
-            $setADFineGrainedPasswordPolicyParams['LockoutObservationWindow'] = $LockoutObservationWindow
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'LockoutObservationWindow', $LockoutObservationWindow)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('LockoutObservationWindow')
-        }
-
-        if ($parameters.ContainsKey('LockoutThreshold') -and `
-            -not [System.String]::IsNullOrEmpty($LockoutThreshold))
-        {
-            $setADFineGrainedPasswordPolicyParams['LockoutThreshold'] = $LockoutThreshold
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'LockoutThreshold', $LockoutThreshold)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('LockoutThreshold')
-        }
-
-        if ($parameters.ContainsKey('MinPasswordAge') -and `
-            -not [System.String]::IsNullOrEmpty($MinPasswordAge))
-        {
-            $setADFineGrainedPasswordPolicyParams['MinPasswordAge'] = $MinPasswordAge
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'MinPasswordAge', $MinPasswordAge)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('MinPasswordAge')
-        }
-
-        if ($parameters.ContainsKey('MaxPasswordAge') -and `
-            -not [System.String]::IsNullOrEmpty($MaxPasswordAge))
-        {
-            $setADFineGrainedPasswordPolicyParams['MaxPasswordAge'] = $MaxPasswordAge
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'MaxPasswordAge', $MaxPasswordAge)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('MaxPasswordAge')
-        }
-
-        if ($parameters.ContainsKey('MinPasswordLength'))
-        {
-            $setADFineGrainedPasswordPolicyParams['MinPasswordLength'] = $MinPasswordLength
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'MinPasswordLength', $MinPasswordLength)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('MinPasswordLength')
-        }
-
-        if ($parameters.ContainsKey('PasswordHistoryCount'))
-        {
-            $setADFineGrainedPasswordPolicyParams['PasswordHistoryCount'] = $PasswordHistoryCount
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'PasswordHistoryCount', $PasswordHistoryCount)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('PasswordHistoryCount')
-        }
-
-        if ($parameters.ContainsKey('ReversibleEncryptionEnabled'))
-        {
-            $setADFineGrainedPasswordPolicyParams['ReversibleEncryptionEnabled'] = $ReversibleEncryptionEnabled
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'ReversibleEncryptionEnabled', $ReversibleEncryptionEnabled)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('ReversibleEncryptionEnabled')
-        }
-
-        if ($parameters.ContainsKey('ProtectedFromAccidentalDeletion'))
-        {
-            $setADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
-            Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
-                'ProtectedFromAccidentalDeletion', $ProtectedFromAccidentalDeletion)
-
-            $commonADFineGrainedPasswordPolicyParams.Remove('ProtectedFromAccidentalDeletion')
-        }
-
         # Resource should be present and set correctly
         if ($getTargetResourceResult.Ensure -eq 'Present')
         {
