@@ -70,7 +70,7 @@ try
             SamAccountName = $testFineGrainedPasswordPolicyName
         }
 
-        $fakeGetFineGrainedPasswordPolicySubjectAbsent = $null
+        [String[]] $fakeGetFineGrainedPasswordPolicySubjectAbsent = ""
         $fakeGetFineGrainedPasswordPolicyAbsent = $null
 
         $mockAdFineGrainedPasswordPolicyChanged = @{
@@ -93,7 +93,7 @@ try
             ReversibleEncryptionEnabled = $fakeGetFineGrainedPasswordPolicy.ReversibleEncryptionEnabled
             Precedence                  = $getTargetResourceParametersPolicy['Precedence']
             Ensure                      = 'Present'
-            Subjects                    = @($fakeGetFineGrainedPasswordPolicy.Name)
+            Subjects                    = [string[]] $fakeGetFineGrainedPasswordPolicy.Name
         }
 
         $mockGetResourceFineGrainedPasswordPolicyAbsent = @{
@@ -109,7 +109,7 @@ try
             ReversibleEncryptionEnabled = $null
             Precedence                  = $null
             Ensure                      = 'Absent'
-            Subjects                    = @()
+            Subjects                    = [string[]] ""
         }
 
         #region Function Get-TargetResource
@@ -210,7 +210,7 @@ try
                     Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy -Times 1
                     Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
                         -ParameterFilter { $Identity -eq $getTargetResourceParametersPolicy.Name } `
-                        -Exactly -Times 1
+                        -Exactly -Times 0
                 }
             }
 
@@ -225,21 +225,9 @@ try
                 }
             }
 
-            Context 'When Get-ADFineGrainedPasswordPolicySubject throws an expected identity not found error' {
-                Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                    -MockWith { $fakeGetFineGrainedPasswordPolicyAbsent }
-                Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                    -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-
-                It 'Should not throw and continue on' {
-                    { Get-TargetResource @getTargetResourceParametersPolicy } |
-                        Should -Not -Throw
-                }
-            }
-
             Context 'When Get-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
                 Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                    -MockWith { $fakeGetFineGrainedPasswordPolicyAbsent }
+                    -MockWith { $fakeGetFineGrainedPasswordPolicy }
                 Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
                     -MockWith { throw 'UnexpectedError' }
 

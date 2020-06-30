@@ -87,20 +87,18 @@ function Get-TargetResource
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
-    try
+    if ($policy)
     {
-        [String[]] $policySubjects = (Get-ADFineGrainedPasswordPolicySubject `
-            @getADFineGrainedPasswordPolicySubjectParams).Name
-    }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
-    {
-        Write-Verbose -Message ($script:localizedData.FineGrainedPasswordPolicySubjectNotFoundMessage -f $Name)
-        [String[]] $policySubjects = ""
-    }
-    catch
-    {
-        $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicySubjectError -f $Name
-        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+        try
+        {
+            [String[]] $policySubjects = (Get-ADFineGrainedPasswordPolicySubject `
+                @getADFineGrainedPasswordPolicySubjectParams).Name
+        }
+        catch
+        {
+            $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicySubjectError -f $Name
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+        }
     }
 
     if ($policy)
