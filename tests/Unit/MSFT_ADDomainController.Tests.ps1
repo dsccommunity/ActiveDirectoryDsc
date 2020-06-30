@@ -370,6 +370,7 @@ try
                             AllowPasswordReplicationAccountName = @($allowedAccount)
                             DenyPasswordReplicationAccountName  = @($deniedAccount)
                             FlexibleSingleMasterOperationRole   = @('DomainNamingMaster', 'RIDMaster')
+                            ReadOnlyReplica                     = $true
                             Ensure                              = $true
                         }
                     }
@@ -445,6 +446,18 @@ try
                     It 'Should return $true' {
                         $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
                             -FlexibleSingleMasterOperationRole @('RIDMaster')
+                        $result | Should -Be $true
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
+                    }
+                }
+
+                Context 'When property ReadOnlyReplica and SiteName are in desired state' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            -ReadOnlyReplica $true -SiteName $correctSiteName
                         $result | Should -Be $true
                     }
 
