@@ -709,7 +709,7 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica)
     {
-        if ($testTargetResourceReturnValue -and -not $testTargetResourceReturnValue.ReadOnlyReplica)
+        if ($testTargetResourceReturnValue -and -not $existingResource.ReadOnlyReplica)
         {
             New-InvalidOperationException -Message $script:localizedData.CannotConvertToRODC
         }
