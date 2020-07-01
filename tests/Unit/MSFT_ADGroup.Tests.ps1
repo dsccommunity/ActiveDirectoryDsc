@@ -316,7 +316,9 @@ try
                     return $fakeADGroup
                 }
 
-                Mock -CommandName Get-ADGroupMember -MockWith {
+                Mock -CommandName Get-ADGroupMember -ParameterFilter {
+                    $Server -eq $testDomainController
+                } -MockWith {
                     $errorMessage = 'Get-ADGroupMember'
                     $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
                     Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
@@ -343,7 +345,9 @@ try
                     return $fakeADGroup
                 }
 
-                Mock -CommandName Get-ADGroupMember -MockWith {
+                Mock -CommandName Get-ADGroupMember -ParameterFilter {
+                    $Credential -eq $testCredentials
+                } -MockWith {
                     $errorMessage = 'Get-ADGroupMember'
                     $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
                     Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
