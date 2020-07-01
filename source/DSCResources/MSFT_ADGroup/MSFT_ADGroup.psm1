@@ -41,9 +41,6 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
 
-    .PARAMETER IgnoreMembership
-        Active Directory group membership evaluation should be ignored.
-
     .PARAMETER Members
         Active Directory group membership should match membership exactly.
 
@@ -119,11 +116,6 @@ function Get-TargetResource
         $DomainController,
 
         [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $IgnoreMembership,
-
-        [Parameter()]
         [System.String[]]
         $Members,
 
@@ -176,14 +168,6 @@ function Get-TargetResource
         DistinguishedName   = $null
     }
 
-    if ($IgnoreMembership)
-    {
-        $null = $getTargetResourceReturnValue.Remove('Members')
-        $null = $getTargetResourceReturnValue.Remove('MembersToInclude')
-        $null = $getTargetResourceReturnValue.Remove('MembersToExclude')
-        $null = $getTargetResourceReturnValue.Remove('MembershipAttribute')
-    }
-
     $commonParameters = Get-ADCommonParameters @PSBoundParameters
 
     try
@@ -196,6 +180,7 @@ function Get-TargetResource
             'Description',
             'DisplayName',
             'ManagedBy',
+            'Members',
             'Info'
         )
 
@@ -203,10 +188,54 @@ function Get-TargetResource
 
         if ($adGroup)
         {
-            if (-not $IgnoreMembership)
+            try
             {
                 [System.Array] $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
-                $getTargetResourceReturnValue['Members'] = $adGroupMembers
+            }
+            catch
+            {
+                # This FullyQualifiedErrorId is indicative of a failure to retrieve members with Get-ADGroupMember for a one-way trust
+                if ($_.FullyQualifiedErrorId -eq 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember')
+                {
+                    # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
+                    if ($MembershipAttribute -eq 'SID')
+                    {
+                        $selectProperty = 'ObjectSID'
+                    }
+                    else
+                    {
+                        $selectProperty = $MembershipAttribute
+                    }
+
+                    # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
+                    $commonParametersClone = $commonParameters.Clone()
+                    $null = $commonParametersClone.Remove('Identity')
+
+                    # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
+                    # This allows for a single Get-ADObject call instead of multiple calls in a loop
+                    $adObjectFilter = @(
+                        "(DistinguishedName -eq '",
+                        ($adGroup.Members -join "') -or (DistinguishedName -eq '"),
+                        "')"
+                    ) -join ''
+
+                    # Retrieve the current list of members, returning the specified membership attribute
+                    [System.Array] $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone | ForEach-Object -Process {
+                        # Perform SID translation to a readable name as the SamAccountName if the member is of objectClass "foreignSecurityPrincipal"
+                        if (($_.objectClass -eq 'foreignSecurityPrincipal') -and ($MembershipAttribute -eq 'SamAccountName'))
+                        {
+                            [System.Security.Principal.SecurityIdentifier]::new($_.objectSid).Translate([System.Security.Principal.NTAccount])
+                        }
+                        else
+                        {
+                            $_.$selectProperty
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Error -Exception $_.Exception
+                }
             }
 
             $getTargetResourceReturnValue['Ensure'] = 'Present'
@@ -217,6 +246,7 @@ function Get-TargetResource
             $getTargetResourceReturnValue['Path'] = Get-ADObjectParentDN -DN $adGroup.DistinguishedName
             $getTargetResourceReturnValue['Description'] = $adGroup.Description
             $getTargetResourceReturnValue['DisplayName'] = $adGroup.DisplayName
+            $getTargetResourceReturnValue['Members'] = $adGroupMembers
             $getTargetResourceReturnValue['ManagedBy'] = $adGroup.ManagedBy
             $getTargetResourceReturnValue['Notes'] = $adGroup.Info
         }
@@ -260,9 +290,6 @@ function Get-TargetResource
 
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
-
-    .PARAMETER IgnoreMembership
-        Active Directory group membership evaluation should be ignored.
 
     .PARAMETER Members
         Active Directory group membership should match membership exactly.
@@ -339,11 +366,6 @@ function Test-TargetResource
         $DomainController,
 
         [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $IgnoreMembership,
-
-        [Parameter()]
         [System.String[]]
         $Members,
 
@@ -377,29 +399,26 @@ function Test-TargetResource
         $RestoreFromRecycleBin
     )
 
-    if (-not $IgnoreMembership)
+    # Validate parameters before we even attempt to retrieve anything
+    $assertMemberParameters = @{}
+
+    # Members parameter should always be tested to enforce an empty group (issue #189)
+    if ($PSBoundParameters.ContainsKey('Members'))
     {
-        # Validate parameters before we even attempt to retrieve anything
-        $assertMemberParameters = @{}
-
-        # Members parameter should always be tested to enforce an empty group (issue #189)
-        if ($PSBoundParameters.ContainsKey('Members'))
-        {
-            $assertMemberParameters['Members'] = $Members
-        }
-
-        if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
-        {
-            $assertMemberParameters['MembersToInclude'] = $MembersToInclude
-        }
-
-        if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
-        {
-            $assertMemberParameters['MembersToExclude'] = $MembersToExclude
-        }
-
-        Assert-MemberParameters @assertMemberParameters
+        $assertMemberParameters['Members'] = $Members
     }
+
+    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+    {
+        $assertMemberParameters['MembersToInclude'] = $MembersToInclude
+    }
+
+    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
+    {
+        $assertMemberParameters['MembersToExclude'] = $MembersToExclude
+    }
+
+    Assert-MemberParameters @assertMemberParameters
 
     $targetResource = Get-TargetResource @PSBoundParameters
 
@@ -447,14 +466,11 @@ function Test-TargetResource
         $targetResourceInCompliance = $false
     }
 
-    if (-not $IgnoreMembership)
+    # Test group members match passed membership parameters
+    if (-not (Test-Members @assertMemberParameters -ExistingMembers $targetResource.Members))
     {
-        # Test group members match passed membership parameters
-        if (-not (Test-Members @assertMemberParameters -ExistingMembers $targetResource.Members))
-        {
-            Write-Verbose -Message $script:localizedData.GroupMembershipNotDesiredState
-            $targetResourceInCompliance = $false
-        }
+        Write-Verbose -Message $script:localizedData.GroupMembershipNotDesiredState
+        $targetResourceInCompliance = $false
     }
 
     if ($targetResource.Ensure -ne $Ensure)
@@ -497,9 +513,6 @@ function Test-TargetResource
 
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
-
-    .PARAMETER IgnoreMembership
-        Active Directory group membership evaluation should be ignored.
 
     .PARAMETER Members
         Active Directory group membership should match membership exactly.
@@ -575,11 +588,6 @@ function Set-TargetResource
         $DomainController,
 
         [Parameter()]
-        [ValidateNotNull()]
-        [System.Boolean]
-        $IgnoreMembership,
-
-        [Parameter()]
         [System.String[]]
         $Members,
 
@@ -616,51 +624,48 @@ function Set-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    if (-not $IgnoreMembership)
+    $assertMemberParameters = @{}
+
+    # Members parameter should always be added to enforce an empty group (issue #189)
+    if ($PSBoundParameters.ContainsKey('Members'))
     {
-        $assertMemberParameters = @{}
+        $assertMemberParameters['Members'] = $Members
+    }
 
-        # Members parameter should always be added to enforce an empty group (issue #189)
-        if ($PSBoundParameters.ContainsKey('Members'))
+    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+    {
+        $assertMemberParameters['MembersToInclude'] = $MembersToInclude
+    }
+
+    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
+    {
+        $assertMemberParameters['MembersToExclude'] = $MembersToExclude
+    }
+
+    Assert-MemberParameters @assertMemberParameters
+
+    $membersInMultipleDomains = $false
+
+    if ($MembershipAttribute -eq 'DistinguishedName')
+    {
+        $allMembers = $Members + $MembersToInclude + $MembersToExclude
+
+        $groupMemberDomains = @()
+
+        foreach ($member in $allMembers)
         {
-            $assertMemberParameters['Members'] = $Members
+            $groupMemberDomains += Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
         }
 
-        if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+        $uniqueGroupMemberDomainCount = $groupMemberDomains |
+            Select-Object -Unique
+
+        $GroupMemberDomainCount = $uniqueGroupMemberDomainCount.count
+
+        if ($GroupMemberDomainCount -gt 1 -or ($groupMemberDomains -ine (Get-DomainName)).Count -gt 0)
         {
-            $assertMemberParameters['MembersToInclude'] = $MembersToInclude
-        }
-
-        if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
-        {
-            $assertMemberParameters['MembersToExclude'] = $MembersToExclude
-        }
-
-        Assert-MemberParameters @assertMemberParameters
-
-        $membersInMultipleDomains = $false
-
-        if ($MembershipAttribute -eq 'DistinguishedName')
-        {
-            $allMembers = $Members + $MembersToInclude + $MembersToExclude
-
-            $groupMemberDomains = @()
-
-            foreach ($member in $allMembers)
-            {
-                $groupMemberDomains += Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
-            }
-
-            $uniqueGroupMemberDomainCount = $groupMemberDomains |
-                Select-Object -Unique
-
-            $GroupMemberDomainCount = $uniqueGroupMemberDomainCount.count
-
-            if ($GroupMemberDomainCount -gt 1 -or ($groupMemberDomains -ine (Get-DomainName)).Count -gt 0)
-            {
-                Write-Verbose -Message ($script:localizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount)
-                $membersInMultipleDomains = $true
-            }
+            Write-Verbose -Message ($script:localizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount)
+            $membersInMultipleDomains = $true
         }
     }
 
@@ -742,55 +747,100 @@ function Set-TargetResource
                 Move-ADObject @moveADObjectParams
             }
 
-            if (-not $IgnoreMembership)
+            if ($assertMemberParameters.Count -gt 0)
             {
-                if ($assertMemberParameters.Count -gt 0)
+                Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
+
+                try
                 {
-                    Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
-
                     $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
-
-                    $assertMemberParameters['ExistingMembers'] = $adGroupMembers
-
-                    # Return $false if the members mismatch.
-                    if (-not (Test-Members @assertMemberParameters))
+                }
+                catch
+                {
+                    # This FullyQualifiedErrorId is indicative of a failure to retrieve members with Get-ADGroupMember for a one-way trust
+                    if ($_.FullyQualifiedErrorId -eq 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember')
                     {
-                        # Members parameter should always be enforce if it is bound (issue #189)
-                        if ($PSBoundParameters.ContainsKey('Members'))
+                        # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
+                        if ($MembershipAttribute -eq 'SID')
                         {
-                            # Remove all existing first and add explicit members
-                            $Members = Remove-DuplicateMembers -Members $Members
+                            $selectProperty = 'ObjectSID'
+                        }
+                        else
+                        {
+                            $selectProperty = $MembershipAttribute
+                        }
 
-                            # We can only remove members if there are members already in the group!
-                            if ($adGroupMembers.Count -gt 0)
+                        # Use the same results from Get-ADCommonParameters but remove the Identity for usage with Get-ADObject
+                        $commonParametersClone = $commonParameters.Clone()
+                        $null = $commonParametersClone.Remove('Identity')
+
+                        # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
+                        # This allows for a single Get-ADObject call instead of multiple calls in a loop
+                        $adObjectFilter = @(
+                            "(DistinguishedName -eq '",
+                            ((Get-ADGroup @commonParameters -Properties Members).Members -join "') -or (DistinguishedName -eq '"),
+                            "')"
+                        ) -join ''
+
+                        # Retrieve the current list of members, returning the specified membership attribute
+                        $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone | ForEach-Object -Process {
+                            # Perform SID translation to a readable name as the SamAccountName if the member is of objectClass "foreignSecurityPrincipal"
+                            if (($_.objectClass -eq 'foreignSecurityPrincipal') -and ($MembershipAttribute -eq 'SamAccountName'))
                             {
-                                Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $adGroupMembers.Count, $GroupName)
-
-                                Remove-ADGroupMember @commonParameters -Members $adGroupMembers -Confirm:$false -ErrorAction 'Stop'
+                                [System.Security.Principal.SecurityIdentifier]::new($_.objectSid).Translate([System.Security.Principal.NTAccount])
                             }
-
-                            Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
-
-                            Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
+                            else
+                            {
+                                $_.$selectProperty
+                            }
                         }
+                    }
+                    else
+                    {
+                        Write-Error -Exception $_.Exception
+                    }
+                }
 
-                        if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+                $assertMemberParameters['ExistingMembers'] = $adGroupMembers
+
+                # Return $false if the members mismatch.
+                if (-not (Test-Members @assertMemberParameters))
+                {
+                    # Members parameter should always be enforce if it is bound (issue #189)
+                    if ($PSBoundParameters.ContainsKey('Members'))
+                    {
+                        # Remove all existing first and add explicit members
+                        $Members = Remove-DuplicateMembers -Members $Members
+
+                        # We can only remove members if there are members already in the group!
+                        if ($adGroupMembers.Count -gt 0)
                         {
-                            $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
+                            Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $adGroupMembers.Count, $GroupName)
 
-                            Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
-
-                            Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
+                            Remove-ADGroupMember @commonParameters -Members $adGroupMembers -Confirm:$false -ErrorAction 'Stop'
                         }
 
-                        if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
-                        {
-                            $MembersToExclude = Remove-DuplicateMembers -Members $MembersToExclude
+                        Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                            Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $MembersToExclude.Count, $GroupName)
+                        Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
+                    }
 
-                            Remove-ADGroupMember @commonParameters -Members $MembersToExclude -Confirm:$false -ErrorAction 'Stop'
-                        }
+                    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+                    {
+                        $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
+
+                        Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
+
+                        Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
+                    }
+
+                    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
+                    {
+                        $MembersToExclude = Remove-DuplicateMembers -Members $MembersToExclude
+
+                        Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $MembersToExclude.Count, $GroupName)
+
+                        Remove-ADGroupMember @commonParameters -Members $MembersToExclude -Confirm:$false -ErrorAction 'Stop'
                     }
                 }
             }
@@ -878,25 +928,22 @@ function Set-TargetResource
                 Set-ADGroup @setADGroupParams
             }
 
-            if (-not $IgnoreMembership)
+            # Add the required members
+            if ($PSBoundParameters.ContainsKey('Members') -and -not [System.String]::IsNullOrEmpty($Members))
             {
-                # Add the required members
-                if ($PSBoundParameters.ContainsKey('Members') -and -not [System.String]::IsNullOrEmpty($Members))
-                {
-                    $Members = Remove-DuplicateMembers -Members $Members
+                $Members = Remove-DuplicateMembers -Members $Members
 
-                    Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
+                Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                    Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
-                }
-                elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
-                {
-                    $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
+                Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
+            }
+            elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
+            {
+                $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
 
-                    Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
+                Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                    Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
-                }
+                Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
             }
         }
     } #end catch

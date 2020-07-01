@@ -10,7 +10,6 @@ class MSFT_ADGroup : OMI_BaseResource
     [Write, Description("Display name of the Active Directory group.")] String DisplayName;
     [Write, Description("Credentials used to enact the change upon."), EmbeddedInstance("MSFT_Credential")] String Credential;
     [Write, Description("Active Directory domain controller to enact the change upon.")] String DomainController;
-    [Write, Description("Active Directory group membership evaluation should be ignored.")] Boolean IgnoreMembership;
     [Write, Description("Active Directory group membership should match membership exactly.")] String Members[];
     [Write, Description("Active Directory group should include these members.")] String MembersToInclude[];
     [Write, Description("Active Directory group should NOT include these members.")] String MembersToExclude[];
