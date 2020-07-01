@@ -35,6 +35,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Restored importing the `DscResource.Common` module import in the `ActiveDirectoryDsc.Common` module that was
     incorrectly disabled.
     ([issue #612](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/612)).
+- ADDomainController
+  - Fixed `Test-TargetResource` error when the `ReadOnlyReplica` property is set to `true`
+    ([issue #611](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/611)).
 - ADReplicationSiteLink
   - Fixed setting options after the resource is initially created
     ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).
