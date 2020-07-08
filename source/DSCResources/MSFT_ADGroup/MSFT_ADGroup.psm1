@@ -211,26 +211,20 @@ function Get-TargetResource
                     $commonParametersClone = $commonParameters.Clone()
                     $null = $commonParametersClone.Remove('Identity')
 
-                    # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
-                    # This allows for a single Get-ADObject call instead of multiple calls in a loop
-                    $adObjectFilter = @(
-                        "(DistinguishedName -eq '",
-                        ($adGroup.Members -join "') -or (DistinguishedName -eq '"),
-                        "')"
-                    ) -join ''
-
                     # Retrieve the current list of members, returning the specified membership attribute
-                    [System.Array] $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone | ForEach-Object -Process {
+                    [System.Array] $adGroupMembers = $adGroup.Members | ForEach-Object -Process {
+                        $adObject = Get-ADObject -Filter "DistinguishedName -eq '$($_)'" -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone
+
                         # Perform SID translation to a readable name as the SamAccountName if the member is of objectClass "foreignSecurityPrincipal"
-                        if (($_.objectClass -eq 'foreignSecurityPrincipal') -and ($MembershipAttribute -eq 'SamAccountName'))
+                        if (($adObject.objectClass -eq 'foreignSecurityPrincipal') -and ($MembershipAttribute -eq 'SamAccountName'))
                         {
-                            [System.Security.Principal.SecurityIdentifier]::new($_.objectSid).Translate([System.Security.Principal.NTAccount])
+                            Resolve-SamAccountName -ObjectSid $adObject.objectSid
                         }
                         else
                         {
-                            $_.$selectProperty
+                            $adObject.$selectProperty
                         }
-                    }
+                    } | Select-Object -Unique
                 }
                 else
                 {
@@ -774,26 +768,20 @@ function Set-TargetResource
                         $commonParametersClone = $commonParameters.Clone()
                         $null = $commonParametersClone.Remove('Identity')
 
-                        # This creates a filter which multiple -or statements matching the various DistinguishedName values of the Members
-                        # This allows for a single Get-ADObject call instead of multiple calls in a loop
-                        $adObjectFilter = @(
-                            "(DistinguishedName -eq '",
-                            ((Get-ADGroup @commonParameters -Properties Members).Members -join "') -or (DistinguishedName -eq '"),
-                            "')"
-                        ) -join ''
-
                         # Retrieve the current list of members, returning the specified membership attribute
-                        $adGroupMembers = Get-ADObject -Filter $adObjectFilter -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone | ForEach-Object -Process {
+                        $adGroupMembers = (Get-ADGroup @commonParameters -Properties Members).Members | ForEach-Object -Process {
+                            $adObject = Get-ADObject -Filter "DistinguishedName -eq '$($_)'" -Properties 'SamAccountName', 'ObjectSID' @commonParametersClone
+
                             # Perform SID translation to a readable name as the SamAccountName if the member is of objectClass "foreignSecurityPrincipal"
-                            if (($_.objectClass -eq 'foreignSecurityPrincipal') -and ($MembershipAttribute -eq 'SamAccountName'))
+                            if (($adObject.objectClass -eq 'foreignSecurityPrincipal') -and ($MembershipAttribute -eq 'SamAccountName'))
                             {
-                                [System.Security.Principal.SecurityIdentifier]::new($_.objectSid).Translate([System.Security.Principal.NTAccount])
+                                Resolve-SamAccountName -ObjectSid $adObject.objectSid
                             }
                             else
                             {
-                                $_.$selectProperty
+                                $adObject.$selectProperty
                             }
-                        }
+                        } | Select-Object -Unique
                     }
                     else
                     {
