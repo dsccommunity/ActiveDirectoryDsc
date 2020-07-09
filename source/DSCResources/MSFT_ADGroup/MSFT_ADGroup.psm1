@@ -228,7 +228,8 @@ function Get-TargetResource
                 }
                 else
                 {
-                    Write-Error -Exception $_.Exception
+                    $errorMessage = $script:localizedData.RetreivingGroupMembersError -f $GroupName
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                 }
             }
 
@@ -785,7 +786,8 @@ function Set-TargetResource
                     }
                     else
                     {
-                        Write-Error -Exception $_.Exception
+                        $errorMessage = $script:localizedData.RetreivingGroupMembersError -f $GroupName
+                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                     }
                 }
 
