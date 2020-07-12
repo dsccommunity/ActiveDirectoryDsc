@@ -95,17 +95,12 @@ try
             ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
             SamAccountName    = 'ADATUM\USER1'
             ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2106'
-        }
-        $fakeADObject2 = [PSCustomObject] @{
-            DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2107,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
-            ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8c'
-            SamAccountName    = 'ADATUM\USER2'
-            ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2107'
+            ObjectClass       = 'foreignSecurityPrincipal'
         }
 
-        $fakeADGroup['Members'] = @(
-            $fakeADObject1.DistinguishedName,
-            $fakeADObject2.DistinguishedName
+        $fakeADGroupWithMembers = $fakeADGroup.Clone()
+        $fakeADGroupWithMembers['Members'] = @(
+            $fakeADObject1.DistinguishedName
         )
 
         $testDomainController = 'TESTDC'
@@ -280,7 +275,7 @@ try
 
             It "Calls 'Get-ADObject' when 'Get-ADGroupMember' fails due to one-way trust" {
                 Mock -CommandName Get-ADGroup -MockWith {
-                    return $fakeADGroup
+                    return $fakeADGroupWithMembers
                 }
 
                 Mock -CommandName Get-ADGroupMember -MockWith {
@@ -290,20 +285,41 @@ try
                 }
 
                 Mock -CommandName Get-ADObject -MockWith {
-                    return @(
-                        $fakeADObject1,
-                        $fakeADObject2
-                    )
+                    return $fakeADObject1
                 }
 
-                Get-TargetResource @testPresentParams
+                Get-TargetResource @testPresentParams -MembershipAttribute DistinguishedName
 
                 Assert-MockCalled -CommandName Get-ADObject -Scope It
             }
 
-            It "Throws when 'Get-ADGroupMember' fails due to an unrecognized 'FullyQualifiedErrorId'" {
+            It "Calls 'Resolve-SamAccountName' when 'MembershipAttribute' is 'SamAccountName' and 'Get-ADGroupMember' fails due to one-way trust" {
                 Mock -CommandName Get-ADGroup -MockWith {
-                    return $fakeADGroup
+                    return $fakeADGroupWithMembers
+                }
+
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    $errorMessage = 'Get-ADGroupMember'
+                    $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
+                    Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
+                }
+
+                Mock -CommandName Get-ADObject -MockWith {
+                    return $fakeADObject1
+                }
+
+                Mock -CommandName Resolve-SamAccountName -MockWith {
+                    $fakeADObject1.SamAccountName
+                }
+
+                Get-TargetResource @testPresentParams -MembershipAttribute SamAccountName
+
+                Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It
+            }
+
+            It "Throws the correct error when 'Get-ADGroupMember' fails due to an unrecognized 'FullyQualifiedErrorId'" {
+                Mock -CommandName Get-ADGroup -MockWith {
+                    return $fakeADGroupWithMembers
                 }
 
                 Mock -CommandName Get-ADGroupMember -MockWith {
@@ -312,7 +328,9 @@ try
                     Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
                 }
 
-                { Get-TargetResource @testPresentParams -ErrorAction Stop } | Should -Throw
+                { Get-TargetResource @testPresentParams -ErrorAction Stop } |
+                    Should -Throw ($script:localizedData.RetrievingGroupMembersError -f
+                        $fakeADGroupWithMembers.Name)
             }
 
         }
@@ -448,7 +466,7 @@ try
 
             It "Passes when 'MembershipAttribute' is 'SID' and 'Get-ADGroupMember' fails due to one-way trust" {
                 Mock -CommandName Get-ADGroup -MockWith {
-                    return $fakeADGroup
+                    return $fakeADGroupWithMembers
                 }
 
                 Mock -CommandName Get-ADGroupMember -MockWith {
@@ -458,13 +476,10 @@ try
                 }
 
                 Mock -CommandName Get-ADObject -MockWith {
-                    return @(
-                        $fakeADObject1,
-                        $fakeADObject2
-                    )
+                    return $fakeADObject1
                 }
 
-                $targetResource = Test-TargetResource @testPresentParams -Members $fakeADObject1.ObjectSID, $fakeADObject2.ObjectSID -MembershipAttribute SID
+                $targetResource = Test-TargetResource @testPresentParams -Members $fakeADObject1.ObjectSID -MembershipAttribute SID
 
                 $targetResource | Should -BeTrue
             }
@@ -893,37 +908,11 @@ try
                 Assert-MockCalled -CommandName Remove-ADGroup -Scope It
             }
 
-            It "Calls 'Get-ADObject' when 'Get-ADGroupMember' fails due to one-way trust" {
-                Mock -CommandName Get-ADGroup -MockWith {
-                    return [PSCustomObject] $fakeADGroup
-                }
-
-                Mock -CommandName Set-ADGroup
-                Mock -CommandName Get-ADGroupMember -MockWith {
-                    $errorMessage = 'Get-ADGroupMember'
-                    $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
-                    Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
-                }
-                Mock -CommandName Get-ADObject -MockWith {
-                    return @(
-                        $fakeADObject1,
-                        $fakeADObject2
-                    )
-                }
-
-                Mock -CommandName Add-ADCommonGroupMember
-                Mock -CommandName Remove-ADGroupMember
-
-                Set-TargetResource @testPresentParams -Members $fakeADObject1.SamAccountName, $fakeADObject2.SamAccountName
-
-                Assert-MockCalled -CommandName Get-ADObject -Scope It
-            }
-
             foreach ($attribute in @('SamAccountName', 'DistinguishedName', 'ObjectGUID', 'SID'))
             {
                 It "Calls 'Get-ADGroup' and 'Get-ADObject' when 'MembershipAttribute' is '$attribute' and 'Get-ADGroupMember' fails due to one-way trust" {
                     Mock -CommandName Get-ADGroup -MockWith {
-                        return [PSCustomObject] $fakeADGroup
+                        return [PSCustomObject] $fakeADGroupWithMembers
                     }
 
                     Mock -CommandName Get-ADGroupMember -MockWith {
@@ -933,27 +922,43 @@ try
                     }
 
                     Mock -CommandName Get-ADObject -MockWith {
-                        return @(
-                            $fakeADObject1,
-                            $fakeADObject2
-                        )
+                        return $fakeADObject1
                     }
 
-                    Set-TargetResource @testPresentParams -Members $fakeADObject1.$attribute, $fakeADObject2.$attribute -MembershipAttribute $attribute
+                    Mock -CommandName Resolve-SamAccountName -MockWith {
+                        return $fakeADObject1.SamAccountName
+                    }
+
+                    Set-TargetResource @testPresentParams -Members $fakeADObject1.$attribute -MembershipAttribute $attribute
 
                     Assert-MockCalled -CommandName Get-ADGroup -Scope It
                     Assert-MockCalled -CommandName Get-ADObject -Scope It
                 }
             }
 
-            It "Throws when 'Get-ADGroupMember' fails due to an unrecognized 'FullyQualifiedErrorId'" {
+            It "Calls 'Resolve-SamAccountName' when 'MembershipAttribute' is 'SamAccountName' and 'Get-ADGroupMember' fails due to one-way trust" {
+                Mock -CommandName Get-ADGroup -MockWith {
+                    return $fakeADGroupWithMembers
+                }
+
                 Mock -CommandName Get-ADGroupMember -MockWith {
                     $errorMessage = 'Get-ADGroupMember'
-                    $errorId = (New-Guid).Guid
+                    $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
                     Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
                 }
 
-                { Set-TargetResource @testPresentParams -ErrorAction Stop } | Should -Throw
+                Mock -CommandName Get-ADObject -MockWith {
+                    return $fakeADObject1
+                }
+
+                Mock -CommandName Resolve-SamAccountName -MockWith {
+                    return $fakeADObject1.SamAccountName
+                }
+
+                $attribute = 'SamAccountName'
+                Set-TargetResource @testPresentParams -Members $fakeADObject1.$attribute -MembershipAttribute $attribute
+
+                Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It
             }
 
             It "Calls 'Set-ADGroup' with credentials when 'Ensure' is 'Present' and the group exists (#106)" {
@@ -1167,6 +1172,31 @@ try
                 Assert-MockCalled -CommandName Restore-AdCommonObject -Scope It
                 Assert-MockCalled -CommandName New-ADGroup -Scope It -Exactly -Times 0
                 Assert-MockCalled -CommandName Set-ADGroup -Scope It -Exactly -Times 0
+            }
+
+            Context "Mocking 'Get-TargetResource' to suppress errors" {
+                It "Throws the correct error when 'Get-ADGroupMember' fails due to an unrecognized 'FullyQualifiedErrorId'" {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $fakeTargetResource = $testPresentParams.Clone()
+                        $fakeTargetResource['DistinguishedName'] = $fakeADGroupWithMembers.DistinguishedName
+                        $fakeTargetResource['Members'] = @(
+                            $fakeADObject1.DistinguishedName
+                        )
+                        return $fakeTargetResource
+                    }
+
+                    Mock -CommandName Set-ADGroup
+
+                    Mock -CommandName Get-ADGroupMember -MockWith {
+                        $errorMessage = 'Get-ADGroupMember'
+                        $errorId = (New-Guid).Guid
+                        Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
+                    }
+
+                    { Set-TargetResource @testPresentParams -Members $fakeADObject1.SamAccountName -ErrorAction Stop } |
+                        Should -Throw ($script:localizedData.RetrievingGroupMembersError -f
+                            $fakeADGroupWithMembers.Name)
+                }
             }
         }
         #end region
