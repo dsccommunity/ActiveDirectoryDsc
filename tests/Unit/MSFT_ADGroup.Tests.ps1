@@ -113,7 +113,6 @@ try
                 ObjectClass       = 'computer'
             }
             # This entry is used to represent a group member from a one-way trusted domain
-            # Removing this entry or changing its ObjectClass will reduce code coverage
             [PSCustomObject] @{
                 DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
                 ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
@@ -184,6 +183,37 @@ try
                 $result.ManagedBy | Should -Be $fakeADGroup.ManagedBy
                 $result.Notes | Should -Be $fakeADGroup.Info
                 $result.DistinguishedName | Should -Be $fakeADGroup.DistinguishedName
+            }
+
+            It "Returns the correct 'Members' when 'MembershipAttribute' is 'SID' and 'Get-ADGroupMember' fails due to one-way trust" {
+                Mock -CommandName Get-ADGroup -MockWith {
+                    $fakeADGroup['Members'] = $fakeADGroupMembersAsADObjects.DistinguishedName
+                    return [PSCustomObject] $fakeADGroup
+                }
+
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    $errorMessage = 'Get-ADGroupMember'
+                    $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
+                    Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
+                }
+
+                $script:getADObjectCallCount = 0
+                Mock -CommandName Get-ADObject -MockWith {
+                    $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount]
+                    $script:getADObjectCallCount++
+                    return $memberADObject
+                }
+
+                $membersParamSplat = @{
+                    Members = $fakeADGroupMembersAsADObjects.ObjectSID
+                    MembershipAttribute = 'SID'
+                }
+
+                $result = Get-TargetResource @testPresentParams @membersParamSplat
+                $result.Members | Should -HaveCount $fakeADGroupMembersAsADObjects.Count
+                $fakeADGroupMembersAsADObjects.ObjectSID | ForEach-Object -Process {
+                    $result.Members | Should -Contain $_
+                }
             }
 
             It 'Returns the correct values when group does not exist' {
@@ -317,22 +347,13 @@ try
                 Assert-MockCalled -CommandName Get-ADObject -Scope It
             }
 
-            if ($fakeADGroupMembersAsADObjects.ObjectClass -contains 'foreignSecurityPrincipal')
-            {
-                $callString = 'Calls'
-                $resolveSamAccountNameCalledTimesSplat = @{}
-                $objectClassMemberString = ", at least 1 group member has an 'ObjectClass' of 'foreignSecurityPrincipal',"
-            }
-            else
-            {
-                $callString = 'Does not call'
-                $resolveSamAccountNameCalledTimesSplat = @{
-                    Times = 0
-                }
-                $objectClassMemberString = ", none of the group members have an 'ObjectClass' of 'foreignSecurityPrincipal',"
-            }
+            $itCallsResolveSamAccountNameString = "Calls 'Resolve-SamAccountName' when " + (@(
+                "'MembershipAttribute' is 'SamAccountName'"
+                "at least 1 group member has an 'ObjectClass' of 'foreignSecurityPrincipal'"
+                "and 'Get-ADGroupMember' fails due to one-way trust"
+            ) -join ', ')
 
-            It "$($callString) 'Resolve-SamAccountName' when 'MembershipAttribute' is 'SamAccountName'$($objectClassMemberString) and 'Get-ADGroupMember' fails due to one-way trust" {
+            It $itCallsResolveSamAccountNameString {
                 Mock -CommandName Get-ADGroup -MockWith {
                     $fakeADGroup['Members'] = $fakeADGroupMembersAsADObjects.DistinguishedName
                     return [PSCustomObject] $fakeADGroup
@@ -357,7 +378,7 @@ try
 
                 Get-TargetResource @testPresentParams -MembershipAttribute SamAccountName
 
-                Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It @resolveSamAccountNameCalledTimesSplat
+                Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It
             }
 
             It "Throws the correct error when 'Get-ADGroupMember' fails due to an unrecognized 'FullyQualifiedErrorId'" {
@@ -506,35 +527,6 @@ try
                 }
 
             } #end foreach attribute
-
-            It "Passes when 'MembershipAttribute' is 'SID' and 'Get-ADGroupMember' fails due to one-way trust" {
-                Mock -CommandName Get-ADGroup -MockWith {
-                    $fakeADGroup['Members'] = $fakeADGroupMembersAsADObjects.DistinguishedName
-                    return [PSCustomObject] $fakeADGroup
-                }
-
-                Mock -CommandName Get-ADGroupMember -MockWith {
-                    $errorMessage = 'Get-ADGroupMember'
-                    $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
-                    Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
-                }
-
-                $script:getADObjectCallCount = 0
-                Mock -CommandName Get-ADObject -MockWith {
-                    $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount]
-                    $script:getADObjectCallCount++
-                    return $memberADObject
-                }
-
-                $membersParamSplat = @{
-                    Members = $fakeADGroupMembersAsADObjects.ObjectSID
-                    MembershipAttribute = 'SID'
-                }
-
-                $targetResource = Test-TargetResource @testPresentParams @membersParamSplat
-
-                $targetResource | Should -BeTrue
-            }
 
             It "Fails when group does not exist and 'Ensure' is 'Present'" {
                 Mock -CommandName Get-TargetResource -MockWith {
@@ -1194,7 +1186,18 @@ try
                         $fakeADGroup.Name)
             }
 
-            Context "Mocking 'Get-TargetResource' and 'Get-ADGroupMember' fails due to one-way trust" {
+            Context "When 'Get-TargetResource' is mocked and 'Get-ADGroupMember' fails due to one-way trust" {
+                Mock -CommandName Get-ADGroup -MockWith {
+                    $fakeADGroup['Members'] = $fakeADGroupMembersAsADObjects.DistinguishedName
+                    return [PSCustomObject] $fakeADGroup
+                }
+
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    $errorMessage = 'Get-ADGroupMember'
+                    $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
+                    Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
+                }
+
                 foreach ($attribute in @('SamAccountName', 'DistinguishedName', 'ObjectGUID', 'SID'))
                 {
                     if ($attribute -eq 'SID')
@@ -1221,86 +1224,46 @@ try
                     }
 
                     It "Calls 'Get-ADGroup' and 'Get-ADObject' when 'MembershipAttribute' is '$attribute'" {
-                        Mock -CommandName Get-ADGroup -MockWith {
-                            $fakeADGroup['Members'] = $fakeADGroupMembersAsADObjects.DistinguishedName
-                            return [PSCustomObject] $fakeADGroup
-                        }
-
-                        Mock -CommandName Get-ADGroupMember -MockWith {
-                            $errorMessage = 'Get-ADGroupMember'
-                            $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
-                            Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
-                        }
-
-                        $script:getADObjectCallCount = 0
+                        $script:getADObjectCallCount1 = 0
                         Mock -CommandName Get-ADObject -MockWith {
-                            $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount]
-                            $script:getADObjectCallCount++
+                            $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount1]
+                            $script:getADObjectCallCount1++
                             return $memberADObject
                         }
 
                         Mock -CommandName Resolve-SamAccountName -MockWith {
-                            return $fakeADGroupMembersAsADObjects[($script:getADObjectCallCount - 1)].SamAccountName
+                            return $fakeADGroupMembersAsADObjects[($script:getADObjectCallCount1 - 1)].SamAccountName
                         }
 
                         Set-TargetResource @testPresentParams @membersParamSplat
 
-                        Assert-MockCalled -CommandName Get-ADGroup -Scope It
+                        Assert-MockCalled -CommandName Get-ADGroup
                         Assert-MockCalled -CommandName Get-ADObject -Scope It
                     }
 
                     if ($attribute -eq 'SamAccountName')
                     {
-                        $resolveSamAccountNameCalledTimesSplat = @{}
-                        $callString = 'Calls'
-                    }
-                    else
-                    {
-                        $resolveSamAccountNameCalledTimesSplat = @{
-                            Times = 0
+                        $itCallsResolveSamAccountNameString = "Calls 'Resolve-SamAccountName' when " + (@(
+                            "'MembershipAttribute' is 'SamAccountName'"
+                            "at least 1 group member has an 'ObjectClass' of 'foreignSecurityPrincipal'"
+                        ) -join ' and ')
+
+                        It $itCallsResolveSamAccountNameString {
+                            $script:getADObjectCallCount2 = 0
+                            Mock -CommandName Get-ADObject -MockWith {
+                                $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount2]
+                                $script:getADObjectCallCount2++
+                                return $memberADObject
+                            }
+
+                            Mock -CommandName Resolve-SamAccountName -MockWith {
+                                return $fakeADGroupMembersAsADObjects[($script:getADObjectCallCount2 - 1)].SamAccountName
+                            }
+
+                            Set-TargetResource @testPresentParams @membersParamSplat
+
+                            Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It
                         }
-                        $callString = 'Does not call'
-                    }
-
-                    if ($fakeADGroupMembersAsADObjects.ObjectClass -contains 'foreignSecurityPrincipal')
-                    {
-                        $objectClassMemberString = " and at least 1 group member has an 'ObjectClass' of 'foreignSecurityPrincipal'"
-                    }
-                    else
-                    {
-                        $objectClassMemberString = " and none of the group members have an 'ObjectClass' of 'foreignSecurityPrincipal'"
-                        $resolveSamAccountNameCalledTimesSplat = @{
-                            Times = 0
-                        }
-                        $callString = 'Does not call'
-                    }
-
-                    It "$($callString) 'Resolve-SamAccountName' when 'MembershipAttribute' is '$attribute'$($objectClassMemberString)" {
-                        Mock -CommandName Get-ADGroup -MockWith {
-                            $fakeADGroup['Members'] = $fakeADGroupMembersAsADObjects.DistinguishedName
-                            return [PSCustomObject] $fakeADGroup
-                        }
-
-                        Mock -CommandName Get-ADGroupMember -MockWith {
-                            $errorMessage = 'Get-ADGroupMember'
-                            $errorId = 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
-                            Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
-                        }
-
-                        $script:getADObjectCallCount = 0
-                        Mock -CommandName Get-ADObject -MockWith {
-                            $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount]
-                            $script:getADObjectCallCount++
-                            return $memberADObject
-                        }
-
-                        Mock -CommandName Resolve-SamAccountName -MockWith {
-                            return $fakeADGroupMembersAsADObjects[($script:getADObjectCallCount - 1)].SamAccountName
-                        }
-
-                        Set-TargetResource @testPresentParams @membersParamSplat
-
-                        Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It @resolveSamAccountNameCalledTimesSplat
                     }
                 }
             }
