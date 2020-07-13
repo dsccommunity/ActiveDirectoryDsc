@@ -355,7 +355,7 @@ try
                     Write-Error -Message $errorMessage -ErrorId $errorId -ErrorAction Stop
                 }
 
-                { Get-TargetResource @testPresentParams -ErrorAction Stop } |
+                { Get-TargetResource @testPresentParams } |
                     Should -Throw ($script:localizedData.RetrievingGroupMembersError -f
                         $fakeADGroup.Name)
             }
