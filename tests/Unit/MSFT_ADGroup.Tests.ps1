@@ -112,7 +112,8 @@ try
                 ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-6606'
                 ObjectClass       = 'computer'
             }
-            # This entry specifically is used to represent a group member from a one-way trusted domain
+            # This entry is used to represent a group member from a one-way trusted domain
+            # Removing this entry or changing its ObjectClass will reduce code coverage
             [PSCustomObject] @{
                 DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
                 ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
@@ -316,7 +317,22 @@ try
                 Assert-MockCalled -CommandName Get-ADObject -Scope It
             }
 
-            It "Calls 'Resolve-SamAccountName' when 'MembershipAttribute' is 'SamAccountName' and 'Get-ADGroupMember' fails due to one-way trust" {
+            if ($fakeADGroupMembersAsADObjects.ObjectClass -contains 'foreignSecurityPrincipal')
+            {
+                $callString = 'Calls'
+                $resolveSamAccountNameCalledTimesSplat = @{}
+                $objectClassMemberString = ", at least 1 group member has an 'ObjectClass' of 'foreignSecurityPrincipal',"
+            }
+            else
+            {
+                $callString = 'Does not call'
+                $resolveSamAccountNameCalledTimesSplat = @{
+                    Times = 0
+                }
+                $objectClassMemberString = ", none of the group members have an 'ObjectClass' of 'foreignSecurityPrincipal',"
+            }
+
+            It "$($callString) 'Resolve-SamAccountName' when 'MembershipAttribute' is 'SamAccountName'$($objectClassMemberString) and 'Get-ADGroupMember' fails due to one-way trust" {
                 Mock -CommandName Get-ADGroup -MockWith {
                     $fakeADGroup['Members'] = $fakeADGroupMembersAsADObjects.DistinguishedName
                     return [PSCustomObject] $fakeADGroup
@@ -341,7 +357,7 @@ try
 
                 Get-TargetResource @testPresentParams -MembershipAttribute SamAccountName
 
-                Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It
+                Assert-MockCalled -CommandName Resolve-SamAccountName -Scope It @resolveSamAccountNameCalledTimesSplat
             }
 
             It "Throws the correct error when 'Get-ADGroupMember' fails due to an unrecognized 'FullyQualifiedErrorId'" {
