@@ -180,6 +180,7 @@ function Get-TargetResource
             'Description',
             'DisplayName',
             'ManagedBy',
+            'Members',
             'Info'
         )
 
@@ -187,8 +188,66 @@ function Get-TargetResource
 
         if ($adGroup)
         {
-            # Retrieve the current list of members, returning the specified membership attribute
-            [System.Array] $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
+            try
+            {
+                [System.Array] $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
+            }
+            catch
+            {
+                # This FullyQualifiedErrorId is indicative of a failure to retrieve members with Get-ADGroupMember
+                # for a one-way trust
+                $oneWayTrustFullyQualifiedErrorId = `
+                    'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
+
+                if ($_.FullyQualifiedErrorId -eq $oneWayTrustFullyQualifiedErrorId)
+                {
+                    # Get-ADGroupMember returns property name 'SID' while Get-ADObject returns property name 'ObjectSID'
+                    if ($MembershipAttribute -eq 'SID')
+                    {
+                        $selectProperty = 'ObjectSID'
+                    }
+                    else
+                    {
+                        $selectProperty = $MembershipAttribute
+                    }
+
+                    # Use the same results from Get-ADCommonParameters but remove the Identity
+                    # for usage with Get-ADObject
+                    $getADObjectParameters = $commonParameters.Clone()
+                    $getADObjectParameters.Remove('Identity')
+
+                    # Retrieve the current list of members, returning the specified membership attribute
+                    [System.Array] $adGroupMembers = $adGroup.Members | ForEach-Object -Process {
+                        # Adding a Filter and additional Properties for the AD object retrieval
+                        $getADObjectParameters['Filter'] = "DistinguishedName -eq '$($_)'"
+                        $getADObjectParameters['Properties'] = @(
+                            'SamAccountName',
+                            'ObjectSID'
+                        )
+
+                        $adObject = Get-ADObject @getADObjectParameters
+
+                        # Perform SID translation to a readable name as the SamAccountName if the member is
+                        # of objectClass "foreignSecurityPrincipal"
+                        $classMatchForResolve = $adObject.objectClass -eq 'foreignSecurityPrincipal'
+                        $attributeMatchForResolve = $MembershipAttribute -eq 'SamAccountName'
+
+                        if ($classMatchForResolve -and $attributeMatchForResolve)
+                        {
+                            Resolve-SamAccountName -ObjectSid $adObject.objectSid
+                        }
+                        else
+                        {
+                            $adObject.$selectProperty
+                        }
+                    }
+                }
+                else
+                {
+                    $errorMessage = $script:localizedData.RetrievingGroupMembersError -f $GroupName
+                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                }
+            }
 
             $getTargetResourceReturnValue['Ensure'] = 'Present'
             $getTargetResourceReturnValue['GroupName'] = $adGroup.Name
@@ -703,7 +762,69 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.RetrievingGroupMembers -f $MembershipAttribute)
 
-                $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
+                try
+                {
+                    $adGroupMembers = (Get-ADGroupMember @commonParameters).$MembershipAttribute
+                }
+                catch
+                {
+                    # This FullyQualifiedErrorId is indicative of a failure to retrieve members with Get-ADGroupMember
+                    # for a one-way trust
+                    $oneWayTrustFullyQualifiedErrorId = `
+                        'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
+
+                    if ($_.FullyQualifiedErrorId -eq $oneWayTrustFullyQualifiedErrorId)
+                    {
+                        # Get-ADGroupMember returns property name 'SID' while Get-ADObject
+                        # returns property name 'ObjectSID'
+                        if ($MembershipAttribute -eq 'SID')
+                        {
+                            $selectProperty = 'ObjectSID'
+                        }
+                        else
+                        {
+                            $selectProperty = $MembershipAttribute
+                        }
+
+                        # Use the same results from Get-ADCommonParameters but remove the Identity
+                        # for usage with Get-ADObject
+                        $getADObjectParameters = $commonParameters.Clone()
+                        $getADObjectParameters.Remove('Identity')
+
+                        $adGroupMemberDNs = (Get-ADGroup @commonParameters -Properties Members).Members
+
+                        # Retrieve the current list of members, returning the specified membership attribute
+                        $adGroupMembers = $adGroupMemberDNs | ForEach-Object -Process {
+                            # Adding a Filter and additional Properties for the AD object retrieval
+                            $getADObjectParameters['Filter'] = "DistinguishedName -eq '$($_)'"
+                            $getADObjectParameters['Properties'] = @(
+                                'SamAccountName',
+                                'ObjectSID'
+                            )
+
+                            $adObject = Get-ADObject @getADObjectParameters
+
+                            # Perform SID translation to a readable name as the SamAccountName if the member is
+                            # of objectClass "foreignSecurityPrincipal"
+                            $classMatchForResolve = $adObject.objectClass -eq 'foreignSecurityPrincipal'
+                            $attributeMatchForResolve = $MembershipAttribute -eq 'SamAccountName'
+
+                            if ($classMatchForResolve -and $attributeMatchForResolve)
+                            {
+                                Resolve-SamAccountName -ObjectSid $adObject.objectSid
+                            }
+                            else
+                            {
+                                $adObject.$selectProperty
+                            }
+                        }
+                    }
+                    else
+                    {
+                        $errorMessage = $script:localizedData.RetrievingGroupMembersError -f $GroupName
+                        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+                    }
+                }
 
                 $assertMemberParameters['ExistingMembers'] = $adGroupMembers
 

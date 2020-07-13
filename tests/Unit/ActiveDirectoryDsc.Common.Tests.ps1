@@ -2210,4 +2210,29 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
         }
     }
+
+    Describe 'ActiveDirectoryDsc.Common\Resolve-SamAccountName' {
+        Context 'Properly formatted ObjectSid' {
+            $objectSid = 'S-1-5-21-8562719340-2451078396-046517832-2106'
+
+            It 'Should not throw and assume an orphaned ForeignSecurityPrincipal' {
+                { Resolve-SamAccountName -ObjectSid $objectSid -ErrorAction Stop -WarningAction SilentlyContinue } |
+                    Should -Not -Throw
+            }
+            It 'Should return the ObjectSid and assume an orphaned ForeignSecurityPrincipal' {
+                Resolve-SamAccountName -ObjectSid $objectSid -WarningAction SilentlyContinue |
+                    Should -Be $objectSid
+            }
+        }
+
+        Context 'Improperly formatted ObjectSid' {
+            $objectSid = (New-Guid).Guid
+            $errorMessage = $script:localizedData.ResolveSamAccountNameError -f $objectSid
+
+            It 'Should throw and not assume an orphaned ForeignSecurityPrincipal' {
+                { Resolve-SamAccountName -ObjectSid $objectSid -ErrorAction Stop } |
+                    Should Throw $errorMessage
+            }
+        }
+    }
 }

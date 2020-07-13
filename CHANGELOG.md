@@ -34,6 +34,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADDomainController
   - Fixed `Test-TargetResource` error when the `ReadOnlyReplica` property is set to `true`
     ([issue #611](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/611)).
+- ADGroup
+  - Fixed issue with retrieving group members using `Get-ADGroupMember` when members are from another domain
+    by adding and using the 'Members' property from `Get-ADGroup` and sending the resulting DistinguishedName to
+    `Get-ADObject` when `Get-ADGroupMember` throws a specific error.
+    ([issue #616](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/616)).
 - ADReplicationSiteLink
   - Fixed setting options after the resource is initially created
     ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).

@@ -13,4 +13,5 @@ ConvertFrom-StringData @'
     NotDesiredPropertyState        = AD Group '{0}' is not correct. Expected '{1}', actual '{2}'. (ADG0011)
     UpdatingGroupProperty          = Updating AD Group property '{0}' to '{1}'. (ADG0012)
     GroupMembershipMultipleDomains = Group membership objects are in '{0}' different AD Domains. (ADG0013)
+    RetrievingGroupMembersError    = Error retrieving membership for AD Group '{0}'. (ADG0014)
 '@
