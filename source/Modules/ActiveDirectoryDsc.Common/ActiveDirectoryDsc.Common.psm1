@@ -2466,3 +2466,55 @@ function Get-ActiveDirectoryForest
 
     return [System.DirectoryServices.ActiveDirectory.Forest]::GetForest($DirectoryContext)
 }
+
+<#
+    .SYNOPSIS
+        Resolves the SamAccountName of an Active Directory object based on a supplied ObjectSid.
+
+    .DESCRIPTION
+        The Resolve-SamAccountName function is used to get a System.String object representing the SamAccountName
+        translated from the specified ObjectSid. If a System.Security.Principal.IdentityNotMappedException exception
+        is thrown, then we assume it is an orphaned ForeignSecurityPrincipal and the ObjectSid value is returned back.
+
+    .EXAMPLE
+        Resolve-SamAccountName -ObjectSid $adObject.objectSid
+
+    .PARAMETER ObjectSid
+        Specifies the Active Directory object security identifier to use for translation to a SamAccountName.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.String
+
+    .NOTES
+        This is a wrapper to allow test mocking of the calling function.
+        See issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/616 for more information.
+#>
+function Resolve-SamAccountName
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ObjectSid
+    )
+
+    try
+    {
+        [System.Security.Principal.SecurityIdentifier]::new($ObjectSid).Translate([System.Security.Principal.NTAccount]).Value
+    }
+    catch [System.Security.Principal.IdentityNotMappedException]
+    {
+        Write-Warning -Message ($script:localizedData.IdentityNotMappedExceptionError -f $ObjectSid)
+        $ObjectSid
+    }
+    catch
+    {
+        $errorMessage = $script:localizedData.ResolveSamAccountNameError -f $ObjectSid
+        New-InvalidResultException -Message $errorMessage -ErrorRecord $_
+    }
+}

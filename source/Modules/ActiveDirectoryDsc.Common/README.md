@@ -73,6 +73,9 @@ Creates a new MSFT_Credential CIM instance credential object.
 ### [Remove-DuplicateMembers](docs/Remove-DuplicateMembers.md)
 Removes duplicate members from a string array.
 
+### [Resolve-SamAccountName](docs/Resolve-SamAccountName.md)
+Resolves the SamAccountName of an Active Directory object based on a supplied ObjectSid.
+
 ### [Restore-ADCommonObject](docs/Restore-ADCommonObject.md)
 Restores an AD object from the AD recyle bin.
 
