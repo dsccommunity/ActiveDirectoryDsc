@@ -510,6 +510,7 @@ try
                     {
                         It "Calls 'Set-ADFineGrainedPasswordPolicy' with '$propertyName' parameter when specified" {
                             $propertyDefaultParams = $testSetDefaultParams.Clone()
+                            $propertyDefaultParams['DisplayName'] = 'Display Name'
                             $propertyDefaultParams[$propertyName] = $stubFineGrainedPasswordPolicy[$propertyName]
                             Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                                 { return $fakeGetSetFineGrainedPasswordPolicy; }
@@ -588,6 +589,8 @@ try
 
                 It "Calls 'New-ADFineGrainedPasswordPolicy' and 'Add-ADFineGrainedPasswordPolicySubject' cmdlets" {
                     $newFineGrainedParametersPolicy = $stubFineGrainedPasswordPolicy.Clone()
+                    $newFineGrainedParametersPolicy['DisplayName'] = 'Display Name'
+                    $newFineGrainedParametersPolicy['ProtectedFromAccidentalDeletion'] = $true
                     $newFineGrainedParametersPolicy['Precedence'] = 10
                     $newFineGrainedParametersPolicy['MinPasswordAge'] = '1.00:00:00'
                     $newFineGrainedParametersPolicy['MaxPasswordAge'] = '42.00:00:00'
