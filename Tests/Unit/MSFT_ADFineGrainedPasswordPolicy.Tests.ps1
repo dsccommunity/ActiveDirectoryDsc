@@ -418,6 +418,20 @@ try
                 Ensure                          = 'Present'
             }
 
+            $fakeGetSetFineGrainedPasswordPolicy = @{
+                Name                        = $testFineGrainedPasswordPolicyName
+                ComplexityEnabled           = $false
+                LockoutDuration             = [TimeSpan]::Parse('00:20:00')
+                LockoutObservationWindow    = [TimeSpan]::Parse('00:20:00')
+                LockoutThreshold            = 5
+                MinPasswordAge              = [TimeSpan]::Parse('2.00:00:00')
+                MaxPasswordAge              = [TimeSpan]::Parse('40.00:00:00')
+                MinPasswordLength           = 8
+                PasswordHistoryCount        = 10
+                Precedence                  = 100
+                ReversibleEncryptionEnabled = $false
+            }
+
             Context 'When the Resource is present and needs to be updated' {
                 Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
@@ -498,7 +512,7 @@ try
                             $propertyDefaultParams = $testSetDefaultParams.Clone()
                             $propertyDefaultParams[$propertyName] = $stubFineGrainedPasswordPolicy[$propertyName]
                             Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                                { return $fakeGetFineGrainedPasswordPolicy; }
+                                { return $fakeGetSetFineGrainedPasswordPolicy; }
                             Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
                                 { return $fakeGetFineGrainedPasswordPolicySubject; }
                             Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
