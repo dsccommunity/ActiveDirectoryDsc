@@ -7,6 +7,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- ADGroup
+  - Added support for managing AD group membership of Foreign Security Principals. This involved completely
+    refactoring group membership management to utilize the `Set-ADGroup` cmdlet and referencing SID values.
+    ([issue #619](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/619)).
+
 ### Changed
 
 - ActiveDirectoryDsc
