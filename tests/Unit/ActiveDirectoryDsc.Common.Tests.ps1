@@ -28,6 +28,38 @@ Import-Module $script:subModuleFile -Force -ErrorAction Stop
 InModuleScope 'ActiveDirectoryDsc.Common' {
     Set-StrictMode -Version 1.0
 
+    $fakeADGroupMembersAsADObjects = @(
+        [PSCustomObject] @{
+            DistinguishedName = 'CN=User 1,CN=Users,DC=contoso,DC=com'
+            ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
+            SamAccountName    = 'USER1'
+            ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1106'
+            ObjectClass       = 'user'
+        }
+        [PSCustomObject] @{
+            DistinguishedName = 'CN=Group 1,CN=Users,DC=contoso,DC=com'
+            ObjectGUID        = 'e2328767-2673-40b2-b3b7-ce9e6511df06'
+            SamAccountName    = 'GROUP1'
+            ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1206'
+            ObjectClass       = 'group'
+        }
+        [PSCustomObject] @{
+            DistinguishedName = 'CN=Computer 1,CN=Users,DC=contoso,DC=com'
+            ObjectGUID        = '42f9d607-0934-4afc-bb91-bdf93e07cbfc'
+            SamAccountName    = 'COMPUTER1'
+            ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-6606'
+            ObjectClass       = 'computer'
+        }
+        # This entry is used to represent a group member from a one-way trusted domain
+        [PSCustomObject] @{
+            DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
+            ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
+            SamAccountName    = 'ADATUM\USER1'
+            ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2106'
+            ObjectClass       = 'foreignSecurityPrincipal'
+        }
+    )
+
     # Load stub cmdlets and classes.
     Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
     Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ADDSDeployment_2019.psm1') -Force
@@ -748,186 +780,40 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
     }
 
-    Describe 'ActiveDirectoryDsc.Common\Add-ADCommonGroupMember' {
+    Describe 'ActiveDirectoryDsc.Common\Set-ADCommonGroupMember' {
         Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
 
-        $memberData = @(
-            [PSCustomObject] @{
-                Name   = 'CN=Account1,DC=contoso,DC=com'
-                Domain = 'contoso.com'
+        $groupMembersSplat = @{
+            Members = $fakeADGroupMembersAsADObjects.DistinguishedName
+            MembershipAttribute = 'DistinguishedName'
+            Parameters = @{
+                Identity = 'CN=TestGroup,OU=Fake,DC=contoso,DC=com'
             }
-            [PSCustomObject] @{
-                Name   = 'CN=Group1,DC=contoso,DC=com'
-                Domain = 'contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Computer1,DC=contoso,DC=com'
-                Domain = 'contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Msa1,DC=contoso,DC=com'
-                Domain = 'contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Gmsa1,DC=contoso,DC=com'
-                Domain = 'contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Account1,DC=a,DC=contoso,DC=com'
-                Domain = 'a.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Group1,DC=a,DC=contoso,DC=com'
-                Domain = 'a.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Computer1,DC=a,DC=contoso,DC=com'
-                Domain = 'a.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Msa1,DC=a,DC=contoso,DC=com'
-                Domain = 'a.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Gmsa1,DC=a,DC=contoso,DC=com'
-                Domain = 'a.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Account1,DC=b,DC=contoso,DC=com'
-                Domain = 'b.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Group1,DC=b,DC=contoso,DC=com'
-                Domain = 'b.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Computer1,DC=b,DC=contoso,DC=com'
-                Domain = 'b.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Msa1,DC=b,DC=contoso,DC=com'
-                Domain = 'b.contoso.com'
-            }
-            [PSCustomObject] @{
-                Name   = 'CN=Gmsa1,DC=b,DC=contoso,DC=com'
-                Domain = 'b.contoso.com'
-            }
-        )
-
-        $invalidMemberData = @(
-            'contoso.com\group1'
-            'user1@contoso.com'
-            'computer1.contoso.com'
-        )
-
-        $fakeParameters = @{
-            Identity = 'SomeGroup'
         }
 
-        Context 'When all members are in the same domain' {
-            BeforeAll {
-                Mock -CommandName Add-ADGroupMember
-                $groupCount = 0
-            }
+        $membershipSID = @{
+            member = $fakeADGroupMembersAsADObjects.ObjectSID | ForEach-Object -Process { "<SID=$($_)>" }
+        }
 
-            foreach ($domainGroup in ($memberData | Group-Object -Property Domain))
-            {
-                $groupCount ++
-                It "Should not throw an error for $($domainGroup.Name)" {
-                    { Add-ADCommonGroupMember -Members $domainGroup.Group.Name -Parameters $fakeParameters } |
-                        Should -Not -Throw
+        Mock -CommandName Resolve-MembersSecurityIdentifier -MockWith {
+            return $membershipSID['member']
+        }
+
+        foreach ($action in @('Add', 'Remove')) {
+            It "Calls 'Set-ADGroup' with '$($action)' parameter when 'Action' parameter is specified as '$($action)'" {
+                Mock -CommandName Set-ADGroup -ParameterFilter {
+                    (Get-Variable -Name $action -ValueOnly) -ne $null
                 }
-            }
 
-            It "Should have called Add-ADGroupMember $groupCount times" {
-                Assert-MockCalled -CommandName Add-ADGroupMember -Exactly -Times $groupCount
-            }
-        }
+                $setADCommonGroupMemberSplat = $groupMembersSplat.Clone()
+                $setADCommonGroupMemberSplat['Action'] = $action
 
-        Context 'When members are in different domains' {
-            BeforeAll {
-                Mock -CommandName Add-ADGroupMember
-                Mock -CommandName Get-ADObject -MockWith {
-                    param
-                    (
-                        [Parameter()]
-                        [System.String]
-                        $Identity,
+                Set-ADCommonGroupMember @setADCommonGroupMemberSplat
 
-                        [Parameter()]
-                        [System.String]
-                        $Server,
-
-                        [Parameter()]
-                        [System.String[]]
-                        $Properties
-                    )
-
-                    $objectClass = switch ($Identity)
-                    {
-                        { $Identity -match 'Group' }
-                        {
-                            'group'
-                        }
-                        { $Identity -match 'Account' }
-                        {
-                            'user'
-                        }
-                        { $Identity -match 'Computer' }
-                        {
-                            'computer'
-                        }
-                        { $Identity -match 'msa' }
-                        {
-                            'msDS-ManagedServiceAccount'
-                        }
-                        { $Identity -match 'gmsa' }
-                        {
-                            'msDS-GroupManagedServiceAccount'
-                        }
-                    }
-
-                    return (
-                        @{
-                            objectClass = $objectClass
-                        }
-                    )
-                }
-                # Mocks should return something that is used with Add-ADGroupMember
-                Mock -CommandName Get-ADComputer -MockWith { 'placeholder' }
-                Mock -CommandName Get-ADGroup -MockWith { 'placeholder' }
-                Mock -CommandName Get-ADUser -MockWith { 'placeholder' }
-                Mock -CommandName Get-ADServiceAccount -MockWith { 'placeholder' }
-            }
-
-            It 'Should not throw an error' {
-                { Add-ADCommonGroupMember -Members $memberData.Name -Parameters $fakeParameters `
-                        -MembersInMultipleDomains } | Should -Not -Throw
-            }
-
-            It 'Should have called the expected mocks' {
-                Assert-MockCalled -CommandName Get-ADComputer `
-                    -Exactly -Times $memberData.Where( { $_.Name -like '*Computer*' }).Count
-                Assert-MockCalled -CommandName Get-ADUser `
-                    -Exactly -Times $memberData.Where( { $_.Name -like '*Account*' }).Count
-                Assert-MockCalled -CommandName Get-ADGroup `
-                    -Exactly -Times $memberData.Where( { $_.Name -like '*Group*' }).Count
-                Assert-MockCalled -CommandName Get-ADServiceAccount `
-                    -Exactly -Times $memberData.Where( { $_.Name -like '*msa*' }).Count
-                Assert-MockCalled -CommandName Add-ADGroupMember `
-                    -Exactly -Times $memberData.Count
-            }
-        }
-
-        Context 'When the domain name cannot be determined' {
-            BeforeAll {
-                $emptyDomainError = ($script:localizedData.EmptyDomainError -f
-                    $invalidMemberData[0], $fakeParameters.Identity)
-            }
-
-            It 'Should throw the correct error' {
-                { Add-ADCommonGroupMember -Members $invalidMemberData -Parameters $fakeParameters `
-                        -MembersInMultipleDomains } | Should -Throw $emptyDomainError
+                Assert-MockCalled -CommandName Resolve-MembersSecurityIdentifier -Scope It
+                Assert-MockCalled -CommandName Set-ADGroup -ParameterFilter {
+                    (Get-Variable -Name $action -ValueOnly) -ne $null
+                } -Exactly -Times 1 -Scope It
             }
         }
     }
@@ -2232,6 +2118,120 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             It 'Should throw and not assume an orphaned ForeignSecurityPrincipal' {
                 { Resolve-SamAccountName -ObjectSid $objectSid -ErrorAction Stop } |
                     Should Throw $errorMessage
+            }
+        }
+    }
+
+    Describe 'ActiveDirectoryDsc.Common\Resolve-MembersSecurityIdentifier' {
+        Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+
+        $testServer = 'TESTDC'
+        $testCredentials = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+            'DummyUser',
+            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+        )
+
+        It "Calls 'Get-ADObject' with 'Server' parameter when passed as part of the 'Parameters' parameter" {
+            Mock -CommandName Get-ADObject -ParameterFilter {
+                $Server -eq $testServer
+            }
+
+            $resolveMembersSIDSplat = @{
+                Members = $fakeADGroupMembersAsADObjects.ObjectGUID
+                MembershipAttribute = 'ObjectGUID'
+                Parameters = @{
+                    Server = $testServer
+                }
+            }
+
+            Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
+
+            Assert-MockCalled -CommandName Get-ADObject -ParameterFilter {
+                $Server -eq $testServer
+            } -Scope It
+        }
+
+        It "Calls 'Get-ADObject' with 'Credential' parameter when passed as part of the 'Parameters' parameter" {
+            Mock -CommandName Get-ADObject -ParameterFilter {
+                $Credential -eq $testCredentials
+            }
+
+            $resolveMembersSIDSplat = @{
+                Members = $fakeADGroupMembersAsADObjects.ObjectGUID
+                MembershipAttribute = 'ObjectGUID'
+                Parameters = @{
+                    Credential = $testCredentials
+                }
+            }
+
+            Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
+
+            Assert-MockCalled -CommandName Get-ADObject -ParameterFilter {
+                $Credential -eq $testCredentials
+            } -Scope It
+        }
+
+        It "Should write a warning when 'Get-ADObject' fails" {
+            Mock -CommandName Write-Warning -Verifiable
+            Mock -CommandName Get-ADObject -MockWith {
+                throw (New-Guid).Guid
+            }
+
+            $resolveMembersSIDSplat = @{
+                Members = $fakeADGroupMembersAsADObjects.ObjectGUID
+                MembershipAttribute = 'ObjectGUID'
+            }
+
+            Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
+
+            Assert-MockCalled -CommandName Write-Warning -Exactly -Times $fakeADGroupMembersAsADObjects.Count -Scope It
+        }
+
+        foreach ($attribute in @('SamAccountName', 'DistinguishedName', 'ObjectGUID', 'SID'))
+        {
+            if ($attribute -eq 'SID')
+            {
+                $memberProperty = 'ObjectSID'
+            }
+            else
+            {
+                $memberProperty = $attribute
+            }
+
+            $membersParamSplat = @{
+                Members = $fakeADGroupMembersAsADObjects.$memberProperty
+                MembershipAttribute = $attribute
+            }
+
+            It "Returns correct values when MembershipAttribute '$($attribute)' is specified" {
+                $script:getADObjectCallCount = 0
+                Mock -CommandName Get-ADObject -MockWith {
+                    $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount]
+                    $script:getADObjectCallCount++
+                    return $memberADObject
+                }
+
+                $result = Resolve-MembersSecurityIdentifier @membersParamSplat
+                $result | ForEach-Object -Process {
+                    $fakeADGroupMembersAsADObjects.ObjectSID | Should -Contain $_
+                }
+            }
+
+            It "Returns correct values when PrepareForMembership and MembershipAttribute '$($attribute)' is specified" {
+                $script:getADObjectCallCount = 0
+                Mock -CommandName Get-ADObject -MockWith {
+                    $memberADObject = $fakeADGroupMembersAsADObjects[$script:getADObjectCallCount]
+                    $script:getADObjectCallCount++
+                    return $memberADObject
+                }
+
+                $resolveMembersSIDSplat = $membersParamSplat.Clone()
+                $resolveMembersSIDSplat['PrepareForMembership'] = $true
+
+                $result = Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
+                $result | ForEach-Object -Process {
+                    $_ | Should -Match '^[<]SID[=]S[-]1[-]5[-]21([-][0-9]{10}){2}[-][0-9]{9}[-][0-9]+[>]$'
+                }
             }
         }
     }

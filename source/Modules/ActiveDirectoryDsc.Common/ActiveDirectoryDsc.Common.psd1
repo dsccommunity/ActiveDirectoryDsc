@@ -37,7 +37,7 @@
         'ConvertTo-DeploymentDomainMode'
         'Restore-ADCommonObject'
         'Get-ADDomainNameFromDistinguishedName'
-        'Add-ADCommonGroupMember'
+        'Set-ADCommonGroupMember'
         'Get-DomainControllerObject'
         'Test-IsDomainController'
         'Convert-PropertyMapToObjectProperties'
@@ -53,6 +53,7 @@
         'Get-ActiveDirectoryDomain'
         'Get-ActiveDirectoryForest'
         'Resolve-SamAccountName'
+        'Resolve-MembersSecurityIdentifier'
     )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.

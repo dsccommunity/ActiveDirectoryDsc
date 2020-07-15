@@ -1073,26 +1073,30 @@ function Get-ADDomainNameFromDistinguishedName
 
 <#
     .SYNOPSIS
-        Adds a member to an AD group.
+        Sets a member of an AD group by adding or removing its membership.
 
     .DESCRIPTION
-        The Add-ADCommonGroupMember function is used to add a member from the current or a different domain to an AD
-        group.
+        The Set-ADCommonGroupMember function is used to add a member from the current or a different domain to or remove
+        it from an AD group.
 
     .EXAMPLE
-        Add-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' -Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc=com}
+        Set-ADCommonGroupMember -Members 'cn=user1,cn=users,dc=contoso,dc=com' -MembershipAttribute 'DistinguishedName' -Parameters @{Identity='cn=group1,cn=users,dc=contoso,dc=com'}
 
     .PARAMETER Members
-        Specifies the members to add to the group. These may be in the same domain as the group or in alternate
-        domains.
+        Specifies the members to add to or remove from the group. These may be in the same domain as the group or in
+        alternate domains.
+
+    .PARAMETER MembershipAttribute
+        Specifies the Active Directory attribute for the values of the Members parameter.
+        Default value is 'SamAccountName'.
 
     .PARAMETER Parameters
-        Specifies the parameters to pass to the Add-ADGroupMember cmdlet when adding the members to the group. This
-        should include the group identity.
+        Specifies the parameters to pass to the Resolve-MembersSecurityIdentifier and Set-ADGroup cmdlets when adding
+        the members to the group. This should include the group Identity as well as Server and/or Credential.
 
-    .PARAMETER MembersInMultipleDomains
-        Setting this switch specifies that there are members from alternate domains. This triggers the identities of
-        the members to be looked up in the alternate domain.
+    .PARAMETER Action
+        Specifies what group membership action to take. Valid options are 'Add' and 'Remove'.
+        Default value is 'Add'.
 
     .INPUTS
         None
@@ -1103,8 +1107,9 @@ function Get-ADDomainNameFromDistinguishedName
     .NOTES
         Author original code: Robert D. Biddle (https://github.com/RobBiddle)
         Author refactored code: Jan-Hendrik Peters (https://github.com/nyanhp)
+        Author refactored code: Jeremy Ciak (https://github.com/jeremyciak)
 #>
-function Add-ADCommonGroupMember
+function Set-ADCommonGroupMember
 {
     [CmdletBinding()]
     param
@@ -1114,71 +1119,37 @@ function Add-ADCommonGroupMember
         $Members,
 
         [Parameter()]
-        [hashtable]
+        [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
+        [System.String]
+        $MembershipAttribute = 'SamAccountName',
+
+        [Parameter()]
+        [System.Collections.Hashtable]
         $Parameters,
 
         [Parameter()]
-        [System.Management.Automation.SwitchParameter]
-        $MembersInMultipleDomains
+        [ValidateSet('Add', 'Remove')]
+        [System.String]
+        $Action = 'Add'
     )
 
     Assert-Module -ModuleName ActiveDirectory
 
-    if ($Members)
-    {
-        if ($MembersInMultipleDomains.IsPresent)
-        {
-            foreach ($member in $Members)
-            {
-                $memberDomain = Get-ADDomainNameFromDistinguishedName -DistinguishedName $member
-
-                if (-not $memberDomain)
-                {
-                    $errorMessage = $script:localizedData.EmptyDomainError -f $member, $Parameters.Identity
-                    New-InvalidOperationException -Message $errorMessage
-                }
-
-                Write-Verbose -Message ($script:localizedData.AddingGroupMember -f $member, $memberDomain, $Parameters.Identity)
-
-                $commonParameters = @{
-                    Identity    = $member
-                    Server      = $memberDomain
-                    ErrorAction = 'Stop'
-                }
-
-                $activeDirectoryObject = Get-ADObject @commonParameters -Properties @('ObjectClass')
-
-                $memberObjectClass = $activeDirectoryObject.ObjectClass
-
-                if ($memberObjectClass -eq 'computer')
-                {
-                    $memberObject = Get-ADComputer @commonParameters
-                }
-                elseif ($memberObjectClass -eq 'group')
-                {
-                    $memberObject = Get-ADGroup @commonParameters
-                }
-                elseif ($memberObjectClass -eq 'user')
-                {
-                    $memberObject = Get-ADUser @commonParameters
-                }
-                elseif ($memberObjectClass -eq 'msDS-ManagedServiceAccount')
-                {
-                    $memberObject = Get-ADServiceAccount @commonParameters
-                }
-                elseif ($memberObjectClass -eq 'msDS-GroupManagedServiceAccount')
-                {
-                    $memberObject = Get-ADServiceAccount @commonParameters
-                }
-
-                Add-ADGroupMember @Parameters -Members $memberObject -ErrorAction 'Stop'
-            }
-        }
-        else
-        {
-            Add-ADGroupMember @Parameters -Members $Members -ErrorAction 'Stop'
-        }
+    $resolveMembersSIDSplat = @{
+        MembershipAttribute = $MembershipAttribute
+        Parameters = $Parameters
+        PrepareForMembership = $true
+        ErrorAction = 'Stop'
     }
+
+    $Parameters[$Action] = @{
+        member = $Members | Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
+    }
+
+    $settingGroupMembersMessage = $script:localizedData.SettingGroupMember -f $Action, $Parameters['Identity']
+    Write-Verbose -Message $settingGroupMembersMessage -Verbose
+
+    Set-ADGroup @Parameters -ErrorAction 'Stop'
 }
 
 <#
@@ -2505,7 +2476,8 @@ function Resolve-SamAccountName
 
     try
     {
-        [System.Security.Principal.SecurityIdentifier]::new($ObjectSid).Translate([System.Security.Principal.NTAccount]).Value
+        $sidObject = [System.Security.Principal.SecurityIdentifier]::new($ObjectSid)
+        $sidObject.Translate([System.Security.Principal.NTAccount]).Value
     }
     catch [System.Security.Principal.IdentityNotMappedException]
     {
@@ -2514,7 +2486,171 @@ function Resolve-SamAccountName
     }
     catch
     {
-        $errorMessage = $script:localizedData.ResolveSamAccountNameError -f $ObjectSid
+        $errorMessage = $script:localizedData.UnableToResolveMembershipAttribute -f
+            'SamAccountName', 'ObjectSID', $ObjectSid
         New-InvalidResultException -Message $errorMessage -ErrorRecord $_
+    }
+}
+
+<#
+    .SYNOPSIS
+        Resolves the Security Identifier (SID) of a list of Members of the same type defined by the MembershipAttribute.
+
+    .DESCRIPTION
+        The Resolve-MembersSecurityIdentifier function is used to get an array of System.String objects representing
+        the Security Identifier (SID) translated from the specified list of Members with a type defined by the
+        MembershipAttribute. Custom logic is used for Foreign Security Principals to translate from a SamAccountName
+        or DistinguishedName, otherwise the value is sent to Get-ADObject as a filter to return the ObjectSID.
+
+    .EXAMPLE
+        Get-ADGroup -Identity 'GroupName' -Properties 'Members' | Resolve-MembersSecurityIdentifier -MembershipAttribute 'DistinguishedName'
+        -----------
+        Description
+        This will translate all of the DistinguishedName values for the Members of 'GroupName' into SID values.
+
+    .PARAMETER Members
+        Specifies the MembershipAttribute type values representing the Members to resolve into a Security Identifier.
+
+    .PARAMETER MembershipAttribute
+        Specifies the Active Directory attribute for the values of the Members parameter.
+        Default value is 'SamAccountName'.
+
+    .PARAMETER Parameters
+        Specifies the parameters to pass to the Resolve-MembersSecurityIdentifier cmdlet for usage with the internal
+        Get-ADObject call. This is an optional parameter which can have Keys and Values for Server and Credential.
+
+    .PARAMETER PrepareForMembership
+        Specifies whether to wrap each resulting value 'VALUE' as '<SID=VALUE>' so that it can be passed directly to
+        Set-ADGroup under the 'member' key in the hash object.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.String[]
+
+    .NOTES
+        This is a helper function to allow for easier cross-domain AD group membership management based on SID.
+        See issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/619 for more information.
+#>
+function Resolve-MembersSecurityIdentifier {
+    [CmdletBinding()]
+    [OutputType([System.String[]])]
+    param(
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [System.String[]]
+        $Members,
+
+        [Parameter()]
+        [ValidateSet('SamAccountName', 'DistinguishedName', 'SID', 'ObjectGUID')]
+        [System.String]
+        $MembershipAttribute = 'SamAccountName',
+
+        [Parameter()]
+        [System.Collections.Hashtable]
+        $Parameters,
+
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $PrepareForMembership
+    )
+
+    begin
+    {
+        $verbose = $PSBoundParameters.Verbose -eq $true
+
+        Assert-Module -ModuleName ActiveDirectory
+
+        $property = 'ObjectSID'
+
+        $resolvingSIDValuesMessage = $script:localizedData.ResolvingMembershipAttributeValues -f
+            $property, $MembershipAttribute
+        Write-Verbose -Message $resolvingSIDValuesMessage -Verbose:$verbose
+
+        $getADObjectSplat = @{}
+
+        if ($PSBoundParameters.Keys -contains 'Parameters')
+        {
+            if (-not ([string]::IsNullOrEmpty($Parameters['Server'])))
+            {
+                $getADObjectSplat['Server'] = $Parameters['Server']
+            }
+            if ($Parameters['Credential'])
+            {
+                $getADObjectSplat['Credential'] = $Parameters['Credential']
+            }
+        }
+
+        $getADObjectSplat['Properties'] = @($property)
+        $getADObjectSplat['ErrorAction'] = 'Stop'
+    }
+
+    process
+    {
+        if ($MembershipAttribute -eq 'SID')
+        {
+            if ($PrepareForMembership.IsPresent)
+            {
+                return $Members | ForEach-Object -Process { "<SID=$($_)>" }
+            }
+            else
+            {
+                return $Members
+            }
+        }
+
+        $Members | ForEach-Object -Process {
+            $member = $_
+
+            try
+            {
+                $fspADContainer = 'CN=ForeignSecurityPrincipals'
+
+                if ($MembershipAttribute -eq 'SamAccountName' -and $member -match '\\')
+                {
+                    $translateSamAccountNameMessage = $script:localizedData.TranslatingMembershipAttribute -f
+                        $MembershipAttribute, $member, $property
+                    Write-Verbose -Message "  $($translateSamAccountNameMessage)" -Verbose:$verbose
+
+                    $samAccountNameSplit = $member -split '\\'
+                    $domain = $samAccountNameSplit[0]
+                    $accountName = $samAccountNameSplit[1]
+                    $ntAccount = [System.Security.Principal.NTAccount]::new($domain, $accountName)
+                    $securityIdentifier = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
+                }
+                elseif ($MembershipAttribute -eq 'DistinguishedName' -and ($member -split ',')[1] -eq $fspADContainer)
+                {
+                    $parseDNMessage = $script:localizedData.ParsingCommonNameFromDN -f $member
+                    Write-Verbose -Message "  $($parseDNMessage)" -Verbose:$verbose
+
+                    $securityIdentifier = ($member -split ',')[0] -replace '^CN[=]'
+                }
+                else
+                {
+                    $adLookupMessage = $script:localizedData.ADObjectPropertyLookup -f
+                        $property, $MembershipAttribute, $member
+                    Write-Verbose -Message "  $($adLookupMessage)" -Verbose:$verbose
+
+                    $getADObjectSplat['Filter'] = "$($MembershipAttribute) -eq '$($member)'"
+
+                    $securityIdentifier = [string](Get-ADObject @getADObjectSplat).$property
+                }
+
+                if ($PrepareForMembership.IsPresent)
+                {
+                    "<SID=$($securityIdentifier)>"
+                }
+                else
+                {
+                    $securityIdentifier
+                }
+            }
+            catch
+            {
+                $resolveSIDWarning = $script:localizedData.UnableToResolveMembershipAttribute -f
+                    $property, $MembershipAttribute, $member
+                Write-Warning -Message $resolveSIDWarning
+            }
+        }
     }
 }
