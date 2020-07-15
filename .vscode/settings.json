@@ -11,5 +11,12 @@
     "powershell.codeFormatting.preset": "Custom",
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
-    "powershell.scriptAnalysis.settingsPath": ".vscode\\analyzersettings.psd1"
+    "files.defaultLanguage": "powershell",
+    "powershell.scriptAnalysis.settingsPath": ".vscode\\analyzersettings.psd1",
+    "[powershell]": {
+        "editor.rulers": [ 120 ]
+    },
+    "[markdown]": {
+        "editor.rulers": [ 120 ]
+    },
 }
