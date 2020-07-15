@@ -655,8 +655,6 @@ function Set-TargetResource
 
     Assert-MemberParameters @assertMemberParameters
 
-    $membersInMultipleDomains = $false
-
     if ($MembershipAttribute -eq 'DistinguishedName')
     {
         $allMembers = $Members + $MembersToInclude + $MembersToExclude
@@ -676,7 +674,6 @@ function Set-TargetResource
         if ($GroupMemberDomainCount -gt 1 -or ($groupMemberDomains -ine (Get-DomainName)).Count -gt 0)
         {
             Write-Verbose -Message ($script:localizedData.GroupMembershipMultipleDomains -f $GroupMemberDomainCount)
-            $membersInMultipleDomains = $true
         }
     }
 
@@ -842,12 +839,24 @@ function Set-TargetResource
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $adGroupMembers.Count, $GroupName)
 
-                            Remove-ADGroupMember @commonParameters -Members $adGroupMembers -Confirm:$false -ErrorAction 'Stop'
+                            $removeMemberSplat = @{
+                                Members = $adGroupMembers
+                                MembershipAttribute = $MembershipAttribute
+                                Parameters = $commonParameters
+                                Action = 'Remove'
+                            }
+                            Set-ADCommonGroupMember @removeMemberSplat
                         }
 
                         Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                        Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
+                        $addMemberSplat = @{
+                            Members = $Members
+                            MembershipAttribute = $MembershipAttribute
+                            Parameters = $commonParameters
+                            Action = 'Add'
+                        }
+                        Set-ADCommonGroupMember @addMemberSplat
                     }
 
                     if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
@@ -856,7 +865,13 @@ function Set-TargetResource
 
                         Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                        Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
+                        $addMemberSplat = @{
+                            Members = $MembersToInclude
+                            MembershipAttribute = $MembershipAttribute
+                            Parameters = $commonParameters
+                            Action = 'Add'
+                        }
+                        Set-ADCommonGroupMember @addMemberSplat
                     }
 
                     if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
@@ -865,7 +880,13 @@ function Set-TargetResource
 
                         Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $MembersToExclude.Count, $GroupName)
 
-                        Remove-ADGroupMember @commonParameters -Members $MembersToExclude -Confirm:$false -ErrorAction 'Stop'
+                        $removeMemberSplat = @{
+                            Members = $MembersToExclude
+                            MembershipAttribute = $MembershipAttribute
+                            Parameters = $commonParameters
+                            Action = 'Remove'
+                        }
+                        Set-ADCommonGroupMember @removeMemberSplat
                     }
                 }
             }
@@ -960,7 +981,13 @@ function Set-TargetResource
 
                 Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                Add-ADCommonGroupMember -Parameters $commonParameters -Members $Members -MembersInMultipleDomains:$membersInMultipleDomains
+                $addMemberSplat = @{
+                    Members = $Members
+                    MembershipAttribute = $MembershipAttribute
+                    Parameters = $commonParameters
+                    Action = 'Add'
+                }
+                Set-ADCommonGroupMember @addMemberSplat
             }
             elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
             {
@@ -968,7 +995,13 @@ function Set-TargetResource
 
                 Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                Add-ADCommonGroupMember -Parameters $commonParameters -Members $MembersToInclude -MembersInMultipleDomains:$membersInMultipleDomains
+                $addMemberSplat = @{
+                    Members = $MembersToInclude
+                    MembershipAttribute = $MembershipAttribute
+                    Parameters = $commonParameters
+                    Action = 'Add'
+                }
+                Set-ADCommonGroupMember @addMemberSplat
             }
         }
     } #end catch
