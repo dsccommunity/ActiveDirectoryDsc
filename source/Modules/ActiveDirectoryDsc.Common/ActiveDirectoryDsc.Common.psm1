@@ -2533,10 +2533,12 @@ function Resolve-SamAccountName
         This is a helper function to allow for easier cross-domain AD group membership management based on SID.
         See issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/619 for more information.
 #>
-function Resolve-MembersSecurityIdentifier {
+function Resolve-MembersSecurityIdentifier
+{
     [CmdletBinding()]
     [OutputType([System.String[]])]
-    param(
+    param
+    (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [System.String[]]
         $Members,
