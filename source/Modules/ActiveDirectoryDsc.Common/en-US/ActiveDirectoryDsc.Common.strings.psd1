@@ -14,7 +14,6 @@ ConvertFrom-StringData @'
     IncludeAndExcludeConflictError      = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values. (ADCOMMON0014)
     IncludeAndExcludeAreEmptyError      = The '{0}' and '{1}' parameters are either both null or empty.  At least one member must be specified in one of these parameters. (ADCOMMON0015)
     RecycleBinRestoreFailed             = Failed restoring {0} ({1}) from the recycle bin. (ADCOMMON0017)
-    EmptyDomainError                    = No domain name retrieved for group member {0} in group {1}. (ADCOMMON0018)
     CheckingMembers                     = Checking for '{0}' members. (ADCOMMON0019)
     MembershipCountMismatch             = Membership count is not correct. Expected '{0}' members, actual '{1}' members. (ADCOMMON0020)
     MemberNotInDesiredState             = Member '{0}' is not in the desired state. (ADCOMMON0021)
