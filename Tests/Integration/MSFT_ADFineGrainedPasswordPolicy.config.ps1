@@ -64,3 +64,22 @@ Configuration MSFT_ADFineGrainedPasswordPolicy_CreateADFineGrainedPasswordPolicy
         }
     }
 }
+
+<#
+    .SYNOPSIS
+        Remove a fine grained password policy for the Administrators group
+#>
+Configuration MSFT_ADFineGrainedPasswordPolicy_RemoveADFineGrainedPasswordPolicy_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADFineGrainedPasswordPolicy 'Integration_Test'
+        {
+            Name                            = $ConfigurationData.AllNodes.Name
+            Ensure                          = 'Absent'
+            Precedence                      = $ConfigurationData.AllNodes.Precedence
+        }
+    }
+}

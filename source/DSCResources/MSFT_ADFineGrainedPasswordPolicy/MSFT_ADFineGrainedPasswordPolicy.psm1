@@ -32,7 +32,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
             Get-ADFineGrainedPasswordPolicySubject | ActiveDirectory
             Assert-Module                          | DscResource.Common
             New-InvalidOperationException          | DscResource.Common
-            Get-ADCommonParameters                 | DscResource.Common
+            Get-ADCommonParameters                 | ActiveDirectoryDsc.Common
 #>
 function Get-TargetResource
 {
@@ -63,7 +63,6 @@ function Get-TargetResource
     Assert-Module -ModuleName 'ActiveDirectory'
 
     [HashTable] $parameters = $PSBoundParameters
-    [String[]] $policySubjects = ""
 
     $parameters['Identity'] = $Name
     $parameters.Remove('Precedence')
@@ -75,8 +74,6 @@ function Get-TargetResource
     $getADFineGrainedPasswordPolicyParams["Filter"] = "name -eq `'$Name`'"
     $getADFineGrainedPasswordPolicyParams.Remove('Identity')
 
-    $getADFineGrainedPasswordPolicySubjectParams = Get-ADCommonParameters @parameters
-
     try
     {
         $policy = Get-ADFineGrainedPasswordPolicy @getADFineGrainedPasswordPolicyParams
@@ -87,8 +84,12 @@ function Get-TargetResource
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
+    [String[]] $policySubjects = ""
+
     if ($policy)
     {
+        $getADFineGrainedPasswordPolicySubjectParams = Get-ADCommonParameters @parameters
+
         try
         {
             [String[]] $policySubjects = (Get-ADFineGrainedPasswordPolicySubject `
@@ -99,10 +100,7 @@ function Get-TargetResource
             $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicySubjectError -f $Name
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
-    }
 
-    if ($policy)
-    {
         return @{
             Name                        = $Name
             ComplexityEnabled           = $policy.ComplexityEnabled
@@ -165,20 +163,24 @@ function Get-TargetResource
 
     .PARAMETER LockoutDuration
         Specifies the length of time that an account is locked after the number of failed login attempts exceeds the
-        lockout threshold (timespan minutes).
+        lockout threshold. The lockout duration must be greater than or equal to the lockout observation time for a
+        password policy. The value must be a string representation of a TimeSpan value.
 
     .PARAMETER LockoutObservationWindow
         Specifies the maximum time interval between two unsuccessful login attempts before the number of unsuccessful
-        login attempts is reset to 0 (timespan minutes).
+        login attempts is reset to 0. The lockout observation window must be smaller than or equal to the lockout
+        duration for a password policy. The value must be a string representation of a TimeSpan value.
 
     .PARAMETER LockoutThreshold
         Specifies the number of unsuccessful login attempts that are permitted before an account is locked out.
 
     .PARAMETER MinPasswordAge
-        Specifies the minimum length of time before you can change a password (timespan days).
+        Specifies the minimum length of time before you can change a password. The value must be a string
+        representation of a TimeSpan value.
 
     .PARAMETER MaxPasswordAge
-        Specifies the maximum length of time that you can have the same password (timespan days).
+        Specifies the maximum length of time that you can have the same password. The value must be a string
+        representation of a TimeSpan value.
 
     .PARAMETER MinPasswordLength
         Specifies the minimum number of characters that a password must contain.
@@ -334,16 +336,14 @@ function Test-TargetResource
             else
             {
                 # Resource is in desired state
-                Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f
-                    $Name)
+                Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
                 $inDesiredState = $true
             }
         }
         else
         {
             # Resource should not exist
-            Write-Verbose -Message ($script:localizedData.ResourceExistsButShouldNotMessage -f
-                $Name)
+            Write-Verbose -Message ($script:localizedData.ResourceExistsButShouldNotMessage -f $Name)
             $inDesiredState = $false
         }
     }
@@ -400,20 +400,24 @@ function Test-TargetResource
 
     .PARAMETER LockoutDuration
         Specifies the length of time that an account is locked after the number of failed login attempts exceeds the
-        lockout threshold (timespan minutes).
+        lockout threshold. The lockout duration must be greater than or equal to the lockout observation time for a
+        password policy. The value must be a string representation of a TimeSpan value.
 
     .PARAMETER LockoutObservationWindow
         Specifies the maximum time interval between two unsuccessful login attempts before the number of unsuccessful
-        login attempts is reset to 0 (timespan minutes).
+        login attempts is reset to 0. The lockout observation window must be smaller than or equal to the lockout
+        duration for a password policy. The value must be a string representation of a TimeSpan value.
 
     .PARAMETER LockoutThreshold
         Specifies the number of unsuccessful login attempts that are permitted before an account is locked out.
 
     .PARAMETER MinPasswordAge
-        Specifies the minimum length of time before you can change a password (timespan days).
+        Specifies the minimum length of time before you can change a password. The value must be a string
+        representation of a TimeSpan value.
 
     .PARAMETER MaxPasswordAge
-        Specifies the maximum length of time that you can have the same password (timespan days).
+        Specifies the maximum length of time that you can have the same password. The value must be a string
+        representation of a TimeSpan value.
 
     .PARAMETER MinPasswordLength
         Specifies the minimum number of characters that a password must contain.
@@ -444,7 +448,7 @@ function Test-TargetResource
             Remove-ADFineGrainedPasswordPolicySubject | ActiveDirectory
             Assert-Module                             | DscResource.Common
             New-InvalidOperationException             | DscResource.Common
-            Get-ADCommonParameters                    | DscResource.Common
+            Get-ADCommonParameters                    | ActiveDirectoryDsc.Common
             Compare-ResourcePropertyState             | ActiveDirectoryDsc.Common
 #>
 function Set-TargetResource
@@ -606,7 +610,7 @@ function Set-TargetResource
                     {
                         $setADFineGrainedPasswordPolicyParams[$property.ParameterName] = $property.Expected
 
-                        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                        Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f
                             $property.ParameterName, $property.Expected)
                     }
                 }
@@ -614,14 +618,14 @@ function Set-TargetResource
                 if ($PSBoundParameters.ContainsKey('DisplayName'))
                 {
                     $setADFineGrainedPasswordPolicyParams['DisplayName'] = $DisplayName
-                    Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                    Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f
                         'DisplayName', $DisplayName)
                 }
 
                 if ($PSBoundParameters.ContainsKey('ProtectedFromAccidentalDeletion'))
                 {
                     $setADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
-                    Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                    Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f
                         'ProtectedFromAccidentalDeletion', $ProtectedFromAccidentalDeletion)
                 }
 
@@ -643,8 +647,8 @@ function Set-TargetResource
 
                     if ($getExistingSubjectsToRemove)
                     {
-                        Write-Verbose -Message ($script:localizedData.RemovingExistingSubjects -f $Name, `
-                            $($getExistingSubjectsToRemove.Count))
+                        Write-Verbose -Message ($script:localizedData.RemovingExistingSubjects -f
+                            $Name, $($getExistingSubjectsToRemove.Count))
 
                         try
                         {
@@ -704,7 +708,7 @@ function Set-TargetResource
                 {
                     $newADFineGrainedPasswordPolicyParams[$property.ParameterName] = $property.Expected
 
-                    Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                    Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f
                         $property.ParameterName, $property.Expected)
                 }
             }
@@ -712,14 +716,14 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey('DisplayName'))
             {
                 $newADFineGrainedPasswordPolicyParams['DisplayName'] = $DisplayName
-                Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f
                     'DisplayName', $DisplayName)
             }
 
             if ($PSBoundParameters.ContainsKey('ProtectedFromAccidentalDeletion'))
             {
                 $newADFineGrainedPasswordPolicyParams['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
-                Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f `
+                Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f
                     'ProtectedFromAccidentalDeletion', $ProtectedFromAccidentalDeletion)
             }
 
@@ -775,7 +779,7 @@ function Set-TargetResource
             }
             else
             {
-                Write-Verbose -Message ($script:localizedData.ProtectedFromAccidentalDeletionUndefined)
+                Write-Verbose -Message ($script:localizedData.ProtectedFromAccidentalDeletionUndefined -f $Name)
             }
 
             Write-Verbose -Message ($script:localizedData.RemovingFineGrainedPasswordPolicy -f $Name)
