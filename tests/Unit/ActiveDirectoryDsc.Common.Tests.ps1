@@ -2098,14 +2098,14 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     }
 
     Describe 'ActiveDirectoryDsc.Common\Resolve-SamAccountName' {
-        Context 'Properly formatted ObjectSid' {
+        Context 'Properly formatted ObjectSid so an orphaned ForeignSecurityPrincipal is assumed' {
             $objectSid = 'S-1-5-21-8562719340-2451078396-046517832-2106'
 
-            It 'Should not throw and assume an orphaned ForeignSecurityPrincipal' {
+            It 'Should not throw' {
                 { Resolve-SamAccountName -ObjectSid $objectSid -ErrorAction Stop -WarningAction SilentlyContinue } |
                     Should -Not -Throw
             }
-            It 'Should return the ObjectSid and assume an orphaned ForeignSecurityPrincipal' {
+            It 'Should return the ObjectSid' {
                 Resolve-SamAccountName -ObjectSid $objectSid -WarningAction SilentlyContinue |
                     Should -Be $objectSid
             }
@@ -2115,7 +2115,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             $objectSid = (New-Guid).Guid
             $errorMessage = $script:localizedData.ResolveSamAccountNameError -f $objectSid
 
-            It 'Should throw and not assume an orphaned ForeignSecurityPrincipal' {
+            It 'Should throw' {
                 { Resolve-SamAccountName -ObjectSid $objectSid -ErrorAction Stop } |
                     Should Throw $errorMessage
             }
@@ -2142,6 +2142,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Parameters = @{
                     Server = $testServer
                 }
+                WarningAction = 'SilentlyContinue'
             }
 
             Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
@@ -2162,6 +2163,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Parameters = @{
                     Credential = $testCredentials
                 }
+                WarningAction = 'SilentlyContinue'
             }
 
             Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
@@ -2171,10 +2173,34 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             } -Scope It
         }
 
-        It "Should write a warning when 'Get-ADObject' fails" {
+        It "Should not throw but instead write a warning and continue to next member when 'MembershipAttribute' is 'SamAccountName' and 'Translate' method fails with known exception" {
+            $resolveMembersSIDSplat = @{
+                Members = $fakeADGroupMembersAsADObjects[-1].SamAccountName
+                MembershipAttribute = 'SamAccountName'
+                ErrorAction = 'Stop'
+                WarningAction = 'SilentlyContinue'
+            }
+
+            { Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat } |
+                Should -Not -Throw
+        }
+
+        It "Should throw when 'MembershipAttribute' is 'SamAccountName' and 'Translate' method fails with unknown exception" {
+            $resolveMembersSIDSplat = @{
+                Members = $fakeADGroupMembersAsADObjects[0].SamAccountName
+                MembershipAttribute = 'SamAccountName'
+                ErrorAction = 'Stop'
+                WarningAction = 'SilentlyContinue'
+            }
+
+            { Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat } |
+                Should -Throw
+        }
+
+        It "Should write a warning when 'Get-ADObject' returns no value" {
             Mock -CommandName Write-Warning -Verifiable
             Mock -CommandName Get-ADObject -MockWith {
-                throw (New-Guid).Guid
+                ''
             }
 
             $resolveMembersSIDSplat = @{

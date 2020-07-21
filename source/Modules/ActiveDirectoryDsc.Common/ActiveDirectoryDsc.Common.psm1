@@ -2615,8 +2615,10 @@ function Resolve-MembersSecurityIdentifier
                 }
                 catch [System.Security.Principal.IdentityNotMappedException]
                 {
-                    Write-Warning -Message $script:localizedData.IdentityNotMappedExceptionError -f
-                        $property, $MembershipAttribute, $member
+                    Write-Warning -Message ($script:localizedData.IdentityNotMappedExceptionError -f
+                        $property, $MembershipAttribute, $member)
+
+                    continue
                 }
                 catch
                 {
@@ -2640,7 +2642,7 @@ function Resolve-MembersSecurityIdentifier
                 $securityIdentifier = [string](Get-ADObject @getADObjectParms).$property
             }
 
-            if ([string]::IsNullOrEmpty($securityIdentifier))
+            if (-not ([string]::IsNullOrEmpty($securityIdentifier)))
             {
                 if ($PrepareForMembership.IsPresent)
                 {
