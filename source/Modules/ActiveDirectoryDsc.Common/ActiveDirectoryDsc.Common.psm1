@@ -1135,7 +1135,7 @@ function Set-ADCommonGroupMember
 
     Assert-Module -ModuleName ActiveDirectory
 
-    $resolveMembersSIDSplat = @{
+    $resolveMembersSecurityIdentifierParms = @{
         MembershipAttribute = $MembershipAttribute
         Parameters = $Parameters
         PrepareForMembership = $true
@@ -1143,11 +1143,10 @@ function Set-ADCommonGroupMember
     }
 
     $Parameters[$Action] = @{
-        member = $Members | Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
+        member = $Members | Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
     }
 
-    $settingGroupMembersMessage = $script:localizedData.SettingGroupMember -f $Action, $Parameters['Identity']
-    Write-Verbose -Message $settingGroupMembersMessage -Verbose
+    Write-Verbose -Message ($script:localizedData.SettingGroupMember -f $Action, $Parameters['Identity']) -Verbose
 
     Set-ADGroup @Parameters -ErrorAction 'Stop'
 }
@@ -2481,7 +2480,8 @@ function Resolve-SamAccountName
     }
     catch [System.Security.Principal.IdentityNotMappedException]
     {
-        Write-Warning -Message ($script:localizedData.IdentityNotMappedExceptionError -f $ObjectSid)
+        Write-Warning -Message ($script:localizedData.IdentityNotMappedExceptionError -f
+            'SamAccountName', 'ObjectSID', $ObjectSid)
         $ObjectSid
     }
     catch
@@ -2530,7 +2530,7 @@ function Resolve-SamAccountName
         System.String[]
 
     .NOTES
-        This is a helper function to allow for easier cross-domain AD group membership management based on SID.
+        This is a helper function to allow for easier one-way trust AD group membership management based on SID.
         See issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/619 for more information.
 #>
 function Resolve-MembersSecurityIdentifier
@@ -2564,27 +2564,27 @@ function Resolve-MembersSecurityIdentifier
         Assert-Module -ModuleName ActiveDirectory
 
         $property = 'ObjectSID'
+        $fspADContainer = 'CN=ForeignSecurityPrincipals'
 
-        $resolvingSIDValuesMessage = $script:localizedData.ResolvingMembershipAttributeValues -f
-            $property, $MembershipAttribute
-        Write-Verbose -Message $resolvingSIDValuesMessage -Verbose:$verbose
+        Write-Verbose -Message ($script:localizedData.ResolvingMembershipAttributeValues -f
+            $property, $MembershipAttribute) -Verbose:$verbose
 
-        $getADObjectSplat = @{}
+        $getADObjectParms = @{}
 
         if ($PSBoundParameters.Keys -contains 'Parameters')
         {
             if (-not ([string]::IsNullOrEmpty($Parameters['Server'])))
             {
-                $getADObjectSplat['Server'] = $Parameters['Server']
+                $getADObjectParms['Server'] = $Parameters['Server']
             }
             if ($Parameters['Credential'])
             {
-                $getADObjectSplat['Credential'] = $Parameters['Credential']
+                $getADObjectParms['Credential'] = $Parameters['Credential']
             }
         }
 
-        $getADObjectSplat['Properties'] = @($property)
-        $getADObjectSplat['ErrorAction'] = 'Stop'
+        $getADObjectParms['Properties'] = @($property)
+        $getADObjectParms['ErrorAction'] = 'Stop'
     }
 
     process
@@ -2601,43 +2601,47 @@ function Resolve-MembersSecurityIdentifier
             }
         }
 
-        $Members | ForEach-Object -Process {
-            $member = $_
-
-            try
+        foreach ($member in $Members)
+        {
+            if ($MembershipAttribute -eq 'SamAccountName' -and $member -match '\\')
             {
-                $fspADContainer = 'CN=ForeignSecurityPrincipals'
-
-                if ($MembershipAttribute -eq 'SamAccountName' -and $member -match '\\')
+                try
                 {
-                    $translateSamAccountNameMessage = $script:localizedData.TranslatingMembershipAttribute -f
-                        $MembershipAttribute, $member, $property
-                    Write-Verbose -Message "  $($translateSamAccountNameMessage)" -Verbose:$verbose
+                    Write-Verbose -Message ($script:localizedData.TranslatingMembershipAttribute -f
+                        $MembershipAttribute, $member, $property) -Verbose:$verbose
 
-                    $samAccountNameSplit = $member -split '\\'
-                    $domain = $samAccountNameSplit[0]
-                    $accountName = $samAccountNameSplit[1]
-                    $ntAccount = [System.Security.Principal.NTAccount]::new($domain, $accountName)
+                    $ntAccount = [System.Security.Principal.NTAccount]::new($member)
                     $securityIdentifier = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
                 }
-                elseif ($MembershipAttribute -eq 'DistinguishedName' -and ($member -split ',')[1] -eq $fspADContainer)
+                catch [System.Security.Principal.IdentityNotMappedException]
                 {
-                    $parseDNMessage = $script:localizedData.ParsingCommonNameFromDN -f $member
-                    Write-Verbose -Message "  $($parseDNMessage)" -Verbose:$verbose
-
-                    $securityIdentifier = ($member -split ',')[0] -replace '^CN[=]'
-                }
-                else
-                {
-                    $adLookupMessage = $script:localizedData.ADObjectPropertyLookup -f
+                    Write-Warning -Message $script:localizedData.IdentityNotMappedExceptionError -f
                         $property, $MembershipAttribute, $member
-                    Write-Verbose -Message "  $($adLookupMessage)" -Verbose:$verbose
-
-                    $getADObjectSplat['Filter'] = "$($MembershipAttribute) -eq '$($member)'"
-
-                    $securityIdentifier = [string](Get-ADObject @getADObjectSplat).$property
                 }
+                catch
+                {
+                    New-InvalidResultException -Message ($script:localizedData.UnableToResolveMembershipAttribute -f
+                        $property, $MembershipAttribute, $member) -ErrorRecord $_
+                }
+            }
+            elseif ($MembershipAttribute -eq 'DistinguishedName' -and ($member -split ',')[1] -eq $fspADContainer)
+            {
+                Write-Verbose -Message ($script:localizedData.ParsingCommonNameFromDN -f $member) -Verbose:$verbose
 
+                $securityIdentifier = ($member -split ',')[0] -replace '^CN[=]'
+            }
+            else
+            {
+                Write-Verbose -Message ($script:localizedData.ADObjectPropertyLookup -f
+                    $property, $MembershipAttribute, $member) -Verbose:$verbose
+
+                $getADObjectParms['Filter'] = "$($MembershipAttribute) -eq '$($member)'"
+
+                $securityIdentifier = [string](Get-ADObject @getADObjectParms).$property
+            }
+
+            if ([string]::IsNullOrEmpty($securityIdentifier))
+            {
                 if ($PrepareForMembership.IsPresent)
                 {
                     "<SID=$($securityIdentifier)>"
@@ -2647,11 +2651,10 @@ function Resolve-MembersSecurityIdentifier
                     $securityIdentifier
                 }
             }
-            catch
+            else
             {
-                $resolveSIDWarning = $script:localizedData.UnableToResolveMembershipAttribute -f
-                    $property, $MembershipAttribute, $member
-                Write-Warning -Message $resolveSIDWarning
+                Write-Warning -Message ($script:localizedData.UnableToResolveMembershipAttribute -f
+                    $property, $MembershipAttribute, $member)
             }
         }
     }

@@ -839,24 +839,24 @@ function Set-TargetResource
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $adGroupMembers.Count, $GroupName)
 
-                            $removeMemberSplat = @{
-                                Members = $adGroupMembers
+                            $setADCommonGroupMemberParms = @{
+                                Members             = $adGroupMembers
                                 MembershipAttribute = $MembershipAttribute
-                                Parameters = $commonParameters
-                                Action = 'Remove'
+                                Parameters          = $commonParameters
+                                Action              = 'Remove'
                             }
-                            Set-ADCommonGroupMember @removeMemberSplat
+                            Set-ADCommonGroupMember @setADCommonGroupMemberParms
                         }
 
                         Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                        $addMemberSplat = @{
-                            Members = $Members
+                        $setADCommonGroupMemberParms = @{
+                            Members             = $Members
                             MembershipAttribute = $MembershipAttribute
-                            Parameters = $commonParameters
-                            Action = 'Add'
+                            Parameters          = $commonParameters
+                            Action              = 'Add'
                         }
-                        Set-ADCommonGroupMember @addMemberSplat
+                        Set-ADCommonGroupMember @setADCommonGroupMemberParms
                     }
 
                     if ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
@@ -865,13 +865,13 @@ function Set-TargetResource
 
                         Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                        $addMemberSplat = @{
-                            Members = $MembersToInclude
+                        $setADCommonGroupMemberParms = @{
+                            Members             = $MembersToInclude
                             MembershipAttribute = $MembershipAttribute
-                            Parameters = $commonParameters
-                            Action = 'Add'
+                            Parameters          = $commonParameters
+                            Action              = 'Add'
                         }
-                        Set-ADCommonGroupMember @addMemberSplat
+                        Set-ADCommonGroupMember @setADCommonGroupMemberParms
                     }
 
                     if ($PSBoundParameters.ContainsKey('MembersToExclude') -and -not [System.String]::IsNullOrEmpty($MembersToExclude))
@@ -880,13 +880,13 @@ function Set-TargetResource
 
                         Write-Verbose -Message ($script:localizedData.RemovingGroupMembers -f $MembersToExclude.Count, $GroupName)
 
-                        $removeMemberSplat = @{
-                            Members = $MembersToExclude
+                        $setADCommonGroupMemberParms = @{
+                            Members             = $MembersToExclude
                             MembershipAttribute = $MembershipAttribute
-                            Parameters = $commonParameters
-                            Action = 'Remove'
+                            Parameters          = $commonParameters
+                            Action              = 'Remove'
                         }
-                        Set-ADCommonGroupMember @removeMemberSplat
+                        Set-ADCommonGroupMember @setADCommonGroupMemberParms
                     }
                 }
             }
@@ -981,13 +981,13 @@ function Set-TargetResource
 
                 Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $Members.Count, $GroupName)
 
-                $addMemberSplat = @{
-                    Members = $Members
+                $setADCommonGroupMemberParms = @{
+                    Members             = $Members
                     MembershipAttribute = $MembershipAttribute
-                    Parameters = $commonParameters
-                    Action = 'Add'
+                    Parameters          = $commonParameters
+                    Action              = 'Add'
                 }
-                Set-ADCommonGroupMember @addMemberSplat
+                Set-ADCommonGroupMember @setADCommonGroupMemberParms
             }
             elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -and -not [System.String]::IsNullOrEmpty($MembersToInclude))
             {
@@ -995,13 +995,13 @@ function Set-TargetResource
 
                 Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f $MembersToInclude.Count, $GroupName)
 
-                $addMemberSplat = @{
-                    Members = $MembersToInclude
+                $setADCommonGroupMemberParms = @{
+                    Members             = $MembersToInclude
                     MembershipAttribute = $MembershipAttribute
-                    Parameters = $commonParameters
-                    Action = 'Add'
+                    Parameters          = $commonParameters
+                    Action              = 'Add'
                 }
-                Set-ADCommonGroupMember @addMemberSplat
+                Set-ADCommonGroupMember @setADCommonGroupMemberParms
             }
         }
     } #end catch
