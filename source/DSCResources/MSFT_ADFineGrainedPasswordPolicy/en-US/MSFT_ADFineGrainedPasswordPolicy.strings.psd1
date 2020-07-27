@@ -13,7 +13,8 @@ ConvertFrom-StringData @'
     ResourceExistsButShouldNotMessage               = Policy '{0}' exists but should not. (ADFGPP0011)
     ResourceDoesNotExistButShouldMessage            = Policy '{0}' does not exist but should. (ADFGPP0012)
     ProtectedFromAccidentalDeletionRemove           = Attempting to remove the protection for accidental deletion. (ADFGPP0013)
-    ProtectedFromAccidentalDeletionUndefined        = ProtectedFromAccidentalDeletion is not defined to false for policy {0}. Delete may fail if not explicitly set false. (ADFGPP0014)
+    ProtectedFromAccidentalDeletionUndefined        = ProtectedFromAccidentalDeletion is not set to false for policy {0}. Delete may fail if not explicitly set false. (ADFGPP0014)
     AddingNewSubjects                               = Adding new subjects to policy '{0}', count '{1}'. (ADFGPP0015)
     RemovingExistingSubjects                        = Removing existing subjects from policy '{0}', count '{1}'. (ADFGPP0016)
+    PasswordPolicyNotFound                          = Policy '{0}' was not found. (ADFGPP0017)
 '@

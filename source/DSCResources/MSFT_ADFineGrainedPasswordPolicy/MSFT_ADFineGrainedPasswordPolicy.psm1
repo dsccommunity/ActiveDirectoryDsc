@@ -65,18 +65,18 @@ function Get-TargetResource
     [HashTable] $parameters = $PSBoundParameters
 
     $parameters['Identity'] = $Name
-    $parameters.Remove('Precedence')
+    $getADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
 
     Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
-
-    # Set the filter parameter and remove items not needed
-    $getADFineGrainedPasswordPolicyParams = Get-ADCommonParameters @parameters
-    $getADFineGrainedPasswordPolicyParams["Filter"] = "name -eq `'$Name`'"
-    $getADFineGrainedPasswordPolicyParams.Remove('Identity')
 
     try
     {
         $policy = Get-ADFineGrainedPasswordPolicy @getADFineGrainedPasswordPolicyParams
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
+    {
+        Write-Verbose -Message ($script:localizedData.PasswordPolicyNotFound -f $Name)
+        $policy = $null
     }
     catch
     {
@@ -84,16 +84,12 @@ function Get-TargetResource
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
-    [String[]] $policySubjects = ""
-
     if ($policy)
     {
-        $getADFineGrainedPasswordPolicySubjectParams = Get-ADCommonParameters @parameters
-
         try
         {
             [String[]] $policySubjects = (Get-ADFineGrainedPasswordPolicySubject `
-                @getADFineGrainedPasswordPolicySubjectParams).Name
+                @getADFineGrainedPasswordPolicyParams).Name
         }
         catch
         {
@@ -132,7 +128,7 @@ function Get-TargetResource
             ReversibleEncryptionEnabled = $null
             Precedence                  = $null
             Ensure                      = 'Absent'
-            Subjects                    = $policySubjects
+            Subjects                    = @()
         }
     }
 } #end Get-TargetResource
