@@ -29,6 +29,7 @@ Configuration ADFineGrainedPasswordPolicy_ConfigurePolicyWithSpecifics_Config
         {
             Name                            = 'DomainUsers'
             DisplayName                     = 'Domain Users Fine Grained Password Policy'
+            Description                     = 'Domain Users Fine Grained Password Policy'
             Subjects                        = 'Domain Users'
             ComplexityEnabled               = $true
             LockoutDuration                 = '00:30:00'

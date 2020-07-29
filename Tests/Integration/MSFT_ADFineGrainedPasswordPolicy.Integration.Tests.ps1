@@ -66,6 +66,8 @@ try
                 }
 
                 $resourceCurrentState.Name | Should -Be $ConfigurationData.AllNodes.Name
+                $resourceCurrentState.DisplayName | Should -Be $ConfigurationData.AllNodes.DisplayName
+                $resourceCurrentState.Description | Should -Be $ConfigurationData.AllNodes.Description
                 $resourceCurrentState.ComplexityEnabled | Should -Be $ConfigurationData.AllNodes.ComplexityEnabled
                 $resourceCurrentState.LockoutDuration | Should -Be $ConfigurationData.AllNodes.LockoutDuration
                 $resourceCurrentState.LockoutObservationWindow | Should -Be $ConfigurationData.AllNodes.LockoutObservationWindow
@@ -76,6 +78,7 @@ try
                 $resourceCurrentState.PasswordHistoryCount | Should -Be $ConfigurationData.AllNodes.PasswordHistoryCount
                 $resourceCurrentState.ReversibleEncryptionEnabled | Should -Be $ConfigurationData.AllNodes.ReversibleEncryptionEnabled
                 $resourceCurrentState.Precedence | Should -Be $ConfigurationData.AllNodes.Precedence
+                $resourceCurrentState.ProtectedFromAccidentalDeletion | Should -Be $ConfigurationData.AllNodes.ProtectedFromAccidentalDeletion
                 $resourceCurrentState.Ensure | Should -Be 'Present'
             }
 

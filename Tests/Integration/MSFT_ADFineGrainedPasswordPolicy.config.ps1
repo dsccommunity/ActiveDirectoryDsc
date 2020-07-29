@@ -17,8 +17,9 @@ else
         AllNodes = @(
             @{
                 NodeName                        = 'localhost'
-                Name                            = "Administrators"
-                DisplayName                     = "Administrators"
+                Name                            = 'Administrators'
+                DisplayName                     = 'Administrators'
+                Description                     = 'Administrators Password Policy'
                 ComplexityEnabled               = $true
                 LockoutDuration                 = '00:30:00'
                 LockoutObservationWindow        = '00:30:00'
@@ -49,6 +50,7 @@ Configuration MSFT_ADFineGrainedPasswordPolicy_CreateADFineGrainedPasswordPolicy
         {
             Name                            = $ConfigurationData.AllNodes.Name
             DisplayName                     = $ConfigurationData.AllNodes.DisplayName
+            Description                     = $ConfigurationData.AllNodes.Description
             Ensure                          = 'Present'
             ComplexityEnabled               = $ConfigurationData.AllNodes.ComplexityEnabled
             LockoutDuration                 = $ConfigurationData.AllNodes.LockoutDuration
@@ -80,6 +82,7 @@ Configuration MSFT_ADFineGrainedPasswordPolicy_RemoveADFineGrainedPasswordPolicy
             Name                            = $ConfigurationData.AllNodes.Name
             Ensure                          = 'Absent'
             Precedence                      = $ConfigurationData.AllNodes.Precedence
+            ProtectedFromAccidentalDeletion = $false
         }
     }
 }
