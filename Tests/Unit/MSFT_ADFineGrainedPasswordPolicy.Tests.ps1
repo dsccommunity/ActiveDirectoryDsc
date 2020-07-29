@@ -847,6 +847,27 @@ try
                     }
                 }
 
+                Context 'When adding a new subject to policy that does not have subjects' {
+                    BeforeAll {
+                        $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Users'
+                        $setSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+                        $fakeGetFineGrainedPasswordPolicy = $mockGetResourceFineGrainedPasswordPolicy.Clone()
+                        $fakeGetFineGrainedPasswordPolicy['Subjects'] = $null
+
+                        Mock -CommandName Get-TargetResource -MockWith { $fakeGetFineGrainedPasswordPolicy }
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                        Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
+                        Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
+
+                        $result = Set-TargetResource @setSubjectsFineGrainedParametersPolicy
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Add-ADFineGrainedPasswordPolicySubject -Exactly -Times 1
+                    }
+                }
+
                 Context 'When Remove-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
                     BeforeAll {
                         $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()

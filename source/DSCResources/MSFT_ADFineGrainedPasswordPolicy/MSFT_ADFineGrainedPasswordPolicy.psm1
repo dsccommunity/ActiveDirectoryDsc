@@ -641,7 +641,6 @@ function Set-TargetResource
                             $subjectsToRemove = $null
                         }
 
-
                         if ($subjectsToAdd)
                         {
                             Write-Verbose -Message ($script:localizedData.AddingPasswordPolicySubjects -f
