@@ -811,13 +811,10 @@ try
 
                 Context 'When expected Subjects is set to null value to remove existing' {
                     BeforeAll {
-                        # $mockGetResourcePasswordPolicySubs = $mockGetResourceFineGrainedPasswordPolicy.Clone()
-                        # $mockGetResourcePasswordPolicySubs['Subjects'] = 'Domain Admins', 'Domain Users'
                         $removeSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
                         $removeSubjectsFineGrainedParametersPolicy['Subjects'] = $null
                         $removeSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
 
-                        # Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicySubs }
                         Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
 
                         Set-TargetResource @removeSubjectsFineGrainedParametersPolicy
