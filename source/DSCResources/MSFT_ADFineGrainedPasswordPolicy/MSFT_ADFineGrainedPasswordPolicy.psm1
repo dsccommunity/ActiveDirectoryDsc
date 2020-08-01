@@ -625,7 +625,7 @@ function Set-TargetResource
                     if ($property.ParameterName -eq 'Subjects')
                     {
                         # Add/Remove required Policy Subjects
-                        if ($property.Actual)
+                        if ($property.Actual -and $property.Expected)
                         {
                             $compareResult = Compare-Object -ReferenceObject $property.Actual `
                                 -DifferenceObject $property.Expected
@@ -634,6 +634,10 @@ function Set-TargetResource
                                 Where-Object -Property SideIndicator -eq '=>').InputObject
                             $subjectsToRemove = ($compareResult |
                                 Where-Object -Property SideIndicator -eq '<=').InputObject
+                        }
+                        elseif (-not($property.Expected))
+                        {
+                            $subjectsToRemove = $property.Actual
                         }
                         else
                         {
