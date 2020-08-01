@@ -638,6 +638,7 @@ function Set-TargetResource
                         elseif (-not($property.Expected))
                         {
                             $subjectsToRemove = $property.Actual
+                            $subjectsToAdd = $null
                         }
                         else
                         {
