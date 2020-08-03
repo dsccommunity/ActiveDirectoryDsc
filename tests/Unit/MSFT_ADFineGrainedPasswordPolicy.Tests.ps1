@@ -535,7 +535,7 @@ try
                                 $result = Set-TargetResource @propertyDefaultParams
 
                                 Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
-                                    { $PSBoundParameters.ContainsKey($propertyName) } -Exactly -Times 1
+                                    { $PSBoundParameters.ContainsKey($propertyName) }
                             }
                         }
                     }
