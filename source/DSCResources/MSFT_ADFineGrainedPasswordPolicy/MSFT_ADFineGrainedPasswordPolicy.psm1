@@ -563,8 +563,6 @@ function Set-TargetResource
         $Credential
     )
 
-    Assert-Module -ModuleName 'ActiveDirectory'
-
     [HashTable] $parameters = $PSBoundParameters
     $parameters.Remove('Ensure')
 
