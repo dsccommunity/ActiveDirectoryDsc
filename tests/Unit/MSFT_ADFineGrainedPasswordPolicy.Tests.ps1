@@ -431,6 +431,7 @@ try
 
                 $stubPasswordPolicy = @{
                     Name                            = $testPasswordPolicyName
+                    Precedence                      = 99
                     DisplayName                     = 'Domain Users Password Policy'
                     Description                     = 'Unit Test Policy'
                     ComplexityEnabled               = $true
@@ -442,7 +443,6 @@ try
                     MinPasswordLength               = 7
                     PasswordHistoryCount            = 12
                     ReversibleEncryptionEnabled     = $true
-                    Precedence                      = $null
                     ProtectedFromAccidentalDeletion = $false
                     Ensure                          = 'Present'
                 }
@@ -461,7 +461,7 @@ try
                     PasswordHistoryCount            = 10
                     ReversibleEncryptionEnabled     = $true
                     Precedence                      = 100
-                    ProtectedFromAccidentalDeletion = $false
+                    ProtectedFromAccidentalDeletion = $true
 
                 }
 
@@ -522,24 +522,20 @@ try
                 }
 
                 Context 'When each configuration is to be changed individually' {
-                    BeforeAll {
-                        $result = Set-TargetResource @testSetDefaultParams
-                    }
-
                     foreach ($propertyName in $stubPasswordPolicy.Keys)
                     {
                         if ($propertyName -notin ('Name','Ensure'))
                         {
-                            $propertyDefaultParams = $testSetDefaultParams.Clone()
-                            $propertyDefaultParams[$propertyName] = $fakeGetSetPasswordPolicy[$propertyName]
-
-                            Mock -CommandName Set-ADFineGrainedPasswordPolicy `
-                                { $PSBoundParameters.ContainsKey($propertyName) }
-
-                            $result = Set-TargetResource @propertyDefaultParams
-
                             It "Should call expected mocks with '$propertyName' parameter when specified" {
-                                Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy
+                                $propertyDefaultParams = $testGetDefaultParams.Clone()
+                                $propertyDefaultParams[$propertyName] = $fakeGetSetPasswordPolicy[$propertyName]
+                                Mock -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
+                                    { $PSBoundParameters.ContainsKey($propertyName) }
+
+                                $result = Set-TargetResource @propertyDefaultParams
+
+                                Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
+                                    { $PSBoundParameters.ContainsKey($propertyName) } -Exactly -Times 1
                             }
                         }
                     }
