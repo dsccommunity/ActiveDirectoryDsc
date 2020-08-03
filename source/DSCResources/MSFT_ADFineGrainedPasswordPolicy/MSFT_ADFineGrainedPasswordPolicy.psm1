@@ -731,8 +731,6 @@ function Set-TargetResource
                 }
             }
 
-            #$newPasswordPolicyParameters.Remove('Ensure')
-
             try
             {
                 New-ADFineGrainedPasswordPolicy @newPasswordPolicyParameters
