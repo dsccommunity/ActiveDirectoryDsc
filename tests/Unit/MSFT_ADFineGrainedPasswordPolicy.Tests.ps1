@@ -36,7 +36,7 @@ try
         # Load stub cmdlets and classes.
         Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
 
-        $testFineGrainedPasswordPolicyName = 'Domain Users'
+        $testPasswordPolicyName = 'Domain Users'
         $testDomainController = 'testserver.contoso.com'
 
         $testPassword = ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force
@@ -46,12 +46,12 @@ try
         )
 
         $getTargetResourceParametersPolicy = @{
-            Name       = $testFineGrainedPasswordPolicyName
+            Name       = $testPasswordPolicyName
             Precedence = 100
         }
 
-        $fakeGetFineGrainedPasswordPolicy = @{
-            Name                            = $testFineGrainedPasswordPolicyName
+        $mockGetPasswordPolicy = @{
+            Name                            = $testPasswordPolicyName
             DisplayName                     = 'Domain Users Password Policy'
             Description                     = 'Unit Test Policy'
             ComplexityEnabled               = $true
@@ -67,43 +67,43 @@ try
             ProtectedFromAccidentalDeletion = $false
         }
 
-        $fakeGetFineGrainedPasswordPolicySubject = @{
-            Name           = $testFineGrainedPasswordPolicyName
+        $mockGetPasswordPolicySubject = @{
+            Name           = $testPasswordPolicyName
             ObjectClass    = 'group'
-            SamAccountName = $testFineGrainedPasswordPolicyName
+            SamAccountName = $testPasswordPolicyName
         }
 
-        $fakeGetFineGrainedPasswordPolicySubjectAbsent = $null
-        $fakeGetFineGrainedPasswordPolicyAbsent = $null
+        $mockGetPasswordPolicySubjectAbsent = $null
+        $mockGetPasswordPolicyAbsent = $null
 
-        $mockAdFineGrainedPasswordPolicyChanged = @{
-            Name                      = $testFineGrainedPasswordPolicyName
+        $mockAdPasswordPolicyChanged = @{
+            Name                      = $testPasswordPolicyName
             ComplexityEnabled         = $false
             MinPasswordLength         = 1
             PasswordHistoryCount      = 0
         }
 
-        $mockGetResourceFineGrainedPasswordPolicy = @{
-            Name                            = $fakeGetFineGrainedPasswordPolicy.Name
-            DisplayName                     = $fakeGetFineGrainedPasswordPolicy.DisplayName
-            Description                     = $fakeGetFineGrainedPasswordPolicy.Description
-            ComplexityEnabled               = $fakeGetFineGrainedPasswordPolicy.ComplexityEnabled
-            LockoutDuration                 = $fakeGetFineGrainedPasswordPolicy.LockoutDuration
-            LockoutObservationWindow        = $fakeGetFineGrainedPasswordPolicy.LockoutObservationWindow
-            LockoutThreshold                = $fakeGetFineGrainedPasswordPolicy.LockoutThreshold
-            MinPasswordAge                  = $fakeGetFineGrainedPasswordPolicy.MinPasswordAge
-            MaxPasswordAge                  = $fakeGetFineGrainedPasswordPolicy.MaxPasswordAge
-            MinPasswordLength               = $fakeGetFineGrainedPasswordPolicy.MinPasswordLength
-            PasswordHistoryCount            = $fakeGetFineGrainedPasswordPolicy.PasswordHistoryCount
-            ReversibleEncryptionEnabled     = $fakeGetFineGrainedPasswordPolicy.ReversibleEncryptionEnabled
-            Precedence                      = $fakeGetFineGrainedPasswordPolicy.Precedence
-            ProtectedFromAccidentalDeletion = $fakeGetFineGrainedPasswordPolicy.ProtectedFromAccidentalDeletion
+        $mockGetResourcePasswordPolicy = @{
+            Name                            = $mockGetPasswordPolicy.Name
+            DisplayName                     = $mockGetPasswordPolicy.DisplayName
+            Description                     = $mockGetPasswordPolicy.Description
+            ComplexityEnabled               = $mockGetPasswordPolicy.ComplexityEnabled
+            LockoutDuration                 = $mockGetPasswordPolicy.LockoutDuration
+            LockoutObservationWindow        = $mockGetPasswordPolicy.LockoutObservationWindow.ToString()
+            LockoutThreshold                = $mockGetPasswordPolicy.LockoutThreshold.ToString()
+            MinPasswordAge                  = $mockGetPasswordPolicy.MinPasswordAge.ToString()
+            MaxPasswordAge                  = $mockGetPasswordPolicy.MaxPasswordAge.ToString()
+            MinPasswordLength               = $mockGetPasswordPolicy.MinPasswordLength
+            PasswordHistoryCount            = $mockGetPasswordPolicy.PasswordHistoryCount
+            ReversibleEncryptionEnabled     = $mockGetPasswordPolicy.ReversibleEncryptionEnabled
+            Precedence                      = $mockGetPasswordPolicy.Precedence
+            ProtectedFromAccidentalDeletion = $mockGetPasswordPolicy.ProtectedFromAccidentalDeletion
             Ensure                          = 'Present'
-            Subjects                        = [string[]] $fakeGetFineGrainedPasswordPolicy.Name
+            Subjects                        = [string[]] $mockGetPasswordPolicy.Name
         }
 
-        $mockGetResourceFineGrainedPasswordPolicyAbsent = @{
-            Name                            = $testFineGrainedPasswordPolicyName
+        $mockGetResourcePasswordPolicyAbsent = @{
+            Name                            = $testPasswordPolicyName
             DisplayName                     = $null
             Description                     = $null
             ComplexityEnabled               = $null
@@ -126,9 +126,9 @@ try
             BeforeAll {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                    -MockWith { $fakeGetFineGrainedPasswordPolicy }
+                    -MockWith { $mockGetPasswordPolicy }
                 Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                    -MockWith { $fakeGetFineGrainedPasswordPolicySubject }
+                    -MockWith { $mockGetPasswordPolicySubject }
             }
 
             Context 'When the resource is Present' {
@@ -168,10 +168,10 @@ try
                         $result = Get-TargetResource @getTargetResourceParametersPolicy
                     }
 
-                    foreach ($property in $mockGetResourceFineGrainedPasswordPolicy.Keys)
+                    foreach ($property in $mockGetResourcePasswordPolicy.Keys)
                     {
                         It "Should return the correct $property property" {
-                            $result.$property | Should -Be $mockGetResourceFineGrainedPasswordPolicy.$property
+                            $result.$property | Should -Be $mockGetResourcePasswordPolicy.$property
                         }
                     }
 
@@ -194,18 +194,18 @@ try
             Context 'When the Resource is Absent' {
                 BeforeAll {
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        -MockWith { $fakeGetFineGrainedPasswordPolicyAbsent }
+                        -MockWith { $mockGetPasswordPolicyAbsent }
 
                     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        -MockWith { $fakeGetFineGrainedPasswordPolicySubjectAbsent }
+                        -MockWith { $mockGetPasswordPolicySubjectAbsent }
 
                     $result = Get-TargetResource @getTargetResourceParametersPolicy
                 }
 
-                foreach ($property in $mockGetResourceFineGrainedPasswordPolicy.Keys)
+                foreach ($property in $mockGetResourcePasswordPolicy.Keys)
                 {
                     It "Should return the correct $property property" {
-                        $result.$property | Should -Be $mockGetResourceFineGrainedPasswordPolicyAbsent.$property
+                        $result.$property | Should -Be $mockGetResourcePasswordPolicyAbsent.$property
                     }
                 }
 
@@ -267,19 +267,19 @@ try
         Describe 'ADFineGrainedPasswordPolicy\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 $testTargetResourceParametersPolicy = @{
-                    Name                            = $fakeGetFineGrainedPasswordPolicy.Name
-                    DisplayName                     = $fakeGetFineGrainedPasswordPolicy.DisplayName
-                    Description                     = $fakeGetFineGrainedPasswordPolicy.Description
-                    ComplexityEnabled               = $fakeGetFineGrainedPasswordPolicy.ComplexityEnabled
+                    Name                            = $mockGetPasswordPolicy.Name
+                    DisplayName                     = $mockGetPasswordPolicy.DisplayName
+                    Description                     = $mockGetPasswordPolicy.Description
+                    ComplexityEnabled               = $mockGetPasswordPolicy.ComplexityEnabled
                     LockoutDuration                 = [TimeSpan]::Parse('00:30:00')
                     LockoutObservationWindow        = [TimeSpan]::Parse('00:30:00')
-                    LockoutThreshold                = $fakeGetFineGrainedPasswordPolicy.LockoutThreshold
+                    LockoutThreshold                = $mockGetPasswordPolicy.LockoutThreshold
                     MinPasswordAge                  = [TimeSpan]::Parse('1.00:00:00')
                     MaxPasswordAge                  = [TimeSpan]::Parse('42.00:00:00')
-                    MinPasswordLength               = $fakeGetFineGrainedPasswordPolicy.MinPasswordLength
-                    PasswordHistoryCount            = $fakeGetFineGrainedPasswordPolicy.PasswordHistoryCount
+                    MinPasswordLength               = $mockGetPasswordPolicy.MinPasswordLength
+                    PasswordHistoryCount            = $mockGetPasswordPolicy.PasswordHistoryCount
                     Precedence                      = $null
-                    ProtectedFromAccidentalDeletion = $fakeGetFineGrainedPasswordPolicy.ProtectedFromAccidentalDeletion
+                    ProtectedFromAccidentalDeletion = $mockGetPasswordPolicy.ProtectedFromAccidentalDeletion
                     Ensure                          = 'Present'
                 }
 
@@ -296,7 +296,7 @@ try
 
             Context 'When the Resource is Present' {
                 BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourceFineGrainedPasswordPolicy }
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicy }
                 }
 
                 Context 'When the Resource should be Present' {
@@ -323,7 +323,7 @@ try
                         }
                     }
 
-                    foreach ($property in $mockAdFineGrainedPasswordPolicyChanged.Keys)
+                    foreach ($property in $mockAdPasswordPolicyChanged.Keys)
                     {
                         if ($property -notin ('Name'))
                         {
@@ -331,7 +331,7 @@ try
 
                                 It 'Should return $false' {
                                     $testTargetResourceParametersChanged = $testTargetResourceParametersNotDesired.Clone()
-                                    $testTargetResourceParametersChanged.$property = $mockAdFineGrainedPasswordPolicyChanged.$property
+                                    $testTargetResourceParametersChanged.$property = $mockAdPasswordPolicyChanged.$property
 
                                     Test-TargetResource @testTargetResourceParametersChanged | Should -Be $false
                                 }
@@ -364,7 +364,7 @@ try
 
             Context 'When the Resource is Absent' {
                 BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourceFineGrainedPasswordPolicyAbsent }
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicyAbsent }
                 }
 
                 Context 'When the Resource should be Present' {
@@ -415,22 +415,22 @@ try
         #region Function Set-TargetResource
         Describe 'ADFineGrainedPasswordPolicy\Set-TargetResource' {
             BeforeAll {
-                $testFineGrainedPasswordPolicyName = 'Domain Users'
+                $testPasswordPolicyName = 'Domain Users'
 
                 $testGetDefaultParams = @{
-                    Name                            = $testFineGrainedPasswordPolicyName
+                    Name                            = $testPasswordPolicyName
                     Precedence                      = 10
                 }
 
                 $testSetDefaultParams = @{
-                    Name                            = $testFineGrainedPasswordPolicyName
+                    Name                            = $testPasswordPolicyName
                     Precedence                      = 10
                     Ensure                          = 'Present'
                     ProtectedFromAccidentalDeletion = $true
                 }
 
-                $stubFineGrainedPasswordPolicy = @{
-                    Name                            = $testFineGrainedPasswordPolicyName
+                $stubPasswordPolicy = @{
+                    Name                            = $testPasswordPolicyName
                     DisplayName                     = 'Domain Users Password Policy'
                     Description                     = 'Unit Test Policy'
                     ComplexityEnabled               = $true
@@ -447,8 +447,8 @@ try
                     Ensure                          = 'Present'
                 }
 
-                $fakeGetSetFineGrainedPasswordPolicy = @{
-                    Name                            = $testFineGrainedPasswordPolicyName
+                $fakeGetSetPasswordPolicy = @{
+                    Name                            = $testPasswordPolicyName
                     DisplayName                     = 'Display Name'
                     Description                     = 'Unit Test Policy Diff'
                     ComplexityEnabled               = $false
@@ -466,7 +466,7 @@ try
                 }
 
                 Mock -CommandName Assert-Module
-                Mock -CommandName Get-TargetResource -MockWith { $mockGetResourceFineGrainedPasswordPolicy }
+                Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicy }
                 Mock -CommandName Set-ADFineGrainedPasswordPolicy
             }
 
@@ -494,9 +494,8 @@ try
 
                 Context 'When the "Credential" parameter is specified' {
                     BeforeAll {
-                        Mock -CommandName Get-TargetResource { $Credential -eq $testCredential } `
-                            -MockWith { $mockGetResourceFineGrainedPasswordPolicy }
-                        Mock -CommandName Set-ADFineGrainedPasswordPolicy { $Credential -eq $testCredential }
+                        Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicy }
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy
 
                         $result = Set-TargetResource @testSetDefaultParams -Credential $testCredential
                     }
@@ -511,7 +510,7 @@ try
 
                 Context 'When the "DomainController" parameter is specified' {
                     BeforeAll {
-                        Mock -CommandName Set-ADFineGrainedPasswordPolicy { $Server -eq $testDomainController }
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy
 
                         $result = Set-TargetResource @testSetDefaultParams -DomainController $testDomainController
                     }
@@ -527,12 +526,12 @@ try
                         $result = Set-TargetResource @testSetDefaultParams
                     }
 
-                    foreach ($propertyName in $stubFineGrainedPasswordPolicy.Keys)
+                    foreach ($propertyName in $stubPasswordPolicy.Keys)
                     {
                         if ($propertyName -notin ('Name','Ensure'))
                         {
                             $propertyDefaultParams = $testSetDefaultParams.Clone()
-                            $propertyDefaultParams[$propertyName] = $fakeGetSetFineGrainedPasswordPolicy[$propertyName]
+                            $propertyDefaultParams[$propertyName] = $fakeGetSetPasswordPolicy[$propertyName]
 
                             Mock -CommandName Set-ADFineGrainedPasswordPolicy `
                                 { $PSBoundParameters.ContainsKey($propertyName) }
@@ -553,8 +552,7 @@ try
 
                         Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
                         Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
-                        Mock -CommandName Set-ADFineGrainedPasswordPolicy { $testSetDefaultParamsDiff } `
-                            -MockWith { throw 'UnexpectedError' }
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy -MockWith { throw 'UnexpectedError' }
                     }
 
                     It 'Should throw the correct exception' {
@@ -584,63 +582,59 @@ try
             Context 'When the Resource does not exist and needs to be created' {
                 BeforeAll {
                     Mock -CommandName Assert-Module
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourceFineGrainedPasswordPolicyAbsent }
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicyAbsent }
                     $result = Get-TargetResource @testGetDefaultParams
                 }
 
                 Context 'When policy does not exist' {
                     BeforeAll {
-                        $newFineGrainedParametersPolicy = $stubFineGrainedPasswordPolicy.Clone()
-                        $newFineGrainedParametersPolicy['DisplayName'] = 'Display Name'
-                        $newFineGrainedParametersPolicy['ProtectedFromAccidentalDeletion'] = $true
-                        $newFineGrainedParametersPolicy['Precedence'] = 10
-                        $newFineGrainedParametersPolicy['MinPasswordAge'] = '1.00:00:00'
-                        $newFineGrainedParametersPolicy['MaxPasswordAge'] = '42.00:00:00'
-                        $newFineGrainedParametersPolicy['Subjects'] = $testFineGrainedPasswordPolicyName
+                        $newParametersPolicy = $stubPasswordPolicy.Clone()
+                        $newParametersPolicy['DisplayName'] = 'Display Name'
+                        $newParametersPolicy['ProtectedFromAccidentalDeletion'] = $true
+                        $newParametersPolicy['Precedence'] = 10
+                        $newParametersPolicy['MinPasswordAge'] = '1.00:00:00'
+                        $newParametersPolicy['MaxPasswordAge'] = '42.00:00:00'
+                        $newParametersPolicy['Subjects'] = $testPasswordPolicyName
 
-                        Mock -CommandName New-ADFineGrainedPasswordPolicy { $newFineGrainedParametersPolicy }
+                        Mock -CommandName New-ADFineGrainedPasswordPolicy
                         Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
 
-                        $result = Set-TargetResource @newFineGrainedParametersPolicy
+                        $result = Set-TargetResource @newParametersPolicy
                     }
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName New-ADFineGrainedPasswordPolicy -ParameterFilter `
-                            { $newFineGrainedParametersPolicy } -Exactly -Times 1
+                            { $newParametersPolicy } -Exactly -Times 1
                         Assert-MockCalled -CommandName Add-ADFineGrainedPasswordPolicySubject -Exactly -Times 1
                     }
                 }
 
                 Context 'When New-ADFineGrainedPasswordPolicy throws an unexpected error' {
                     BeforeAll {
-                        Mock -CommandName New-ADFineGrainedPasswordPolicy `
-                            -MockWith { throw 'UnexpectedError' }
+                        Mock -CommandName New-ADFineGrainedPasswordPolicy -MockWith { throw 'UnexpectedError' }
                     }
 
                     It 'Should throw the correct exception' {
-                        { Set-TargetResource @stubFineGrainedPasswordPolicy } |
+                        { Set-TargetResource @stubPasswordPolicy } |
                             Should -Throw ($script:localizedData.ResourceConfigurationError -f
-                                $stubFineGrainedPasswordPolicy.Name)
+                                $stubPasswordPolicy.Name)
                     }
                 }
 
                 Context 'When Add-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
                     BeforeAll {
-                        $newFineGrainedParametersPolicy = $stubFineGrainedPasswordPolicy.Clone()
-                        $newFineGrainedParametersPolicy['Precedence'] = 10
-                        $newFineGrainedParametersPolicy['Subjects'] = $testFineGrainedPasswordPolicyName
+                        $newParametersPolicy = $stubPasswordPolicy.Clone()
+                        $newParametersPolicy['Precedence'] = 10
+                        $newParametersPolicy['Subjects'] = $testPasswordPolicyName
 
-                        Mock -CommandName New-ADFineGrainedPasswordPolicy { $newFineGrainedParametersPolicy }
-                        Mock -CommandName Add-ADFineGrainedPasswordPolicySubject `
-                            { $Identity -eq $newFineGrainedParametersPolicy['Name'] -and `
-                                $Subjects -eq $newFineGrainedParametersPolicy['Subjects'] } `
-                            -MockWith { throw 'UnexpectedError' }
+                        Mock -CommandName New-ADFineGrainedPasswordPolicy
+                        Mock -CommandName Add-ADFineGrainedPasswordPolicySubject -MockWith { throw 'UnexpectedError' }
                     }
 
                     It 'Should throw the correct exception' {
-                        { Set-TargetResource @newFineGrainedParametersPolicy } |
+                        { Set-TargetResource @newParametersPolicy } |
                             Should -Throw ($script:localizedData.AddingPasswordPolicySubjectsError -f
-                                $newFineGrainedParametersPolicy.Name)
+                                $newParametersPolicy.Name)
                     }
                 }
             }
@@ -652,87 +646,81 @@ try
 
                 Context 'When "ProtectedFromAccidentalDeletion" is set true and the policy is deleted' {
                     BeforeAll {
-                        $removeFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $removeFineGrainedParametersPolicy['Ensure'] = 'Absent'
-                        $mockPasswordPolicyProtected = $mockGetResourceFineGrainedPasswordPolicy.Clone()
+                        $removeParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $removeParametersPolicy['Ensure'] = 'Absent'
+                        $mockPasswordPolicyProtected = $mockGetResourcePasswordPolicy.Clone()
                         $mockPasswordPolicyProtected['ProtectedFromAccidentalDeletion'] = $true
 
                         Mock -CommandName Get-TargetResource -MockWith { $mockPasswordPolicyProtected }
-                        Mock -CommandName Set-ADFineGrainedPasswordPolicy { $removeFineGrainedParametersPolicy }
-                        Mock -CommandName Remove-ADFineGrainedPasswordPolicy `
-                            { $Identity -eq $removeFineGrainedParametersPolicy['Name'] }
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                        Mock -CommandName Remove-ADFineGrainedPasswordPolicy
 
-                        $result = Set-TargetResource @removeFineGrainedParametersPolicy
+                        $result = Set-TargetResource @removeParametersPolicy
                     }
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
-                            { $removeFineGrainedParametersPolicy } -Exactly -Times 1
+                            { $removeParametersPolicy } -Exactly -Times 1
                         Assert-MockCalled -CommandName Remove-ADFineGrainedPasswordPolicy -ParameterFilter `
-                            { $Identity -eq $removeFineGrainedParametersPolicy['Name'] } -Exactly -Times 1
+                            { $Identity -eq $removeParametersPolicy['Name'] } -Exactly -Times 1
                     }
                 }
 
                 Context 'When Set-ADFineGrainedPasswordPolicy throws an unexpected error' {
                     BeforeAll {
-                        $removeFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $removeFineGrainedParametersPolicy['Ensure'] = 'Absent'
-                        $mockPasswordPolicyProtected = $mockGetResourceFineGrainedPasswordPolicy.Clone()
+                        $removeParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $removeParametersPolicy['Ensure'] = 'Absent'
+                        $mockPasswordPolicyProtected = $mockGetResourcePasswordPolicy.Clone()
                         $mockPasswordPolicyProtected['ProtectedFromAccidentalDeletion'] = $true
 
                         Mock -CommandName Get-TargetResource -MockWith { $mockPasswordPolicyProtected }
-                        Mock -CommandName Set-ADFineGrainedPasswordPolicy { $removeFineGrainedParametersPolicy } `
-                            -MockWith { throw 'UnexpectedError' }
-                        Mock -CommandName Remove-ADFineGrainedPasswordPolicy `
-                            { $Identity -eq $removeFineGrainedParametersPolicy['Name'] }
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy -MockWith { throw 'UnexpectedError' }
+                        Mock -CommandName Remove-ADFineGrainedPasswordPolicy
                     }
 
                     It 'Should throw the correct exception' {
-                        { Set-TargetResource @removeFineGrainedParametersPolicy } |
+                        { Set-TargetResource @removeParametersPolicy } |
                             Should -Throw ($script:localizedData.ResourceConfigurationError -f
-                                $removeFineGrainedParametersPolicy.Name)
+                                $removeParametersPolicy.Name)
                     }
                 }
 
                 Context 'When Remove-ADFineGrainedPasswordPolicy throws an unexpected error' {
                     BeforeAll {
-                        $removeFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $removeFineGrainedParametersPolicy['ProtectedFromAccidentalDeletion'] = $false
-                        $removeFineGrainedParametersPolicy['Ensure'] = 'Absent'
+                        $removeParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $removeParametersPolicy['ProtectedFromAccidentalDeletion'] = $false
+                        $removeParametersPolicy['Ensure'] = 'Absent'
 
-                        Mock -CommandName Set-ADFineGrainedPasswordPolicy { $removeFineGrainedParametersPolicy }
-                        Mock -CommandName Remove-ADFineGrainedPasswordPolicy `
-                            { $Identity -eq $removeFineGrainedParametersPolicy['Name'] } `
-                            -MockWith { throw 'UnexpectedError' }
+                        Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                        Mock -CommandName Remove-ADFineGrainedPasswordPolicy -MockWith { throw 'UnexpectedError' }
                     }
 
                     It 'Should throw the correct exception' {
-                        { Set-TargetResource @removeFineGrainedParametersPolicy } |
+                        { Set-TargetResource @removeParametersPolicy } |
                             Should -Throw ($script:localizedData.ResourceRemovalError -f
-                                $removeFineGrainedParametersPolicy.Name)
+                                $removeParametersPolicy.Name)
                     }
                 }
             }
 
             Context 'When the Resource does not exist and specified to be deleted' {
                     BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourceFineGrainedPasswordPolicyAbsent }
-                    $removeFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                    $removeFineGrainedParametersPolicy['ProtectedFromAccidentalDeletion'] = $false
-                    $removeFineGrainedParametersPolicy['Ensure'] = 'Absent'
+                    Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicyAbsent }
+                    $removeParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                    $removeParametersPolicy['ProtectedFromAccidentalDeletion'] = $false
+                    $removeParametersPolicy['Ensure'] = 'Absent'
 
-                    Mock -CommandName Set-ADFineGrainedPasswordPolicy { $removeFineGrainedParametersPolicy }
-                    Mock -CommandName Remove-ADFineGrainedPasswordPolicy `
-                        { $Identity -eq $removeFineGrainedParametersPolicy['Name'] }
+                    Mock -CommandName Set-ADFineGrainedPasswordPolicy
+                    Mock -CommandName Remove-ADFineGrainedPasswordPolicy
 
-                    $result = Set-TargetResource @removeFineGrainedParametersPolicy
+                    $result = Set-TargetResource @removeParametersPolicy
                 }
 
                 It 'Should not call the expected mocks' {
                     Assert-MockCalled -CommandName Set-ADFineGrainedPasswordPolicy -ParameterFilter `
-                        { $removeFineGrainedParametersPolicy } -Times 0
+                        { $removeParametersPolicy } -Times 0
                     Assert-MockCalled -CommandName Remove-ADFineGrainedPasswordPolicy -ParameterFilter `
-                        { $Identity -eq $removeFineGrainedParametersPolicy['Name'] } -Times 0
+                        { $Identity -eq $removeParametersPolicy['Name'] } -Times 0
                 }
             }
 
@@ -749,14 +737,14 @@ try
 
                 Context 'When adding a new subject to policy' {
                     BeforeAll {
-                        $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Admins'
-                        $setSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+                        $setSubjectsParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $setSubjectsParametersPolicy['Subjects'] = 'Domain Admins'
+                        $setSubjectsParametersPolicy['Ensure'] = 'Present'
 
                         Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
                         Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
 
-                        $result = Set-TargetResource @setSubjectsFineGrainedParametersPolicy
+                        $result = Set-TargetResource @setSubjectsParametersPolicy
                     }
 
                     It 'Should call the expected mocks' {
@@ -766,16 +754,16 @@ try
 
                 Context 'When adding a new subject to policy that does not have subjects' {
                     BeforeAll {
-                        $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Users'
-                        $setSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
-                        $fakeGetFineGrainedPasswordPolicy = $mockGetResourceFineGrainedPasswordPolicy.Clone()
-                        $fakeGetFineGrainedPasswordPolicy['Subjects'] = $null
+                        $setSubjectsParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $setSubjectsParametersPolicy['Subjects'] = 'Domain Users'
+                        $setSubjectsParametersPolicy['Ensure'] = 'Present'
+                        $mockGetPasswordPolicy = $mockGetResourcePasswordPolicy.Clone()
+                        $mockGetPasswordPolicy['Subjects'] = $null
 
-                        Mock -CommandName Get-TargetResource -MockWith { $fakeGetFineGrainedPasswordPolicy }
+                        Mock -CommandName Get-TargetResource -MockWith { $mockGetPasswordPolicy }
                         Mock -CommandName Add-ADFineGrainedPasswordPolicySubject
 
-                        $result = Set-TargetResource @setSubjectsFineGrainedParametersPolicy
+                        $result = Set-TargetResource @setSubjectsParametersPolicy
                     }
 
                     It 'Should call the expected mocks' {
@@ -785,13 +773,13 @@ try
 
                 Context 'When expected Subjects is set to null value to remove existing' {
                     BeforeAll {
-                        $removeSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $removeSubjectsFineGrainedParametersPolicy['Subjects'] = $null
-                        $removeSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+                        $removeSubjectsParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $removeSubjectsParametersPolicy['Subjects'] = $null
+                        $removeSubjectsParametersPolicy['Ensure'] = 'Present'
 
                         Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject
 
-                        Set-TargetResource @removeSubjectsFineGrainedParametersPolicy
+                        Set-TargetResource @removeSubjectsParametersPolicy
                     }
 
                     It 'Should call the expected mocks' {
@@ -801,11 +789,11 @@ try
 
                 Context 'When Remove-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
                     BeforeAll {
-                        $mockGetResourcePasswordPolicySubs = $mockGetResourceFineGrainedPasswordPolicy.Clone()
+                        $mockGetResourcePasswordPolicySubs = $mockGetResourcePasswordPolicy.Clone()
                         $mockGetResourcePasswordPolicySubs['Subjects'] = 'Domain Admins', 'Domain Users'
-                        $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Users'
-                        $setSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+                        $setSubjectsParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $setSubjectsParametersPolicy['Subjects'] = 'Domain Users'
+                        $setSubjectsParametersPolicy['Ensure'] = 'Present'
 
                         Mock -CommandName Get-TargetResource -MockWith { $mockGetResourcePasswordPolicySubs }
                         Mock -CommandName Remove-ADFineGrainedPasswordPolicySubject `
@@ -813,26 +801,25 @@ try
                     }
 
                     It 'Should throw the correct exception' {
-                        { Set-TargetResource @setSubjectsFineGrainedParametersPolicy } |
+                        { Set-TargetResource @setSubjectsParametersPolicy } |
                             Should -Throw ($script:localizedData.RemovingPasswordPolicySubjectsError -f
-                                $setSubjectsFineGrainedParametersPolicy.Name)
+                                $setSubjectsParametersPolicy.Name)
                     }
                 }
 
                 Context 'When Add-ADFineGrainedPasswordPolicySubject throws an unexpected error' {
                     BeforeAll {
-                        $setSubjectsFineGrainedParametersPolicy = $getTargetResourceParametersPolicy.Clone()
-                        $setSubjectsFineGrainedParametersPolicy['Subjects'] = 'Domain Admins'
-                        $setSubjectsFineGrainedParametersPolicy['Ensure'] = 'Present'
+                        $setSubjectsParametersPolicy = $getTargetResourceParametersPolicy.Clone()
+                        $setSubjectsParametersPolicy['Subjects'] = 'Domain Admins'
+                        $setSubjectsParametersPolicy['Ensure'] = 'Present'
 
-                        Mock -CommandName Add-ADFineGrainedPasswordPolicySubject `
-                            -MockWith { throw 'UnexpectedError' }
+                        Mock -CommandName Add-ADFineGrainedPasswordPolicySubject -MockWith { throw 'UnexpectedError' }
                     }
 
                     It 'Should throw the correct exception' {
-                        { Set-TargetResource @setSubjectsFineGrainedParametersPolicy } |
+                        { Set-TargetResource @setSubjectsParametersPolicy } |
                             Should -Throw ($script:localizedData.AddingPasswordPolicySubjectsError -f
-                                $setSubjectsFineGrainedParametersPolicy.Name)
+                                $setSubjectsParametersPolicy.Name)
                     }
                 }
             }
