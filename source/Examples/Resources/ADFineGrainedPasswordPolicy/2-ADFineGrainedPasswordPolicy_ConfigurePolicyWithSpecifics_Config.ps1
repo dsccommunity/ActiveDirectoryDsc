@@ -16,7 +16,7 @@
 <#
     .DESCRIPTION
         This configuration will create an Active Directory domain fine-grained password
-        policy with specific settings settings.
+        policy with specific settings.
 #>
 
 Configuration ADFineGrainedPasswordPolicy_ConfigurePolicyWithSpecifics_Config
@@ -27,10 +27,10 @@ Configuration ADFineGrainedPasswordPolicy_ConfigurePolicyWithSpecifics_Config
     {
         ADFineGrainedPasswordPolicy 'FineGrainedPasswordPolicy'
         {
-            Name                            = 'DomainUsers'
-            DisplayName                     = 'Domain Users Fine Grained Password Policy'
-            Description                     = 'Domain Users Fine Grained Password Policy'
-            Subjects                        = 'Domain Users'
+            Name                            = 'DomainAdmins'
+            DisplayName                     = 'Domain Admins Password Policy'
+            Description                     = 'This is the Fine Grained Password Policy for Domain Admins'
+            Subjects                        = 'Domain Admins'
             ComplexityEnabled               = $true
             LockoutDuration                 = '00:30:00'
             LockoutObservationWindow        = '00:30:00'

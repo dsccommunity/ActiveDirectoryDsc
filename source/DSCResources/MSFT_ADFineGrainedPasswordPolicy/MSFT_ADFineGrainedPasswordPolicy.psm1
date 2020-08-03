@@ -256,14 +256,14 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $LockoutDuration,
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $LockoutObservationWindow,
@@ -274,14 +274,14 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $MaxPasswordAge,
@@ -314,7 +314,6 @@ function Test-TargetResource
         $Credential
     )
 
-    # Need to set these parameters to compare if users are using the default parameter values
     [HashTable] $parameters = $PSBoundParameters
 
     # Build parameters needed to get resource properties
@@ -506,14 +505,14 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $LockoutDuration,
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInMinutes = [TimeSpan]::Parse($_).TotalMinutes); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $LockoutObservationWindow,
@@ -524,14 +523,14 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript({
-            ([ValidateRange(1, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
         [String]
         $MaxPasswordAge,
@@ -564,44 +563,29 @@ function Set-TargetResource
         $Credential
     )
 
-    # Need to set these to compare if not specified since user is using defaults
-    [HashTable] $parameters = $PSBoundParameters
-
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    # Build parameters common to all commands
-    $commonParameters = @{
+    [HashTable] $parameters = $PSBoundParameters
+    $parameters.Remove('Ensure')
+
+    $getTargetResourceParameters = @{
+        Name             = $Name
+        Precedence       = $Precedence
         DomainController = $DomainController
         Credential       = $Credential
     }
 
-    @($commonParameters.Keys) |
+    @($getTargetResourceParameters.Keys) |
         ForEach-Object {
             if (-not $parameters.ContainsKey($_))
             {
-                $commonParameters.Remove($_)
+                $getTargetResourceParameters.Remove($_)
             }
         }
 
-    # Build parameters needed to get resource properties
-    $getTargetResourceParameters = $commonParameters.Clone()
-    $commonParameters['Identity'] = $Name
-    $getTargetResourceParameters['Name'] = $Name
-    $getTargetResourceParameters['Precedence'] = $Precedence
-
     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
-    # Build parameters used for setting the resource
-    if ($getTargetResourceResult.Ensure -eq 'Present')
-    {
-        $setPasswordPolicyParameters = Get-ADCommonParameters @parameters
-    }
-    else
-    {
-        $newPasswordPolicyParameters = Get-ADCommonParameters @parameters -UseNameParameter
-    }
-
-    $passwordPolicyParameters  = Get-ADCommonParameters @commonParameters
+    $passwordPolicyParameters = Get-ADCommonParameters @parameters
 
     if ($Ensure -eq 'Present')
     {
@@ -617,7 +601,10 @@ function Set-TargetResource
             if ($propertiesNotInDesiredState)
             {
                 # Resource is present not in desired state
+                $setPasswordPolicyParameters = $passwordPolicyParameters.Clone()
                 $setPasswordPolicyRequired = $false
+
+                Write-Verbose -Message ($script:localizedData.ResourceNotInDesiredState -f $Name)
 
                 # Build parameters needed to set resource properties
                 foreach ($property in $propertiesNotInDesiredState)
@@ -625,7 +612,7 @@ function Set-TargetResource
                     if ($property.ParameterName -eq 'Subjects')
                     {
                         # Add/Remove required Policy Subjects
-                        if ($property.Actual -and $property.Expected)
+                        if ($null -ne $property.Actual -and $null -ne $property.Expected)
                         {
                             $compareResult = Compare-Object -ReferenceObject $property.Actual `
                                 -DifferenceObject $property.Expected
@@ -635,7 +622,7 @@ function Set-TargetResource
                             $subjectsToRemove = ($compareResult |
                                 Where-Object -Property SideIndicator -eq '<=').InputObject
                         }
-                        elseif (-not($property.Expected))
+                        elseif ($null -eq $property.Expected)
                         {
                             $subjectsToRemove = $property.Actual
                             $subjectsToAdd = $null
@@ -646,7 +633,7 @@ function Set-TargetResource
                             $subjectsToRemove = $null
                         }
 
-                        if ($subjectsToAdd)
+                        if ($null -ne $subjectsToAdd)
                         {
                             Write-Verbose -Message ($script:localizedData.AddingPasswordPolicySubjects -f
                                 $Name, $($subjectsToAdd.Count))
@@ -661,9 +648,11 @@ function Set-TargetResource
                                 $errorMessage = $script:localizedData.AddingPasswordPolicySubjectsError -f $Name
                                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                             }
+
+                            $subjectsToAdd = $null
                         }
 
-                        if ($subjectsToRemove)
+                        if ($null -ne $subjectsToRemove)
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingPasswordPolicySubjects -f
                                 $Name, $($SubjectstoRemove.Count))
@@ -678,9 +667,11 @@ function Set-TargetResource
                                 $errorMessage = $script:localizedData.RemovingPasswordPolicySubjectsError -f $Name
                                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                             }
+
+                            $subjectsToRemove = $null
                         }
                     }
-                    elseif ($property.Expected)
+                    elseif ($null -ne $property.Expected)
                     {
                         $setPasswordPolicyParameters[$property.ParameterName] = $property.Expected
 
@@ -688,6 +679,10 @@ function Set-TargetResource
                             $property.ParameterName, $property.Expected)
 
                         $setPasswordPolicyRequired = $true
+                    }
+                    else
+                    {
+                        # N/A
                     }
                 }
 
@@ -714,12 +709,15 @@ function Set-TargetResource
         else
         {
             # Resource should exist
+
             Write-Verbose -Message ($script:localizedData.ResourceDoesNotExistButShouldMessage -f $Name)
 
             Write-Verbose -Message ($script:localizedData.CreatingFineGrainedPasswordPolicy -f $Name)
 
             # Build parameters needed to create resource properties
             $createSubjectsRequired = $false
+            $newPasswordPolicyParameters = $passwordPolicyParameters.Clone()
+            $newPasswordPolicyParameters.Remove('Identity')
 
             foreach ($property in $parameters.keys)
             {
@@ -733,7 +731,7 @@ function Set-TargetResource
                 }
             }
 
-            $newPasswordPolicyParameters.Remove('Ensure')
+            #$newPasswordPolicyParameters.Remove('Ensure')
 
             try
             {
