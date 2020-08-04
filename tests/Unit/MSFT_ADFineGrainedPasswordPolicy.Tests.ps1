@@ -214,23 +214,15 @@ try
 
             Context 'When the Resource is Absent' {
                 BeforeAll {
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                        -MockWith { $mockGetPasswordPolicyAbsent }
-
-                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                        -MockWith { $mockGetPasswordPolicySubjectAbsent }
-
-                    $result = Get-TargetResource @getTargetResourceParametersPolicy
+                    Mock -CommandName Get-ADFineGrainedPasswordPolicySubject
                 }
 
                 Context 'When Get-ADFineGrainedPasswordPolicy cannot find the policy' {
                     BeforeAll {
                         Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                             -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-                    }
 
-                    It 'Should not throw' {
-                        { Get-TargetResource @getTargetResourceParametersPolicy } | Should -Not -Throw
+                        $result = Get-TargetResource @getTargetResourceParametersPolicy
                     }
 
                     foreach ($property in $mockGetResourcePasswordPolicy.Keys)
