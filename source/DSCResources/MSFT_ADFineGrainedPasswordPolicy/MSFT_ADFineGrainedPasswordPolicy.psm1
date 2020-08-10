@@ -71,7 +71,7 @@ function Get-TargetResource
         'Description'
     )
 
-    Write-Verbose -Message ($script:localizedData.QueryingFineGrainedPasswordPolicy -f $Name)
+    Write-Verbose -Message ($script:localizedData.QueryingPasswordPolicy -f $Name)
 
     try
     {
@@ -84,7 +84,7 @@ function Get-TargetResource
     }
     catch
     {
-        $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicyError -f $Name
+        $errorMessage = $script:localizedData.RetrievePasswordPolicyError -f $Name
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 
@@ -99,7 +99,7 @@ function Get-TargetResource
         }
         catch
         {
-            $errorMessage = $script:localizedData.RetrieveFineGrainedPasswordPolicySubjectError -f $Name
+            $errorMessage = $script:localizedData.RetrievePasswordPolicySubjectError -f $Name
             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
         }
 
@@ -258,14 +258,14 @@ function Test-TargetResource
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $LockoutDuration,
 
         [Parameter()]
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $LockoutObservationWindow,
 
         [Parameter()]
@@ -276,14 +276,14 @@ function Test-TargetResource
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $MaxPasswordAge,
 
         [Parameter()]
@@ -351,14 +351,14 @@ function Test-TargetResource
             else
             {
                 # Resource is in desired state
-                Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
+                Write-Verbose -Message ($script:localizedData.PasswordPolicyInDesiredState -f $Name)
                 $inDesiredState = $true
             }
         }
         else
         {
             # Resource should not exist
-            Write-Verbose -Message ($script:localizedData.ResourceExistsButShouldNotMessage -f $Name)
+            Write-Verbose -Message ($script:localizedData.PasswordPolicyExistsButShouldNot -f $Name)
             $inDesiredState = $false
         }
     }
@@ -368,7 +368,7 @@ function Test-TargetResource
         if ($Ensure -eq 'Present')
         {
             # Resource should exist
-            Write-Verbose -Message ($script:localizedData.ResourceDoesNotExistButShouldMessage -f $Name)
+            Write-Verbose -Message ($script:localizedData.PasswordPolicyDoesNotExistButShould -f $Name)
             $inDesiredState = $false
         }
         else
@@ -380,12 +380,12 @@ function Test-TargetResource
 
     if ($inDesiredState)
     {
-        Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
+        Write-Verbose -Message ($script:localizedData.PasswordPolicyInDesiredState -f $Name)
         return $true
     }
     else
     {
-        Write-Verbose -Message ($script:localizedData.ResourceNotInDesiredState -f $Name)
+        Write-Verbose -Message ($script:localizedData.PasswordPolicyNotInDesiredState -f $Name)
         return $false
     }
 } #end Test-TargetResource
@@ -464,7 +464,6 @@ function Test-TargetResource
             Remove-ADFineGrainedPasswordPolicy        | ActiveDirectory
             Add-ADFineGrainedPasswordPolicySubject    | ActiveDirectory
             Remove-ADFineGrainedPasswordPolicySubject | ActiveDirectory
-            Assert-Module                             | DscResource.Common
             New-InvalidOperationException             | DscResource.Common
             Get-ADCommonParameters                    | ActiveDirectoryDsc.Common
             Compare-ResourcePropertyState             | ActiveDirectoryDsc.Common
@@ -507,14 +506,14 @@ function Set-TargetResource
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $LockoutDuration,
 
         [Parameter()]
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $LockoutObservationWindow,
 
         [Parameter()]
@@ -525,14 +524,14 @@ function Set-TargetResource
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript({
             ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
         })]
-        [String]
+        [System.String]
         $MaxPasswordAge,
 
         [Parameter()]
@@ -602,7 +601,7 @@ function Set-TargetResource
                 $setPasswordPolicyParameters = $passwordPolicyParameters.Clone()
                 $setPasswordPolicyRequired = $false
 
-                Write-Verbose -Message ($script:localizedData.ResourceNotInDesiredState -f $Name)
+                Write-Verbose -Message ($script:localizedData.PasswordPolicyNotInDesiredState -f $Name)
 
                 # Build parameters needed to set resource properties
                 foreach ($property in $propertiesNotInDesiredState)
@@ -610,7 +609,9 @@ function Set-TargetResource
                     if ($property.ParameterName -eq 'Subjects')
                     {
                         # Add/Remove required Policy Subjects
-                        if ($null -ne $property.Actual -and $null -ne $property.Expected)
+                        #if ($null -ne $property.Actual -and $null -ne $property.Expected)
+                        if (-not [System.String]::IsNullOrEmpty($property.Actual) -and
+                            -not [System.String]::IsNullOrEmpty($property.Expected))
                         {
                             $compareResult = Compare-Object -ReferenceObject $property.Actual `
                                 -DifferenceObject $property.Expected
@@ -620,7 +621,8 @@ function Set-TargetResource
                             $subjectsToRemove = ($compareResult |
                                 Where-Object -Property SideIndicator -eq '<=').InputObject
                         }
-                        elseif ($null -eq $property.Expected)
+                        #elseif ($null -eq $property.Expected)
+                        elseif ([System.String]::IsNullOrEmpty($property.Expected))
                         {
                             $subjectsToRemove = $property.Actual
                             $subjectsToAdd = $null
@@ -631,7 +633,8 @@ function Set-TargetResource
                             $subjectsToRemove = $null
                         }
 
-                        if ($null -ne $subjectsToAdd)
+                        #if ($null -ne $subjectsToAdd)
+                        if (-not [System.String]::IsNullOrEmpty($subjectsToAdd))
                         {
                             Write-Verbose -Message ($script:localizedData.AddingPasswordPolicySubjects -f
                                 $Name, $($subjectsToAdd.Count))
@@ -647,10 +650,11 @@ function Set-TargetResource
                                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                             }
 
-                            $subjectsToAdd = $null
+                            #$subjectsToAdd = $null
                         }
 
-                        if ($null -ne $subjectsToRemove)
+                        #if ($null -ne $subjectsToRemove)
+                        if (-not [System.String]::IsNullOrEmpty($subjectsToRemove))
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingPasswordPolicySubjects -f
                                 $Name, $($SubjectstoRemove.Count))
@@ -666,22 +670,22 @@ function Set-TargetResource
                                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                             }
 
-                            $subjectsToRemove = $null
+                            #$subjectsToRemove = $null
                         }
                     }
-                    elseif ($null -ne $property.Expected)
+                    else  #elseif ($null -ne $property.Expected)
                     {
                         $setPasswordPolicyParameters[$property.ParameterName] = $property.Expected
 
                         Write-Verbose -Message ($script:localizedData.SettingPasswordPolicyValue -f
-                            $property.ParameterName, $property.Expected)
+                            $Name, $property.ParameterName, $property.Expected)
 
                         $setPasswordPolicyRequired = $true
                     }
-                    else
-                    {
-                        # N/A
-                    }
+                    # else
+                    # {
+                    #     #
+                    # }
                 }
 
                 # Update the password policy if needed
@@ -693,7 +697,7 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+                        $errorMessage = $script:localizedData.SettingPasswordPolicyError -f $Name
                         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                     }
                 }
@@ -701,16 +705,16 @@ function Set-TargetResource
             else
             {
                 # Resource is in desired state
-                Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
+                Write-Verbose -Message ($script:localizedData.PasswordPolicyInDesiredState -f $Name)
             }
         }
         else
         {
             # Resource should exist
 
-            Write-Verbose -Message ($script:localizedData.ResourceDoesNotExistButShouldMessage -f $Name)
+            Write-Verbose -Message ($script:localizedData.PasswordPolicyDoesNotExistButShould -f $Name)
 
-            Write-Verbose -Message ($script:localizedData.CreatingFineGrainedPasswordPolicy -f $Name)
+            Write-Verbose -Message ($script:localizedData.CreatingPasswordPolicy -f $Name)
 
             # Build parameters needed to create resource properties
             $createSubjectsRequired = $false
@@ -735,7 +739,7 @@ function Set-TargetResource
             }
             catch
             {
-                $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+                $errorMessage = $script:localizedData.AddingPasswordPolicyError -f $Name
                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
 
@@ -761,11 +765,11 @@ function Set-TargetResource
         {
             # Resource exists but shouldn't
 
-            Write-Verbose -Message ($script:localizedData.ResourceExistsButShouldNotMessage -f $Name)
+            Write-Verbose -Message ($script:localizedData.PasswordPolicyExistsButShouldNot -f $Name)
 
             if ($getTargetResourceResult.ProtectedFromAccidentalDeletion)
             {
-                Write-Verbose -Message ($script:localizedData.ProtectedFromAccidentalDeletionRemove -f $Name)
+                Write-Verbose -Message ($script:localizedData.RemoveDeletionProtection -f $Name)
 
                 try
                 {
@@ -774,12 +778,12 @@ function Set-TargetResource
                 }
                 catch
                 {
-                    $errorMessage = $script:localizedData.ResourceConfigurationError -f $Name
+                    $errorMessage = $script:localizedData.RemovingDeletionProtectionError -f $Name
                     New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                 }
             }
 
-            Write-Verbose -Message ($script:localizedData.RemovingFineGrainedPasswordPolicy -f $Name)
+            Write-Verbose -Message ($script:localizedData.RemovingPasswordPolicy -f $Name)
 
             try
             {
@@ -787,7 +791,7 @@ function Set-TargetResource
             }
             catch
             {
-                $errorMessage = $script:localizedData.ResourceRemovalError -f $Name
+                $errorMessage = $script:localizedData.RemovePasswordPolicyError -f $Name
                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
         }
@@ -795,7 +799,7 @@ function Set-TargetResource
         {
             # Resource should not and does not exist
 
-            Write-Verbose -Message ($script:localizedData.ResourceInDesiredState -f $Name)
+            Write-Verbose -Message ($script:localizedData.PasswordPolicyInDesiredState -f $Name)
         }
     }
 } #end Set-TargetResource
