@@ -609,7 +609,6 @@ function Set-TargetResource
                     if ($property.ParameterName -eq 'Subjects')
                     {
                         # Add/Remove required Policy Subjects
-                        #if ($null -ne $property.Actual -and $null -ne $property.Expected)
                         if (-not [System.String]::IsNullOrEmpty($property.Actual) -and
                             -not [System.String]::IsNullOrEmpty($property.Expected))
                         {
@@ -621,7 +620,6 @@ function Set-TargetResource
                             $subjectsToRemove = ($compareResult |
                                 Where-Object -Property SideIndicator -eq '<=').InputObject
                         }
-                        #elseif ($null -eq $property.Expected)
                         elseif ([System.String]::IsNullOrEmpty($property.Expected))
                         {
                             $subjectsToRemove = $property.Actual
@@ -633,7 +631,6 @@ function Set-TargetResource
                             $subjectsToRemove = $null
                         }
 
-                        #if ($null -ne $subjectsToAdd)
                         if (-not [System.String]::IsNullOrEmpty($subjectsToAdd))
                         {
                             Write-Verbose -Message ($script:localizedData.AddingPasswordPolicySubjects -f
@@ -649,11 +646,8 @@ function Set-TargetResource
                                 $errorMessage = $script:localizedData.AddingPasswordPolicySubjectsError -f $Name
                                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                             }
-
-                            #$subjectsToAdd = $null
                         }
 
-                        #if ($null -ne $subjectsToRemove)
                         if (-not [System.String]::IsNullOrEmpty($subjectsToRemove))
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingPasswordPolicySubjects -f
@@ -669,11 +663,9 @@ function Set-TargetResource
                                 $errorMessage = $script:localizedData.RemovingPasswordPolicySubjectsError -f $Name
                                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                             }
-
-                            #$subjectsToRemove = $null
                         }
                     }
-                    else  #elseif ($null -ne $property.Expected)
+                    else
                     {
                         $setPasswordPolicyParameters[$property.ParameterName] = $property.Expected
 
@@ -682,10 +674,6 @@ function Set-TargetResource
 
                         $setPasswordPolicyRequired = $true
                     }
-                    # else
-                    # {
-                    #     #
-                    # }
                 }
 
                 # Update the password policy if needed
