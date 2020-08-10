@@ -683,7 +683,7 @@ try
 
                         It 'Should throw the correct exception' {
                             { Set-TargetResource @setTargetResourceParametersChangedProperty } |
-                                Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                Should -Throw ($script:localizedData.SettingPasswordPolicyError -f
                                     $setTargetResourceParametersChangedProperty.Name)
                         }
                     }
@@ -791,7 +791,7 @@ try
 
                         It 'Should throw the correct exception' {
                             { Set-TargetResource @setTargetResourceParameters } |
-                                Should -Throw ($script:localizedData.ResourceConfigurationError -f
+                                Should -Throw ($script:localizedData.AddingPasswordPolicyError -f
                                     $setTargetResourceParameters.Name)
                         }
                     }
@@ -863,7 +863,7 @@ try
 
                             It 'Should throw the correct exception' {
                                 { Set-TargetResource @setTargetResourceParametersAbsent } |
-                                    Should -Throw ($script:localizedData.RemovingProtectedFromAccidentalDeletionError -f
+                                    Should -Throw ($script:localizedData.RemovingDeletionProtectionError -f
                                         $setTargetResourceParametersAbsent.Name)
                             }
                         }
@@ -876,7 +876,7 @@ try
 
                         It 'Should throw the correct exception' {
                             { Set-TargetResource @setTargetResourceParametersAbsent } |
-                                Should -Throw ($script:localizedData.ResourceRemovalError -f
+                                Should -Throw ($script:localizedData.RemovePasswordPolicyError -f
                                     $setTargetResourceParametersAbsent.Name)
                         }
                     }
