@@ -81,7 +81,7 @@ try
             ProtectedFromAccidentalDeletion = $mockAdPasswordPolicy.ProtectedFromAccidentalDeletion
         }
 
-        $mockGetFineGrainedPasswordPolicySubjectResults= @{
+        $mockGetFineGrainedPasswordPolicySubjectResults = @{
             Name           = $testPasswordPolicySubjectsName
             ObjectClass    = 'group'
             SamAccountName = $testPasswordPolicySubjectsName
@@ -153,7 +153,7 @@ try
                 Mock -CommandName Get-ADFineGrainedPasswordPolicy `
                     -MockWith { $mockGetAdFineGrainedPasswordPolicy }
                 Mock -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                    -MockWith { $mockGetFineGrainedPasswordPolicySubjectResults}
+                    -MockWith { $mockGetFineGrainedPasswordPolicySubjectResults }
             }
 
             Context 'When the resource is Present' {
@@ -239,33 +239,33 @@ try
                 BeforeAll {
                     Mock -CommandName Get-ADFineGrainedPasswordPolicySubject
                     Mock -CommandName Get-ADFineGrainedPasswordPolicy `
-                            -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
+                        -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
 
                     $result = Get-TargetResource @getTargetResourceParameters
                 }
 
                 foreach ($property in $mockGetTargetResourceResults.Keys)
-                    {
-                        It "Should return the correct $property property" {
-                            $result.$property | Should -Be $mockGetTargetResourceResultsAbsent.$property
-                        }
+                {
+                    It "Should return the correct $property property" {
+                        $result.$property | Should -Be $mockGetTargetResourceResultsAbsent.$property
                     }
+                }
 
-                    It 'Should return the correct Ensure property' {
-                        $result.Ensure | Should -Be 'Absent'
-                    }
+                It 'Should return the correct Ensure property' {
+                    $result.Ensure | Should -Be 'Absent'
+                }
 
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Assert-Module `
-                            -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy `
-                            -ParameterFilter { $Identity -eq $getTargetResourceParameters.Name } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
-                            -ParameterFilter { $Identity -eq $getTargetResourceParameters.Name } `
-                            -Exactly -Times 0
-                    }
+                It 'Should call the expected mocks' {
+                    Assert-MockCalled -CommandName Assert-Module `
+                        -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                        -Exactly -Times 1
+                    Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicy `
+                        -ParameterFilter { $Identity -eq $getTargetResourceParameters.Name } `
+                        -Exactly -Times 1
+                    Assert-MockCalled -CommandName Get-ADFineGrainedPasswordPolicySubject `
+                        -ParameterFilter { $Identity -eq $getTargetResourceParameters.Name } `
+                        -Exactly -Times 0
+                }
 
                 Context 'When Get-ADFineGrainedPasswordPolicy throws an unexpected error' {
                     BeforeAll {
@@ -325,9 +325,8 @@ try
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Get-TargetResource `
                                 -ParameterFilter { `
-                                    $Name -eq $testTargetResourceParameters.Name
-                                    $Precedence -eq $testTargetResourceParameters.Precedence
-                                    $Subjects -eq $testTargetResourceParameters.Subjects
+                                    $Name -eq $testTargetResourceParameters.Name -and `
+                                    $Precedence -eq $testTargetResourceParameters.Precedence -and `
                                     $Credential -eq $testCredential } `
                                 -Exactly -Times 1
                         }
@@ -339,9 +338,8 @@ try
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Get-TargetResource `
                                 -ParameterFilter { `
-                                    $Name -eq $testTargetResourceParameters.Name
-                                    $Precedence -eq $testTargetResourceParameters.Precedence
-                                    $Subjects -eq $testTargetResourceParameters.Subjects
+                                    $Name -eq $testTargetResourceParameters.Name -and `
+                                    $Precedence -eq $testTargetResourceParameters.Precedence -and `
                                     $DomainController -eq $testDomainController } `
                                 -Exactly -Times 1
                         }
@@ -355,16 +353,12 @@ try
 
                     foreach ($property in $mockAdPasswordPolicyChanged.Keys)
                     {
-                        if ($property -notin ('Name'))
-                        {
-                            Context "When the $property resource property is not in the desired state" {
+                        Context "When the $property resource property is not in the desired state" {
+                            It 'Should return $false' {
+                                $testTargetResourceParametersChanged = $testTargetResourceParameters.Clone()
+                                $testTargetResourceParametersChanged.$property = $mockAdPasswordPolicyChanged.$property
 
-                                It 'Should return $false' {
-                                    $testTargetResourceParametersChanged = $testTargetResourceParameters.Clone()
-                                    $testTargetResourceParametersChanged.$property = $mockAdPasswordPolicyChanged.$property
-
-                                    Test-TargetResource @testTargetResourceParametersChanged | Should -Be $false
-                                }
+                                Test-TargetResource @testTargetResourceParametersChanged | Should -Be $false
                             }
                         }
                     }
@@ -377,8 +371,8 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter {
-                                $Name -eq $testTargetResourceParameters.Name
+                            -ParameterFilter { `
+                                $Name -eq $testTargetResourceParameters.Name -and `
                                 $Precedence -eq $testTargetResourceParameters.Precedence } `
                             -Exactly -Times 1
                     }
@@ -401,8 +395,8 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter {
-                                $Name -eq $testTargetResourceParameters.Name
+                            -ParameterFilter { `
+                                $Name -eq $testTargetResourceParameters.Name -and `
                                 $Precedence -eq $testTargetResourceParameters.Precedence } `
                             -Exactly -Times 1
                     }
@@ -420,7 +414,7 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource `
                             -ParameterFilter { `
-                                $Name -eq $testTargetResourceParametersAbsent.Name
+                                $Name -eq $testTargetResourceParametersAbsent.Name -and `
                                 $Precedence -eq $testTargetResourceParametersAbsent.Precedence } `
                             -Exactly -Times 1
                     }
@@ -773,7 +767,7 @@ try
                         Context "When 'Add-ADFineGrainedPasswordPolicySubject' throws an unexpected error" {
                             BeforeAll {
                                 Mock -CommandName Add-ADFineGrainedPasswordPolicySubject `
-                                -MockWith { throw 'UnexpectedError' }
+                                    -MockWith { throw 'UnexpectedError' }
                             }
 
                             It 'Should throw the correct exception' {

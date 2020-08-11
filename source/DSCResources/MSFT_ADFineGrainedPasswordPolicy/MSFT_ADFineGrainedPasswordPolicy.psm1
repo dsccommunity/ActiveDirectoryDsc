@@ -95,7 +95,7 @@ function Get-TargetResource
         try
         {
             [String[]] $policySubjects = (Get-ADFineGrainedPasswordPolicySubject `
-                @getADFineGrainedPasswordPolicySubjectParameters).Name
+                    @getADFineGrainedPasswordPolicySubjectParameters).Name
         }
         catch
         {
@@ -255,16 +255,16 @@ function Test-TargetResource
         $ComplexityEnabled,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $LockoutDuration,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $LockoutObservationWindow,
 
@@ -273,16 +273,16 @@ function Test-TargetResource
         $LockoutThreshold,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $MinPasswordAge,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $MaxPasswordAge,
 
@@ -503,16 +503,16 @@ function Set-TargetResource
         $ComplexityEnabled,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $LockoutDuration,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $LockoutObservationWindow,
 
@@ -521,16 +521,16 @@ function Set-TargetResource
         $LockoutThreshold,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $MinPasswordAge,
 
         [Parameter()]
-        [ValidateScript({
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
-        })]
+        [ValidateScript( {
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            })]
         [System.String]
         $MaxPasswordAge,
 
@@ -616,9 +616,9 @@ function Set-TargetResource
                                 -DifferenceObject $property.Expected
 
                             $subjectsToAdd = ($compareResult |
-                                Where-Object -Property SideIndicator -eq '=>').InputObject
+                                    Where-Object -Property SideIndicator -eq '=>').InputObject
                             $subjectsToRemove = ($compareResult |
-                                Where-Object -Property SideIndicator -eq '<=').InputObject
+                                    Where-Object -Property SideIndicator -eq '<=').InputObject
                         }
                         elseif ([System.String]::IsNullOrEmpty($property.Expected))
                         {
