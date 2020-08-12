@@ -372,8 +372,8 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource `
                             -ParameterFilter { `
-                                $Name -eq $testTargetResourceParameters.Name -and `
-                                $Precedence -eq $testTargetResourceParameters.Precedence } `
+                                $Name -eq $testTargetResourceParametersAbsent.Name -and `
+                                $Precedence -eq $testTargetResourceParametersAbsent.Precedence } `
                             -Exactly -Times 1
                     }
 
