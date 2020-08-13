@@ -1,0 +1,23 @@
+# culture="en-US"
+ConvertFrom-StringData @'
+    QueryingPasswordPolicy              = Querying policy '{0}'. (ADFGPP0001)
+    CreatingPasswordPolicy              = Creating policy '{0}'. (ADFGPP0002)
+    RemovingPasswordPolicy              = Removing policy '{0}'. (ADFGPP0003)
+    SettingPasswordPolicyValue          = Setting policy '{0}' property '{1}' to '{2}'. (ADFGPP0004)
+    PasswordPolicyInDesiredState        = Policy '{0}' is in the desired state. (ADFGPP0005)
+    PasswordPolicyNotInDesiredState     = Policy '{0}' is not in the desired state. (ADFGPP0006)
+    SettingPasswordPolicyError          = Error setting policy '{0}'. (ADFGPP0007)
+    AddingPasswordPolicyError           = Error adding policy '{0}'. (ADFGPP0008)
+    RemovePasswordPolicyError           = Error removing policy '{0}'. (ADFGPP0009)
+    RetrievePasswordPolicyError         = Error retrieving policy '{0}'. (ADFGPP0010)
+    RetrievePasswordPolicySubjectError  = Error retrieving policy subject '{0}'. (ADFGPP0011)
+    PasswordPolicyExistsButShouldNot    = Policy '{0}' exists but should not. (ADFGPP0012)
+    PasswordPolicyDoesNotExistButShould = Policy '{0}' does not exist but should. (ADFGPP0013)
+    RemoveDeletionProtection            = Removing deletion protection from policy '{0}'. (ADFGPP0014)
+    RemovingDeletionProtectionError     = Error removing deletion protection from policy '{0}'. (ADFGPP0015)
+    AddingPasswordPolicySubjects        = Adding new subjects to policy '{0}', count '{1}'. (ADFGPP0016)
+    RemovingPasswordPolicySubjects      = Removing existing subjects from policy '{0}', count '{1}'. (ADFGPP0017)
+    AddingPasswordPolicySubjectsError   = Error adding subjects to policy '{0}'. (ADFGPP0018)
+    RemovingPasswordPolicySubjectsError = Error removing subjects from policy '{0}'. (ADFGPP0019)
+    PasswordPolicyNotFound              = Policy '{0}' was not found. (ADFGPP0020)
+'@
