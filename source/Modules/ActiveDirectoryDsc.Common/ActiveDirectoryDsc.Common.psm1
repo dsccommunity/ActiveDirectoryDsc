@@ -2619,17 +2619,12 @@ function Resolve-MembersSecurityIdentifier
                     $ntAccount = [System.Security.Principal.NTAccount]::new($member)
                     $securityIdentifier = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
                 }
-                catch [System.Security.Principal.IdentityNotMappedException]
+                catch
                 {
                     Write-Warning -Message ($script:localizedData.IdentityNotMappedExceptionError -f
                         $property, $MembershipAttribute, $member)
 
                     continue
-                }
-                catch
-                {
-                    New-InvalidResultException -Message ($script:localizedData.UnableToResolveMembershipAttribute -f
-                        $property, $MembershipAttribute, $member) -ErrorRecord $_
                 }
             }
             elseif ($MembershipAttribute -eq 'DistinguishedName' -and ($member -split ',')[1] -eq $fspADContainer)
