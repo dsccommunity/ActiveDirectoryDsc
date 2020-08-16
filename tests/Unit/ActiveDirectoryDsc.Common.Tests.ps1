@@ -799,7 +799,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             return $membershipSID['member']
         }
 
-        Context "Action' parameter is specified as 'Add'" {
+        Context "When 'Action' parameter is specified as 'Add'" {
             BeforeAll {
                 Mock -CommandName Set-ADGroup -ParameterFilter {
                     $Add -ne $null
@@ -820,7 +820,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
         }
 
-        Context "Action' parameter is specified as 'Remove'" {
+        Context "When 'Action' parameter is specified as 'Remove'" {
             BeforeAll {
                 Mock -CommandName Set-ADGroup -ParameterFilter {
                     $Remove -ne $null
@@ -838,6 +838,19 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Assert-MockCalled -CommandName Set-ADGroup -ParameterFilter {
                     $Remove -ne $null
                 } -Exactly -Times 1
+            }
+        }
+
+        Context "When 'Set-ADGroup' fails" {
+            BeforeAll {
+                Mock -CommandName Set-ADGroup -ParameterFilter {
+                    throw (New-Guid).Guid
+                }
+            }
+
+            It "Should throw an exception" {
+                { Set-ADCommonGroupMember @groupMembersParms } |
+                    Should -Throw
             }
         }
     }
@@ -2231,11 +2244,18 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                         ErrorAction         = 'Stop'
                         WarningAction       = 'SilentlyContinue'
                     }
+
+                    Mock -CommandName Write-Warning
                 }
 
                 It "Should not throw" {
                     { Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat } |
                         Should -Not -Throw
+                }
+
+                It "Should write a warning" {
+                    Resolve-MembersSecurityIdentifier @resolveMembersSIDSplat
+                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
                 }
             }
 
