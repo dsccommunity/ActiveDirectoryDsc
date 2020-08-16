@@ -636,7 +636,7 @@ function Get-ADCommonParameters
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Alias('UserName', 'GroupName', 'ComputerName', 'ServiceAccountName')]
+        [Alias('UserName', 'GroupName', 'ComputerName', 'ServiceAccountName', 'Name')]
         [System.String]
         $Identity,
 
