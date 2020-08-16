@@ -2573,7 +2573,7 @@ function Resolve-MembersSecurityIdentifier
         $fspADContainer = 'CN=ForeignSecurityPrincipals'
 
         Write-Debug -Message ($script:localizedData.ResolvingMembershipAttributeValues -f
-            $property, $MembershipAttribute) -Verbose:$verbose
+            $property, $MembershipAttribute)
 
         $getADObjectParms = @{}
 
@@ -2614,7 +2614,7 @@ function Resolve-MembersSecurityIdentifier
                 try
                 {
                     Write-Debug -Message ($script:localizedData.TranslatingMembershipAttribute -f
-                        $MembershipAttribute, $member, $property) -Verbose:$verbose
+                        $MembershipAttribute, $member, $property)
 
                     $ntAccount = [System.Security.Principal.NTAccount]::new($member)
                     $securityIdentifier = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
@@ -2629,14 +2629,14 @@ function Resolve-MembersSecurityIdentifier
             }
             elseif ($MembershipAttribute -eq 'DistinguishedName' -and ($member -split ',')[1] -eq $fspADContainer)
             {
-                Write-Debug -Message ($script:localizedData.ParsingCommonNameFromDN -f $member) -Verbose:$verbose
+                Write-Debug -Message ($script:localizedData.ParsingCommonNameFromDN -f $member)
 
                 $securityIdentifier = ($member -split ',')[0] -replace '^CN[=]'
             }
             else
             {
                 Write-Debug -Message ($script:localizedData.ADObjectPropertyLookup -f
-                    $property, $MembershipAttribute, $member) -Verbose:$verbose
+                    $property, $MembershipAttribute, $member)
 
                 $getADObjectParms['Filter'] = "$($MembershipAttribute) -eq '$($member)'"
 
