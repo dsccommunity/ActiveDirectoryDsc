@@ -9,6 +9,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
+- ADFineGrainedPasswordPolicy
+  - New resource for creating and updating Fine Grained Password Policies for AD principal subjects.
+    ([issue #584](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/584)).
 - ADGroup
   - Added support for managing AD group membership of Foreign Security Principals. This involved completely
     refactoring group membership management to utilize the `Set-ADGroup` cmdlet and referencing SID values.
