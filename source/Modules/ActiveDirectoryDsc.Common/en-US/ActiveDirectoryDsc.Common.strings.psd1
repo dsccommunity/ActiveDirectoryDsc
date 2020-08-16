@@ -23,7 +23,7 @@ ConvertFrom-StringData @'
     FindInRecycleBin                    = Finding objects in the recycle bin matching the filter {0}. (ADCOMMON0027)
     FoundRestoreTargetInRecycleBin      = Found object {0} ({1}) in the recycle bin as {2}. Attempting to restore the object. (ADCOMMON0028)
     RecycleBinRestoreSuccessful         = Successfully restored object {0} ({1}) from the recycle bin. (ADCOMMON0029)
-    SettingGroupMember                  = {0}ing members to/from AD group '{1}'. (ADCOMMON0030)
+    FailedToSetADGroupMembership        = Unable to set the group membership for AD Group '{0}'. (ADCOMMON0030)
     PropertyMapArrayIsWrongType         = An object in the property map array is not of the type [System.Collections.Hashtable]. (ADCOMMON0031)
     CreatingNewADPSDrive                = Creating new AD: PSDrive. (ADCOMMON0032)
     CreatingNewADPSDriveError           = Error creating AD: PS Drive. (ADCOMMON0033)
