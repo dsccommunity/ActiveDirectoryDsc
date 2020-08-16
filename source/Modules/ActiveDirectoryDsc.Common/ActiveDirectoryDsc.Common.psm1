@@ -965,7 +965,7 @@ function Restore-ADCommonObject
     )
 
     $restoreFilter = 'msDS-LastKnownRDN -eq "{0}" -and objectClass -eq "{1}" -and isDeleted -eq $true' -f
-        $Identity, $ObjectClass
+    $Identity, $ObjectClass
     Write-Verbose -Message ($script:localizedData.FindInRecycleBin -f $restoreFilter) -Verbose
 
     <#
@@ -1136,19 +1136,25 @@ function Set-ADCommonGroupMember
     Assert-Module -ModuleName ActiveDirectory
 
     $resolveMembersSecurityIdentifierParms = @{
-        MembershipAttribute = $MembershipAttribute
-        Parameters = $Parameters
+        MembershipAttribute  = $MembershipAttribute
+        Parameters           = $Parameters
         PrepareForMembership = $true
-        ErrorAction = 'Stop'
+        ErrorAction          = 'Stop'
     }
 
     $Parameters[$Action] = @{
         member = $Members | Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
     }
 
-    Write-Verbose -Message ($script:localizedData.SettingGroupMember -f $Action, $Parameters['Identity']) -Verbose
-
-    Set-ADGroup @Parameters -ErrorAction 'Stop'
+    try
+    {
+        Set-ADGroup @Parameters -ErrorAction 'Stop'
+    }
+    catch
+    {
+        $errorMessage = $script:localizedData.FailedToSetADGroupMembership -f $Parameters['Identity']
+        New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+    }
 }
 
 <#
@@ -1988,7 +1994,7 @@ function Find-DomainController
             )
         }
         elseif ($_.Exception.InnerException -is `
-            [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException])
+                [System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException])
         {
             Write-Verbose -Message ($script:localizedData.FailedToFindDomainController -f $DomainName) -Verbose
         }
@@ -2486,8 +2492,8 @@ function Resolve-SamAccountName
     }
     catch
     {
-        $errorMessage = $script:localizedData.UnableToResolveMembershipAttribute -f
-            'SamAccountName', 'ObjectSID', $ObjectSid
+        $errorMessage = ($script:localizedData.UnableToResolveMembershipAttribute -f
+            'SamAccountName', 'ObjectSID', $ObjectSid)
         New-InvalidResultException -Message $errorMessage -ErrorRecord $_
     }
 }
@@ -2566,7 +2572,7 @@ function Resolve-MembersSecurityIdentifier
         $property = 'ObjectSID'
         $fspADContainer = 'CN=ForeignSecurityPrincipals'
 
-        Write-Verbose -Message ($script:localizedData.ResolvingMembershipAttributeValues -f
+        Write-Debug -Message ($script:localizedData.ResolvingMembershipAttributeValues -f
             $property, $MembershipAttribute) -Verbose:$verbose
 
         $getADObjectParms = @{}
@@ -2607,7 +2613,7 @@ function Resolve-MembersSecurityIdentifier
             {
                 try
                 {
-                    Write-Verbose -Message ($script:localizedData.TranslatingMembershipAttribute -f
+                    Write-Debug -Message ($script:localizedData.TranslatingMembershipAttribute -f
                         $MembershipAttribute, $member, $property) -Verbose:$verbose
 
                     $ntAccount = [System.Security.Principal.NTAccount]::new($member)
@@ -2628,13 +2634,13 @@ function Resolve-MembersSecurityIdentifier
             }
             elseif ($MembershipAttribute -eq 'DistinguishedName' -and ($member -split ',')[1] -eq $fspADContainer)
             {
-                Write-Verbose -Message ($script:localizedData.ParsingCommonNameFromDN -f $member) -Verbose:$verbose
+                Write-Debug -Message ($script:localizedData.ParsingCommonNameFromDN -f $member) -Verbose:$verbose
 
                 $securityIdentifier = ($member -split ',')[0] -replace '^CN[=]'
             }
             else
             {
-                Write-Verbose -Message ($script:localizedData.ADObjectPropertyLookup -f
+                Write-Debug -Message ($script:localizedData.ADObjectPropertyLookup -f
                     $property, $MembershipAttribute, $member) -Verbose:$verbose
 
                 $getADObjectParms['Filter'] = "$($MembershipAttribute) -eq '$($member)'"
@@ -2655,8 +2661,9 @@ function Resolve-MembersSecurityIdentifier
             }
             else
             {
-                Write-Warning -Message ($script:localizedData.UnableToResolveMembershipAttribute -f
+                $errorMessage = ($script:localizedData.UnableToResolveMembershipAttribute -f
                     $property, $MembershipAttribute, $member)
+                New-InvalidOperationException -Message $errorMessage
             }
         }
     }
