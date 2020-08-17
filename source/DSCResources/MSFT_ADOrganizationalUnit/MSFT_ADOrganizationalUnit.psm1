@@ -172,14 +172,9 @@ function Test-TargetResource
         if ($Ensure -eq 'Present')
         {
 
-            if ($PSBoundParameters.ContainsKey('Credential')){
-                #Remove it from Desired Values to compare
-                $PSBoundParameters.Remove('Credential')
-            }
-
             # Resource should exist
             $propertiesNotInDesiredState = (
-                Compare-ResourcePropertyState -CurrentValue $targetResource -DesiredValues $PSBoundParameters |
+                Compare-ResourcePropertyState -CurrentValue $targetResource -DesiredValues $PSBoundParameters -IgnoreProperties @("Credential") |
                     Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)
