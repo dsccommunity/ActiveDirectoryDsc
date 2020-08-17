@@ -6,8 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md).
 
 ## [Unreleased]
-- ActiveDirectoryDsc
-  - ADOrganizationalUnit Removing Credential from the list of desired values to compare when passed
 
 ### Added
 
@@ -33,7 +31,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Refactor Test-TargetResource Function.
 
 ### Fixed
-
+- ActiveDirectoryDsc
+  - ADOrganizationalUnit Removing Credential from the list of desired values to compare when passed
 - ActiveDirectoryDsc
   - Fixed the CI pipeline by pinning the `Pester` module to `v4.10.1`
   - Restored importing the `DscResource.Common` module import in the `ActiveDirectoryDsc.Common` module that was
