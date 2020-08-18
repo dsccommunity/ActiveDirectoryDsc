@@ -1057,10 +1057,10 @@ try
                     $fakeADUser2.SamAccountName
                 )
 
-                Assert-MockCalled -CommandName Set-ADGroup -Scope It -Times 1
+                Assert-MockCalled -CommandName Set-ADGroup -Scope It -Exactly -Times 1
                 Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
                     $Action -eq 'Add'
-                } -Scope It -Times 1
+                } -Scope It -Exactly -Times 1
             }
 
             # tests for issue 183
@@ -1085,10 +1085,10 @@ try
                     $fakeADUser2.SamAccountName
                 )
 
-                Assert-MockCalled -CommandName Set-ADGroup -Scope It -Times 1
+                Assert-MockCalled -CommandName Set-ADGroup -Scope It -Exactly -Times 1
                 Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
                     $Action -eq 'Add'
-                } -Scope It -Times 1
+                } -Scope It -Exactly -Times 1
             }
 
             # tests for issue 183
@@ -1113,7 +1113,7 @@ try
 
                 Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
                     $Action -eq 'Add'
-                } -Scope It -Times 1
+                } -Scope It -Exactly -Times 1
             }
 
             # tests for issue 183
@@ -1138,7 +1138,7 @@ try
 
                 Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
                     $Action -eq 'Add'
-                } -Scope It -Times 1
+                } -Scope It -Exactly -Times 1
             }
 
             It "Calls Restore-AdCommonObject when RestoreFromRecycleBin is used" {

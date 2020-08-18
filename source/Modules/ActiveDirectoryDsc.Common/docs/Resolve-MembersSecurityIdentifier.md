@@ -105,7 +105,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.String[]
 ## NOTES
-This is a helper function to allow for easier cross-domain AD group membership management based on SID.
+This is a helper function to allow for easier one-way trust AD group membership management based on SID.
 See issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/619 for more information.
 
 ## RELATED LINKS

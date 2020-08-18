@@ -2165,7 +2165,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 $testServer = 'TESTDC'
 
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.ObjectGUID
+                    Members             = $mockADGroupMembersAsADObjects[0].ObjectGUID
                     MembershipAttribute = 'ObjectGUID'
                     Parameters          = @{
                         Server = $testServer
@@ -2173,13 +2173,10 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     WarningAction       = 'SilentlyContinue'
                 }
 
-                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+                Mock -CommandName Assert-Module
 
-                $script:getADObjectCallCount = 0
                 Mock -CommandName Get-ADObject -MockWith {
-                    $memberADObject = $mockADGroupMembersAsADObjects[$script:getADObjectCallCount]
-                    $script:getADObjectCallCount++
-                    return $memberADObject
+                    $mockADGroupMembersAsADObjects[0]
                 }
             }
 
@@ -2188,6 +2185,10 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 Assert-MockCalled -CommandName Get-ADObject -ParameterFilter {
                     $Server -eq $testServer
+                }
+
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
+                     $ModuleName -eq 'ActiveDirectory'
                 }
             }
         }
@@ -2200,7 +2201,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 )
 
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.ObjectGUID
+                    Members             = $mockADGroupMembersAsADObjects[0].ObjectGUID
                     MembershipAttribute = 'ObjectGUID'
                     Parameters          = @{
                         Credential = $testCredentials
@@ -2208,13 +2209,10 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     WarningAction       = 'SilentlyContinue'
                 }
 
-                Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+                Mock -CommandName Assert-Module
 
-                $script:getADObjectCallCount = 0
                 Mock -CommandName Get-ADObject -MockWith {
-                    $memberADObject = $mockADGroupMembersAsADObjects[$script:getADObjectCallCount]
-                    $script:getADObjectCallCount++
-                    return $memberADObject
+                    $mockADGroupMembersAsADObjects[0]
                 }
             }
 
@@ -2224,34 +2222,15 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Assert-MockCalled -CommandName Get-ADObject -ParameterFilter {
                     $Credential -eq $testCredentials
                 }
+
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
+                     $ModuleName -eq 'ActiveDirectory'
+                }
             }
         }
 
         Context "When 'MembershipAttribute' is 'SamAccountName'" {
-            Context "When 'Translate' method fails with known exception" {
-                BeforeAll {
-                    $resolveMembersSecurityIdentifierParms = @{
-                        Members             = $mockADGroupMembersAsADObjects[-1].SamAccountName
-                        MembershipAttribute = 'SamAccountName'
-                        ErrorAction         = 'Stop'
-                        WarningAction       = 'SilentlyContinue'
-                    }
-
-                    Mock -CommandName Write-Warning
-                }
-
-                It "Should not throw" {
-                    { Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms } |
-                        Should -Not -Throw
-                }
-
-                It "Should write a warning" {
-                    Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
-                    Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1 -Scope It
-                }
-            }
-
-            Context "When 'Translate' method fails with unknown exception" {
+            Context "When 'Resolve-SecurityIdentifier' fails" {
                 BeforeAll {
                     $resolveMembersSecurityIdentifierParms = @{
                         Members             = $mockADGroupMembersAsADObjects[0].SamAccountName
@@ -2302,10 +2281,23 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                         MembershipAttribute = $attribute
                     }
 
-                    $script:getADObjectCallCount = 0
+                    $script:memberIndex = 0
+
+                    Mock -CommandName Resolve-SecurityIdentifier -MockWith {
+                        $memberADObjectSID = $mockADGroupMembersAsADObjects[($script:memberIndex)].ObjectSID
+                        $script:memberIndex++
+                        return $memberADObjectSID
+                    }
+
+                    Mock -CommandName Write-Debug -MockWith {
+                        $script:memberIndex++
+                    } -ParameterFilter {
+                        $Message -eq ($script:localizedData.ParsingCommonNameFromDN -f $memberProperty)
+                    }
+
                     Mock -CommandName Get-ADObject -MockWith {
-                        $memberADObject = $mockADGroupMembersAsADObjects[$script:getADObjectCallCount]
-                        $script:getADObjectCallCount++
+                        $memberADObject = $mockADGroupMembersAsADObjects[$script:memberIndex]
+                        $script:memberIndex++
                         return $memberADObject
                     }
                 }
@@ -2319,10 +2311,23 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
                 Context "When 'PrepareForMembership' is specified" {
                     BeforeAll {
-                        $script:getADObjectCallCount = 0
+                        $script:memberIndex = 0
+
+                        Mock -CommandName Resolve-SecurityIdentifier -MockWith {
+                            $memberADObjectSID = $mockADGroupMembersAsADObjects[($script:memberIndex)].ObjectSID
+                            $script:memberIndex++
+                            return $memberADObjectSID
+                        }
+
+                        Mock -CommandName Write-Debug -MockWith {
+                            $script:memberIndex++
+                        } -ParameterFilter {
+                            $Message -eq ($script:localizedData.ParsingCommonNameFromDN -f $memberProperty)
+                        }
+
                         Mock -CommandName Get-ADObject -MockWith {
-                            $memberADObject = $mockADGroupMembersAsADObjects[$script:getADObjectCallCount]
-                            $script:getADObjectCallCount++
+                            $memberADObject = $mockADGroupMembersAsADObjects[$script:memberIndex]
+                            $script:memberIndex++
                             return $memberADObject
                         }
 

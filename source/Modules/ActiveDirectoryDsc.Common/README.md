@@ -76,6 +76,9 @@ Resolves the Security Identifier (docs/SID) of a list of Members of the same typ
 ### [Resolve-SamAccountName](docs/Resolve-SamAccountName.md)
 Resolves the SamAccountName of an Active Directory object based on a supplied ObjectSid.
 
+### [Resolve-SecurityIdentifier](docs/Resolve-SecurityIdentifier.md)
+Resolves the Security Identifier (docs/SID) of an Active Directory object based on a supplied SamAccountName.
+
 ### [Restore-ADCommonObject](docs/Restore-ADCommonObject.md)
 Restores an AD object from the AD recyle bin.
 

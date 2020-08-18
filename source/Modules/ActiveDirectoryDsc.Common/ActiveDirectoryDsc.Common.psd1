@@ -53,6 +53,7 @@
         'Get-ActiveDirectoryDomain'
         'Get-ActiveDirectoryForest'
         'Resolve-SamAccountName'
+        'Resolve-SecurityIdentifier'
         'Resolve-MembersSecurityIdentifier'
     )
 

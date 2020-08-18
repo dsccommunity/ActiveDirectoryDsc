@@ -2500,6 +2500,54 @@ function Resolve-SamAccountName
 
 <#
     .SYNOPSIS
+        Resolves the Security Identifier (SID) of an Active Directory object based on a supplied SamAccountName.
+
+    .DESCRIPTION
+        The Resolve-SecurityIdentifier function is used to get a System.String object representing the Security Identifier
+        (SID) translated from the specified SamAccountName.
+
+    .EXAMPLE
+        Resolve-SecurityIdentifier -SamAccountName $adObject.SamAccountName
+
+    .PARAMETER SamAccountName
+        Specifies the Active Directory object SamAccountName to use for translation to a Security Identifier (SID).
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.String
+
+    .NOTES
+        This is a wrapper to allow test mocking of the calling function.
+        See issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/619 for more information.
+#>
+function Resolve-SecurityIdentifier
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $SamAccountName
+    )
+
+    try
+    {
+        $ntAccount = [System.Security.Principal.NTAccount]::new($SamAccountName)
+        $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
+    }
+    catch
+    {
+        $errorMessage = ($script:localizedData.IdentityNotMappedExceptionError -f
+            'SID', 'SamAccountName', $SamAccountName)
+        New-InvalidResultException -Message $errorMessage -ErrorRecord $_
+    }
+}
+
+<#
+    .SYNOPSIS
         Resolves the Security Identifier (SID) of a list of Members of the same type defined by the MembershipAttribute.
 
     .DESCRIPTION
@@ -2611,21 +2659,10 @@ function Resolve-MembersSecurityIdentifier
         {
             if ($MembershipAttribute -eq 'SamAccountName' -and $member -match '\\')
             {
-                try
-                {
-                    Write-Debug -Message ($script:localizedData.TranslatingMembershipAttribute -f
-                        $MembershipAttribute, $member, $property)
+                Write-Debug -Message ($script:localizedData.TranslatingMembershipAttribute -f
+                    $MembershipAttribute, $member, $property)
 
-                    $ntAccount = [System.Security.Principal.NTAccount]::new($member)
-                    $securityIdentifier = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
-                }
-                catch
-                {
-                    Write-Warning -Message ($script:localizedData.IdentityNotMappedExceptionError -f
-                        $property, $MembershipAttribute, $member)
-
-                    continue
-                }
+                $securityIdentifier = Resolve-SecurityIdentifier -SamAccountName $member
             }
             elseif ($MembershipAttribute -eq 'DistinguishedName' -and ($member -split ',')[1] -eq $fspADContainer)
             {
