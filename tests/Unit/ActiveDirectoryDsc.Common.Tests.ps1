@@ -2130,66 +2130,56 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
     }
 
-    Describe 'ActiveDirectoryDsc.Common\Resolve-SamAccountName' {
-        Context 'When the ObjectSid is properly formatted and an orphaned ForeignSecurityPrincipal is assumed' {
-            BeforeAll {
-                $objectSid = 'S-1-5-21-8562719340-2451078396-046517832-2106'
-            }
-
-            It 'Should not throw' {
-                { Resolve-SamAccountName -ObjectSid $objectSid -ErrorAction Stop -WarningAction SilentlyContinue } |
-                    Should -Not -Throw
-            }
-            It 'Should return the ObjectSid' {
-                Resolve-SamAccountName -ObjectSid $objectSid -WarningAction SilentlyContinue |
-                    Should -Be $objectSid
-            }
-        }
-
-        Context 'When the ObjectSid is improperly formatted' {
-            BeforeAll {
-                $objectSid = (New-Guid).Guid
-                $errorMessage = $script:localizedData.ResolveSamAccountNameError -f $objectSid
-            }
-
-            It 'Should throw' {
-                { Resolve-SamAccountName -ObjectSid $objectSid -ErrorAction Stop } |
-                    Should Throw $errorMessage
-            }
-        }
-    }
-
     Describe 'ActiveDirectoryDsc.Common\Resolve-MembersSecurityIdentifier' {
+        BeforeAll {
+            $script:memberIndex = 0
+            $script:resolveSecurityIdentifierCalls = 0
+            $script:getADObjectCalls = 0
+
+            Mock -CommandName Assert-Module
+
+            Mock -CommandName Resolve-SecurityIdentifier -MockWith {
+                $memberADObjectSID = $mockADGroupMembersAsADObjects[($script:memberIndex)].ObjectSID
+                $script:memberIndex++
+                $script:resolveSecurityIdentifierCalls++
+                return $memberADObjectSID
+            }
+
+            Mock -CommandName Get-ADObject -MockWith {
+                $memberADObject = $mockADGroupMembersAsADObjects[$script:memberIndex]
+                $script:memberIndex++
+                $script:getADObjectCalls++
+                return $memberADObject
+            }
+        }
+
         Context "When 'Server' is passed as part of the 'Parameters' parameter" {
             BeforeAll {
                 $testServer = 'TESTDC'
 
+                $script:memberIndex = 0
+
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects[0].ObjectGUID
+                    Members             = $mockADGroupMembersAsADObjects[$script:memberIndex].ObjectGUID
                     MembershipAttribute = 'ObjectGUID'
                     Parameters          = @{
                         Server = $testServer
                     }
-                    WarningAction       = 'SilentlyContinue'
-                }
-
-                Mock -CommandName Assert-Module
-
-                Mock -CommandName Get-ADObject -MockWith {
-                    $mockADGroupMembersAsADObjects[0]
                 }
             }
 
             It "Calls 'Get-ADObject' with 'Server' parameter" {
                 Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
 
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
+                    $ModuleName -eq 'ActiveDirectory'
+                } -Exactly -Times 1
+
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 0
+
                 Assert-MockCalled -CommandName Get-ADObject -ParameterFilter {
                     $Server -eq $testServer
-                }
-
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
-                     $ModuleName -eq 'ActiveDirectory'
-                }
+                } -Exactly -Times 1
             }
         }
 
@@ -2200,66 +2190,73 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                 )
 
+                $script:memberIndex = 0
+
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects[0].ObjectGUID
+                    Members             = $mockADGroupMembersAsADObjects[$script:memberIndex].ObjectGUID
                     MembershipAttribute = 'ObjectGUID'
                     Parameters          = @{
                         Credential = $testCredentials
                     }
-                    WarningAction       = 'SilentlyContinue'
-                }
-
-                Mock -CommandName Assert-Module
-
-                Mock -CommandName Get-ADObject -MockWith {
-                    $mockADGroupMembersAsADObjects[0]
                 }
             }
 
             It "Calls 'Get-ADObject' with 'Credential' parameter" {
                 Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
 
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
+                    $ModuleName -eq 'ActiveDirectory'
+                } -Exactly -Times 1
+
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 0
+
                 Assert-MockCalled -CommandName Get-ADObject -ParameterFilter {
                     $Credential -eq $testCredentials
-                }
-
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
-                     $ModuleName -eq 'ActiveDirectory'
-                }
+                } -Exactly -Times 1
             }
         }
 
-        Context "When 'MembershipAttribute' is 'SamAccountName'" {
-            Context "When 'Resolve-SecurityIdentifier' fails" {
-                BeforeAll {
-                    $resolveMembersSecurityIdentifierParms = @{
-                        Members             = $mockADGroupMembersAsADObjects[0].SamAccountName
-                        MembershipAttribute = 'SamAccountName'
-                        ErrorAction         = 'Stop'
-                        WarningAction       = 'SilentlyContinue'
-                    }
-                }
+        Context "When 'MembershipAttribute' is 'SamAccountName' and the value is in the form 'NetBIOSDomain\SamAccountName'" {
+            BeforeAll {
+                $script:memberIndex = -1
 
-                It "Should throw an exception" {
-                    { Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms } |
-                        Should -Throw
+                $resolveMembersSecurityIdentifierParms = @{
+                    Members             = $mockADGroupMembersAsADObjects[$script:memberIndex].SamAccountName
+                    MembershipAttribute = 'SamAccountName'
                 }
+            }
+
+            It "Should call 'Resolve-SecurityIdentifier'" {
+                Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 1
+            }
+
+            It "Should not call 'Get-ADObject'" {
+                Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
+                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 0
             }
         }
 
         Context "When 'Get-ADObject' returns no value" {
             BeforeAll {
-                Mock -CommandName Get-ADObject
+                $script:memberIndex = 0
 
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.ObjectGUID
+                    Members             = $mockADGroupMembersAsADObjects[$script:memberIndex].ObjectGUID
                     MembershipAttribute = 'ObjectGUID'
                 }
+
+                $errorMessage = ($script:localizedData.UnableToResolveMembershipAttribute -f
+                    'ObjectSID', 'ObjectGUID', $mockADGroupMembersAsADObjects[$script:memberIndex].ObjectGUID)
+
+                Mock -CommandName Get-ADObject
             }
 
-            It "Should throw an exception" {
+            It "Should throw the correct exception" {
                 { Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms } |
-                    Should -Throw
+                    Should -Throw $errorMessage
+
+                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 1
             }
         }
 
@@ -2276,82 +2273,62 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                         $memberProperty = $attribute
                     }
 
-                    $membersParamSplat = @{
+                    $resolveMembersSecurityIdentifierParms = @{
                         Members             = $mockADGroupMembersAsADObjects.$memberProperty
                         MembershipAttribute = $attribute
                     }
 
                     $script:memberIndex = 0
-
-                    Mock -CommandName Resolve-SecurityIdentifier -MockWith {
-                        $memberADObjectSID = $mockADGroupMembersAsADObjects[($script:memberIndex)].ObjectSID
-                        $script:memberIndex++
-                        return $memberADObjectSID
-                    }
+                    $script:resolveSecurityIdentifierCalls = 0
+                    $script:getADObjectCalls = 0
 
                     Mock -CommandName Write-Debug -MockWith {
                         $script:memberIndex++
                     } -ParameterFilter {
                         $Message -eq ($script:localizedData.ParsingCommonNameFromDN -f $memberProperty)
                     }
-
-                    Mock -CommandName Get-ADObject -MockWith {
-                        $memberADObject = $mockADGroupMembersAsADObjects[$script:memberIndex]
-                        $script:memberIndex++
-                        return $memberADObject
-                    }
-
-                    Mock -CommandName Assert-Module
                 }
 
                 It "Returns the correct value" {
-                    $result = Resolve-MembersSecurityIdentifier @membersParamSplat
-                    $result | ForEach-Object -Process {
-                        $mockADGroupMembersAsADObjects.ObjectSID | Should -Contain $_
+                    $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
+
+                    for ($i = 0; $i -lt $result.Count; $i++)
+                    {
+                        $mockADGroupMembersAsADObjects[$i].ObjectSID | Should -Be $result[$i]
                     }
 
                     Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
                         $ModuleName -eq 'ActiveDirectory'
-                    }
+                    } -Exactly -Times 1
+
+                    Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times $script:resolveSecurityIdentifierCalls
+                    Assert-MockCalled -CommandName Get-ADObject -Exactly -Times $script:getADObjectCalls
                 }
 
                 Context "When 'PrepareForMembership' is specified" {
                     BeforeAll {
+                        $resolveMembersPreparedSecurityIdentifierParms = $resolveMembersSecurityIdentifierParms.Clone()
+                        $resolveMembersPreparedSecurityIdentifierParms['PrepareForMembership'] = $true
+
                         $script:memberIndex = 0
-
-                        Mock -CommandName Resolve-SecurityIdentifier -MockWith {
-                            $memberADObjectSID = $mockADGroupMembersAsADObjects[($script:memberIndex)].ObjectSID
-                            $script:memberIndex++
-                            return $memberADObjectSID
-                        }
-
-                        Mock -CommandName Write-Debug -MockWith {
-                            $script:memberIndex++
-                        } -ParameterFilter {
-                            $Message -eq ($script:localizedData.ParsingCommonNameFromDN -f $memberProperty)
-                        }
-
-                        Mock -CommandName Get-ADObject -MockWith {
-                            $memberADObject = $mockADGroupMembersAsADObjects[$script:memberIndex]
-                            $script:memberIndex++
-                            return $memberADObject
-                        }
-
-                        Mock -CommandName Assert-Module
-
-                        $resolveMembersSecurityIdentifierParms = $membersParamSplat.Clone()
-                        $resolveMembersSecurityIdentifierParms['PrepareForMembership'] = $true
+                        $script:resolveSecurityIdentifierCalls = 0
+                        $script:getADObjectCalls = 0
                     }
 
                     It 'Returns the correct value' {
-                        $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
-                        $result | ForEach-Object -Process {
-                            $_ | Should -Match '^[<]SID[=]S[-]1[-]5[-]21([-][0-9]{10}){2}[-][0-9]{9}[-][0-9]+[>]$'
+                        $result = Resolve-MembersSecurityIdentifier @resolveMembersPreparedSecurityIdentifierParms
+
+                        for ($i = 0; $i -lt $result.Count; $i++)
+                        {
+                            "<SID=$($mockADGroupMembersAsADObjects[$i].ObjectSID)>" | Should -Be $result[$i]
                         }
 
                         Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
                             $ModuleName -eq 'ActiveDirectory'
-                        }
+                        } -Exactly -Times 1
+
+                        Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times $script:resolveSecurityIdentifierCalls
+                        Assert-MockCalled -CommandName Get-ADObject -Exactly -Times $script:getADObjectCalls
                     }
                 }
             }
