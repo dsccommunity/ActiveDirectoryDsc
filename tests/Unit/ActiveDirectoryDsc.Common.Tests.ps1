@@ -2240,7 +2240,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     }
                 }
 
-                It "Should throw" {
+                It "Should throw an exception" {
                     { Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms } |
                         Should -Throw
                 }
@@ -2300,12 +2300,18 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                         $script:memberIndex++
                         return $memberADObject
                     }
+
+                    Mock -CommandName Assert-Module
                 }
 
                 It "Returns the correct value" {
                     $result = Resolve-MembersSecurityIdentifier @membersParamSplat
                     $result | ForEach-Object -Process {
                         $mockADGroupMembersAsADObjects.ObjectSID | Should -Contain $_
+                    }
+
+                    Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
+                        $ModuleName -eq 'ActiveDirectory'
                     }
                 }
 
@@ -2331,6 +2337,8 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                             return $memberADObject
                         }
 
+                        Mock -CommandName Assert-Module
+
                         $resolveMembersSecurityIdentifierParms = $membersParamSplat.Clone()
                         $resolveMembersSecurityIdentifierParms['PrepareForMembership'] = $true
                     }
@@ -2339,6 +2347,10 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                         $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
                         $result | ForEach-Object -Process {
                             $_ | Should -Match '^[<]SID[=]S[-]1[-]5[-]21([-][0-9]{10}){2}[-][0-9]{9}[-][0-9]+[>]$'
+                        }
+
+                        Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
+                            $ModuleName -eq 'ActiveDirectory'
                         }
                     }
                 }
