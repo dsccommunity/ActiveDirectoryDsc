@@ -1106,14 +1106,8 @@ try
                     $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope')
                 }
 
-                Mock -CommandName Set-ADCommonGroupMember
-
                 $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
                 $universalGroupInCompliance | Should -BeTrue
-
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
             }
 
             # tests for issue 183
@@ -1131,14 +1125,8 @@ try
                     $Identity -eq $fakeADUniversalGroup.Identity -and -not $PSBoundParameters.ContainsKey('GroupScope')
                 }
 
-                Mock -CommandName Set-ADCommonGroupMember
-
                 $universalGroupInCompliance = Test-TargetResource -GroupName $testUniversalPresentParams.GroupName -DisplayName $testUniversalPresentParams.DisplayName
                 $universalGroupInCompliance | Should -BeTrue
-
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
             }
 
             It "Calls Restore-AdCommonObject when RestoreFromRecycleBin is used" {
