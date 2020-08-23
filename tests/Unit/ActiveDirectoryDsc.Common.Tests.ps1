@@ -2399,17 +2399,34 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
 
         Context "When 'PrepareForMembership' is specified" {
-            BeforeAll {
-                $resolveMembersPreparedSecurityIdentifierParms = @{
-                    Members              = $mockADGroupMembersAsADObjects[0].ObjectGUID
-                    MembershipAttribute  = 'ObjectGUID'
-                    PrepareForMembership = $true
+            Context "When MembershipAttribute 'ObjectGUID' is specified" {
+                BeforeAll {
+                    $resolveMembersPreparedSecurityIdentifierParms = @{
+                        Members              = $mockADGroupMembersAsADObjects[0].ObjectGUID
+                        MembershipAttribute  = 'ObjectGUID'
+                        PrepareForMembership = $true
+                    }
+                }
+
+                It 'Returns the correct value' {
+                    Resolve-MembersSecurityIdentifier @resolveMembersPreparedSecurityIdentifierParms |
+                        Should -Be "<SID=$($mockADGroupMembersAsADObjects[0].ObjectSID)>"
                 }
             }
 
-            It 'Returns the correct value' {
-                Resolve-MembersSecurityIdentifier @resolveMembersPreparedSecurityIdentifierParms |
-                    Should -Be "<SID=$($mockADGroupMembersAsADObjects[0].ObjectSID)>"
+            Context "When MembershipAttribute 'SID' is specified" {
+                BeforeAll {
+                    $resolveMembersPreparedSecurityIdentifierParms = @{
+                        Members              = $mockADGroupMembersAsADObjects[0].ObjectSID
+                        MembershipAttribute  = 'SID'
+                        PrepareForMembership = $true
+                    }
+                }
+
+                It 'Returns the correct value' {
+                    Resolve-MembersSecurityIdentifier @resolveMembersPreparedSecurityIdentifierParms |
+                        Should -Be "<SID=$($mockADGroupMembersAsADObjects[0].ObjectSID)>"
+                }
             }
         }
     }
