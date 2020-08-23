@@ -2613,8 +2613,6 @@ function Resolve-MembersSecurityIdentifier
 
     begin
     {
-        $verbose = $PSBoundParameters.Verbose -eq $true
-
         Assert-Module -ModuleName ActiveDirectory
 
         $property = 'ObjectSID'
