@@ -9,9 +9,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
-- ADFineGrainedPasswordPolicy
-  - New resource for creating and updating Fine Grained Password Policies for AD principal subjects.
-    ([issue #584](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/584)).
+- ADFineGrainedPasswordPolicy
+  - New resource for creating and updating Fine Grained Password Policies for AD principal subjects.
+    ([issue #584](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/584)).
 
 ### Changed
 
