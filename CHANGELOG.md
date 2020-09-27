@@ -7,7 +7,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
-### Added
+### Added
 
 - ADFineGrainedPasswordPolicy
   - New resource for creating and updating Fine Grained Password Policies for AD principal subjects.
