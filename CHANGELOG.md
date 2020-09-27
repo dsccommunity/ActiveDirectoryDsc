@@ -23,7 +23,6 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Removed redundant common functions `Resolve-DomainFQDN` and `Set-DscADComputer`.
   - Added ActiveDirectoryDsc.Common Module markdown help.
   - Updated the `DscResource.Common` module to `v0.9.0`.
-
 - ADDomainTrust
   - Move `Get-ActiveDirectoryDomain` and `Get-ActiveDirectoryForest` functions
     into the `ActiveDirectoryDsc.Common` module.
