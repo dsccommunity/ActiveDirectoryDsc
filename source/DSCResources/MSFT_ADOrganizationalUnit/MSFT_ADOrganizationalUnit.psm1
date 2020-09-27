@@ -171,10 +171,9 @@ function Test-TargetResource
         # Resource exists
         if ($Ensure -eq 'Present')
         {
-
             # Resource should exist
             $propertiesNotInDesiredState = (
-                Compare-ResourcePropertyState -CurrentValue $targetResource -DesiredValues $PSBoundParameters -IgnoreProperties @("Credential") |
+                Compare-ResourcePropertyState -CurrentValue $targetResource -DesiredValues $PSBoundParameters -IgnoreProperties 'Credential' |
                     Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)
