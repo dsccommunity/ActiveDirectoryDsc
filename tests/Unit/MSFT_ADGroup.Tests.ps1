@@ -751,9 +751,9 @@ try
 
                 Set-TargetResource @testPresentParams -Members @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
 
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
             }
 
             It "Tries to resolve the domain names for all groups in the same domain when the 'MembershipAttribute' property is set to distinguishedName" {
@@ -782,9 +782,9 @@ try
                 Set-TargetResource @testPresentParamsMultiDomain -Members @($fakeADUser1.distinguishedName, $fakeADUser2.distinguishedName)
 
                 Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
                 Assert-MockCalled -CommandName Write-Verbose -ParameterFilter {
                     $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'
                 } -Exactly -Times 0
@@ -830,9 +830,9 @@ try
                 Set-TargetResource @testPresentParamsMultiDomain -Members @($fakeADUser1.distinguishedName, $fakeADUser4.distinguishedName)
 
                 Assert-MockCalled -CommandName Get-ADDomainNameFromDistinguishedName
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
                 Assert-MockCalled -CommandName Write-Verbose -ParameterFilter {
                     $Message -and $Message -match 'Group membership objects are in .* different AD Domains.'
                 }
@@ -851,9 +851,9 @@ try
 
                 Set-TargetResource @testPresentParams -MembersToInclude @($fakeADUser1.SamAccountName, $fakeADUser2.SamAccountName)
 
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
             }
 
             It "Moves group when 'Ensure' is 'Present', the group exists but the 'Path' has changed" {
@@ -885,21 +885,19 @@ try
                     )
                 }
 
-                Mock -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                }
-                Mock -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Remove'
-                }
+                Mock -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' }
+                Mock -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Remove' }
 
                 Set-TargetResource @testPresentParams -Members $fakeADUser1.SamAccountName
 
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Remove'
-                } -Scope It -Exactly -Times 1
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Remove' } `
+                    -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
             }
 
             It "Does not reset group membership when 'Ensure' is 'Present' and existing group is empty" {
@@ -913,9 +911,9 @@ try
 
                 Set-TargetResource @testPresentParams -MembersToExclude $fakeADUser1.SamAccountName
 
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Remove'
-                } -Scope It -Exactly -Times 0
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Remove' } `
+                    -Scope It -Exactly -Times 0
             }
 
             It "Removes members when 'Ensure' is 'Present' and 'MembersToExclude' is incorrect" {
@@ -935,9 +933,9 @@ try
 
                 Set-TargetResource @testPresentParams -MembersToExclude $fakeADUser1.SamAccountName
 
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Remove'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Remove' } `
+                    -Scope It -Exactly -Times 1
             }
 
             It "Adds members when 'Ensure' is 'Present' and 'MembersToInclude' is incorrect" {
@@ -957,9 +955,9 @@ try
 
                 Set-TargetResource @testPresentParams -MembersToInclude $fakeADUser3.SamAccountName
 
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
             }
 
             It "Removes group when 'Ensure' is 'Absent' and group exists" {
@@ -1058,9 +1056,9 @@ try
                 )
 
                 Assert-MockCalled -CommandName Set-ADGroup -Scope It -Exactly -Times 1
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
             }
 
             # tests for issue 183
@@ -1086,9 +1084,9 @@ try
                 )
 
                 Assert-MockCalled -CommandName Set-ADGroup -Scope It -Exactly -Times 1
-                Assert-MockCalled -CommandName Set-ADCommonGroupMember -ParameterFilter {
-                    $Action -eq 'Add'
-                } -Scope It -Exactly -Times 1
+                Assert-MockCalled -CommandName Set-ADCommonGroupMember `
+                    -ParameterFilter { $Action -eq 'Add' } `
+                    -Scope It -Exactly -Times 1
             }
 
             # tests for issue 183

@@ -749,107 +749,114 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     }
 
     Describe 'ActiveDirectoryDsc.Common\Set-ADCommonGroupMember' {
-        $mockADGroupMembersAsADObjects = @(
-            [PSCustomObject] @{
-                DistinguishedName = 'CN=User 1,CN=Users,DC=contoso,DC=com'
-                ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
-                SamAccountName    = 'USER1'
-                ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1106'
-                ObjectClass       = 'user'
-            }
-            [PSCustomObject] @{
-                DistinguishedName = 'CN=Group 1,CN=Users,DC=contoso,DC=com'
-                ObjectGUID        = 'e2328767-2673-40b2-b3b7-ce9e6511df06'
-                SamAccountName    = 'GROUP1'
-                ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1206'
-                ObjectClass       = 'group'
-            }
-            [PSCustomObject] @{
-                DistinguishedName = 'CN=Computer 1,CN=Users,DC=contoso,DC=com'
-                ObjectGUID        = '42f9d607-0934-4afc-bb91-bdf93e07cbfc'
-                SamAccountName    = 'COMPUTER1'
-                ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-6606'
-                ObjectClass       = 'computer'
-            }
-            # This entry is used to represent a group member from a one-way trusted domain
-            [PSCustomObject] @{
-                DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
-                ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
-                SamAccountName    = 'ADATUM\USER1'
-                ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2106'
-                ObjectClass       = 'foreignSecurityPrincipal'
-            }
-        )
+        BeforeAll {
+            $mockADGroupMembersAsADObjects = @(
+                [PSCustomObject] @{
+                    DistinguishedName = 'CN=User 1,CN=Users,DC=contoso,DC=com'
+                    ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
+                    SamAccountName    = 'USER1'
+                    ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1106'
+                    ObjectClass       = 'user'
+                }
+                [PSCustomObject] @{
+                    DistinguishedName = 'CN=Group 1,CN=Users,DC=contoso,DC=com'
+                    ObjectGUID        = 'e2328767-2673-40b2-b3b7-ce9e6511df06'
+                    SamAccountName    = 'GROUP1'
+                    ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1206'
+                    ObjectClass       = 'group'
+                }
+                [PSCustomObject] @{
+                    DistinguishedName = 'CN=Computer 1,CN=Users,DC=contoso,DC=com'
+                    ObjectGUID        = '42f9d607-0934-4afc-bb91-bdf93e07cbfc'
+                    SamAccountName    = 'COMPUTER1'
+                    ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-6606'
+                    ObjectClass       = 'computer'
+                }
+                # This entry is used to represent a group member from a one-way trusted domain
+                [PSCustomObject] @{
+                    DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
+                    ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
+                    SamAccountName    = 'ADATUM\USER1'
+                    ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2106'
+                    ObjectClass       = 'foreignSecurityPrincipal'
+                }
+            )
 
-        $groupMembersParms = @{
-            Members             = $mockADGroupMembersAsADObjects.DistinguishedName
-            MembershipAttribute = 'DistinguishedName'
-            Parameters          = @{
-                Identity = 'CN=TestGroup,OU=Fake,DC=contoso,DC=com'
+            $setADCommonGroupMemberParms = @{
+                Members             = $mockADGroupMembersAsADObjects.DistinguishedName
+                MembershipAttribute = 'DistinguishedName'
+                Parameters          = @{
+                    Identity = 'CN=TestGroup,OU=Fake,DC=contoso,DC=com'
+                }
             }
+
+            $membershipSID = @{
+                member = $mockADGroupMembersAsADObjects.ObjectSID | ForEach-Object -Process { "<SID=$($_)>" }
+            }
+
+            Mock -CommandName Assert-Module
+            Mock -CommandName Resolve-MembersSecurityIdentifier -MockWith { $membershipSID['member'] }
+            Mock -CommandName Set-ADGroup
         }
 
-        $membershipSID = @{
-            member = $mockADGroupMembersAsADObjects.ObjectSID | ForEach-Object -Process { "<SID=$($_)>" }
-        }
-
-        Mock -CommandName Assert-Module
-
-        Mock -CommandName Resolve-MembersSecurityIdentifier `
-            -MockWith { $membershipSID['member'] }
-
-        Context "When 'Action' parameter is specified as 'Add'" {
+        Context "When the 'Action' parameter is specified as 'Add'" {
             BeforeAll {
-                Mock -CommandName Set-ADGroup
-
-                $setADCommonGroupMemberParms = $groupMembersParms.Clone()
-                $setADCommonGroupMemberParms['Action'] = 'Add'
+                $setADCommonGroupMemberAddParms = $setADCommonGroupMemberParms.Clone()
+                $setADCommonGroupMemberAddParms['Action'] = 'Add'
             }
 
-            It "Calls 'Set-ADGroup' with 'Add' parameter" {
-                Set-ADCommonGroupMember @setADCommonGroupMemberParms
+            It 'Should not throw' {
+                { Set-ADCommonGroupMember @setADCommonGroupMemberAddParms } | Should -Not -Throw
+            }
 
-                Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName Assert-Module `
+                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                    -Exactly -Times 1
                 Assert-MockCalled -CommandName Resolve-MembersSecurityIdentifier `
-                    -Exactly -Times $setADCommonGroupMemberParms.Members.Count
+                    -Exactly -Times $setADCommonGroupMemberAddParms.Members.Count
                 Assert-MockCalled -CommandName Set-ADGroup `
-                    -ParameterFilter { $Add -ne $null } `
+                    -ParameterFilter { `
+                        $Add -ne $null -and `
+                        $Identity -eq $setADCommonGroupMemberAddParms.Parameters.Identity } `
                     -Exactly -Times 1
             }
         }
 
         Context "When 'Action' parameter is specified as 'Remove'" {
             BeforeAll {
-                Mock -CommandName Set-ADGroup
-
-                $setADCommonGroupMemberParms = $groupMembersParms.Clone()
-                $setADCommonGroupMemberParms['Action'] = 'Remove'
+                $setADCommonGroupMemberRemoveParms = $setADCommonGroupMemberParms.Clone()
+                $setADCommonGroupMemberRemoveParms['Action'] = 'Remove'
             }
 
-            It "Calls 'Set-ADGroup' with 'Remove' parameter" {
-                Set-ADCommonGroupMember @setADCommonGroupMemberParms
+            It 'Should not throw' {
+                { Set-ADCommonGroupMember @setADCommonGroupMemberRemoveParms } | Should -Not -Throw
+            }
 
-                Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName Assert-Module `
+                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                    -Exactly -Times 1
                 Assert-MockCalled -CommandName Resolve-MembersSecurityIdentifier `
-                    -Exactly -Times $setADCommonGroupMemberParms.Members.Count
+                    -Exactly -Times $setADCommonGroupMemberRemoveParms.Members.Count
                 Assert-MockCalled -CommandName Set-ADGroup `
-                    -ParameterFilter { $Remove -ne $null } `
+                    -ParameterFilter { `
+                        $Remove -ne $null -and `
+                        $Identity -eq $setADCommonGroupMemberRemoveParms.Parameters.Identity } `
                     -Exactly -Times 1
             }
         }
 
         Context "When 'Set-ADGroup' throws an exception" {
             BeforeAll {
-                Mock -CommandName Set-ADGroup -MockWith {
-                    throw 'Error'
-                }
+                Mock -CommandName Set-ADGroup -MockWith { throw 'Error' }
 
                 $errorMessage = $script:localizedData.FailedToSetADGroupMembership -f
-                    $groupMembersParms.Parameters.Identity
+                $setADCommonGroupMemberParms.Parameters.Identity
             }
 
             It "Should throw the correct exception" {
-                { Set-ADCommonGroupMember @groupMembersParms } |
+                { Set-ADCommonGroupMember @setADCommonGroupMemberParms } |
                     Should -Throw $errorMessage
             }
         }
@@ -2188,27 +2195,29 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         Context "When 'Server' is passed as part of the 'Parameters' parameter" {
             BeforeAll {
                 $testServer = 'TESTDC'
+                $membershipAttribute = 'ObjectGUID'
 
                 $script:memberIndex = 0
 
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.ObjectGUID
-                    MembershipAttribute = 'ObjectGUID'
+                    Members             = $mockADGroupMembersAsADObjects.$membershipAttribute
+                    MembershipAttribute = $membershipAttribute
                     Parameters          = @{
                         Server = $testServer
                     }
                 }
             }
 
-            It "Calls the correct mocks" {
-                Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
+            It 'Should not throw' {
+                { Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms } | Should -Not -Throw
+            }
 
+            It 'Should call the expected mocks' {
                 Assert-MockCalled -CommandName Assert-Module `
                     -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
                     -Exactly -Times 1
-
-                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 0
-
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier `
+                    -Exactly -Times 0
                 Assert-MockCalled -CommandName Get-ADObject `
                     -ParameterFilter { $Server -eq $testServer } `
                     -Exactly -Times $mockADGroupMembersAsADObjects.Count
@@ -2221,153 +2230,159 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                     'DummyUser',
                     (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                 )
+                $membershipAttribute = 'ObjectGUID'
 
                 $script:memberIndex = 0
 
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.ObjectGUID
-                    MembershipAttribute = 'ObjectGUID'
+                    Members             = $mockADGroupMembersAsADObjects.$membershipAttribute
+                    MembershipAttribute = $membershipAttribute
                     Parameters          = @{
                         Credential = $testCredentials
                     }
                 }
             }
 
-            It "Calls the correct mocks" {
-                Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
+            It 'Should not throw' {
+                { Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms } | Should -Not -Throw
+            }
 
+            It 'Should call the expected mocks' {
                 Assert-MockCalled -CommandName Assert-Module `
                     -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
                     -Exactly -Times 1
-
-                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 0
-
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier `
+                    -Exactly -Times 0
                 Assert-MockCalled -CommandName Get-ADObject `
                     -ParameterFilter { $Credential -eq $testCredentials } `
                     -Exactly -Times $mockADGroupMembersAsADObjects.Count
             }
         }
 
-        Context "When 'MembershipAttribute' is 'SamAccountName' and the value is in the form 'NetBIOSDomain\SamAccountName'" {
-            BeforeAll {
-                $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects[-1].SamAccountName
-                    MembershipAttribute = 'SamAccountName'
-                }
-
-                Mock -CommandName Resolve-SecurityIdentifier -MockWith { $mockADGroupMembersAsADObjects[-1].ObjectSID }
-            }
-
-            It "Should call 'Resolve-SecurityIdentifier'" {
-                Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
-                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 1
-            }
-
-            It "Should not call 'Get-ADObject'" {
-                Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
-                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 0
-            }
-        }
-
         Context "When 'Get-ADObject' returns no value" {
             BeforeAll {
+                $membershipAttribute = 'ObjectGUID'
+
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects[0].ObjectGUID
-                    MembershipAttribute = 'ObjectGUID'
+                    Members             = $mockADGroupMembersAsADObjects[0].$membershipAttribute
+                    MembershipAttribute = $membershipAttribute
                 }
 
                 $errorMessage = ($script:localizedData.UnableToResolveMembershipAttribute -f
-                    'ObjectSID', 'ObjectGUID', $mockADGroupMembersAsADObjects[0].ObjectGUID)
+                    'ObjectSID', $membershipAttribute, $mockADGroupMembersAsADObjects[0].$membershipAttribute)
 
+                Mock -CommandName Resolve-SecurityIdentifier
                 Mock -CommandName Get-ADObject
             }
 
-            It "Should throw the correct exception" {
+            It 'Should throw the correct exception' {
                 { Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms } |
                     Should -Throw $errorMessage
-
-                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 1
             }
         }
 
         Context "When MembershipAttribute 'SamAccountName' is specified" {
             BeforeAll {
+                $membershipAttribute = 'SamAccountName'
+
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.SamAccountName
-                    MembershipAttribute = 'SamAccountName'
+                    Members             = $mockADGroupMembersAsADObjects.$membershipAttribute
+                    MembershipAttribute = $membershipAttribute
                 }
+
+                $resolveSecurityIdentifierCount = @($mockADGroupMembersAsADObjects |
+                        Where-Object -Property $membershipAttribute -Match '\\').Count
+
+                $getADObjectCount = @($mockADGroupMembersAsADObjects |
+                        Where-Object -Property $membershipAttribute -NotMatch '\\').Count
 
                 $script:memberIndex = 0
             }
 
-            It "Returns the correct value and calls the correct mocks" {
+            It 'Should return the correct result' {
                 $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
 
                 for ($i = 0; $i -lt $result.Count; $i++)
                 {
-                    $mockADGroupMembersAsADObjects[$i].ObjectSID | Should -Be $result[$i]
+                    $result[$i] | Should -Be $mockADGroupMembersAsADObjects[$i].ObjectSID
                 }
+            }
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
-                    $ModuleName -eq 'ActiveDirectory'
-                } -Exactly -Times 1
-
-                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 1
-                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 3
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName Assert-Module `
+                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                    -Exactly -Times 1
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier `
+                    -Exactly -Times $resolveSecurityIdentifierCount
+                Assert-MockCalled -CommandName Get-ADObject `
+                    -Exactly -Times $getADObjectCount
             }
         }
 
         Context "When MembershipAttribute 'DistinguishedName' is specified" {
             BeforeAll {
+                $membershipAttribute = 'DistinguishedName'
+
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.DistinguishedName
-                    MembershipAttribute = 'DistinguishedName'
+                    Members             = $mockADGroupMembersAsADObjects.$membershipAttribute
+                    MembershipAttribute = $membershipAttribute
                 }
+
+                $getADObjectCount = @($mockADGroupMembersAsADObjects |
+                        Where-Object -Property $membershipAttribute -NotMatch 'CN=ForeignSecurityPrincipals').Count
 
                 $script:memberIndex = 0
             }
 
-            It "Returns the correct value and calls the correct mocks" {
+            It 'Should return the correct result' {
                 $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
 
                 for ($i = 0; $i -lt $result.Count; $i++)
                 {
-                    $mockADGroupMembersAsADObjects[$i].ObjectSID | Should -Be $result[$i]
+                    $result[$i] | Should -Be $mockADGroupMembersAsADObjects[$i].ObjectSID
                 }
+            }
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
-                    $ModuleName -eq 'ActiveDirectory'
-                } -Exactly -Times 1
-
-                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 0
-                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 3
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName Assert-Module `
+                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                    -Exactly -Times 1
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier `
+                    -Exactly -Times 0
+                Assert-MockCalled -CommandName Get-ADObject `
+                    -Exactly -Times $getADObjectCount
             }
         }
 
         Context "When MembershipAttribute 'ObjectGUID' is specified" {
             BeforeAll {
+                $membershipAttribute = 'ObjectGUID'
+
                 $resolveMembersSecurityIdentifierParms = @{
-                    Members             = $mockADGroupMembersAsADObjects.ObjectGUID
-                    MembershipAttribute = 'ObjectGUID'
+                    Members             = $mockADGroupMembersAsADObjects.$membershipAttribute
+                    MembershipAttribute = $membershipAttribute
                 }
 
                 $script:memberIndex = 0
             }
 
-            It "Returns the correct value and calls the correct mocks" {
+            It 'Should Return the correct result' {
                 $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
 
                 for ($i = 0; $i -lt $result.Count; $i++)
                 {
-                    $mockADGroupMembersAsADObjects[$i].ObjectSID | Should -Be $result[$i]
+                    $result[$i] | Should -Be $mockADGroupMembersAsADObjects[$i].ObjectSID
                 }
+            }
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
-                    $ModuleName -eq 'ActiveDirectory'
-                } -Exactly -Times 1
-
-                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 0
-                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 4
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName Assert-Module `
+                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                    -Exactly -Times 1
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier `
+                    -Exactly -Times 0
+                Assert-MockCalled -CommandName Get-ADObject `
+                    -Exactly -Times $mockADGroupMembersAsADObjects.Count
             }
         }
 
@@ -2381,51 +2396,64 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 $script:memberIndex = 0
             }
 
-            It "Returns the correct value and calls the correct mocks" {
+            It 'Should return the correct result' {
                 $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
 
                 for ($i = 0; $i -lt $result.Count; $i++)
                 {
-                    $mockADGroupMembersAsADObjects[$i].ObjectSID | Should -Be $result[$i]
+                    $result[$i] | Should -Be $mockADGroupMembersAsADObjects[$i].ObjectSID
                 }
+            }
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
-                    $ModuleName -eq 'ActiveDirectory'
-                } -Exactly -Times 1
-
-                Assert-MockCalled -CommandName Resolve-SecurityIdentifier -Exactly -Times 0
-                Assert-MockCalled -CommandName Get-ADObject -Exactly -Times 0
+            It 'Should call the expected mocks' {
+                Assert-MockCalled -CommandName Assert-Module `
+                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
+                    -Exactly -Times 1
+                Assert-MockCalled -CommandName Resolve-SecurityIdentifier `
+                    -Exactly -Times 0
+                Assert-MockCalled -CommandName Get-ADObject `
+                    -Exactly -Times 0
             }
         }
 
         Context "When 'PrepareForMembership' is specified" {
-            Context "When MembershipAttribute 'ObjectGUID' is specified" {
+            Context "When the MembershipAttribute specified is not 'SID'" {
                 BeforeAll {
-                    $resolveMembersPreparedSecurityIdentifierParms = @{
-                        Members              = $mockADGroupMembersAsADObjects[0].ObjectGUID
-                        MembershipAttribute  = 'ObjectGUID'
+                    $membershipAttribute = 'ObjectGUID'
+
+                    $resolveMembersSecurityIdentifierParms = @{
+                        Members              = $mockADGroupMembersAsADObjects.$membershipAttribute
+                        MembershipAttribute  = $membershipAttribute
                         PrepareForMembership = $true
                     }
                 }
 
-                It 'Returns the correct value' {
-                    Resolve-MembersSecurityIdentifier @resolveMembersPreparedSecurityIdentifierParms |
-                        Should -Be "<SID=$($mockADGroupMembersAsADObjects[0].ObjectSID)>"
+                It 'Should return the correct result' {
+                    $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
+
+                    for ($i = 0; $i -lt $result.Count; $i++)
+                    {
+                        $result[$i] | Should -Be "<SID=$($mockADGroupMembersAsADObjects[$i].ObjectSID)>"
+                    }
                 }
             }
 
-            Context "When MembershipAttribute 'SID' is specified" {
+            Context "When MembershipAttribute specified is 'SID'" {
                 BeforeAll {
-                    $resolveMembersPreparedSecurityIdentifierParms = @{
-                        Members              = $mockADGroupMembersAsADObjects[0].ObjectSID
+                    $resolveMembersSecurityIdentifierParms = @{
+                        Members              = $mockADGroupMembersAsADObjects.ObjectSID
                         MembershipAttribute  = 'SID'
                         PrepareForMembership = $true
                     }
                 }
 
-                It 'Returns the correct value' {
-                    Resolve-MembersSecurityIdentifier @resolveMembersPreparedSecurityIdentifierParms |
-                        Should -Be "<SID=$($mockADGroupMembersAsADObjects[0].ObjectSID)>"
+                It 'Should return the correct result' {
+                    $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
+
+                    for ($i = 0; $i -lt $result.Count; $i++)
+                    {
+                        $result[$i] | Should -Be "<SID=$($mockADGroupMembersAsADObjects[$i].ObjectSID)>"
+                    }
                 }
             }
         }
