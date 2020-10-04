@@ -19,6 +19,8 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER Path
         Specifies the X.500 path of the OrganizationalUnit (OU) or container where the new object is created.
 
+    .PARAMETER Server
+        Specifies the AD DS instance to connect to, by providing a value corresponding domain name or directory server. The service may be any of the following: AD LDS, AD DS, or Active Directory snapshot instance.
     .NOTES
         Used Functions:
             Name                          | Module
@@ -39,7 +41,10 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Path
+        $Path,
+
+        [System.String]
+        $Server = "localhost"
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
@@ -48,7 +53,7 @@ function Get-TargetResource
 
     try
     {
-        $ou = Get-ADOrganizationalUnit -Filter "Name -eq '$Name'" -SearchBase $Path `
+        $ou = Get-ADOrganizationalUnit -Server $Server -Filter "Name -eq '$Name'" -SearchBase $Path `
             -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
@@ -116,6 +121,9 @@ function Get-TargetResource
 
     .PARAMETER RestoreFromRecycleBin
         Try to restore the Organizational Unit (OU) from the recycle bin before creating a new one.
+
+    .PARAMETER Server
+        Specifies the AD DS instance to connect to, by providing a value corresponding domain name or directory server. The service may be any of the following: AD LDS, AD DS, or Active Directory snapshot instance.
 
     .NOTES
         Used Functions:
@@ -243,6 +251,9 @@ function Test-TargetResource
     .PARAMETER RestoreFromRecycleBin
         Try to restore the Organizational Unit (OU) from the recycle bin before creating a new one.
 
+    .PARAMETER Server
+        Specifies the AD DS instance to connect to, by providing a value corresponding domain name or directory server. The service may be any of the following: AD LDS, AD DS, or Active Directory snapshot instance.
+
     .NOTES
         Used Functions:
             Name                          | Module
@@ -306,6 +317,7 @@ function Set-TargetResource
                 Identity                        = $targetResource.DistinguishedName
                 Description                     = $Description
                 ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
+                Server = $Server
             }
 
             if ($Credential)
@@ -354,6 +366,7 @@ function Set-TargetResource
 
             $removeADOrganizationalUnitParams = @{
                 Identity = $targetResource.DistinguishedName
+                Server = $Server
             }
 
             if ($Credential)
@@ -403,6 +416,7 @@ function Set-TargetResource
                     Path                            = $Path
                     Description                     = $Description
                     ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
+                    Server = $Server
                 }
 
                 if ($Credential)
