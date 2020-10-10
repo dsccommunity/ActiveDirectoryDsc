@@ -4,9 +4,6 @@
 The ActiveDirectoryDsc.Common module is a PowerShell module that contains a set of functions that are common across the ActiveDirectoryDsc Module
 
 ## ActiveDirectoryDsc.Common Cmdlets
-### [Add-ADCommonGroupMember](docs/Add-ADCommonGroupMember.md)
-Adds a member to an AD group.
-
 ### [Add-TypeAssembly](docs/Add-TypeAssembly.md)
 Adds the assembly to the PowerShell session.
 
@@ -73,11 +70,20 @@ Creates a new MSFT_Credential CIM instance credential object.
 ### [Remove-DuplicateMembers](docs/Remove-DuplicateMembers.md)
 Removes duplicate members from a string array.
 
+### [Resolve-MembersSecurityIdentifier](docs/Resolve-MembersSecurityIdentifier.md)
+Resolves the Security Identifier (docs/SID) of a list of Members of the same type defined by the MembershipAttribute.
+
 ### [Resolve-SamAccountName](docs/Resolve-SamAccountName.md)
 Resolves the SamAccountName of an Active Directory object based on a supplied ObjectSid.
 
+### [Resolve-SecurityIdentifier](docs/Resolve-SecurityIdentifier.md)
+Resolves the Security Identifier (docs/SID) of an Active Directory object based on a supplied SamAccountName.
+
 ### [Restore-ADCommonObject](docs/Restore-ADCommonObject.md)
 Restores an AD object from the AD recyle bin.
+
+### [Set-ADCommonGroupMember](docs/Set-ADCommonGroupMember.md)
+Sets a member of an AD group by adding or removing its membership.
 
 ### [Start-ProcessWithTimeout](docs/Start-ProcessWithTimeout.md)
 Starts a process with a timeout.

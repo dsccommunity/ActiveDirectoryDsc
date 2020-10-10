@@ -76,7 +76,7 @@ Aliases are 'UserName',
 ```yaml
 Type: System.String
 Parameter Sets: (All)
-Aliases: UserName, GroupName, ComputerName, ServiceAccountName
+Aliases: UserName, GroupName, ComputerName, ServiceAccountName, Name
 
 Required: True
 Position: 1
