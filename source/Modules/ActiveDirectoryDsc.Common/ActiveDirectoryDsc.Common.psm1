@@ -1119,6 +1119,8 @@ function Set-ADCommonGroupMember
 
     Assert-Module -ModuleName ActiveDirectory
 
+    $setADGroupParameters = $Parameters.Clone()
+
     $resolveMembersSecurityIdentifierParms = @{
         MembershipAttribute  = $MembershipAttribute
         Parameters           = $Parameters
@@ -1126,13 +1128,13 @@ function Set-ADCommonGroupMember
         ErrorAction          = 'Stop'
     }
 
-    $Parameters[$Action] = @{
+    $setADGroupParameters[$Action] = @{
         member = $Members | Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
     }
 
     try
     {
-        Set-ADGroup @Parameters -ErrorAction 'Stop'
+        Set-ADGroup @setADGroupParameters -ErrorAction 'Stop'
     }
     catch
     {
