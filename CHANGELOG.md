@@ -7,7 +7,14 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Changed
+
+- ADGroup
+  - Refactored Module.
+  - Refactored Unit and Integration Tests.
+
 ### Added
+
 - ADGroup
   - Added support for managing AD group membership of Foreign Security Principals. This involved completely
     refactoring group membership management to utilize the `Set-ADGroup` cmdlet and referencing SID values.
