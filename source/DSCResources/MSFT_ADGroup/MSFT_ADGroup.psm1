@@ -682,11 +682,11 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
                         $GroupName, $property.ParameterName, ($property.Expected -join ', '))
 
-                    $setADGroupParameters.Add('GroupCategory', $property.Expected)
+                    $setADGroupParameters['GroupCategory'] = $property.Expected
                     }
                     elseif ($property.ParameterName -eq 'GroupScope')
                     {
-                        If ($GroupScope -ne 'Universal' -and $getTargetResourceResult.GroupScope -ne 'Universal')
+                        if ($GroupScope -ne 'Universal' -and $getTargetResourceResult.GroupScope -ne 'Universal')
                         {
                             #  Cannot change DomainLocal <-> Global directly, so need to change to a Universal group first
                             Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
@@ -712,7 +712,7 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
                             $GroupName, $property.ParameterName, $property.Expected)
 
-                        $SetAdGroupParameters.Add($property.ParameterName, $property.Expected)
+                        $SetAdGroupParameters[$property.ParameterName] = $property.Expected
                     }
                     elseif ($property.ParameterName -eq 'Notes')
                     {
@@ -721,7 +721,9 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
                             $GroupName, $property.ParameterName, ($property.Expected -join ', '))
 
-                        $setADGroupParameters.Add('Replace', @{ Info = $property.Expected })
+                        $setADGroupParameters['Replace'] = @{
+                            Info = $property.Expected
+                        }
                     }
                     elseif ($property.ParameterName -eq 'Members')
                     {
@@ -784,7 +786,7 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
                             $GroupName, $property.ParameterName, ($property.Expected -join ', '))
 
-                        $SetAdGroupParameters.Add($property.ParameterName, $property.Expected)
+                        $SetAdGroupParameters[$property.ParameterName] = $property.Expected
                     }
                 }
 
