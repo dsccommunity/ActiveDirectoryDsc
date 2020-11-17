@@ -8,6 +8,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ## [Unreleased]
 
 ### Added
+
 - ADGroup
   - Added support for managing AD group membership of Foreign Security Principals. This involved completely
     refactoring group membership management to utilize the `Set-ADGroup` cmdlet and referencing SID values.
@@ -15,6 +16,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADFineGrainedPasswordPolicy
   - New resource for creating and updating Fine Grained Password Policies for AD principal subjects.
     ([issue #584](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/584)).
+- ADDomainController
+  - Added support to demote domain controller when `ensure` is set to `Absent`.
+    ([issue #251](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/251))
 
 ### Changed
 
