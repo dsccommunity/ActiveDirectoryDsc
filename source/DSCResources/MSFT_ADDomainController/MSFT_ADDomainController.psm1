@@ -146,6 +146,9 @@ function Get-TargetResource
     .PARAMETER SafemodeAdministratorPassword
         Provide a password that will be used to set the DSRM password. This is a PSCredential.
 
+    .PARAMETER Ensure
+        Specifies if the node will be configured as a domain controller
+
     .PARAMETER DatabasePath
         Provide the path where the NTDS.dit will be created and stored.
 
@@ -618,6 +621,9 @@ function Set-TargetResource
 
     .PARAMETER SafemodeAdministratorPassword
         Provide a password that will be used to set the DSRM password. This is a PSCredential.
+
+    .PARAMETER Ensure
+        Specifies if the node will be configured as a domain controller
 
     .PARAMETER DatabasePath
         Provide the path where the NTDS.dit will be created and stored.
