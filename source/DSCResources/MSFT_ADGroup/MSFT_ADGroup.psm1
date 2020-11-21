@@ -17,7 +17,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
          Name of the Active Directory group.
 
     .PARAMETER Credential
-        Credentials used to enact the change upon.
+        The credential to be used to perform the operation on Active Directory.
 
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
@@ -223,7 +223,7 @@ function Get-TargetResource
         Display name of the Active Directory group.
 
     .PARAMETER Credential
-        Credentials used to enact the change upon.
+        The credential to be used to perform the operation on Active Directory.
 
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
@@ -475,7 +475,7 @@ function Test-TargetResource
         Display name of the Active Directory group.
 
     .PARAMETER Credential
-        Credentials used to enact the change with.
+        The credential to be used to perform the operation on Active Directory.
 
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
