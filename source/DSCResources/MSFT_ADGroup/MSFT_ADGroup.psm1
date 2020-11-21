@@ -954,8 +954,7 @@ function Set-TargetResource
             {
                 $Members = Remove-DuplicateMembers -Members $Members
 
-                Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f
-                    ($Members -join ', '), $GroupName)
+                Write-Verbose -Message ($script:localizedData.AddingGroupMembers -f ($Members -join ', '), $GroupName)
 
                 $setADCommonGroupMemberParms = @{
                     Members             = $Members
