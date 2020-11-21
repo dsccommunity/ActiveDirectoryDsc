@@ -474,7 +474,7 @@ function ConvertTo-TimeSpan
         $TimeSpanType
     )
 
-    $newTimeSpanParams = @{ }
+    $newTimeSpanParams = @{}
 
     switch ($TimeSpanType)
     {
