@@ -61,6 +61,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Fixed setting options after the resource is initially created
     ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).
 
+## [6.1.0] - 2020-12-09
+
+### Changed
+
+- Retracted release.
+
 ## [6.0.1] - 2020-04-16
 
 ### Fixed
