@@ -8,18 +8,19 @@ assembly-informational-format: '{NuGetVersionV2}+Sha.{Sha}.Date.{CommitDate}'
 branches:
   master:
     tag: preview
+    regex: ^main$
   pull-request:
     tag: PR
   feature:
     tag: useBranchName
     increment: Minor
     regex: f(eature(s)?)?[\/-]
-    source-branches: ['master']
+    source-branches: ['main']
   hotfix:
     tag: fix
     increment: Patch
     regex: (hot)?fix(es)?[\/-]
-    source-branches: ['master']
+    source-branches: ['main']
 
 ignore:
   sha: []

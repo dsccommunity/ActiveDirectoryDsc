@@ -8,6 +8,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ## [Unreleased]
 
 ### Added
+
 - ADGroup
   - Added support for managing AD group membership of Foreign Security Principals. This involved completely
     refactoring group membership management to utilize the `Set-ADGroup` cmdlet and referencing SID values.
@@ -19,6 +20,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Changed
 
 - ActiveDirectoryDsc
+  - Renamed `master` branch to `main` ([issue #641](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/641)).
   - Migrated to DscResource.Common Module.
   - Fixed the pipeline paths trigger.
   - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline.
