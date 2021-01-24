@@ -45,7 +45,7 @@
 
 .PARAMETER Credential
     Write - PSCredential
-    Credentials used to enact the change upon.
+    The credential to be used to perform the operation on Active Directory.
 
 .PARAMETER DomainController
     Write - String
