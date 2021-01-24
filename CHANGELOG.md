@@ -26,6 +26,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Changed
 
 - ActiveDirectoryDsc
+  - Renamed `master` branch to `main` ([issue #641](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/641)).
   - Migrated to DscResource.Common Module.
   - Fixed the pipeline paths trigger.
   - Migrated HQRM and Unit Tests to use PowerShell 7 in the CI pipeline.
@@ -42,6 +43,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Fixed
 
 - ActiveDirectoryDsc
+  - The component `gitversion` that is used in the pipeline was wrongly configured
+    when the repository moved to the new default branch `main`. It no longer throws
+    an error when using newer versions of GitVersion.
   - Fixed the CI pipeline by pinning the `Pester` module to `v4.10.1`
   - Restored importing the `DscResource.Common` module import in the `ActiveDirectoryDsc.Common` module that was
     incorrectly disabled.
