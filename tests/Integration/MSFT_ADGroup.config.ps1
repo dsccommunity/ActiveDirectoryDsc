@@ -16,32 +16,63 @@ else
     $currentDomain = Get-ADDomain
     $netBiosDomainName = $currentDomain.NetBIOSName
     $domainDistinguishedName = $currentDomain.DistinguishedName
+    $AdminUserName = "$netBiosDomainName\Administrator"
+    $AdminPassword = 'Coffee33!'
+    $AdminCredential = [System.Management.Automation.PSCredential]::new($AdminUserName,
+        (ConvertTo-SecureString -String $AdminPassword -AsPlainText -Force))
+
+    $groupName = 'DscIntegrationTestGroup'
 
     $ConfigurationData = @{
         AllNodes = @(
             @{
                 NodeName                = 'localhost'
                 CertificateFile         = $env:DscPublicCertificatePath
+                PsDscAllowDomainUser    = $true
 
                 DomainDistinguishedName = $domainDistinguishedName
 
-                Group1_Name             = 'DscGroup1'
-
-                Group2_Name             = 'DscGroup2'
-                Group2_Scope            = 'Global'
-
-                Group3_Name             = 'DscGroup3'
-                Group3_Scope            = 'Universal'
-
-                Group4_Name             = 'DscGroup4'
-                Group4_Scope            = 'DomainLocal'
-
-                Group5_Name             = 'DscDistributionGroup1'
-                Group5_Scope            = 'Universal'
-                Group5_Category         = 'Distribution'
-
-                AdministratorUserName   = ('{0}\Administrator' -f $netBiosDomainName)
-                AdministratorPassword   = 'P@ssw0rd1'
+                Tests                   = [Ordered]@{
+                    CreateGroup               = @{
+                        GroupName   = $groupName
+                        GroupScope  = 'Global'
+                        Category    = 'Security'
+                        Path        = "CN=Users,$domainDistinguishedName"
+                        Description = 'Original Description'
+                        DisplayName = 'Display Name'
+                        Members     = 'Administrator', 'Guest'
+                        ManagedBy   = "CN=Administrator,CN=Users,$domainDistinguishedName"
+                        Notes       = 'Notes'
+                        Ensure      = 'Present'
+                    }
+                    ModifyGroup               = @{
+                        GroupName   = $groupName
+                        GroupScope  = 'DomainLocal'
+                        Category    = 'Distribution'
+                        Path        = "CN=Computers,$domainDistinguishedName"
+                        Description = 'Modified Description'
+                        DisplayName = 'Modified Display Name'
+                        Members     = 'Administrator'
+                        ManagedBy   = "CN=Guest,CN=Users,$domainDistinguishedName"
+                        Notes       = 'Modified Notes'
+                    }
+                    MembersToInclude          = @{
+                        GroupName        = $groupName
+                        MembersToInclude = 'Guest'
+                    }
+                    MembersToExclude          = @{
+                        GroupName        = $groupName
+                        MembersToExclude = 'Guest'
+                    }
+                    RemoveAllMembersFromGroup = @{
+                        GroupName = $groupName
+                        Members   = @()
+                    }
+                    RemoveGroup               = @{
+                        GroupName = $groupName
+                        Ensure    = 'Absent'
+                    }
+                }
             }
         )
     }
@@ -49,440 +80,141 @@ else
 
 <#
     .SYNOPSIS
-        Add a group using default values.
+        Create an AD Group.
 #>
-Configuration MSFT_ADGroup_CreateGroup1_Config
+Configuration MSFT_ADGroup_CreateGroup_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    $testName = 'CreateGroup'
 
     node $AllNodes.NodeName
     {
         ADGroup 'Integration_Test'
         {
-            GroupName  = $Node.Group1_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
+            GroupName            = $Node.Tests.$testName.GroupName
+            GroupScope           = $Node.Tests.$testName.GroupScope
+            Category             = $Node.Tests.$testName.Category
+            Path                 = $Node.Tests.$testName.Path
+            Description          = $Node.Tests.$testName.Description
+            DisplayName          = $Node.Tests.$testName.DisplayName
+            Members              = $Node.Tests.$testName.Members
+            ManagedBy            = $Node.Tests.$testName.ManagedBy
+            Notes                = $Node.Tests.$testName.Notes
+            Ensure               = $Node.Tests.$testName.Ensure
+            PsDscRunAsCredential = $adminCredential
         }
     }
 }
 
 <#
     .SYNOPSIS
-        Add a global group using default values.
+        Modify an AD Group.
 #>
-Configuration MSFT_ADGroup_CreateGroup2_Config
+Configuration MSFT_ADGroup_ModifyGroup_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    $testName = 'ModifyGroup'
 
     node $AllNodes.NodeName
     {
         ADGroup 'Integration_Test'
         {
-            GroupName  = $Node.Group2_Name
-            GroupScope = $Node.Group2_Scope
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
+            GroupName            = $Node.Tests.$testName.GroupName
+            GroupScope           = $Node.Tests.$testName.GroupScope
+            Category             = $Node.Tests.$testName.Category
+            Path                 = $Node.Tests.$testName.Path
+            Description          = $Node.Tests.$testName.Description
+            DisplayName          = $Node.Tests.$testName.DisplayName
+            Members              = $Node.Tests.$testName.Members
+            ManagedBy            = $Node.Tests.$testName.ManagedBy
+            Notes                = $Node.Tests.$testName.Notes
+            PsDscRunAsCredential = $adminCredential
         }
     }
 }
 
 <#
     .SYNOPSIS
-        Add a universal group using default values.
+        Include members in an AD Group.
 #>
-Configuration MSFT_ADGroup_CreateGroup3_Config
+Configuration MSFT_ADGroup_MembersToInclude_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    $testName = 'MembersToInclude'
 
     node $AllNodes.NodeName
     {
         ADGroup 'Integration_Test'
         {
-            GroupName  = $Node.Group3_Name
-            GroupScope = $Node.Group3_Scope
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
+            GroupName            = $Node.Tests.$testName.GroupName
+            MembersToInclude     = $Node.Tests.$testName.MembersToInclude
+            PsDscRunAsCredential = $adminCredential
         }
     }
 }
 
 <#
     .SYNOPSIS
-        Changes the category for an existing universal group.
+        Exclude members in an AD Group.
 #>
-Configuration MSFT_ADGroup_ChangeCategoryGroup3_Config
+Configuration MSFT_ADGroup_MembersToExclude_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    $testName = 'MembersToExclude'
 
     node $AllNodes.NodeName
     {
         ADGroup 'Integration_Test'
         {
-            GroupName  = $Node.Group3_Name
-            Category   = 'Distribution'
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
+            GroupName            = $Node.Tests.$testName.GroupName
+            MembersToExclude     = $Node.Tests.$testName.MembersToExclude
+            PsDscRunAsCredential = $adminCredential
         }
     }
 }
 
 <#
     .SYNOPSIS
-        Add a domain local group using default values.
+        Remove all members from an AD Group.
 #>
-Configuration MSFT_ADGroup_CreateGroup4_Config
+Configuration MSFT_ADGroup_RemoveAllMembersFromGroup_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    $testName = 'RemoveAllMembersFromGroup'
 
     node $AllNodes.NodeName
     {
         ADGroup 'Integration_Test'
         {
-            GroupName  = $Node.Group4_Name
-            GroupScope = $Node.Group4_Scope
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
+            GroupName            = $Node.Tests.$testName.GroupName
+            Members              = $Node.Tests.$testName.Members
+            PsDscRunAsCredential = $adminCredential
         }
     }
 }
 
 <#
     .SYNOPSIS
-        Remove a group.
+        Remove an AD Group.
 #>
-Configuration MSFT_ADGroup_RemoveGroup4_Config
+Configuration MSFT_ADGroup_RemoveGroup_Config
 {
     Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    $testName = 'RemoveGroup'
 
     node $AllNodes.NodeName
     {
         ADGroup 'Integration_Test'
         {
-            Ensure     = 'Absent'
-            GroupName  = $Node.Group4_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Restore a group with scope domain local from recycle bin.
-
-    .NOTES
-        This restores a group with the scope domain local so that the test
-        will generate an error if the restore does not work instead a new group
-        is created. If a new group is created it will be created using default
-        value of scope with is Global, and the test will fail on the group
-        having the wrong scope.
-
-        For this to work the Recycle Bin must be enabled prior to
-        running this test.
-#>
-Configuration MSFT_ADGroup_RestoreGroup4_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            Ensure                = 'Present'
-            GroupName             = $Node.Group4_Name
-            RestoreFromRecycleBin = $true
-
-            Credential            = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Change existing domain local group to global group.
-#>
-Configuration MSFT_ADGroup_ChangeScopeGroup4_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            Ensure     = 'Present'
-            GroupName  = $Node.Group4_Name
-            GroupScope = 'Global'
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Update an existing group.
-#>
-Configuration MSFT_ADGroup_UpdateGroup1_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            Ensure                = 'Present'
-            GroupName             = $Node.Group1_Name
-            Path                  = 'CN=Computers,{0}' -f $Node.DomainDistinguishedName
-            DisplayName           = 'DSC Group 1'
-            Description           = 'A DSC description'
-            Notes                 = 'Notes for this group'
-            ManagedBy             = 'CN=Administrator,CN=Users,{0}' -f $Node.DomainDistinguishedName
-            Members               = @(
-                'Administrator',
-                'Guest'
-            )
-
-            Credential            = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Add a universal distribution group with one member.
-#>
-Configuration MSFT_ADGroup_CreateGroup5_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            GroupName  = $Node.Group5_Name
-            GroupScope = $Node.Group5_Scope
-            Category   = $Node.Group5_Category
-
-            Members    = @(
-                'Administrator'
-            )
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Add and remove members from a group.
-#>
-Configuration MSFT_ADGroup_ModifyMembersGroup5_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            GroupName        = $Node.Group5_Name
-
-            MembersToInclude = @(
-                'Guest'
-            )
-
-            MembersToExclude = @(
-                'Administrator'
-            )
-
-            Credential       = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Enforce members in a group.
-#>
-Configuration MSFT_ADGroup_EnforceMembersGroup5_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            GroupName  = $Node.Group5_Name
-            Members    = @(
-                'Administrator'
-                'Guest'
-            )
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Enforce no members in a group.
-
-    .NOTES
-        Regression test for issue #189.
-#>
-Configuration MSFT_ADGroup_ClearMembersGroup5_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'Integration_Test'
-        {
-            GroupName  = $Node.Group5_Name
-            Members    = @()
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
-        Cleanup everything
-#>
-Configuration MSFT_ADGroup_Cleanup_Config
-{
-    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
-
-    node $AllNodes.NodeName
-    {
-        ADGroup 'RemoveGroup1'
-        {
-            Ensure     = 'Absent'
-            GroupName  = $Node.Group1_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-
-        ADGroup 'RemoveGroup2'
-        {
-            Ensure     = 'Absent'
-            GroupName  = $Node.Group2_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-
-        ADGroup 'RemoveGroup3'
-        {
-            Ensure     = 'Absent'
-            GroupName  = $Node.Group3_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-
-        ADGroup 'RemoveGroup4'
-        {
-            Ensure     = 'Absent'
-            GroupName  = $Node.Group4_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
-        }
-
-        ADGroup 'RemoveGroup5'
-        {
-            Ensure     = 'Absent'
-            GroupName  = $Node.Group5_Name
-
-            Credential = New-Object `
-                -TypeName System.Management.Automation.PSCredential `
-                -ArgumentList @(
-                $Node.AdministratorUserName,
-                (ConvertTo-SecureString -String $Node.AdministratorPassword -AsPlainText -Force)
-            )
+            GroupName            = $Node.Tests.$testName.GroupName
+            Ensure               = $Node.Tests.$testName.Ensure
+            PsDscRunAsCredential = $adminCredential
         }
     }
 }
