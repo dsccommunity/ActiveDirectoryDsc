@@ -2,7 +2,8 @@
 class MSFT_ADUser : OMI_BaseResource
 {
     [Key, Description("Name of the domain where the user account is located (only used if password is managed).")] String DomainName;
-    [Key, Description("Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').")] String UserName;
+    [Key, Description("Specifies the account name of the user. (You can identify a user by its distinguished
+    name (DN), GUID, security identifier (SID) or Security Accounts Manager (SAM) account name.)")] String UserName;
     [Write, Description("Specifies a new password value for the account."), EmbeddedInstance("MSFT_Credential")] String Password;
     [Write, Description("Specifies whether the user account should be present or absent. Default value is 'Present'."), ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] String Ensure;
     [Write, Description("Specifies the common name assigned to the user account (ldapDisplayName 'cn'). If not specified the default value will be the same value provided in parameter UserName.")] String CommonName;

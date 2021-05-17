@@ -27,7 +27,8 @@ $adPropertyMap = (Import-PowerShellDataFile -Path $adPropertyMapPath).Parameters
         Name of the domain where the user account is located (only used if password is managed).
 
     .PARAMETER UserName
-        Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
+        Specifies the account name of the user. (You can identify a user by its distinguished
+    name (DN), GUID, security identifier (SID) or Security Accounts Manager (SAM) account name.)
 
     .PARAMETER DomainController
         Specifies the Active Directory Domain Services instance to use to perform the task.
@@ -185,7 +186,8 @@ function Get-TargetResource
         Name of the domain where the user account is located (only used if password is managed).
 
     .PARAMETER UserName
-        Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
+        Specifies the account name of the user. (You can identify a user by its distinguished
+    name (DN), GUID, security identifier (SID) or Security Accounts Manager (SAM) account name.)
 
     .PARAMETER Password
         Specifies a new password value for the account.
@@ -869,7 +871,8 @@ function Test-TargetResource
         Name of the domain where the user account is located (only used if password is managed).
 
     .PARAMETER UserName
-        Specifies the Security Account Manager (SAM) account name of the user (ldapDisplayName 'sAMAccountName').
+        Specifies the account name of the user. (You can identify a user by its distinguished
+    name (DN), GUID, security identifier (SID) or Security Accounts Manager (SAM) account name.)
 
     .PARAMETER Password
         Specifies a new password value for the account.
@@ -1506,7 +1509,7 @@ function Set-TargetResource
 
                 Write-Debug -Message ('New-ADUser Parameters:' + ($newADUserParams | Out-String))
 
-                $newADUser = New-ADUser @newADUserParams -SamAccountName $UserName -Passthru
+                $newADUser = New-ADUser @newADUserParams -Name $UserName -Passthru
 
                 if ($updateCnRequired)
                 {
