@@ -187,7 +187,7 @@ function Get-TargetResource
 
     .PARAMETER UserName
         Specifies the account name of the user. (You can identify a user by its distinguished
-    name (DN), GUID, security identifier (SID) or Security Accounts Manager (SAM) account name.)
+    name (DN), GUID, security identifier (SID), or Security Accounts Manager (SAM) account name.)
 
     .PARAMETER Password
         Specifies a new password value for the account.
@@ -204,6 +204,9 @@ function Get-TargetResource
 
     .PARAMETER DisplayName
         Specifies the display name of the object (ldapDisplayName 'displayName').
+
+    .PARAMETER SamAccountName
+        Specifies the SamAccountName of the object (ldapDisplayName 'SamAccountName').
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
@@ -305,7 +308,7 @@ function Get-TargetResource
     .PARAMETER LogonWorkstations
         Specifies the computers that the user can access. To specify more than one computer, create a single
         comma-separated list. You can identify a computer by using the Security Account Manager (SAM) account name
-        (sAMAccountName) or the DNS host name of the computer. The SAM account name is the same as the NetBIOS name of
+        (SamAccountName) or the DNS host name of the computer. The SAM account name is the same as the NetBIOS name of
         the computer (ldapDisplayName 'userWorkStations').
 
     .PARAMETER Organization
@@ -433,6 +436,11 @@ function Test-TargetResource
         [ValidateNotNull()]
         [System.String]
         $DisplayName,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $SamAccountName,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -872,7 +880,7 @@ function Test-TargetResource
 
     .PARAMETER UserName
         Specifies the account name of the user. (You can identify a user by its distinguished
-    name (DN), GUID, security identifier (SID) or Security Accounts Manager (SAM) account name.)
+    name (DN), GUID, security identifier (SID), or Security Accounts Manager (SAM) account name.)
 
     .PARAMETER Password
         Specifies a new password value for the account.
@@ -889,6 +897,9 @@ function Test-TargetResource
 
     .PARAMETER DisplayName
         Specifies the display name of the object (ldapDisplayName 'displayName').
+
+    .PARAMETER SamAccountName
+        Specifies the SamAccountName of the object (ldapDisplayName 'SamAccountName').
 
     .PARAMETER Path
         Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.
@@ -990,7 +1001,7 @@ function Test-TargetResource
     .PARAMETER LogonWorkstations
         Specifies the computers that the user can access. To specify more than one computer, create a single
         comma-separated list. You can identify a computer by using the Security Account Manager (SAM) account name
-        (sAMAccountName) or the DNS host name of the computer. The SAM account name is the same as the NetBIOS name of
+        (SamAccountName) or the DNS host name of the computer. The SAM account name is the same as the NetBIOS name of
         the computer (ldapDisplayName 'userWorkStations').
 
     .PARAMETER Organization
@@ -1127,6 +1138,11 @@ function Set-TargetResource
         [ValidateNotNull()]
         [System.String]
         $DisplayName,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $SamAccountName,
 
         [Parameter()]
         [ValidateNotNull()]
