@@ -12,6 +12,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADGroup
   - Refactored Module.
   - Refactored Unit and Integration Tests.
+- ADGroup, ADUser, ADManagedServiceAccount
+  - Allow settings sAMAccountName independently.
 
 ### Added
 
