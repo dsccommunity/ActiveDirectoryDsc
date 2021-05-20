@@ -153,7 +153,7 @@ function Get-TargetResource
             Path                      = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
             Description               = $adServiceAccount.Description
             DisplayName               = $adServiceAccount.DisplayName
-            SamAccountName            = $SamAccountName
+            SamAccountName            = $adServiceAccount.SamAccountName
             DistinguishedName         = $adServiceAccount.DistinguishedName
             Enabled                   = $adServiceAccount.Enabled
             KerberosEncryptionType    = $adServiceAccount.KerberosEncryptionType -split (', ')
