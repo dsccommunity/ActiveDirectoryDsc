@@ -16,9 +16,8 @@ $script:errorCodeKdsRootKeyNotFound = -2146893811
         Returns the current state of an Active Directory managed service account.
 
     .PARAMETER ServiceAccountName
-    Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
-    'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20 characters
-    or less. Once created, the user's SamAccountName and CN cannot be changed.
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
+        'sAMAccountName').
 
     .PARAMETER AccountType
         The type of managed service account. Standalone will create a Standalone Managed Service Account (sMSA) and
@@ -189,12 +188,16 @@ function Get-TargetResource
 
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
-        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20
-        characters or less. Once created, the user's SamAccountName and CN cannot be changed.
+        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 15
+        characters or less. Once created, the user's SamAccountName cannot be changed.
 
     .PARAMETER AccountType
         The type of managed service account. Standalone will create a Standalone Managed Service Account (sMSA) and
         Group will create a Group Managed Service Account (gMSA).
+
+    .PARAMETER CommonName
+        Specifies the common name assigned to the managed service account (ldapDisplayName 'cn'). If not specified the
+        default value will be the same value provided in parameter ServiceAccountName.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
@@ -253,6 +256,11 @@ function Test-TargetResource
         [ValidateSet('Group', 'Standalone')]
         [System.String]
         $AccountType,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $CommonName,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -376,12 +384,16 @@ function Test-TargetResource
 
     .PARAMETER ServiceAccountName
         Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
-        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20
-        characters or less. Once created, the user's SamAccountName and CN cannot be changed.
+        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 15
+        characters or less. Once created, the user's SamAccountName cannot be changed.
 
     .PARAMETER AccountType
         The type of managed service account. Standalone will create a Standalone Managed Service Account (sMSA) and
         Group will create a Group Managed Service Account (gMSA).
+
+    .PARAMETER CommonName
+        Specifies the common name assigned to the managed service account (ldapDisplayName 'cn'). If not specified the
+        default value will be the same value provided in parameter ServiceAccountName.
 
     .PARAMETER Credential
         Specifies the user account credentials to use to perform this task.
@@ -448,6 +460,11 @@ function Set-TargetResource
         [ValidateSet('Group', 'Standalone')]
         [System.String]
         $AccountType,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $CommonName,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -643,7 +660,13 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.AddingManagedServiceAccountMessage -f
                 $AccountType, $ServiceAccountName, $messagePath)
 
-            $newAdServiceAccountParameters = Get-ADCommonParameters @parameters -UseNameParameter
+            $newAdServiceAccountParameters = Get-ADCommonParameters @parameters -UseNameParameter -PreferCommonName
+
+            if ($parameters.ContainsKey('CommonName'))
+            {
+                # We have to specify the SamAccountName to prefent errors when the common name is longer than 15 characters
+                $newAdServiceAccountParameters.SamAccountName = $ServiceAccountName
+            }
 
             if ($parameters.ContainsKey('Description'))
             {
