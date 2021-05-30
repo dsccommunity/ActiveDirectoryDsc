@@ -88,6 +88,7 @@ function Get-TargetResource
     try
     {
         $adServiceAccount = Get-ADServiceAccount @adServiceAccountParameters -Properties @(
+            'CN'
             'DistinguishedName'
             'Description'
             'DisplayName'
@@ -151,6 +152,7 @@ function Get-TargetResource
             ServiceAccountName        = $ServiceAccountName
             AccountType               = $existingAccountType
             Path                      = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
+            CommonName                = $adServiceAccount.CN
             Description               = $adServiceAccount.Description
             DisplayName               = $adServiceAccount.DisplayName
             DistinguishedName         = $adServiceAccount.DistinguishedName
@@ -168,6 +170,7 @@ function Get-TargetResource
             ServiceAccountName        = $ServiceAccountName
             AccountType               = $AccountType
             Path                      = $null
+            CommonName                = $null
             Description               = $null
             DisplayName               = $null
             DistinguishedName         = $null
@@ -568,6 +571,7 @@ function Set-TargetResource
                     $setServiceAccountParameters = $adServiceAccountParameters.Clone()
                     $setAdServiceAccountRequired = $false
                     $moveAdServiceAccountRequired = $false
+                    $renameAdServiceAccountRequired = $false
 
                     foreach ($property in $propertiesNotInDesiredState)
                     {
@@ -575,6 +579,11 @@ function Set-TargetResource
                         {
                             # The path has changed, so the account needs moving, but not until after any other changes
                             $moveAdServiceAccountRequired = $true
+                        }
+                        elseif ($property.ParameterName -eq 'CommonName')
+                        {
+                            # Need to set different CN using Rename-ADObject
+                            $renameAdServiceAccountRequired = $true
                         }
                         else
                         {
@@ -590,7 +599,7 @@ function Set-TargetResource
                             }
                             else
                             {
-                                $SetServiceAccountParameters.Add($property.ParameterName, $property.Expected)
+                                $setServiceAccountParameters.Add($property.ParameterName, $property.Expected)
                             }
                         }
                     }
@@ -625,6 +634,20 @@ function Set-TargetResource
                                 $AccountType, $ServiceAccountName, $getTargetResourceResult.Path, $Path)
                             New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                         }
+                    }
+
+                    if ($renameAdServiceAccountRequired)
+                    {
+                        # Cannot update the CN property directly. Must use Rename-ADObject
+                        $renameAdObjectParameters = Get-ADCommonParameters @PSBoundParameters
+
+                        # Using the SamAccountName for identity with Rename-ADObject does not work, use the DN instead
+                        $renameAdObjectParameters['Identity'] = $getTargetResourceResult.DistinguishedName
+
+                        Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f
+                            'CommonName', $CommonName)
+
+                        Rename-ADObject @renameAdObjectParameters -NewName $CommonName
                     }
                 }
             }
