@@ -421,7 +421,7 @@ try
             $testTargetResourceParametersStandalone = @{
                 ServiceAccountName        = $mockAdServiceAccountStandalone.ServiceAccountName
                 AccountType               = $mockAdServiceAccountStandalone.AccountType
-                CN                        = $mockAdServiceAccountStandalone.CommonName
+                CommonName                = $mockAdServiceAccountStandalone.CommonName
                 Description               = $mockAdServiceAccountStandalone.Description
                 DisplayName               = $mockAdServiceAccountStandalone.DisplayName
                 KerberosEncryptionType    = $mockAdServiceAccountStandalone.KerberosEncryptionType

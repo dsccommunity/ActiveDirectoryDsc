@@ -644,9 +644,6 @@ function Set-TargetResource
                         # Using the SamAccountName for identity with Rename-ADObject does not work, use the DN instead
                         $renameAdObjectParameters['Identity'] = $getTargetResourceResult.DistinguishedName
 
-                        Write-Verbose -Message ($script:localizedData.UpdatingADUserProperty -f
-                            'CommonName', $CommonName)
-
                         Rename-ADObject @renameAdObjectParameters -NewName $CommonName
                     }
                 }
