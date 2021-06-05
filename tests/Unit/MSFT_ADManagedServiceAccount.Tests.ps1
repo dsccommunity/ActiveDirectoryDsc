@@ -167,7 +167,7 @@ try
             ServiceAccountName        = $mockGetAdServiceAccountResultsStandAlone.Name
             DistinguishedName         = $mockGetAdServiceAccountResultsStandAlone.DistinguishedName
             Path                      = $mockDefaultMsaPath
-            CN                        = $mockGetAdServiceAccountResultsStandAlone.CommonName
+            CommonName                = $mockGetAdServiceAccountResultsStandAlone.CN
             Description               = $mockGetAdServiceAccountResultsStandAlone.Description
             DisplayName               = $mockGetAdServiceAccountResultsStandAlone.DisplayName
             AccountType               = 'Standalone'
@@ -184,7 +184,7 @@ try
             ServiceAccountName        = $mockGetAdServiceAccountResultsGroup.Name
             DistinguishedName         = $mockGetAdServiceAccountResultsGroup.DistinguishedName
             Path                      = $mockDefaultMsaPath
-            CN                        = $mockGetAdServiceAccountResultsGroup.CommonName
+            CommonName                = $mockGetAdServiceAccountResultsGroup.CN
             Description               = $mockGetAdServiceAccountResultsGroup.Description
             DisplayName               = $mockGetAdServiceAccountResultsGroup.DisplayName
             AccountType               = 'Group'
@@ -599,7 +599,12 @@ try
                                 -Scope It -Exactly -Times 1
                             Assert-MockCalled -CommandName New-ADServiceAccount -Scope It -Exactly -Times 0
                             Assert-MockCalled -CommandName Remove-ADServiceAccount -Scope It -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject -Scope It -Exactly -Times 1
+                            if ($property -eq 'CommonName') {
+                                Assert-MockCalled -CommandName Rename-ADObject -Scope It -Exactly -Times 1
+                            }
+                            else {
+                                Assert-MockCalled -CommandName Rename-ADObject -Scope It -Exactly -Times 0
+                            }
                             Assert-MockCalled -CommandName Move-ADObject -Scope It -Exactly -Times 0
                             Assert-MockCalled -CommandName Set-ADServiceAccount `
                                 -ParameterFilter { `
@@ -675,7 +680,7 @@ try
                                 -Exactly -Times 1
                             Assert-MockCalled -CommandName New-ADServiceAccount -Exactly -Times 0
                             Assert-MockCalled -CommandName Remove-ADServiceAccount -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject -Exactly -Times 1
+                            Assert-MockCalled -CommandName Rename-ADObject -Exactly -Times 0
                             Assert-MockCalled -CommandName Move-ADObject `
                                 -ParameterFilter { $Identity -eq $mockGetTargetResourceResultsStandAlone.DistinguishedName } `
                                 -Exactly -Times 1
