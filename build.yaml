@@ -88,6 +88,8 @@ ModuleBuildTasks:
   # - ModuleName: 'alias to search'
   Sampler:
     - '*.build.Sampler.ib.tasks' # this means: import (dot source) all aliases ending with .ib.tasks exported by sampler module
+  Sampler.GitHubTasks:
+    - '*.ib.tasks'
 
 # Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |
