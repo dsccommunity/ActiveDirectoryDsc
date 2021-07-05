@@ -16,9 +16,7 @@ $script:errorCodeKdsRootKeyNotFound = -2146893811
         Returns the current state of an Active Directory managed service account.
 
     .PARAMETER ServiceAccountName
-    Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
-    'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20 characters
-    or less. Once created, the user's SamAccountName and CN cannot be changed.
+        Specifies the name of the object. This parameter sets the Name property of the Active Directory object. The LDAP Display Name (ldapDisplayName) of this property is 'name'. Once created, the account's Name cannot be changed. Once created, the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
         The type of managed service account. Standalone will create a Standalone Managed Service Account (sMSA) and
@@ -92,6 +90,7 @@ function Get-TargetResource
             'DistinguishedName'
             'Description'
             'DisplayName'
+            'SamAccountName'
             'ObjectClass'
             'Enabled'
             'PrincipalsAllowedToRetrieveManagedPassword'
@@ -154,6 +153,7 @@ function Get-TargetResource
             Path                      = Get-ADObjectParentDN -DN $adServiceAccount.DistinguishedName
             Description               = $adServiceAccount.Description
             DisplayName               = $adServiceAccount.DisplayName
+            SamAccountName            = $adServiceAccount.SamAccountName
             DistinguishedName         = $adServiceAccount.DistinguishedName
             Enabled                   = $adServiceAccount.Enabled
             KerberosEncryptionType    = $adServiceAccount.KerberosEncryptionType -split (', ')
@@ -171,6 +171,7 @@ function Get-TargetResource
             Path                      = $null
             Description               = $null
             DisplayName               = $null
+            SamAccountName            = $null
             DistinguishedName         = $null
             Enabled                   = $false
             KerberosEncryptionType    = @()
@@ -188,9 +189,7 @@ function Get-TargetResource
         Tests if an Active Directory managed service account is in the desired state.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
-        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20
-        characters or less. Once created, the user's SamAccountName and CN cannot be changed.
+        Specifies the name of the object. This parameter sets the Name property of the Active Directory object. The LDAP Display Name (ldapDisplayName) of this property is 'name'. Once created, the account's Name cannot be changed. Once created, the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
         The type of managed service account. Standalone will create a Standalone Managed Service Account (sMSA) and
@@ -205,6 +204,11 @@ function Get-TargetResource
 
     .PARAMETER DisplayName
         Specifies the display name of the account (ldapDisplayName 'displayName').
+
+    .PARAMETER SamAccountName
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
+        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20
+        characters or less.
 
     .PARAMETER DomainController
         Specifies the Active Directory Domain Controller instance to use to perform the task.
@@ -267,6 +271,11 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $DisplayName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $SamAccountName,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -375,9 +384,7 @@ function Test-TargetResource
         Sets the state of an Active Directory managed service account.
 
     .PARAMETER ServiceAccountName
-        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
-        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20
-        characters or less. Once created, the user's SamAccountName and CN cannot be changed.
+        Specifies the name of the object. This parameter sets the Name property of the Active Directory object. The LDAP Display Name (ldapDisplayName) of this property is 'name'. Once created, the account's Name cannot be changed. Once created, the user's SamAccountName and CN cannot be changed.
 
     .PARAMETER AccountType
         The type of managed service account. Standalone will create a Standalone Managed Service Account (sMSA) and
@@ -392,6 +399,11 @@ function Test-TargetResource
 
     .PARAMETER DisplayName
         Specifies the display name of the account (ldapDisplayName 'displayName').
+
+    .PARAMETER SamAccountName
+        Specifies the Security Account Manager (SAM) account name of the managed service account (ldapDisplayName
+        'sAMAccountName'). To be compatible with older operating systems, create a SAM account name that is 20
+        characters or less.
 
     .PARAMETER DomainController
         Specifies the Active Directory Domain Controller instance to use to perform the task.
@@ -462,6 +474,11 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $DisplayName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $SamAccountName,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]

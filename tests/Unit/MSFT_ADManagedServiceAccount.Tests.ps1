@@ -74,6 +74,7 @@ try
             DistinguishedName         = "CN=TestSMSA,$mockDefaultMsaPath"
             Description               = 'Dummy StandAlone service account for unit testing'
             DisplayName               = 'TestSMSA'
+            SamAccountName            = 'TestSMSA'
             Enabled                   = $true
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
             ManagedPasswordPrincipals = @()
@@ -87,6 +88,7 @@ try
             DistinguishedName         = $null
             Description               = $null
             DisplayName               = $null
+            SamAccountName            = $null
             Enabled                   = $false
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $mockAdServiceAccountStandalone.MembershipAttribute
@@ -97,6 +99,7 @@ try
         $mockAdServiceAccountChanged = @{
             Description               = 'Changed description'
             DisplayName               = 'Changed displayname'
+            SamAccountName            = 'ChangedSMSA'
             KerberosEncryptionType    = 'AES128', 'AES256'
             ManagedPasswordPrincipals = $mockADUSer.SamAccountName
         }
@@ -107,6 +110,7 @@ try
             DistinguishedName         = "CN=TestGMSA,$mockDefaultMsaPath"
             Description               = 'Dummy group service account for unit testing'
             DisplayName               = 'TestGMSA'
+            SamAccountName            = 'TestGMSA'
             Enabled                   = $true
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
             ManagedPasswordPrincipals = $mockADUSer.SamAccountName, $mockADComputer.SamAccountName
@@ -120,6 +124,7 @@ try
             DistinguishedName         = $null
             Description               = $null
             DisplayName               = $null
+            SamAccountName            = $null
             Enabled                   = $false
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $mockAdServiceAccountGroup.MembershipAttribute
@@ -136,7 +141,7 @@ try
             Name                   = $mockAdServiceAccountStandalone.ServiceAccountName
             ObjectClass            = 'msDS-ManagedServiceAccount'
             ObjectGUID             = '91bffe90-4c84-4026-b1fc-d03671ff56ad'
-            SamAccountName         = $mockAdServiceAccountStandalone.ServiceAccountName
+            SamAccountName         = $mockAdServiceAccountStandalone.SamAccountName
             SID                    = 'S-1-5-21-1409167834-891301383-2860967316-1144'
             UserPrincipalName      = ''
         }
@@ -151,7 +156,7 @@ try
             ObjectClass                                = 'msDS-GroupManagedServiceAccount'
             ObjectGUID                                 = '91bffe90-4c84-4026-b1fc-d03671ff56ae'
             PrincipalsAllowedToRetrieveManagedPassword = $mockAdServiceAccountGroup.ManagedPasswordPrincipals
-            SamAccountName                             = $mockAdServiceAccountGroup.ServiceAccountName
+            SamAccountName                             = $mockAdServiceAccountGroup.SamAccountName
             SID                                        = 'S-1-5-21-1409167834-891301383-2860967316-1145'
             UserPrincipalName                          = ''
         }
@@ -162,6 +167,7 @@ try
             Path                      = $mockDefaultMsaPath
             Description               = $mockGetAdServiceAccountResultsStandAlone.Description
             DisplayName               = $mockGetAdServiceAccountResultsStandAlone.DisplayName
+            SamAccountName            = $mockGetAdServiceAccountResultsStandAlone.SamAccountName
             AccountType               = 'Standalone'
             Ensure                    = 'Present'
             Enabled                   = $true
@@ -177,6 +183,7 @@ try
             DistinguishedName         = $mockGetAdServiceAccountResultsGroup.DistinguishedName
             Path                      = $mockDefaultMsaPath
             Description               = $mockGetAdServiceAccountResultsGroup.Description
+            SamAccountName            = $mockGetAdServiceAccountResultsStandAlone.SamAccountName
             DisplayName               = $mockGetAdServiceAccountResultsGroup.DisplayName
             AccountType               = 'Group'
             Ensure                    = 'Present'
@@ -194,6 +201,7 @@ try
             Path                      = $null
             Description               = $null
             DisplayName               = $null
+            SamAccountName            = $null
             AccountType               = $null
             Ensure                    = 'Absent'
             Enabled                   = $false
