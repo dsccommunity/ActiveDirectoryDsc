@@ -62,7 +62,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     `Get-ADObject` when `Get-ADGroupMember` throws a specific error.
     ([issue #616](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/616)).
 - ADOrganizationalUnit
-  - Removed Credential from the list of desired values to compare when passed
+  - Removed Credential and RestoreFromRecycleBin from the list of desired values to compare when passed
     ([issue #624](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/624)).
 - ADReplicationSiteLink
   - Fixed setting options after the resource is initially created
