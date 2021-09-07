@@ -9,6 +9,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Changed
 
+- ActiveDirectoryDsc
+  - Pin All RequiredModules versions and Add 'Sampler.GitHubTasks'.
+
 - ADGroup
   - Refactored Module.
   - Refactored Unit and Integration Tests.
