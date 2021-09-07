@@ -47,6 +47,12 @@ else
                 'Guest'
             )
         }
+
+        ManagedServiceAccount4 = @{
+            Name        = 'Dsc-gMSA4'
+            AccountType = 'Group'
+            CommonName  = 'Dsc-gMSACommonName4'
+        }
     }
 }
 
@@ -78,6 +84,13 @@ Configuration MSFT_ADManagedServiceAccount_Initialise_Config
         {
             ServiceAccountName = $ConfigurationData.ManagedServiceAccount3.Name
             AccountType        = $ConfigurationData.ManagedServiceAccount3.AccountType
+            Ensure             = 'Absent'
+        }
+
+        ADManagedServiceAccount 'RemoveGroup4'
+        {
+            ServiceAccountName = $ConfigurationData.ManagedServiceAccount4.Name
+            AccountType        = $ConfigurationData.ManagedServiceAccount4.AccountType
             Ensure             = 'Absent'
         }
     }
@@ -139,6 +152,25 @@ Configuration MSFT_ADManagedServiceAccount_CreateServiceAccount3_Config
 
 <#
     .SYNOPSIS
+        Add a Third Group ManagedServiceAccount using default values.
+#>
+Configuration MSFT_ADManagedServiceAccount_CreateServiceAccount4_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADManagedServiceAccount 'Integration_Test'
+        {
+            ServiceAccountName = $ConfigurationData.ManagedServiceAccount4.Name
+            AccountType        = $ConfigurationData.ManagedServiceAccount4.AccountType
+            CommonName         = $ConfigurationData.ManagedServiceAccount4.CommonName
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
         Remove a group.
 #>
 Configuration MSFT_ADManagedServiceAccount_RemoveServiceAccount1_Config
@@ -155,7 +187,6 @@ Configuration MSFT_ADManagedServiceAccount_RemoveServiceAccount1_Config
         }
     }
 }
-
 
 <#
     .SYNOPSIS
