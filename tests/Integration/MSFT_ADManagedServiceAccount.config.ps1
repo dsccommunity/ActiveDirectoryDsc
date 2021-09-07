@@ -171,7 +171,7 @@ Configuration MSFT_ADManagedServiceAccount_CreateServiceAccount4_Config
 
 <#
     .SYNOPSIS
-        Remove a group.
+        Remove a ManagedServiceAccount.
 #>
 Configuration MSFT_ADManagedServiceAccount_RemoveServiceAccount1_Config
 {
@@ -190,7 +190,7 @@ Configuration MSFT_ADManagedServiceAccount_RemoveServiceAccount1_Config
 
 <#
     .SYNOPSIS
-        Update an existing group.
+        Update an existing ManagedServiceAccount.
 #>
 Configuration MSFT_ADManagedServiceAccount_UpdateServiceAccount2_Config
 {
@@ -212,7 +212,7 @@ Configuration MSFT_ADManagedServiceAccount_UpdateServiceAccount2_Config
 
 <#
     .SYNOPSIS
-        Enforce members in a group.
+        Enforce members in a ManagedServiceAccount.
 #>
 Configuration MSFT_ADManagedServiceAccount_EnforcePasswordPrincipalsServiceAccount3_Config
 {
@@ -231,7 +231,7 @@ Configuration MSFT_ADManagedServiceAccount_EnforcePasswordPrincipalsServiceAccou
 
 <#
     .SYNOPSIS
-        Enforce no members in a group.
+        Enforce no members in a ManagedServiceAccount.
 #>
 Configuration MSFT_ADManagedServiceAccount_ClearPasswordPrincipalsServiceAccount3_Config
 {
@@ -244,6 +244,25 @@ Configuration MSFT_ADManagedServiceAccount_ClearPasswordPrincipalsServiceAccount
             ServiceAccountName        = $ConfigurationData.ManagedServiceAccount3.Name
             AccountType               = $ConfigurationData.ManagedServiceAccount3.AccountType
             ManagedPasswordPrincipals = @()
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Rename the common name of a ManagedServiceAccount.
+#>
+Configuration MSFT_ADManagedServiceAccount_RenameServiceAccount4_Config
+{
+    Import-DscResource -ModuleName 'ActiveDirectoryDsc'
+
+    node $AllNodes.NodeName
+    {
+        ADManagedServiceAccount 'Integration_Test'
+        {
+            ServiceAccountName = $ConfigurationData.ManagedServiceAccount4.Name
+            AccountType        = $ConfigurationData.ManagedServiceAccount4.AccountType
+            CommonName         = $ConfigurationData.ManagedServiceAccount4.Name
         }
     }
 }
