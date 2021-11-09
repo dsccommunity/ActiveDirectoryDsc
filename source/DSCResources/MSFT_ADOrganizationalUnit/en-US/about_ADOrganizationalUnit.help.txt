@@ -29,6 +29,10 @@
     Write - PSCredential
     The credential to be used to perform the operation on Active Directory.
 
+.PARAMETER DomainController
+    Write - String
+    Specifies the Active Directory Domain Services instance to use to perform the task.
+
 .PARAMETER ProtectedFromAccidentalDeletion
     Write - Boolean
     Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true.
