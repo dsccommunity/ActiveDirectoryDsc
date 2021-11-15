@@ -15,11 +15,14 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADGroup
   - Refactored Module.
   - Refactored Unit and Integration Tests.
-  
+
 - Azure Pipeline
   - Updated Pipeline to Ubuntu 18.04 from Ubuntu 16.04
     ([issue #667](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/667))
 
+- Pipeline
+  - Fixed PowerShell 7.2+ support due to removal of PSDesiredStateConfiguration Module from PowerShell
+    ([Issue #669](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/669))
 
 ### Added
 

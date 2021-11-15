@@ -21,4 +21,8 @@
     xDscResourceDesigner        = '1.13.0.0'
     MarkdownLinkCheck           = '0.2.0'
     xFailoverCluster            = '1.14.1'
+    # Required for PowerShell v 7.2+ as it has been split to a separate resource.
+    'PSDesiredStateConfiguration' =@{
+        Version = '2.0.5'
+    }
 }
