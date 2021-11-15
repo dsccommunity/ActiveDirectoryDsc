@@ -37,7 +37,7 @@ Configuration ADDomain_NewChildDomain_Config
         $SafeModePassword
     )
 
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName (@{ModuleName='PSDesiredStateConfiguration'; RequiredVersion='2.0.5'} )
     Import-DscResource -ModuleName ActiveDirectoryDsc
 
     node 'localhost'
