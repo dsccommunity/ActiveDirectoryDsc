@@ -48,7 +48,7 @@ function Get-TargetResource
 
     try
     {
-        $ou = Get-ADOrganizationalUnit -Filter "Name -eq '$Name'" -SearchBase $Path `
+        $ou = Get-ADOrganizationalUnit -Filter "Name -eq `"$Name`"" -SearchBase $Path `
             -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
