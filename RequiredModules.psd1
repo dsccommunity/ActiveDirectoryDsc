@@ -23,5 +23,5 @@
     'DscResource.DocGenerator'  = 'latest'
 
     # Prerequisites modules needed for examples or integration tests
-    FailoverCluster            = '1.14.1'
+    xFailoverCluster            = '1.14.1'
 }
