@@ -1,24 +1,27 @@
 @{
-    # Set up a mini virtual environment...
-    PSDependOptions      = @{
-        AddToPath  = $True
+    PSDependOptions             = @{
+        AddToPath  = $true
         Target     = 'output\RequiredModules'
         Parameters = @{
+            Repository = 'PSGallery'
         }
     }
 
-    invokeBuild                 = '5.8.0'
-    PSScriptAnalyzer            = '1.19.1'
-    pester                      = '4.10.1'
-    Plaster                     = '1.1.3'
-    ModuleBuilder               = '1.0.0'
-    ChangelogManagement         = '2.1.4'
-    Sampler                     = '0.111.6'
-    'Sampler.GitHubTasks'       = '0.3.0'
-    'DscResource.Common'        = '0.10.3'
-    'DscResource.Test'          = '0.15.1'
-    'DscResource.AnalyzerRules' = '0.2.0'
-    xDscResourceDesigner        = '1.13.0.0'
-    MarkdownLinkCheck           = '0.2.0'
+    InvokeBuild                 = 'latest'
+    PSScriptAnalyzer            = 'latest'
+    Pester                      = '4.10.1'
+    Plaster                     = 'latest'
+    ModuleBuilder               = 'latest'
+    ChangelogManagement         = 'latest'
+    Sampler                     = 'latest'
+    'Sampler.GitHubTasks'       = 'latest'
+    MarkdownLinkCheck           = 'latest'
+    'DscResource.Common'        = 'latest'
+    'DscResource.Test'          = 'latest'
+    'DscResource.AnalyzerRules' = 'latest'
+    xDscResourceDesigner        = 'latest'
+    'DscResource.DocGenerator'  = 'latest'
+
+    # Prerequisites modules needed for examples or integration tests
     xFailoverCluster            = '1.14.1'
 }

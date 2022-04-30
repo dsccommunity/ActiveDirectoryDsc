@@ -120,6 +120,31 @@ try
                     }
                 }
 
+                Context 'When the OU has apostrophe' {
+                    BeforeAll {
+                        $mockGetADOrganizationUnitProtectedResult = $mockGetADOrganizationUnitResult.Clone()
+                        $mockGetADOrganizationUnitProtectedResult['Name'] = "Jones's OU"
+
+                        Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                            return $mockGetADOrganizationUnitProtectedResult
+                         }
+                    }
+
+                    It 'Should return the desired result' {
+                        $getTargetResourceParamsWithApostrophe = $getTargetResourceParams.Clone()
+                        $getTargetResourceParamsWithApostrophe['Name'] = "Jones's OU"
+
+                        $targetResource = Get-TargetResource @getTargetResourceParamsWithApostrophe
+
+                        $targetResource.Name | Should -Be "Jones's OU"
+
+                        # Regression tests for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/674.
+                        Assert-MockCalled -CommandName Get-ADOrganizationalUnit -ParameterFilter {
+                             $Filter -eq ('Name -eq "{0}"' -f "Jones's OU")
+                         }
+                    }
+                }
+
                 Context 'When the OU is protected' {
                     BeforeAll {
 

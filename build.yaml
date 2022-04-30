@@ -2,26 +2,30 @@
 ####################################################
 #          ModuleBuilder Configuration             #
 ####################################################
-CopyDirectories:
+
+CopyPaths:
   - en-US
   - DSCResources
   - Modules
-Encoding: UTF8 # With BOM in WinPS, noBOM in PSCore.
+Encoding: UTF8
 VersionedOutputDirectory: true
 
+####################################################
+#      ModuleBuilder Submodules Configuration      #
+####################################################
+
 NestedModule:
-  DscResource.Common:
-    CopyOnly: true
-    Path: ./output/RequiredModules/DscResource.Common
-    AddToManifest: false
-    Exclude: PSGetModuleInfo.xml
+    DscResource.Common:
+      CopyOnly: true
+      Path: ./output/RequiredModules/DscResource.Common
+      AddToManifest: false
+      Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #       Sampler Pipeline Configuration             #
 ####################################################
-# Defining 'Workflows' (suite of InvokeBuild tasks) to be run using their alias
 BuildWorkflow:
-  '.': # "." is the default Invoke-Build workflow. It is called when no -Tasks is specified to the build.ps1
+  '.':
     - build
     - test
 
@@ -30,23 +34,25 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
+    - Generate_Conceptual_Help
+    - Generate_Wiki_Content
 
   pack:
     - build
     - package_module_nupkg
 
   hqrmtest:
-  - DscResource_Tests_Stop_On_Fail
+    - DscResource_Tests_Stop_On_Fail
 
-  # defining test task to be run when invoking `./build.ps1 -Tasks test`
+  # Defining test task to be run when invoking `./build.ps1 -Tasks test`
   test:
     - Pester_Tests_Stop_On_Fail
     - Pester_if_Code_Coverage_Under_Threshold
 
   publish:
-    - Publish_release_to_GitHub
-    - publish_module_to_gallery # runs if nuget is not available
-
+    - publish_module_to_gallery
+    - Publish_Release_To_GitHub
+    - Publish_GitHub_Wiki_Content
 
 ####################################################
 #       PESTER  Configuration                      #
@@ -57,8 +63,7 @@ Pester:
   ExcludeFromCodeCoverage:
     - Modules/DscResource.Common
   Script:
-  - tests/Unit
-  ExcludeTag:
+    - tests/Unit
   Tag:
   CodeCoverageThreshold: 85
   CodeCoverageOutputFile: JaCoCo_coverage.xml
@@ -74,22 +79,13 @@ DscTest:
     - Modules/DscResource.Common
   MainGitBranch: main
 
-Resolve-Dependency: #Parameters for Resolve-Dependency
-  #PSDependTarget: ./output/modules
-  #Proxy: ''
-  #ProxyCredential:
-  Gallery: 'PSGallery'
-  # AllowOldPowerShellGetModule: true
-  # MinimumPSDependVersion = '0.3.0'
-  AllowPrerelease: false
-  Verbose: false
-
 ModuleBuildTasks:
-  # - ModuleName: 'alias to search'
   Sampler:
-    - '*.build.Sampler.ib.tasks' # this means: import (dot source) all aliases ending with .ib.tasks exported by sampler module
+    - '*.build.Sampler.ib.tasks'
   Sampler.GitHubTasks:
     - '*.ib.tasks'
+  DscResource.DocGenerator:
+    - 'Task.*'
 
 # Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |
@@ -109,3 +105,16 @@ GitHubConfig:
   GitHubConfigUserName: dscbot
   GitHubConfigUserEmail: dsccommunity@outlook.com
   UpdateChangelogOnPrerelease: false
+
+####################################################
+#      DscResource.DocGenerator Configuration      #
+####################################################
+DscResource.DocGenerator:
+  Generate_Conceptual_Help:
+    MarkdownCodeRegularExpression:
+      - '\`(.+?)\`' # Match inline code-block
+      - '\\(\\)' # Match escaped backslash
+      - '\[[^\[]+\]\((.+?)\)' # Match markdown URL
+      - '_(.+?)_' # Match Italic (underscore)
+      - '\*\*(.+?)\*\*' # Match bold
+      - '\*(.+?)\*' # Match Italic (asterisk)
