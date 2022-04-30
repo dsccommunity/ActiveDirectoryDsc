@@ -127,8 +127,6 @@ try
 
                         Mock -CommandName Get-ADOrganizationalUnit -MockWith {
                             return $mockGetADOrganizationUnitProtectedResult
-                         } -ParameterFilter {
-                             $Filter -eq ('Name -eq "{0}"' -f "Jones's OU")
                          }
                     }
 
@@ -140,6 +138,7 @@ try
 
                         $targetResource.Name | Should -Be "Jones's OU"
 
+                        # Regression tests for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/674.
                         Assert-MockCalled -CommandName Get-ADOrganizationalUnit -ParameterFilter {
                              $Filter -eq ('Name -eq "{0}"' -f "Jones's OU")
                          }
