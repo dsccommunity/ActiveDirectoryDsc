@@ -260,8 +260,8 @@ The below steps *must* be run in a elevated PowerShell console.
    cd 'c:\source\ActiveDirectoryDsc'
 
    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc01Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
-    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc02Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
-    Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc03Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+   Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc02Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
+   Get-ChildItem -Path '.\tests' | Copy-Item -ToSession $dc03Session -Destination 'c:\projects\ActiveDirectoryDsc\tests' -Recurse -Force
    ```
 1. Configure prerequisites like computer name, IP address, and Windows features
    that is needed to promote a node to a domain controller. This creates
@@ -288,6 +288,7 @@ The below steps *must* be run in a elevated PowerShell console.
       $dc02Session
       $dc03Session
    )
+
    Invoke-Command -Session $vmPSSessions -ScriptBlock {
       Set-DscLocalConfigurationManager -Path 'C:\DSC\Configuration' -ComputerName 'localhost' -Verbose -Force
    }
