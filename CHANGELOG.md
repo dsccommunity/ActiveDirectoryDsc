@@ -67,6 +67,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADOrganizationalUnit
   - Removed Credential from the list of desired values to compare when passed
     ([issue #624](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/624)).
+  - Allows use of apostrophe or single quote in Name attribute
+    ([issue #674](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/674)).
 - ADReplicationSiteLink
   - Fixed setting options after the resource is initially created
     ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).
