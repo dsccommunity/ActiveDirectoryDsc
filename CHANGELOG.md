@@ -10,14 +10,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Changed
 
 - ActiveDirectoryDsc
-  - Updated pipeline files to latest from the Sampler project.
-- ADGroup
-  - Refactored Module.
-  - Refactored Unit and Integration Tests.
-- Azure Pipeline
   - Updated Pipeline to Ubuntu 18.04 from Ubuntu 16.04
     ([issue #667](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/667))
   - Update pipeline files to latest Sampler ([issue #680](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/680)).
+- ADGroup
+  - Refactored Module.
+  - Refactored Unit and Integration Tests.
 
 ### Added
 
