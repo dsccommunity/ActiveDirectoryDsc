@@ -255,6 +255,21 @@ try
                             Test-TargetResource @testTargetResourcePresentParams | Should -BeTrue
                         }
                     }
+
+                    # Regression test for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/624.
+                    Context 'When parameter RestoreFromRecycleBin is specified' {
+                        It 'Should return $true' {
+                            $mockTestTargetResourceParameters = @{
+                                Name                            = $mockResource.Name
+                                Path                            = $mockResource.Path
+                                Description                     = $mockResource.Description
+                                ProtectedFromAccidentalDeletion = $mockResource.ProtectedFromAccidentalDeletion
+                                RestoreFromRecycleBin           = $true
+                            }
+
+                            Test-TargetResource @mockTestTargetResourceParameters | Should -BeTrue
+                        }
+                    }
                 }
 
                 Context 'When the Resource should be Absent' {
