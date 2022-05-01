@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.2.0] - 2022-05-01
+
 ### Changed
 
 - ActiveDirectoryDsc
