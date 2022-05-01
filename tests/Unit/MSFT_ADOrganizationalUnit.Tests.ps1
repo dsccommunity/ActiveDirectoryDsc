@@ -120,6 +120,31 @@ try
                     }
                 }
 
+                Context 'When the OU has apostrophe' {
+                    BeforeAll {
+                        $mockGetADOrganizationUnitProtectedResult = $mockGetADOrganizationUnitResult.Clone()
+                        $mockGetADOrganizationUnitProtectedResult['Name'] = "Jones's OU"
+
+                        Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                            return $mockGetADOrganizationUnitProtectedResult
+                         }
+                    }
+
+                    It 'Should return the desired result' {
+                        $getTargetResourceParamsWithApostrophe = $getTargetResourceParams.Clone()
+                        $getTargetResourceParamsWithApostrophe['Name'] = "Jones's OU"
+
+                        $targetResource = Get-TargetResource @getTargetResourceParamsWithApostrophe
+
+                        $targetResource.Name | Should -Be "Jones's OU"
+
+                        # Regression tests for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/674.
+                        Assert-MockCalled -CommandName Get-ADOrganizationalUnit -ParameterFilter {
+                             $Filter -eq ('Name -eq "{0}"' -f "Jones's OU")
+                         }
+                    }
+                }
+
                 Context 'When the OU is protected' {
                     BeforeAll {
 
@@ -228,6 +253,21 @@ try
                     Context 'When all the resource properties are in the desired state' {
                         It 'Should return $true' {
                             Test-TargetResource @testTargetResourcePresentParams | Should -BeTrue
+                        }
+                    }
+
+                    # Regression test for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/624.
+                    Context 'When parameter RestoreFromRecycleBin is specified' {
+                        It 'Should return $true' {
+                            $mockTestTargetResourceParameters = @{
+                                Name                            = $mockResource.Name
+                                Path                            = $mockResource.Path
+                                Description                     = $mockResource.Description
+                                ProtectedFromAccidentalDeletion = $mockResource.ProtectedFromAccidentalDeletion
+                                RestoreFromRecycleBin           = $true
+                            }
+
+                            Test-TargetResource @mockTestTargetResourceParameters | Should -BeTrue
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-# Change log for ActiveDirectoryDsc
+# Changelog for ActiveDirectoryDsc
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -9,9 +9,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Changed
 
+- ActiveDirectoryDsc
+  - Pin All RequiredModules versions and Add 'Sampler.GitHubTasks'.
 - ADGroup
   - Refactored Module.
   - Refactored Unit and Integration Tests.
+- Azure Pipeline
+  - Updated Pipeline to Ubuntu 18.04 from Ubuntu 16.04
+    ([issue #667](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/667))
+  - Update pipeline files to latest Sampler ([issue #680](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/680)).
 
 ### Added
 
@@ -59,8 +65,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     `Get-ADObject` when `Get-ADGroupMember` throws a specific error.
     ([issue #616](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/616)).
 - ADOrganizationalUnit
-  - Removed Credential from the list of desired values to compare when passed
+  - Removed Credential and RestoreFromRecycleBin from the list of desired values to compare when passed
     ([issue #624](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/624)).
+  - Allows use of apostrophe or single quote in Name attribute
+    ([issue #674](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/674)).
 - ADReplicationSiteLink
   - Fixed setting options after the resource is initially created
     ([issue #605](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/605)).
