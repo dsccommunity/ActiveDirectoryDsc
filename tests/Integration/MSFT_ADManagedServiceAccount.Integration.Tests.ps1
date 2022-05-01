@@ -83,6 +83,7 @@ try
                 $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount1.Name
                 $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount1.AccountType
                 $resourceCurrentState.Path | Should -Be $DefaultManagedServiceAccountPath
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount1.Name
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Enabled | Should -Be $true
@@ -124,6 +125,7 @@ try
                 $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount2.Name
                 $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount2.AccountType
                 $resourceCurrentState.Path | Should -Be $DefaultManagedServiceAccountPath
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount2.Name
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Enabled | Should -Be $true
@@ -165,6 +167,7 @@ try
                 $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount3.Name
                 $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount3.AccountType
                 $resourceCurrentState.Path | Should -Be $DefaultManagedServiceAccountPath
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount3.Name
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Enabled | Should -Be $true
@@ -172,6 +175,48 @@ try
                 $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
                 $resourceCurrentState.KerberosEncryptionType | Should -Be $DefaultKerberosEncryptionType
                 $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},{1}' -f $ConfigurationData.ManagedServiceAccount3.Name, `
+                        $DefaultManagedServiceAccountPath)
+            }
+
+            It 'Should return $true when Test-DscConfiguration is run' {
+                Test-DscConfiguration -Verbose | Should -Be 'True'
+            }
+        }
+
+        $configurationName = "$($script:dscResourceName)_CreateServiceAccount4_Config"
+
+        Context ('When using configuration {0}' -f $configurationName) {
+            It 'Should compile and apply the MOF without throwing' {
+                {
+                    & $configurationName @configurationParameters
+                    Start-DscConfiguration @startDscConfigurationParameters
+                } | Should -Not -Throw
+            }
+
+            It 'Should be able to call Get-DscConfiguration without throwing' {
+                {
+                    $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
+                } | Should -Not -Throw
+            }
+
+            It 'Should have set the resource and all the parameters should match' {
+                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
+                    $_.ConfigurationName -eq $configurationName `
+                        -and $_.ResourceId -eq $resourceId
+                }
+
+                $resourceCurrentState.Ensure | Should -Be 'Present'
+                $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount4.Name
+                $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount4.AccountType
+                $resourceCurrentState.Path | Should -Be $DefaultManagedServiceAccountPath
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount4.CommonName
+                $resourceCurrentState.Description | Should -BeNullOrEmpty
+                $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
+                $resourceCurrentState.Enabled | Should -Be $true
+                $resourceCurrentState.ManagedPasswordPrincipals | Should -BeNullOrEmpty
+                $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
+                $resourceCurrentState.KerberosEncryptionType | Should -Be $DefaultKerberosEncryptionType
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},{1}' -f $ConfigurationData.ManagedServiceAccount4.CommonName, `
                         $DefaultManagedServiceAccountPath)
             }
 
@@ -206,6 +251,7 @@ try
                 $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount1.Name
                 $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount1.AccountType
                 $resourceCurrentState.Path | Should -BeNullOrEmpty
+                $resourceCurrentState.CommonName | Should -BeNullOrEmpty
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Enabled | Should -BeFalse
@@ -246,6 +292,7 @@ try
                 $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount2.Name
                 $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount2.AccountType
                 $resourceCurrentState.Path | Should -Be $ConfigurationData.ManagedServiceAccount2.Path
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount2.Name
                 $resourceCurrentState.Description | Should -Be $ConfigurationData.ManagedServiceAccount2.Description
                 $resourceCurrentState.DisplayName | Should -Be $ConfigurationData.ManagedServiceAccount2.DisplayName
                 $resourceCurrentState.Enabled | Should -Be $true
@@ -287,6 +334,7 @@ try
                 $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount3.Name
                 $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount3.AccountType
                 $resourceCurrentState.Path | Should -Be $DefaultManagedServiceAccountPath
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount3.Name
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Enabled | Should -Be $true
@@ -328,6 +376,7 @@ try
                 $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount3.Name
                 $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount3.AccountType
                 $resourceCurrentState.Path | Should -Be $DefaultManagedServiceAccountPath
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount3.Name
                 $resourceCurrentState.Description | Should -BeNullOrEmpty
                 $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
                 $resourceCurrentState.Enabled | Should -Be $true
@@ -336,6 +385,48 @@ try
                 $resourceCurrentState.KerberosEncryptionType | Should -Be $DefaultKerberosEncryptionType
                 $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},{1}' -f `
                         $ConfigurationData.ManagedServiceAccount3.Name, $DefaultManagedServiceAccountPath)
+            }
+
+            It 'Should return $true when Test-DscConfiguration is run' {
+                Test-DscConfiguration -Verbose | Should -Be 'True'
+            }
+        }
+
+        $configurationName = "$($script:dscResourceName)_RenameServiceAccount4_Config"
+
+        Context ('When using configuration {0}' -f $configurationName) {
+            It 'Should compile and apply the MOF without throwing' {
+                {
+                    & $configurationName @configurationParameters
+                    Start-DscConfiguration @startDscConfigurationParameters
+                } | Should -Not -Throw
+            }
+
+            It 'Should be able to call Get-DscConfiguration without throwing' {
+                {
+                    $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
+                } | Should -Not -Throw
+            }
+
+            It 'Should have set the resource and all the parameters should match' {
+                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
+                    $_.ConfigurationName -eq $configurationName `
+                        -and $_.ResourceId -eq $resourceId
+                }
+
+                $resourceCurrentState.Ensure | Should -Be 'Present'
+                $resourceCurrentState.ServiceAccountName | Should -Be $ConfigurationData.ManagedServiceAccount4.Name
+                $resourceCurrentState.AccountType | Should -Be $ConfigurationData.ManagedServiceAccount4.AccountType
+                $resourceCurrentState.Path | Should -Be $DefaultManagedServiceAccountPath
+                $resourceCurrentState.CommonName | Should -Be $ConfigurationData.ManagedServiceAccount4.Name
+                $resourceCurrentState.Description | Should -BeNullOrEmpty
+                $resourceCurrentState.DisplayName | Should -BeNullOrEmpty
+                $resourceCurrentState.Enabled | Should -Be $true
+                $resourceCurrentState.ManagedPasswordPrincipals | Should -BeNullOrEmpty
+                $resourceCurrentState.MembershipAttribute | Should -Be 'SamAccountName'
+                $resourceCurrentState.KerberosEncryptionType | Should -Be $DefaultKerberosEncryptionType
+                $resourceCurrentState.DistinguishedName | Should -Be ('CN={0},{1}' -f `
+                        $ConfigurationData.ManagedServiceAccount4.Name, $DefaultManagedServiceAccountPath)
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {

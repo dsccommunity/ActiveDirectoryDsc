@@ -1,12 +1,7 @@
 @{
-    <#
-        For the custom rules to work, the DscResource.Tests repo must be
-        cloned. It is automatically clone as soon as any unit or
-        integration tests are run.
-    #>
-    CustomRulePath      = '.\DSCResource.Tests\DscResource.AnalyzerRules'
-
-    IncludeRules        = @(
+    CustomRulePath      = '.\output\RequiredModules\DscResource.AnalyzerRules'
+    includeDefaultRules = $true
+    IncludeRules   = @(
         # DSC Resource Kit style guideline rules.
         'PSAvoidDefaultValueForMandatoryParameter',
         'PSAvoidDefaultValueSwitchParameter',
@@ -43,13 +38,7 @@
         'PSUseDeclaredVarsMoreThanAssignments',
         'PSUsePSCredentialType',
 
-        <#
-            This is to test all the DSC Resource Kit custom rules.
-            The name of the function-blocks of each custom rule start
-            with 'Measure*'.
-        #>
         'Measure-*'
     )
 
-    IncludeDefaultRules = $true
 }
