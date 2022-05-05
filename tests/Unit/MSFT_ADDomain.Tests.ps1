@@ -106,7 +106,7 @@ try
                 Mock -CommandName Test-Path `
                     -ParameterFilter { $Path -eq $mockDomainSysVolPath } `
                     -MockWith { $true }
-                Mock -CommandName Get-AdDomain `
+                Mock -CommandName Get-DomainObject `
                     -MockWith { $mockGetADDomainResult }
                 Mock -CommandName Get-AdForest `
                     -MockWith { $mockGetADForestResult }
@@ -144,7 +144,7 @@ try
                         -Exactly -Times 1
                     Assert-MockCalled -CommandName Test-Path `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Get-ADDomain `
+                    Assert-MockCalled -CommandName Get-DomainObject `
                         -Exactly -Times 0
                     Assert-MockCalled -CommandName Get-ADForest `
                         -Exactly -Times 0
@@ -201,7 +201,7 @@ try
                     Assert-MockCalled -CommandName Test-Path `
                         -ParameterFilter { $Path -eq $mockDomainSysVolPath } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Get-ADDomain `
+                    Assert-MockCalled -CommandName Get-DomainObject `
                         -ParameterFilter { $Identity -eq $mockDomainFQDN } `
                         -Exactly -Times 1
                     Assert-MockCalled -CommandName Get-ADForest `
@@ -225,102 +225,6 @@ try
                     It 'Should throw the correct exception' {
                         { Get-TargetResource @mockGetTargetResourceParameters } |
                             Should -Throw ($script:localizedData.SysVolPathDoesNotExistError -f $mockDomainSysVolPath)
-                    }
-                }
-
-                Context 'When Get-ADDomain throws an unexpected error' {
-                    BeforeAll {
-                        Mock -CommandName Get-AdDomain `
-                            -MockWith { Throw 'Unknown Error' }
-                    }
-
-                    It 'Should throw the correct exception' {
-                        { Get-TargetResource @mockGetTargetResourceParameters } |
-                            Should -Throw ($script:localizedData.GetAdDomainUnexpectedError -f $mockDomainFQDN)
-                    }
-                }
-
-                Context 'When Get-ADDomain throws an ADServerDownException until timeout' {
-                    BeforeAll {
-                        Mock -CommandName Get-AdDomain `
-                            -MockWith { throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADServerDownException' }
-                        Mock -CommandName Start-Sleep
-                    }
-
-                    It 'Should throw the correct exception' {
-                        { Get-TargetResource @mockGetTargetResourceParameters } |
-                            Should -Throw ($script:localizedData.MaxDomainRetriesReachedError -f $mockDomainFQDN)
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $mockDomainFQDN } `
-                            -Exactly -Times $maxRetries
-                        Assert-MockCalled -CommandName Start-Sleep `
-                            -Exactly -Times $maxRetries
-                    }
-                }
-
-                Context 'When Get-ADDomain throws an AuthenticationException until timeout' {
-                    BeforeAll {
-                        Mock -CommandName Get-AdDomain `
-                            -MockWith { throw New-Object -TypeName 'System.Security.Authentication.AuthenticationException' }
-                        Mock -CommandName Start-Sleep
-                    }
-
-                    It 'Should throw the correct exception' {
-                        { Get-TargetResource @mockGetTargetResourceParameters } |
-                            Should -Throw ($script:localizedData.MaxDomainRetriesReachedError -f $mockDomainFQDN)
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $mockDomainFQDN } `
-                            -Exactly -Times $maxRetries
-                        Assert-MockCalled -CommandName Start-Sleep `
-                            -Exactly -Times $maxRetries
-                    }
-                }
-
-                Context 'When Get-ADDomain throws an InvalidOperationException until timeout' {
-                    BeforeAll {
-                        Mock -CommandName Get-AdDomain `
-                            -MockWith { throw New-Object -TypeName 'System.InvalidOperationException' }
-                        Mock -CommandName Start-Sleep
-                    }
-
-                    It 'Should throw the correct exception' {
-                        { Get-TargetResource @mockGetTargetResourceParameters } |
-                            Should -Throw ($script:localizedData.MaxDomainRetriesReachedError -f $mockDomainFQDN)
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $mockDomainFQDN } `
-                            -Exactly -Times $maxRetries
-                        Assert-MockCalled -CommandName Start-Sleep `
-                            -Exactly -Times $maxRetries
-                    }
-                }
-
-                Context 'When Get-ADDomain throws an ArgumentException until timeout' {
-                    BeforeAll {
-                        Mock -CommandName Get-AdDomain `
-                            -MockWith { throw New-Object -TypeName 'System.ArgumentException' }
-                        Mock -CommandName Start-Sleep
-                    }
-
-                    It 'Should throw the correct exception' {
-                        { Get-TargetResource @mockGetTargetResourceParameters } |
-                            Should -Throw ($script:localizedData.MaxDomainRetriesReachedError -f $mockDomainFQDN)
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $mockDomainFQDN } `
-                            -Exactly -Times $maxRetries
-                        Assert-MockCalled -CommandName Start-Sleep `
-                            -Exactly -Times $maxRetries
                     }
                 }
 

@@ -11,6 +11,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Changed
 
+- ActiveDirectoryDSC.Common
+  - Created Get-DomainObject to wrap Get-ADDomain with common retry logic.
+- ADDomainController
+  - Refactored to use Get-DomainObject ([issue #673](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/673)).
+  - Refactored Unit Tests.
+- ADDomain
+  - Refactored to use Get-DomainObject.
+  - Refactored Unit Tests.
+
 - ActiveDirectoryDsc
   - Updated Pipeline to Ubuntu 18.04 from Ubuntu 16.04
     ([issue #667](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/667))
