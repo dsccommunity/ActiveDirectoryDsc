@@ -1169,10 +1169,10 @@ function Set-ADCommonGroupMember
         Specifies the time to wait in seconds between retries attempts.
 
     .PARAMETER ErrorOnUnexpectedExceptions
-        Switch to indicate if the function should thow an exception on unexpected errors rather than returning null.
+        Switch to indicate if the function should throw an exception on unexpected errors rather than returning null.
 
     .PARAMETER ErrorOnMaxRetries
-        Switch to indicate if the function should thow an exception when the maximum retries are exceeded.
+        Switch to indicate if the function should throw an exception when the maximum retries are exceeded.
 
     .INPUTS
         None
