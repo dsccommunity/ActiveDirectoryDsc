@@ -52,9 +52,8 @@ ConvertFrom-StringData @'
     TranslatingMembershipAttribute      = Translating {0} value '{1}' to {2}. (ADCOMMON0064)
     ParsingCommonNameFromDN             = Parsing CommonName value from DistinguishedName '{0}'. (ADCOMMON0065)
     ADObjectPropertyLookup              = Looking up AD Object based on {0} '{1}' to retrieve {2} value. (ADCOMMON0066)
-    ADDomainTypeNotFound                = The type Microsoft.ActiveDirectory.Management.ADDomain was not found on the current node '{0}'. (ADCOMMON0067)
-    ADServerNotReady                    = The AD Server for domain '{0}' is currently not ready. (ADCOMMON0068)
-    RetryingGetADDomain                 = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds. (ADCOMMON0069)
-    MaxDomainRetriesReachedError        = Maximum Get-ADDomain retries for domain '{0}' reached and the domain did not respond. (ADCOMMON0070)
-    GetAdDomainUnexpectedError          = Error getting AD domain '{0}'. (ADCOMMON0071)
+    ADServerNotReady                    = The AD Server for domain '{0}' is currently not ready. (ADCOMMON0067)
+    RetryingGetADDomain                 = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds. (ADCOMMON0068)
+    MaxDomainRetriesReachedError        = Maximum Get-ADDomain retries for domain '{0}' reached and the domain did not respond. (ADCOMMON0069)
+    GetAdDomainUnexpectedError          = Error getting AD domain '{0}'. (ADCOMMON0070)
 '@
