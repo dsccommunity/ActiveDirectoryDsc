@@ -143,7 +143,7 @@ try
                 }
 
                 It 'Should return the desired result' {
-                    $getTargetResourceParamsWithApostrophe = $getTargetResourceParams.Clone()
+                    $getTargetResourceParamsWithApostrophe = $getTargetResourceParameters.Clone()
                     $getTargetResourceParamsWithApostrophe['Name'] = "Jones's OU"
 
                     $targetResource = Get-TargetResource @getTargetResourceParamsWithApostrophe
@@ -191,7 +191,8 @@ try
                     Assert-MockCalled -CommandName Assert-Module `
                         -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
                     Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path } `
+                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path `
+                            -and $null -ne $Credential} `
                         -Exactly -Times 1
                 }
             }
@@ -209,7 +210,8 @@ try
                     Assert-MockCalled -CommandName Assert-Module `
                         -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
                     Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path } `
+                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path `
+                            -and $null -ne $Credential} `
                         -Exactly -Times 1
                 }
             }

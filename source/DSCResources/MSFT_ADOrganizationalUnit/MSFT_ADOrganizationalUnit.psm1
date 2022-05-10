@@ -66,20 +66,18 @@ function Get-TargetResource
 
     Write-Verbose -Message ($script:localizedData.RetrievingOU -f $Name, $Path)
 
-    $getADOUProperties = ('Name', 'DistinguishedName', 'Description', 'ProtectedFromAccidentalDeletion',
-        'ManagedBy', 'Info')
+    $getADOUProperties = ('Name', 'DistinguishedName', 'Description', 'ProtectedFromAccidentalDeletion')
 
     try
     {
         $getADOUParameters = $commonParameters.Clone()
-        $getADOUParameters.Remove('Identity')
-        $getADOUParameters.Remove('Name')
         $getADOUParameters.Filter = ('Name -eq "{0}"' -f $Name)
         $getADOUParameters.SearchBase = $Path
-        $getADOUParameters.Remove('Path')
         $getADOUParameters.SearchScope = 'OneLevel'
-        $getADOUParameters.Properties =$getADOUProperties
-        Write-Verbose -Message ($getADOUParameters | fl | out-string)
+        $getADOUParameters.Properties = $getADOUProperties
+        $getADOUParameters.Remove('Identity')
+        $getADOUParameters.Remove('Name')
+        $getADOUParameters.Remove('Path')
         $ou = Get-ADOrganizationalUnit @getADOUParameters
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
@@ -229,7 +227,7 @@ function Test-TargetResource
         if ($Ensure -eq 'Present')
         {
             # Resource should exist
-            $ignoreProperties = @('DomainController', 'Credential')
+            $ignoreProperties = @('DomainController', 'Credential','RestoreFromRecycleBin')
             $propertiesNotInDesiredState = (Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult `
                     -DesiredValues $parameters -IgnoreProperties $ignoreProperties -Verbose:$VerbosePreference | `
                     Where-Object -Property InDesiredState -eq $false)
@@ -359,8 +357,6 @@ function Set-TargetResource
         $RestoreFromRecycleBin
     )
 
-    [HashTable] $parameters = $PSBoundParameters
-
     $getTargetResourceParameters = @{
         Name             = $Name
         Path             = $Path
@@ -371,7 +367,7 @@ function Set-TargetResource
     # Remove parameters that have not been specified
     @($getTargetResourceParameters.Keys) |
         ForEach-Object {
-            if (-not $parameters.ContainsKey($_))
+            if (-not $PSBoundParameters.ContainsKey($_))
             {
                 $getTargetResourceParameters.Remove($_)
             }
