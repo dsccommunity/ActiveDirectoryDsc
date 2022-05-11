@@ -208,10 +208,16 @@ function Test-TargetResource
         DomainController = $DomainController
     }
 
-    # Remove parameters that have not been specified
+    # Create object with the expected values
+    [HashTable] $parameters = $PSBoundParameters
+    $parameters['Description'] = $Description
+    $parameters['ProtectedFromAccidentalDeletion'] = $ProtectedFromAccidentalDeletion
+
+
+    # Remove parameters that have not been specified, unless in the IgnoreParameters array
     @($getTargetResourceParameters.Keys) |
         ForEach-Object {
-            if (-not $PSBoundParameters.ContainsKey($_))
+            if (-not $parameters.ContainsKey($_))
             {
                 $getTargetResourceParameters.Remove($_)
             }
@@ -225,10 +231,10 @@ function Test-TargetResource
         if ($Ensure -eq 'Present')
         {
             # Resource should exist
-            $ignoreProperties = @('DomainController', 'Credential','RestoreFromRecycleBin')
+            $ignoreProperties = @('DomainController', 'Credential', 'RestoreFromRecycleBin')
             $propertiesNotInDesiredState = (Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult `
-                    -DesiredValues $getTargetResourceParameters -IgnoreProperties $ignoreProperties -Verbose:$VerbosePreference | `
-                    Where-Object -Property InDesiredState -eq $false)
+                    -DesiredValues $parameters -IgnoreProperties $ignoreProperties `
+                    -Verbose:$VerbosePreference | Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)
             {

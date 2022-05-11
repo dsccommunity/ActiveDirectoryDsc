@@ -308,7 +308,7 @@ try
                         Context "When the $property resource property is not in the desired state" {
                             BeforeAll {
                                 $testTargetResourceNotInDesiredStateParams = $testTargetResourcePresentParams.Clone()
-                                $testTargetResourceNotInDesiredStateParams.$property = $mockChangedResource.$property
+                                $testTargetResourceNotInDesiredStateParams[$property] = $mockChangedResource.$property
                             }
 
                             It 'Should return $false' {
