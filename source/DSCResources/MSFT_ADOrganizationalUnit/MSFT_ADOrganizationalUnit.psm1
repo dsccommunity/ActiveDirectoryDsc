@@ -201,8 +201,6 @@ function Test-TargetResource
         $DomainController
     )
 
-    [HashTable] $parameters = $PSBoundParameters
-
     $getTargetResourceParameters = @{
         Name             = $Name
         Path             = $Path
@@ -213,7 +211,7 @@ function Test-TargetResource
     # Remove parameters that have not been specified
     @($getTargetResourceParameters.Keys) |
         ForEach-Object {
-            if (-not $parameters.ContainsKey($_))
+            if (-not $PSBoundParameters.ContainsKey($_))
             {
                 $getTargetResourceParameters.Remove($_)
             }
@@ -229,7 +227,7 @@ function Test-TargetResource
             # Resource should exist
             $ignoreProperties = @('DomainController', 'Credential','RestoreFromRecycleBin')
             $propertiesNotInDesiredState = (Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult `
-                    -DesiredValues $parameters -IgnoreProperties $ignoreProperties -Verbose:$VerbosePreference | `
+                    -DesiredValues $getTargetResourceParameters -IgnoreProperties $ignoreProperties -Verbose:$VerbosePreference | `
                     Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)

@@ -134,11 +134,11 @@ try
             }
             Context 'When the OU has apostrophe' {
                 BeforeAll {
-                    $mockGetADOrganizationUnitProtectedResult = $mockGetADOrganizationUnitResult.Clone()
-                    $mockGetADOrganizationUnitProtectedResult['Name'] = "Jones's OU"
+                    $mockGetADOrganizationUnitApostropheResult = $mockGetADOrganizationUnitResult.Clone()
+                    $mockGetADOrganizationUnitApostropheResult['Name'] = "Jones's OU"
 
                     Mock -CommandName Get-ADOrganizationalUnit -MockWith {
-                        return $mockGetADOrganizationUnitProtectedResult
+                        return $mockGetADOrganizationUnitApostropheResult
                     }
                 }
 
@@ -159,7 +159,8 @@ try
 
             Context 'When the OU is protected' {
                 BeforeAll {
-
+                    $mockGetADOrganizationUnitProtectedResult = $mockGetADOrganizationUnitResult.Clone()
+                    $mockGetADOrganizationUnitProtectedResult['ProtectedFromAccidentalDeletion'] = $true
                     Mock -CommandName Get-ADOrganizationalUnit -MockWith { $mockGetADOrganizationUnitProtectedResult }
                 }
 
@@ -191,8 +192,8 @@ try
                     Assert-MockCalled -CommandName Assert-Module `
                         -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
                     Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path `
-                            -and $null -ne $Credential} `
+                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path -and `
+                            $Credential -eq $testCredential } `
                         -Exactly -Times 1
                 }
             }
@@ -210,8 +211,8 @@ try
                     Assert-MockCalled -CommandName Assert-Module `
                         -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
                     Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path `
-                            -and $null -ne $Credential} `
+                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path -and `
+                            $Server -eq $testDomainController } `
                         -Exactly -Times 1
                 }
             }
@@ -566,7 +567,8 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name } `
+                                    -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name -and `
+                                        $DomainController -eq $testDomainController } `
                                     -Exactly -Times 1
                                 Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
                                     -ParameterFilter { $Identity -eq $mockDistinguishedName -and `
@@ -759,6 +761,26 @@ try
                             Assert-MockCalled -CommandName New-ADOrganizationalUnit `
                                 -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name -and `
                                     $Credential -eq $testCredential } `
+                                -Exactly -Times 1
+                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
+                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
+                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
+                        }
+                    }
+
+                    Context 'When the "DomainController" parameter is specified' {
+                        It 'Should not throw' {
+                            { Set-TargetResource @setTargetResourcePresentParameters `
+                                    -DomainController $testDomainController } | Should -Not -Throw
+                        }
+
+                        It 'Should call the expected mocks' {
+                            Assert-MockCalled -CommandName Get-TargetResource `
+                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
+                                -Exactly -Times 1
+                            Assert-MockCalled -CommandName New-ADOrganizationalUnit `
+                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name -and `
+                                    $Server -eq $testDomainController } `
                                 -Exactly -Times 1
                             Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
                             Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
