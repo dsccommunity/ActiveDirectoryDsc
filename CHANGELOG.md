@@ -13,11 +13,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - There was a 'build.ps1' file under the source folder than are no longer
     required for ModuleBuilder to work.
 
-## [6.2.0] - 2022-05-01
-
 ### Changed
 
-- ActiveDirectoryDSC.Common
+- ActiveDirectoryDsc.Common
   - Created Get-DomainObject to wrap Get-ADDomain with common retry logic.
 - ADDomainController
   - Refactored to use Get-DomainObject ([issue #673](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/673)).
@@ -25,6 +23,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADDomain
   - Refactored to use Get-DomainObject.
   - Refactored Unit Tests.
+
+## [6.2.0] - 2022-05-01
+
+### Changed
 
 - ActiveDirectoryDsc
   - Updated Pipeline to Ubuntu 18.04 from Ubuntu 16.04
