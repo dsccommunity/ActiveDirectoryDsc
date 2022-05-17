@@ -915,7 +915,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
     Describe 'ActiveDirectoryDsc.Common\Get-DomainObject' {
         Context 'When Get-ADDomain throws an unexpected error with ErrorOnUnexpectedExceptions' {
             BeforeAll {
-                Mock -CommandName Get-ADDomain -MockWith { Throw 'Unknown Error' }
+                Mock -CommandName Get-ADDomain -MockWith { throw 'Unknown Error' }
             }
 
             It 'Should throw the correct error' {
@@ -928,7 +928,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
 
         Context 'When Get-ADDomain throws an unexpected error without ErrorOnUnexpectedExceptions' {
             BeforeAll {
-                Mock -CommandName Get-ADDomain -MockWith { Throw 'Unknown Error' }
+                Mock -CommandName Get-ADDomain -MockWith { throw 'Unknown Error' }
             }
 
             It 'Should return $null' {

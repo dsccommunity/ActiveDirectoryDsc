@@ -57,7 +57,7 @@ function Get-TargetResource
 
     Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
 
-    $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose
+    $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose:$VerbosePreference
 
     if (-not $Domain)
     {
