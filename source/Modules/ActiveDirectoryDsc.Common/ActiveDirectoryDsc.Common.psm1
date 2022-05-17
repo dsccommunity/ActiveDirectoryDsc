@@ -1145,6 +1145,146 @@ function Set-ADCommonGroupMember
 
 <#
     .SYNOPSIS
+        Gets the domain object.
+
+    .DESCRIPTION
+        The Get-DomainObject function is used to get the domain object with retries, otherwise it returns $null.
+
+    .EXAMPLE
+        Get-DomainObject -DomainName contoso.com
+
+    .PARAMETER Identity
+        Specifies an Active Directory domain object, most commonly a DNS domain name.
+
+    .PARAMETER Server
+        Specifies the Active Directory Domain Services instance to connect to, most commonly a Fully qualified domain name.
+
+    .PARAMETER Credential
+        Specifies the credentials to use when accessing the domain, or use the current user if not specified.
+
+    .PARAMETER MaximumRetries
+        Specifies the maximum number of retries to attempt.
+
+    .PARAMETER RetryIntervalInSeconds
+        Specifies the time to wait in seconds between retries attempts.
+
+    .PARAMETER ErrorOnUnexpectedExceptions
+        Switch to indicate if the function should throw an exception on unexpected errors rather than returning null.
+
+    .PARAMETER ErrorOnMaxRetries
+        Switch to indicate if the function should throw an exception when the maximum retries are exceeded.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        System.DirectoryServices.ActiveDirectory.Domain
+
+#>
+function Get-DomainObject
+{
+    [CmdletBinding()]
+
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Identity,
+
+        [Parameter()]
+        [System.String]
+        $Server,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        $Credential,
+
+        [Parameter()]
+        [System.Int32]
+        $MaximumRetries = 15,
+
+        [Parameter()]
+        [System.Int32]
+        $RetryIntervalInSeconds = 30,
+
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $ErrorOnUnexpectedExceptions,
+
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $ErrorOnMaxRetries
+    )
+
+    $getADDomainParameters = @{
+        Identity = $Identity
+        ErrorAction = 'Stop'
+    }
+
+    if ($PSBoundParameters.ContainsKey('Credential'))
+    {
+        $getADDomainParameters['Credential'] = $Credential
+    }
+    if ($PSBoundParameters.ContainsKey('Server'))
+    {
+        $getADDomainParameters['Server'] = $Server
+    }
+
+    $retries = 0
+    $domainObject = $null
+
+    do
+    {
+        $domainFound = $true
+        try
+        {
+            $domainObject = Get-ADDomain @getADDomainParameters
+        }
+        catch [Microsoft.ActiveDirectory.Management.ADServerDownException], `
+            [System.Security.Authentication.AuthenticationException], `
+            [System.InvalidOperationException], `
+            [System.ArgumentException]
+        {
+            Write-Verbose ($script:localizedData.ADServerNotReady -f $Identity)
+            $domainFound = $false
+            # will fall into the retry mechanism.
+        }
+        catch
+        {
+            if ($ErrorOnUnexpectedExceptions)
+            {
+                $errorMessage = $script:localizedData.GetAdDomainUnexpectedError -f $Identity
+                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
+            }
+            return $null
+        }
+
+        if (-not $domainFound)
+        {
+            $retries++
+
+            Write-Verbose ($script:localizedData.RetryingGetADDomain -f
+                    $retries, $MaximumRetries, $RetryIntervalInSeconds)
+
+            Start-Sleep -Seconds $RetryIntervalInSeconds
+        }
+    } while ((-not $domainFound) -and $retries -lt $MaximumRetries)
+
+    if ($retries -eq $MaximumRetries)
+    {
+        if ($ErrorOnMaxRetries)
+        {
+            $errorMessage = $script:localizedData.MaxDomainRetriesReachedError -f $Identity
+            New-InvalidOperationException -Message $errorMessage
+        }
+        Write-Verbose -Message ($script:localizedData.MaxDomainRetriesReachedError -f $Identity) -Verbose
+    }
+
+    return $domainObject
+}
+
+<#
+    .SYNOPSIS
         Gets the domain controller object if the node is a domain controller.
 
     .DESCRIPTION

@@ -57,14 +57,12 @@ function Get-TargetResource
 
     Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
 
-    try
-    {
-        $domain = Get-ADDomain -Identity $DomainName -Credential $Credential
-    }
-    catch
+    $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose:$VerbosePreference
+
+    if (-not $Domain)
     {
         $errorMessage = $script:localizedData.MissingDomain -f $DomainName
-        New-ObjectNotFoundException -Message $errorMessage -ErrorRecord $_
+        New-ObjectNotFoundException -Message $errorMessage
     }
 
     Write-Verbose -Message ($script:localizedData.DomainPresent -f $DomainName)
@@ -191,7 +189,6 @@ function Get-TargetResource
             Name                                               | Module
             ---------------------------------------------------|--------------------------
             Install-ADDSDomainController                       | ActiveDirectory
-            Get-ADDomain                                       | ActiveDirectory
             Get-ADForest                                       | ActiveDirectory
             Set-ADObject                                       | ActiveDirectory
             Move-ADDirectoryServer                             | ActiveDirectory
@@ -199,6 +196,7 @@ function Get-TargetResource
             Remove-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
             Add-ADDomainControllerPasswordReplicationPolicy    | ActiveDirectory
             Get-DomainControllerObject                         | ActiveDirectoryDsc.Common
+            Get-DomainObject                                   | ActiveDirectoryDsc.Common
             New-InvalidOperationException                      | DscResource.Common
 #>
 function Set-TargetResource

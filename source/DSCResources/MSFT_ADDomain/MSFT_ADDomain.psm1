@@ -34,11 +34,11 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Used Functions:
             Name                           | Module
             -------------------------------|--------------------------
-            Get-ADDomain                   | ActiveDirectory
             Get-ADForest                   | ActiveDirectory
             Assert-Module                  | DscResource.Common
             New-InvalidOperationException  | DscResource.Common
             Resolve-DomainFQDN             | MSFT_ADDomain
+            Get-DomainObject               | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentForestMode | ActiveDirectoryDsc.Common
             ConvertTo-DeploymentDomainMode | ActiveDirectoryDsc.Common
 #>
@@ -93,48 +93,7 @@ function Get-TargetResource
 
         Write-Verbose ($script:localizedData.QueryDomain -f $domainFQDN)
 
-        $retries = 0
-        $maxRetries = 15
-        $retryIntervalInSeconds = 30
-
-        do
-        {
-            $domainFound = $true
-            try
-            {
-                $domain = Get-ADDomain -Identity $domainFQDN -Server localhost -ErrorAction Stop
-            }
-            catch [Microsoft.ActiveDirectory.Management.ADServerDownException], `
-                [System.Security.Authentication.AuthenticationException], `
-                [System.InvalidOperationException], `
-                [System.ArgumentException]
-            {
-                Write-Verbose ($script:localizedData.ADServerNotReady -f $domainFQDN)
-                $domainFound = $false
-                # will fall into the retry mechanism.
-            }
-            catch
-            {
-                $errorMessage = $script:localizedData.GetAdDomainUnexpectedError -f $domainFQDN
-                New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-            }
-
-            if (-not $domainFound)
-            {
-                $retries++
-
-                Write-Verbose ($script:localizedData.RetryingGetADDomain -f
-                    $retries, $maxRetries, $retryIntervalInSeconds)
-
-                Start-Sleep -Seconds $retryIntervalInSeconds
-            }
-        } while ((-not $domainFound) -and $retries -lt $maxRetries)
-
-        if ($retries -eq $maxRetries)
-        {
-            $errorMessage = $script:localizedData.MaxDomainRetriesReachedError -f $domainFQDN
-            New-InvalidOperationException -Message $errorMessage
-        }
+        $domain = Get-DomainObject -Identity $domainFQDN -Server localhost -ErrorOnUnexpectedExceptions -ErrorOnMaxRetries -Verbose
     }
     else
     {

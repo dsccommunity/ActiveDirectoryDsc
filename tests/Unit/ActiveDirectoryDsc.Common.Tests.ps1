@@ -912,6 +912,176 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
         }
     }
 
+    Describe 'ActiveDirectoryDsc.Common\Get-DomainObject' {
+        Context 'When Get-ADDomain throws an unexpected error with ErrorOnUnexpectedExceptions' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith { throw 'Unknown Error' }
+            }
+
+            It 'Should throw the correct error' {
+                { Get-DomainObject -Identity 'contoso.com' -ErrorOnUnexpectedExceptions } |
+                            Should -Throw ($script:localizedData.GetAdDomainUnexpectedError -f 'contoso.com')
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When Get-ADDomain throws an unexpected error without ErrorOnUnexpectedExceptions' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith { throw 'Unknown Error' }
+            }
+
+            It 'Should return $null' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com' 
+                $getDomainObjectResult | Should -BeNullOrEmpty
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When Get-ADDomain throws an ADServerDownException until timeout' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADServerDownException'
+                }
+                Mock -CommandName Start-Sleep
+            }
+
+            It 'Should return $null' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com' -MaximumRetries 3 -RetryIntervalInSeconds 3
+                $getDomainObjectResult | Should -BeNullOrEmpty
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 3 -Scope It
+                Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 3 -Scope It
+            }
+        }
+
+        Context 'When Get-ADDomain throws an ADServerDownException until timeout and ErrorOnMaxRetries' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADServerDownException'
+                }
+                Mock -CommandName Start-Sleep
+            }
+
+            It 'Should throw the correct error' {
+                { Get-DomainObject -Identity 'contoso.com' -MaximumRetries 3 -RetryIntervalInSeconds 3 -ErrorOnMaxRetries } |
+                            Should -Throw ($script:localizedData.MaxDomainRetriesReachedError -f 'contoso.com')
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 3 -Scope It
+                Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 3 -Scope It
+            }
+        }
+
+        Context 'When Get-ADDomain throws an AuthenticationException until timeout' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    throw New-Object -TypeName 'System.Security.Authentication.AuthenticationException'
+                }
+                Mock -CommandName Start-Sleep
+            }
+
+            It 'Should return $null' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com' -MaximumRetries 3 -RetryIntervalInSeconds 3
+                $getDomainObjectResult | Should -BeNullOrEmpty
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 3 -Scope It
+                Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 3 -Scope It
+            }
+        }
+
+        Context 'When Get-ADDomain throws an InvalidOperationException until timeout' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    throw New-Object -TypeName 'System.InvalidOperationException'
+                }
+                Mock -CommandName Start-Sleep
+            }
+
+            It 'Should return $null' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com' -MaximumRetries 3 -RetryIntervalInSeconds 3
+                $getDomainObjectResult | Should -BeNullOrEmpty
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 3 -Scope It
+                Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 3
+            }
+        }
+
+        Context 'When Get-ADDomain throws an ArgumentException until timeout' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    throw New-Object -TypeName 'System.ArgumentException'
+                }
+                Mock -CommandName Start-Sleep
+            }
+
+            It 'Should return $null' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com' -MaximumRetries 3 -RetryIntervalInSeconds 3
+                $getDomainObjectResult | Should -BeNullOrEmpty
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 3 -Scope It
+                Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 3
+            }
+        }
+
+        Context 'When domain cannot be found' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException'
+                }
+            }
+
+            It 'Should return $null' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com'
+                $getDomainObjectResult | Should -BeNullOrEmpty
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When domain can be reached' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    return @{
+                        Forest          = 'contoso.com'
+                    }
+                }
+            }
+
+            It 'Should return the correct values for each property' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com'
+
+                $getDomainObjectResult.Forest | Should -Be 'contoso.com'
+
+                Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When domain can be reached, and using specific credential' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomain -MockWith {
+                    return @{
+                        Forest          = 'contoso.com'
+                    }
+                }
+
+                $mockAdministratorUser = 'admin@contoso.com'
+                $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force
+                $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @($mockAdministratorUser, $mockAdministratorPassword)
+            }
+
+            It 'Should return the correct values for each property' {
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com' -Credential $mockAdministratorCredential
+
+                $getDomainObjectResult.Forest | Should -Be 'contoso.com'
+
+                Assert-MockCalled -CommandName Get-ADDomain -ParameterFilter {
+                    $PSBoundParameters.ContainsKey('Credential') -eq $true
+                } -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+
     Describe 'ActiveDirectoryDsc.Common\Get-DomainControllerObject' {
         Context 'When domain name cannot be reached' {
             BeforeAll {
