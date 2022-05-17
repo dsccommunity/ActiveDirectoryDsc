@@ -38,6 +38,7 @@
         'Restore-ADCommonObject'
         'Get-ADDomainNameFromDistinguishedName'
         'Set-ADCommonGroupMember'
+        'Get-DomainObject'
         'Get-DomainControllerObject'
         'Test-IsDomainController'
         'Convert-PropertyMapToObjectProperties'

@@ -58,6 +58,9 @@ Gets the contents of a file as a byte array.
 ### [Get-CurrentUser](docs/Get-CurrentUser.md)
 Gets the current user identity.
 
+### [Get-DomainObject](docs/Get-DomainObject.md)
+Gets the domain object with retries.
+
 ### [Get-DomainControllerObject](docs/Get-DomainControllerObject.md)
 Gets the domain controller object if the node is a domain controller.
 

@@ -74,8 +74,8 @@ try
 
             Context 'When the domain name is not available' {
                 BeforeAll {
-                    Mock -CommandName Get-ADDomain -MockWith {
-                        throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADServerDownException'
+                    Mock -CommandName Get-DomainObject -MockWith {
+                        return $null
                     }
                 }
 
@@ -87,8 +87,7 @@ try
                 It 'Should call the expected mocks' {
                     Assert-MockCalled -CommandName Assert-Module `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Get-ADDomain `
-                        -ParameterFilter { $Identity -eq $correctDomainName } `
+                    Assert-MockCalled -CommandName Get-DomainObject `
                         -Exactly -Times 1
                 }
             }
@@ -105,7 +104,7 @@ try
                     $nTDSRegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
                     $netlogonRegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
 
-                    Mock -CommandName Get-ADDomain -MockWith { $true }
+                    Mock -CommandName Get-DomainObject -MockWith { $true }
                     Mock -CommandName Get-ItemProperty `
                         -ParameterFilter { $Path -eq $nTDSRegistryPath } `
                         -MockWith { $mockGetItemPropertyNTDSResult }
@@ -140,8 +139,7 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Assert-Module `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $correctDomainName } `
+                        Assert-MockCalled -CommandName Get-DomainObject `
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
@@ -190,8 +188,7 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Assert-Module `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $correctDomainName } `
+                        Assert-MockCalled -CommandName Get-DomainObject `
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
@@ -264,8 +261,7 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Assert-Module `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $correctDomainName } `
+                        Assert-MockCalled -CommandName Get-DomainObject `
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
@@ -314,8 +310,7 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Assert-Module `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADDomain `
-                            -ParameterFilter { $Identity -eq $correctDomainName } `
+                        Assert-MockCalled -CommandName Get-DomainObject `
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
