@@ -7,6 +7,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Removed
+
+- ActiveDirectoryDsc
+  - There was a 'build.ps1' file under the source folder than are no longer
+    required for ModuleBuilder to work.
+
 ## [6.2.0] - 2022-05-01
 
 ### Changed
