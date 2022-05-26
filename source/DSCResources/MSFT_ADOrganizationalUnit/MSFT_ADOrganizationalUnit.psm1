@@ -19,10 +19,17 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER Path
         Specifies the X.500 path of the OrganizationalUnit (OU) or container where the new object is created.
 
+    .PARAMETER Credential
+        The credential to be used to perform the operation on Active Directory.
+
+    .PARAMETER DomainController
+        Active Directory domain controller to enact the change upon.
+
     .NOTES
         Used Functions:
             Name                          | Module
             ------------------------------|--------------------------
+            Get-ADCommonParameters        | ActiveDirectoryDsc.Common
             Get-ADOrganizationalUnit      | ActiveDirectory
             Assert-Module                 | DscResource.Common
             New-InvalidOperationException | DscResource.Common
@@ -39,17 +46,39 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $Path
+        $Path,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $DomainController
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    Write-Verbose ($script:localizedData.RetrievingOU -f $Name, $Path)
+    $commonParameters = Get-ADCommonParameters @PSBoundParameters
+
+    Write-Verbose -Message ($script:localizedData.RetrievingOU -f $Name, $Path)
+
+    $getADOUProperties = ('Name', 'DistinguishedName', 'Description', 'ProtectedFromAccidentalDeletion')
 
     try
     {
-        $ou = Get-ADOrganizationalUnit -Filter "Name -eq `"$Name`"" -SearchBase $Path `
-            -SearchScope OneLevel -Properties ProtectedFromAccidentalDeletion, Description
+        $getADOUParameters = $commonParameters.Clone()
+        $getADOUParameters.Filter = ('Name -eq "{0}"' -f $Name)
+        $getADOUParameters.SearchBase = $Path
+        $getADOUParameters.SearchScope = 'OneLevel'
+        $getADOUParameters.Properties = $getADOUProperties
+        $getADOUParameters.Remove('Identity')
+        $getADOUParameters.Remove('Name')
+        $getADOUParameters.Remove('Path')
+        $ou = Get-ADOrganizationalUnit @getADOUParameters
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]
     {
@@ -108,6 +137,9 @@ function Get-TargetResource
     .PARAMETER Credential
         The credential to be used to perform the operation on Active Directory.
 
+    .PARAMETER DomainController
+        Active Directory domain controller to enact the change upon.
+
     .PARAMETER ProtectedFromAccidentalDeletion
         Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true.
 
@@ -161,20 +193,41 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
-        $RestoreFromRecycleBin
+        $RestoreFromRecycleBin,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DomainController
     )
 
-    $targetResource = Get-TargetResource -Name $Name -Path $Path
+    $getTargetResourceParameters = @{
+        Name             = $Name
+        Path             = $Path
+        Credential       = $Credential
+        DomainController = $DomainController
+    }
 
-    if ($targetResource.Ensure -eq 'Present')
+    # Remove parameters that have not been specified, unless in the IgnoreParameters array
+    @($getTargetResourceParameters.Keys) |
+        ForEach-Object {
+            if (-not $PSBoundParameters.ContainsKey($_))
+            {
+                $getTargetResourceParameters.Remove($_)
+            }
+        }
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+
+    if ($getTargetResourceResult.Ensure -eq 'Present')
     {
         # Resource exists
         if ($Ensure -eq 'Present')
         {
             # Resource should exist
-            $propertiesNotInDesiredState = (
-                Compare-ResourcePropertyState -CurrentValue $targetResource -DesiredValues $PSBoundParameters -IgnoreProperties ('Credential', 'RestoreFromRecycleBin') |
-                    Where-Object -Property InDesiredState -eq $false)
+            $ignoreProperties = @('DomainController', 'Credential', 'RestoreFromRecycleBin')
+            $propertiesNotInDesiredState = (Compare-ResourcePropertyState -CurrentValues $getTargetResourceResult `
+                    -DesiredValues $PSBoundParameters -IgnoreProperties $ignoreProperties `
+                    -Verbose:$VerbosePreference | Where-Object -Property InDesiredState -eq $false)
 
             if ($propertiesNotInDesiredState)
             {
@@ -182,9 +235,8 @@ function Test-TargetResource
             }
             else
             {
-                # Resource is in the desired state
-                Write-Verbose ($script:localizedData.OUInDesiredState -f $Name)
-
+                # Resource is in desired state
+                Write-Verbose -Message ($script:localizedData.OUInDesiredState -f $Name)
                 $inDesiredState = $true
             }
         }
@@ -234,6 +286,9 @@ function Test-TargetResource
     .PARAMETER Credential
         The credential to be used to perform the operation on Active Directory.
 
+    .PARAMETER DomainController
+        Active Directory domain controller to enact the change upon.
+
     .PARAMETER ProtectedFromAccidentalDeletion
         Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true.
 
@@ -279,6 +334,11 @@ function Set-TargetResource
         $Credential,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DomainController,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $ProtectedFromAccidentalDeletion = $true,
@@ -294,16 +354,32 @@ function Set-TargetResource
         $RestoreFromRecycleBin
     )
 
-    $targetResource = Get-TargetResource -Name $Name -Path $Path
+    $getTargetResourceParameters = @{
+        Name             = $Name
+        Path             = $Path
+        Credential       = $Credential
+        DomainController = $DomainController
+    }
 
-    if ($targetResource.Ensure -eq 'Present')
+    # Remove parameters that have not been specified
+    @($getTargetResourceParameters.Keys) |
+        ForEach-Object {
+            if (-not $PSBoundParameters.ContainsKey($_))
+            {
+                $getTargetResourceParameters.Remove($_)
+            }
+        }
+
+    $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+
+    if ($getTargetResourceResult.Ensure -eq 'Present')
     {
         if ($Ensure -eq 'Present')
         {
             Write-Verbose ($script:localizedData.UpdatingOU -f $Name)
 
             $setADOrganizationalUnitParams = @{
-                Identity                        = $targetResource.DistinguishedName
+                Identity                        = $getTargetResourceResult.DistinguishedName
                 Description                     = $Description
                 ProtectedFromAccidentalDeletion = $ProtectedFromAccidentalDeletion
             }
@@ -311,6 +387,11 @@ function Set-TargetResource
             if ($Credential)
             {
                 $setADOrganizationalUnitParams['Credential'] = $Credential
+            }
+
+            if ($DomainController)
+            {
+                $setADOrganizationalUnitParams['Server'] = $DomainController
             }
 
             try
@@ -329,16 +410,21 @@ function Set-TargetResource
             Write-Verbose ($script:localizedData.DeletingOU -f $Name)
 
             # Disable 'ProtectedFromAccidentalDeletion' if it is set.
-            if ($targetResource.ProtectedFromAccidentalDeletion)
+            if ($getTargetResourceResult.ProtectedFromAccidentalDeletion)
             {
                 $setADOrganizationalUnitParams = @{
-                    Identity                        = $targetResource.DistinguishedName
+                    Identity                        = $getTargetResourceResult.DistinguishedName
                     ProtectedFromAccidentalDeletion = $false
                 }
 
                 if ($Credential)
                 {
                     $setADOrganizationalUnitParams['Credential'] = $Credential
+                }
+
+                if ($DomainController)
+                {
+                    $setADOrganizationalUnitParams['Server'] = $DomainController
                 }
 
                 try
@@ -353,12 +439,17 @@ function Set-TargetResource
             }
 
             $removeADOrganizationalUnitParams = @{
-                Identity = $targetResource.DistinguishedName
+                Identity = $getTargetResourceResult.DistinguishedName
             }
 
             if ($Credential)
             {
                 $removeADOrganizationalUnitParams['Credential'] = $Credential
+            }
+
+            if ($DomainController)
+            {
+                $removeADOrganizationalUnitParams['Server'] = $DomainController
             }
 
             try
@@ -391,6 +482,11 @@ function Set-TargetResource
                     $restoreParams['Credential'] = $Credential
                 }
 
+                if ($DomainController)
+                {
+                    $restoreParams['Server'] = $DomainController
+                }
+
                 $restoreSuccessful = Restore-ADCommonObject @restoreParams
             }
 
@@ -408,6 +504,11 @@ function Set-TargetResource
                 if ($Credential)
                 {
                     $newADOrganizationalUnitParams['Credential'] = $Credential
+                }
+
+                if ($DomainController)
+                {
+                    $newADOrganizationalUnitParams['Server'] = $DomainController
                 }
 
                 try

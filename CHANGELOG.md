@@ -23,6 +23,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADDomain
   - Refactored to use Get-DomainObject.
   - Refactored Unit Tests.
+- ADOrganizationalUnit
+  - Added DomainController Parameter.
 
 ## [6.2.0] - 2022-05-01
 

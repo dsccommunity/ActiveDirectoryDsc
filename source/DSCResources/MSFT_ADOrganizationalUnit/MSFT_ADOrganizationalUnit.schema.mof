@@ -5,6 +5,7 @@ class MSFT_ADOrganizationalUnit : OMI_BaseResource
     [Key, Description("Specifies the X.500 path of the Organizational Unit (OU) or container where the new object is created.")] String Path;
     [Write, Description("Specifies whether the Organizational Unit (OU) should be present or absent. Default value is 'Present'."), ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
     [Write, Description("The credential to be used to perform the operation on Active Directory."), EmbeddedInstance("MSFT_Credential")] String Credential;
+    [Write, Description("Specifies the Active Directory Domain Services instance to use to perform the task.")] String DomainController;
     [Write, Description("Specifies if the Organizational Unit (OU) container should be protected from deletion. Default value is $true.")] Boolean ProtectedFromAccidentalDeletion;
     [Write, Description("Specifies the description of the Organizational Unit (OU). Default value is empty ('').")] String Description;
     [Write, Description("Try to restore the Organizational Unit (OU) from the recycle bin before creating a new one.")] Boolean RestoreFromRecycleBin;
