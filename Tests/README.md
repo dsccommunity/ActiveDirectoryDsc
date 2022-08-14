@@ -60,6 +60,28 @@ _to more resemble the Hyper-V steps._
 should be installed), but the lab that runs the integration tests does _not_
 need Internet connectivity.
 
+### Setup the Hyper-V host
+
+Run the following command to get the virtual machine and virtual machine
+harddisk location:
+
+```powershell
+Get-VMHost | Select-Object -Property VirtualMachinePath,VirtualHardDiskPath
+```
+
+Make sure the paths point to a location that has sufficient disk space,
+especially the virtual machine harddisk location (`VirtualHardDiskPath`).
+If the path need to change then run the below command and change the paths
+as needed:
+
+```powershell
+$virtualMachinePath = 'E:\Hyper-V'
+$virtualMachineHarddiskPath = 'E:\Hyper-V\Virtual Hard Disks'
+New-Item -Path $virtualMachinePath -Type 'Directory' -Force | Out-Null
+New-Item -Path $virtualMachineHarddiskPath -Type 'Directory' -Force | Out-Null
+Set-VMHost -VirtualMachinePath $virtualMachinePath -VirtualHardDiskPath $virtualMachineHarddiskPath
+```
+
 ### Create Hyper-V base image template
 
 There are many blog articles explaining this, just search for
