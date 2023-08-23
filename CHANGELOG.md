@@ -26,6 +26,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADOrganizationalUnit
   - Added DomainController Parameter.
 
+### Fixed
+
+- ADReplicationSiteLink
+  - Allow OptionChangeNotification, OptionTwoWaySync and OptionDisableCompression to be updated even if
+    ReplicationFrequencyInMinutes is not set ([issue #637](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/637)).
+
 ## [6.2.0] - 2022-05-01
 
 ### Changed
