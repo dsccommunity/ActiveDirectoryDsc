@@ -287,7 +287,7 @@ function Set-TargetResource
                 $setADReplicationSiteLinkParameters['ReplicationFrequencyInMinutes'] = $ReplicationFrequencyInMinutes
             }
 
-            if ($PSBoundParameters.ContainsKey('ReplicationFrequencyInMinutes') -and
+            if ($PSBoundParameters.ContainsKey('OptionChangeNotification') -and
                 $OptionChangeNotification -ne $currentADSiteLink.OptionChangeNotification)
             {
                 Write-Verbose -Message ($script:localizedData.SettingProperty -f
@@ -299,7 +299,7 @@ function Set-TargetResource
                 $desiredChangeNotification = $currentADSiteLink.OptionChangeNotification
             }
 
-            if ($PSBoundParameters.ContainsKey('ReplicationFrequencyInMinutes') -and
+            if ($PSBoundParameters.ContainsKey('OptionTwoWaySync') -and
                 $OptionTwoWaySync -ne $currentADSiteLink.OptionTwoWaySync)
             {
                 Write-Verbose -Message ($script:localizedData.SettingProperty -f
@@ -311,7 +311,7 @@ function Set-TargetResource
                 $desiredTwoWaySync = $currentADSiteLink.OptionTwoWaySync
             }
 
-            if ($PSBoundParameters.ContainsKey('ReplicationFrequencyInMinutes') -and
+            if ($PSBoundParameters.ContainsKey('OptionDisableCompression') -and
                 $OptionDisableCompression -ne $currentADSiteLink.OptionDisableCompression)
             {
                 Write-Verbose -Message ($script:localizedData.SettingProperty -f
