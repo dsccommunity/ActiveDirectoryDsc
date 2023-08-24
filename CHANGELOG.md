@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.3.0] - 2023-08-24
+
 ### Removed
 
 - ActiveDirectoryDsc
