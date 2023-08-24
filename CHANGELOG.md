@@ -15,6 +15,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Changed
 
+- ActiveDirectoryDsc
+  - Move CI/CD build step to using build worker image `windows-latest`.
 - ActiveDirectoryDsc.Common
   - Created Get-DomainObject to wrap Get-ADDomain with common retry logic.
 - ADDomainController
