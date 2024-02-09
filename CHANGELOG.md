@@ -7,6 +7,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Fixed
+
+- Move tests pipeline to Windows PowerShell.
+
 ## [6.3.0] - 2023-08-24
 
 ### Removed
