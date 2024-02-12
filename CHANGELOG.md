@@ -12,6 +12,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - Move test pipeline to Windows PowerShell. The hosted agent was updated
   to PowerShell 7.4.1. That broke the ASKDSKey unit tests that has a helper
   function (`Copy-ArrayObjects`) that serializes objects.
+- ADSRootKey
+  -  Resolved 'String was not recognized as a valid DateTime' in non-US cultures ([issue #702](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/702)).
 
 ## [6.3.0] - 2023-08-24
 
