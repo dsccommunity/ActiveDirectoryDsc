@@ -107,7 +107,7 @@ function Get-TargetResource
         elseif ($kdsRootKey)
         {
             $targetResource['Ensure'] = 'Present'
-            $targetResource['EffectiveTime'] = ([DateTime]::Parse($kdsRootKey.EffectiveTime)).ToString()
+            $targetResource['EffectiveTime'] = $kdsRootKey.EffectiveTime.ToString('o')
             $targetResource['CreationTime'] = $kdsRootKey.CreationTime
             $targetResource['KeyId'] = $kdsRootKey.KeyId
             $targetResource['DistinguishedName'] = 'CN={0},CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,{1}' -f
