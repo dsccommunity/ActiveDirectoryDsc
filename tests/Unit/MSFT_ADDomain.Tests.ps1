@@ -67,6 +67,7 @@ try
             ParentDomainName              = $mockParentDomainName
             DomainNetBiosName             = $null
             DnsDelegationCredential       = $null
+            DomainType                    = $null
             DatabasePath                  = $null
             LogPath                       = $null
             SysvolPath                    = $null
@@ -84,6 +85,7 @@ try
             ParentDomainName              = $mockParentDomainName
             DomainNetBiosName             = $mockNetBiosName
             DnsDelegationCredential       = $null
+            DomainType                    = $null
             DatabasePath                  = $mockNTDSPath
             LogPath                       = $mockNTDSPath
             SysvolPath                    = $mockSysVolPath
