@@ -126,6 +126,7 @@ function Get-TargetResource
             ParentDomainName              = $domain.ParentDomain
             DomainNetBiosName             = $domain.NetBIOSName
             DnsDelegationCredential       = $null
+            DomainType                    = $null
             DatabasePath                  = $serviceNTDS.'DSA Working Directory'
             LogPath                       = $serviceNTDS.'Database log files path'
             SysvolPath                    = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
@@ -145,6 +146,7 @@ function Get-TargetResource
             ParentDomainName              = $ParentDomainName
             DomainNetBiosName             = $null
             DnsDelegationCredential       = $null
+            DomainType                    = $null
             DatabasePath                  = $null
             LogPath                       = $null
             SysvolPath                    = $null
@@ -185,6 +187,10 @@ function Get-TargetResource
 
     .PARAMETER DnsDelegationCredential
         Credential used for creating DNS delegation.
+
+    .PARAMETER DomainType
+        Specifies whether the domain is a new domain tree in an existing forest ('TreeDomain'),
+        or a child of an existing domain ('ChildDomain'). Default value is 'ChildDomain'.
 
     .PARAMETER DatabasePath
         Path to a directory that contains the domain database.
@@ -238,6 +244,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         $DnsDelegationCredential,
+
+        [Parameter()]
+        [ValidateSet('ChildDomain', 'TreeDomain')]
+        [System.String]
+        $DomainType = 'ChildDomain',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -327,6 +338,10 @@ function Test-TargetResource
     .PARAMETER DnsDelegationCredential
         Credential used for creating DNS delegation.
 
+    .PARAMETER DomainType
+        Specifies whether the domain is a new domain tree in an existing forest ('TreeDomain'),
+        or a child of an existing domain ('ChildDomain'). Default value is 'ChildDomain'.
+
     .PARAMETER DatabasePath
         Path to a directory that contains the domain database.
 
@@ -386,6 +401,11 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         $DnsDelegationCredential,
+
+        [Parameter()]
+        [ValidateSet('ChildDomain', 'TreeDomain')]
+        [System.String]
+        $DomainType = 'ChildDomain',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -474,7 +494,11 @@ function Set-TargetResource
             $installADDSParameters['Credential'] = $Credential
             $installADDSParameters['NewDomainName'] = $DomainName
             $installADDSParameters['ParentDomainName'] = $ParentDomainName
-            $installADDSParameters['DomainType'] = 'ChildDomain'
+
+            if ($PSBoundParameters.ContainsKey('DomainType'))
+            {
+                $installADDSParameters['DomainType'] = $DomainType
+            }
 
             if ($PSBoundParameters.ContainsKey('DomainNetBiosName'))
             {

@@ -7,6 +7,7 @@ class MSFT_ADDomain : OMI_BaseResource
     [Write, Description("Fully qualified domain name (FQDN) of the parent domain.")] String ParentDomainName;
     [Write, Description("NetBIOS name for the new domain.")] String DomainNetBiosName;
     [Write, Description("Credential used for creating DNS delegation."), EmbeddedInstance("MSFT_Credential")] String DnsDelegationCredential;
+    [Write, Description("Specifies whether the domain is a new domain tree in an existing forest ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Default value is 'ChildDomain'."), ValueMap{"ChildDomain", "TreeDomain"}, Values{"ChildDomain", "TreeDomain"}] String DomainType;
     [Write, Description("Path to a directory that contains the domain database.")] String DatabasePath;
     [Write, Description("Path to a directory for the log file that will be written.")] String LogPath;
     [Write, Description("Path to a directory where the Sysvol file will be written.")] String SysvolPath;
