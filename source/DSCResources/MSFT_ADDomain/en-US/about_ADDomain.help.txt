@@ -32,6 +32,11 @@
     Write - PSCredential
     Credential used for creating DNS delegation.
 
+.PARAMETER DomainType
+    Write - String
+    Allowed values: ChildDomain, TreeDomain
+    Specifies whether the domain is a new domain tree in an existing forest ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Default value is 'ChildDomain'.
+
 .PARAMETER DatabasePath
     Write - String
     Path to a directory that contains the domain database.
@@ -160,5 +165,3 @@ Configuration ADDomain_NewChildDomain_Config
         }
     }
 }
-
-
