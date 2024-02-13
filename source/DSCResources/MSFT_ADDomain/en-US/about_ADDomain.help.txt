@@ -204,7 +204,7 @@ Configuration ADDomain_NewTreeDomain_Config
             Ensure = 'Present'
         }
 
-        ADDomain 'child'
+        ADDomain 'fabrikam.com'
         {
             DomainName                    = 'fabrikam.com'
             Credential                    = $Credential
