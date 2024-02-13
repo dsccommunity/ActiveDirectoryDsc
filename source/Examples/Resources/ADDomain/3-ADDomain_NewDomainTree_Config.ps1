@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 1.0.1
-.GUID 40a01066-4c01-4115-b7a8-c21b51ac4ed3
+.GUID 77c6a983-7bb0-4457-88e2-3e4f36727748
 .AUTHOR DSC Community
 .COMPANYNAME DSC Community
 .COPYRIGHT DSC Community contributors. All rights reserved.
@@ -17,12 +17,12 @@ Updated author, copyright notice, and URLs.
 
 <#
     .DESCRIPTION
-        This configuration will create a new child domain in an existing forest with
+        This configuration will create a new domain tree in an existing forest with
         a Domain Functional Level of Windows Server 2016 (WinThreshold).
         The credential parameter must contain the domain qualified credentials of a
-        user in the forest who has permissions to create a new child domain.
+        user in the forest who has permissions to create a new domain tree.
 #>
-Configuration ADDomain_NewChildDomain_Config
+Configuration ADDomain_NewDomainTree_Config
 {
     param
     (
@@ -54,12 +54,12 @@ Configuration ADDomain_NewChildDomain_Config
             Ensure = 'Present'
         }
 
-        ADDomain 'child'
+        ADDomain 'fabrikam.com'
         {
-            DomainName                    = 'child'
+            DomainName                    = 'fabrikam.com'
             Credential                    = $Credential
             SafemodeAdministratorPassword = $SafeModePassword
-            DomainType                    = 'ChildDomain'
+            DomainType                    = 'TreeDomain'
             DomainMode                    = 'WinThreshold'
             ParentDomainName              = 'contoso.com'
         }
