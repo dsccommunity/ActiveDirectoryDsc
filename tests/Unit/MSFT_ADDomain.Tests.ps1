@@ -44,6 +44,7 @@ try
         $mockDnsRoot = $mockDomainName
         $mockParentDomainName = ''
         $mockDomainFQDN = $mockDomainName
+        $mockDomainType = 'ChildDomain'
         $mockNTDSPath = 'C:\Windows\NTDS'
         $mockSysVolPath = 'C:\Windows\SysVol'
         $mockDomainSysVolPath = Join-Path -Path $mockSysVolPath -ChildPath $mockDomainName
@@ -67,6 +68,7 @@ try
             ParentDomainName              = $mockParentDomainName
             DomainNetBiosName             = $null
             DnsDelegationCredential       = $null
+            DomainType                    = $mockDomainType
             DatabasePath                  = $null
             LogPath                       = $null
             SysvolPath                    = $null
@@ -84,6 +86,7 @@ try
             ParentDomainName              = $mockParentDomainName
             DomainNetBiosName             = $mockNetBiosName
             DnsDelegationCredential       = $null
+            DomainType                    = $mockDomainType
             DatabasePath                  = $mockNTDSPath
             LogPath                       = $mockNTDSPath
             SysvolPath                    = $mockSysVolPath
@@ -265,6 +268,7 @@ try
         Describe 'ADDomain\Set-TargetResource' {
             $mockDomainName = 'present.com'
             $mockParentDomainName = 'parent.com'
+            $mockDomainType = 'ChildDomain'
             $mockDomainNetBIOSNameName = 'PRESENT'
             $mockDomainForestMode = 'WinThreshold'
             $mockPath = 'TestPath'
@@ -283,6 +287,7 @@ try
                 ParentDomainName              = $mockParentDomainName
                 Credential                    = $mockAdministratorCredential
                 SafeModeAdministratorPassword = $mockSafemodeCredential
+                DomainType                    = $mockDomainType
             }
 
             Mock -CommandName Get-TargetResource -MockWith { return $mockADDomainAbsent }
@@ -385,7 +390,7 @@ try
                     Set-TargetResource @setTargetResourceDomainParams
 
                     Assert-MockCalled -CommandName Install-ADDSDomain `
-                        -ParameterFilter { $DomainType -eq 'ChildDomain' }
+                        -ParameterFilter { $DomainType -eq $mockDomainType }
                 }
 
                 It 'Calls "Install-ADDSDomain" with "SafeModeAdministratorPassword"' {

@@ -30,6 +30,11 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER ParentDomainName
         Fully qualified domain name (FQDN) of the parent domain.
 
+    .PARAMETER DomainType
+        When installing a new domain, specifies whether it is a new domain tree in an existing forest
+        ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Only used when installing a
+        new domain. Default value is 'ChildDomain'.
+
     .NOTES
         Used Functions:
             Name                           | Module
@@ -62,7 +67,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ParentDomainName
+        $ParentDomainName,
+
+        [Parameter()]
+        [ValidateSet('ChildDomain', 'TreeDomain')]
+        [System.String]
+        $DomainType = 'ChildDomain'
     )
 
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
@@ -126,6 +136,7 @@ function Get-TargetResource
             ParentDomainName              = $domain.ParentDomain
             DomainNetBiosName             = $domain.NetBIOSName
             DnsDelegationCredential       = $null
+            DomainType                    = $DomainType
             DatabasePath                  = $serviceNTDS.'DSA Working Directory'
             LogPath                       = $serviceNTDS.'Database log files path'
             SysvolPath                    = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
@@ -145,6 +156,7 @@ function Get-TargetResource
             ParentDomainName              = $ParentDomainName
             DomainNetBiosName             = $null
             DnsDelegationCredential       = $null
+            DomainType                    = $DomainType
             DatabasePath                  = $null
             LogPath                       = $null
             SysvolPath                    = $null
@@ -185,6 +197,11 @@ function Get-TargetResource
 
     .PARAMETER DnsDelegationCredential
         Credential used for creating DNS delegation.
+
+    .PARAMETER DomainType
+        When installing a new domain, specifies whether it is a new domain tree in an existing forest
+        ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Only used when installing a
+        new domain. Default value is 'ChildDomain'.
 
     .PARAMETER DatabasePath
         Path to a directory that contains the domain database.
@@ -238,6 +255,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         $DnsDelegationCredential,
+
+        [Parameter()]
+        [ValidateSet('ChildDomain', 'TreeDomain')]
+        [System.String]
+        $DomainType = 'ChildDomain',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -327,6 +349,11 @@ function Test-TargetResource
     .PARAMETER DnsDelegationCredential
         Credential used for creating DNS delegation.
 
+    .PARAMETER DomainType
+        When installing a new domain, specifies whether it is a new domain tree in an existing forest
+        ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Only used when installing a
+        new domain. Default value is 'ChildDomain'.
+
     .PARAMETER DatabasePath
         Path to a directory that contains the domain database.
 
@@ -386,6 +413,11 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         $DnsDelegationCredential,
+
+        [Parameter()]
+        [ValidateSet('ChildDomain', 'TreeDomain')]
+        [System.String]
+        $DomainType = 'ChildDomain',
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -474,7 +506,7 @@ function Set-TargetResource
             $installADDSParameters['Credential'] = $Credential
             $installADDSParameters['NewDomainName'] = $DomainName
             $installADDSParameters['ParentDomainName'] = $ParentDomainName
-            $installADDSParameters['DomainType'] = 'ChildDomain'
+            $installADDSParameters['DomainType'] = $DomainType
 
             if ($PSBoundParameters.ContainsKey('DomainNetBiosName'))
             {

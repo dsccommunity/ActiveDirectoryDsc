@@ -7,6 +7,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- ADDomain
+  - Added support for creating a Tree domain via the DomainType field
+    ([issue #689](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/689))
+    ([issue #692](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/692)).
+
 ### Fixed
 
 - Move test pipeline to Windows PowerShell. The hosted agent was updated
