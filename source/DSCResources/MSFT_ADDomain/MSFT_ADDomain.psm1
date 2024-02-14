@@ -30,6 +30,11 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER ParentDomainName
         Fully qualified domain name (FQDN) of the parent domain.
 
+    .PARAMETER DomainType
+        When installing a new domain, specifies whether it is a new domain tree in an existing forest
+        ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Only used when installing a
+        new domain. Default value is 'ChildDomain'.
+
     .NOTES
         Used Functions:
             Name                           | Module
@@ -62,7 +67,12 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ParentDomainName
+        $ParentDomainName,
+
+        [Parameter()]
+        [ValidateSet('ChildDomain', 'TreeDomain')]
+        [System.String]
+        $DomainType = 'ChildDomain'
     )
 
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
@@ -126,7 +136,7 @@ function Get-TargetResource
             ParentDomainName              = $domain.ParentDomain
             DomainNetBiosName             = $domain.NetBIOSName
             DnsDelegationCredential       = $null
-            DomainType                    = $null
+            DomainType                    = $DomainType
             DatabasePath                  = $serviceNTDS.'DSA Working Directory'
             LogPath                       = $serviceNTDS.'Database log files path'
             SysvolPath                    = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
@@ -146,7 +156,7 @@ function Get-TargetResource
             ParentDomainName              = $ParentDomainName
             DomainNetBiosName             = $null
             DnsDelegationCredential       = $null
-            DomainType                    = $null
+            DomainType                    = $DomainType
             DatabasePath                  = $null
             LogPath                       = $null
             SysvolPath                    = $null
@@ -189,8 +199,9 @@ function Get-TargetResource
         Credential used for creating DNS delegation.
 
     .PARAMETER DomainType
-        Specifies whether the domain is a new domain tree in an existing forest ('TreeDomain'),
-        or a child of an existing domain ('ChildDomain'). Default value is 'ChildDomain'.
+        When installing a new domain, specifies whether it is a new domain tree in an existing forest
+        ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Only used when installing a
+        new domain. Default value is 'ChildDomain'.
 
     .PARAMETER DatabasePath
         Path to a directory that contains the domain database.
@@ -339,8 +350,9 @@ function Test-TargetResource
         Credential used for creating DNS delegation.
 
     .PARAMETER DomainType
-        Specifies whether the domain is a new domain tree in an existing forest ('TreeDomain'),
-        or a child of an existing domain ('ChildDomain'). Default value is 'ChildDomain'.
+        When installing a new domain, specifies whether it is a new domain tree in an existing forest
+        ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Only used when installing a
+        new domain. Default value is 'ChildDomain'.
 
     .PARAMETER DatabasePath
         Path to a directory that contains the domain database.
@@ -494,11 +506,7 @@ function Set-TargetResource
             $installADDSParameters['Credential'] = $Credential
             $installADDSParameters['NewDomainName'] = $DomainName
             $installADDSParameters['ParentDomainName'] = $ParentDomainName
-
-            if ($PSBoundParameters.ContainsKey('DomainType'))
-            {
-                $installADDSParameters['DomainType'] = $DomainType
-            }
+            $installADDSParameters['DomainType'] = $DomainType
 
             if ($PSBoundParameters.ContainsKey('DomainNetBiosName'))
             {

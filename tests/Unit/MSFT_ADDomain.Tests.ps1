@@ -44,6 +44,7 @@ try
         $mockDnsRoot = $mockDomainName
         $mockParentDomainName = ''
         $mockDomainFQDN = $mockDomainName
+        $mockDomainType = 'ChildDomain'
         $mockNTDSPath = 'C:\Windows\NTDS'
         $mockSysVolPath = 'C:\Windows\SysVol'
         $mockDomainSysVolPath = Join-Path -Path $mockSysVolPath -ChildPath $mockDomainName
@@ -67,7 +68,7 @@ try
             ParentDomainName              = $mockParentDomainName
             DomainNetBiosName             = $null
             DnsDelegationCredential       = $null
-            DomainType                    = $null
+            DomainType                    = $mockDomainType
             DatabasePath                  = $null
             LogPath                       = $null
             SysvolPath                    = $null
@@ -85,7 +86,7 @@ try
             ParentDomainName              = $mockParentDomainName
             DomainNetBiosName             = $mockNetBiosName
             DnsDelegationCredential       = $null
-            DomainType                    = $null
+            DomainType                    = $mockDomainType
             DatabasePath                  = $mockNTDSPath
             LogPath                       = $mockNTDSPath
             SysvolPath                    = $mockSysVolPath

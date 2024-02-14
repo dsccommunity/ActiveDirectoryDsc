@@ -35,7 +35,7 @@
 .PARAMETER DomainType
     Write - String
     Allowed values: ChildDomain, TreeDomain
-    Specifies whether the domain is a new domain tree in an existing forest ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Default value is 'ChildDomain'.
+    When installing a new domain, specifies whether it is a new domain tree in an existing forest ('TreeDomain'), or a child of an existing domain ('ChildDomain'). Only used when installing a new domain. Default value is 'ChildDomain'.
 
 .PARAMETER DatabasePath
     Write - String
