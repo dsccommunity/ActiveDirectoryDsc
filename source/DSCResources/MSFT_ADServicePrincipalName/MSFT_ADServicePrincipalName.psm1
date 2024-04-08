@@ -96,7 +96,10 @@ function Set-TargetResource
 
     # Test if the resource needs changing if called with Invoke-DscResource -Method Set
     $inDesiredConfiguration = Test-TargetResource @PSBoundParameters
-    if ($inDesiredConfiguration) { return }
+    if ($inDesiredConfiguration)
+    {
+        return
+    }
 
     # Get all Active Directory object having the target SPN configured.
     $spnAccounts = Get-ADObject -Filter { ServicePrincipalName -eq $ServicePrincipalName } -Properties 'SamAccountName', 'DistinguishedName'
