@@ -12,6 +12,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADServicePrincipalName
   - Add check to Set function to cover if `Invoke-DscResource -Method Set` is run and no changes are required.
     ([issue #520](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/520))
+- VS Code
+  - Add recommended extensions ([issue #622](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/622))
 
 ## [6.4.0] - 2024-02-14
 
