@@ -80,6 +80,10 @@
     Write - Boolean
     Indicates that the cmdlet installs the domain controller as an Read-Only Domain Controller (RODC) for an existing domain.
 
+.PARAMETER DelegatedAdministratorAccountName
+    Write - String
+    Specifies the user or group that is the delegated administrator of this Read-Only Domain Controller (RODC).
+
 .PARAMETER AllowPasswordReplicationAccountName
     Write - StringArray
     Specifies an array of names of user accounts, group accounts, and computer accounts whose passwords can be replicated to this Read-Only Domain Controller (RODC).
@@ -331,6 +335,7 @@ Configuration ADDomainController_AddReadOnlyDomainController_Config
             SafeModeAdministratorPassword       = $SafeModePassword
             ReadOnlyReplica                     = $true
             SiteName                            = 'Default-First-Site-Name'
+            DelegatedAdministratorAccountName   = 'adm.pvdi'
             AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
             DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
 
