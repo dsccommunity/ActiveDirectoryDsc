@@ -7,6 +7,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- ADDomainController
+  - Added support for specifying an RODC delegated administrator account using DelegatedAdministratorAccountName.
+
 ### Changed
 
 - ADServicePrincipalName
