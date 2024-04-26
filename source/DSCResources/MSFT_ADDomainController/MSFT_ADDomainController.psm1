@@ -785,7 +785,8 @@ function Test-TargetResource
         $testTargetResourceReturnValue = $false
     }
 
-    if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName') -and $existingResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName)
+    # If this is a read-only domain controller, check the delegated administrator
+    if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName') -and $existingResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName -and $existingResource.ReadOnlyReplica)
     {
         Write-Verbose -Message ($script:localizedData.DelegatedAdministratorAccountNameMismatch -f $existingResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
 

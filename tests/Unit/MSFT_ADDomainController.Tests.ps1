@@ -50,6 +50,7 @@ try
         $incorrectSiteName = 'IncorrectSite'
         $correctInstallationMediaPath = 'TestDrive:\IFM'
         $mockNtdsSettingsObjectDn = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=PresentSite,CN=Sites,CN=Configuration,DC=present,DC=com'
+        $delegatedAdminAccount = 'delegatedAdminAccount'
         $allowedAccount = 'allowedAccount'
         $deniedAccount = 'deniedAccount'
 
@@ -215,10 +216,17 @@ try
                     BeforeAll {
                         $mockDomainControllerObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                        $mockDomainControllerComputerObject = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADAccount
+                        $mockDomainControllerDelegatedAdminObject = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADEntity
                         $mockDomainControllerObject.Site = $correctSiteName
                         $mockDomainControllerObject.Domain = $correctDomainName
                         $mockDomainControllerObject.IsGlobalCatalog = $true
                         $mockDomainControllerObject.IsReadOnly = $true
+                        $mockDomainControllerDelegatedAdminObject.SamAccountName = $delegatedAdminAccount
+                        $mockDomainControllerComputerObject.ManagedBy = $mockDomainControllerDelegatedAdminObject
+                        $mockDomainControllerObject.ComputerObjectDN = $mockDomainControllerComputerObject
                         $mockGetADDomainControllerPasswordReplicationAllowedPolicy = @{
                             SamAccountName = $allowedAccount
                         }
@@ -227,6 +235,10 @@ try
                         }
 
                         Mock -CommandName Get-DomainControllerObject { $mockDomainControllerObject }
+
+                        Mock -CommandName Get-ADComputer { $mockDomainControllerComputerObject }
+
+                        Mock -CommandName Get-ADObject { $mockDomainControllerDelegatedAdminObject }
 
                         Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy `
                             -ParameterFilter { $Allowed.IsPresent } `
@@ -252,6 +264,7 @@ try
                         $result.Ensure | Should -BeTrue
                         $result.IsGlobalCatalog | Should -BeTrue
                         $result.ReadOnlyReplica | Should -BeTrue
+                        $result.DelegatedAdministratorAccountName | Should -Be $delegatedAdminAccount
                         $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
@@ -265,6 +278,12 @@ try
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-ADComputer `
+                            -ParameterFilter { $Properties -eq 'ManagedBy' } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-ADObject `
+                            -ParameterFilter { $Properties -eq 'SamAccountName' } `
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-ADDomainControllerPasswordReplicationPolicy `
                             -ParameterFilter { $Allowed -eq $true } `
@@ -301,6 +320,7 @@ try
                         $result.IsGlobalCatalog | Should -BeFalse
                         $result.NtdsSettingsObjectDn | Should -BeNullOrEmpty
                         $result.ReadOnlyReplica | Should -BeFalse
+                        $result.DelegatedAdministratorAccountName | Should -BeNullOrEmpty
                         $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.FlexibleSingleMasterOperationRole | Should -BeNullOrEmpty
@@ -315,6 +335,12 @@ try
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
                             -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-ADComputer `
+                            -ParameterFilter { $Properties -eq 'ManagedBy' } `
+                            -Exactly -Times 0
+                        Assert-MockCalled -CommandName Get-ADObject `
+                            -ParameterFilter { $Properties -eq 'SamAccountName' } `
+                            -Exactly -Times 0
                         Assert-MockCalled -CommandName Get-ADDomainControllerPasswordReplicationPolicy `
                             -ParameterFilter { $Allowed -eq $true } `
                             -Exactly -Times 0
@@ -362,6 +388,7 @@ try
                             DomainName                          = $correctDomainName
                             SiteName                            = $correctSiteName
                             IsGlobalCatalog                     = $true
+                            DelegatedAdministratorAccountName   = $delegatedAdminAccount
                             AllowPasswordReplicationAccountName = @($allowedAccount)
                             DenyPasswordReplicationAccountName  = @($deniedAccount)
                             FlexibleSingleMasterOperationRole   = @('DomainNamingMaster', 'RIDMaster')
@@ -402,6 +429,19 @@ try
                     It 'Should return $true' {
                         $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
                             -IsGlobalCatalog $true
+                        $result | Should -BeTrue
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                    }
+                }
+
+                Context 'When property DelegatedAdministratorAccountName is in desired state' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            -DelegatedAdministratorAccountName $delegatedAdminAccount
                         $result | Should -BeTrue
                     }
 
@@ -557,6 +597,29 @@ try
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
                                 Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
                             }
+                        }
+                    }
+
+                    Context 'When property DelegatedAdministratorAccountName is not in desired state' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return @{
+                                    DomainName                        = $correctDomainName
+                                    DelegatedAdministratorAccountName = $correctSiteName
+                                    Ensure                            = $true
+                                }
+                            }
+                        }
+
+                        It 'Should return $false' {
+                            $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName 'NewDelegatedAdminAccount'
+                            $result | Should -BeFalse
+                        }
+
+                        It 'Should call the expected mocks' {
+                            Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
+                            Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
                         }
                     }
 
@@ -872,6 +935,19 @@ try
                     }
                 }
 
+                Context 'When adding a domain controller with DelegatedAdministratorAccountName' {
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $DelegatedAdministratorAccountName -eq $delegatedAdminAccount
+                        } -Exactly -Times 1
+                    }
+                }
+
                 Context 'When adding a domain controller with AllowPasswordReplicationAccountName' {
                     It 'Should not throw' {
                         { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
@@ -1043,6 +1119,36 @@ try
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Set-ADObject -Exactly -Times 0
                         }
+                    }
+                }
+
+                Context 'When DelegatedAdministratorAccountName is not compliant' {
+                    Mock -CommandName Set-ADComputer
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Ensure                            = $true
+                            DelegatedAdministratorAccountName = 'PresentDelegatedAdminAccount'
+                            SiteName                          = $correctSiteName
+                        }
+                    }
+
+                    Mock -CommandName Get-DomainControllerObject -MockWith {
+                        $stubDomainController = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                        $stubDomainController.Site = $correctSiteName
+
+                        return $stubDomainController
+                    }
+
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
+                            $ManagedBy -eq $delegatedAdminAccount
+                        } -Exactly -Times 1
                     }
                 }
 
@@ -1283,6 +1389,27 @@ try
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Set-ADObject -Exactly -Times 0
                         }
+                    }
+                }
+
+                Context 'When DelegatedAdministratorAccountName is correct' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure                            = $true
+                                DelegatedAdministratorAccountName = $delegatedAdminAccount
+                                SiteName                          = $correctSiteName
+                            }
+                        }
+                    }
+
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0
                     }
                 }
 
