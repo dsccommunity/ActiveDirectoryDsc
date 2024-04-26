@@ -1395,6 +1395,14 @@ try
                 Context 'When DelegatedAdministratorAccountName is correct' {
                     BeforeAll {
                         Mock -CommandName Set-ADComputer
+                        Mock -CommandName Get-DomainControllerObject -MockWith {
+                            $stubDomainController = New-Object `
+                                -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $stubDomainController.Site = $correctSiteName
+
+                            return $stubDomainController
+                        }
+
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 Ensure                            = $true
