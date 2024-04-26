@@ -1394,6 +1394,7 @@ try
 
                 Context 'When DelegatedAdministratorAccountName is correct' {
                     BeforeAll {
+                        Mock -CommandName Set-ADComputer
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 Ensure                            = $true
