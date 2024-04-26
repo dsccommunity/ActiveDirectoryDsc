@@ -606,6 +606,7 @@ try
                                 return @{
                                     DomainName                        = $correctDomainName
                                     DelegatedAdministratorAccountName = $correctSiteName
+                                    ReadOnlyReplica                   = $true
                                     Ensure                            = $true
                                 }
                             }
@@ -1128,6 +1129,7 @@ try
                         return @{
                             Ensure                            = $true
                             DelegatedAdministratorAccountName = 'PresentDelegatedAdminAccount'
+                            ReadOnlyReplica                   = $true
                             SiteName                          = $correctSiteName
                         }
                     }
@@ -1407,6 +1409,7 @@ try
                             return @{
                                 Ensure                            = $true
                                 DelegatedAdministratorAccountName = $delegatedAdminAccount
+                                ReadOnlyReplica                   = $true
                                 SiteName                          = $correctSiteName
                             }
                         }

@@ -77,13 +77,14 @@ function Get-TargetResource
 
         # If this is a read-only domain controller, retrieve any user or group that is a delegated administrator via the ManagedBy attribute
         $delegateAdministratorAccountName = $null
-        if ($domainControllerObject.IsReadOnly) {
+        if ($domainControllerObject.IsReadOnly)
+        {
             $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN | Get-ADComputer -Properties ManagedBy -Credential $Credential
-
-            if ($domainControllerComputerObject.ManagedBy) {
+            if ($domainControllerComputerObject.ManagedBy)
+            {
                 $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy | Get-ADObject -Properties SamAccountName -Credential $Credential
-
-                if ($domainControllerManagedByObject.SamAccountName) {
+                if ($domainControllerManagedByObject.SamAccountName)
+                {
                     $delegateAdministratorAccountName = $domainControllerManagedByObject.SamAccountName
                 }
             }
@@ -434,7 +435,8 @@ function Set-TargetResource
             $targetResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName)
         {
             # If this is a read-only domain controller, set the delegated administrator via the ManagedBy attribute
-            if ($domainControllerObject.IsReadOnly) {
+            if ($domainControllerObject.IsReadOnly)
+            {
                 Write-Verbose -Message ($script:localizedData.UpdatingDelegatedAdministratorAccountName -f
                 $targetResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
 
