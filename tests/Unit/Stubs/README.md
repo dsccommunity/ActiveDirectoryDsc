@@ -103,6 +103,23 @@ public class ADDomainController
 }
 ```
 
+The parameter `DelegatedAdministratorAccountName` in ADDomainController resource
+requires that the property `ManagedBy` is present when calling `Get-ADComputer`,
+which does not happen automatically.
+To workaround this this property below must be added manually to the stub
+class `ADComputer` in the namespace `Microsoft.ActiveDirectory.Management`.
+
+```csharp
+public class ADComputer
+{
+    ...
+
+    // Property
+    ...
+    public System.String ManagedBy;
+}
+```
+
 The helper function `Get-MembersToAddAndRemove` in ADDomainController resource
 depends on the member (principal) property `SamAccountName` is returned
 by the method `ToString()` and that is not automatically generated.
