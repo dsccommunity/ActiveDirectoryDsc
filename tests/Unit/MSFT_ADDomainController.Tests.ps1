@@ -1120,6 +1120,7 @@ try
                     Mock -CommandName Get-TargetResource -MockWith {
                         return @{
                             Ensure                            = $true
+                            SiteName                          = $correctSiteName
                             DelegatedAdministratorAccountName = 'PresentDelegatedAdminAccount'
                         }
                     }
@@ -1130,6 +1131,7 @@ try
                         $stubDomainControllerComputerObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADComputer
                         $stubDomainController.IsReadOnly = $true
+                        $stubDomainController.Site = $correctSiteName
                         $stubDomainController.ComputerObjectDN = $stubDomainControllerComputerObject
 
                         return $stubDomainController
@@ -1396,6 +1398,7 @@ try
                             $stubDomainControllerComputerObject = New-Object `
                                 -TypeName Microsoft.ActiveDirectory.Management.ADComputer
                             $stubDomainController.IsReadOnly = $true
+                            $stubDomainController.Site = $correctSiteName
                             $stubDomainController.ComputerObjectDN = $stubDomainControllerComputerObject
 
                             return $stubDomainController
@@ -1404,6 +1407,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 Ensure                            = $true
+                                SiteName                          = $correctSiteName
                                 DelegatedAdministratorAccountName = $delegatedAdminAccount
                             }
                         }
