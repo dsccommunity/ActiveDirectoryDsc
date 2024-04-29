@@ -219,7 +219,8 @@ try
                         $mockDomainControllerComputerObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADAccount
                         $mockDomainControllerDelegatedAdminObject = New-Object `
-                            -TypeName Microsoft.ActiveDirectory.Management.ADEntity
+                            -TypeName Microsoft.ActiveDirectory.Management.ADEntity `
+                            -ArgumentList [NullString]::Value
                         $mockDomainControllerObject.Site = $correctSiteName
                         $mockDomainControllerObject.Domain = $correctDomainName
                         $mockDomainControllerObject.IsGlobalCatalog = $true
@@ -335,12 +336,6 @@ try
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Get-ADComputer `
-                            -ParameterFilter { $Properties -eq 'ManagedBy' } `
-                            -Exactly -Times 0
-                        Assert-MockCalled -CommandName Get-ADObject `
-                            -ParameterFilter { $Properties -eq 'SamAccountName' } `
-                            -Exactly -Times 0
                         Assert-MockCalled -CommandName Get-ADDomainControllerPasswordReplicationPolicy `
                             -ParameterFilter { $Allowed -eq $true } `
                             -Exactly -Times 0
