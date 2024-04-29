@@ -96,6 +96,7 @@ public class ADDomainController
 
     // Property
     ...
+    public System.String ComputerObjectDN;
     public bool IsGlobalCatalog;
     public bool IsReadOnly;
     public Microsoft.ActiveDirectory.Management.ADOperationMasterRole[] OperationMasterRoles;

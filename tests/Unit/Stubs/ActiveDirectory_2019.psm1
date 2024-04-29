@@ -336,6 +336,7 @@ namespace Microsoft.ActiveDirectory.Management
         public System.Collections.Generic.ICollection<System.String> ModifiedProperties { get; set; }
         public System.Int32 PropertyCount { get; set; }
         public Microsoft.ActiveDirectory.Management.ADPropertyValueCollection Item { get; set; }
+        public System.String ComputerObjectDN;
         public bool IsGlobalCatalog;
         public bool IsReadOnly;
         public Microsoft.ActiveDirectory.Management.ADOperationMasterRole[] OperationMasterRoles;
