@@ -219,8 +219,7 @@ try
                         $mockDomainControllerComputerObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADAccount
                         $mockDomainControllerDelegatedAdminObject = New-Object `
-                            -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal `
-                            -ArgumentList [NullString]::Value
+                            -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal
                         $mockDomainControllerObject.Site = $correctSiteName
                         $mockDomainControllerObject.Domain = $correctDomainName
                         $mockDomainControllerObject.IsGlobalCatalog = $true
