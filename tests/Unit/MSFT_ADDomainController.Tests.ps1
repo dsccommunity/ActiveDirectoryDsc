@@ -1132,8 +1132,11 @@ try
                     Mock -CommandName Get-DomainControllerObject -MockWith {
                         $stubDomainController = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                        $stubDomainControllerComputerObject = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADAccount
                         $stubDomainController.IsReadOnly = $true
                         $stubDomainController.Site = $correctSiteName
+                        $stubDomainController.ComputerObjectDN = $stubDomainControllerComputerObject
 
                         return $stubDomainController
                     }
