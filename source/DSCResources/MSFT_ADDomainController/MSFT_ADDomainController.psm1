@@ -769,7 +769,7 @@ function Test-TargetResource
 
         $testTargetResourceReturnValue = $false
     }
-    
+
     # Check Global Catalog Config
     if ($PSBoundParameters.ContainsKey('IsGlobalCatalog') -and $existingResource.IsGlobalCatalog -ne $IsGlobalCatalog)
     {

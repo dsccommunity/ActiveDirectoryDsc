@@ -217,7 +217,7 @@ try
                         $mockDomainControllerObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                         $mockDomainControllerComputerObject = New-Object `
-                            -TypeName Microsoft.ActiveDirectory.Management.ADAccount
+                            -TypeName Microsoft.ActiveDirectory.Management.ADComputer
                         $mockDomainControllerDelegatedAdminObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal
                         $mockDomainControllerObject.Site = $correctSiteName
@@ -441,7 +441,6 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
                     }
                 }
 
@@ -614,7 +613,6 @@ try
 
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
                         }
                     }
 
@@ -1123,8 +1121,6 @@ try
                         return @{
                             Ensure                            = $true
                             DelegatedAdministratorAccountName = 'PresentDelegatedAdminAccount'
-                            ReadOnlyReplica                   = $true
-                            SiteName                          = $correctSiteName
                         }
                     }
 
@@ -1132,9 +1128,8 @@ try
                         $stubDomainController = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
                         $stubDomainControllerComputerObject = New-Object `
-                            -TypeName Microsoft.ActiveDirectory.Management.ADAccount
+                            -TypeName Microsoft.ActiveDirectory.Management.ADComputer
                         $stubDomainController.IsReadOnly = $true
-                        $stubDomainController.Site = $correctSiteName
                         $stubDomainController.ComputerObjectDN = $stubDomainControllerComputerObject
 
                         return $stubDomainController
@@ -1398,8 +1393,10 @@ try
                         Mock -CommandName Get-DomainControllerObject -MockWith {
                             $stubDomainController = New-Object `
                                 -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $stubDomainControllerComputerObject = New-Object `
+                                -TypeName Microsoft.ActiveDirectory.Management.ADComputer
                             $stubDomainController.IsReadOnly = $true
-                            $stubDomainController.Site = $correctSiteName
+                            $stubDomainController.ComputerObjectDN = $stubDomainControllerComputerObject
 
                             return $stubDomainController
                         }
@@ -1408,8 +1405,6 @@ try
                             return @{
                                 Ensure                            = $true
                                 DelegatedAdministratorAccountName = $delegatedAdminAccount
-                                ReadOnlyReplica                   = $true
-                                SiteName                          = $correctSiteName
                             }
                         }
                     }
