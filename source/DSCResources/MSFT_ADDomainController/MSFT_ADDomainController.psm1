@@ -838,7 +838,8 @@ function Test-TargetResource
     }
 
     # If this is a read-only domain controller, check the delegated administrator
-    if ($existingResource.ReadOnlyReplica) {
+    if ($existingResource.ReadOnlyReplica)
+    {
         if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName') -and $existingResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName)
         {
             Write-Verbose -Message ($script:localizedData.DelegatedAdministratorAccountNameMismatch -f $existingResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
