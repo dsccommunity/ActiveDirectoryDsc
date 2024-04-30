@@ -461,7 +461,7 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
@@ -474,7 +474,7 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
@@ -645,7 +645,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
@@ -658,7 +658,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
@@ -671,7 +671,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
                     }
@@ -697,7 +697,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
@@ -710,7 +710,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
@@ -723,7 +723,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
                     }
