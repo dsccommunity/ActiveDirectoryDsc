@@ -14,6 +14,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Changed
 
+- ADDomainController
+  - Do not allow use of AllowPasswordReplicationAccountName	or DenyPasswordReplicationAccountName
+    unless ReadOnlyReplica is also set.
 - ADServicePrincipalName
   - Add check to Set function to cover if `Invoke-DscResource -Method Set` is run and no changes are required.
     ([issue #520](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/520))
