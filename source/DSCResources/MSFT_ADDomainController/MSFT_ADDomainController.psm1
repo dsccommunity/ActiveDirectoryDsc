@@ -82,11 +82,9 @@ function Get-TargetResource
             $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN | Get-ADComputer -Properties ManagedBy -Credential $Credential
             if ($domainControllerComputerObject.ManagedBy)
             {
-                $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy | Get-ADObject -Properties SamAccountName -Credential $Credential
-                if ($domainControllerManagedByObject.SamAccountName)
-                {
-                    $delegateAdministratorAccountName = $domainControllerManagedByObject.SamAccountName
-                }
+                $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy | Get-ADObject -Properties objectSid -Credential $Credential
+                
+                $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
             }
         }
 
@@ -302,6 +300,30 @@ function Set-TargetResource
 
     $targetResource = Get-TargetResource @getTargetResourceParameters
 
+    if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
+        }
+    }
+
     if ($targetResource.Ensure -eq $false)
     {
         Write-Verbose -Message ($script:localizedData.Promoting -f $env:COMPUTERNAME, $DomainName)
@@ -440,7 +462,11 @@ function Set-TargetResource
                 Write-Verbose -Message ($script:localizedData.UpdatingDelegatedAdministratorAccountName -f
                 $targetResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
 
-                Set-ADComputer -Identity $domainControllerObject.ComputerObjectDN -ManagedBy $DelegatedAdministratorAccountName -Credential $Credential
+                $delegateAdministratorAccountSecurityIdentifier = Resolve-SecurityIdentifier -SamAccountName $DelegatedAdministratorAccountName
+
+                $delegateAdministratorAccountObject = Get-ADObject -Filter { objectSid -eq $delegateAdministratorAccountSecurityIdentifier } -Credential $Credential
+
+                Set-ADComputer -Identity $domainControllerObject.ComputerObjectDN -ManagedBy $delegateAdministratorAccountObject.DistinguishedName -Credential $Credential
             }
         }
 
@@ -728,6 +754,30 @@ function Test-TargetResource
 
     Write-Verbose -Message ($script:localizedData.TestingConfiguration -f $env:COMPUTERNAME, $DomainName)
 
+    if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
+        }
+    }
+
     if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica -eq $true)
     {
         if (-not $PSBoundParameters.ContainsKey('SiteName'))
@@ -788,11 +838,13 @@ function Test-TargetResource
     }
 
     # If this is a read-only domain controller, check the delegated administrator
-    if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName') -and $existingResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName -and $existingResource.ReadOnlyReplica)
-    {
-        Write-Verbose -Message ($script:localizedData.DelegatedAdministratorAccountNameMismatch -f $existingResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
+    if ($existingResource.ReadOnlyReplica) {
+        if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName') -and $existingResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName)
+        {
+            Write-Verbose -Message ($script:localizedData.DelegatedAdministratorAccountNameMismatch -f $existingResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
 
-        $testTargetResourceReturnValue = $false
+            $testTargetResourceReturnValue = $false
+        }
     }
 
     if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName') -and
