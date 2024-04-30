@@ -630,6 +630,7 @@ try
                                 return @{
                                     DomainName                          = $correctDomainName
                                     AllowPasswordReplicationAccountName = @($allowedAccount, 'Member2')
+                                    ReadOnlyReplica                     = $true
                                     Ensure                              = $true
                                 }
                             }
@@ -681,6 +682,7 @@ try
                                 return @{
                                     DomainName                         = $correctDomainName
                                     DenyPasswordReplicationAccountName = @($deniedAccount, 'Member2')
+                                    ReadOnlyReplica                    = $true
                                     Ensure                             = $true
                                 }
                             }
@@ -1126,7 +1128,7 @@ try
                 Context 'When DelegatedAdministratorAccountName is not compliant' {
                     Mock -CommandName Set-ADComputer
                     Mock -CommandName Resolve-SecurityIdentifier `
-                        -ParameterFilter { $SamAccountName -eq $delegatedAdminAccount }
+                        -ParameterFilter { $SamAccountName -eq $delegatedAdminAccount } `
                         -MockWith { $delegatedAdminAccountSid }
                     Mock -CommandName Get-TargetResource -MockWith {
                         return @{
@@ -1407,7 +1409,7 @@ try
                     BeforeAll {
                         Mock -CommandName Set-ADComputer
                         Mock -CommandName Resolve-SecurityIdentifier `
-                            -ParameterFilter { $SamAccountName -eq $delegatedAdminAccount }
+                            -ParameterFilter { $SamAccountName -eq $delegatedAdminAccount } `
                             -MockWith { $delegatedAdminAccountSid }
                         Mock -CommandName Get-DomainControllerObject -MockWith {
                             $stubDomainController = New-Object `
