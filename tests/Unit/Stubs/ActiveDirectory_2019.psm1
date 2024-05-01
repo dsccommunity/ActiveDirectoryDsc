@@ -527,7 +527,7 @@ namespace Microsoft.ActiveDirectory.Management
         public System.Collections.Generic.ICollection<System.String> ModifiedProperties { get; set; }
         public System.Int32 PropertyCount { get; set; }
         public Microsoft.ActiveDirectory.Management.ADPropertyValueCollection Item { get; set; }
-
+        public System.Object objectSid;
     }
 
     public enum ADOperationMasterRole : int
@@ -623,7 +623,6 @@ namespace Microsoft.ActiveDirectory.Management
         public System.Collections.Generic.ICollection<System.String> ModifiedProperties { get; set; }
         public System.Int32 PropertyCount { get; set; }
         public Microsoft.ActiveDirectory.Management.ADPropertyValueCollection Item { get; set; }
-        public System.Object objectSid;
 
         // Method
         public override string ToString()

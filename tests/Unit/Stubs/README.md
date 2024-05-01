@@ -107,10 +107,10 @@ The parameter `DelegatedAdministratorAccountName` in ADDomainController resource
 requires that the property `objectSid` is present when calling `Get-ADObject`,
 which does not happen automatically.
 To workaround this this property below must be added manually to the stub
-class `ADPrincipal` in the namespace `Microsoft.ActiveDirectory.Management`.
+class `ADObject` in the namespace `Microsoft.ActiveDirectory.Management`.
 
 ```csharp
-public class ADPrincipal
+public class ADObject
 {
     ...
 

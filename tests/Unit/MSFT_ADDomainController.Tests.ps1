@@ -220,7 +220,7 @@ try
                         $mockDomainControllerComputerObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADComputer
                         $mockDomainControllerDelegatedAdminObject = New-Object `
-                            -TypeName Microsoft.ActiveDirectory.Management.ADPrincipal
+                            -TypeName Microsoft.ActiveDirectory.Management.ADObject
                         $mockDomainControllerObject.Site = $correctSiteName
                         $mockDomainControllerObject.Domain = $correctDomainName
                         $mockDomainControllerObject.IsGlobalCatalog = $true
@@ -242,7 +242,7 @@ try
                         Mock -CommandName Get-ADObject { $mockDomainControllerDelegatedAdminObject }
 
                         Mock -CommandName Resolve-SamAccountName `
-                            -ParameterFilter { $ObjectSid -eq $delegatedAdminAccountSid }
+                            -ParameterFilter { $ObjectSid -eq $delegatedAdminAccountSid } `
                             -MockWith { $delegatedAdminAccount }
 
                         Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy `
