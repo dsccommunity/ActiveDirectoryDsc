@@ -116,7 +116,7 @@ public class ADPrincipal
 
     // Property
     ...
-    public System.Object objectSid
+    public System.Object objectSid;
 }
 ```
 
@@ -133,7 +133,7 @@ public class ADComputer
 
     // Property
     ...
-    public System.String ManagedBy
+    public System.String ManagedBy;
 }
 ```
 
