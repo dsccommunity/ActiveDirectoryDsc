@@ -449,6 +449,7 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
@@ -606,6 +607,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
                                     DomainName                        = $correctDomainName
+                                    SiteName                          = $correctSiteName
                                     DelegatedAdministratorAccountName = $delegatedAdminAccount
                                     ReadOnlyReplica                   = $true
                                     Ensure                            = $true
@@ -621,6 +623,7 @@ try
 
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
+                            Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                         }
                     }
 
@@ -629,6 +632,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
                                     DomainName                          = $correctDomainName
+                                    SiteName                            = $correctSiteName
                                     AllowPasswordReplicationAccountName = @($allowedAccount, 'Member2')
                                     ReadOnlyReplica                     = $true
                                     Ensure                              = $true
@@ -681,6 +685,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
                                     DomainName                         = $correctDomainName
+                                    SiteName                           = $correctSiteName
                                     DenyPasswordReplicationAccountName = @($deniedAccount, 'Member2')
                                     ReadOnlyReplica                    = $true
                                     Ensure                             = $true

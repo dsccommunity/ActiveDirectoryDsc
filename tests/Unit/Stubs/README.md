@@ -104,6 +104,23 @@ public class ADDomainController
 ```
 
 The parameter `DelegatedAdministratorAccountName` in ADDomainController resource
+requires that the property `objectSID` is present when calling `Get-ADObject`,
+which does not happen automatically.
+To workaround this this property below must be added manually to the stub
+class `ADPrincipal` in the namespace `Microsoft.ActiveDirectory.Management`.
+
+```csharp
+public class ADPrincipal
+{
+    ...
+
+    // Property
+    ...
+    public System.Object objectSID
+}
+```
+
+The parameter `DelegatedAdministratorAccountName` in ADDomainController resource
 requires that the property `ManagedBy` is present when calling `Get-ADComputer`,
 which does not happen automatically.
 To workaround this this property below must be added manually to the stub
@@ -116,7 +133,7 @@ public class ADComputer
 
     // Property
     ...
-    public System.String ManagedBy;
+    public System.String ManagedBy
 }
 ```
 

@@ -214,7 +214,7 @@ namespace Microsoft.ActiveDirectory.Management
         public System.Collections.Generic.ICollection<System.String> ModifiedProperties { get; set; }
         public System.Int32 PropertyCount { get; set; }
         public Microsoft.ActiveDirectory.Management.ADPropertyValueCollection Item { get; set; }
-        public System.String ManagedBy;
+        public System.String ManagedBy
     }
 
     public class ADDefaultDomainPasswordPolicy
@@ -623,6 +623,7 @@ namespace Microsoft.ActiveDirectory.Management
         public System.Collections.Generic.ICollection<System.String> ModifiedProperties { get; set; }
         public System.Int32 PropertyCount { get; set; }
         public Microsoft.ActiveDirectory.Management.ADPropertyValueCollection Item { get; set; }
+        public System.Object objectSID
 
         // Method
         public override string ToString()
