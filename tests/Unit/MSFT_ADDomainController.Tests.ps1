@@ -51,7 +51,7 @@ try
         $correctInstallationMediaPath = 'TestDrive:\IFM'
         $mockNtdsSettingsObjectDn = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=PresentSite,CN=Sites,CN=Configuration,DC=present,DC=com'
         $delegatedAdminAccount = 'contoso\delegatedAdminAccount'
-        $delegatedAdminAccountSid = 'delegatedAdminAccountSid'
+        $delegatedAdminAccountSid = 'S-1-0-0'
         $allowedAccount = 'allowedAccount'
         $deniedAccount = 'deniedAccount'
 
