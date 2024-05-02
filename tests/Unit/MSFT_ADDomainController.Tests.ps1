@@ -785,6 +785,78 @@ try
                     }
                 }
 
+                Context 'When parameter DelegatedAdministratorAccountName is passed, but ReadOnlyReplica is not $true' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                        = $correctDomainName
+                                SiteName                          = $correctSiteName
+                                DelegatedAdministratorAccountName = $delegatedAdminAccount
+                                Ensure                            = $true
+                            }
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount
+                        } | Should -Throw $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0
+                    }
+                }
+
+                Context 'When parameter AllowPasswordReplicationAccountName is passed, but ReadOnlyReplica is not $true' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                          = $correctDomainName
+                                SiteName                            = $correctSiteName
+                                AllowPasswordReplicationAccountName = $allowedAccount
+                                Ensure                              = $true
+                            }
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -AllowPasswordReplicationAccountName $allowedAccount
+                        } | Should -Throw $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0
+                    }
+                }
+
+                Context 'When parameter DenyPasswordReplicationAccountName is passed, but ReadOnlyReplica is not $true' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                         = $correctDomainName
+                                SiteName                           = $correctSiteName
+                                DenyPasswordReplicationAccountName = $deniedAccount
+                                Ensure                             = $true
+                            }
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DenyPasswordReplicationAccountName $deniedAccount
+                        } | Should -Throw $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0
+                    }
+                }
+
                 Context 'When parameter ReadOnlyReplica is $true, but SiteName is not specified' {
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
