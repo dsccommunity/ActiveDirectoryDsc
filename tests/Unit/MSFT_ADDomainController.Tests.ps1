@@ -785,7 +785,7 @@ try
                     }
                 }
 
-                Context 'When parameter DelegatedAdministratorAccountName is passed, but ReadOnlyReplica is not $true' {
+                Context 'When parameter DelegatedAdministratorAccountName is specified, but ReadOnlyReplica is not $true' {
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
@@ -809,7 +809,7 @@ try
                     }
                 }
 
-                Context 'When parameter AllowPasswordReplicationAccountName is passed, but ReadOnlyReplica is not $true' {
+                Context 'When parameter AllowPasswordReplicationAccountName is specified, but ReadOnlyReplica is not $true' {
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
@@ -833,7 +833,7 @@ try
                     }
                 }
 
-                Context 'When parameter DenyPasswordReplicationAccountName is passed, but ReadOnlyReplica is not $true' {
+                Context 'When parameter DenyPasswordReplicationAccountName is specified, but ReadOnlyReplica is not $true' {
                     BeforeAll {
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
@@ -1004,6 +1004,33 @@ try
                         Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
                             $InstallationMediaPath -eq $correctInstallationMediaPath
                         } -Exactly -Times 1
+                    }
+                }
+
+                Context 'Throws if "DelegatedAdministratorAccountName" is specified but ReadOnlyReplica is not $true' {
+                    It 'Should throw the correct exception' {
+                        {
+                            Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount
+                        } | Should -Throw $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+                    }
+                }
+
+                Context 'Throws if "AllowPasswordReplicationAccountName" is specified but ReadOnlyReplica is not $true' {
+                    It 'Should throw the correct exception' {
+                        {
+                            Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -AllowPasswordReplicationAccountName $allowedAccount
+                        } | Should -Throw $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+                    }
+                }
+
+                Context 'Throws if "DenyPasswordReplicationAccountName" is specified but ReadOnlyReplica is not $true' {
+                    It 'Should throw the correct exception' {
+                        {
+                            Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DenyPasswordReplicationAccountName $deniedAccount
+                        } | Should -Throw $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
                     }
                 }
 
