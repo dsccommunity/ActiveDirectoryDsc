@@ -20,4 +20,9 @@ ConvertFrom-StringData @'
     CannotConvertToRODC                         = Cannot convert a existing domain controller to a Read-Only Domain Controller (RODC). (ADDC0023)
     NotOwnerOfFlexibleSingleMasterOperationRole = The domain controller was expected to be the owner of the Flexible Single Master Operation (FSMO) role '{0}', but it is not. (ADDC0024)
     MovingFlexibleSingleMasterOperationRole     = The Flexible Single Master Operation (FSMO) role '{0}' is being moved from domain controller '{1}' to this domain controller. (ADDC0025)
+    DelegatedAdministratorAccountNameMismatch   = There is a mismatch in DelegatedAdministratorAccountName. Got {0}, expected was {1}. (ADDC0026)
+    UpdatingDelegatedAdministratorAccountName   = Updating the DelegatedAdministratorAccountName from the name {0} to the name {1}. (ADDC0027)
+    DelegatedAdministratorAccountNameNotRODC    = You have specified 'DelegatedAdministratorAccountName', but this is not a Read-Only Domain Controller (RODC). (ADDC0028)
+    AllowPasswordReplicationAccountNameNotRODC  = You have specified 'AllowPasswordReplicationAccountName', but this is not a Read-Only Domain Controller (RODC). (ADDC0029)
+    DenyPasswordReplicationAccountNameNotRODC   = You have specified 'DenyPasswordReplicationAccountName', but this is not a Read-Only Domain Controller (RODC). (ADDC0030)
 '@

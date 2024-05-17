@@ -68,6 +68,7 @@ Configuration ADDomainController_AddReadOnlyDomainController_Config
             SafeModeAdministratorPassword       = $SafeModePassword
             ReadOnlyReplica                     = $true
             SiteName                            = 'Default-First-Site-Name'
+            DelegatedAdministratorAccountName   = 'contoso\adm.pvdi'
             AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
             DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
 

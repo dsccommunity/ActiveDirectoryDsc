@@ -96,9 +96,44 @@ public class ADDomainController
 
     // Property
     ...
+    public System.String ComputerObjectDN;
     public bool IsGlobalCatalog;
     public bool IsReadOnly;
     public Microsoft.ActiveDirectory.Management.ADOperationMasterRole[] OperationMasterRoles;
+}
+```
+
+The parameter `DelegatedAdministratorAccountName` in ADDomainController resource
+requires that the property `objectSid` is present when calling `Get-ADObject`,
+which does not happen automatically.
+To workaround this this property below must be added manually to the stub
+class `ADObject` in the namespace `Microsoft.ActiveDirectory.Management`.
+
+```csharp
+public class ADObject
+{
+    ...
+
+    // Property
+    ...
+    public System.Object objectSid;
+}
+```
+
+The parameter `DelegatedAdministratorAccountName` in ADDomainController resource
+requires that the property `ManagedBy` is present when calling `Get-ADComputer`,
+which does not happen automatically.
+To workaround this this property below must be added manually to the stub
+class `ADComputer` in the namespace `Microsoft.ActiveDirectory.Management`.
+
+```csharp
+public class ADComputer
+{
+    ...
+
+    // Property
+    ...
+    public System.String ManagedBy;
 }
 ```
 

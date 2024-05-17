@@ -75,6 +75,19 @@ function Get-TargetResource
         Write-Verbose -Message ($script:localizedData.IsDomainController -f
             $domainControllerObject.Name, $domainControllerObject.Domain)
 
+        # If this is a read-only domain controller, retrieve any user or group that is a delegated administrator via the ManagedBy attribute
+        $delegateAdministratorAccountName = $null
+        if ($domainControllerObject.IsReadOnly)
+        {
+            $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN | Get-ADComputer -Properties ManagedBy -Credential $Credential
+            if ($domainControllerComputerObject.ManagedBy)
+            {
+                $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy | Get-ADObject -Properties objectSid -Credential $Credential
+                
+                $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
+            }
+        }
+
         $allowedPasswordReplicationAccountName = (
             Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject |
             ForEach-Object -MemberName sAMAccountName)
@@ -89,6 +102,7 @@ function Get-TargetResource
             AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
             Credential                          = $Credential
             DatabasePath                        = $serviceNTDS.'DSA Working Directory'
+            DelegatedAdministratorAccountName   = $delegateAdministratorAccountName
             DenyPasswordReplicationAccountName  = @($deniedPasswordReplicationAccountName)
             DomainName                          = $domainControllerObject.Domain
             Ensure                              = $true
@@ -111,6 +125,7 @@ function Get-TargetResource
             AllowPasswordReplicationAccountName = $null
             Credential                          = $Credential
             DatabasePath                        = $null
+            DelegatedAdministratorAccountName   = $null
             DenyPasswordReplicationAccountName  = $null
             DomainName                          = $DomainName
             Ensure                              = $false
@@ -165,6 +180,9 @@ function Get-TargetResource
 
     .PARAMETER ReadOnlyReplica
         Specifies if the domain controller should be provisioned as read-only domain controller
+
+    .PARAMETER DelegatedAdministratorAccountName
+        Specifies the user or group that is the delegated administrator of this read-only domain controller.
 
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
@@ -253,6 +271,10 @@ function Set-TargetResource
         $ReadOnlyReplica,
 
         [Parameter()]
+        [System.String]
+        $DelegatedAdministratorAccountName,
+
+        [Parameter()]
         [System.String[]]
         $AllowPasswordReplicationAccountName,
 
@@ -278,6 +300,30 @@ function Set-TargetResource
 
     $targetResource = Get-TargetResource @getTargetResourceParameters
 
+    if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
+        }
+    }
+
     if ($targetResource.Ensure -eq $false)
     {
         Write-Verbose -Message ($script:localizedData.Promoting -f $env:COMPUTERNAME, $DomainName)
@@ -299,6 +345,12 @@ function Set-TargetResource
             }
 
             $installADDSDomainControllerParameters.Add('ReadOnlyReplica', $true)
+        }
+
+        if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName'))
+        {
+            $installADDSDomainControllerParameters.Add('DelegatedAdministratorAccountName',
+                $DelegatedAdministratorAccountName)
         }
 
         if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
@@ -399,6 +451,21 @@ function Set-TargetResource
                 $targetResource.SiteName, $SiteName)
 
             Move-ADDirectoryServer -Identity $env:COMPUTERNAME -Site $SiteName -Credential $Credential
+        }
+
+        if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName') -and
+            $targetResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName)
+        {
+            # If this is a read-only domain controller, set the delegated administrator via the ManagedBy attribute
+            if ($domainControllerObject.IsReadOnly)
+            {
+                Write-Verbose -Message ($script:localizedData.UpdatingDelegatedAdministratorAccountName -f
+                $targetResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
+
+                $delegateAdministratorAccountSecurityIdentifier = Resolve-SecurityIdentifier -SamAccountName $DelegatedAdministratorAccountName
+
+                Set-ADComputer -Identity $domainControllerObject.ComputerObjectDN -ManagedBy $delegateAdministratorAccountSecurityIdentifier -Credential $Credential
+            }
         }
 
         if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
@@ -580,6 +647,9 @@ function Set-TargetResource
     .PARAMETER ReadOnlyReplica
         Specifies if the domain controller should be provisioned as read-only domain controller
 
+    .PARAMETER DelegatedAdministratorAccountName
+        Specifies the user or group that is the delegated administrator of this read-only domain controller.
+
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
 
@@ -659,6 +729,10 @@ function Test-TargetResource
         $ReadOnlyReplica,
 
         [Parameter()]
+        [System.String]
+        $DelegatedAdministratorAccountName,
+
+        [Parameter()]
         [System.String[]]
         $AllowPasswordReplicationAccountName,
 
@@ -677,6 +751,30 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message ($script:localizedData.TestingConfiguration -f $env:COMPUTERNAME, $DomainName)
+
+    if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey('DenyPasswordReplicationAccountName'))
+    {
+        if (-not $PSBoundParameters.ContainsKey('ReadOnlyReplica') -or $ReadOnlyReplica -ne $true)
+        {
+            New-InvalidOperationException -Message $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
+        }
+    }
 
     if ($PSBoundParameters.ContainsKey('ReadOnlyReplica') -and $ReadOnlyReplica -eq $true)
     {
@@ -735,6 +833,17 @@ function Test-TargetResource
         }
 
         $testTargetResourceReturnValue = $false
+    }
+
+    # If this is a read-only domain controller, check the delegated administrator
+    if ($existingResource.ReadOnlyReplica)
+    {
+        if ($PSBoundParameters.ContainsKey('DelegatedAdministratorAccountName') -and $existingResource.DelegatedAdministratorAccountName -ne $DelegatedAdministratorAccountName)
+        {
+            Write-Verbose -Message ($script:localizedData.DelegatedAdministratorAccountNameMismatch -f $existingResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
+
+            $testTargetResourceReturnValue = $false
+        }
     }
 
     if ($PSBoundParameters.ContainsKey('AllowPasswordReplicationAccountName') -and

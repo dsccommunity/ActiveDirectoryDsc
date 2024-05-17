@@ -50,6 +50,8 @@ try
         $incorrectSiteName = 'IncorrectSite'
         $correctInstallationMediaPath = 'TestDrive:\IFM'
         $mockNtdsSettingsObjectDn = 'CN=NTDS Settings,CN=ServerName,CN=Servers,CN=PresentSite,CN=Sites,CN=Configuration,DC=present,DC=com'
+        $delegatedAdminAccount = 'contoso\delegatedAdminAccount'
+        $delegatedAdminAccountSid = 'S-1-0-0'
         $allowedAccount = 'allowedAccount'
         $deniedAccount = 'deniedAccount'
 
@@ -215,10 +217,17 @@ try
                     BeforeAll {
                         $mockDomainControllerObject = New-Object `
                             -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                        $mockDomainControllerComputerObject = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADComputer
+                        $mockDomainControllerDelegatedAdminObject = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADObject
                         $mockDomainControllerObject.Site = $correctSiteName
                         $mockDomainControllerObject.Domain = $correctDomainName
                         $mockDomainControllerObject.IsGlobalCatalog = $true
                         $mockDomainControllerObject.IsReadOnly = $true
+                        $mockDomainControllerDelegatedAdminObject.objectSid = $delegatedAdminAccountSid
+                        $mockDomainControllerComputerObject.ManagedBy = $mockDomainControllerDelegatedAdminObject
+                        $mockDomainControllerObject.ComputerObjectDN = $mockDomainControllerComputerObject
                         $mockGetADDomainControllerPasswordReplicationAllowedPolicy = @{
                             SamAccountName = $allowedAccount
                         }
@@ -227,6 +236,14 @@ try
                         }
 
                         Mock -CommandName Get-DomainControllerObject { $mockDomainControllerObject }
+
+                        Mock -CommandName Get-ADComputer { $mockDomainControllerComputerObject }
+
+                        Mock -CommandName Get-ADObject { $mockDomainControllerDelegatedAdminObject }
+
+                        Mock -CommandName Resolve-SamAccountName `
+                            -ParameterFilter { $ObjectSid -eq $delegatedAdminAccountSid } `
+                            -MockWith { $delegatedAdminAccount }
 
                         Mock -CommandName Get-ADDomainControllerPasswordReplicationPolicy `
                             -ParameterFilter { $Allowed.IsPresent } `
@@ -252,6 +269,7 @@ try
                         $result.Ensure | Should -BeTrue
                         $result.IsGlobalCatalog | Should -BeTrue
                         $result.ReadOnlyReplica | Should -BeTrue
+                        $result.DelegatedAdministratorAccountName | Should -Be $delegatedAdminAccount
                         $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
@@ -265,6 +283,15 @@ try
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-DomainControllerObject `
                             -ParameterFilter { $DomainName -eq $correctDomainName } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-ADComputer `
+                            -ParameterFilter { $Properties -eq 'ManagedBy' } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName Get-ADObject `
+                            -ParameterFilter { $Properties -eq 'objectSid' } `
+                            -Exactly -Times 1
+                        Assert-MockCalled -CommandName Resolve-SamAccountName `
+                            -ParameterFilter { $ObjectSid -eq $delegatedAdminAccountSid } `
                             -Exactly -Times 1
                         Assert-MockCalled -CommandName Get-ADDomainControllerPasswordReplicationPolicy `
                             -ParameterFilter { $Allowed -eq $true } `
@@ -301,6 +328,7 @@ try
                         $result.IsGlobalCatalog | Should -BeFalse
                         $result.NtdsSettingsObjectDn | Should -BeNullOrEmpty
                         $result.ReadOnlyReplica | Should -BeFalse
+                        $result.DelegatedAdministratorAccountName | Should -BeNullOrEmpty
                         $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.FlexibleSingleMasterOperationRole | Should -BeNullOrEmpty
@@ -362,6 +390,7 @@ try
                             DomainName                          = $correctDomainName
                             SiteName                            = $correctSiteName
                             IsGlobalCatalog                     = $true
+                            DelegatedAdministratorAccountName   = $delegatedAdminAccount
                             AllowPasswordReplicationAccountName = @($allowedAccount)
                             DenyPasswordReplicationAccountName  = @($deniedAccount)
                             FlexibleSingleMasterOperationRole   = @('DomainNamingMaster', 'RIDMaster')
@@ -411,29 +440,42 @@ try
                     }
                 }
 
+                Context 'When property DelegatedAdministratorAccountName is in desired state' {
+                    It 'Should return $true' {
+                        $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                            -DelegatedAdministratorAccountName $delegatedAdminAccount
+                        $result | Should -BeTrue
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
+                    }
+                }
+
                 Context 'When property AllowPasswordReplicationAccountName is in desired state' {
                     It 'Should return $true' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                             -AllowPasswordReplicationAccountName @($allowedAccount)
                         $result | Should -BeTrue
                     }
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
                 Context 'When property DenyPasswordReplicationAccountName is in desired state' {
                     It 'Should return $true' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                             -DenyPasswordReplicationAccountName @($deniedAccount)
                         $result | Should -BeTrue
                     }
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
@@ -560,12 +602,39 @@ try
                         }
                     }
 
+                    Context 'When property DelegatedAdministratorAccountName is not in desired state' {
+                        BeforeAll {
+                            Mock -CommandName Get-TargetResource -MockWith {
+                                return @{
+                                    DomainName                        = $correctDomainName
+                                    SiteName                          = $correctSiteName
+                                    DelegatedAdministratorAccountName = $delegatedAdminAccount
+                                    ReadOnlyReplica                   = $true
+                                    Ensure                            = $true
+                                }
+                            }
+                        }
+
+                        It 'Should return $false' {
+                            $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName 'contoso\NewDelegatedAdminAccount'
+                            $result | Should -BeFalse
+                        }
+
+                        It 'Should call the expected mocks' {
+                            Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
+                            Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
+                        }
+                    }
+
                     Context 'When property AllowPasswordReplicationAccountName is not in desired state' {
                         BeforeAll {
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
                                     DomainName                          = $correctDomainName
+                                    SiteName                            = $correctSiteName
                                     AllowPasswordReplicationAccountName = @($allowedAccount, 'Member2')
+                                    ReadOnlyReplica                     = $true
                                     Ensure                              = $true
                                 }
                             }
@@ -573,40 +642,40 @@ try
 
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                                     -AllowPasswordReplicationAccountName @('NewMember1', 'NewMember2')
                                 $result | Should -BeFalse
                             }
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                                     -AllowPasswordReplicationAccountName @($allowedAccount, 'Member2', 'NewMember')
                                 $result | Should -BeFalse
                             }
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
                         Context 'When there exist more members that the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                                     -AllowPasswordReplicationAccountName @($allowedAccount)
                                 $result | Should -BeFalse
                             }
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
                     }
@@ -616,7 +685,9 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
                                     DomainName                         = $correctDomainName
+                                    SiteName                           = $correctSiteName
                                     DenyPasswordReplicationAccountName = @($deniedAccount, 'Member2')
+                                    ReadOnlyReplica                    = $true
                                     Ensure                             = $true
                                 }
                             }
@@ -624,40 +695,40 @@ try
 
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                                     -DenyPasswordReplicationAccountName @('NewMember1', 'NewMember2')
                                 $result | Should -BeFalse
                             }
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                                     -DenyPasswordReplicationAccountName @($allowedAccount, 'Member2', 'NewMember')
                                 $result | Should -BeFalse
                             }
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
                         Context 'When there exist more members that the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
                                     -DenyPasswordReplicationAccountName @($allowedAccount)
                                 $result | Should -BeFalse
                             }
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
                     }
@@ -711,6 +782,78 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0
                         Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
+                    }
+                }
+
+                Context 'When parameter DelegatedAdministratorAccountName is specified, but ReadOnlyReplica is not $true' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                        = $correctDomainName
+                                SiteName                          = $correctSiteName
+                                DelegatedAdministratorAccountName = $delegatedAdminAccount
+                                Ensure                            = $true
+                            }
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount
+                        } | Should -Throw $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0
+                    }
+                }
+
+                Context 'When parameter AllowPasswordReplicationAccountName is specified, but ReadOnlyReplica is not $true' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                          = $correctDomainName
+                                SiteName                            = $correctSiteName
+                                AllowPasswordReplicationAccountName = $allowedAccount
+                                Ensure                              = $true
+                            }
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -AllowPasswordReplicationAccountName $allowedAccount
+                        } | Should -Throw $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0
+                    }
+                }
+
+                Context 'When parameter DenyPasswordReplicationAccountName is specified, but ReadOnlyReplica is not $true' {
+                    BeforeAll {
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                DomainName                         = $correctDomainName
+                                SiteName                           = $correctSiteName
+                                DenyPasswordReplicationAccountName = $deniedAccount
+                                Ensure                             = $true
+                            }
+                        }
+                    }
+
+                    It 'Should throw the correct error' {
+                        {
+                            Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DenyPasswordReplicationAccountName $deniedAccount
+                        } | Should -Throw $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 0
                     }
                 }
 
@@ -864,11 +1007,51 @@ try
                     }
                 }
 
+                Context 'Throws if "DelegatedAdministratorAccountName" is specified but ReadOnlyReplica is not $true' {
+                    It 'Should throw the correct exception' {
+                        {
+                            Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount
+                        } | Should -Throw $script:localizedData.DelegatedAdministratorAccountNameNotRODC
+                    }
+                }
+
+                Context 'Throws if "AllowPasswordReplicationAccountName" is specified but ReadOnlyReplica is not $true' {
+                    It 'Should throw the correct exception' {
+                        {
+                            Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -AllowPasswordReplicationAccountName $allowedAccount
+                        } | Should -Throw $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
+                    }
+                }
+
+                Context 'Throws if "DenyPasswordReplicationAccountName" is specified but ReadOnlyReplica is not $true' {
+                    It 'Should throw the correct exception' {
+                        {
+                            Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                -DenyPasswordReplicationAccountName $deniedAccount
+                        } | Should -Throw $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
+                    }
+                }
+
                 Context 'Throws if "ReadOnlyReplica" is specified without Site' {
                     It 'Should throw the correct exception' {
                         {
                             Set-TargetResource @testDefaultParams -DomainName $correctDomainName -ReadOnlyReplica $true
                         } | Should -Throw $script:localizedData.RODCMissingSite
+                    }
+                }
+
+                Context 'When adding a domain controller with DelegatedAdministratorAccountName' {
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $DelegatedAdministratorAccountName -eq $delegatedAdminAccount
+                        } -Exactly -Times 1
                     }
                 }
 
@@ -1043,6 +1226,46 @@ try
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Set-ADObject -Exactly -Times 0
                         }
+                    }
+                }
+
+                Context 'When DelegatedAdministratorAccountName is not compliant' {
+                    Mock -CommandName Set-ADComputer
+                    Mock -CommandName Resolve-SecurityIdentifier `
+                        -ParameterFilter { $SamAccountName -eq $delegatedAdminAccount } `
+                        -MockWith { $delegatedAdminAccountSid }
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            Ensure                            = $true
+                            SiteName                          = $correctSiteName
+                            DelegatedAdministratorAccountName = 'contoso\PresentDelegatedAdminAccount'
+                        }
+                    }
+
+                    Mock -CommandName Get-DomainControllerObject -MockWith {
+                        $stubDomainController = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                        $stubDomainControllerComputerObject = New-Object `
+                            -TypeName Microsoft.ActiveDirectory.Management.ADComputer
+                        $stubDomainController.IsReadOnly = $true
+                        $stubDomainController.Site = $correctSiteName
+                        $stubDomainController.ComputerObjectDN = $stubDomainControllerComputerObject
+
+                        return $stubDomainController
+                    }
+
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Resolve-SecurityIdentifier -ParameterFilter {
+                            $SamAccountName -eq $delegatedAdminAccount
+                        } -Exactly -Times 1
+                        Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
+                            $ManagedBy -eq $delegatedAdminAccountSid
+                        } -Exactly -Times 1
                     }
                 }
 
@@ -1283,6 +1506,46 @@ try
                         It 'Should call the expected mocks' {
                             Assert-MockCalled -CommandName Set-ADObject -Exactly -Times 0
                         }
+                    }
+                }
+
+                Context 'When DelegatedAdministratorAccountName is correct' {
+                    BeforeAll {
+                        Mock -CommandName Set-ADComputer
+                        Mock -CommandName Resolve-SecurityIdentifier `
+                            -ParameterFilter { $SamAccountName -eq $delegatedAdminAccount } `
+                            -MockWith { $delegatedAdminAccountSid }
+                        Mock -CommandName Get-DomainControllerObject -MockWith {
+                            $stubDomainController = New-Object `
+                                -TypeName Microsoft.ActiveDirectory.Management.ADDomainController
+                            $stubDomainControllerComputerObject = New-Object `
+                                -TypeName Microsoft.ActiveDirectory.Management.ADComputer
+                            $stubDomainController.IsReadOnly = $true
+                            $stubDomainController.Site = $correctSiteName
+                            $stubDomainController.ComputerObjectDN = $stubDomainControllerComputerObject
+
+                            return $stubDomainController
+                        }
+
+                        Mock -CommandName Get-TargetResource -MockWith {
+                            return @{
+                                Ensure                            = $true
+                                SiteName                          = $correctSiteName
+                                DelegatedAdministratorAccountName = $delegatedAdminAccount
+                            }
+                        }
+                    }
+
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Resolve-SecurityIdentifier -ParameterFilter {
+                            $SamAccountName -eq $delegatedAdminAccount
+                        } -Exactly -Times 0
+                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0
                     }
                 }
 
