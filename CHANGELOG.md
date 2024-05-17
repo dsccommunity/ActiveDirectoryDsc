@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.5.0] - 2024-05-17
+
 ### Added
 
 - ADDomainController
