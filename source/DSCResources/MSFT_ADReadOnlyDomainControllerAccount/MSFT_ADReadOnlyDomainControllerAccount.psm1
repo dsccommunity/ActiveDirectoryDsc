@@ -22,6 +22,16 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER Credential
         Specifies the credential for the account used to add the read only domain controller account.
 
+    .PARAMETER InstallDns
+        Specifies if the DNS Server service should be installed and configured on
+        the read only domain controller. If this is not set the default value of the parameter
+        InstallDns of the cmdlet Add-ADDSReadOnlyDomainControllerAccount is used.
+        The parameter `InstallDns` is only used during the provisioning of a read only domain
+        controller. The parameter cannot be used to install or uninstall the DNS
+        server on an already provisioned read only domain controller.
+
+        Not used in Get-TargetResource.
+
     .NOTES
         Used Functions:
             Name                                            | Module
@@ -48,7 +58,11 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [Parameter()]
+        [System.Boolean]
+        $InstallDns
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
@@ -91,7 +105,6 @@ function Get-TargetResource
             ForEach-Object -MemberName sAMAccountName)
         $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
         $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
-        $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
 
         $targetResource = @{
             AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
@@ -101,7 +114,7 @@ function Get-TargetResource
             DomainControllerAccountName         = $domainControllerObject.Name
             DomainName                          = $domainControllerObject.Domain
             Ensure                              = $true
-            InstallDns                          = $installDns
+            InstallDns                          = $InstallDns
             IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
             SiteName                            = $domainControllerObject.Site
         }
@@ -162,6 +175,7 @@ function Get-TargetResource
         The parameter `InstallDns` is only used during the provisioning of a read only domain
         controller. The parameter cannot be used to install or uninstall the DNS
         server on an already provisioned read only domain controller.
+
     .NOTES
         Used Functions:
             Name                                               | Module
