@@ -110,8 +110,6 @@ function Get-TargetResource
         $deniedPasswordReplicationAccountName = (
             Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject |
             ForEach-Object -MemberName sAMAccountName)
-        $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
-        $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
 
         $targetResource = @{
             AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
