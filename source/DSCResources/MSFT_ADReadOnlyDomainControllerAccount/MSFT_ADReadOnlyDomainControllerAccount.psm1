@@ -321,7 +321,7 @@ function Set-TargetResource
 
         if ($targetResource.SiteName -ne $SiteName)
         {
-            # DC is not in correct site. Move it.
+            # RODC is not in correct site. Move it.
             Write-Verbose -Message ($script:localizedData.MovingDomainController -f
                 $targetResource.SiteName, $SiteName)
 
