@@ -22,6 +22,9 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER Credential
         Specifies the credential for the account used to add the read only domain controller account.
 
+    .PARAMETER SiteName
+        Provide the name of the site you want the Read Only Domain Controller Account to be added to.
+
     .PARAMETER InstallDns
         Specifies if the DNS Server service should be installed and configured on
         the read only domain controller. If this is not set the default value of the parameter
@@ -59,6 +62,10 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $Credential,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $SiteName,
 
         [Parameter()]
         [System.Boolean]
