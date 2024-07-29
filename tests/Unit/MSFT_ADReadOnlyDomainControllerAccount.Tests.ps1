@@ -257,7 +257,7 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
@@ -270,7 +270,7 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
@@ -337,7 +337,7 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                        Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                     }
                 }
 
@@ -387,7 +387,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
 
@@ -411,7 +411,7 @@ try
 
                             It 'Should call the expected mocks' {
                                 Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 0
+                                Assert-MockCalled -CommandName Test-ADReplicationSite -Exactly -Times 1
                             }
                         }
                     }
@@ -712,6 +712,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return $stubTargetResource = @{
                                     Ensure          = $true
+                                    SiteName        = $correctSiteName
                                     IsGlobalCatalog = $false
                                 }
                             }
@@ -734,6 +735,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return $stubTargetResource = @{
                                     Ensure          = $true
+                                    SiteName        = $correctSiteName
                                     IsGlobalCatalog = $true
                                 }
                             }
@@ -756,6 +758,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return $stubTargetResource = @{
                                     Ensure          = $true
+                                    SiteName        = $correctSiteName
                                     IsGlobalCatalog = $true
                                 }
                             }
@@ -782,6 +785,7 @@ try
                     Mock -CommandName Get-TargetResource -MockWith {
                         return @{
                             Ensure                            = $true
+                            SiteName                          = $correctSiteName
                             DelegatedAdministratorAccountName = 'contoso\PresentDelegatedAdminAccount'
                         }
                     }
@@ -815,6 +819,7 @@ try
                     Mock -CommandName Get-TargetResource -MockWith {
                         return @{
                             Ensure                              = $true
+                            SiteName                            = $correctSiteName
                             AllowPasswordReplicationAccountName = 'allowedAccount2'
                         }
                     }
@@ -843,6 +848,7 @@ try
                     Mock -CommandName Get-TargetResource -MockWith {
                         return @{
                             Ensure                             = $true
+                            SiteName                           = $correctSiteName
                             DenyPasswordReplicationAccountName = 'deniedAccount2'
                         }
                     }
@@ -879,7 +885,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 Ensure   = $true
-                                SiteName = 'PresentSite'
+                                SiteName = $correctSiteName
                             }
                         }
                         Mock -CommandName Get-DomainControllerObject {
@@ -911,6 +917,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return $stubTargetResource = @{
                                     Ensure          = $true
+                                    SiteName        = $correctSiteName
                                     IsGlobalCatalog = $false
                                 }
                             }
@@ -933,6 +940,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return $stubTargetResource = @{
                                     Ensure          = $true
+                                    SiteName        = $correctSiteName
                                     IsGlobalCatalog = $true
                                 }
                             }
@@ -953,6 +961,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return $stubTargetResource = @{
                                     Ensure          = $true
+                                    SiteName        = $correctSiteName
                                     IsGlobalCatalog = $false
                                 }
                             }
@@ -988,6 +997,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 Ensure                            = $true
+                                SiteName                          = $correctSiteName
                                 DelegatedAdministratorAccountName = $delegatedAdminAccount
                             }
                         }
@@ -1018,6 +1028,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 Ensure                              = $true
+                                SiteName                            = $correctSiteName
                                 AllowPasswordReplicationAccountName = $allowedAccount
                             }
                         }
@@ -1040,6 +1051,7 @@ try
                             Mock -CommandName Get-TargetResource -MockWith {
                                 return @{
                                     Ensure                             = $true
+                                    SiteName                           = $correctSiteName
                                     DenyPasswordReplicationAccountName = $deniedAccount
                                 }
                             }
