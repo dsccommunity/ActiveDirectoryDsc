@@ -244,6 +244,7 @@ function Set-TargetResource
         DomainControllerAccountName   = $DomainControllerAccountName
         DomainName                    = $DomainName
         Credential                    = $Credential
+        SiteName                      = $SiteName
     }
 
     $targetResource = Get-TargetResource @getTargetResourceParameters
@@ -256,8 +257,8 @@ function Set-TargetResource
         $addADDSReadOnlyDomainControllerAccountParameters = @{
             DomainControllerAccountName   = $DomainControllerAccountName
             DomainName                    = $DomainName
-            SiteName                      = $SiteName
             Credential                    = $Credential
+            SiteName                      = $SiteName
             Force                         = $true
         }
 
@@ -549,6 +550,7 @@ function Test-TargetResource
         DomainControllerAccountName   = $DomainControllerAccountName
         DomainName                    = $DomainName
         Credential                    = $Credential
+        SiteName                      = $SiteName
     }
 
     $existingResource = Get-TargetResource @getTargetResourceParameters
