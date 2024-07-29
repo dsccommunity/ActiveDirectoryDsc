@@ -126,7 +126,8 @@ function Get-TargetResource
     }
     else
     {
-        Write-Verbose -Message ($script:localizedData.NotReadOnlyDomainControllerAccount -f $DomainControllerAccountName)
+        Write-Verbose -Message ($script:localizedData.NotReadOnlyDomainControllerAccount -f
+            $domainControllerObject.Name, $domainControllerObject.Domain)
 
         $targetResource = @{
             AllowPasswordReplicationAccountName = $null
