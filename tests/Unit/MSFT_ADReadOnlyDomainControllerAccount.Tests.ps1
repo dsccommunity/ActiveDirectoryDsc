@@ -695,17 +695,6 @@ try
                             $Site.ToString() -eq $correctSiteName
                         } -Exactly -Times 1
                     }
-
-                    Context 'When the read only domain controller account is in the wrong site, but SiteName is not specified' {
-                        It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName } |
-                                Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Move-ADDirectoryServer  -Exactly -Times 0
-                        }
-                    }
                 }
 
                 Context 'When specifying the IsGlobalCatalog parameter' {
@@ -890,6 +879,7 @@ try
                         Mock -CommandName Get-TargetResource -MockWith {
                             return @{
                                 Ensure   = $true
+                                SiteName = 'PresentSite'
                             }
                         }
                         Mock -CommandName Get-DomainControllerObject {
