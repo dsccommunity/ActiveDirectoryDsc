@@ -62,6 +62,7 @@ DscResourcesToExport = @(
     'ADObjectPermissionEntry'
     'ADOptionalFeature'
     'ADOrganizationalUnit'
+    'ADReadOnlyDomainControllerAccount'
     'ADReplicationSite'
     'ADReplicationSiteLink'
     'ADServicePrincipalName'

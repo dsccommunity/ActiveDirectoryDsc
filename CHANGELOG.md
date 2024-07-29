@@ -7,6 +7,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- ADReadOnlyDomainControllerAccount
+  - New resource for pre-creating Read Only Domain Controller accounts.
+    ([issue #40](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/40))
+    ([issue #711](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/711)).
+
 ## [6.5.0] - 2024-05-17
 
 ### Added
