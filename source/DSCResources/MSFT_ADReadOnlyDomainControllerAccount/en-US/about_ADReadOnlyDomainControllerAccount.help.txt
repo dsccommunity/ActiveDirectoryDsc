@@ -56,7 +56,7 @@
 This configuration will add a read only domain controller account to the domain
 contoso.com.
 
-Configuration ADReadOnlyDomainControllerAccount_AddReadOnlyDomainControllerAccountToDomainMinimal_Config
+Configuration ADReadOnlyDomainControllerAccount_Minimal_Config
 {
     param
     (
@@ -110,7 +110,7 @@ Configuration ADReadOnlyDomainControllerAccount_AddReadOnlyDomainControllerAccou
 This configuration will add a read only domain controller account to the domain
 contoso.com, specifying all properties of the resource.
 
-Configuration ADReadOnlyDomainControllerAccount_AddReadOnlyDomainControllerAccountToDomainAllProperties_Config
+Configuration ADReadOnlyDomainControllerAccount_AllProperties_Config
 {
     param
     (
