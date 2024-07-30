@@ -685,8 +685,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
-                                -SiteName $correctSiteName } | Should -Not -Throw
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName } | Should -Not -Throw
                     }
 
                     It 'Should call the expected mocks' {
@@ -944,7 +943,7 @@ try
                         }
 
                         It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $false } | Should -Not -Throw
                         }
 
