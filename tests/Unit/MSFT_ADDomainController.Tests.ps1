@@ -1120,7 +1120,7 @@ try
 
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
-                            $UseExistingAccount-eq $true
+                            $UseExistingAccount -eq $true
                         } -Exactly -Times 1
                     }
                 }
