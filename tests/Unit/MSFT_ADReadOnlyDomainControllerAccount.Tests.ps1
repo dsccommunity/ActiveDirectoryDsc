@@ -55,7 +55,6 @@ try
         $testDefaultParams = @{
             DomainControllerAccountName   = $domainControllerAccountName
             Credential                    = $testAdminCredential
-            SiteName                      = $correctSiteName
         }
 
         #endregion Pester Test Variable Initialization
@@ -74,7 +73,7 @@ try
                 }
 
                 It 'Should throw the correct exception' {
-                    { Get-TargetResource @testDefaultParams -DomainName $correctDomainName } |
+                    { Get-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName } |
                         Should -Throw ($script:localizedData.MissingDomain -f $correctDomainName)
                 }
 
@@ -135,7 +134,7 @@ try
                     }
 
                     It 'Should return the expected result' {
-                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
                         $result.DomainControllerAccountName | Should -Be $domainControllerAccountName
                         $result.DomainName | Should -Be $correctDomainName
@@ -180,7 +179,7 @@ try
                     }
 
                     It 'Should return the expected result' {
-                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
 
                         $result.DomainControllerAccountName | Should -Be $domainControllerAccountName
                         $result.DomainName | Should -Be $correctDomainName
@@ -251,7 +250,7 @@ try
 
                 Context 'When creating a read only domain controller account with only mandatory parameters' {
                     It 'Should return $true' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName
                         $result | Should -BeTrue
                     }
 
@@ -263,7 +262,7 @@ try
 
                 Context 'When property IsGlobalCatalog is in desired state' {
                     It 'Should return $true' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                             -IsGlobalCatalog $true
                         $result | Should -BeTrue
                     }
@@ -276,7 +275,7 @@ try
 
                 Context 'When property DelegatedAdministratorAccountName is in desired state' {
                     It 'Should return $true' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                             -DelegatedAdministratorAccountName $delegatedAdminAccount
                         $result | Should -BeTrue
                     }
@@ -289,7 +288,7 @@ try
 
                 Context 'When property AllowPasswordReplicationAccountName is in desired state' {
                     It 'Should return $true' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                             -AllowPasswordReplicationAccountName @($allowedAccount)
                         $result | Should -BeTrue
                     }
@@ -302,7 +301,7 @@ try
 
                 Context 'When property DenyPasswordReplicationAccountName is in desired state' {
                     It 'Should return $true' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                             -DenyPasswordReplicationAccountName @($deniedAccount)
                         $result | Should -BeTrue
                     }
@@ -331,7 +330,7 @@ try
                     }
 
                     It 'Should return $false' {
-                        $result = Test-TargetResource @testDefaultParams -DomainName 'WrongDomainName'
+                        $result = Test-TargetResource @testDefaultParams -DomainName 'WrongDomainName' -SiteName $correctSiteName
                         $result | Should -BeFalse
                     }
 
@@ -380,7 +379,7 @@ try
                             }
 
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $true
                                 $result | Should -BeFalse
                             }
@@ -404,7 +403,7 @@ try
                             }
 
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $false
                                 $result | Should -BeFalse
                             }
@@ -429,7 +428,7 @@ try
                         }
 
                         It 'Should return $false' {
-                            $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -DelegatedAdministratorAccountName 'contoso\NewDelegatedAdminAccount'
                             $result | Should -BeFalse
                         }
@@ -454,7 +453,7 @@ try
 
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -AllowPasswordReplicationAccountName @('NewMember1', 'NewMember2')
                                 $result | Should -BeFalse
                             }
@@ -467,7 +466,7 @@ try
 
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -AllowPasswordReplicationAccountName @($allowedAccount, 'Member2', 'NewMember')
                                 $result | Should -BeFalse
                             }
@@ -480,7 +479,7 @@ try
 
                         Context 'When there exist more members that the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -AllowPasswordReplicationAccountName @($allowedAccount)
                                 $result | Should -BeFalse
                             }
@@ -506,7 +505,7 @@ try
 
                         Context 'When there are different members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -DenyPasswordReplicationAccountName @('NewMember1', 'NewMember2')
                                 $result | Should -BeFalse
                             }
@@ -519,7 +518,7 @@ try
 
                         Context 'When there exist less members than the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -DenyPasswordReplicationAccountName @($allowedAccount, 'Member2', 'NewMember')
                                 $result | Should -BeFalse
                             }
@@ -532,7 +531,7 @@ try
 
                         Context 'When there exist more members that the desired state' {
                             It 'Should return $false' {
-                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                                $result = Test-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -DenyPasswordReplicationAccountName @($allowedAccount)
                                 $result | Should -BeFalse
                             }
@@ -594,7 +593,7 @@ try
 
                 Context 'When adding a read only domain controller account that should not be a Global Catalog' {
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -IsGlobalCatalog $false } | Should -Not -Throw
                     }
 
@@ -607,7 +606,7 @@ try
 
                 Context 'When adding a read only domain controller account with DelegatedAdministratorAccountName' {
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
                     }
 
@@ -620,7 +619,7 @@ try
 
                 Context 'When adding a read only domain controller account with AllowPasswordReplicationAccountName' {
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -AllowPasswordReplicationAccountName $allowedAccount } | Should -Not -Throw
                     }
 
@@ -633,7 +632,7 @@ try
 
                 Context 'When adding a read only domain controller account with DenyPasswordReplicationAccountName' {
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -DenyPasswordReplicationAccountName $deniedAccount } | Should -Not -Throw
                     }
 
@@ -646,7 +645,7 @@ try
 
                 Context 'When the read only domain controller account should have a DNS installed' {
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -InstallDns $true } | Should -Not -Throw
                     }
 
@@ -659,7 +658,7 @@ try
 
                 Context 'When the read only domain controller account should not have a DNS installed' {
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -InstallDns $false } | Should -Not -Throw
                     }
 
@@ -686,7 +685,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -SiteName $correctSiteName } | Should -Not -Throw
                     }
 
@@ -719,7 +718,7 @@ try
                         }
 
                         It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $true } | Should -Not -Throw
                         }
 
@@ -742,7 +741,7 @@ try
                         }
 
                         It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $false } | Should -Not -Throw
                         }
 
@@ -767,7 +766,7 @@ try
                         }
 
                         It 'Should throw the correct exception' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $false } | Should -Throw $script:localizedData.ExpectedDomainController
                         }
 
@@ -801,7 +800,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
                     }
 
@@ -832,7 +831,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -AllowPasswordReplicationAccountName $allowedAccount } | Should -Not -Throw
                     }
 
@@ -860,7 +859,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams  -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams  -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -DenyPasswordReplicationAccountName $deniedAccount } | Should -Not -Throw
                     }
 
@@ -879,7 +878,7 @@ try
                     Mock -CommandName Add-ADDomainControllerPasswordReplicationPolicy
                 }
 
-                Context 'When a read only domain controller account is in the correct site' {
+                Context 'When the read only domain controller account is in the correct site' {
                     BeforeAll {
                         Mock -CommandName Move-ADDirectoryServer
                         Mock -CommandName Get-TargetResource -MockWith {
@@ -894,7 +893,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName } | Should -Not -Throw
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName } | Should -Not -Throw
                     }
 
                     It 'Should call the expected mocks' {
@@ -924,7 +923,7 @@ try
                         }
 
                         It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $true } | Should -Not -Throw
                         }
 
@@ -947,7 +946,7 @@ try
                         }
 
                         It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -IsGlobalCatalog $true } | Should -Not -Throw
                         }
 
@@ -1004,7 +1003,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -DelegatedAdministratorAccountName $delegatedAdminAccount } | Should -Not -Throw
                     }
 
@@ -1016,7 +1015,7 @@ try
                     }
                 }
 
-                Context 'When Read-OnlyDomainController(RODC) Sync Accounts are compliant' {
+                Context 'When AllowPasswordReplicationAccountName is correct' {
                     BeforeAll {
                         Mock -CommandName Get-DomainControllerObject -MockWith {
                             $stubDomainController = New-Object `
@@ -1035,7 +1034,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                        { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                 -AllowPasswordReplicationAccountName $allowedAccount } | Should -Not -Throw
                     }
 
@@ -1058,7 +1057,7 @@ try
                         }
 
                         It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
                                     -DenyPasswordReplicationAccountName $deniedAccount } | Should -Not -Throw
                         }
 
