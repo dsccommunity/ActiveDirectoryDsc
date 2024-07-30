@@ -1112,10 +1112,10 @@ try
                     }
                 }
 
-                Context 'When the domain controller should use an existing account' {
+                Context 'When the read only domain controller should use an existing account' {
                     It 'Should not throw' {
                         { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
-                                -ReadOnlyReplica $true -UseExistingAccount $true } | Should -Not -Throw
+                                -UseExistingAccount $true } | Should -Not -Throw
                     }
 
                     It 'Should call the expected mocks' {
@@ -1125,10 +1125,10 @@ try
                     }
                 }
 
-                Context 'When the domain controller should not use an existing account' {
+                Context 'When the read only domain controller should not use an existing account' {
                     It 'Should not throw' {
                         { Set-TargetResource @testDefaultParams -DomainName $correctDomainName `
-                                -ReadOnlyReplica $true -UseExistingAccount $false } | Should -Not -Throw
+                                -UseExistingAccount $false } | Should -Not -Throw
                     }
 
                     It 'Should call the expected mocks' {
