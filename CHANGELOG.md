@@ -9,6 +9,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
+- ADDomainController
+  - New parameter UseExistingAccount for attaching a server to an existing RODC account.
+    ([issue #711](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/711)).
 - ADReadOnlyDomainControllerAccount
   - New resource for pre-creating Read Only Domain Controller accounts.
     ([issue #40](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/40))

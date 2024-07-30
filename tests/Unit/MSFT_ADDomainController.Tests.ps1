@@ -136,6 +136,7 @@ try
 
                         $result.DomainName | Should -Be $correctDomainName
                         $result.InstallDns | Should -BeTrue
+                        $result.UseExistingAccount | Should -BeFalse
                     }
 
                     It 'Should call the expected mocks' {
@@ -185,6 +186,7 @@ try
 
                         $result.DomainName | Should -Be $correctDomainName
                         $result.InstallDns | Should -BeFalse
+                        $result.UseExistingAccount | Should -BeFalse
                     }
 
                     It 'Should call the expected mocks' {
@@ -259,7 +261,8 @@ try
                     }
 
                     It 'Should return the expected result' {
-                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName
+                        $result = Get-TargetResource @testDefaultParams -DomainName $correctDomainName `
+                            -UseExistingAccount $true
 
                         $result.DomainName | Should -Be $correctDomainName
                         $result.DatabasePath | Should -Be $correctDatabasePath
@@ -274,6 +277,7 @@ try
                         $result.AllowPasswordReplicationAccountName | Should -Be $allowedAccount
                         $result.DenyPasswordReplicationAccountName | Should -Be $deniedAccount
                         $result.InstallDns | Should -BeFalse
+                        $result.UseExistingAccount | Should -BeTrue
                     }
 
                     It 'Should call the expected mocks' {
@@ -333,6 +337,7 @@ try
                         $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
                         $result.FlexibleSingleMasterOperationRole | Should -BeNullOrEmpty
                         $result.InstallDns | Should -BeFalse
+                        $result.UseExistingAccount | Should -BeFalse
                     }
 
                     It 'Should call the expected mocks' {
@@ -1103,6 +1108,32 @@ try
                     It 'Should call the expected mocks' {
                         Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
                             $InstallDns -eq $false
+                        } -Exactly -Times 1
+                    }
+                }
+
+                Context 'When the domain controller should use an existing account' {
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -UseExistingAccount $true } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $UseExistingAccount-eq $true
+                        } -Exactly -Times 1
+                    }
+                }
+
+                Context 'When the domain controller should not use an existing account' {
+                    It 'Should not throw' {
+                        { Set-TargetResource @testDefaultParamsRODC -DomainName $correctDomainName `
+                                -UseExistingAccount $false } | Should -Not -Throw
+                    }
+
+                    It 'Should call the expected mocks' {
+                        Assert-MockCalled -CommandName Install-ADDSDomainController -ParameterFilter {
+                            $UseExistingAccount -eq $false
                         } -Exactly -Times 1
                     }
                 }

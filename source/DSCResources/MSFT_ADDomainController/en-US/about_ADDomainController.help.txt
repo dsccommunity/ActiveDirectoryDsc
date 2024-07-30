@@ -101,6 +101,10 @@
     Write - Boolean
     Specifies if the DNS Server service should be installed and configured on the Domain Controller. If this is not set the default value of the parameter `InstallDns` of the cmdlet Install-ADDSDomainController is used. This parameter is only used during the provisioning of a domain controller. The parameter cannot be used to install or uninstall the DNS server on an already provisioned domain controller.
 
+.PARAMETER UseExistingAccount
+    Write - Boolean
+    Indicates that the cmdlet attaches a server to an existing Read-Only Domain Controller (RODC) account. If specified, a member of the Domain Admins group or a delegated user can run this cmdlet.
+
 .EXAMPLE 1
 
 This configuration will add a domain controller to the domain
@@ -284,7 +288,8 @@ Configuration ADDomainController_AddDomainControllerToDomainUsingIFM_Config
 .EXAMPLE 4
 
 This configuration will add a read-only domain controller to the domain contoso.com
-and specify a list of account, whose passwords are allowed/denied for synchronisation.
+using an existing read only domain controller account, and specify a list of accounts,
+whose passwords are allowed/denied for synchronisation.
 
 Configuration ADDomainController_AddReadOnlyDomainController_Config
 {
@@ -338,6 +343,7 @@ Configuration ADDomainController_AddReadOnlyDomainController_Config
             DelegatedAdministratorAccountName   = 'contoso\adm.pvdi'
             AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
             DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
+            UseExistingAccount                  = $true
 
             DependsOn                           = '[WaitForADDomain]WaitForestAvailability'
         }
@@ -458,5 +464,3 @@ Configuration ADDomainController_AddDomainControllerUsingInstallDns_Config
         }
     }
 }
-
-
