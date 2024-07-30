@@ -7,6 +7,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Fixed
+
+- Add PlatyPS as required module to fix build issues
+  ([issue #714](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/714)).
+
 ## [6.5.0] - 2024-05-17
 
 ### Added
