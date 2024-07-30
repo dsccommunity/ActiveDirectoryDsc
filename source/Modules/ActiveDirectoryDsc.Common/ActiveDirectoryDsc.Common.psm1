@@ -1351,7 +1351,7 @@ function Get-DomainControllerObject
 
         $domainControllerObject = Get-ADDomainController @getADDomainControllerParameters
 
-        if (-not $domainControllerObject -and (Test-IsDomainController) -eq $true)
+        if (-not $domainControllerObject -and $env:COMPUTERNAME -eq $ComputerName -and (Test-IsDomainController) -eq $true)
         {
             $errorMessage = $script:localizedData.WasExpectingDomainController
             New-InvalidResultException -Message $errorMessage
