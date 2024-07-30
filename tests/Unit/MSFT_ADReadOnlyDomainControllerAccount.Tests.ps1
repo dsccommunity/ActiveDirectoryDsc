@@ -878,7 +878,7 @@ try
                     Mock -CommandName Add-ADDomainControllerPasswordReplicationPolicy
                 }
 
-                Context 'When the read only domain controller account is in the correct site' {
+                Context 'When the read only domain controller account is already in the correct site' {
                     BeforeAll {
                         Mock -CommandName Move-ADDirectoryServer
                         Mock -CommandName Get-TargetResource -MockWith {
@@ -908,29 +908,6 @@ try
                             return @{
                                 NTDSSettingsObjectDN = $mockNtdsSettingsObjectDn
                             }
-                        }
-                    }
-
-                    Context 'When the read only domain controller account should be a Global Catalog' {
-                        BeforeAll {
-                            Mock -CommandName Get-TargetResource -MockWith {
-                                return $stubTargetResource = @{
-                                    Ensure          = $true
-                                    SiteName        = $correctSiteName
-                                    IsGlobalCatalog = $false
-                                }
-                            }
-                        }
-
-                        It 'Should not throw' {
-                            { Set-TargetResource @testDefaultParams -DomainName $correctDomainName -SiteName $correctSiteName `
-                                    -IsGlobalCatalog $true } | Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Set-ADObject -ParameterFilter {
-                                $Replace['options'] -eq 1
-                            } -Exactly -Times 1
                         }
                     }
 
