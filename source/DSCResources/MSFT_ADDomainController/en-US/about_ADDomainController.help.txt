@@ -342,7 +342,6 @@ Configuration ADDomainController_AddReadOnlyDomainController_Config
             DelegatedAdministratorAccountName   = 'contoso\adm.pvdi'
             AllowPasswordReplicationAccountName = @('pvdi.test1', 'pvdi.test')
             DenyPasswordReplicationAccountName  = @('SVC_PVS', 'TA2SCVMM')
-            UseExistingAccount                  = $true
 
             DependsOn                           = '[WaitForADDomain]WaitForestAvailability'
         }
