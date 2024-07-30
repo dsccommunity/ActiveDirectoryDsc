@@ -20,6 +20,7 @@
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
     xDscResourceDesigner        = 'latest'
+    PlatyPS                     = 'latest'
     'DscResource.DocGenerator'  = 'latest'
 
     # Prerequisites modules needed for examples or integration tests
