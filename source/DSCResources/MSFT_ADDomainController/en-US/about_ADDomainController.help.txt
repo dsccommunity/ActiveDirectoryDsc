@@ -288,8 +288,7 @@ Configuration ADDomainController_AddDomainControllerToDomainUsingIFM_Config
 .EXAMPLE 4
 
 This configuration will add a read-only domain controller to the domain contoso.com
-using an existing read only domain controller account, and specify a list of accounts,
-whose passwords are allowed/denied for synchronisation.
+and specify a list of accounts, whose passwords are allowed/denied for synchronisation.
 
 Configuration ADDomainController_AddReadOnlyDomainController_Config
 {
@@ -352,6 +351,65 @@ Configuration ADDomainController_AddReadOnlyDomainController_Config
 
 .EXAMPLE 5
 
+This configuration will add a read-only domain controller to the domain contoso.com
+with a delegated credential, using an existing read only domain controller account.
+
+Configuration ADDomainController_AddReadOnlyDomainControllerExistingAccount_Config
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $DelegatedCredential,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        $SafeModePassword
+    )
+
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName ActiveDirectoryDsc
+
+    node localhost
+    {
+        WindowsFeature 'InstallADDomainServicesFeature'
+        {
+            Ensure = 'Present'
+            Name   = 'AD-Domain-Services'
+        }
+
+        WindowsFeature 'RSATADPowerShell'
+        {
+            Ensure    = 'Present'
+            Name      = 'RSAT-AD-PowerShell'
+
+            DependsOn = '[WindowsFeature]InstallADDomainServicesFeature'
+        }
+
+        WaitForADDomain 'WaitForestAvailability'
+        {
+            DomainName = 'contoso.com'
+            Credential = $DelegatedCredential
+
+            DependsOn  = '[WindowsFeature]RSATADPowerShell'
+        }
+
+        ADDomainController 'Read-OnlyDomainController(RODC)ExistingAccount'
+        {
+            DomainName                          = 'contoso.com'
+            Credential                          = $DelegatedCredential
+            SafeModeAdministratorPassword       = $SafeModePassword
+            UseExistingAccount                  = $true
+
+            DependsOn                           = '[WaitForADDomain]WaitForestAvailability'
+        }
+    }
+}
+
+.EXAMPLE 6
+
 This configuration will add a domain controller to the domain
 contoso.com, and when the configuration is enforced it will
 move the Flexible Single Master Operation (FSMO) role
@@ -411,7 +469,7 @@ Configuration ADDomainController_AddDomainControllerAndMoveRole_Config
     }
 }
 
-.EXAMPLE 6
+.EXAMPLE 7
 
 This configuration will add a domain controller to the domain contoso.com
 without installing the local DNS server service and using the one in the existing domain.
