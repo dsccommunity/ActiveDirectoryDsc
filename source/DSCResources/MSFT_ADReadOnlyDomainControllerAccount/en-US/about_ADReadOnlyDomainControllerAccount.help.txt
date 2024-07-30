@@ -63,7 +63,7 @@ Configuration ADReadOnlyDomainControllerAccount_AddReadOnlyDomainControllerAccou
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $Credential,
+        $Credential
     )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
@@ -117,7 +117,7 @@ Configuration ADReadOnlyDomainControllerAccount_AddReadOnlyDomainControllerAccou
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
-        $Credential,
+        $Credential
     )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
