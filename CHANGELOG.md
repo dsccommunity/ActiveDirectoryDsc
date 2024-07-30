@@ -11,6 +11,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - Add PlatyPS as required module to fix build issues
   ([issue #714](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/714)).
+- Update build process to pin GitVersion to 5.* to resolve errors
+  (https://github.com/gaelcolas/Sampler/issues/477).
 
 ## [6.5.0] - 2024-05-17
 
