@@ -1351,10 +1351,15 @@ function Get-DomainControllerObject
 
         $domainControllerObject = Get-ADDomainController @getADDomainControllerParameters
 
-        if (-not $domainControllerObject -and $env:COMPUTERNAME -eq $ComputerName -and (Test-IsDomainController) -eq $true)
+        # If we are getting the domain controller object for the local computer
+        if ($env:COMPUTERNAME -eq $ComputerName)
         {
-            $errorMessage = $script:localizedData.WasExpectingDomainController
-            New-InvalidResultException -Message $errorMessage
+            # If we can't find the object but the computer is a domain controller, throw an exception
+            if (-not $domainControllerObject -and (Test-IsDomainController) -eq $true)
+            {
+                $errorMessage = $script:localizedData.WasExpectingDomainController
+                New-InvalidResultException -Message $errorMessage
+            }
         }
     }
     catch
