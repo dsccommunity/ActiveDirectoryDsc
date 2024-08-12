@@ -1141,7 +1141,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 Mock -CommandName Test-IsDomainController -MockWith {
                     return $true
                 }
-            }
+
                 $mockComputerName = "Mock-$($env:COMPUTERNAME)"
             }
 
