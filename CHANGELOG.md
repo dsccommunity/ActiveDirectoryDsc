@@ -18,6 +18,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     ([issue #711](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/711)).
 
 ### Fixed
+
+- ActiveDirectoryDsc.Common
+  - Fixed Get-DomainControllerObject to allow checking non-local domain controller accounts.
 - Update build process to pin GitVersion to 5.* to resolve errors
   (https://github.com/gaelcolas/Sampler/issues/477).
 
