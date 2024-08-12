@@ -78,7 +78,7 @@
 
 .PARAMETER ReadOnlyReplica
     Write - Boolean
-    Indicates that the cmdlet installs the domain controller as an Read-Only Domain Controller (RODC) for an existing domain.
+    Indicates that the resource installs the domain controller as an Read-Only Domain Controller (RODC) for an existing domain.
 
 .PARAMETER DelegatedAdministratorAccountName
     Write - String
@@ -103,7 +103,7 @@
 
 .PARAMETER UseExistingAccount
     Write - Boolean
-    Indicates that the cmdlet attaches a server to an existing Read-Only Domain Controller (RODC) account. If specified, a member of the Domain Admins group or a delegated user can run this cmdlet.
+    Indicates that the resource attaches a server to an existing Read-Only Domain Controller (RODC) account. If specified, a member of the Domain Admins group or a delegated user can apply this resource.
 
 .EXAMPLE 1
 
