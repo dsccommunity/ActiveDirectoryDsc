@@ -65,7 +65,7 @@ try
                 Mock -CommandName Assert-Module
             }
 
-            Context 'When the domain name is not available' {
+            Context 'When the domain could not be found' {
                 BeforeAll {
                     Mock -CommandName Get-DomainObject -MockWith {
                         return $null
