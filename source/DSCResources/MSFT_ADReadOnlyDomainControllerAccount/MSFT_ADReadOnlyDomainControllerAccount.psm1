@@ -96,10 +96,12 @@ function Get-TargetResource
 
         # Retrieve any user or group that is a delegated administrator via the ManagedBy attribute
         $delegateAdministratorAccountName = $null
-        $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN | Get-ADComputer -Properties ManagedBy -Credential $Credential
+        $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
+            Get-ADComputer -Properties ManagedBy -Credential $Credential
         if ($domainControllerComputerObject.ManagedBy)
         {
-            $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy | Get-ADObject -Properties objectSid -Credential $Credential
+            $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
+                Get-ADObject -Properties objectSid -Credential $Credential
 
             $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
         }
@@ -148,7 +150,7 @@ function Get-TargetResource
 
 <#
     .SYNOPSIS
-        Installs, or change properties on, a read only domain controller account.
+        Creates a read only domain controller account.
 
     .PARAMETER DomainControllerAccountName
         Provide the name of the Read Domain Controller Account which will be created.
