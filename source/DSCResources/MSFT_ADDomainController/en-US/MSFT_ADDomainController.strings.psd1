@@ -1,6 +1,6 @@
 ConvertFrom-StringData @'
     ResolveDomainName                           = Resolving the domain name '{0}'. (ADDC0001)
-    DomainPresent                               = The domain '{0}' is present. Looking for domain controllers. (ADDC0002)
+    DomainPresent                               = The domain '{0}' is present. Looking for domain controller. (ADDC0002)
     NotDomainController                         = The current node '{0}' is not a domain controller. (ADDC0006)
     IsDomainController                          = The current node '{0}' is a domain controller for the domain '{1}'. (ADDC0007)
     MissingDomain                               = Current node could not find the domain '{0}'. (ADDC0008)

@@ -5,7 +5,7 @@ controller account in Active Directory. This allows the account actually install
 the read only domain controller to use delegated administrative credentials suppled in
 DelegatedAdministratorAccountName rather than requiring Domain Admins permissions.
 
->The resource does not support removing pre-created Read Only Domain Controller accounts.
+> The resource does not support removing pre-created Read Only Domain Controller accounts.
 
 ## Requirements
 

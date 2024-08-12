@@ -490,7 +490,8 @@ function Set-TargetResource
 
                 $delegateAdministratorAccountSecurityIdentifier = Resolve-SecurityIdentifier -SamAccountName $DelegatedAdministratorAccountName
 
-                Set-ADComputer -Identity $domainControllerObject.ComputerObjectDN -ManagedBy $delegateAdministratorAccountSecurityIdentifier -Credential $Credential
+                Set-ADComputer -Identity $domainControllerObject.ComputerObjectDN `
+                    -ManagedBy $delegateAdministratorAccountSecurityIdentifier -Credential $Credential
             }
         }
 

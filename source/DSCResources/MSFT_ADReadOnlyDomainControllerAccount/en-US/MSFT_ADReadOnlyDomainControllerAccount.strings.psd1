@@ -1,6 +1,6 @@
 ConvertFrom-StringData @'
     ResolveDomainName                           = Resolving the domain name '{0}'. (ADRODCA0001)
-    DomainPresent                               = The domain '{0}' is present. Looking for read only domain controller accounts. (ADRODCA0002)
+    DomainPresent                               = The domain '{0}' is present. Looking for read only domain controller account. (ADRODCA0002)
     NotReadOnlyDomainControllerAccount          = The read only domain controller account '{0}' does not exist in the domain '{1}'. (ADRODCA0003)
     IsReadOnlyDomainControllerAccount           = The read only domain controller account '{0}' does exist in the domain '{1}'. (ADRODCA0004)
     MissingDomain                               = Current node could not find the domain '{0}'. (ADRODCA0005)
