@@ -1,0 +1,14 @@
+[ClassVersion("1.0.1.0"), FriendlyName("ADReadOnlyDomainControllerAccount")]
+class MSFT_ADReadOnlyDomainControllerAccount : OMI_BaseResource
+{
+    [Key, Description("The name of the Read Only Domain Controller Account which will be created.")] String DomainControllerAccountName;
+    [Key, Description("The fully qualified domain name (FQDN) of the domain the Read Only Domain Controller will be created in.")] String DomainName;
+    [Required, Description("The credentials (as a 'PSCredential' object) of a user that has Domain Administrator rights to add the Read Only Domain Controller Account to the domain."), EmbeddedInstance("MSFT_Credential")] String Credential;
+    [Required, Description("The name of the site this Read Only Domain Controller Account will be added to.")] String SiteName;
+    [Write, Description("Specifies if the read only domain controller will be a Global Catalog (GC).")] Boolean IsGlobalCatalog;
+    [Read, Description("Returns the state of the Read Only Domain Controller Account.")] String Ensure;
+    [Write, Description("Specifies the user or group that is the delegated administrator of this Read-Only Domain Controller (RODC) Account.")] String DelegatedAdministratorAccountName;
+    [Write, Description("Specifies an array of names of user accounts, group accounts, and computer accounts whose passwords can be replicated to this Read-Only Domain Controller (RODC) Account.")] String AllowPasswordReplicationAccountName[];
+    [Write, Description("Specifies the names of user accounts, group accounts, and computer accounts whose passwords are not to be replicated to this Read-Only Domain Controller (RODC) Account.")] String DenyPasswordReplicationAccountName[];
+    [Write, Description("Specifies if the DNS Server service should be installed and configured on the Read Only Domain Controller. If this is not set the default value of the parameter `InstallDns` of the cmdlet Add-ADDSReadOnlyDomainControllerAccount is used. This parameter is only used during the provisioning of a read only domain controller. The parameter cannot be used to install or uninstall the DNS server on an already provisioned read only domain controller.")] Boolean InstallDns;
+};

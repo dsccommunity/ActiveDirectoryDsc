@@ -13,13 +13,13 @@ is used. The parameter `InstallDns` is only used during the provisioning
 of a domain controller. The parameter cannot be used to install or uninstall
 the DNS server on an already provisioned domain controller.
 
->**Note:** If the account used for the parameter `Credential`
->cannot connect to another domain controller, for example using a credential
->without the domain name, then the cmdlet `Install-ADDSDomainController` will
->seemingly halt (without reporting an error) when trying to replicate
->information from another domain controller.
->Make sure to use a correct domain account with the correct permission as
->the account for the parameter `Credential`.
+> **Note:** If the account used for the parameter `Credential`
+> cannot connect to another domain controller, for example using a credential
+> without the domain name, then the cmdlet `Install-ADDSDomainController` will
+> seemingly halt (without reporting an error) when trying to replicate
+> information from another domain controller.
+> Make sure to use a correct domain account with the correct permission as
+> the account for the parameter `Credential`.
 
 The parameter `FlexibleSingleMasterOperationRole` is ignored until
 the node has been provisioned as a domain controller. Take extra care
@@ -27,8 +27,8 @@ to make sure the Flexible Single Master Operation (FSMO) roles are moved
 accordingly to avoid that two domain controller try to get to be the
 owner of the same role (potential "ping-pong"-behavior).
 
->The resource does not support seizing of Flexible Single Master Operation
->(FSMO) roles
+> The resource does not support seizing of Flexible Single Master Operation
+> (FSMO) roles
 
 ## Requirements
 

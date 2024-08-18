@@ -7,6 +7,23 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- ADDomainController
+  - New parameter UseExistingAccount for attaching a server to an existing RODC account.
+    ([issue #711](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/711)).
+- ADReadOnlyDomainControllerAccount
+  - New resource for pre-creating Read Only Domain Controller accounts.
+    ([issue #40](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/40))
+    ([issue #711](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/711)).
+
+### Fixed
+
+- ActiveDirectoryDsc.Common
+  - Fixed Get-DomainControllerObject to allow checking non-local domain controller accounts.
+- Update build process to pin GitVersion to 5.* to resolve errors
+  (https://github.com/gaelcolas/Sampler/issues/477).
+
 ## [6.5.0] - 2024-05-17
 
 ### Added

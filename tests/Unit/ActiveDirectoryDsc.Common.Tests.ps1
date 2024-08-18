@@ -932,7 +932,7 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
             }
 
             It 'Should return $null' {
-                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com' 
+                $getDomainObjectResult = Get-DomainObject -Identity 'contoso.com'
                 $getDomainObjectResult | Should -BeNullOrEmpty
 
                 Assert-MockCalled -CommandName Get-ADDomain -Exactly -Times 1 -Scope It
@@ -1126,6 +1126,38 @@ InModuleScope 'ActiveDirectoryDsc.Common' {
                 { Get-DomainControllerObject -DomainName 'contoso.com' } | Should -Throw $script:localizedData.WasExpectingDomainController
 
                 Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the domain controller object is a remote computer and local computer is a domain controller' {
+            BeforeAll {
+                Mock -CommandName Get-ADDomainController -MockWith {
+                    return @{
+                        Site            = 'MySite'
+                        Domain          = 'contoso.com'
+                        IsGlobalCatalog = $true
+                    }
+                }
+                Mock -CommandName Test-IsDomainController -MockWith {
+                    return $true
+                }
+
+                $mockComputerName = "Mock-$($env:COMPUTERNAME)"
+            }
+
+            It 'Should not throw and call the correct mocks' {
+                { Get-DomainControllerObject -DomainName 'contoso.com' -ComputerName $mockComputerName } | Should -Not -Throw
+
+                Assert-MockCalled -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Test-IsDomainController -Exactly -Times 0
+            }
+
+            It 'Should return the correct values for each property' {
+                $getDomainControllerObjectResult = Get-DomainControllerObject -DomainName 'contoso.com' -ComputerName $mockComputerName
+
+                $getDomainControllerObjectResult.Site | Should -Be 'MySite'
+                $getDomainControllerObjectResult.Domain | Should -Be 'contoso.com'
+                $getDomainControllerObjectResult.IsGlobalCatalog | Should -BeTrue
             }
         }
 

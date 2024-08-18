@@ -24,6 +24,11 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER SafemodeAdministratorPassword
         Provide a password that will be used to set the DSRM password. This is a PSCredential.
 
+    .PARAMETER UseExistingAccount
+        Specifies whether to use an existing read only domain controller account.
+
+        Not used in Get-TargetResource.
+
     .NOTES
         Used Functions:
             Name                                            | Module
@@ -50,7 +55,11 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
-        $SafemodeAdministratorPassword
+        $SafemodeAdministratorPassword,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseExistingAccount
     )
 
     Assert-Module -ModuleName 'ActiveDirectory'
@@ -79,11 +88,13 @@ function Get-TargetResource
         $delegateAdministratorAccountName = $null
         if ($domainControllerObject.IsReadOnly)
         {
-            $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN | Get-ADComputer -Properties ManagedBy -Credential $Credential
+            $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
+                Get-ADComputer -Properties ManagedBy -Credential $Credential
             if ($domainControllerComputerObject.ManagedBy)
             {
-                $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy | Get-ADObject -Properties objectSid -Credential $Credential
-                
+                $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
+                    Get-ADObject -Properties objectSid -Credential $Credential
+
                 $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
             }
         }
@@ -115,6 +126,7 @@ function Get-TargetResource
             SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
             SiteName                            = $domainControllerObject.Site
             SysvolPath                          = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+            UseExistingAccount                  = $UseExistingAccount
         }
     }
     else
@@ -138,6 +150,7 @@ function Get-TargetResource
             SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
             SiteName                            = $null
             SysvolPath                          = $null
+            UseExistingAccount                  = $UseExistingAccount
         }
     }
 
@@ -202,6 +215,10 @@ function Get-TargetResource
         The parameter `InstallDns` is only used during the provisioning of a domain
         controller. The parameter cannot be used to install or uninstall the DNS
         server on an already provisioned domain controller.
+
+    .PARAMETER UseExistingAccount
+        Specifies whether to use an existing read only domain controller account.
+
     .NOTES
         Used Functions:
             Name                                               | Module
@@ -289,7 +306,11 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $InstallDns
+        $InstallDns,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseExistingAccount
     )
 
     $getTargetResourceParameters = @{
@@ -395,6 +416,11 @@ function Set-TargetResource
             $installADDSDomainControllerParameters.Add('InstallDns', $InstallDns)
         }
 
+        if ($PSBoundParameters.ContainsKey('UseExistingAccount'))
+        {
+            $installADDSDomainControllerParameters.Add('UseExistingAccount', $UseExistingAccount)
+        }
+
         if (-not [System.String]::IsNullOrWhiteSpace($InstallationMediaPath))
         {
             $installADDSDomainControllerParameters.Add('InstallationMediaPath', $InstallationMediaPath)
@@ -464,7 +490,8 @@ function Set-TargetResource
 
                 $delegateAdministratorAccountSecurityIdentifier = Resolve-SecurityIdentifier -SamAccountName $DelegatedAdministratorAccountName
 
-                Set-ADComputer -Identity $domainControllerObject.ComputerObjectDN -ManagedBy $delegateAdministratorAccountSecurityIdentifier -Credential $Credential
+                Set-ADComputer -Identity $domainControllerObject.ComputerObjectDN `
+                    -ManagedBy $delegateAdministratorAccountSecurityIdentifier -Credential $Credential
             }
         }
 
@@ -671,6 +698,11 @@ function Set-TargetResource
 
         Not used in Test-TargetResource.
 
+    .PARAMETER UseExistingAccount
+        Specifies whether to use an existing read only domain controller account.
+
+        Not used in Test-TargetResource.
+
     .NOTES
         Used Functions:
             Name                          | Module
@@ -747,7 +779,11 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $InstallDns
+        $InstallDns,
+
+        [Parameter()]
+        [System.Boolean]
+        $UseExistingAccount
     )
 
     Write-Verbose -Message ($script:localizedData.TestingConfiguration -f $env:COMPUTERNAME, $DomainName)
