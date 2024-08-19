@@ -21,6 +21,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - ActiveDirectoryDsc.Common
   - Fixed Get-DomainControllerObject to allow checking non-local domain controller accounts.
+- ADObjectPermissionEntry
+  - Fixed 'The object name has a bad syntax' error when using path that requires escaping.
+    ([issue #675](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/675)).
 - Update build process to pin GitVersion to 5.* to resolve errors
   (https://github.com/gaelcolas/Sampler/issues/477).
 
