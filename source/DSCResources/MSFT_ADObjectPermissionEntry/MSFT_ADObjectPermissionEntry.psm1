@@ -83,8 +83,8 @@ function Get-TargetResource
 
     try
     {
-        # Get the current acl
-        $acl = Get-Acl -Path "AD:$Path" -ErrorAction Stop
+        # Get the current acl - include workaround for escaping paths https://github.com/dsccommunity/ActiveDirectoryDsc/issues/675
+        $acl = Get-Acl -Path "Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/$Path" -ErrorAction Stop
     }
     catch [System.Management.Automation.ItemNotFoundException]
     {
@@ -209,8 +209,8 @@ function Set-TargetResource
 
     Assert-ADPSDrive
 
-    # Get the current acl
-    $acl = Get-Acl -Path "AD:$Path"
+    # Get the current acl - include workaround for escaping paths https://github.com/dsccommunity/ActiveDirectoryDsc/issues/675
+    $acl = Get-Acl -Path "Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/$Path"
 
     if ($Ensure -eq 'Present')
     {
@@ -253,9 +253,9 @@ function Set-TargetResource
         }
     }
 
-    # Set the updated acl to the object
+    # Set the updated acl to the object - include workaround for escaping paths https://github.com/dsccommunity/ActiveDirectoryDsc/issues/675
     $acl |
-        Set-Acl -Path "AD:$Path"
+        Set-Acl -Path "Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/$Path"
 }
 
 <#
