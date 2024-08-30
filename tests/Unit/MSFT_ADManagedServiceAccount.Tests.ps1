@@ -77,6 +77,7 @@ try
             DisplayName               = 'TestSMSA'
             Enabled                   = $true
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            TrustedForDelegation      = $false
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = 'SamAccountName'
             Ensure                    = 'Present'
@@ -113,6 +114,7 @@ try
             DisplayName               = 'TestGMSA'
             Enabled                   = $true
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            TrustedForDelegation      = $true
             ManagedPasswordPrincipals = $mockADUSer.SamAccountName, $mockADComputer.SamAccountName
             MembershipAttribute       = 'SamAccountName'
             Ensure                    = 'Present'
@@ -129,6 +131,7 @@ try
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $mockAdServiceAccountGroup.MembershipAttribute
             KerberosEncryptionType    = @()
+            TrustedForDelegation      = $null
             Ensure                    = 'Absent'
         }
 
@@ -139,6 +142,7 @@ try
             DistinguishedName      = $mockAdServiceAccountStandalone.DistinguishedName
             Enabled                = $mockAdServiceAccountStandalone.Enabled
             KerberosEncryptionType = $mockAdServiceAccountStandalone.KerberosEncryptionType
+            TrustedForDelegation   = $mockAdServiceAccountStandalone.TrustedForDelegation
             Name                   = $mockAdServiceAccountStandalone.ServiceAccountName
             ObjectClass            = 'msDS-ManagedServiceAccount'
             ObjectGUID             = '91bffe90-4c84-4026-b1fc-d03671ff56ad'
@@ -154,6 +158,7 @@ try
             DistinguishedName                          = $mockAdServiceAccountGroup.DistinguishedName
             Enabled                                    = $mockAdServiceAccountGroup.Enabled
             KerberosEncryptionType                     = $mockAdServiceAccountGroup.KerberosEncryptionType
+            TrustedForDelegation                       = $mockAdServiceAccountGroup.TrustedForDelegation
             Name                                       = $mockAdServiceAccountGroup.ServiceAccountName
             ObjectClass                                = 'msDS-GroupManagedServiceAccount'
             ObjectGUID                                 = '91bffe90-4c84-4026-b1fc-d03671ff56ae'
@@ -178,6 +183,8 @@ try
             Credential                = $mockCredentials
             DomainController          = $mockDomainController
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            TrustedForDelegation      = $false
+
         }
 
         $mockGetTargetResourceResultsGroup = @{
@@ -195,6 +202,7 @@ try
             Credential                = $mockCredentials
             DomainController          = $mockDomainController
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            TrustedForDelegation      = $false
         }
 
         $mockGetTargetResourceResultsStandAloneAbsent = @{
@@ -210,6 +218,7 @@ try
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = 'SamAccountName'
             KerberosEncryptionType    = @()
+            TrustedForDelegation      = $null
         }
 
         #region Function Get-TargetResource

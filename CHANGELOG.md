@@ -8,7 +8,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ## [Unreleased]
 
 ### Added
-
+- ADManagedServiceAccount
+  - New parameter TrustedForDelegation for Kerberos Delegation
+    ([issue #717](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/717)).
 - ADDomainController
   - New parameter UseExistingAccount for attaching a server to an existing RODC account.
     ([issue #711](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/711)).
