@@ -96,6 +96,7 @@ function Get-TargetResource
             'Enabled'
             'PrincipalsAllowedToRetrieveManagedPassword'
             'KerberosEncryptionType'
+            'TrustedForDelegation'
         )
     }
 
@@ -158,6 +159,7 @@ function Get-TargetResource
             DistinguishedName         = $adServiceAccount.DistinguishedName
             Enabled                   = $adServiceAccount.Enabled
             KerberosEncryptionType    = $adServiceAccount.KerberosEncryptionType -split (', ')
+            TrustedForDelegation      = $adServiceAccount.TrustedForDelegation
             ManagedPasswordPrincipals = $managedPasswordPrincipals
             MembershipAttribute       = $MembershipAttribute
             Ensure                    = 'Present'
@@ -176,6 +178,7 @@ function Get-TargetResource
             DistinguishedName         = $null
             Enabled                   = $false
             KerberosEncryptionType    = @()
+            TrustedForDelegation      = $null
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $MembershipAttribute
             Ensure                    = 'Absent'
@@ -223,6 +226,9 @@ function Get-TargetResource
         Specifies which Kerberos encryption types the account supports when creating service tickets.
         This value sets the encryption types supported flags of the Active Directory msDS-SupportedEncryptionTypes
         attribute.
+
+    .PARAMETER TrustedForDelegation
+        Specifies whether an account is trusted for Kerberos delegation. Default value is $false.
 
     .PARAMETER ManagedPasswordPrincipals
         Specifies the membership policy for systems which can use a group managed service account. (ldapDisplayName
@@ -293,6 +299,11 @@ function Test-TargetResource
         [ValidateSet('None', 'RC4', 'AES128', 'AES256')]
         [System.String[]]
         $KerberosEncryptionType,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $TrustedForDelegation,
 
         [Parameter()]
         [System.String[]]
@@ -420,6 +431,9 @@ function Test-TargetResource
         This value sets the encryption types supported flags of the Active Directory msDS-SupportedEncryptionTypes
         attribute.
 
+    .PARAMETER TrustedForDelegation
+        Specifies whether an account is trusted for Kerberos delegation. Default value is $false.
+
     .PARAMETER ManagedPasswordPrincipals
         Specifies the membership policy for systems which can use a group managed service account. (ldapDisplayName
         'msDS-GroupMSAMembership'). Only used when 'Group' is selected for 'AccountType'.
@@ -497,6 +511,11 @@ function Set-TargetResource
         [ValidateSet('None', 'RC4', 'AES128', 'AES256')]
         [System.String[]]
         $KerberosEncryptionType,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.Boolean]
+        $TrustedForDelegation,
 
         [Parameter()]
         [System.String[]]
