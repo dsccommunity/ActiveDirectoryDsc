@@ -96,6 +96,7 @@ function Get-TargetResource
             'Enabled'
             'PrincipalsAllowedToRetrieveManagedPassword'
             'KerberosEncryptionType'
+            'ServicePrincipalNames'
             'TrustedForDelegation'
         )
     }
@@ -159,6 +160,7 @@ function Get-TargetResource
             DistinguishedName         = $adServiceAccount.DistinguishedName
             Enabled                   = $adServiceAccount.Enabled
             KerberosEncryptionType    = $adServiceAccount.KerberosEncryptionType -split (', ')
+            ServicePrincipalNames     = $adServiceAccount.ServicePrincipalNames
             TrustedForDelegation      = $adServiceAccount.TrustedForDelegation
             ManagedPasswordPrincipals = $managedPasswordPrincipals
             MembershipAttribute       = $MembershipAttribute
@@ -178,6 +180,7 @@ function Get-TargetResource
             DistinguishedName         = $null
             Enabled                   = $false
             KerberosEncryptionType    = @()
+            ServicePrincipalNames     = $null
             TrustedForDelegation      = $null
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $MembershipAttribute
@@ -226,6 +229,9 @@ function Get-TargetResource
         Specifies which Kerberos encryption types the account supports when creating service tickets.
         This value sets the encryption types supported flags of the Active Directory msDS-SupportedEncryptionTypes
         attribute.
+
+    .PARAMETER ServicePrincipalNames
+        Specifies the service principal names for the user account.
 
     .PARAMETER TrustedForDelegation
         Specifies whether an account is trusted for Kerberos delegation. Default value is $false.
@@ -299,6 +305,11 @@ function Test-TargetResource
         [ValidateSet('None', 'RC4', 'AES128', 'AES256')]
         [System.String[]]
         $KerberosEncryptionType,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String[]]
+        $ServicePrincipalNames,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -431,6 +442,9 @@ function Test-TargetResource
         This value sets the encryption types supported flags of the Active Directory msDS-SupportedEncryptionTypes
         attribute.
 
+    .PARAMETER ServicePrincipalNames
+        Specifies the service principal names for the user account.
+
     .PARAMETER TrustedForDelegation
         Specifies whether an account is trusted for Kerberos delegation. Default value is $false.
 
@@ -511,6 +525,11 @@ function Set-TargetResource
         [ValidateSet('None', 'RC4', 'AES128', 'AES256')]
         [System.String[]]
         $KerberosEncryptionType,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String[]]
+        $ServicePrincipalNames,
 
         [Parameter()]
         [ValidateNotNull()]
