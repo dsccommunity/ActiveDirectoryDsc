@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.6.0] - 2024-09-29
+
 ### Added
 - ADManagedServiceAccount
   - New parameter TrustedForDelegation for Kerberos Delegation
