@@ -7,6 +7,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Fixed
+- ADmanagedServiceAccount
+  - Set properties KeberosEncryptionType and TrustedForDelegation properly on account creation.
+    Both properties were not considered previously when the account was created.
+    ([issue #650](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/650)).
+
 ## [6.6.0] - 2024-09-29
 
 ### Added
