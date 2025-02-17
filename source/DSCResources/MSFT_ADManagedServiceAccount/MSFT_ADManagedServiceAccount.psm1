@@ -717,9 +717,19 @@ function Set-TargetResource
                 $newAdServiceAccountParameters.DisplayName = $DisplayName
             }
 
+            if ($parameters.ContainsKey('KerberosEncryptionType'))
+            {
+                $newAdServiceAccountParameters.KerberosEncryptionType = $KerberosEncryptionType
+            }
+
             if ($parameters.ContainsKey('Path'))
             {
                 $newAdServiceAccountParameters.Path = $Path
+            }
+
+            if ($parameters.ContainsKey('TrustedForDelegation'))
+            {
+                $newAdServiceAccountParameters.TrustedForDelegation = $TrustedForDelegation
             }
 
             if ( $AccountType -eq 'Standalone' )
