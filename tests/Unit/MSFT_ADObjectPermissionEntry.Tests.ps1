@@ -174,6 +174,9 @@ try
 
         #region Function Test-TargetResource
         Describe 'ADObjectPermissionEntry\Test-TargetResource' {
+            Mock -CommandName 'Get-ADDrivePSPath' -MockWith {
+                return $mockADDrivePSPath
+            }
 
             Context 'When the desired ace is present' {
 
