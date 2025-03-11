@@ -67,7 +67,6 @@ function Get-TargetResource
         $InheritedObjectType
     )
 
-    Assert-ADPSDrive
     $ADDrivePSPath = Get-ADDrivePSPath
 
     # Return object, by default representing an absent ace
@@ -208,7 +207,6 @@ function Set-TargetResource
         $InheritedObjectType
     )
 
-    Assert-ADPSDrive
     $ADDrivePSPath = Get-ADDrivePSPath
 
     # Get the current acl
@@ -393,7 +391,9 @@ function Get-ADDrivePSPath
     # Need to use the full PSPath to avoid issues when escaping paths - https://github.com/dsccommunity/ActiveDirectoryDsc/issues/675
     # The full PSPath varies between operating systems, so we obtain it dynamically - https://github.com/dsccommunity/ActiveDirectoryDsc/issues/724
 
-    $adDrivePSPath = (Get-Item -Path 'AD:\').PSPath
+    Assert-ADPSDrive
+
+    $adDrivePSPath = (Get-Item -Path 'AD:').PSPath
     Write-Verbose -Message ($script:localizedData.RetrievedADDrivePSPath -f $adDrivePSPath)
     return $adDrivePSPath
 }
