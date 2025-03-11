@@ -7,6 +7,12 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Fixed
+
+- ADObjectPermissionEntry
+  - Fixed regression where resource cannot run on Windows Server 2016
+    ([issue #724])(https://github.com/dsccommunity/ActiveDirectoryDsc/issues/724)).
+
 ## [6.6.0] - 2024-09-29
 
 ### Added
