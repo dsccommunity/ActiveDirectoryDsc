@@ -56,7 +56,7 @@ try
             ActiveDirectoryRights = 'GenericAll'
         }
 
-        $mockADDrivePSPath = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/'
+        $mockADDrivePSPath = '/'
 
         $mockGetAclPresent = {
             $mock = [PSCustomObject] @{
