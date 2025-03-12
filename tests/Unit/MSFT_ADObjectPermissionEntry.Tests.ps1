@@ -96,6 +96,26 @@ try
         }
         #endregion
 
+        #region Function Get-ADDrivePSPath
+        Describe -Name 'ADObjectPermissionEntry\Get-ADDrivePSPath' {
+            Mock -CommandName 'Assert-ADPSDrive'
+            Mock -CommandName Get-Item -MockWith {
+                return @{
+                    PSPath = $mockADDrivePSPath
+                }
+            }
+
+            It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                Get-ADDrivePSPath
+                Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+            }
+
+            It 'Should return domain distinguished name' {
+                Get-ADDrivePSPath | Should -Be $mockADDrivePSPath
+            }
+        }
+        #endregion Function Get-ADDrivePSPath
+
         #region Function Get-TargetResource
         Describe 'ADObjectPermissionEntry\Get-TargetResource' {
             Mock -CommandName 'Get-ADDrivePSPath' -MockWith {
