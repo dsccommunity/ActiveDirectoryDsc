@@ -106,12 +106,19 @@ try
             }
 
             It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
-                Get-ADDrivePSPath
+                # Act
+                $ADDrivePSPath = Get-ADDrivePSPath
+
+                # Assert
                 Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
             }
 
-            It 'Should return domain distinguished name' {
-                Get-ADDrivePSPath | Should -Be $mockADDrivePSPath
+            It 'Should return full PSPath for the AD Drive' {
+                # Act
+                $ADDrivePSPath = Get-ADDrivePSPath
+
+                # Assert
+                $ADDrivePSPath | Should -Be $mockADDrivePSPath
             }
         }
         #endregion Function Get-ADDrivePSPath
