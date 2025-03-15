@@ -94,6 +94,7 @@ try
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $mockAdServiceAccountStandalone.MembershipAttribute
             KerberosEncryptionType    = @()
+            TrustedForDelegation      = $null
             Ensure                    = 'Absent'
         }
 
@@ -102,6 +103,7 @@ try
             Description               = 'Changed description'
             DisplayName               = 'Changed displayname'
             KerberosEncryptionType    = 'AES128', 'AES256'
+            TrustedForDelegation      = $true
             ManagedPasswordPrincipals = $mockADUSer.SamAccountName
         }
 
@@ -434,6 +436,7 @@ try
                 Description               = $mockAdServiceAccountStandalone.Description
                 DisplayName               = $mockAdServiceAccountStandalone.DisplayName
                 KerberosEncryptionType    = $mockAdServiceAccountStandalone.KerberosEncryptionType
+                TrustedForDelegation      = $mockAdServiceAccountStandalone.TrustedForDelegation
                 ManagedPasswordPrincipals = $mockAdServiceAccountStandalone.ManagedPasswordPrincipals
                 MembershipAttribute       = $mockAdServiceAccountStandalone.MembershipAttribute
                 Ensure                    = $mockAdServiceAccountStandalone.Ensure
@@ -567,6 +570,7 @@ try
                 Ensure                 = $mockAdServiceAccountStandAlone.Ensure
                 DisplayName            = $mockAdServiceAccountStandAlone.DisplayName
                 KerberosEncryptionType = $mockAdServiceAccountStandAlone.KerberosEncryptionType
+                TrustedForDelegation   = $mockAdServiceAccountStandAlone.TrustedForDelegation
             }
 
             $setTargetResourceParametersStandAloneAbsent = $setTargetResourceParametersStandAlone.Clone()
@@ -583,6 +587,7 @@ try
                 ManagedPasswordPrincipals = $mockAdServiceAccountGroup.ManagedPasswordPrincipals
                 DisplayName               = $mockAdServiceAccountGroup.Name.DisplayName
                 KerberosEncryptionType    = $mockAdServiceAccountGroup.KerberosEncryptionType
+                TrustedForDelegation      = $mockAdServiceAccountGroup.TrustedForDelegation
             }
             Context 'When the Resource should be Present' {
 
