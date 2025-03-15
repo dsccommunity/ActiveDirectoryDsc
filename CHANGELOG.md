@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.6.1] - 2025-03-15
+
 ### Fixed
 - ADmanagedServiceAccount
   - Set properties KeberosEncryptionType and TrustedForDelegation properly on account creation.
