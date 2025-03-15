@@ -12,6 +12,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Set properties KeberosEncryptionType and TrustedForDelegation properly on account creation.
     Both properties were not considered previously when the account was created.
     ([issue #650](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/650)).
+- ADObjectPermissionEntry
+  - Fixed regression where resource cannot run on Windows Server 2016
+    ([issue #724])(https://github.com/dsccommunity/ActiveDirectoryDsc/issues/724)).
 
 ## [6.6.0] - 2024-09-29
 
