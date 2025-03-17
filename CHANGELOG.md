@@ -23,7 +23,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Fixed
  - ADObjectPermissionEntry
-   -Fixed regression in 6.6.1 when using Join-Path.
+   - Fixed regression in 6.6.1 when using Join-Path.
    ([issue #727](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/727)).
 
 ## [6.6.1] - 2025-03-15
