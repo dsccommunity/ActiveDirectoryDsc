@@ -313,12 +313,6 @@
             Array              = $false
         }
         @{
-            Parameter          = 'DisplayNamePrintable'
-            ADProperty         = 'displayNamePrintable'
-            UseCmdletParameter = $false
-            Array              = $false
-        }
-        @{
             Parameter          = 'PhoneticDisplayName'
             ADProperty         = 'msDS-PhoneticDisplayName'
             UseCmdletParameter = $false
@@ -327,6 +321,12 @@
         @{
             Parameter          = 'PreferredLanguage'
             ADProperty         = 'preferredLanguage'
+            UseCmdletParameter = $false
+            Array              = $false
+        }
+        @{
+            Parameter          = 'SimpleDisplayName'
+            ADProperty         = 'displayNamePrintable'
             UseCmdletParameter = $false
             Array              = $false
         }

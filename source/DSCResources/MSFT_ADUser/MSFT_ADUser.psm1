@@ -388,16 +388,16 @@ function Get-TargetResource
         Specifies the description displayed on admin screens. Can be set to User_ to filter out an user from
         Entra ID Connect synchronization.
 
-    .PARAMETER DisplayNamePrintable
-        Specifies the printable display name for an object. Can be set to a different display name to be used
-        externally.
-
     .PARAMETER PhoneticDisplayName
         The phonetic display name of an object. In the absence of a phonetic display name, the existing display name
         is used. (ldapDisplayName 'msDS-PhoneticDisplayName').
 
     .PARAMETER PreferredLanguage
         The preferred written or spoken language for a person. For Microsoft 365, should follow ISO 639-1 Code, for example, en-US.
+
+    .PARAMETER SimpleDisplayName
+        Specifies the printable display name for an object. Can be set to a different display name to be used
+        externally. (ldapDisplayName 'displayNamePrintable').
 
     .NOTES
         Used Functions:
@@ -1087,16 +1087,16 @@ function Test-TargetResource
         Specifies the description displayed on admin screens. Can be set to User_ to filter out an user from
         Entra ID Connect synchronization.
 
-    .PARAMETER DisplayNamePrintable
-        Specifies the printable display name for an object. Can be set to a different display name to be used
-        externally.
-
     .PARAMETER PhoneticDisplayName
         The phonetic display name of an object. In the absence of a phonetic display name, the existing display name
         is used. (ldapDisplayName 'msDS-PhoneticDisplayName').
 
     .PARAMETER PreferredLanguage
         The preferred written or spoken language for a person. For Microsoft 365, should follow ISO 639-1 Code, for example, en-US.
+
+    .PARAMETER SimpleDisplayName
+        Specifies the printable display name for an object. Can be set to a different display name to be used
+        externally. (ldapDisplayName 'displayNamePrintable').
 
     .NOTES
         Used Functions:

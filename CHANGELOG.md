@@ -18,8 +18,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Support for Windows Server 2025 Forest functional mode.
     ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
 - ADUser
-  - Support for AdminDescription, DisplayNamePrintable, PhoneticDisplayName
-    and PreferredLanguage attributes.
+  - Support for AdminDescription, PhoneticDisplayName, PreferredLanguage and
+    SimpleDisplayName attributes.
 
 ### Fixed
  - ADObjectPermissionEntry

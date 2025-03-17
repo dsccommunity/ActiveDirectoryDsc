@@ -110,9 +110,9 @@ try
             SmartcardLogonRequired            = $false
             ProxyAddresses                    = 'testuser1@fabrikam.com', 'testuser2@fabrikam.com'
             AdminDescription                  = 'User_'
-            DisplayNamePrintable              = 'Test User Printable'
             PhoneticDisplayName               = 'Test User Phonetic'
             PreferredLanguage                 = 'en-US'
+            SimpleDisplayName                 = 'Test User Simple'
             Ensure                            = 'Present'
         }
 
@@ -174,9 +174,9 @@ try
             SmartcardLogonRequired            = $null
             ProxyAddresses                    = $null
             AdminDescription                  = $null
-            DisplayNamePrintable              = $null
             PhoneticDisplayName               = $null
             PreferredLanguage                 = $null
+            SimpleDisplayName                 = $null
             Ensure                            = 'Absent'
         }
 
@@ -232,9 +232,9 @@ try
             SmartcardLogonRequired            = $true
             ProxyAddresses                    = 'testuser3@fabrikam.com', 'testuser4@fabrikam.com'
             AdminDescription                  = 'User_ Changed'
-            DisplayNamePrintable              = 'Test User Printable Changed'
             PhoneticDisplayName               = 'Test User Phonetic Changed'
             PreferredLanguage                 = 'en-GB'
+            SimpleDisplayName                 = 'Test User Simple Changed'
         }
 
         $mockGetADUserResult = @{
@@ -291,9 +291,9 @@ try
             ServicePrincipalName              = $mockResource.ServicePrincipalNames
             ProxyAddresses                    = $mockResource.ProxyAddresses
             AdminDescription                  = $mockResource.AdminDescription
-            DisplayNamePrintable              = $mockResource.DisplayNamePrintable
             PhoneticDisplayName               = $mockResource.PhoneticDisplayName
             PreferredLanguage                 = $mockResource.PreferredLanguage
+            SimpleDisplayName                 = $mockResource.SimpleDisplayName
         }
 
         $mockGetTargetResourceResult = $mockResource.Clone()
