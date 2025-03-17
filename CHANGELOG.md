@@ -21,6 +21,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Support for AdminDescription, DisplayNamePrintable, PhoneticDisplayName
     and PreferredLanguage attributes.
 
+### Fixed
+ - ADObjectPermissionEntry
+   -Fixed regression in 6.6.1 when using Join-Path.
+   ([issue #727](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/727)).
+
 ## [6.6.1] - 2025-03-15
 
 ### Fixed
@@ -30,7 +35,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     ([issue #650](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/650)).
 - ADObjectPermissionEntry
   - Fixed regression where resource cannot run on Windows Server 2016
-    ([issue #724])(https://github.com/dsccommunity/ActiveDirectoryDsc/issues/724)).
+    ([issue #724](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/724)).
 
 ## [6.6.0] - 2024-09-29
 

@@ -84,7 +84,7 @@ function Get-TargetResource
     try
     {
         # Get the current acl
-        $acl = Get-Acl -Path (Join-Path -Path $ADDrivePSPath -ChildPath $Path) -ErrorAction Stop
+        $acl = Get-Acl -Path ($ADDrivePSPath + $Path) -ErrorAction Stop
     }
     catch [System.Management.Automation.ItemNotFoundException]
     {
@@ -210,7 +210,7 @@ function Set-TargetResource
     $ADDrivePSPath = Get-ADDrivePSPath
 
     # Get the current acl
-    $acl = Get-Acl -Path (Join-Path -Path $ADDrivePSPath -ChildPath $Path)
+    $acl = Get-Acl -Path ($ADDrivePSPath + $Path)
 
     if ($Ensure -eq 'Present')
     {
@@ -255,7 +255,7 @@ function Set-TargetResource
 
     # Set the updated acl to the object
     $acl |
-        Set-Acl -Path (Join-Path -Path $ADDrivePSPath -ChildPath $Path)
+        Set-Acl -Path ($ADDrivePSPath + $Path)
 }
 
 <#
