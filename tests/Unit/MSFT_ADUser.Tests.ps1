@@ -291,9 +291,9 @@ try
             ServicePrincipalName              = $mockResource.ServicePrincipalNames
             ProxyAddresses                    = $mockResource.ProxyAddresses
             AdminDescription                  = $mockResource.AdminDescription
-            PhoneticDisplayName               = $mockResource.PhoneticDisplayName
+            'msDS-PhoneticDisplayName'        = $mockResource.PhoneticDisplayName
             PreferredLanguage                 = $mockResource.PreferredLanguage
-            SimpleDisplayName                 = $mockResource.SimpleDisplayName
+            displayNamePrintable              = $mockResource.SimpleDisplayName
         }
 
         $mockGetTargetResourceResult = $mockResource.Clone()
