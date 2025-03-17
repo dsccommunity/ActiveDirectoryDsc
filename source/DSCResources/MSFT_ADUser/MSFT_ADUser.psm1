@@ -710,7 +710,27 @@ function Test-TargetResource
 
         [Parameter()]
         [System.String]
-        $ThumbnailPhoto
+        $ThumbnailPhoto,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $AdminDescription,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $PhoneticDisplayName,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $PreferredLanguage,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $SimpleDisplayName
     )
 
     <#
@@ -1418,7 +1438,27 @@ function Set-TargetResource
 
         [Parameter()]
         [System.String]
-        $ThumbnailPhoto
+        $ThumbnailPhoto,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $AdminDescription,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $PhoneticDisplayName,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $PreferredLanguage,
+
+        [Parameter()]
+        [ValidateNotNull()]
+        [System.String]
+        $SimpleDisplayName
     )
 
     <#
