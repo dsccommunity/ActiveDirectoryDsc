@@ -22,7 +22,7 @@
 
 .PARAMETER DomainMode
     Required - String
-    Allowed values: Windows2008R2Domain, Windows2012Domain, Windows2012R2Domain, Windows2016Domain
+    Allowed values: Windows2008R2Domain, Windows2012Domain, Windows2012R2Domain, Windows2016Domain, Windows2025Domain
     Specifies the functional level for the Active Directory domain.
 
 .EXAMPLE 1
@@ -43,5 +43,3 @@ Configuration ADDomainFunctionalLevel_SetLevel_Config
         }
     }
 }
-
-

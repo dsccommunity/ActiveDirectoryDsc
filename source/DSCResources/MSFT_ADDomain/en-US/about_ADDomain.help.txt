@@ -51,12 +51,12 @@
 
 .PARAMETER ForestMode
     Write - String
-    Allowed values: Win2008, Win2008R2, Win2012, Win2012R2, WinThreshold
+    Allowed values: Win2008, Win2008R2, Win2012, Win2012R2, WinThreshold, Win2025
     The Forest Functional Level for the entire forest.
 
 .PARAMETER DomainMode
     Write - String
-    Allowed values: Win2008, Win2008R2, Win2012, Win2012R2, WinThreshold
+    Allowed values: Win2008, Win2008R2, Win2012, Win2012R2, WinThreshold, Win2025
     The Domain Functional Level for the entire domain.
 
 .PARAMETER DomainExist

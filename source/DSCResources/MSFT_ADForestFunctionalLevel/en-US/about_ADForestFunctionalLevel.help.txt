@@ -22,7 +22,7 @@
 
 .PARAMETER ForestMode
     Required - String
-    Allowed values: Windows2008R2Forest, Windows2012Forest, Windows2012R2Forest, Windows2016Forest
+    Allowed values: Windows2008R2Forest, Windows2012Forest, Windows2012R2Forest, Windows2016Forest, Windows2025Forest
     Specifies the the functional level for the Active Directory forest.
 
 .EXAMPLE 1
@@ -43,5 +43,3 @@ Configuration ADForestFunctionalLevel_SetLevel_Config
         }
     }
 }
-
-
