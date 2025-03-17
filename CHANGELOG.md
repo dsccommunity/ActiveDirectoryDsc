@@ -21,6 +21,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Support for AdminDescription, PhoneticDisplayName, PreferredLanguage and
     SimpleDisplayName attributes.
 
+## [6.6.2] - 2025-03-17
+
 ### Fixed
  - ADObjectPermissionEntry
    - Fixed regression in 6.6.1 when using Join-Path.
