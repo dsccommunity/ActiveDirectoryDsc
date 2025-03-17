@@ -384,6 +384,21 @@ function Get-TargetResource
         be removed. The property ThumbnailPhoto will always return the image as a Base64-encoded string even if the
         configuration specified a file path.
 
+    .PARAMETER AdminDescription
+        Specifies the description displayed on admin screens. Can be set to User_ to filter out an user from
+        Entra ID Connect synchronization.
+
+    .PARAMETER DisplayNamePrintable
+        Specifies the printable display name for an object. Can be set to a different display name to be used
+        externally.
+
+    .PARAMETER PhoneticDisplayName
+        The phonetic display name of an object. In the absence of a phonetic display name, the existing display name
+        is used. (ldapDisplayName 'msDS-PhoneticDisplayName').
+
+    .PARAMETER PreferredLanguage
+        The preferred written or spoken language for a person. For Microsoft 365, should follow ISO 639-1 Code, for example, en-US.
+
     .NOTES
         Used Functions:
             Name                   | Module
@@ -1067,6 +1082,21 @@ function Test-TargetResource
         .jpg-file, or to a Base64-encoded jpeg image. If set to an empty string ('') the current thumbnail photo will
         be removed. The property ThumbnailPhoto will always return the image as a Base64-encoded string even if the
         configuration specified a file path.
+
+    .PARAMETER AdminDescription
+        Specifies the description displayed on admin screens. Can be set to User_ to filter out an user from
+        Entra ID Connect synchronization.
+
+    .PARAMETER DisplayNamePrintable
+        Specifies the printable display name for an object. Can be set to a different display name to be used
+        externally.
+
+    .PARAMETER PhoneticDisplayName
+        The phonetic display name of an object. In the absence of a phonetic display name, the existing display name
+        is used. (ldapDisplayName 'msDS-PhoneticDisplayName').
+
+    .PARAMETER PreferredLanguage
+        The preferred written or spoken language for a person. For Microsoft 365, should follow ISO 639-1 Code, for example, en-US.
 
     .NOTES
         Used Functions:

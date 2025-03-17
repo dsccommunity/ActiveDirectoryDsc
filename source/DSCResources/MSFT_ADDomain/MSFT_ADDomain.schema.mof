@@ -11,8 +11,8 @@ class MSFT_ADDomain : OMI_BaseResource
     [Write, Description("Path to a directory that contains the domain database.")] String DatabasePath;
     [Write, Description("Path to a directory for the log file that will be written.")] String LogPath;
     [Write, Description("Path to a directory where the Sysvol file will be written.")] String SysvolPath;
-    [Write, Description("The Forest Functional Level for the entire forest."), ValueMap{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold"}, Values{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold"}] String ForestMode;
-    [Write, Description("The Domain Functional Level for the entire domain."), ValueMap{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold"}, Values{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold"}] String DomainMode;
+    [Write, Description("The Forest Functional Level for the entire forest."), ValueMap{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold", "Win2025"}, Values{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold", "Win2025"}] String ForestMode;
+    [Write, Description("The Domain Functional Level for the entire domain."), ValueMap{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold", "Win2025"}, Values{"Win2008", "Win2008R2", "Win2012", "Win2012R2", "WinThreshold", "Win2025"}] String DomainMode;
     [Read, Description("Returns $true if the domain is available, or $false if the domain could not be found.")] Boolean DomainExist;
     [Read, Description("Returns the fully qualified domain name (FQDN) DNS root of the domain.")] String DnsRoot;
     [Read, Description("Returns the fully qualified domain name (FQDN) of the forest.")] String Forest;

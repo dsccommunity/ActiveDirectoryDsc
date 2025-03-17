@@ -306,5 +306,29 @@
             UseCmdletParameter = $false
             Array              = $true
         }
+        @{
+            Parameter          = 'AdminDescription'
+            ADProperty         = 'adminDescription'
+            UseCmdletParameter = $false
+            Array              = $false
+        }
+        @{
+            Parameter          = 'DisplayNamePrintable'
+            ADProperty         = 'displayNamePrintable'
+            UseCmdletParameter = $false
+            Array              = $false
+        }
+        @{
+            Parameter          = 'PhoneticDisplayName'
+            ADProperty         = 'msDS-PhoneticDisplayName'
+            UseCmdletParameter = $false
+            Array              = $false
+        }
+        @{
+            Parameter          = 'PreferredLanguage'
+            ADProperty         = 'preferredLanguage'
+            UseCmdletParameter = $false
+            Array              = $false
+        }
     )
 }

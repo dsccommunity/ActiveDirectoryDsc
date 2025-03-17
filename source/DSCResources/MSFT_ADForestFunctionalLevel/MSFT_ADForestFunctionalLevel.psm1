@@ -34,7 +34,7 @@ function Get-TargetResource
         $ForestIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest', 'Windows2025Forest')]
         [System.String]
         $ForestMode
     )
@@ -77,7 +77,7 @@ function Test-TargetResource
         $ForestIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest', 'Windows2025Forest')]
         [System.String]
         $ForestMode
     )
@@ -126,7 +126,7 @@ function Set-TargetResource
         $ForestIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest', 'Windows2025Forest')]
         [System.String]
         $ForestMode
     )
@@ -179,7 +179,7 @@ function Compare-TargetResourceState
         $ForestIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest')]
+        [ValidateSet('Windows2008R2Forest', 'Windows2012Forest', 'Windows2012R2Forest', 'Windows2016Forest', 'Windows2025Forest')]
         [System.String]
         $ForestMode
     )

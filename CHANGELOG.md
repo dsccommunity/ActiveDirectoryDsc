@@ -7,6 +7,20 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+- ADDomain
+  - Support for Windows Server 2025 Forest and Domain functional modes.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADDomainFunctionalLevel
+  - Support for Windows Server 2025 Domain functional mode.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADForestFunctionalLevel
+  - Support for Windows Server 2025 Forest functional mode.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADUser
+  - Support for AdminDescription, DisplayNamePrintable, PhoneticDisplayName
+    and PreferredLanguage attributes.
+
 ## [6.6.1] - 2025-03-15
 
 ### Fixed
