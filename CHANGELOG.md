@@ -7,11 +7,25 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+- ADDomain
+  - Support for Windows Server 2025 Forest and Domain functional modes.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADDomainFunctionalLevel
+  - Support for Windows Server 2025 Domain functional mode.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADForestFunctionalLevel
+  - Support for Windows Server 2025 Forest functional mode.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADUser
+  - Support for AdminDescription, PhoneticDisplayName, PreferredLanguage and
+    SimpleDisplayName attributes.
+
 ## [6.6.2] - 2025-03-17
 
 ### Fixed
  - ADObjectPermissionEntry
-   -Fixed regression in 6.6.1 when using Join-Path.
+   - Fixed regression in 6.6.1 when using Join-Path.
    ([issue #727](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/727)).
 
 ## [6.6.1] - 2025-03-15

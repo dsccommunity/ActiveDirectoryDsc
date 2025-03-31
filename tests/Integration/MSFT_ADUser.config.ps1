@@ -89,6 +89,10 @@ else
                         PasswordNotRequired               = $false
                         SmartcardLogonRequired            = $false
                         ProxyAddresses                    = 'testuser1@fabrikam.com', 'testuser2@fabrikam.com'
+                        AdminDescription                  = 'User_'
+                        PhoneticDisplayName               = 'Test User Phonetic'
+                        PreferredLanguage                 = 'en-US'
+                        SimpleDisplayName                 = 'Test User Simple'
                         Ensure                            = 'Present'
                     }
                     ModifyUser = @{
@@ -176,6 +180,10 @@ Configuration MSFT_ADUser_CreateUser_Config
             PasswordNotRequired               = $Node.Tests.$testName.PasswordNotRequired
             SmartcardLogonRequired            = $Node.Tests.$testName.SmartcardLogonRequired
             ProxyAddresses                    = $Node.Tests.$testName.ProxyAddresses
+            AdminDescription                  = $Node.Tests.$testName.AdminDescription
+            PhoneticDisplayName               = $Node.Tests.$testName.PhoneticDisplayName
+            PreferredLanguage                 = $Node.Tests.$testName.PreferredLanguage
+            SimpleDisplayName                 = $Node.Tests.$testName.SimpleDisplayName
             Ensure                            = $Node.Tests.$testName.Ensure
         }
     }

@@ -61,6 +61,10 @@ class MSFT_ADUser : OMI_BaseResource
     [Write, Description("Specifies whether the account requires a password. A password is not required for a new account. This parameter sets the PasswordNotRequired property of an account object.")] Boolean PasswordNotRequired;
     [Write, Description("Specifies whether a smart card is required to logon. This parameter sets the SmartCardLoginRequired property for a user object. This parameter also sets the ADS_UF_SMARTCARD_REQUIRED flag of the Active Directory User Account Control attribute.")] Boolean SmartcardLogonRequired;
     [Write, Description("Specifies the thumbnail photo to be used for the user object. Can be set either to a path pointing to a .jpg-file, or to a Base64-encoded jpeg image. If set to an empty string ('') the current thumbnail photo will be removed. The property ThumbnailPhoto will always return the image as a Base64-encoded string even if the configuration specified a file path.")] String ThumbnailPhoto;
+    [Write, Description("Specifies the description displayed on admin screens. Can be set to User_ to filter out an user from Entra ID Connect synchronization.")] String AdminDescription;
+    [Write, Description("The phonetic display name of an object. In the absence of a phonetic display name, the existing display name is used. (ldapDisplayName 'msDS-PhoneticDisplayName').")] String PhoneticDisplayName;
+    [Write, Description("The preferred written or spoken language for a person. For Microsoft 365, should follow ISO 639-1 Code, for example, en-US.")] String PreferredLanguage;
+    [Write, Description("Specifies the printable display name for an object. Can be set to a different display name to be used externally. (ldapDisplayName 'displayNamePrintable').")] String SimpleDisplayName;
     [Read, Description("Returns the X.500 path of the object.")] String DistinguishedName;
     [Read, Description("Return the MD5 hash of the current thumbnail photo, or $null if no thumbnail photo exist.")] String ThumbnailPhotoHash;
 };

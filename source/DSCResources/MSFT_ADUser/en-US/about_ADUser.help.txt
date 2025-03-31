@@ -254,6 +254,22 @@
     Write - String
     Specifies the thumbnail photo to be used for the user object. Can be set either to a path pointing to a .jpg-file, or to a Base64-encoded jpeg image. If set to an empty string ('') the current thumbnail photo will be removed. The property ThumbnailPhoto will always return the image as a Base64-encoded string even if the configuration specified a file path.
 
+.PARAMETER AdminDescription
+    Write - String
+    Specifies the description displayed on admin screens. Can be set to User_ to filter out an user from Entra ID Connect synchronization.
+
+.PARAMETER PhoneticDisplayName
+    Write - String
+    The phonetic display name of an object. In the absence of a phonetic display name, the existing display name is used. (ldapDisplayName 'msDS-PhoneticDisplayName').
+
+.PARAMETER PreferredLanguage
+    Write - String
+    The preferred written or spoken language for a person. For Microsoft 365, should follow ISO 639-1 Code, for example, en-US.
+
+.PARAMETER SimpleDisplayName
+    Write - String
+    Specifies the printable display name for an object. Can be set to a different display name to be used externally. (ldapDisplayName 'displayNamePrintable').
+
 .PARAMETER DistinguishedName
     Read - String
     Returns the X.500 path of the object.
@@ -382,5 +398,3 @@ Configuration ADUser_RemoveThumbnailPhoto_Config
         }
     }
 }
-
-

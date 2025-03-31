@@ -277,12 +277,12 @@ function Test-TargetResource
         $SysvolPath,
 
         [Parameter()]
-        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
+        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold', 'Win2025')]
         [System.String]
         $ForestMode,
 
         [Parameter()]
-        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
+        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold', 'Win2025')]
         [System.String]
         $DomainMode
     )
@@ -435,12 +435,12 @@ function Set-TargetResource
         $SysvolPath,
 
         [Parameter()]
-        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
+        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold', 'Win2025')]
         [System.String]
         $ForestMode,
 
         [Parameter()]
-        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold')]
+        [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold', 'Win2025')]
         [System.String]
         $DomainMode
     )
