@@ -8,6 +8,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ## [Unreleased]
 
 ### Added
+
 - ADDomain
   - Support for Windows Server 2025 Forest and Domain functional modes.
     ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
@@ -24,13 +25,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ## [6.6.2] - 2025-03-17
 
 ### Fixed
- - ADObjectPermissionEntry
-   - Fixed regression in 6.6.1 when using Join-Path.
-   ([issue #727](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/727)).
+
+- ADObjectPermissionEntry
+  - Fixed regression in 6.6.1 when using Join-Path.
+    ([issue #727](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/727)).
 
 ## [6.6.1] - 2025-03-15
 
 ### Fixed
+
 - ADmanagedServiceAccount
   - Set properties KeberosEncryptionType and TrustedForDelegation properly on account creation.
     Both properties were not considered previously when the account was created.
@@ -42,6 +45,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ## [6.6.0] - 2024-09-29
 
 ### Added
+
 - ADManagedServiceAccount
   - New parameter TrustedForDelegation for Kerberos Delegation
     ([issue #717](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/717)).
