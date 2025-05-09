@@ -34,7 +34,7 @@ function Get-TargetResource
         $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain', 'Windows2025Domain')]
         [System.String]
         $DomainMode
     )
@@ -78,7 +78,7 @@ function Test-TargetResource
         $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain', 'Windows2025Domain')]
         [System.String]
         $DomainMode
     )
@@ -127,7 +127,7 @@ function Set-TargetResource
         $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain', 'Windows2025Domain')]
         [System.String]
         $DomainMode
     )
@@ -180,7 +180,7 @@ function Compare-TargetResourceState
         $DomainIdentity,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain')]
+        [ValidateSet('Windows2008R2Domain', 'Windows2012Domain', 'Windows2012R2Domain', 'Windows2016Domain', 'Windows2025Domain')]
         [System.String]
         $DomainMode
     )

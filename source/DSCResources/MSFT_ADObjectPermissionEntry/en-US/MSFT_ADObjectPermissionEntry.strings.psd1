@@ -8,4 +8,5 @@ ConvertFrom-StringData @'
     ObjectPermissionEntryInDesiredState    = Object permission entry on object '{0}' is in the desired state. (OPE0005)
     ObjectPermissionEntryNotInDesiredState = Object permission entry on object '{0}' is not in the desired state. (OPE0006)
     ObjectPathIsAbsent                     = Object Path '{0}' is absent from Active Directory. (OPE0007)
+    RetrievedADDrivePSPath                 = Retrieved the AD Drive full PSPath of '{0}'. (OPE0008)
 '@

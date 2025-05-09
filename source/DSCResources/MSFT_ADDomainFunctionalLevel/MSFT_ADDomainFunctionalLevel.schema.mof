@@ -2,5 +2,5 @@
 class MSFT_ADDomainFunctionalLevel : OMI_BaseResource
 {
     [Key, Description("Specifies the Active Directory domain to modify. You can identify a domain by its distinguished name, GUID, security identifier, DNS domain name, or NetBIOS domain name.")] String DomainIdentity;
-    [Required, Description("Specifies the functional level for the Active Directory domain."), ValueMap{"Windows2008R2Domain", "Windows2012Domain", "Windows2012R2Domain", "Windows2016Domain"}, Values{"Windows2008R2Domain", "Windows2012Domain", "Windows2012R2Domain", "Windows2016Domain"}] String DomainMode;
+    [Required, Description("Specifies the functional level for the Active Directory domain."), ValueMap{"Windows2008R2Domain", "Windows2012Domain", "Windows2012R2Domain", "Windows2016Domain", "Windows2025Domain"}, Values{"Windows2008R2Domain", "Windows2012Domain", "Windows2012R2Domain", "Windows2016Domain", "Windows2025Domain"}] String DomainMode;
 };

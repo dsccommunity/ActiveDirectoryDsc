@@ -56,6 +56,8 @@ try
             ActiveDirectoryRights = 'GenericAll'
         }
 
+        $mockADDrivePSPath = '\'
+
         $mockGetAclPresent = {
             $mock = [PSCustomObject] @{
                 Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -94,18 +96,42 @@ try
         }
         #endregion
 
+        #region Function Get-ADDrivePSPath
+        Describe -Name 'ADObjectPermissionEntry\Get-ADDrivePSPath' {
+            Mock -CommandName 'Assert-ADPSDrive'
+            Mock -CommandName Get-Item -MockWith {
+                return @{
+                    PSPath = $mockADDrivePSPath
+                }
+            }
+
+            It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
+                # Act
+                $ADDrivePSPath = Get-ADDrivePSPath
+
+                # Assert
+                Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
+            }
+
+            It 'Should return full PSPath for the AD Drive' {
+                # Act
+                $ADDrivePSPath = Get-ADDrivePSPath
+
+                # Assert
+                $ADDrivePSPath | Should -Be $mockADDrivePSPath
+            }
+        }
+        #endregion Function Get-ADDrivePSPath
+
         #region Function Get-TargetResource
         Describe 'ADObjectPermissionEntry\Get-TargetResource' {
-            Mock -CommandName 'Assert-ADPSDrive'
+            Mock -CommandName 'Get-ADDrivePSPath' -MockWith {
+                return $mockADDrivePSPath
+            }
 
             Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
-
-                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
-                    $targetResource = Get-TargetResource @testDefaultParameters
-                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
-                }
 
                 It 'Should return a "System.Collections.Hashtable" object type' {
                     # Act
@@ -134,11 +160,6 @@ try
             Context 'When the desired ace is absent' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
-
-                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
-                    $targetResource = Get-TargetResource @testDefaultParameters
-                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
-                }
 
                 It 'Should return a valid result if the ace is absent' {
                     # Act
@@ -180,7 +201,9 @@ try
 
         #region Function Test-TargetResource
         Describe 'ADObjectPermissionEntry\Test-TargetResource' {
-            Mock -CommandName 'Assert-ADPSDrive' { }
+            Mock -CommandName 'Get-ADDrivePSPath' -MockWith {
+                return $mockADDrivePSPath
+            }
 
             Context 'When the desired ace is present' {
 
@@ -236,17 +259,14 @@ try
 
         #region Function Set-TargetResource
         Describe 'ADObjectPermissionEntry\Set-TargetResource' {
-            Mock -CommandName 'Assert-ADPSDrive'
+            Mock -CommandName 'Get-ADDrivePSPath' -MockWith {
+                return $mockADDrivePSPath
+            }
 
             Context 'When the desired ace is present' {
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclPresent
                 Mock -CommandName 'Set-Acl' -Verifiable
-
-                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
-                    $targetResource = Get-TargetResource @testDefaultParameters
-                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
-                }
 
                 It 'Should remove the ace from the existing acl' {
                     # Act
@@ -261,11 +281,6 @@ try
 
                 Mock -CommandName 'Get-Acl' -MockWith $mockGetAclAbsent
                 Mock -CommandName 'Set-Acl' -Verifiable
-
-                It 'Should call "Assert-ADPSDrive" to check AD PS Drive is created' {
-                    $targetResource = Get-TargetResource @testDefaultParameters
-                    Assert-MockCalled -CommandName Assert-ADPSDrive -Scope It -Exactly -Times 1
-                }
 
                 It 'Should add the ace to the existing acl' {
                     # Act
