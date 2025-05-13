@@ -78,7 +78,7 @@
 
 .PARAMETER AdminDescription
     Write - String
-    Specifies the description displayed on admin screens. Can be set to Group_to filter out a group from Entra ID Connect synchronization.
+    Specifies the description displayed on admin screens. Can be set to Group_ to filter out a group from Entra ID Connect synchronization.
 
 .PARAMETER RestoreFromRecycleBin
     Write - Boolean
