@@ -700,10 +700,10 @@ function Get-ADCommonParameters
 
 <#
     .SYNOPSIS
-        Tests Active Directory replication site availablity.
+        Tests Active Directory replication site availability.
 
     .DESCRIPTION
-        The Test-ADReplicationSite function is used to test Active Directory replication site availablity. A boolean is
+        The Test-ADReplicationSite function is used to test Active Directory replication site availability. A boolean is
         returned that represents the replication site availability.
 
     .EXAMPLE
@@ -891,10 +891,10 @@ function ConvertTo-DeploymentDomainMode
 
 <#
     .SYNOPSIS
-        Restores an AD object from the AD recyle bin.
+        Restores an AD object from the AD recycle bin.
 
     .DESCRIPTION
-        The Restore-ADCommonObject function is used to Restore an AD object from the AD recyle bin. An ADObject is
+        The Restore-ADCommonObject function is used to Restore an AD object from the AD recycle bin. An ADObject is
         returned that represents the restored object.
 
     .EXAMPLE
@@ -2155,7 +2155,7 @@ function Find-DomainController
         Find-DomainControllerFindOneWrapper -DirectoryContext $directoryContext
 
     .PARAMETER DirectoryContext
-        Specifies the Active Directory context from which the donmain controller object is returned. Calling the
+        Specifies the Active Directory context from which the domain controller object is returned. Calling the
         Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
     .INPUTS
@@ -2197,7 +2197,7 @@ function Find-DomainControllerFindOneWrapper
         Find-DomainControllerFindOneWrapper -DirectoryContext $directoryContext -SiteName 'Default'
 
     .PARAMETER DirectoryContext
-        Specifies the Active Directory context from which the donmain controller object is returned. Calling the
+        Specifies the Active Directory context from which the domain controller object is returned. Calling the
         Get-ADDirectoryContext gets a value that can be provided in this parameter.
 
     .INPUTS
@@ -2264,7 +2264,7 @@ function Get-CurrentUser
         Tests the validity of a user's password.
 
     .DESCRIPTION
-        The Test-Password funtion is used to test the validity of a user's password. A boolean is returned that
+        The Test-Password function is used to test the validity of a user's password. A boolean is returned that
         represents the validity of the password.
 
     .EXAMPLE
