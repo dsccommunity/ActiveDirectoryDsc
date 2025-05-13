@@ -103,7 +103,6 @@ try
             GroupScope       = 'Universal'
             Description      = 'Test AD group description changed'
             DisplayName      = 'Test display name changed'
-            adminDescription = 'Group_ changed'
             ManagedBy        = 'CN=User 2,CN=Users,DC=contoso,DC=com'
         }
 
