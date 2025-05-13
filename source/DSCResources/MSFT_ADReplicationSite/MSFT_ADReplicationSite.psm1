@@ -73,7 +73,7 @@ function Get-TargetResource
 
     .PARAMETER RenameDefaultFirstSiteName
         Specify if the Default-First-Site-Name should be renamed, if it exists.
-        Dafult value is 'false'.
+        Default value is 'false'.
 #>
 function Set-TargetResource
 {

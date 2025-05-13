@@ -146,7 +146,7 @@ function Set-TargetResource
 
         <#
             Get the name of the replication site, if it's not empty and update the
-            site if it's not vaild.
+            site if it's not valid.
         #>
         if ($null -ne $replicationSubnet.Site)
         {
