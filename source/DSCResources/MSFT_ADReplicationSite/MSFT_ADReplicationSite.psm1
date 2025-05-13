@@ -163,7 +163,7 @@ function Set-TargetResource
 
     .PARAMETER RenameDefaultFirstSiteName
         Specify if the Default-First-Site-Name should be renamed, if it exists.
-        Dafult value is 'false'.
+        Default value is 'false'.
 
     .PARAMETER Description
         Specifies a description of the object. This parameter sets the value of
