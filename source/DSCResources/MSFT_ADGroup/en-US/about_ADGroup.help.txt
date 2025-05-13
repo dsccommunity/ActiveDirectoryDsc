@@ -76,6 +76,10 @@
     Write - String
     Active Directory group notes field.
 
+.PARAMETER AdminDescription
+    Write - String
+    Specifies the description displayed on admin screens. Can be set to Group_to filter out a group from Entra ID Connect synchronization.
+
 .PARAMETER RestoreFromRecycleBin
     Write - Boolean
     Try to restore the group from the recycle bin before creating a new one.
@@ -167,5 +171,3 @@ Configuration ADGroup_NewGroupMultiDomainMembers_Config
         }
     }
 }
-
-

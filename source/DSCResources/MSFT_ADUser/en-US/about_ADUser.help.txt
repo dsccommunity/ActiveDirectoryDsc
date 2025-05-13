@@ -139,7 +139,7 @@
 
 .PARAMETER Notes
     Write - String
-    Specifies the notes attached to the user's accoutn (ldapDisplayName 'info').
+    Specifies the notes attached to the user's account (ldapDisplayName 'info').
 
 .PARAMETER OfficePhone
     Write - String

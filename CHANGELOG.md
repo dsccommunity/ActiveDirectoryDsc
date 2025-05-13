@@ -21,6 +21,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADUser
   - Support for AdminDescription, PhoneticDisplayName, PreferredLanguage and
     SimpleDisplayName attributes.
+- ADGroup
+  - Support for AdminDescription attribute.
 
 ## [6.6.2] - 2025-03-17
 

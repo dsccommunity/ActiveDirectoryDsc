@@ -22,7 +22,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
 
-        .PARAMETER MembershipAttribute
+    .PARAMETER MembershipAttribute
         Active Directory attribute used to perform membership operations.
         Default value is 'SamAccountName'.
 
@@ -72,7 +72,7 @@ function Get-TargetResource
     Write-Verbose -Message ($script:localizedData.RetrievingGroup -f $GroupName)
 
     $getADGroupProperties = ('Name', 'GroupScope', 'GroupCategory', 'DistinguishedName', 'Description', 'DisplayName',
-        'ManagedBy', 'Members', 'Info')
+        'ManagedBy', 'Members', 'Info', 'adminDescription')
 
     try
     {
@@ -169,6 +169,7 @@ function Get-TargetResource
             MembershipAttribute = $MembershipAttribute
             ManagedBy           = $adGroup.ManagedBy
             Notes               = $adGroup.Info
+            AdminDescription    = $adGroup.adminDescription
         }
     }
     else
@@ -190,6 +191,7 @@ function Get-TargetResource
             MembershipAttribute = $MembershipAttribute
             ManagedBy           = $null
             Notes               = $null
+            AdminDescription    = $null
         }
     }
 
@@ -246,6 +248,10 @@ function Get-TargetResource
 
     .PARAMETER Notes
         Active Directory group notes field.
+
+    .PARAMETER AdminDescription
+        Specifies the description displayed on admin screens. Can be set to Group_
+        to filter out a group from Entra ID Connect synchronization.
 
     .PARAMETER RestoreFromRecycleBin
         Try to restore the group from the recycle bin before creating a new one.
@@ -337,6 +343,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Notes,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $AdminDescription,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -474,6 +485,10 @@ function Test-TargetResource
     .PARAMETER DisplayName
         Display name of the Active Directory group.
 
+    .PARAMETER AdminDescription
+        Specifies the description displayed on admin screens. Can be set to Group_
+        to filter out a group from Entra ID Connect synchronization.
+
     .PARAMETER Credential
         The credential to be used to perform the operation on Active Directory.
 
@@ -598,10 +613,14 @@ function Set-TargetResource
         $Notes,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $AdminDescription,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $RestoreFromRecycleBin
-
     )
 
     $assertMemberParameters = @{}
@@ -721,8 +740,19 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
                             $GroupName, $property.ParameterName, ($property.Expected -join ', '))
 
-                        $setADGroupParameters['Replace'] = @{
+                        $setADGroupParameters['Replace'] += @{
                             Info = $property.Expected
+                        }
+                    }
+                    elseif ($property.ParameterName -eq 'AdminDescription')
+                    {
+                        $setAdGroupRequired = $true
+
+                        Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
+                            $GroupName, $property.ParameterName, ($property.Expected -join ', '))
+
+                        $setADGroupParameters['Replace'] += @{
+                            'adminDescription' = $property.Expected
                         }
                     }
                     elseif ($property.ParameterName -eq 'Members')
@@ -918,8 +948,15 @@ function Set-TargetResource
 
             if ($PSBoundParameters.ContainsKey('Notes'))
             {
-                $newAdGroupParameters['OtherAttributes'] = @{
+                $newAdGroupParameters['OtherAttributes'] += @{
                     Info = $Notes
+                }
+            }
+
+            if ($PSBoundParameters.ContainsKey('AdminDescription'))
+            {
+                $newAdGroupParameters['OtherAttributes'] += @{
+                    adminDescription = $AdminDescription
                 }
             }
 
