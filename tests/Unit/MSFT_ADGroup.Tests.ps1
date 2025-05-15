@@ -152,7 +152,7 @@ try
                 Mock -CommandName Assert-Module
 
                 $getTargetResourceParameters = @{
-                    GroupName = $mockADGroup.GroupName
+                    GroupName = $mockADGroup.SamAccountName
                 }
             }
 
@@ -317,7 +317,7 @@ try
 
                     It 'Should throw the correct error' {
                         { Get-TargetResource @getTargetResourceParameters } |
-                            Should -Throw ($script:localizedData.RetrievingGroupADGroupError -f $mockADGroup.GroupName)
+                            Should -Throw ($script:localizedData.RetrievingGroupADGroupError -f $mockADGroup.SamAccountName)
                     }
                 }
 
@@ -328,7 +328,7 @@ try
 
                     It 'Should throw the correct error' {
                         { Get-TargetResource @getTargetResourceParameters } |
-                            Should -Throw ($script:localizedData.RetrievingGroupMembersError -f $mockADGroup.GroupName)
+                            Should -Throw ($script:localizedData.RetrievingGroupMembersError -f $mockADGroup.SamAccountName)
                     }
                 }
             }
@@ -377,7 +377,7 @@ try
         Describe 'ADGroup\Test-TargetResource' -Tag 'Test' {
             BeforeAll {
                 $testTargetResourceParameters = @{
-                    GroupName        = $mockADGroup.GroupName
+                    GroupName        = $mockADGroup.SamAccountName
                     CommonName       = $mockADGroup.Name
                     GroupScope       = $mockADGroup.GroupScope
                     Category         = $mockADGroup.GroupCategory
@@ -562,7 +562,7 @@ try
         Describe 'ADGroup\Set-TargetResource' -Tag 'Set' {
             BeforeAll {
                 $setTargetResourceParameters = @{
-                    GroupName        = $mockADGroup.GroupName
+                    GroupName        = $mockADGroup.SamAccountName
                     CommonName       = $mockADGroup.Name
                     GroupScope       = $mockADGroup.GroupScope
                     Category         = $mockADGroup.GroupCategory
