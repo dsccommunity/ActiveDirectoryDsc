@@ -1,4 +1,4 @@
-[ClassVersion("1.0.2.0"), FriendlyName("ADGroup")]
+[ClassVersion("1.0.1.0"), FriendlyName("ADGroup")]
 class MSFT_ADGroup : OMI_BaseResource
 {
     [Key, Description("Specifies the Security Account Manager (SAM) account name of the group (ldapDisplayName 'sAMAccountName').")] String GroupName;
