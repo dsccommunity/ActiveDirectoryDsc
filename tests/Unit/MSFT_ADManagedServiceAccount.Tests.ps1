@@ -77,6 +77,7 @@ try
             DisplayName               = 'TestSMSA'
             Enabled                   = $true
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            ServicePrincipalNames     = 'MSSQLSvc/Node1.contoso.com','HTTP/Node1','HTTP/Node1.contoso.com'
             TrustedForDelegation      = $false
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = 'SamAccountName'
@@ -94,6 +95,7 @@ try
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $mockAdServiceAccountStandalone.MembershipAttribute
             KerberosEncryptionType    = @()
+            ServicePrincipalNames     = $null
             TrustedForDelegation      = $null
             Ensure                    = 'Absent'
         }
@@ -103,6 +105,7 @@ try
             Description               = 'Changed description'
             DisplayName               = 'Changed displayname'
             KerberosEncryptionType    = 'AES128', 'AES256'
+            ServicePrincipalNames     = 'MSSQLSvc/Node1.contoso.com','HTTP/Node1'
             TrustedForDelegation      = $true
             ManagedPasswordPrincipals = $mockADUSer.SamAccountName
         }
@@ -116,6 +119,7 @@ try
             DisplayName               = 'TestGMSA'
             Enabled                   = $true
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            ServicePrincipalNames     = 'MSSQLSvc/Node1.contoso.com','HTTP/Node1','HTTP/Node1.contoso.com'
             TrustedForDelegation      = $true
             ManagedPasswordPrincipals = $mockADUSer.SamAccountName, $mockADComputer.SamAccountName
             MembershipAttribute       = 'SamAccountName'
@@ -133,6 +137,7 @@ try
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = $mockAdServiceAccountGroup.MembershipAttribute
             KerberosEncryptionType    = @()
+            ServicePrincipalNames     = $null
             TrustedForDelegation      = $null
             Ensure                    = 'Absent'
         }
@@ -144,6 +149,7 @@ try
             DistinguishedName      = $mockAdServiceAccountStandalone.DistinguishedName
             Enabled                = $mockAdServiceAccountStandalone.Enabled
             KerberosEncryptionType = $mockAdServiceAccountStandalone.KerberosEncryptionType
+            ServicePrincipalNames  = $mockAdServiceAccountStandalone.ServicePrincipalNames
             TrustedForDelegation   = $mockAdServiceAccountStandalone.TrustedForDelegation
             Name                   = $mockAdServiceAccountStandalone.ServiceAccountName
             ObjectClass            = 'msDS-ManagedServiceAccount'
@@ -160,6 +166,7 @@ try
             DistinguishedName                          = $mockAdServiceAccountGroup.DistinguishedName
             Enabled                                    = $mockAdServiceAccountGroup.Enabled
             KerberosEncryptionType                     = $mockAdServiceAccountGroup.KerberosEncryptionType
+            ServicePrincipalNames                      = $mockAdServiceAccountGroup.ServicePrincipalNames
             TrustedForDelegation                       = $mockAdServiceAccountGroup.TrustedForDelegation
             Name                                       = $mockAdServiceAccountGroup.ServiceAccountName
             ObjectClass                                = 'msDS-GroupManagedServiceAccount'
@@ -185,6 +192,7 @@ try
             Credential                = $mockCredentials
             DomainController          = $mockDomainController
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            ServicePrincipalNames     = 'MSSQLSvc/Node1.contoso.com','HTTP/Node1','HTTP/Node1.contoso.com'
             TrustedForDelegation      = $false
 
         }
@@ -204,6 +212,7 @@ try
             Credential                = $mockCredentials
             DomainController          = $mockDomainController
             KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
+            ServicePrincipalNames     = 'MSSQLSvc/Node1.contoso.com','HTTP/Node1','HTTP/Node1.contoso.com'
             TrustedForDelegation      = $false
         }
 
@@ -220,6 +229,7 @@ try
             ManagedPasswordPrincipals = @()
             MembershipAttribute       = 'SamAccountName'
             KerberosEncryptionType    = @()
+            ServicePrincipalNames     = $null
             TrustedForDelegation      = $null
         }
 
@@ -436,6 +446,7 @@ try
                 Description               = $mockAdServiceAccountStandalone.Description
                 DisplayName               = $mockAdServiceAccountStandalone.DisplayName
                 KerberosEncryptionType    = $mockAdServiceAccountStandalone.KerberosEncryptionType
+                ServicePrincipalNames     = $mockAdServiceAccountStandalone.ServicePrincipalNames
                 TrustedForDelegation      = $mockAdServiceAccountStandalone.TrustedForDelegation
                 ManagedPasswordPrincipals = $mockAdServiceAccountStandalone.ManagedPasswordPrincipals
                 MembershipAttribute       = $mockAdServiceAccountStandalone.MembershipAttribute
@@ -570,6 +581,7 @@ try
                 Ensure                 = $mockAdServiceAccountStandAlone.Ensure
                 DisplayName            = $mockAdServiceAccountStandAlone.DisplayName
                 KerberosEncryptionType = $mockAdServiceAccountStandAlone.KerberosEncryptionType
+                ServicePrincipalNames  = $mockAdServiceAccountStandalone.ServicePrincipalNames
                 TrustedForDelegation   = $mockAdServiceAccountStandAlone.TrustedForDelegation
             }
 
@@ -587,6 +599,7 @@ try
                 ManagedPasswordPrincipals = $mockAdServiceAccountGroup.ManagedPasswordPrincipals
                 DisplayName               = $mockAdServiceAccountGroup.Name.DisplayName
                 KerberosEncryptionType    = $mockAdServiceAccountGroup.KerberosEncryptionType
+                ServicePrincipalNames     = $mockAdServiceAccountGroup.ServicePrincipalNames
                 TrustedForDelegation      = $mockAdServiceAccountGroup.TrustedForDelegation
             }
             Context 'When the Resource should be Present' {
