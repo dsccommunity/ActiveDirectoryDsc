@@ -1,7 +1,8 @@
-[ClassVersion("1.0.1.0"), FriendlyName("ADGroup")]
+[ClassVersion("1.0.2.0"), FriendlyName("ADGroup")]
 class MSFT_ADGroup : OMI_BaseResource
 {
-    [Key, Description("Name of the Active Directory group.")] String GroupName;
+    [Key, Description("Specifies the Security Account Manager (SAM) account name of the group (ldapDisplayName 'sAMAccountName').")] String GroupName;
+    [Write, Description("Specifies the common name assigned to the group (ldapDisplayName 'cn'). If not specified the default value will be the same value provided in parameter GroupName.")] String CommonName;
     [Write, Description("Active Directory group scope. Default value is 'Global'."), ValueMap{"DomainLocal","Global","Universal"}, Values{"DomainLocal","Global","Universal"}] String GroupScope;
     [Write, Description("Active Directory group category. Default value is 'Security'."), ValueMap{"Security","Distribution"}, Values{"Security","Distribution"}] String Category;
     [Write, Description("Location of the group within Active Directory expressed as a Distinguished Name.")] String Path;

@@ -14,7 +14,11 @@
 
 .PARAMETER GroupName
     Key - String
-    Name of the Active Directory group.
+    Specifies the Security Account Manager (SAM) account name of the group (ldapDisplayName 'sAMAccountName').
+
+.PARAMETER CommonName
+    Write - String
+    Specifies the common name assigned to the group (ldapDisplayName 'cn'). If not specified the default value will be the same value provided in parameter GroupName.
 
 .PARAMETER GroupScope
     Write - String

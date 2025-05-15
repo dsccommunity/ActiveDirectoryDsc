@@ -35,6 +35,7 @@ else
                 Tests                   = [Ordered]@{
                     CreateGroup               = @{
                         GroupName         = $groupName
+                        CommonName        = 'DscIntegrationTestGroupCN'
                         GroupScope        = 'Global'
                         Category          = 'Security'
                         Path              = "CN=Users,$domainDistinguishedName"
@@ -48,6 +49,7 @@ else
                     }
                     ModifyGroup               = @{
                         GroupName         = $groupName
+                        CommonName        = 'DSCIntegrationTestGroupCN2'
                         GroupScope        = 'DomainLocal'
                         Category          = 'Distribution'
                         Path              = "CN=Computers,$domainDistinguishedName"
@@ -95,6 +97,7 @@ Configuration MSFT_ADGroup_CreateGroup_Config
         ADGroup 'Integration_Test'
         {
             GroupName            = $Node.Tests.$testName.GroupName
+            CommonName           = $Node.Tests.$testName.CommonName
             GroupScope           = $Node.Tests.$testName.GroupScope
             Category             = $Node.Tests.$testName.Category
             Path                 = $Node.Tests.$testName.Path
@@ -125,6 +128,7 @@ Configuration MSFT_ADGroup_ModifyGroup_Config
         ADGroup 'Integration_Test'
         {
             GroupName            = $Node.Tests.$testName.GroupName
+            CommonName           = $Node.Tests.$testName.CommonName
             GroupScope           = $Node.Tests.$testName.GroupScope
             Category             = $Node.Tests.$testName.Category
             Path                 = $Node.Tests.$testName.Path
