@@ -954,15 +954,7 @@ function Set-TargetResource
                 $renameADObjectParameters = $commonParameters.Clone()
                 $renameADObjectParameters['Identity'] = $getTargetResourceResult.DistinguishedName
 
-                try
-                {
-                    Rename-ADObject @renameADObjectParameters -NewName $CommonName
-                }
-                catch
-                {
-                    $errorMessage = "Error renaming AD Group '$GroupName' to '$CommonName'."
-                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-                }
+                Rename-ADObject @renameADObjectParameters -NewName $CommonName
             }
         }
         else
@@ -1044,15 +1036,8 @@ function Set-TargetResource
             {
                 $renameADObjectParameters = $commonParameters.Clone()
                 $renameADObjectParameters['Identity'] = $adGroup.DistinguishedName
-                try
-                {
-                    Rename-ADObject @renameADObjectParameters -NewName $CommonName
-                }
-                catch
-                {
-                    $errorMessage = "Error renaming AD Group '$GroupName' to '$CommonName'."
-                    New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
-                }
+
+                Rename-ADObject @renameADObjectParameters -NewName $CommonName
             }
 
             # Add the required members
