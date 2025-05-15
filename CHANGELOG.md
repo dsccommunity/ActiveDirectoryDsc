@@ -23,6 +23,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     SimpleDisplayName attributes.
 - ADGroup
   - Support for AdminDescription attribute.
+  - BREAKING CHANGE: GroupName field specifically refers to sAMAccountName, and
+    new CommonName field should be used to update 'cn'.
+    ([issue #732](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/732)).
 
 ## [6.6.2] - 2025-03-17
 
