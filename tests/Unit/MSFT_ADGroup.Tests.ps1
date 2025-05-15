@@ -89,7 +89,7 @@ try
 
         $mockADGroup = @{
             SamAccountName    = $mockGroupName
-            Name              = $mockCommonName
+            CN                = $mockCommonName
             GroupScope        = 'Global'
             GroupCategory     = 'Security'
             Path              = $mockGroupPath
@@ -1481,14 +1481,14 @@ try
                     Context "When creating a new group with a different CommonName" {
                         BeforeAll {
                             $setTargetResourceParametersNewCN = $setTargetResourceParameters.Clone()
-                            $setTargetResourceParametersNewCN.CommonName = 'DifferentCN'
+                            $setTargetResourceParametersNewCN.CommonName = $mockAdGroupChanged.CommonName
                         }
                         It 'Should not throw' {
                             { Set-TargetResource @setTargetResourceParametersNewCN } | Should -Not -Throw
                         }
                         It 'Should call Rename-ADObject with the new CN' {
                             Assert-MockCalled -CommandName Rename-ADObject `
-                                -ParameterFilter { $NewName -eq 'DifferentCN' } `
+                                -ParameterFilter { $NewName -eq $mockAdGroupChanged.CommonName } `
                                 -Exactly -Times 1
                         }
                     }
