@@ -1482,6 +1482,11 @@ try
                         BeforeAll {
                             $setTargetResourceParametersNewCN = $setTargetResourceParameters.Clone()
                             $setTargetResourceParametersNewCN.CommonName = $mockAdGroupChanged.CommonName
+                            $mockNewAdGroupResult = @{
+                                DistinguishedName = $mockGetTargetResourceResults.DistinguishedName
+                            }
+
+                            Mock -CommandName New-ADGroup -MockWith { $mockNewAdGroupResult }
                         }
                         It 'Should not throw' {
                             { Set-TargetResource @setTargetResourceParametersNewCN } | Should -Not -Throw
