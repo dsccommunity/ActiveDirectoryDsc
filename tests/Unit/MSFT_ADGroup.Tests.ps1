@@ -112,7 +112,7 @@ try
 
         $mockGetTargetResourceResults = @{
             GroupName           = $mockADGroup.SamAccountName
-            CommonName          = $mockADGroup.Name
+            CommonName          = $mockADGroup.CN
             GroupScope          = $mockADGroup.GroupScope
             Category            = $mockADGroup.GroupCategory
             Path                = $mockADGroup.Path
@@ -167,7 +167,7 @@ try
 
                     $result.Ensure | Should -Be 'Present'
                     $result.GroupName | Should -Be $mockADGroup.SamAccountName
-                    $result.CommonName | Should -Be $mockADGroup.Name
+                    $result.CommonName | Should -Be $mockADGroup.CN
                     $result.GroupScope | Should -Be $mockADGroup.GroupScope
                     $result.Category | Should -Be $mockADGroup.GroupCategory
                     $result.Path | Should -Be $mockADGroup.Path
@@ -378,7 +378,7 @@ try
             BeforeAll {
                 $testTargetResourceParameters = @{
                     GroupName        = $mockADGroup.SamAccountName
-                    CommonName       = $mockADGroup.Name
+                    CommonName       = $mockADGroup.CN
                     GroupScope       = $mockADGroup.GroupScope
                     Category         = $mockADGroup.GroupCategory
                     Path             = $mockADGroup.Path
@@ -563,7 +563,7 @@ try
             BeforeAll {
                 $setTargetResourceParameters = @{
                     GroupName        = $mockADGroup.SamAccountName
-                    CommonName       = $mockADGroup.Name
+                    CommonName       = $mockADGroup.CN
                     GroupScope       = $mockADGroup.GroupScope
                     Category         = $mockADGroup.GroupCategory
                     Path             = $mockADGroup.Path
