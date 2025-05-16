@@ -308,7 +308,7 @@ function Set-TargetResource
 <#
     .SYNOPSIS
         Compares the properties in the current state with the properties of the
-        desired state and returns a hashtable with the comaprison result.
+        desired state and returns a hashtable with the comparison result.
 
     .PARAMETER Identity
         Specifies the identity of an object that has the object class specified

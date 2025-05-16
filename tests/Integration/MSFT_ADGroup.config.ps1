@@ -34,27 +34,31 @@ else
 
                 Tests                   = [Ordered]@{
                     CreateGroup               = @{
-                        GroupName   = $groupName
-                        GroupScope  = 'Global'
-                        Category    = 'Security'
-                        Path        = "CN=Users,$domainDistinguishedName"
-                        Description = 'Original Description'
-                        DisplayName = 'Display Name'
-                        Members     = 'Administrator', 'Guest'
-                        ManagedBy   = "CN=Administrator,CN=Users,$domainDistinguishedName"
-                        Notes       = 'Notes'
-                        Ensure      = 'Present'
+                        GroupName         = $groupName
+                        CommonName        = 'DscIntegrationTestGroupCN'
+                        GroupScope        = 'Global'
+                        Category          = 'Security'
+                        Path              = "CN=Users,$domainDistinguishedName"
+                        Description       = 'Original Description'
+                        DisplayName       = 'Display Name'
+                        AdminDescription  = 'Admin Description'
+                        Members           = 'Administrator', 'Guest'
+                        ManagedBy         = "CN=Administrator,CN=Users,$domainDistinguishedName"
+                        Notes             = 'Notes'
+                        Ensure            = 'Present'
                     }
                     ModifyGroup               = @{
-                        GroupName   = $groupName
-                        GroupScope  = 'DomainLocal'
-                        Category    = 'Distribution'
-                        Path        = "CN=Computers,$domainDistinguishedName"
-                        Description = 'Modified Description'
-                        DisplayName = 'Modified Display Name'
-                        Members     = 'Administrator'
-                        ManagedBy   = "CN=Guest,CN=Users,$domainDistinguishedName"
-                        Notes       = 'Modified Notes'
+                        GroupName         = $groupName
+                        CommonName        = 'DSCIntegrationTestGroupCN2'
+                        GroupScope        = 'DomainLocal'
+                        Category          = 'Distribution'
+                        Path              = "CN=Computers,$domainDistinguishedName"
+                        Description       = 'Modified Description'
+                        DisplayName       = 'Modified Display Name'
+                        AdminDescription  = 'Modified Admin Description'
+                        Members           = 'Administrator'
+                        ManagedBy         = "CN=Guest,CN=Users,$domainDistinguishedName"
+                        Notes             = 'Modified Notes'
                     }
                     MembersToInclude          = @{
                         GroupName        = $groupName
@@ -93,11 +97,13 @@ Configuration MSFT_ADGroup_CreateGroup_Config
         ADGroup 'Integration_Test'
         {
             GroupName            = $Node.Tests.$testName.GroupName
+            CommonName           = $Node.Tests.$testName.CommonName
             GroupScope           = $Node.Tests.$testName.GroupScope
             Category             = $Node.Tests.$testName.Category
             Path                 = $Node.Tests.$testName.Path
             Description          = $Node.Tests.$testName.Description
             DisplayName          = $Node.Tests.$testName.DisplayName
+            AdminDescription     = $Node.Tests.$testName.AdminDescription
             Members              = $Node.Tests.$testName.Members
             ManagedBy            = $Node.Tests.$testName.ManagedBy
             Notes                = $Node.Tests.$testName.Notes
@@ -122,11 +128,13 @@ Configuration MSFT_ADGroup_ModifyGroup_Config
         ADGroup 'Integration_Test'
         {
             GroupName            = $Node.Tests.$testName.GroupName
+            CommonName           = $Node.Tests.$testName.CommonName
             GroupScope           = $Node.Tests.$testName.GroupScope
             Category             = $Node.Tests.$testName.Category
             Path                 = $Node.Tests.$testName.Path
             Description          = $Node.Tests.$testName.Description
             DisplayName          = $Node.Tests.$testName.DisplayName
+            AdminDescription     = $Node.Tests.$testName.AdminDescription
             Members              = $Node.Tests.$testName.Members
             ManagedBy            = $Node.Tests.$testName.ManagedBy
             Notes                = $Node.Tests.$testName.Notes
