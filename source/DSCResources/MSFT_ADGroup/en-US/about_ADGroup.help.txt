@@ -14,11 +14,7 @@
 
 .PARAMETER GroupName
     Key - String
-    Specifies the Security Account Manager (SAM) account name of the group (ldapDisplayName 'sAMAccountName').
-
-.PARAMETER CommonName
-    Write - String
-    Specifies the common name assigned to the group (ldapDisplayName 'cn'). If not specified the default value will be the same value provided in parameter GroupName.
+    Name of the Active Directory group.
 
 .PARAMETER GroupScope
     Write - String
@@ -79,10 +75,6 @@
 .PARAMETER Notes
     Write - String
     Active Directory group notes field.
-
-.PARAMETER AdminDescription
-    Write - String
-    Specifies the description displayed on admin screens. Can be set to Group_ to filter out a group from Entra ID Connect synchronization.
 
 .PARAMETER RestoreFromRecycleBin
     Write - Boolean
