@@ -21,6 +21,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - ADUser
   - Support for AdminDescription, PhoneticDisplayName, PreferredLanguage and
     SimpleDisplayName attributes.
+- ADGroup
+  - Support for AdminDescription attribute.
+  - BREAKING CHANGE: GroupName field specifically refers to sAMAccountName, and
+    new CommonName field should be used to update 'cn'.
+    ([issue #732](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/732)).
 
 ## [6.6.2] - 2025-03-17
 
@@ -34,8 +39,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Fixed
 
-- ADmanagedServiceAccount
-  - Set properties KeberosEncryptionType and TrustedForDelegation properly on account creation.
+- ADManagedServiceAccount
+  - Set properties KerberosEncryptionType and TrustedForDelegation properly on account creation.
     Both properties were not considered previously when the account was created.
     ([issue #650](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/650)).
 - ADObjectPermissionEntry
@@ -97,7 +102,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Fixed
 
 - Move test pipeline to Windows PowerShell. The hosted agent was updated
-  to PowerShell 7.4.1. That broke the ASKDSKey unit tests that has a helper
+  to PowerShell 7.4.1. That broke the ADKDSKey unit tests that has a helper
   function (`Copy-ArrayObjects`) that serializes objects.
 - ADSRootKey
   -  Resolved 'String was not recognized as a valid DateTime' in non-US cultures ([issue #702](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/702)).

@@ -32,7 +32,7 @@ class MSFT_ADUser : OMI_BaseResource
     [Write, Description("Specifies the URL of the home page of the object (ldapDisplayName 'wWWHomePage').")] String HomePage;
     [Write, Description("Specifies a path to the user's profile (ldapDisplayName 'profilePath').")] String ProfilePath;
     [Write, Description("Specifies a path to the user's log on script (ldapDisplayName 'scriptPath').")] String LogonScript;
-    [Write, Description("Specifies the notes attached to the user's accoutn (ldapDisplayName 'info').")] String Notes;
+    [Write, Description("Specifies the notes attached to the user's account (ldapDisplayName 'info').")] String Notes;
     [Write, Description("Specifies the user's office telephone number (ldapDisplayName 'telephoneNumber').")] String OfficePhone;
     [Write, Description("Specifies the user's mobile phone number (ldapDisplayName 'mobile').")] String MobilePhone;
     [Write, Description("Specifies the user's fax phone number (ldapDisplayName 'facsimileTelephoneNumber').")] String Fax;

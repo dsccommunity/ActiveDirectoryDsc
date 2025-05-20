@@ -14,7 +14,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Returns the current state of the Active Directory group.
 
     .PARAMETER GroupName
-         Name of the Active Directory group.
+         Specifies the Security Account Manager (SAM) account name of the group (ldapDisplayName 'sAMAccountName').
 
     .PARAMETER Credential
         The credential to be used to perform the operation on Active Directory.
@@ -22,7 +22,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
     .PARAMETER DomainController
         Active Directory domain controller to enact the change upon.
 
-        .PARAMETER MembershipAttribute
+    .PARAMETER MembershipAttribute
         Active Directory attribute used to perform membership operations.
         Default value is 'SamAccountName'.
 
@@ -72,7 +72,7 @@ function Get-TargetResource
     Write-Verbose -Message ($script:localizedData.RetrievingGroup -f $GroupName)
 
     $getADGroupProperties = ('Name', 'GroupScope', 'GroupCategory', 'DistinguishedName', 'Description', 'DisplayName',
-        'ManagedBy', 'Members', 'Info')
+        'ManagedBy', 'Members', 'Info', 'adminDescription', 'CN')
 
     try
     {
@@ -156,7 +156,8 @@ function Get-TargetResource
 
         $targetResource = @{
             Ensure              = 'Present'
-            GroupName           = $adGroup.Name
+            GroupName           = $GroupName
+            CommonName          = $adGroup.CN
             GroupScope          = $adGroup.GroupScope
             Category            = $adGroup.GroupCategory
             DistinguishedName   = $adGroup.DistinguishedName
@@ -169,6 +170,7 @@ function Get-TargetResource
             MembershipAttribute = $MembershipAttribute
             ManagedBy           = $adGroup.ManagedBy
             Notes               = $adGroup.Info
+            AdminDescription    = $adGroup.adminDescription
         }
     }
     else
@@ -178,6 +180,7 @@ function Get-TargetResource
         $targetResource = @{
             Ensure              = 'Absent'
             GroupName           = $GroupName
+            CommonName          = $null
             GroupScope          = $null
             Category            = $null
             DistinguishedName   = $null
@@ -190,6 +193,7 @@ function Get-TargetResource
             MembershipAttribute = $MembershipAttribute
             ManagedBy           = $null
             Notes               = $null
+            AdminDescription    = $null
         }
     }
 
@@ -201,7 +205,11 @@ function Get-TargetResource
         Determines if the Active Directory group is in the desired state.
 
     .PARAMETER GroupName
-         Name of the Active Directory group.
+         Specifies the Security Account Manager (SAM) account name of the group (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER CommonName
+        Specifies the common name assigned to the group (ldapDisplayName 'cn'). If not specified the default
+        value will be the same value provided in parameter GroupName.
 
     .PARAMETER GroupScope
         Active Directory group scope. Default value is 'Global'.
@@ -247,6 +255,10 @@ function Get-TargetResource
     .PARAMETER Notes
         Active Directory group notes field.
 
+    .PARAMETER AdminDescription
+        Specifies the description displayed on admin screens. Can be set to Group_
+        to filter out a group from Entra ID Connect synchronization.
+
     .PARAMETER RestoreFromRecycleBin
         Try to restore the group from the recycle bin before creating a new one.
 
@@ -268,6 +280,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $GroupName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $CommonName,
 
         [Parameter()]
         [ValidateSet('DomainLocal', 'Global', 'Universal')]
@@ -337,6 +354,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Notes,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $AdminDescription,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -453,7 +475,11 @@ function Test-TargetResource
         Sets the state of an Active Directory group.
 
     .PARAMETER GroupName
-         Name of the Active Directory group.
+         Specifies the Security Account Manager (SAM) account name of the group (ldapDisplayName 'sAMAccountName').
+
+    .PARAMETER CommonName
+        Specifies the common name assigned to the group (ldapDisplayName 'cn'). If not specified the default
+        value will be the same value provided in parameter GroupName.
 
     .PARAMETER GroupScope
         Active Directory group scope. Default value is 'Global'.
@@ -473,6 +499,10 @@ function Test-TargetResource
 
     .PARAMETER DisplayName
         Display name of the Active Directory group.
+
+    .PARAMETER AdminDescription
+        Specifies the description displayed on admin screens. Can be set to Group_
+        to filter out a group from Entra ID Connect synchronization.
 
     .PARAMETER Credential
         The credential to be used to perform the operation on Active Directory.
@@ -516,6 +546,7 @@ function Test-TargetResource
             Set-ADGroup                               | ActiveDirectory
             Move-ADObject                             | ActiveDirectory
             New-ADGroup                               | ActiveDirectory
+            Rename-ADObject                           | ActiveDirectory
             Remove-ADGroup                            | ActiveDirectory
 #>
 function Set-TargetResource
@@ -527,6 +558,11 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $GroupName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $CommonName,
 
         [Parameter()]
         [ValidateSet('DomainLocal', 'Global', 'Universal')]
@@ -598,6 +634,11 @@ function Set-TargetResource
         $Notes,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $AdminDescription,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Boolean]
         $RestoreFromRecycleBin
@@ -654,6 +695,7 @@ function Set-TargetResource
         {
             # Resource is present
             $moveAdGroupRequired = $false
+            $updateCnRequired = $false
 
             $ignoreProperties = @('DomainController', 'Credential', 'MembershipAttribute', 'MembersToInclude',
                 'MembersToExclude')
@@ -674,6 +716,10 @@ function Set-TargetResource
                     {
                         # The path has changed, so the account needs moving, but not until after any other changes
                         $moveAdGroupRequired = $true
+                    }
+                    elseif ($property.ParameterName -eq 'CommonName')
+                    {
+                        $updateCnRequired = $true
                     }
                     elseif ($property.ParameterName -eq 'Category')
                     {
@@ -721,8 +767,19 @@ function Set-TargetResource
                         Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
                             $GroupName, $property.ParameterName, ($property.Expected -join ', '))
 
-                        $setADGroupParameters['Replace'] = @{
+                        $setADGroupParameters['Replace'] += @{
                             Info = $property.Expected
+                        }
+                    }
+                    elseif ($property.ParameterName -eq 'AdminDescription')
+                    {
+                        $setAdGroupRequired = $true
+
+                        Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
+                            $GroupName, $property.ParameterName, ($property.Expected -join ', '))
+
+                        $setADGroupParameters['Replace'] += @{
+                            'adminDescription' = $property.Expected
                         }
                     }
                     elseif ($property.ParameterName -eq 'Members')
@@ -888,6 +945,17 @@ function Set-TargetResource
                     New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                 }
             }
+
+            if ($updateCnRequired)
+            {
+                Write-Verbose -Message ($script:localizedData.UpdatingResourceProperty -f
+                    $GroupName, 'CommonName', $CommonName)
+
+                $renameADObjectParameters = $commonParameters.Clone()
+                $renameADObjectParameters['Identity'] = $getTargetResourceResult.DistinguishedName
+
+                Rename-ADObject @renameADObjectParameters -NewName $CommonName
+            }
         }
         else
         {
@@ -918,9 +986,23 @@ function Set-TargetResource
 
             if ($PSBoundParameters.ContainsKey('Notes'))
             {
-                $newAdGroupParameters['OtherAttributes'] = @{
+                $newAdGroupParameters['OtherAttributes'] += @{
                     Info = $Notes
                 }
+            }
+
+            if ($PSBoundParameters.ContainsKey('AdminDescription'))
+            {
+                $newAdGroupParameters['OtherAttributes'] += @{
+                    adminDescription = $AdminDescription
+                }
+            }
+
+            # Set CN if specified and different from GroupName
+            $setCNPostCreate = $false
+            if ($PSBoundParameters.ContainsKey('CommonName') -and $CommonName -ne $GroupName)
+            {
+                $setCNPostCreate = $true
             }
 
             $adGroup = $null
@@ -940,13 +1022,22 @@ function Set-TargetResource
 
                 try
                 {
-                    $adGroup = New-ADGroup @newAdGroupParameters -PassThru
+                    $adGroup = New-ADGroup @newAdGroupParameters -SamAccountName $GroupName -PassThru
                 }
                 catch
                 {
                     $errorMessage = ($script:localizedData.AddingGroupError -f $GroupName)
                     New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
                 }
+            }
+
+            # Rename CN if needed
+            if ($setCNPostCreate)
+            {
+                $renameADObjectParameters = $commonParameters.Clone()
+                $renameADObjectParameters['Identity'] = $adGroup.DistinguishedName
+
+                Rename-ADObject @renameADObjectParameters -NewName $CommonName
             }
 
             # Add the required members

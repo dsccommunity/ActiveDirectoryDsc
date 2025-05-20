@@ -703,7 +703,7 @@ function Set-TargetResource
 
             if ($parameters.ContainsKey('CommonName'))
             {
-                # We have to specify the SamAccountName to prefent errors when the common name is longer than 15 characters
+                # We have to specify the SamAccountName to prevent errors when the common name is longer than 15 characters
                 $newAdServiceAccountParameters.SamAccountName = $ServiceAccountName
             }
 
