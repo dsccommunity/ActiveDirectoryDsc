@@ -27,6 +27,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     new CommonName field should be used to update 'cn'.
     ([issue #732](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/732)).
 
+### Fixed
+
+- ADDomain
+  - Resolve 'Unable to find type [Microsoft.DirectoryServices.Deployment.Types.ForestMode]'
+    when running on PowerShell Core / DSC 2.0 / Azure Machine Configuration.
+    ([issue #723](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/723)).
+
 ## [6.6.2] - 2025-03-17
 
 ### Fixed
