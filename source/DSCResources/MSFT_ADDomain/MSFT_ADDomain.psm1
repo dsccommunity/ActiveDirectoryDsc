@@ -77,6 +77,10 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ADDSDeployment' -ImportModule
 
+    $typeName = 'Microsoft.DirectoryServices.Deployment.Types.ForestMode'
+
+    Add-TypeAssembly -AssemblyName 'Microsoft.DirectoryServices.Deployment.Types' -TypeName $typeName
+
     $domainFQDN = Resolve-DomainFQDN -DomainName $DomainName -ParentDomainName $ParentDomainName
 
     # If the domain has been installed then the Netlogon SysVol registry item will exist.
