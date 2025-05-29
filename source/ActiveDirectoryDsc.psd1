@@ -1,99 +1,76 @@
 @{
-# Version number of this module.
-moduleVersion = '0.0.1'
+    # Script module or binary module file associated with this manifest.
+    RootModule            = 'ActiveDirectoryDsc.psm1'
 
-# ID used to uniquely identify this module
-GUID = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
+    # Version number of this module.
+    moduleVersion        = '0.0.1'
 
-# Author of this module
-Author = 'DSC Community'
+    # ID used to uniquely identify this module
+    GUID                 = '9FECD4F6-8F02-4707-99B3-539E940E9FF5'
 
-# Company or vendor of this module
-CompanyName = 'DSC Community'
+    # Author of this module
+    Author               = 'DSC Community'
 
-# Copyright statement for this module
-Copyright = 'Copyright the DSC Community contributors. All rights reserved.'
+    # Company or vendor of this module
+    CompanyName          = 'DSC Community'
 
-# Description of the functionality provided by this module
-Description = 'The ActiveDirectoryDsc module contains DSC resources for deployment and configuration of Active Directory.
+    # Copyright statement for this module
+    Copyright            = 'Copyright the DSC Community contributors. All rights reserved.'
 
-These DSC resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.'
+    # Description of the functionality provided by this module
+    Description          = 'The ActiveDirectoryDsc module contains DSC resources for deployment and configuration of Active Directory.
 
-# Minimum version of the Windows PowerShell engine required by this module
-PowerShellVersion = '5.0'
+    These DSC resources allow you to configure new domains, child domains, and high availability domain controllers, establish cross-domain trusts and manage users, groups and OUs.'
 
-# Minimum version of the common language runtime (CLR) required by this module
-CLRVersion = '4.0'
+    # Minimum version of the Windows PowerShell engine required by this module
+    PowerShellVersion    = '5.0'
 
-# Nested modules to load when this module is imported.
-NestedModules = 'Modules\ActiveDirectoryDsc.Common\ActiveDirectoryDsc.Common.psm1'
+    # Minimum version of the common language runtime (CLR) required by this module
+    CLRVersion           = '4.0'
 
-# Functions to export from this module
-FunctionsToExport = @(
-  # Exported so that WaitForADDomain can use this function in a separate scope.
-  'Find-DomainController'
-)
+    # Nested modules to load when this module is imported.
+    NestedModules        = 'Modules\ActiveDirectoryDsc.Common\ActiveDirectoryDsc.Common.psm1'
 
-# Cmdlets to export from this module
-CmdletsToExport = @()
+    # Functions to export from this module
+    FunctionsToExport    = @(
+      # Exported so that WaitForADDomain can use this function in a separate scope.
+      'Find-DomainController'
+    )
 
-# Variables to export from this module
-VariablesToExport = @()
+    # Cmdlets to export from this module
+    CmdletsToExport      = @()
 
-# Aliases to export from this module
-AliasesToExport = @()
+    # Variables to export from this module
+    VariablesToExport    = @()
 
-# Dsc Resources to export from this module
-DscResourcesToExport = @(
-    'ADComputer'
-    'ADDomain'
-    'ADDomainController'
-    'ADDomainControllerProperties'
-    'ADDomainDefaultPasswordPolicy'
-    'ADDomainFunctionalLevel'
-    'ADDomainTrust'
-    'ADFineGrainedPasswordPolicy'
-    'ADForestFunctionalLevel'
-    'ADForestProperties'
-    'ADGroup'
-    'ADKDSKey'
-    'ADManagedServiceAccount'
-    'ADObjectEnabledState'
-    'ADObjectPermissionEntry'
-    'ADOptionalFeature'
-    'ADOrganizationalUnit'
-    'ADReadOnlyDomainControllerAccount'
-    'ADReplicationSite'
-    'ADReplicationSiteLink'
-    'ADServicePrincipalName'
-    'ADUser'
-    'WaitForADDomain'
-)
+    # Aliases to export from this module
+    AliasesToExport      = @()
 
-# Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
-PrivateData = @{
+    # Dsc Resources to export from this module
+    DscResourcesToExport = @()
 
-    PSData = @{
+    # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
+    PrivateData          = @{
 
-        # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
+        PSData = @{
 
-        # A URL to the license for this module.
-        LicenseUri = 'https://github.com/dsccommunity/ActiveDirectoryDsc/blob/main/LICENSE'
+            # Tags applied to this module. These help with module discovery in online galleries.
+            Tags         = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
 
-        # A URL to the main website for this project.
-        ProjectUri = 'https://github.com/dsccommunity/ActiveDirectoryDsc'
+            # A URL to the license for this module.
+            LicenseUri   = 'https://github.com/dsccommunity/ActiveDirectoryDsc/blob/main/LICENSE'
 
-        # A URL to an icon representing this module.
-        IconUri = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
+            # A URL to the main website for this project.
+            ProjectUri   = 'https://github.com/dsccommunity/ActiveDirectoryDsc'
 
-        # ReleaseNotes of this module
-        ReleaseNotes = ''
+            # A URL to an icon representing this module.
+            IconUri      = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
 
-        # Set to a prerelease string value if the release should be a prerelease.
-        Prerelease = ''
+            # ReleaseNotes of this module
+            ReleaseNotes = ''
 
-      } # End of PSData hashtable
-
-} # End of PrivateData hashtable
+            # Set to a prerelease string value if the release should be a prerelease.
+            Prerelease   = ''
+        } # End of PSData hashtable
+    } # End of PrivateData hashtable
 }
