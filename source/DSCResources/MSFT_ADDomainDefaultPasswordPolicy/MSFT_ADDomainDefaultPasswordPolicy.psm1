@@ -92,11 +92,11 @@ function Get-TargetResource
     return @{
         DomainName                  = $DomainName
         ComplexityEnabled           = $policy.ComplexityEnabled
-        LockoutDuration             = ConvertFrom-Timespan -Timespan $policy.LockoutDuration -TimeSpanType Minutes
-        LockoutObservationWindow    = ConvertFrom-Timespan -Timespan $policy.LockoutObservationWindow -TimeSpanType Minutes
+        LockoutDuration             = ConvertFrom-TimeSpan -Timespan $policy.LockoutDuration -TimeSpanType Minutes
+        LockoutObservationWindow    = ConvertFrom-TimeSpan -Timespan $policy.LockoutObservationWindow -TimeSpanType Minutes
         LockoutThreshold            = $policy.LockoutThreshold
-        MinPasswordAge              = ConvertFrom-Timespan -Timespan $policy.MinPasswordAge -TimeSpanType Minutes
-        MaxPasswordAge              = ConvertFrom-Timespan -Timespan $policy.MaxPasswordAge -TimeSpanType Minutes
+        MinPasswordAge              = ConvertFrom-TimeSpan -Timespan $policy.MinPasswordAge -TimeSpanType Minutes
+        MaxPasswordAge              = ConvertFrom-TimeSpan -Timespan $policy.MaxPasswordAge -TimeSpanType Minutes
         MinPasswordLength           = $policy.MinPasswordLength
         PasswordHistoryCount        = $policy.PasswordHistoryCount
         ReversibleEncryptionEnabled = $policy.ReversibleEncryptionEnabled
@@ -373,5 +373,3 @@ function Set-TargetResource
 
     [ref] $null = Set-ADDefaultDomainPasswordPolicy @setADDefaultDomainPasswordPolicyParams
 } #end Set-TargetResource
-
-Export-ModuleMember -Function *-TargetResource
