@@ -58,8 +58,6 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - BREAKING CHANGE: GroupName field specifically refers to sAMAccountName, and
     new CommonName field should be used to update 'cn'.
     ([issue #732](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/732)).
-- `ActiveDirectoryDsc`
-  - Added strings.psd1 for HQRM compliance.
 
 ### Fixed
 
@@ -67,31 +65,6 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Resolve 'Unable to find type [Microsoft.DirectoryServices.Deployment.Types.ForestMode]'
     when running on PowerShell Core / DSC 2.0 / Azure Machine Configuration.
     ([issue #723](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/723)).
-
-### Removed
-
-- All Resources
-  - Removed about_*.help.txt from sources as these are now generated at build time.
-
-### Changed
-
-- `build.ps1`
-  - Update to latest Sampler version.
-- `ResolveDependency.ps1`
-  - Update to latest Sampler version.
-- `RequiredModules.psd1`
-  - Add PlatyPS.
-  - Indented.ScriptAnalyzerRules.
-- `analyzersettings.psd1`
-  - Update to latest dsccommunity version.
-- `ActiveDirectory.psd1`
-  - Fix formatting.
-  - Clear DscResourcesToExport as this is overwritten by ModuleBuilder.
-  - Add RootModule.
-- `build.yaml`
-  - Add doc generation.
-  - Move module to buildModule directory.
-  - Add wiki to release assets.
 
 ## [6.6.2] - 2025-03-17
 
