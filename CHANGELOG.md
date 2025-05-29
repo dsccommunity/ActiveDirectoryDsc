@@ -83,7 +83,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 - `ResolveDependency.ps1`
   - Update to latest Sampler version.
 - `RequiredModules.psd1`
-  - Add PlatyPS.
+  - Add PlatyPS fixes [#714](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/714).
   - Indented.ScriptAnalyzerRules.
 - `analyzersettings.psd1`
   - Update to latest dsccommunity version.
