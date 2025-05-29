@@ -48,12 +48,13 @@ BuildWorkflow:
     - package_module_nupkg
 
   hqrmtest:
-    - DscResource_Tests_Stop_On_Fail
+    - Invoke_HQRM_Tests_Stop_On_Fail
 
   # Defining test task to be run when invoking `./build.ps1 -Tasks test`
   test:
     - Pester_Tests_Stop_On_Fail
-    - Pester_if_Code_Coverage_Under_Threshold
+    - Convert_Pester_Coverage
+    - Pester_If_Code_Coverage_Under_Threshold
 
   publish:
     - publish_module_to_gallery
@@ -63,27 +64,51 @@ BuildWorkflow:
 ####################################################
 #       PESTER  Configuration                      #
 ####################################################
-
 Pester:
-  OutputFormat: NUnitXML
+  Configuration:
+    Run:
+      Path:
+        - tests/Unit
+    Output:
+      Verbosity: Detailed
+      StackTraceVerbosity: Full
+      CIFormat: Auto
+    CodeCoverage:
+      CoveragePercentTarget: 85
+      OutputPath: JaCoCo_coverage.xml
+      OutputEncoding: ascii
+      UseBreakpoints: false
+    TestResult:
+      OutputFormat: NUnitXML
+      OutputEncoding: ascii
   ExcludeFromCodeCoverage:
     - Modules/DscResource.Common
-  Script:
-    - tests/Unit
-  Tag:
-  CodeCoverageThreshold: 85
-  CodeCoverageOutputFile: JaCoCo_coverage.xml
-  CodeCoverageOutputFileEncoding: ascii
 
+####################################################
+#      Pester Configuration (DscResource.Test)     #
+####################################################
 DscTest:
-  ExcludeTag:
-    - "Common Tests - New Error-Level Script Analyzer Rules"
-  Tag:
-  ExcludeSourceFile:
-    - output
-  ExcludeModuleFile:
-    - Modules/DscResource.Common
-  MainGitBranch: main
+  Pester:
+    Configuration:
+      Filter:
+        ExcludeTag:
+          - "Common Tests - New Error-Level Script Analyzer Rules"
+      Output:
+        Verbosity: Detailed
+        CIFormat: Auto
+      TestResult:
+        Enabled: true
+        OutputFormat: NUnitXML
+        OutputEncoding: ascii
+        OutputPath: ./output/testResults/NUnitXml_HQRM_Tests.xml
+  Script:
+    ExcludeSourceFile:
+      - output
+    ExcludeModuleFile:
+      - Modules/DscResource.Common
+      # Must exclude built module file because it should not be tested like MOF-based resources
+      - ActiveDirectoryDsc.psm1
+    MainGitBranch: main
 
 ModuleBuildTasks:
   Sampler:
