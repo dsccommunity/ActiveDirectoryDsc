@@ -7,6 +7,39 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Added
+
+- `ActiveDirectoryDsc`
+  - Added strings.psd1 for HQRM compliance.
+
+### Removed
+
+- All Resources
+  - Removed about_*.help.txt from sources as these are now generated at build time.
+
+### Changed
+
+- `build.ps1`
+  - Update to latest Sampler version.
+- `Resolve-Dependency.ps1`
+  - Update to latest Sampler version.
+- `Resolve-Dependency.psd1`
+  - Update to latest Sampler version.
+  - Enable ModuleFast.
+- `RequiredModules.psd1`
+  - Add PlatyPS fixes [#714](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/714).
+  - Indented.ScriptAnalyzerRules.
+- `analyzersettings.psd1`
+  - Update to latest dsccommunity version.
+- `ActiveDirectory.psd1`
+  - Fix formatting.
+  - Clear DscResourcesToExport as this is overwritten by ModuleBuilder.
+  - Add RootModule.
+- `build.yaml`
+  - Add doc generation.
+  - Move module to buildModule directory.
+  - Add wiki to release assets.
+
 ## [6.7.0] - 2025-05-29
 
 ### Added
