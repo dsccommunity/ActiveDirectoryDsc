@@ -21,8 +21,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - `build.ps1`
   - Update to latest Sampler version.
-- `ResolveDependency.ps1`
+- `Resolve-Dependency.ps1`
   - Update to latest Sampler version.
+- `Resolve-Dependency.psd1`
+  - Update to latest Sampler version.
+  - Enable ModuleFast.
 - `RequiredModules.psd1`
   - Add PlatyPS fixes [#714](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/714).
   - Indented.ScriptAnalyzerRules.
