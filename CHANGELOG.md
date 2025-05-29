@@ -7,36 +7,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
-## [6.7.0] - 2025-05-29
-
 ### Added
 
-- ADDomain
-  - Support for Windows Server 2025 Forest and Domain functional modes.
-    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
-- ADDomainFunctionalLevel
-  - Support for Windows Server 2025 Domain functional mode.
-    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
-- ADForestFunctionalLevel
-  - Support for Windows Server 2025 Forest functional mode.
-    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
-- ADUser
-  - Support for AdminDescription, PhoneticDisplayName, PreferredLanguage and
-    SimpleDisplayName attributes.
-- ADGroup
-  - Support for AdminDescription attribute.
-  - BREAKING CHANGE: GroupName field specifically refers to sAMAccountName, and
-    new CommonName field should be used to update 'cn'.
-    ([issue #732](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/732)).
 - `ActiveDirectoryDsc`
   - Added strings.psd1 for HQRM compliance.
-
-### Fixed
-
-- ADDomain
-  - Resolve 'Unable to find type [Microsoft.DirectoryServices.Deployment.Types.ForestMode]'
-    when running on PowerShell Core / DSC 2.0 / Azure Machine Configuration.
-    ([issue #723](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/723)).
 
 ### Removed
 
@@ -62,6 +36,35 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Add doc generation.
   - Move module to buildModule directory.
   - Add wiki to release assets.
+
+## [6.7.0] - 2025-05-29
+
+### Added
+
+- ADDomain
+  - Support for Windows Server 2025 Forest and Domain functional modes.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADDomainFunctionalLevel
+  - Support for Windows Server 2025 Domain functional mode.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADForestFunctionalLevel
+  - Support for Windows Server 2025 Forest functional mode.
+    ([issue #721](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/721)).
+- ADUser
+  - Support for AdminDescription, PhoneticDisplayName, PreferredLanguage and
+    SimpleDisplayName attributes.
+- ADGroup
+  - Support for AdminDescription attribute.
+  - BREAKING CHANGE: GroupName field specifically refers to sAMAccountName, and
+    new CommonName field should be used to update 'cn'.
+    ([issue #732](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/732)).
+
+### Fixed
+
+- ADDomain
+  - Resolve 'Unable to find type [Microsoft.DirectoryServices.Deployment.Types.ForestMode]'
+    when running on PowerShell Core / DSC 2.0 / Azure Machine Configuration.
+    ([issue #723](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/723)).
 
 ## [6.6.2] - 2025-03-17
 
