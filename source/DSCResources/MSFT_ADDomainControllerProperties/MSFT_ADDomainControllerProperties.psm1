@@ -147,7 +147,6 @@ function Set-TargetResource
             Property  = @{
                 MaxOfflineTimeInDays = $ContentFreshness
             }
-
         }
 
         $null = Set-CimInstance @setCimInstanceParameters
