@@ -1,6 +1,6 @@
 <#
     .DESCRIPTION
-        Bootstrap and build script for PowerShell module CI/CD pipeline
+        Bootstrap and build script for PowerShell module CI/CD pipeline.
 
     .PARAMETER Tasks
         The task or tasks to run. The default value is '.' (runs the default task).
@@ -56,6 +56,19 @@
 
     .PARAMETER AutoRestore
         Not yet written.
+
+    .PARAMETER UseModuleFast
+        Specifies to use ModuleFast instead of PowerShellGet to resolve dependencies
+        faster.
+
+    .PARAMETER UsePSResourceGet
+        Specifies to use PSResourceGet instead of PowerShellGet to resolve dependencies
+        faster. This can also be configured in Resolve-Dependency.psd1.
+
+    .PARAMETER UsePowerShellGetCompatibilityModule
+        Specifies to use the compatibility module PowerShellGet. This parameter
+        only works then the method of downloading dependencies is PSResourceGet.
+        This can also be configured in Resolve-Dependency.psd1.
 #>
 [CmdletBinding()]
 param
@@ -121,7 +134,19 @@ param
 
     [Parameter()]
     [System.Management.Automation.SwitchParameter]
-    $AutoRestore
+    $AutoRestore,
+
+    [Parameter()]
+    [System.Management.Automation.SwitchParameter]
+    $UseModuleFast,
+
+    [Parameter()]
+    [System.Management.Automation.SwitchParameter]
+    $UsePSResourceGet,
+
+    [Parameter()]
+    [System.Management.Automation.SwitchParameter]
+    $UsePowerShellGetCompatibilityModule
 )
 
 <#
@@ -132,7 +157,6 @@ param
 
 process
 {
-
     if ($MyInvocation.ScriptName -notLike '*Invoke-Build.ps1')
     {
         # Only run the process block through InvokeBuild (look at the Begin block at the bottom of this script).
@@ -178,7 +202,7 @@ process
                             ConvertFrom-Yaml -Yaml (Get-Content -Raw $configFile)
                         }
 
-                        # Native Support for JSON and JSONC (by Removing comments)
+                        # Support for JSON and JSONC (by Removing comments) when module PowerShell-Yaml is available
                         '\.[json|jsonc]'
                         {
                             $jsonFile = Get-Content -Raw -Path $configFile
@@ -336,7 +360,7 @@ process
     }
 }
 
-Begin
+begin
 {
     # Find build config if not specified.
     if (-not $BuildConfig)
@@ -450,7 +474,8 @@ Begin
 
     if ($ResolveDependency)
     {
-        Write-Host -Object "[pre-build] Resolving dependencies." -ForegroundColor Green
+        Write-Host -Object "[pre-build] Resolving dependencies using preferred method." -ForegroundColor Green
+
         $resolveDependencyParams = @{ }
 
         # If BuildConfig is a Yaml file, bootstrap powershell-yaml via ResolveDependency.
