@@ -57,30 +57,6 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# $testDomainName = 'contoso.com'
-# $testDefaultParams = @{
-#     DomainName = $testDomainName
-# }
-# $testDomainController = 'testserver.contoso.com'
-
-# $testPassword = ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force
-# $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-#     'Safemode',
-#     ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force
-# )
-
-# $fakePasswordPolicy = @{
-#     ComplexityEnabled           = $true
-#     LockoutDuration             = New-TimeSpan -Minutes 30
-#     LockoutObservationWindow    = New-TimeSpan -Minutes 30
-#     LockoutThreshold            = 3
-#     MinPasswordAge              = New-TimeSpan -Days 1
-#     MaxPasswordAge              = New-TimeSpan -Days 42
-#     MinPasswordLength           = 7
-#     PasswordHistoryCount        = 12
-#     ReversibleEncryptionEnabled = $false
-# }
-
 Describe 'ADDomainDefaultPasswordPolicy\Get-TargetResource' -Tag 'Get' {
     Context 'When the system is in the desired state' {
         BeforeAll {
