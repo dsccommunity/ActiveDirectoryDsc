@@ -57,30 +57,6 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# $mockComputerNamePresent = 'TEST01'
-# $mockDomain = 'contoso.com'
-# $mockComputerNameAbsent = 'MISSING01'
-# $mockLocation = 'Test location'
-# $mockDnsHostName = 'TEST01.contoso.com'
-# $mockServicePrincipalNames_DefaultValues = @('TERMSRV/TEST01', 'TERMSRV/TEST01.contoso.com')
-# $mockServicePrincipalNames = @('spn/a', 'spn/b')
-# $mockUserPrincipalName = 'TEST01@contoso.com'
-# $mockDisplayName = 'TEST01'
-# $mockDescription = 'Test description'
-# $mockEnabled = $true
-# $mockManagedBy = 'CN=Manager,CN=Users,DC=contoso,DC=com'
-# $mockDistinguishedName = 'CN=TEST01,CN=Computers,DC=contoso,DC=com'
-# $mockSamAccountName = 'TEST01$'
-# $mockSID = 'S-1-5-21-1409167834-891301383-2860967316-1143'
-# $mockObjectClass = 'Computer'
-# $mockParentContainer = 'CN=Computers,DC=contoso,DC=com'
-
-# $mockCredentialUserName = 'COMPANY\User'
-# $mockCredentialPassword = 'dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force
-# $mockCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-#     'COMPANY\User', 'dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force
-# )
-
 Describe 'MSFT_ADComputer\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
