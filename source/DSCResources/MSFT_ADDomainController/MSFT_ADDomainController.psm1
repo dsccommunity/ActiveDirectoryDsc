@@ -101,10 +101,10 @@ function Get-TargetResource
 
         $allowedPasswordReplicationAccountName = (
             Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject |
-            ForEach-Object -MemberName sAMAccountName)
+                ForEach-Object -MemberName sAMAccountName)
         $deniedPasswordReplicationAccountName = (
             Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject |
-            ForEach-Object -MemberName sAMAccountName)
+                ForEach-Object -MemberName sAMAccountName)
         $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
         $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
         $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
@@ -486,7 +486,7 @@ function Set-TargetResource
             if ($domainControllerObject.IsReadOnly)
             {
                 Write-Verbose -Message ($script:localizedData.UpdatingDelegatedAdministratorAccountName -f
-                $targetResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
+                    $targetResource.DelegatedAdministratorAccountName, $DelegatedAdministratorAccountName)
 
                 $delegateAdministratorAccountSecurityIdentifier = Resolve-SecurityIdentifier -SamAccountName $DelegatedAdministratorAccountName
 
@@ -714,7 +714,7 @@ function Set-TargetResource
 #>
 function Test-TargetResource
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "",
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '',
         Justification = 'Read-Only Domain Controller (RODC) Creation support($AllowPasswordReplicationAccountName and DenyPasswordReplicationAccountName)')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
@@ -928,10 +928,11 @@ function Test-TargetResource
     #>
     if ($PSBoundParameters.ContainsKey('FlexibleSingleMasterOperationRole') -and $existingResource.Ensure -eq $true)
     {
-        $FlexibleSingleMasterOperationRole | ForEach-Object -Process {
-            if ($_ -notin $existingResource.FlexibleSingleMasterOperationRole)
+        foreach ($role in $FlexibleSingleMasterOperationRole)
+        {
+            if ($role -notin $existingResource.FlexibleSingleMasterOperationRole)
             {
-                Write-Verbose -Message ($script:localizedData.NotOwnerOfFlexibleSingleMasterOperationRole -f $_ )
+                Write-Verbose -Message ($script:localizedData.NotOwnerOfFlexibleSingleMasterOperationRole -f $role )
 
                 $testTargetResourceReturnValue = $false
             }

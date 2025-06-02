@@ -1783,7 +1783,6 @@ function Set-TargetResource
 
         Remove-ADUser @adCommonParameters -Confirm:$false | Out-Null
     }
-
 } # end function Set-TargetResource
 
 <#
@@ -1813,7 +1812,7 @@ function Set-TargetResource
         Used Functions:
             Name                         | Module
             -----------------------------|--------------------------
-            New-InvalidArgumentException | DscResource.Common
+            New-ArgumentException | DscResource.Common
 #>
 function Assert-Parameters
 {
@@ -1848,7 +1847,7 @@ function Assert-Parameters
     if (($PSBoundParameters.ContainsKey('Password')) -and ($Enabled -eq $false))
     {
         $errorMessage = $script:localizedData.PasswordParameterConflictError -f 'Enabled', $false, 'Password'
-        New-InvalidArgumentException -ArgumentName 'Password' -Message $errorMessage
+        New-ArgumentException -ArgumentName 'Password' -Message $errorMessage
     }
 
     # ChangePasswordAtLogon cannot be set for an account that also has PasswordNeverExpires set
@@ -1858,9 +1857,8 @@ function Assert-Parameters
             $PSBoundParameters['PasswordNeverExpires'] -eq $true)
     {
         $errorMessage = $script:localizedData.ChangePasswordParameterConflictError
-        New-InvalidArgumentException -ArgumentName 'ChangePasswordAtLogon, PasswordNeverExpires' -Message $errorMessage
+        New-ArgumentException -ArgumentName 'ChangePasswordAtLogon, PasswordNeverExpires' -Message $errorMessage
     }
-
 } #end function Assert-Parameters
 
 <#

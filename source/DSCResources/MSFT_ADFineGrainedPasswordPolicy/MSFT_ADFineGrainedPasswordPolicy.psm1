@@ -221,6 +221,8 @@ function Get-TargetResource
 #>
 function Test-TargetResource
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -274,14 +276,14 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateScript( {
-                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript( {
-                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MaxPasswordAge,
@@ -470,6 +472,8 @@ function Test-TargetResource
 #>
 function Set-TargetResource
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge')]
     [CmdletBinding()]
     param
     (
@@ -522,14 +526,14 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateScript( {
-                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript( {
-                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MaxPasswordAge,

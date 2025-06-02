@@ -214,7 +214,7 @@ function Assert-MemberParameters
         {
             # If Members are provided, Include and Exclude are not allowed.
             $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude'
-            New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
+            New-ArgumentException -ArgumentName 'Members' -Message $errorMessage
         }
     }
 
@@ -227,10 +227,9 @@ function Assert-MemberParameters
         if ($member -in $MembersToExclude)
         {
             $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude'
-            New-InvalidArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
+            New-ArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
         }
     }
-
 }
 
 <#
@@ -255,6 +254,7 @@ function Assert-MemberParameters
 #>
 function Remove-DuplicateMembers
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     [OutputType([System.String[]])]
     param
@@ -966,7 +966,7 @@ function Restore-ADCommonObject
     # If more than one object is returned, we pick the one that was changed last.
     $restorableObject = Get-ADObject @getAdObjectParams |
         Sort-Object -Descending -Property 'whenChanged' |
-            Select-Object -First 1
+        Select-Object -First 1
 
     $restoredObject = $null
 
@@ -1052,7 +1052,6 @@ function Get-ADDomainNameFromDistinguishedName
     $domainName = $domainFqdn -replace 'DC=', '' -replace ',', '.'
 
     return $domainName
-
 }
 
 <#
@@ -1217,7 +1216,7 @@ function Get-DomainObject
     )
 
     $getADDomainParameters = @{
-        Identity = $Identity
+        Identity    = $Identity
         ErrorAction = 'Stop'
     }
 
@@ -1264,7 +1263,7 @@ function Get-DomainObject
             $retries++
 
             Write-Verbose ($script:localizedData.RetryingGetADDomain -f
-                    $retries, $MaximumRetries, $RetryIntervalInSeconds)
+                $retries, $MaximumRetries, $RetryIntervalInSeconds)
 
             Start-Sleep -Seconds $RetryIntervalInSeconds
         }
@@ -1901,20 +1900,20 @@ function Add-TypeAssembly
     {
         if ($TypeName -as [Type])
         {
-            Write-Verbose -Message ($script:localizedData.TypeAlreadyExistInSession -f $TypeName) -Verbose
+            Write-Verbose -Message ($script:localizedData.TypeAlreadyExistInSession -f $TypeName)
 
             # The type already exists so no need to load the type again.
             return
         }
         else
         {
-            Write-Verbose -Message ($script:localizedData.TypeDoesNotExistInSession -f $TypeName) -Verbose
+            Write-Verbose -Message ($script:localizedData.TypeDoesNotExistInSession -f $TypeName)
         }
     }
 
     try
     {
-        Write-Verbose -Message ($script:localizedData.AddingAssemblyToSession -f $AssemblyName) -Verbose
+        Write-Verbose -Message ($script:localizedData.AddingAssemblyToSession -f $AssemblyName)
 
         Add-Type -AssemblyName $AssemblyName
     }
@@ -2293,6 +2292,7 @@ function Get-CurrentUser
 #>
 function Test-Password
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'PasswordAuthentication')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -2409,6 +2409,7 @@ function Test-Password
 #>
 function Test-PrincipalContextCredentials
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'PasswordAuthentication')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
