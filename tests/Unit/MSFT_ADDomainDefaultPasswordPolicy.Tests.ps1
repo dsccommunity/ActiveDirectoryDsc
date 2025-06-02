@@ -57,7 +57,7 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-Describe 'ADDomainDefaultPasswordPolicy\Get-TargetResource' -Tag 'Get' {
+Describe 'MSFT_ADDomainDefaultPasswordPolicy\Get-TargetResource' -Tag 'Get' {
     Context 'When the system is in the desired state' {
         BeforeAll {
             Mock -CommandName Assert-Module
@@ -158,7 +158,7 @@ Describe 'ADDomainDefaultPasswordPolicy\Get-TargetResource' -Tag 'Get' {
     }
 }
 
-Describe 'ADDomainDefaultPasswordPolicy\Test-TargetResource' -Tag 'Test' {
+Describe 'MSFT_ADDomainDefaultPasswordPolicy\Test-TargetResource' -Tag 'Test' {
     Context 'When the system is in the desired state' {
         BeforeAll {
             Mock -CommandName Get-TargetResource -MockWith {
@@ -292,7 +292,7 @@ Describe 'ADDomainDefaultPasswordPolicy\Test-TargetResource' -Tag 'Test' {
     }
 }
 
-Describe 'ADDomainDefaultPasswordPolicy\Set-TargetResource' -Tag 'Set' {
+Describe 'MSFT_ADDomainDefaultPasswordPolicy\Set-TargetResource' -Tag 'Set' {
     Context 'When the system is not in the desired state' {
         BeforeAll {
             Mock -CommandName Assert-Module
