@@ -57,7 +57,7 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-Describe 'ADServicePrincipalName\Get-TargetResource' -Tag 'Get' {
+Describe 'MSFT_ADServicePrincipalName\Get-TargetResource' -Tag 'Get' {
     Context 'When no SPN is set' {
         BeforeAll {
             Mock -CommandName Get-ADObject
@@ -138,7 +138,7 @@ Describe 'ADServicePrincipalName\Get-TargetResource' -Tag 'Get' {
     }
 }
 
-Describe 'ADServicePrincipalName\Test-TargetResource' -Tag 'Test' {
+Describe 'MSFT_ADServicePrincipalName\Test-TargetResource' -Tag 'Test' {
     Context 'When no SPN set' {
         BeforeAll {
             Mock -CommandName Get-TargetResource -MockWith {
@@ -300,7 +300,7 @@ Describe 'ADServicePrincipalName\Test-TargetResource' -Tag 'Test' {
     }
 }
 
-Describe 'ADServicePrincipalName\Set-TargetResource' -Tag 'Set' {
+Describe 'MSFT_ADServicePrincipalName\Set-TargetResource' -Tag 'Set' {
     Context 'When AD Object does not exist' {
         BeforeAll {
             Mock -CommandName Test-TargetResource -MockWith { $false }
