@@ -544,7 +544,7 @@ Describe 'MSFT_ADOptionalFeature\Set-TargetResource' -Tag 'Set' {
         Context 'When forest is available but authentication fails' {
             BeforeAll {
                 Mock -CommandName Get-ADForest -ParameterFilter {
-                    $Credential.Username -eq $badCredentialsProperties.EnterpriseAdministratorCredential.Username
+                    $Credential.Username -eq 'Invalid'
                 } -MockWith {
                     throw New-Object System.Security.Authentication.AuthenticationException
                 }
