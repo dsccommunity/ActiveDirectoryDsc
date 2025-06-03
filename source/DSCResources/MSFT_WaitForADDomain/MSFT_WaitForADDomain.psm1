@@ -51,7 +51,6 @@ $script:waitForDomainControllerScriptBlock = {
         if ($SiteName)
         {
             $findDomainControllerParameters['SiteName'] = $SiteName
-
         }
 
         if ($null -ne $Credential)
@@ -205,7 +204,6 @@ function Get-TargetResource
         $domainControllerSiteName = $currentDomainController.SiteName
 
         Write-Verbose -Message $script:localizedData.FoundDomainController
-
     }
     else
     {
