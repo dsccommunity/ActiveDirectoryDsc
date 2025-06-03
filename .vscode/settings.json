@@ -36,7 +36,12 @@
         "keepachangelog",
         "notin",
         "pscmdlet",
-        "steppable"
+        "steppable",
+        "HKLM",
+        "NTDS",
+        "Sysvol",
+        "contoso",
+        "netlogon"
     ],
     "cSpell.ignorePaths": [
         ".git"
