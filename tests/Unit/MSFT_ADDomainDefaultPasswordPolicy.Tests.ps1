@@ -184,7 +184,7 @@ Describe 'MSFT_ADDomainDefaultPasswordPolicy\Test-TargetResource' -Tag 'Test' {
                 $mockTestParams = @{
                     DomainName                  = 'contoso.com'
                     Credential                  = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-                        'Safemode',
+                        'SafeMode',
                         (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainController            = 'testserver.contoso.com'
