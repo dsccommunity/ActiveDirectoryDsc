@@ -588,7 +588,6 @@ function Set-TargetResource
 
                     Add-ADDomainControllerPasswordReplicationPolicy @addADPasswordReplicationPolicy
                 }
-
             }
         }
 
