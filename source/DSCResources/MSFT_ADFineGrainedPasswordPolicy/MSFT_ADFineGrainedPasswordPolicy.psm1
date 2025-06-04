@@ -658,7 +658,7 @@ function Set-TargetResource
                         if (-not [System.String]::IsNullOrEmpty($subjectsToRemove))
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingPasswordPolicySubjects -f
-                                $Name, $($SubjectstoRemove.Count))
+                                $Name, $($SubjectsToRemove.Count))
 
                             try
                             {
