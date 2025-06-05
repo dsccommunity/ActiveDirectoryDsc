@@ -1,235 +1,281 @@
-$script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_ADForestFunctionalLevel'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-function Invoke-TestSetup
-{
+BeforeDiscovery {
     try
     {
-        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
     }
     catch [System.IO.FileNotFoundException]
     {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
     }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'ActiveDirectoryDsc'
+    $script:dscResourceName = 'MSFT_ADForestFunctionalLevel'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
         -DSCResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
 }
 
-function Invoke-TestCleanup
-{
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name ActiveDirectory_2019 -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# Begin Testing
-
-Invoke-TestSetup
-
-try
-{
-    InModuleScope $script:dscResourceName {
-        Set-StrictMode -Version 1.0
-
-        # Load the AD Module Stub, so we can mock the cmdlets, then load the AD types.
-        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
-
-        $mockDefaultParameters = @{
-            ForestIdentity = 'contoso.com'
-            ForestMode     = 'Windows2016Forest'
-        }
-
-        Describe 'MSFT_ADForestFunctionalLevel\Get-TargetResource' -Tag 'Get' {
-            Context 'When the current property values are returned' {
-                BeforeAll {
-                    Mock -CommandName Get-ADForest -MockWith {
-                        return @{
-                            ForestMode = 'Windows2012R2Forest'
-                        }
-                    }
-                }
-
-                It 'Should return the the same values as was passed as parameters' {
-                    $getTargetResourceResult = Get-TargetResource @mockDefaultParameters
-                    $getTargetResourceResult.ForestIdentity | Should -Be $mockDefaultParameters.ForestIdentity
-
-                    Assert-MockCalled -CommandName Get-ADForest -Exactly -Times 1 -Scope It
-                }
-
-                It 'Should return the correct value for ForestMode' {
-                    $getTargetResourceResult = Get-TargetResource @mockDefaultParameters
-                    $getTargetResourceResult.ForestMode | Should -Be 'Windows2012R2Forest'
-
-                    Assert-MockCalled -CommandName Get-ADForest -Exactly -Times 1 -Scope It
+Describe 'MSFT_ADForestFunctionalLevel\Get-TargetResource' -Tag 'Get' {
+    Context 'When the current property values are returned' {
+        BeforeAll {
+            Mock -CommandName Get-ADForest -MockWith {
+                return @{
+                    ForestMode = 'Windows2012R2Forest'
                 }
             }
         }
 
-        Describe 'MSFT_ADForestFunctionalLevel\Test-TargetResource' -Tag 'Test' {
-            Context 'When the system is in the desired state' {
-                Context 'When the property ForestMode is in desired state' {
-                    BeforeAll {
-                        Mock -CommandName Compare-TargetResourceState -MockWith {
-                            return @(
-                                @{
-                                    ParameterName  = 'ForestMode'
-                                    InDesiredState = $true
-                                }
-                            )
-                        }
-                    }
+        It 'Should return the the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-                    It 'Should return $true' {
-                        $testTargetResourceResult = Test-TargetResource @mockDefaultParameters
-                        $testTargetResourceResult | Should -BeTrue
-
-                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
-                    }
+                $mockParameters = @{
+                    ForestIdentity = 'contoso.com'
+                    ForestMode     = 'Windows2016Forest'
                 }
+
+                $result = Get-TargetResource @mockParameters
+
+                $result.ForestIdentity | Should -Be $mockParameters.ForestIdentity
+                $result.ForestMode | Should -Be 'Windows2012R2Forest'
             }
 
-            Context 'When the system is not in the desired state' {
-                Context 'When the property ForestMode is not in desired state' {
-                    BeforeAll {
-                        Mock -CommandName Compare-TargetResourceState -MockWith {
-                            return @(
-                                @{
-                                    ParameterName  = 'ForestMode'
-                                    InDesiredState = $false
-                                }
-                            )
-                        }
+            Should -Invoke -CommandName Get-ADForest -Exactly -Times 1 -Scope It
+        }
+    }
+}
 
-                        $testTargetResourceParameters = $mockDefaultParameters.Clone()
-                        $testTargetResourceParameters['ForestMode'] = 'Windows2012R2Forest'
+Describe 'MSFT_ADForestFunctionalLevel\Test-TargetResource' -Tag 'Test' {
+    Context 'When the system is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Compare-TargetResourceState -MockWith {
+                return @(
+                    @{
+                        ParameterName  = 'ForestMode'
+                        InDesiredState = $true
                     }
+                )
+            }
+        }
 
-                    It 'Should return $false' {
-                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                        $testTargetResourceResult | Should -BeFalse
+        It 'Should return $true' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+                $mockParameters = @{
+                    ForestIdentity = 'contoso.com'
+                    ForestMode     = 'Windows2016Forest'
+                }
+
+                Test-TargetResource @mockParameters | Should -BeTrue
+            }
+
+            Should -Invoke -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the system is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Compare-TargetResourceState -MockWith {
+                return @(
+                    @{
+                        ParameterName  = 'ForestMode'
+                        InDesiredState = $false
                     }
+                )
+            }
+        }
+
+        It 'Should return $false' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestIdentity = 'contoso.com'
+                    ForestMode     = 'Windows2012R2Forest'
+                }
+
+                Test-TargetResource @mockParameters | Should -BeFalse
+            }
+
+            Should -Invoke -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+        }
+    }
+}
+
+Describe 'MSFT_ADForestFunctionalLevel\Compare-TargetResourceState' -Tag 'Compare' {
+    Context 'When the system is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                return @{
+                    ForestIdentity = 'contoso.com'
+                    ForestMode     = 'Windows2016Forest'
                 }
             }
         }
 
-        Describe 'MSFT_ADForestFunctionalLevel\Compare-TargetResourceState' -Tag 'Compare' {
-            Context 'When the system is in the desired state' {
-                Context 'When the property ForestMode is in desired state' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                ForestIdentity = 'contoso.com'
-                                ForestMode     = $mockDefaultParameters.ForestMode
-                            }
-                        }
-                    }
+        It 'Should return $true' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-                    It 'Should return $true' {
-                        $compareTargetResourceStateResult = Compare-TargetResourceState @mockDefaultParameters
-                        $compareTargetResourceStateResult | Should -HaveCount 1
-
-                        $comparedReturnValue = $compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'ForestMode' })
-                        $comparedReturnValue | Should -Not -BeNullOrEmpty
-                        $comparedReturnValue.Expected | Should -Be $mockDefaultParameters.ForestMode
-                        $comparedReturnValue.Actual | Should -Be $mockDefaultParameters.ForestMode
-                        $comparedReturnValue.InDesiredState | Should -BeTrue
-
-                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                    }
+                $mockParameters = @{
+                    ForestIdentity = 'contoso.com'
+                    ForestMode     = 'Windows2016Forest'
                 }
+
+                $compareResult = Compare-TargetResourceState @mockParameters
+                $compareResult | Should -HaveCount 1
+
+                $comparedReturnValue = $compareResult.Where( { $_.ParameterName -eq 'ForestMode' })
+                $comparedReturnValue | Should -Not -BeNullOrEmpty
+                $comparedReturnValue.Expected | Should -Be $mockParameters.ForestMode
+                $comparedReturnValue.Actual | Should -Be $mockParameters.ForestMode
+                $comparedReturnValue.InDesiredState | Should -BeTrue
             }
 
-            Context 'When the system is not in the desired state' {
-                Context 'When the property ForestMode is not in desired state' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith {
-                            return @{
-                                ForestIdentity = 'contoso.com'
-                                ForestMode     = $mockDefaultParameters.ForestMode
-                            }
-                        }
-
-                        $compareTargetResourceStateParameters = $mockDefaultParameters.Clone()
-                        $compareTargetResourceStateParameters['ForestMode'] = 'Windows2012R2Forest'
-                    }
-
-                    It 'Should return $false' {
-                        $compareTargetResourceStateResult = Compare-TargetResourceState @compareTargetResourceStateParameters
-                        $compareTargetResourceStateResult | Should -HaveCount 1
-
-                        $comparedReturnValue = $compareTargetResourceStateResult.Where( { $_.ParameterName -eq 'ForestMode' })
-                        $comparedReturnValue | Should -Not -BeNullOrEmpty
-                        $comparedReturnValue.Expected | Should -Be 'Windows2012R2Forest'
-                        $comparedReturnValue.Actual | Should -Be $mockDefaultParameters.ForestMode
-                        $comparedReturnValue.InDesiredState | Should -BeFalse
-
-                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                    }
-                }
-            }
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
         }
+    }
 
-        Describe 'MSFT_ADForestFunctionalLevel\Set-TargetResource' -Tag 'Set' {
-            Context 'When the system is in the desired state' {
-                Context 'When the property ForestMode is in desired state' {
-                    BeforeAll {
-                        Mock -CommandName Set-ADForestMode
-                        Mock -CommandName Compare-TargetResourceState -MockWith {
-                            return @(
-                                @{
-                                    ParameterName  = 'ForestMode'
-                                    Actual         = 'Windows2016Forest'
-                                    Expected       = 'Windows2016Forest'
-                                    InDesiredState = $true
-                                }
-                            )
-                        }
-                    }
-
-                    It 'Should not throw and do not call Set-CimInstance' {
-                        { Set-TargetResource @mockDefaultParameters } | Should -Not -Throw
-
-                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Set-ADForestMode -Exactly -Times 0 -Scope It
+    Context 'When the system is not in the desired state' {
+        Context 'When the property ForestMode is not in desired state' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        ForestIdentity = 'contoso.com'
+                        ForestMode     = 'Windows2016Forest'
                     }
                 }
             }
 
-            Context 'When the system is not in the desired state' {
-                Context 'When the property ForestMode is not in desired state' {
-                    BeforeAll {
-                        Mock -CommandName Set-ADForestMode
-                        Mock -CommandName Compare-TargetResourceState -MockWith {
-                            return @(
-                                @{
-                                    ParameterName  = 'ForestMode'
-                                    Actual         = 'Windows2016Forest'
-                                    Expected       = 'Windows2012R2Forest'
-                                    InDesiredState = $false
-                                }
-                            )
-                        }
+            It 'Should return $false' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-                        $setTargetResourceParameters = $mockDefaultParameters.Clone()
-                        $setTargetResourceParameters['ForestMode'] = 'Windows2012R2Forest'
+                    $mockParameters = @{
+                        ForestIdentity = 'contoso.com'
+                        ForestMode     = 'Windows2012R2Forest'
                     }
 
-                    It 'Should not throw and call the correct mocks' {
-                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+                    $compareResult = Compare-TargetResourceState @mockParameters
+                    $compareResult | Should -HaveCount 1
 
-                        Assert-MockCalled -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
-                        Assert-MockCalled -CommandName Set-ADForestMode -Exactly -Times 1 -Scope It
-                    }
+                    $comparedReturnValue = $compareResult.Where( { $_.ParameterName -eq 'ForestMode' })
+                    $comparedReturnValue | Should -Not -BeNullOrEmpty
+                    $comparedReturnValue.Expected | Should -Be $mockParameters.ForestMode
+                    $comparedReturnValue.Actual | Should -Be 'Windows2016Forest'
+                    $comparedReturnValue.InDesiredState | Should -BeFalse
                 }
+
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
             }
         }
     }
 }
-finally
-{
-    Invoke-TestCleanup
+
+Describe 'MSFT_ADForestFunctionalLevel\Set-TargetResource' -Tag 'Set' {
+    Context 'When the system is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Set-ADForestMode
+            Mock -CommandName Compare-TargetResourceState -MockWith {
+                return @(
+                    @{
+                        ParameterName  = 'ForestMode'
+                        Actual         = 'Windows2016Forest'
+                        Expected       = 'Windows2016Forest'
+                        InDesiredState = $true
+                    }
+                )
+            }
+        }
+
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestIdentity = 'contoso.com'
+                    ForestMode     = 'Windows2016Forest'
+                }
+
+                { Set-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-ADForestMode -Exactly -Times 0 -Scope It
+        }
+    }
+
+    Context 'When the system is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Set-ADForestMode
+            Mock -CommandName Compare-TargetResourceState -MockWith {
+                return @(
+                    @{
+                        ParameterName  = 'ForestMode'
+                        Actual         = 'Windows2016Forest'
+                        Expected       = 'Windows2012R2Forest'
+                        InDesiredState = $false
+                    }
+                )
+            }
+        }
+
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestIdentity = 'contoso.com'
+                    ForestMode     = 'Windows2012R2Forest'
+                }
+
+                { Set-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-ADForestMode -Exactly -Times 1 -Scope It
+        }
+    }
 }
