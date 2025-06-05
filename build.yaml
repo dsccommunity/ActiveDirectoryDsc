@@ -83,6 +83,7 @@ Pester:
       OutputEncoding: ascii
   ExcludeFromCodeCoverage:
     - Modules/DscResource.Common
+    - Modules/ActiveDirectoryDsc.Common/Build-Readme.ps1
 
 ####################################################
 #      Pester Configuration (DscResource.Test)     #
