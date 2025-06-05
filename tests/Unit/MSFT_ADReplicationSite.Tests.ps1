@@ -186,7 +186,7 @@ Describe 'MSFT_ADReplicationSite\Test-TargetResource' -Tag 'Test' {
 }
 
 
-Describe 'ADReplicationSite\Set-TargetResource' -Tag 'Set' {
+Describe 'MSFT_ADReplicationSite\Set-TargetResource' -Tag 'Set' {
     Context 'When a site is missing' {
         BeforeAll {
             Mock -CommandName Get-ADReplicationSite
