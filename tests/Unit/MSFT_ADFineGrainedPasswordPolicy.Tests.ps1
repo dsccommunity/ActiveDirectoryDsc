@@ -924,7 +924,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
                 }
             }
 
-            Context 'When the 'DomainController' parameter is specified' {
+            Context 'When the ''DomainController'' parameter is specified' {
                 It 'Should call the expected mocks' {
                     InModuleScope -ScriptBlock {
                         Set-StrictMode -Version 1.0
@@ -1084,7 +1084,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
                 Should -Invoke -CommandName Add-ADFineGrainedPasswordPolicySubject -Exactly -Times 0 -Scope It
             }
 
-            Context 'When the 'Subjects' Property is specified' {
+            Context 'When the ''Subjects'' Property is specified' {
                 BeforeAll {
                     Mock -CommandName Get-TargetResource -MockWith {
                         @{
@@ -1277,7 +1277,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
                 Should -Invoke -CommandName Add-ADFineGrainedPasswordPolicySubject -Exactly -Times 0 -Scope It
             }
 
-            Context 'When ''ProtectedFromAccidentalDeletion'' is 'true'' {
+            Context 'When ''ProtectedFromAccidentalDeletion'' is ''true''' {
                 BeforeAll {
                     Mock -CommandName Get-TargetResource -MockWith {
                         @{
