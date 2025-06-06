@@ -1,458 +1,604 @@
-$script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_ADObjectEnabledState'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
 
-function Invoke-TestSetup
-{
+BeforeDiscovery {
     try
     {
-        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
     }
     catch [System.IO.FileNotFoundException]
     {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
     }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'ActiveDirectoryDsc'
+    $script:dscResourceName = 'MSFT_ADObjectEnabledState'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
         -DSCResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
 }
 
-function Invoke-TestCleanup
-{
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name ActiveDirectory_2019 -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# Begin Testing
+$mockComputerNamePresent = 'TEST01'
+$mockDomain = 'contoso.com'
+$mockEnabled = $true
+$mockDisabled = $false
+$mockObjectClass_Computer = 'Computer'
+$mockDomainController = 'DC01'
 
-Invoke-TestSetup
+$mockCredentialUserName = 'COMPANY\User'
+$mockCredentialPassword = ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+$mockCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+    'COMPANY\User',
+    ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+)
 
-try
-{
-    InModuleScope $script:dscResourceName {
-        Set-StrictMode -Version 1.0
+Describe 'MSFT_ADObjectEnabledState\Get-TargetResource' -Tag 'Get' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
 
-        # Load stub cmdlets and classes.
-        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
-
-        $mockComputerNamePresent = 'TEST01'
-        $mockDomain = 'contoso.com'
-        $mockEnabled = $true
-        $mockDisabled = $false
-        $mockObjectClass_Computer = 'Computer'
-        $mockDomainController = 'DC01'
-
-        $mockCredentialUserName = 'COMPANY\User'
-        $mockCredentialPassword = 'dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force
-        $mockCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-            $mockCredentialUserName, $mockCredentialPassword
-        )
-
-        Describe 'MSFT_ADObjectEnabledState\Get-TargetResource' -Tag 'Get' {
+    Context 'When the system is not in the desired state' {
+        Context 'When the Get-ADComputer throws an unknown error' {
             BeforeAll {
-                Mock -CommandName Assert-Module
-            }
-
-            Context 'When the system is not in the desired state' {
-                Context 'When the Get-ADComputer throws an unknown error' {
-                    BeforeAll {
-                        $errorMessage = 'Mocked error'
-                        Mock -CommandName Get-ADComputer -MockWith {
-                            throw $errorMessage
-                        }
-
-                        $getTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                        }
-                    }
-
-                    It 'Should throw the correct error' {
-                        { Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
-
-                        Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
-                    }
-                }
-
-                Context 'When the computer account is absent in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-ADComputer -MockWith {
-                            throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException'
-                        }
-
-                        $getTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                        }
-                    }
-
-                    It 'Should throw the correct error' {
-                        { Get-TargetResource @getTargetResourceParameters } | Should -Throw ($script:localizedData.FailedToRetrieveComputerAccount -f $mockComputerNamePresent)
-
-                        Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
-                    }
+                Mock -CommandName Get-ADComputer -MockWith {
+                    throw 'Mocked error'
                 }
             }
 
-            Context 'When the system is in the desired state' {
-                BeforeEach {
+            It 'Should throw the correct error' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
+                    }
+
+                    $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToRetrieveComputerAccount -f $mockParameters.Identity)
+
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                }
+
+                Should -Invoke -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the computer account is absent in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Get-ADComputer -MockWith {
+                    throw New-Object -TypeName 'Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException'
+                }
+            }
+
+            It 'Should throw the correct error' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
+                    }
+
+                    $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToRetrieveComputerAccount -f $mockParameters.Identity)
+
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                }
+
+                Should -Invoke -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+
+    Context 'When the system is in the desired state' {
+        Context 'When the computer account is present in Active Directory' {
+            Context 'When the computer account is enabled' {
+                BeforeAll {
                     Mock -CommandName Get-ADComputer -MockWith {
                         return @{
-                            CN          = $mockComputerNamePresent
-                            Enabled     = $mockDynamicEnabledProperty
-                            ObjectClass = $mockObjectClass_Computer
+                            CN          = 'TEST01'
+                            Enabled     = $true
+                            ObjectClass = 'Computer'
                         }
                     }
                 }
 
-                Context 'When the computer account is present in Active Directory' {
-                    Context 'When the computer account is enabled' {
-                        BeforeAll {
-                            $mockDynamicEnabledProperty = $mockEnabled
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-                            $getTargetResourceParameters = @{
-                                Identity         = $mockComputerNamePresent
-                                ObjectClass      = $mockObjectClass_Computer
-                                DomainController = $mockDomainController
-                                Credential       = $mockCredential
-                                Enabled          = $false
-                            }
-                        }
-
-                        It 'Should return the same values as passed as parameters' {
-                            $result = Get-TargetResource @getTargetResourceParameters
-                            $result.Identity | Should -Be $getTargetResourceParameters.Identity
-                            $result.ObjectClass | Should -Be $getTargetResourceParameters.ObjectClass
-                            $result.DomainController | Should -Be $getTargetResourceParameters.DomainController
-                            $result.Credential.UserName | Should -Be $getTargetResourceParameters.Credential.UserName
-
-                            Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
-                        }
-
-                        It 'Should return correct values for the rest of the properties' {
-                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                            $getTargetResourceResult.Enabled | Should -BeTrue
-                        }
-                    }
-
-                    Context 'When the computer account is disabled' {
-                        BeforeAll {
-                            $mockDynamicEnabledProperty = $mockDisabled
-
-                            $getTargetResourceParameters = @{
-                                Identity         = $mockComputerNamePresent
-                                ObjectClass      = $mockObjectClass_Computer
-                                DomainController = $mockDomainController
-                                Credential       = $mockCredential
-                                Enabled          = $true
-                            }
-                        }
-
-                        It 'Should return the same values as passed as parameters' {
-                            $result = Get-TargetResource @getTargetResourceParameters
-                            $result.Identity | Should -Be $getTargetResourceParameters.Identity
-                            $result.ObjectClass | Should -Be $getTargetResourceParameters.ObjectClass
-                            $result.DomainController | Should -Be $getTargetResourceParameters.DomainController
-                            $result.Credential.UserName | Should -Be $getTargetResourceParameters.Credential.UserName
-
-                            Assert-MockCalled -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
-                        }
-
-                        It 'Should return correct values for the rest of the properties' {
-                            $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                            $getTargetResourceResult.Enabled | Should -BeFalse
-                        }
-                    }
-                }
-
-                Context 'When Get-TargetResource is called with only mandatory parameters' {
-                    BeforeAll {
-                        $mockDynamicEnabledProperty = $mockEnabled
-
-                        $getTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                        }
-                    }
-
-                    It 'Should only call Get-ADComputer with only Identity parameter' {
-                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-
-                        Assert-MockCalled -CommandName Get-ADComputer -ParameterFilter {
-                            $PSBoundParameters.ContainsKey('Identity') `
-                                -and -not $PSBoundParameters.ContainsKey('Server') `
-                                -and -not $PSBoundParameters.ContainsKey('Credential')
-                        } -Exactly -Times 1 -Scope It
-                    }
-                }
-
-                Context 'When Get-TargetResource is called with DomainController parameter' {
-                    BeforeAll {
-                        $mockDynamicEnabledProperty = $mockEnabled
-
-                        $getTargetResourceParameters = @{
-                            Identity         = $mockComputerNamePresent
-                            ObjectClass      = $mockObjectClass_Computer
+                        $mockParameters = @{
+                            Identity         = 'TEST01'
+                            ObjectClass      = 'Computer'
+                            DomainController = 'DC01'
+                            Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                                'COMPANY\User',
+                                ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                            )
                             Enabled          = $false
-                            DomainController = $mockDomainController
                         }
+
+                        $result = Get-TargetResource @mockParameters
+
+                        $result.Enabled | Should -BeTrue
+                        $result.Identity | Should -Be $mockParameters.Identity
+                        $result.ObjectClass | Should -Be $mockParameters.ObjectClass
+                        $result.DomainController | Should -Be $mockParameters.DomainController
+                        $result.Credential.UserName | Should -Be $mockParameters.Credential.UserName
                     }
 
-                    It 'Should only call Get-ADComputer with Identity and Server parameter' {
-                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
+                    Should -Invoke -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
+                }
+            }
 
-                        Assert-MockCalled -CommandName Get-ADComputer -ParameterFilter {
-                            $PSBoundParameters.ContainsKey('Identity') `
-                                -and $PSBoundParameters.ContainsKey('Server') `
-                                -and -not $PSBoundParameters.ContainsKey('Credential')
-                        } -Exactly -Times 1 -Scope It
+            Context 'When the computer account is disabled' {
+                BeforeAll {
+                    Mock -CommandName Get-ADComputer -MockWith {
+                        return @{
+                            CN          = 'TEST01'
+                            Enabled     = $false
+                            ObjectClass = 'Computer'
+                        }
                     }
                 }
 
-                Context 'When Get-TargetResource is called with Credential parameter' {
-                    BeforeAll {
-                        $mockDynamicEnabledProperty = $mockEnabled
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-                        $getTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                            Credential  = $mockCredential
+                        $mockParameters = @{
+                            Identity         = 'TEST01'
+                            ObjectClass      = 'Computer'
+                            DomainController = 'DC01'
+                            Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                                'COMPANY\User',
+                                ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                            )
+                            Enabled          = $true
                         }
+
+                        $result = Get-TargetResource @mockParameters
+
+                        $result.Enabled | Should -BeFalse
+                        $result.Identity | Should -Be $mockParameters.Identity
+                        $result.ObjectClass | Should -Be $mockParameters.ObjectClass
+                        $result.DomainController | Should -Be $mockParameters.DomainController
+                        $result.Credential.UserName | Should -Be $mockParameters.Credential.UserName
                     }
 
-                    It 'Should only call Get-ADComputer with Identity and Credential parameter' {
-                        $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-
-                        Assert-MockCalled -CommandName Get-ADComputer -ParameterFilter {
-                            $PSBoundParameters.ContainsKey('Identity') `
-                                -and -not $PSBoundParameters.ContainsKey('Server') `
-                                -and $PSBoundParameters.ContainsKey('Credential')
-                        } -Exactly -Times 1 -Scope It
-                    }
+                    Should -Invoke -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
                 }
             }
         }
 
-        Describe 'MSFT_ADObjectEnabledState\Test-TargetResource' -Tag 'Test' {
+        Context 'When Get-TargetResource is called with only mandatory parameters' {
             BeforeAll {
-                Mock -CommandName Assert-Module
-
-                $mockGetTargetResource_Enabled = {
+                Mock -CommandName Get-ADComputer -MockWith {
                     return @{
-                        Identity         = $null
-                        ObjectClass      = $mockObjectClass_Computer
-                        Enabled          = $true
-                        DomainController = $mockDomainController
-                        Credential       = $mockCredential
-                    }
-                }
-
-                $mockGetTargetResource_Disabled = {
-                    return @{
-                        Identity         = $null
-                        ObjectClass      = $mockObjectClass_Computer
-                        Enabled          = $false
-                        DomainController = $mockDomainController
-                        Credential       = $mockCredential
+                        CN          = 'TEST01'
+                        Enabled     = $true
+                        ObjectClass = 'Computer'
                     }
                 }
             }
 
-            Context 'When the system is in the desired state' {
-                Context 'When the computer account is disabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource $mockGetTargetResource_Disabled
+            It 'Should only call Get-ADComputer with only Identity parameter' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-                        $testTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                        }
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
                     }
 
-                    It 'Should return $true' {
-                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                        $testTargetResourceResult | Should -BeTrue
-
-                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                    }
+                    Get-TargetResource @mockParameters
                 }
 
-                Context 'When the computer account is enabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Enabled
-
-                        $testTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $true
-                        }
-                    }
-
-                    It 'Should return $true' {
-                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                        $testTargetResourceResult | Should -BeTrue
-
-                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                    }
-                }
-            }
-
-            Context 'When the system is not in the desired state' {
-                Context 'When the computer account should be enabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource $mockGetTargetResource_Disabled
-
-                        $testTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $true
-                        }
-                    }
-
-                    It 'Should return $false' {
-                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                        $testTargetResourceResult | Should -BeFalse
-
-                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                    }
-                }
-
-                Context 'When the computer account should be disabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Enabled
-
-                        $testTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                        }
-                    }
-
-                    It 'Should return $false' {
-                        $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                        $testTargetResourceResult | Should -BeFalse
-
-                        Assert-MockCalled -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                    }
-                }
+                Should -Invoke -CommandName Get-ADComputer -ParameterFilter {
+                    $PesterBoundParameters.ContainsKey('Identity') -and -not
+                    $PesterBoundParameters.ContainsKey('Server') -and -not
+                    $PesterBoundParameters.ContainsKey('Credential')
+                } -Exactly -Times 1 -Scope It
             }
         }
 
-        Describe 'MSFT_ADObjectEnabledState\Set-TargetResource' -Tag 'Set' {
+        Context 'When Get-TargetResource is called with DomainController parameter' {
             BeforeAll {
-                Mock -CommandName Assert-Module
-                Mock -CommandName Set-ADComputer
-
-                $mockGetTargetResource_Enabled = {
+                Mock -CommandName Get-ADComputer -MockWith {
                     return @{
-                        Identity         = $null
-                        ObjectClass      = $mockObjectClass_Computer
-                        Enabled          = $true
-                        DomainController = $mockDomainController
-                        Credential       = $mockCredential
+                        CN          = 'TEST01'
+                        Enabled     = $true
+                        ObjectClass = 'Computer'
                     }
                 }
+            }
 
-                $mockGetTargetResource_Disabled = {
-                    return @{
-                        Identity         = $null
-                        ObjectClass      = $mockObjectClass_Computer
+            It 'Should only call Get-ADComputer with Identity and Server parameter' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity         = 'TEST01'
+                        ObjectClass      = 'Computer'
                         Enabled          = $false
-                        DomainController = $mockDomainController
-                        Credential       = $mockCredential
+                        DomainController = 'DC01'
+                    }
+
+                    Get-TargetResource @mockParameters
+                }
+
+                Should -Invoke -CommandName Get-ADComputer -ParameterFilter {
+                    $PesterBoundParameters.ContainsKey('Identity') -and
+                    $PesterBoundParameters.ContainsKey('Server') -and -not
+                    $PesterBoundParameters.ContainsKey('Credential')
+                } -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When Get-TargetResource is called with Credential parameter' {
+            BeforeAll {
+                Mock -CommandName Get-ADComputer -MockWith {
+                    return @{
+                        CN          = 'TEST01'
+                        Enabled     = $true
+                        ObjectClass = 'Computer'
                     }
                 }
             }
 
-            Context 'When the system is in the desired state' {
-                Context 'When the computer account is enabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Enabled
+            It 'Should only call Get-ADComputer with Identity and Credential parameter' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-                        $setTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $true
-                        }
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
+                        Credential  = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
                     }
 
-                    It 'Should not call any mocks that changes state' {
-                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
-
-                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
-                    }
+                    Get-TargetResource @mockParameters
                 }
 
-                Context 'When the computer account is disabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Disabled
-
-                        $setTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                        }
-                    }
-
-                    It 'Should not call any mocks that changes state' {
-                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
-
-                        Assert-MockCalled -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
-                    }
-                }
-            }
-
-            Context 'When the system is not in the desired state' {
-                Context 'When the computer account should be enabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Disabled
-
-                        $setTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $true
-                        }
-                    }
-
-                    It 'Should call the correct mocks' {
-                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
-
-                        Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-                            $Enabled -eq $true
-                        } -Exactly -Times 1 -Scope It
-                    }
-                }
-
-                Context 'When the computer account should be disabled in Active Directory' {
-                    BeforeAll {
-                        Mock -CommandName Get-TargetResource -MockWith $mockGetTargetResource_Enabled
-
-                        $setTargetResourceParameters = @{
-                            Identity    = $mockComputerNamePresent
-                            ObjectClass = $mockObjectClass_Computer
-                            Enabled     = $false
-                        }
-                    }
-
-                    It 'Should call the correct mocks' {
-                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
-
-                        Assert-MockCalled -CommandName Set-ADComputer -ParameterFilter {
-                            $Enabled -eq $false
-                        } -Exactly -Times 1 -Scope It
-                    }
-                }
+                Should -Invoke -CommandName Get-ADComputer -ParameterFilter {
+                    $PesterBoundParameters.ContainsKey('Identity') -and -not
+                    $PesterBoundParameters.ContainsKey('Server') -and
+                    $PesterBoundParameters.ContainsKey('Credential')
+                } -Exactly -Times 1 -Scope It
             }
         }
     }
 }
-finally
-{
-    Invoke-TestCleanup
+
+Describe 'MSFT_ADObjectEnabledState\Test-TargetResource' -Tag 'Test' {
+    Context 'When the system is in the desired state' {
+        Context 'When the computer account is disabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-TargetResource {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $false
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should return $true' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeTrue
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the computer account is enabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $true
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should return $true' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $true
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeTrue
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+
+    Context 'When the system is not in the desired state' {
+        Context 'When the computer account should be enabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-TargetResource {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $false
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should return $false' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $true
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the computer account should be disabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $true
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should return $false' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+}
+
+Describe 'MSFT_ADObjectEnabledState\Set-TargetResource' -Tag 'Set' {
+    Context 'When the system is in the desired state' {
+        Context 'When the computer account is enabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $true
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should not call any mocks that changes state' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $true
+                    }
+
+                    { Set-TargetResource @mockParameters } | Should -Not -Throw
+                }
+
+                Should -Invoke -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
+            }
+        }
+
+        Context 'When the computer account is disabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $false
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should not call any mocks that changes state' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
+                    }
+
+                    { Set-TargetResource @mockParameters } | Should -Not -Throw
+                }
+
+                Should -Invoke -CommandName Set-ADComputer -Exactly -Times 0 -Scope It
+            }
+        }
+    }
+
+    Context 'When the system is not in the desired state' {
+        Context 'When the computer account should be enabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $false
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $true
+                    }
+                    { Set-TargetResource @mockParameters } | Should -Not -Throw
+                }
+
+                Should -Invoke -CommandName Set-ADComputer -ParameterFilter {
+                    $Enabled -eq $true
+                } -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the computer account should be disabled in Active Directory' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Set-ADComputer
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        Identity         = $null
+                        ObjectClass      = 'Computer'
+                        Enabled          = $true
+                        DomainController = 'DC01'
+                        Credential       = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'COMPANY\User',
+                            ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+                }
+            }
+
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Identity    = 'TEST01'
+                        ObjectClass = 'Computer'
+                        Enabled     = $false
+                    }
+                    { Set-TargetResource @mockParameters } | Should -Not -Throw
+                }
+
+                Should -Invoke -CommandName Set-ADComputer -ParameterFilter {
+                    $Enabled -eq $false
+                } -Exactly -Times 1 -Scope It
+            }
+        }
+    }
 }
