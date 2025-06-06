@@ -44,6 +44,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Add wiki to release assets.
 - `ActiveDirectoryDsc`
   - Migrate tests to Pester 5.
+  - Add VSCode settings for Pester Extension.
 
 ## [6.7.0] - 2025-05-29
 
