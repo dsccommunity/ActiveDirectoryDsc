@@ -51,7 +51,6 @@ $script:waitForDomainControllerScriptBlock = {
         if ($SiteName)
         {
             $findDomainControllerParameters['SiteName'] = $SiteName
-
         }
 
         if ($null -ne $Credential)
@@ -172,11 +171,11 @@ function Get-TargetResource
     }
     else
     {
-        if ($null -ne $global:PsDscContext.RunAsUser)
+        if ($null -ne $PsDscContext.RunAsUser)
         {
             # Running using PsDscRunAsCredential
             Write-Verbose -Message (
-                $script:localizedData.ImpersonatingCredentials -f $global:PsDscContext.RunAsUser
+                $script:localizedData.ImpersonatingCredentials -f $PsDscContext.RunAsUser
             )
         }
         else
@@ -205,7 +204,6 @@ function Get-TargetResource
         $domainControllerSiteName = $currentDomainController.SiteName
 
         Write-Verbose -Message $script:localizedData.FoundDomainController
-
     }
     else
     {
