@@ -16,6 +16,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - All Resources
   - Removed about_*.help.txt from sources as these are now generated at build time.
+- `ActiveDirectoryDsc.Common`
+  - `Test-DscPropertyState` now provided by `DscResource.Common`.
+  - `Compare-ResourcePropertyState` now provided by `DscResource.Common`.
 
 ### Changed
 
@@ -39,6 +42,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Add doc generation.
   - Move module to buildModule directory.
   - Add wiki to release assets.
+- `ActiveDirectoryDsc`
+  - Migrate tests to Pester 5.
 
 ## [6.7.0] - 2025-05-29
 
