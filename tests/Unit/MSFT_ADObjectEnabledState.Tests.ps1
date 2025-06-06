@@ -57,20 +57,6 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-$mockComputerNamePresent = 'TEST01'
-$mockDomain = 'contoso.com'
-$mockEnabled = $true
-$mockDisabled = $false
-$mockObjectClass_Computer = 'Computer'
-$mockDomainController = 'DC01'
-
-$mockCredentialUserName = 'COMPANY\User'
-$mockCredentialPassword = ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
-$mockCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-    'COMPANY\User',
-    ('dummyPassw0rd' | ConvertTo-SecureString -AsPlainText -Force)
-)
-
 Describe 'MSFT_ADObjectEnabledState\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
