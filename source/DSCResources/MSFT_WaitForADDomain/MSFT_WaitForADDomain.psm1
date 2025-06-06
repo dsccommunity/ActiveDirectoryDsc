@@ -171,11 +171,11 @@ function Get-TargetResource
     }
     else
     {
-        if ($null -ne $global:PsDscContext.RunAsUser)
+        if ($null -ne $PsDscContext.RunAsUser)
         {
             # Running using PsDscRunAsCredential
             Write-Verbose -Message (
-                $script:localizedData.ImpersonatingCredentials -f $global:PsDscContext.RunAsUser
+                $script:localizedData.ImpersonatingCredentials -f $PsDscContext.RunAsUser
             )
         }
         else

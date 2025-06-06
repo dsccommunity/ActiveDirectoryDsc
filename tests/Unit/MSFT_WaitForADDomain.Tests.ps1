@@ -61,7 +61,7 @@ Describe 'MSFT_WaitForADDomain\Get-TargetResource' -Tag 'Get' {
 
                 InModuleScope -ScriptBlock {
                     # Mock PsDscRunAsCredential context.
-                    $global:PsDscContext = @{
+                    $script:PsDscContext = @{
                         RunAsUser = $null
                     }
                 }
@@ -165,7 +165,7 @@ Describe 'MSFT_WaitForADDomain\Get-TargetResource' -Tag 'Get' {
 
                     InModuleScope -ScriptBlock {
                         # Mock PsDscRunAsCredential context.
-                        $global:PsDscContext = @{
+                        $script:PsDscContext = @{
                             RunAsUser = 'BuiltInCredential'
                         }
                     }
@@ -844,7 +844,7 @@ Describe 'MSFT_WaitForADDomain\WaitForDomainControllerScriptBlock' -Tag 'Helper'
     Context 'When a domain controller is found' {
         BeforeAll {
             Mock -CommandName Find-DomainController -MockWith {
-                return New-Object -TypeName 'PSObject'
+                return [PSCustomObject] @{}
             }
         }
 
