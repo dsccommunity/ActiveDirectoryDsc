@@ -254,7 +254,6 @@ function Assert-MemberParameters
 #>
 function Remove-DuplicateMembers
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseOutputTypeCorrectly', '')]
     [CmdletBinding()]
     [OutputType([System.String[]])]
     param
@@ -2046,7 +2045,9 @@ function Get-CurrentUser
 #>
 function Test-Password
 {
+    #TODO: Fix the justification message
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'PasswordAuthentication')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '', Justification = 'This is to allow testing of service accounts.')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -2164,6 +2165,7 @@ function Test-Password
 function Test-PrincipalContextCredentials
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'PasswordAuthentication')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '', Justification = 'This is to allow testing of service accounts.')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -2568,7 +2570,7 @@ function Resolve-MembersSecurityIdentifier
             {
                 if ($PrepareForMembership.IsPresent)
                 {
-                    "<SID=$($securityIdentifier)>"
+                    [System.String[]] "<SID=$($securityIdentifier)>"
                 }
                 else
                 {
