@@ -255,7 +255,7 @@ function Assert-MemberParameters
 function Remove-DuplicateMembers
 {
     [CmdletBinding()]
-    [OutputType([System.String[]])]
+    [OutputType([System.Object[]])]
     param
     (
         [Parameter()]
