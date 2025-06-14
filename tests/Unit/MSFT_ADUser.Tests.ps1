@@ -58,6 +58,7 @@ try
             Path                              = $mockPath
             DistinguishedName                 = "CN=$UserName,$mockPath"
             DisplayName                       = 'Test User'
+            SamAccountName                    = $UserName
             Initials                          = 'T'
             Enabled                           = $true
             GivenName                         = 'Test'
@@ -118,7 +119,7 @@ try
 
         $mockAbsentResource = @{
             DomainName                        = 'contoso.com'
-            UserName                          = 'TestUser'
+            UserName                          = $UserName
             Path                              = $null
             DistinguishedName                 = $null
             DisplayName                       = $null
@@ -183,6 +184,7 @@ try
         $mockChangedResource = @{
             Path                              = 'OU=Staff,DC=contoso,DC=com'
             DisplayName                       = 'Test User Changed'
+            SamAccountName                    = 'TestUserChanged'
             Initials                          = 'S'
             Enabled                           = $false
             GivenName                         = 'Test Changed'
@@ -238,7 +240,7 @@ try
         }
 
         $mockGetADUserResult = @{
-            samAccountName                    = $mockResource.UserName
+            samAccountName                    = $mockResource.SamAccountName
             cn                                = $mockResource.CommonName
             UserPrincipalName                 = $mockResource.UserPrincipalName
             DisplayName                       = $mockResource.DisplayName
