@@ -1,15 +1,15 @@
 trigger:
   branches:
     include:
-    - main
+      - main
   paths:
     include:
-    - source/*
+      - source/*
   tags:
     include:
-    - "v*"
+      - 'v*'
     exclude:
-    - "*-*"
+      - '*-*'
 
 variables:
   buildFolderName: output
@@ -101,7 +101,7 @@ stages:
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks test -PesterScript 'tests/Unit'"
-              pwsh: false
+              pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: succeededOrFailed()
