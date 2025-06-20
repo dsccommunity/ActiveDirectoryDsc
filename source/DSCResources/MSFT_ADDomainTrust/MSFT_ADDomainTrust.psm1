@@ -269,7 +269,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw $script:localizedData.NotOptInToRecreateTrust
+                    New-InvalidOperationException -Message $script:localizedData.NotOptInToRecreateTrust
                 }
             }
 
