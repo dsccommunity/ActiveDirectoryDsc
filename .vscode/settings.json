@@ -41,7 +41,9 @@
         "NTDS",
         "Sysvol",
         "contoso",
-        "netlogon"
+        "netlogon",
+        "TESTDC",
+        "ADATUM"
     ],
     "cSpell.ignorePaths": [
         ".git"
