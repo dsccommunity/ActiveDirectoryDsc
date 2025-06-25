@@ -57,119 +57,6 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-$testPresentParams = @{
-    GroupName        = 'TestGroup'
-    CommonName       = 'TestGroup'
-    GroupScope       = 'Global'
-    Category         = 'Security'
-    Path             = 'OU=OU,DC=contoso,DC=com'
-    Description      = 'Test AD group description'
-    DisplayName      = 'Test display name'
-    AdminDescription = 'Group_'
-    Ensure           = 'Present'
-    Notes            = 'This is a test AD group'
-    ManagedBy        = 'CN=User 1,CN=Users,DC=contoso,DC=com'
-}
-
-$mockGroupName = 'TestGroup'
-$mockCommonName = 'TestGroup'
-$mockGroupPath = 'OU=Test,DC=contoso,DC=com'
-$mockGroupDN = 'CN=TestGroup,OU=Test,DC=contoso,DC=com'
-
-$mockADGroupMembersAsADObjects = @(
-    @{
-        DistinguishedName = 'CN=User 1,CN=Users,DC=contoso,DC=com'
-        ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
-        SamAccountName    = 'USER1'
-        ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1106'
-        ObjectClass       = 'user'
-    }
-    @{
-        DistinguishedName = 'CN=Group 1,CN=Users,DC=contoso,DC=com'
-        ObjectGUID        = 'e2328767-2673-40b2-b3b7-ce9e6511df06'
-        SamAccountName    = 'GROUP1'
-        ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1206'
-        ObjectClass       = 'group'
-    }
-    @{
-        DistinguishedName = 'CN=Computer 1,CN=Users,DC=contoso,DC=com'
-        ObjectGUID        = '42f9d607-0934-4afc-bb91-bdf93e07cbfc'
-        SamAccountName    = 'COMPUTER1'
-        ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-6606'
-        ObjectClass       = 'computer'
-    }
-    # This entry is used to represent a group member from a one-way trusted domain
-    @{
-        DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
-        ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
-        SamAccountName    = 'ADATUM\USER1'
-        ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2106'
-        ObjectClass       = 'foreignSecurityPrincipal'
-    }
-)
-
-$mockADGroup = @{
-    SamAccountName    = 'TestGroup'
-    CN                = 'TestGroup'
-    GroupScope        = 'Global'
-    GroupCategory     = 'Security'
-    Path              = 'OU=Test,DC=contoso,DC=com'
-    Description       = 'Test AD group description'
-    DisplayName       = 'Test display name'
-    AdminDescription  = 'Group_'
-    Info              = 'This is a test AD group'
-    ManagedBy         = 'CN=User 1,CN=Users,DC=contoso,DC=com'
-    DistinguishedName = 'CN=TestGroup,OU=Test,DC=contoso,DC=com'
-    Members           = @('USER1', 'GROUP1', 'COMPUTER1', 'ADATUM\USER1')
-}
-
-$mockADGroupChanged = @{
-    GroupScope  = 'Universal'
-    Description = 'Test AD group description changed'
-    DisplayName = 'Test display name changed'
-    ManagedBy   = 'CN=User 2,CN=Users,DC=contoso,DC=com'
-    CommonName  = 'ChangedCN'
-}
-
-$mockGetTargetResourceResults = @{
-    GroupName         = 'TestGroup'
-    CommonName        = 'TestGroup'
-    GroupScope        = 'Global'
-    Category          = 'Security'
-    Path              = 'OU=Test,DC=contoso,DC=com'
-    Description       = 'Test AD group description'
-    DisplayName       = 'Test display name'
-    AdminDescription  = 'Group_'
-    Notes             = 'This is a test AD group'
-    ManagedBy         = 'CN=User 1,CN=Users,DC=contoso,DC=com'
-    DistinguishedName = 'CN=TestGroup,OU=Test,DC=contoso,DC=com'
-    Members           = @('USER1', 'GROUP1', 'COMPUTER1', 'ADATUM\USER1')
-    Ensure            = 'Present'
-}
-
-$mockGetTargetResourceResultsAbsent = @{
-    GroupName         = 'TestGroup'
-    CommonName        = $null
-    GroupScope        = $null
-    GroupCategory     = $null
-    Path              = $null
-    Description       = $null
-    DisplayName       = $null
-    AdminDescription  = $null
-    Notes             = $null
-    ManagedBy         = $null
-    DistinguishedName = $null
-    Members           = @()
-    Ensure            = 'Absent'
-}
-
-$testDomainController = 'TESTDC'
-
-$testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-    'DummyUser',
-    $(ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
-)
-
 Describe 'MSFT_ADGroup\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
@@ -327,143 +214,132 @@ Describe 'MSFT_ADGroup\Get-TargetResource' -Tag 'Get' {
             }
         }
 
-        # Context 'When ''Get-ADGroupMember'' fails due to one-way trust' {
-        #     BeforeAll {
-        #         Mock -CommandName Get-ADGroupMember -MockWith {
-        #             throw 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
-        #         }
+        Context 'When ''Get-ADGroupMember'' fails due to one-way trust' {
+            BeforeAll {
+                Mock -CommandName Get-ADGroupMember -MockWith {
+                    throw 'ActiveDirectoryServer:0,Microsoft.ActiveDirectory.Management.Commands.GetADGroupMember'
+                }
 
-        #         Mock -CommandName Resolve-SamAccountName -ParameterFilter {
-        #             $ObjectSID -eq 'S-1-5-21-1131554080-2861379300-292325817-1106'
-        #         } -MockWith {
-        #             'USER1'
-        #         }
+                Mock -CommandName Resolve-SamAccountName -ParameterFilter {
+                    $ObjectSID -eq 'S-1-5-21-1131554080-2861379300-292325817-1106'
+                } -MockWith {
+                    'USER1'
+                }
 
-        #         Mock -CommandName Get-ADObject -ParameterFilter {
-        #             $Filter -like 'USER1'
-        #         } -MockWith {
-        #             @{
-        #                 DistinguishedName = 'CN=User 1,CN=Users,DC=contoso,DC=com'
-        #                 ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
-        #                 SamAccountName    = 'USER1'
-        #                 ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1106'
-        #                 ObjectClass       = 'user'
-        #             }
-        #         }
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $Filter -eq 'DistinguishedName -eq ''USER1'''
+                } -MockWith {
+                    @{
+                        DistinguishedName = 'CN=User 1,CN=Users,DC=contoso,DC=com'
+                        ObjectGUID        = 'a97cc867-0c9e-4928-8387-0dba0c883b8e'
+                        SamAccountName    = 'USER1'
+                        ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1106'
+                        ObjectClass       = 'user'
+                    }
+                }
 
-        #         Mock -CommandName Resolve-SamAccountName -ParameterFilter {
-        #             $ObjectSID -eq 'S-1-5-21-1131554080-2861379300-292325817-1206'
-        #         } -MockWith {
-        #             'GROUP1'
-        #         }
+                Mock -CommandName Resolve-SamAccountName -ParameterFilter {
+                    $ObjectSID -eq 'S-1-5-21-1131554080-2861379300-292325817-1206'
+                } -MockWith {
+                    'GROUP1'
+                }
 
-        #         Mock -CommandName Get-ADObject -ParameterFilter {
-        #             $Filter -eq 'DistinguishedName -eq "GROUP1"' -and
-        #             $Properties -eq @('SamAccountName', 'ObjectSID')
-        #         } -MockWith {
-        #             @{
-        #                 DistinguishedName = 'CN=Group 1,CN=Users,DC=contoso,DC=com'
-        #                 ObjectGUID        = 'e2328767-2673-40b2-b3b7-ce9e6511df06'
-        #                 SamAccountName    = 'GROUP1'
-        #                 ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1206'
-        #                 ObjectClass       = 'group'
-        #             }
-        #         }
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $Filter -eq 'DistinguishedName -eq ''GROUP1'''
+                } -MockWith {
+                    @{
+                        DistinguishedName = 'CN=Group 1,CN=Users,DC=contoso,DC=com'
+                        ObjectGUID        = 'e2328767-2673-40b2-b3b7-ce9e6511df06'
+                        SamAccountName    = 'GROUP1'
+                        ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-1206'
+                        ObjectClass       = 'group'
+                    }
+                }
 
-        #         Mock -CommandName Resolve-SamAccountName -ParameterFilter {
-        #             $ObjectSID -eq 'S-1-5-21-1131554080-2861379300-292325817-6606'
-        #         } -MockWith {
-        #             'COMPUTER1'
-        #         }
+                Mock -CommandName Resolve-SamAccountName -ParameterFilter {
+                    $ObjectSID -eq 'S-1-5-21-1131554080-2861379300-292325817-6606'
+                } -MockWith {
+                    'COMPUTER1'
+                }
 
-        #         Mock -CommandName Get-ADObject -ParameterFilter {
-        #             $Filter -eq 'DistinguishedName -eq "COMPUTER1"' -and
-        #             $Properties -eq @('SamAccountName', 'ObjectSID')
-        #         } -MockWith {
-        #             @{
-        #                 DistinguishedName = 'CN=Computer 1,CN=Users,DC=contoso,DC=com'
-        #                 ObjectGUID        = '42f9d607-0934-4afc-bb91-bdf93e07cbfc'
-        #                 SamAccountName    = 'COMPUTER1'
-        #                 ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-6606'
-        #                 ObjectClass       = 'computer'
-        #             }
-        #         }
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $Filter -eq 'DistinguishedName -eq ''COMPUTER1'''
+                } -MockWith {
+                    @{
+                        DistinguishedName = 'CN=Computer 1,CN=Users,DC=contoso,DC=com'
+                        ObjectGUID        = '42f9d607-0934-4afc-bb91-bdf93e07cbfc'
+                        SamAccountName    = 'COMPUTER1'
+                        ObjectSID         = 'S-1-5-21-1131554080-2861379300-292325817-6606'
+                        ObjectClass       = 'computer'
+                    }
+                }
 
-        #         Mock -CommandName Resolve-SamAccountName -ParameterFilter {
-        #             $ObjectSID -eq 'S-1-5-21-8562719340-2451078396-046517832-2106'
-        #         } -MockWith {
-        #             'ADATUM\USER1'
-        #         }
+                Mock -CommandName Resolve-SamAccountName -ParameterFilter {
+                    $ObjectSID -eq 'S-1-5-21-8562719340-2451078396-046517832-2106'
+                } -MockWith {
+                    'ADATUM\USER1'
+                }
 
-        #         Mock -CommandName Get-ADObject -ParameterFilter {
-        #             $Filter -eq 'DistinguishedName -eq "ADATUM\USER1"' -and
-        #             $Properties -eq @('SamAccountName', 'ObjectSID')
-        #         } -MockWith {
-        #             @{
-        #                 DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
-        #                 ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
-        #                 SamAccountName    = 'ADATUM\USER1'
-        #                 ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2106'
-        #                 ObjectClass       = 'foreignSecurityPrincipal'
-        #             }
-        #         }
-        #     }
+                Mock -CommandName Get-ADObject -ParameterFilter {
+                    $Filter -eq 'DistinguishedName -eq ''ADATUM\USER1'''
+                } -MockWith {
+                    @{
+                        DistinguishedName = 'CN=S-1-5-21-8562719340-2451078396-046517832-2106,CN=ForeignSecurityPrincipals,DC=contoso,DC=com'
+                        ObjectGUID        = '6df78e9e-c795-4e67-a626-e17f1b4a0d8b'
+                        SamAccountName    = 'ADATUM\USER1'
+                        ObjectSID         = 'S-1-5-21-8562719340-2451078396-046517832-2106'
+                        ObjectClass       = 'foreignSecurityPrincipal'
+                    }
+                }
+            }
 
-        #     Context 'When ''MembershipAttribute'' is ''SamAccountName''' {
-        #         It 'Should return the correct result' {
-        #             $mockParameters = @{
-        #                 GroupName           = 'TestGroup'
-        #                 MembershipAttribute = 'SamAccountName'
-        #             }
+            Context 'When ''MembershipAttribute'' is ''SamAccountName''' {
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-        #             InModuleScope -Parameters @{
-        #                 mockParameters = $mockParameters
-        #             } -ScriptBlock {
-        #                 Set-StrictMode -Version 1.0
+                        $mockParameters = @{
+                            GroupName           = 'TestGroup'
+                            MembershipAttribute = 'SamAccountName'
+                        }
 
-        #                 $result = Get-TargetResource @mockParameters
+                        $result = Get-TargetResource @mockParameters
 
-        #                 $result.Members | Should -HaveCount 4
-        #             }
+                        $result.Members | Should -HaveCount 4
+                    }
 
-        #             Should -Invoke -CommandName Assert-Module -ParameterFilter -Exactly -Times 1 -Scope It
-        #             Should -Invoke -CommandName Get-ADGroup -ParameterFilter {
-        #                 $Identity -eq $mockParameters.GroupName
-        #             } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-ADGroup -ParameterFilter {
+                        $Identity -eq 'TestGroup'
+                    } -Exactly -Times 1 -Scope It
 
-        #             Should -Invoke -CommandName Get-ADGroupMember -ParameterFilter {
-        #                 $Identity -eq $mockParameters.GroupName
-        #             } -Exactly -Times 1 -Scope It
-        #         }
-        #     }
+                    Should -Invoke -CommandName Get-ADGroupMember -ParameterFilter {
+                        $Identity -eq 'TestGroup'
+                    } -Exactly -Times 1 -Scope It
+                }
+            }
 
-        #     Context "When 'MembershipAttribute' is 'SID'" {
-        #         BeforeAll {
-        #             $script:getADObjectCallCount = 0
-        #         }
+            Context 'When ''MembershipAttribute'' is ''SID''' {
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-        #         It 'Should return the correct result' {
-        #             $getTargetResourceParameters = @{
-        #                 GroupName           = 'TestGroup'
-        #                 MembershipAttribute = 'SID'
-        #             }
+                        $mockParameters = @{
+                            GroupName           = 'TestGroup'
+                            MembershipAttribute = 'SID'
+                        }
 
-        #             $result = Get-TargetResource @getTargetResourceParameters
+                        $result = Get-TargetResource @mockParameters
 
-        #             $result.Members | Should -HaveCount $mockADGroupMembersAsADObjects.Count
-        #             foreach ($member in $result.Members)
-        #             {
-        #                 $mockADGroupMembersAsADObjects.ObjectSID | Should -Contain $member
-        #             }
-        #         }
+                        $result.Members | Should -HaveCount 4
+                    }
 
-        #         It 'Should call the expected mocks' {
-        #             Should -Invoke -CommandName Assert-Module -Exactly -Times 1
-        #             Should -Invoke -CommandName Get-ADGroup -ParameterFilter { $Identity -eq $getTargetResourceParameters.GroupName } -Exactly -Times 1
-        #             Should -Invoke -CommandName Get-ADGroupMember -ParameterFilter { $Identity -eq $getTargetResourceParameters.GroupName } -Exactly -Times 1
-        #         }
-        #     }
-        # }
+                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-ADGroup -ParameterFilter { $Identity -eq 'TestGroup' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-ADGroupMember -ParameterFilter { $Identity -eq 'TestGroup' } -Exactly -Times 1 -Scope It
+                }
+            }
+        }
 
         Context "When 'Get-ADGroup' throws an exception" {
             BeforeAll {
