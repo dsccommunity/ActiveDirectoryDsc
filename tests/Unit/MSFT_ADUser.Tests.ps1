@@ -75,15 +75,15 @@ AfterAll {
 
 # $mockResource = @{
 #     DomainName                        = 'contoso.com'
-#     UserName                          = $UserName
-#     Path                              = $mockPath
-#     DistinguishedName                 = "CN=$UserName,$mockPath"
+#     UserName                          = 'TestUser'
+#     Path                              = 'CN=Users,DC=contoso,DC=com'
+#     DistinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
 #     DisplayName                       = 'Test User'
 #     Initials                          = 'T'
 #     Enabled                           = $true
 #     GivenName                         = 'Test'
-#     CommonName                        = $UserName
-#     Password                          = $testCredential
+#     CommonName                        = 'TestUser'
+#     Password                          = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
 #     Description                       = 'This is the test user'
 #     Surname                           = 'User'
 #     StreetAddress                     = '1 Highway Road'
@@ -138,67 +138,67 @@ AfterAll {
 # }
 
 # $mockAbsentResource = @{
-#     DomainName                        = 'contoso.com'
-#     UserName                          = 'TestUser'
-#     Path                              = $null
-#     DistinguishedName                 = $null
-#     DisplayName                       = $null
-#     Initials                          = $null
-#     Enabled                           = $null
-#     GivenName                         = $null
-#     CommonName                        = $null
-#     Password                          = $null
-#     Description                       = $null
-#     Surname                           = $null
-#     StreetAddress                     = $null
-#     POBox                             = $null
-#     City                              = $null
-#     State                             = $null
-#     UserPrincipalName                 = $null
-#     ServicePrincipalNames             = $null
-#     ThumbnailPhoto                    = $null
-#     ThumbnailPhotoHash                = $null
-#     PostalCode                        = $null
-#     Country                           = $null
-#     Department                        = $null
-#     Division                          = $null
-#     Company                           = $null
-#     Office                            = $null
-#     JobTitle                          = $null
-#     EmailAddress                      = $null
-#     EmployeeID                        = $null
-#     EmployeeNumber                    = $null
-#     HomeDirectory                     = $null
-#     HomeDrive                         = $null
-#     HomePage                          = $null
-#     ProfilePath                       = $null
-#     LogonScript                       = $null
-#     Notes                             = $null
-#     OfficePhone                       = $null
-#     MobilePhone                       = $null
-#     Fax                               = $null
-#     Pager                             = $null
-#     IPPhone                           = $null
-#     HomePhone                         = $null
-#     Manager                           = $null
-#     LogonWorkstations                 = $null
-#     Organization                      = $null
-#     OtherName                         = $null
-#     PasswordNeverExpires              = $null
-#     CannotChangePassword              = $null
-#     ChangePasswordAtLogon             = $null
-#     TrustedForDelegation              = $null
-#     AccountNotDelegated               = $null
-#     AllowReversiblePasswordEncryption = $null
-#     CompoundIdentitySupported         = $null
-#     PasswordNotRequired               = $null
-#     SmartcardLogonRequired            = $null
-#     ProxyAddresses                    = $null
-#     AdminDescription                  = $null
-#     PhoneticDisplayName               = $null
-#     PreferredLanguage                 = $null
-#     SimpleDisplayName                 = $null
-#     Ensure                            = 'Absent'
+# DomainName                        = 'contoso.com'
+# UserName                          = 'TestUser'
+# Path                              = $null
+# DistinguishedName                 = $null
+# DisplayName                       = $null
+# Initials                          = $null
+# Enabled                           = $null
+# GivenName                         = $null
+# CommonName                        = $null
+# Password                          = $null
+# Description                       = $null
+# Surname                           = $null
+# StreetAddress                     = $null
+# POBox                             = $null
+# City                              = $null
+# State                             = $null
+# UserPrincipalName                 = $null
+# ServicePrincipalNames             = $null
+# ThumbnailPhoto                    = $null
+# ThumbnailPhotoHash                = $null
+# PostalCode                        = $null
+# Country                           = $null
+# Department                        = $null
+# Division                          = $null
+# Company                           = $null
+# Office                            = $null
+# JobTitle                          = $null
+# EmailAddress                      = $null
+# EmployeeID                        = $null
+# EmployeeNumber                    = $null
+# HomeDirectory                     = $null
+# HomeDrive                         = $null
+# HomePage                          = $null
+# ProfilePath                       = $null
+# LogonScript                       = $null
+# Notes                             = $null
+# OfficePhone                       = $null
+# MobilePhone                       = $null
+# Fax                               = $null
+# Pager                             = $null
+# IPPhone                           = $null
+# HomePhone                         = $null
+# Manager                           = $null
+# LogonWorkstations                 = $null
+# Organization                      = $null
+# OtherName                         = $null
+# PasswordNeverExpires              = $null
+# CannotChangePassword              = $null
+# ChangePasswordAtLogon             = $null
+# TrustedForDelegation              = $null
+# AccountNotDelegated               = $null
+# AllowReversiblePasswordEncryption = $null
+# CompoundIdentitySupported         = $null
+# PasswordNotRequired               = $null
+# SmartcardLogonRequired            = $null
+# ProxyAddresses                    = $null
+# AdminDescription                  = $null
+# PhoneticDisplayName               = $null
+# PreferredLanguage                 = $null
+# SimpleDisplayName                 = $null
+# Ensure                            = 'Absent'
 # }
 
 # $mockChangedResource = @{
@@ -259,64 +259,64 @@ AfterAll {
 # }
 
 # $mockGetADUserResult = @{
-#     samAccountName                    = $mockResource.UserName
-#     cn                                = $mockResource.CommonName
-#     UserPrincipalName                 = $mockResource.UserPrincipalName
-#     DisplayName                       = $mockResource.DisplayName
-#     distinguishedName                 = "CN=$($mockResource.Username),$($mockResource.Path)"
-#     GivenName                         = $mockResource.GivenName
-#     Initials                          = $mockResource.Initials
-#     sn                                = $mockResource.Surname
-#     Description                       = $mockResource.Description
-#     StreetAddress                     = $mockResource.StreetAddress
-#     PostOfficeBox                     = $mockResource.POBox
-#     l                                 = $mockResource.City
-#     St                                = $mockResource.State
-#     PostalCode                        = $mockResource.PostalCode
-#     c                                 = $mockResource.Country
-#     Department                        = $mockResource.Department
-#     Division                          = $mockResource.Division
-#     Company                           = $mockResource.Company
-#     physicalDeliveryOfficeName        = $mockResource.Office
-#     title                             = $mockResource.JobTitle
-#     mail                              = $mockResource.EmailAddress
-#     EmployeeID                        = $mockResource.EmployeeID
-#     EmployeeNumber                    = $mockResource.EmployeeNumber
-#     HomeDirectory                     = $mockResource.HomeDirectory
-#     HomeDrive                         = $mockResource.HomeDrive
-#     wWWHomePage                       = $mockResource.HomePage
-#     ProfilePath                       = $mockResource.ProfilePath
-#     scriptPath                        = $mockResource.LogonScript
-#     info                              = $mockResource.Notes
-#     telephoneNumber                   = $mockResource.OfficePhone
-#     mobile                            = $mockResource.MobilePhone
-#     facsimileTelephoneNumber          = $mockResource.Fax
-#     Pager                             = $mockResource.Pager
-#     IPPhone                           = $mockResource.IPPhone
-#     HomePhone                         = $mockResource.HomePhone
-#     Enabled                           = $mockResource.Enabled
-#     Manager                           = $mockResource.Manager
-#     userWorkstations                  = $mockResource.LogonWorkstations
-#     O                                 = $mockResource.Organization
-#     middleName                        = $mockResource.OtherName
+#     samAccountName                    = 'TestUser'
+#     cn                                = 'TestUser'
+#     UserPrincipalName                 = 'testuser@contoso.com'
+#     DisplayName                       = 'Test User'
+#     distinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+#     GivenName                         = 'Test'
+#     Initials                          = 'T'
+#     sn                                = 'User'
+#     Description                       = 'This is the test user'
+#     StreetAddress                     = '1 Highway Road'
+#     PostOfficeBox                     = 'PO Box 1'
+#     l                                 = 'Cityville'
+#     St                                = 'State'
+#     PostalCode                        = 'AA1 1AA'
+#     c                                 = 'US'
+#     Department                        = 'IT'
+#     Division                          = 'Global'
+#     Company                           = 'Contoso'
+#     physicalDeliveryOfficeName        = 'Office 1'
+#     title                             = 'Test'
+#     mail                              = 'testuser@contoso.com'
+#     EmployeeID                        = 'ID1'
+#     EmployeeNumber                    = '1'
+#     HomeDirectory                     = '\\fs01\users\testuser'
+#     HomeDrive                         = 'H:'
+#     wWWHomePage                       = 'www.contoso.com/users/testuser'
+#     ProfilePath                       = 'profilepath'
+#     scriptPath                        = 'logonscript.ps1'
+#     info                              = 'This is a test user'
+#     telephoneNumber                   = '+1 12345'
+#     mobile                            = '+1 23456'
+#     facsimileTelephoneNumber          = '+1 34567'
+#     Pager                             = '+1 45678'
+#     IPPhone                           = '12345'
+#     HomePhone                         = '+1 56789'
+#     Enabled                           = $true
+#     Manager                           = 'John Doe'
+#     userWorkstations                  = 'PC01,PC02'
+#     O                                 = 'Contoso'
+#     middleName                        = 'User1'
 #     ThumbnailPhoto                    = [System.Byte[]] (
 #         255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 1, 1, 1, 0, 96, 0, 96, 0, 0, 255, 225, 0, 102, 69, 120, 105
 #     )
-#     PasswordNeverExpires              = $mockResource.PasswordNeverExpires
-#     CannotChangePassword              = $mockResource.CannotChangePassword
+#     PasswordNeverExpires              = $false
+#     CannotChangePassword              = $false
 #     pwdLastSet                        = 0
-#     TrustedForDelegation              = $mockResource.TrustedForDelegation
-#     AccountNotDelegated               = $mockResource.AccountNotDelegated
-#     AllowReversiblePasswordEncryption = $mockResource.AllowReversiblePasswordEncryption
-#     CompoundIdentitySupported         = $mockResource.CompoundIdentitySupported
-#     PasswordNotRequired               = $mockResource.PasswordNotRequired
-#     SmartcardLogonRequired            = $mockResource.SmartcardLogonRequired
-#     ServicePrincipalName              = $mockResource.ServicePrincipalNames
-#     ProxyAddresses                    = $mockResource.ProxyAddresses
-#     AdminDescription                  = $mockResource.AdminDescription
-#     'msDS-PhoneticDisplayName'        = $mockResource.PhoneticDisplayName
-#     PreferredLanguage                 = $mockResource.PreferredLanguage
-#     displayNamePrintable              = $mockResource.SimpleDisplayName
+#     TrustedForDelegation              = $false
+#     AccountNotDelegated               = $true
+#     AllowReversiblePasswordEncryption = $false
+#     CompoundIdentitySupported         = $false
+#     PasswordNotRequired               = $false
+#     SmartcardLogonRequired            = $false
+#     ServicePrincipalName              = @('spn/a', 'spn/b')
+#     ProxyAddresses                    = @('testuser1@fabrikam.com', 'testuser2@fabrikam.com')
+#     AdminDescription                  = 'User_'
+#     'msDS-PhoneticDisplayName'        = 'Test User Phonetic'
+#     PreferredLanguage                 = 'en-US'
+#     displayNamePrintable              = 'Test User Simple'
 # }
 
 # $mockGetTargetResourceResult = $mockResource.Clone()
@@ -327,166 +327,794 @@ AfterAll {
 # $mockGetTargetResourceAbsentResult = $mockGetTargetResourceResult.Clone()
 # $mockGetTargetResourceAbsentResult.Ensure = 'Absent'
 
-Describe 'ADUser\Get-TargetResource' -Skip:$true {
+Describe 'MSFT_ADUser\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
-
-        $getTargetResourceParameters = @{
-            DomainName = $mockResource.DomainName
-            UserName   = $mockResource.UserName
-        }
     }
 
     Context 'When the resource is present' {
         BeforeAll {
-            Mock -CommandName Get-ADUser -MockWith { $mockGetADUserResult }
-
-            $targetResource = Get-TargetResource @getTargetResourceParameters
-        }
-
-        foreach ($property in $mockResource.Keys)
-        {
-            if ($property -ne 'Password')
-            {
-                It "Should return the correct '$property' property" {
-                    $targetResource.$property | Should -Be $mockResource.$property
+            Mock -CommandName Get-ADUser -MockWith {
+                @{
+                    samAccountName                    = 'TestUser'
+                    cn                                = 'TestUser'
+                    UserPrincipalName                 = 'testuser@contoso.com'
+                    DisplayName                       = 'Test User'
+                    distinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                    GivenName                         = 'Test'
+                    Initials                          = 'T'
+                    sn                                = 'User'
+                    Description                       = 'This is the test user'
+                    StreetAddress                     = '1 Highway Road'
+                    PostOfficeBox                     = 'PO Box 1'
+                    l                                 = 'Cityville'
+                    St                                = 'State'
+                    PostalCode                        = 'AA1 1AA'
+                    c                                 = 'US'
+                    Department                        = 'IT'
+                    Division                          = 'Global'
+                    Company                           = 'Contoso'
+                    physicalDeliveryOfficeName        = 'Office 1'
+                    title                             = 'Test'
+                    mail                              = 'testuser@contoso.com'
+                    EmployeeID                        = 'ID1'
+                    EmployeeNumber                    = '1'
+                    HomeDirectory                     = '\\fs01\users\testuser'
+                    HomeDrive                         = 'H:'
+                    wWWHomePage                       = 'www.contoso.com/users/testuser'
+                    ProfilePath                       = 'profilepath'
+                    scriptPath                        = 'logonscript.ps1'
+                    info                              = 'This is a test user'
+                    telephoneNumber                   = '+1 12345'
+                    mobile                            = '+1 23456'
+                    facsimileTelephoneNumber          = '+1 34567'
+                    Pager                             = '+1 45678'
+                    IPPhone                           = '12345'
+                    HomePhone                         = '+1 56789'
+                    Enabled                           = $true
+                    Manager                           = 'John Doe'
+                    userWorkstations                  = 'PC01,PC02'
+                    O                                 = 'Contoso'
+                    middleName                        = 'User1'
+                    ThumbnailPhoto                    = [System.Byte[]] (
+                        255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 1, 1, 1, 0, 96, 0, 96, 0, 0, 255, 225, 0, 102, 69, 120, 105
+                    )
+                    PasswordNeverExpires              = $false
+                    CannotChangePassword              = $false
+                    pwdLastSet                        = 0
+                    TrustedForDelegation              = $false
+                    AccountNotDelegated               = $true
+                    AllowReversiblePasswordEncryption = $false
+                    CompoundIdentitySupported         = $false
+                    PasswordNotRequired               = $false
+                    SmartcardLogonRequired            = $false
+                    ServicePrincipalName              = @('spn/a', 'spn/b')
+                    ProxyAddresses                    = @('testuser1@fabrikam.com', 'testuser2@fabrikam.com')
+                    AdminDescription                  = 'User_'
+                    'msDS-PhoneticDisplayName'        = 'Test User Phonetic'
+                    PreferredLanguage                 = 'en-US'
+                    displayNamePrintable              = 'Test User Simple'
                 }
             }
         }
 
-        It 'Should call the expected mocks' {
-            Assert-MockCalled -CommandName Assert-Module `
-                -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                -Exactly -Times 1
-            Assert-MockCalled -CommandName Get-ADUser `
-                -ParameterFilter { $Identity -eq $mockResource.UserName } `
-                -Exactly -Times 1
+        BeforeDiscovery {
+            $testCases = @(
+                @{
+                    Property = 'DomainName'
+                    Value    = 'contoso.com'
+                }
+                @{
+                    Property = 'UserName'
+                    Value    = 'TestUser'
+                }
+                @{
+                    Property = 'Path'
+                    Value    = 'CN=Users,DC=contoso,DC=com'
+                }
+                @{
+                    Property = 'DistinguishedName'
+                    Value    = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                }
+                @{
+                    Property = 'DisplayName'
+                    Value    = 'Test User'
+                }
+                @{
+                    Property = 'Initials'
+                    Value    = 'T'
+                }
+                @{
+                    Property = 'Enabled'
+                    Value    = $true
+                }
+                @{
+                    Property = 'GivenName'
+                    Value    = 'Test'
+                }
+                @{
+                    Property = 'CommonName'
+                    Value    = 'TestUser'
+                }
+                @{
+                    Property = 'Description'
+                    Value    = 'This is the test user'
+                }
+                @{
+                    Property = 'Surname'
+                    Value    = 'User'
+                }
+                @{
+                    Property = 'StreetAddress'
+                    Value    = '1 Highway Road'
+                }
+                @{
+                    Property = 'POBox'
+                    Value    = 'PO Box 1'
+                }
+                @{
+                    Property = 'City'
+                    Value    = 'Cityville'
+                }
+                @{
+                    Property = 'State'
+                    Value    = 'State'
+                }
+                @{
+                    Property = 'UserPrincipalName'
+                    Value    = 'testuser@contoso.com'
+                }
+                @{
+                    Property = 'ServicePrincipalNames'
+                    Value    = 'spn/a', 'spn/b'
+                }
+                @{
+                    Property = 'ThumbnailPhoto'
+                    Value    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhp'
+                }
+                @{
+                    Property = 'ThumbnailPhotoHash'
+                    Value    = 'D8719F18D789F449CBD14B5798BE79F7'
+                }
+                @{
+                    Property = 'PostalCode'
+                    Value    = 'AA1 1AA'
+                }
+                @{
+                    Property = 'Country'
+                    Value    = 'US'
+                }
+                @{
+                    Property = 'Department'
+                    Value    = 'IT'
+                }
+                @{
+                    Property = 'Division'
+                    Value    = 'Global'
+                }
+                @{
+                    Property = 'Company'
+                    Value    = 'Contoso'
+                }
+                @{
+                    Property = 'Office'
+                    Value    = 'Office 1'
+                }
+                @{
+                    Property = 'JobTitle'
+                    Value    = 'Test'
+                }
+                @{
+                    Property = 'EmailAddress'
+                    Value    = 'testuser@contoso.com'
+                }
+                @{
+                    Property = 'EmployeeID'
+                    Value    = 'ID1'
+                }
+                @{
+                    Property = 'EmployeeNumber'
+                    Value    = '1'
+                }
+                @{
+                    Property = 'HomeDirectory'
+                    Value    = '\\fs01\users\testuser'
+                }
+                @{
+                    Property = 'HomeDrive'
+                    Value    = 'H:'
+                }
+                @{
+                    Property = 'HomePage'
+                    Value    = 'www.contoso.com/users/testuser'
+                }
+                @{
+                    Property = 'ProfilePath'
+                    Value    = 'profilepath'
+                }
+                @{
+                    Property = 'LogonScript'
+                    Value    = 'logonscript.ps1'
+                }
+                @{
+                    Property = 'Notes'
+                    Value    = 'This is a test user'
+                }
+                @{
+                    Property = 'OfficePhone'
+                    Value    = '+1 12345'
+                }
+                @{
+                    Property = 'MobilePhone'
+                    Value    = '+1 23456'
+                }
+                @{
+                    Property = 'Fax'
+                    Value    = '+1 34567'
+                }
+                @{
+                    Property = 'Pager'
+                    Value    = '+1 45678'
+                }
+                @{
+                    Property = 'IPPhone'
+                    Value    = '12345'
+                }
+                @{
+                    Property = 'HomePhone'
+                    Value    = '+1 56789'
+                }
+                @{
+                    Property = 'Manager'
+                    Value    = 'John Doe'
+                }
+                @{
+                    Property = 'LogonWorkstations'
+                    Value    = 'PC01,PC02'
+                }
+                @{
+                    Property = 'Organization'
+                    Value    = 'Contoso'
+                }
+                @{
+                    Property = 'OtherName'
+                    Value    = 'User1'
+                }
+                @{
+                    Property = 'PasswordNeverExpires'
+                    Value    = $false
+                }
+                @{
+                    Property = 'CannotChangePassword'
+                    Value    = $false
+                }
+                @{
+                    Property = 'ChangePasswordAtLogon'
+                    Value    = $true
+                }
+                @{
+                    Property = 'TrustedForDelegation'
+                    Value    = $false
+                }
+                @{
+                    Property = 'AccountNotDelegated'
+                    Value    = $true
+                }
+                @{
+                    Property = 'AllowReversiblePasswordEncryption'
+                    Value    = $false
+                }
+                @{
+                    Property = 'CompoundIdentitySupported'
+                    Value    = $false
+                }
+                @{
+                    Property = 'PasswordNotRequired'
+                    Value    = $false
+                }
+                @{
+                    Property = 'SmartcardLogonRequired'
+                    Value    = $false
+                }
+                @{
+                    Property = 'ProxyAddresses'
+                    Value    = 'testuser1@fabrikam.com', 'testuser2@fabrikam.com'
+                }
+                @{
+                    Property = 'AdminDescription'
+                    Value    = 'User_'
+                }
+                @{
+                    Property = 'PhoneticDisplayName'
+                    Value    = 'Test User Phonetic'
+                }
+                @{
+                    Property = 'PreferredLanguage'
+                    Value    = 'en-US'
+                }
+                @{
+                    Property = 'SimpleDisplayName'
+                    Value    = 'Test User Simple'
+                }
+                @{
+                    Property = 'Ensure'
+                    Value    = 'Present'
+                }
+            )
         }
+
+        It 'Should call the expected mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    DomainName = 'contoso.com'
+                    UserName   = 'TestUser'
+                }
+
+                $script:targetResource = Get-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADUser -ParameterFilter { $Identity -eq 'TestUser' } -Exactly -Times 1 -Scope It
+        }
+
+        It 'Should return the correct value for property <Property>' -TestCases $testCases {
+            InModuleScope -Parameters $_ -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $script:targetResource.$Property | Should -Be $Value
+            }
+        }
+
 
         Context 'When the "ChangePassswordAtLogon" parameter is false' {
             BeforeAll {
-                $mockChangePasswordFalseGetADUserResult = $mockGetADUserResult.Clone()
-                $mockChangePasswordFalseGetADUserResult['pwdLastSet'] = 12345678
-
-                Mock -CommandName Get-ADUser -MockWith { $mockChangePasswordFalseGetADUserResult }
+                Mock -CommandName Get-ADUser -MockWith {
+                    @{
+                        samAccountName                    = 'TestUser'
+                        cn                                = 'TestUser'
+                        UserPrincipalName                 = 'testuser@contoso.com'
+                        DisplayName                       = 'Test User'
+                        distinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                        GivenName                         = 'Test'
+                        Initials                          = 'T'
+                        sn                                = 'User'
+                        Description                       = 'This is the test user'
+                        StreetAddress                     = '1 Highway Road'
+                        PostOfficeBox                     = 'PO Box 1'
+                        l                                 = 'Cityville'
+                        St                                = 'State'
+                        PostalCode                        = 'AA1 1AA'
+                        c                                 = 'US'
+                        Department                        = 'IT'
+                        Division                          = 'Global'
+                        Company                           = 'Contoso'
+                        physicalDeliveryOfficeName        = 'Office 1'
+                        title                             = 'Test'
+                        mail                              = 'testuser@contoso.com'
+                        EmployeeID                        = 'ID1'
+                        EmployeeNumber                    = '1'
+                        HomeDirectory                     = '\\fs01\users\testuser'
+                        HomeDrive                         = 'H:'
+                        wWWHomePage                       = 'www.contoso.com/users/testuser'
+                        ProfilePath                       = 'profilepath'
+                        scriptPath                        = 'logonscript.ps1'
+                        info                              = 'This is a test user'
+                        telephoneNumber                   = '+1 12345'
+                        mobile                            = '+1 23456'
+                        facsimileTelephoneNumber          = '+1 34567'
+                        Pager                             = '+1 45678'
+                        IPPhone                           = '12345'
+                        HomePhone                         = '+1 56789'
+                        Enabled                           = $true
+                        Manager                           = 'John Doe'
+                        userWorkstations                  = 'PC01,PC02'
+                        O                                 = 'Contoso'
+                        middleName                        = 'User1'
+                        ThumbnailPhoto                    = [System.Byte[]] (
+                            255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 1, 1, 1, 0, 96, 0, 96, 0, 0, 255, 225, 0, 102, 69, 120, 105
+                        )
+                        PasswordNeverExpires              = $false
+                        CannotChangePassword              = $false
+                        pwdLastSet                        = 12345678
+                        TrustedForDelegation              = $false
+                        AccountNotDelegated               = $true
+                        AllowReversiblePasswordEncryption = $false
+                        CompoundIdentitySupported         = $false
+                        PasswordNotRequired               = $false
+                        SmartcardLogonRequired            = $false
+                        ServicePrincipalName              = @('spn/a', 'spn/b')
+                        ProxyAddresses                    = @('testuser1@fabrikam.com', 'testuser2@fabrikam.com')
+                        AdminDescription                  = 'User_'
+                        'msDS-PhoneticDisplayName'        = 'Test User Phonetic'
+                        PreferredLanguage                 = 'en-US'
+                        displayNamePrintable              = 'Test User Simple'
+                    }
+                }
             }
 
             It 'Should return the correct property' {
-                $targetResource = Get-TargetResource @getTargetResourceParameters
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-                $targetResource.ChangePasswordAtLogon | Should -BeFalse
-            }
+                    $mockParameters = @{
+                        DomainName = 'contoso.com'
+                        UserName   = 'TestUser'
+                    }
 
-            It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Assert-Module `
-                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                    -Exactly -Times 1
-                Assert-MockCalled -CommandName Get-ADUser `
-                    -ParameterFilter { $Identity -eq $mockResource.UserName } `
-                    -Exactly -Times 1
+                    $targetResource = Get-TargetResource @mockParameters
+
+                    $targetResource.ChangePasswordAtLogon | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-ADUser -ParameterFilter { $Identity -eq 'TestUser' } -Exactly -Times 1 -Scope It
             }
         }
 
         Context 'When the "ThumbnailPhoto" parameter is empty' {
             BeforeAll {
-                $mockThumbnailPhotoEmptyGetADUserResult = $mockGetADUserResult.Clone()
-                $mockThumbnailPhotoEmptyGetADUserResult['ThumbnailPhoto'] = ''
-
-                Mock -CommandName Get-ADUser -MockWith { $mockThumbnailPhotoEmptyGetADUserResult }
+                Mock -CommandName Get-ADUser -MockWith {
+                    @{
+                        samAccountName                    = 'TestUser'
+                        cn                                = 'TestUser'
+                        UserPrincipalName                 = 'testuser@contoso.com'
+                        DisplayName                       = 'Test User'
+                        distinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                        GivenName                         = 'Test'
+                        Initials                          = 'T'
+                        sn                                = 'User'
+                        Description                       = 'This is the test user'
+                        StreetAddress                     = '1 Highway Road'
+                        PostOfficeBox                     = 'PO Box 1'
+                        l                                 = 'Cityville'
+                        St                                = 'State'
+                        PostalCode                        = 'AA1 1AA'
+                        c                                 = 'US'
+                        Department                        = 'IT'
+                        Division                          = 'Global'
+                        Company                           = 'Contoso'
+                        physicalDeliveryOfficeName        = 'Office 1'
+                        title                             = 'Test'
+                        mail                              = 'testuser@contoso.com'
+                        EmployeeID                        = 'ID1'
+                        EmployeeNumber                    = '1'
+                        HomeDirectory                     = '\\fs01\users\testuser'
+                        HomeDrive                         = 'H:'
+                        wWWHomePage                       = 'www.contoso.com/users/testuser'
+                        ProfilePath                       = 'profilepath'
+                        scriptPath                        = 'logonscript.ps1'
+                        info                              = 'This is a test user'
+                        telephoneNumber                   = '+1 12345'
+                        mobile                            = '+1 23456'
+                        facsimileTelephoneNumber          = '+1 34567'
+                        Pager                             = '+1 45678'
+                        IPPhone                           = '12345'
+                        HomePhone                         = '+1 56789'
+                        Enabled                           = $true
+                        Manager                           = 'John Doe'
+                        userWorkstations                  = 'PC01,PC02'
+                        O                                 = 'Contoso'
+                        middleName                        = 'User1'
+                        ThumbnailPhoto                    = ''
+                        PasswordNeverExpires              = $false
+                        CannotChangePassword              = $false
+                        pwdLastSet                        = 0
+                        TrustedForDelegation              = $false
+                        AccountNotDelegated               = $true
+                        AllowReversiblePasswordEncryption = $false
+                        CompoundIdentitySupported         = $false
+                        PasswordNotRequired               = $false
+                        SmartcardLogonRequired            = $false
+                        ServicePrincipalName              = @('spn/a', 'spn/b')
+                        ProxyAddresses                    = @('testuser1@fabrikam.com', 'testuser2@fabrikam.com')
+                        AdminDescription                  = 'User_'
+                        'msDS-PhoneticDisplayName'        = 'Test User Phonetic'
+                        PreferredLanguage                 = 'en-US'
+                        displayNamePrintable              = 'Test User Simple'
+                    }
+                }
             }
 
             It 'Should return the correct property' {
-                $targetResource = Get-TargetResource @getTargetResourceParameters
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-                $targetResource.ThumbnailPhoto | Should -BeNullOrEmpty
-                $targetResource.ThumbnailPhotoHash | Should -BeNullOrEmpty
-            }
+                    $mockParameters = @{
+                        DomainName = 'contoso.com'
+                        UserName   = 'TestUser'
+                    }
+                    $targetResource = Get-TargetResource @mockParameters
 
-            It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Assert-Module `
-                    -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                    -Exactly -Times 1
-                Assert-MockCalled -CommandName Get-ADUser `
-                    -ParameterFilter { $Identity -eq $mockResource.UserName } `
-                    -Exactly -Times 1
+                    $targetResource.ThumbnailPhoto | Should -BeNullOrEmpty
+                    $targetResource.ThumbnailPhotoHash | Should -BeNullOrEmpty
+                }
+
+                Should -Invoke -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-ADUser -ParameterFilter { $Identity -eq 'TestUser' } -Exactly -Times 1 -Scope It
             }
         }
     }
 
     Context 'When the resource is absent' {
         BeforeAll {
-            Mock -CommandName Get-ADUser `
-                -MockWith { throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException }
-
-            $targetResource = Get-TargetResource @getTargetResourceParameters
-        }
-
-        foreach ($property in $mockResource.Keys)
-        {
-            It "Should return the correct '$property' property" {
-                $targetResource.$property | Should -Be $mockAbsentResource.$property
+            Mock -CommandName Get-ADUser -MockWith {
+                throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
             }
         }
 
-        It 'Should call the expected mocks' {
-            Assert-MockCalled -CommandName Assert-Module `
-                -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                -Exactly -Times 1
-            Assert-MockCalled -CommandName Get-ADUser `
-                -ParameterFilter { $Identity -eq $mockResource.UserName } `
-                -Exactly -Times 1
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    DomainName = 'contoso.com'
+                    UserName   = 'TestUser'
+                }
+
+                $targetResource = Get-TargetResource @mockParameters
+
+                $targetResource.DomainName | Should -Be 'contoso.com'
+                $targetResource.UserName | Should -Be 'TestUser'
+                $targetResource.Path | Should -BeNullOrEmpty
+                $targetResource.DistinguishedName | Should -BeNullOrEmpty
+                $targetResource.DisplayName | Should -BeNullOrEmpty
+                $targetResource.Initials | Should -BeNullOrEmpty
+                $targetResource.Enabled | Should -BeNullOrEmpty
+                $targetResource.GivenName | Should -BeNullOrEmpty
+                $targetResource.CommonName | Should -BeNullOrEmpty
+                $targetResource.Password | Should -BeNullOrEmpty
+                $targetResource.Description | Should -BeNullOrEmpty
+                $targetResource.Surname | Should -BeNullOrEmpty
+                $targetResource.StreetAddress | Should -BeNullOrEmpty
+                $targetResource.POBox | Should -BeNullOrEmpty
+                $targetResource.City | Should -BeNullOrEmpty
+                $targetResource.State | Should -BeNullOrEmpty
+                $targetResource.UserPrincipalName | Should -BeNullOrEmpty
+                $targetResource.ServicePrincipalNames | Should -BeNullOrEmpty
+                $targetResource.ThumbnailPhoto | Should -BeNullOrEmpty
+                $targetResource.ThumbnailPhotoHash | Should -BeNullOrEmpty
+                $targetResource.PostalCode | Should -BeNullOrEmpty
+                $targetResource.Country | Should -BeNullOrEmpty
+                $targetResource.Department | Should -BeNullOrEmpty
+                $targetResource.Division | Should -BeNullOrEmpty
+                $targetResource.Company | Should -BeNullOrEmpty
+                $targetResource.Office | Should -BeNullOrEmpty
+                $targetResource.JobTitle | Should -BeNullOrEmpty
+                $targetResource.EmailAddress | Should -BeNullOrEmpty
+                $targetResource.EmployeeID | Should -BeNullOrEmpty
+                $targetResource.EmployeeNumber | Should -BeNullOrEmpty
+                $targetResource.HomeDirectory | Should -BeNullOrEmpty
+                $targetResource.HomeDrive | Should -BeNullOrEmpty
+                $targetResource.HomePage | Should -BeNullOrEmpty
+                $targetResource.ProfilePath | Should -BeNullOrEmpty
+                $targetResource.LogonScript | Should -BeNullOrEmpty
+                $targetResource.Notes | Should -BeNullOrEmpty
+                $targetResource.OfficePhone | Should -BeNullOrEmpty
+                $targetResource.MobilePhone | Should -BeNullOrEmpty
+                $targetResource.Fax | Should -BeNullOrEmpty
+                $targetResource.Pager | Should -BeNullOrEmpty
+                $targetResource.IPPhone | Should -BeNullOrEmpty
+                $targetResource.HomePhone | Should -BeNullOrEmpty
+                $targetResource.Manager | Should -BeNullOrEmpty
+                $targetResource.LogonWorkstations | Should -BeNullOrEmpty
+                $targetResource.Organization | Should -BeNullOrEmpty
+                $targetResource.OtherName | Should -BeNullOrEmpty
+                $targetResource.PasswordNeverExpires | Should -BeNullOrEmpty
+                $targetResource.CannotChangePassword | Should -BeNullOrEmpty
+                $targetResource.ChangePasswordAtLogon | Should -BeNullOrEmpty
+                $targetResource.TrustedForDelegation | Should -BeNullOrEmpty
+                $targetResource.AccountNotDelegated | Should -BeNullOrEmpty
+                $targetResource.AllowReversiblePasswordEncryption | Should -BeNullOrEmpty
+                $targetResource.CompoundIdentitySupported | Should -BeNullOrEmpty
+                $targetResource.PasswordNotRequired | Should -BeNullOrEmpty
+                $targetResource.SmartcardLogonRequired | Should -BeNullOrEmpty
+                $targetResource.ProxyAddresses | Should -BeNullOrEmpty
+                $targetResource.AdminDescription | Should -BeNullOrEmpty
+                $targetResource.PhoneticDisplayName | Should -BeNullOrEmpty
+                $targetResource.PreferredLanguage | Should -BeNullOrEmpty
+                $targetResource.SimpleDisplayName | Should -BeNullOrEmpty
+                $targetResource.Ensure | Should -Be 'Absent'
+            }
+
+            Should -Invoke -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Exactly -Times 1
+            Should -Invoke -CommandName Get-ADUser -ParameterFilter { $Identity -eq 'TestUser' } -Exactly -Times 1
         }
     }
 
     Context 'When Get-ADUser returns an unknown error' {
         BeforeAll {
             Mock -CommandName Get-ADUser -MockWith { throw }
-
-            $expectedError = ($script:localizedData.RetrievingADUserError -f
-                $getTargetResourceParameters.UserName, $getTargetResourceParameters.DomainName)
         }
 
-        It 'Should throw the correct exception ' {
-            { Get-TargetResource @getTargetResourceParameters } | Should -Throw $expectedError
+        It 'Should throw the correct exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    DomainName = 'contoso.com'
+                    UserName   = 'TestUser'
+                }
+
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RetrievingADUserError -f
+                    $mockParameters.UserName, $mockParameters.DomainName)
+
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+            }
         }
     }
 
     Context 'When the "DomainController" parameter is specified' {
         BeforeAll {
-            Mock -CommandName Get-ADUser -MockWith { $mockGetADUserResult }
-
-            Get-TargetResource @getTargetResourceParameters -DomainController $testDomainController
+            Mock -CommandName Get-ADUser -MockWith {
+                @{
+                    samAccountName                    = 'TestUser'
+                    cn                                = 'TestUser'
+                    UserPrincipalName                 = 'testuser@contoso.com'
+                    DisplayName                       = 'Test User'
+                    distinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                    GivenName                         = 'Test'
+                    Initials                          = 'T'
+                    sn                                = 'User'
+                    Description                       = 'This is the test user'
+                    StreetAddress                     = '1 Highway Road'
+                    PostOfficeBox                     = 'PO Box 1'
+                    l                                 = 'Cityville'
+                    St                                = 'State'
+                    PostalCode                        = 'AA1 1AA'
+                    c                                 = 'US'
+                    Department                        = 'IT'
+                    Division                          = 'Global'
+                    Company                           = 'Contoso'
+                    physicalDeliveryOfficeName        = 'Office 1'
+                    title                             = 'Test'
+                    mail                              = 'testuser@contoso.com'
+                    EmployeeID                        = 'ID1'
+                    EmployeeNumber                    = '1'
+                    HomeDirectory                     = '\\fs01\users\testuser'
+                    HomeDrive                         = 'H:'
+                    wWWHomePage                       = 'www.contoso.com/users/testuser'
+                    ProfilePath                       = 'profilepath'
+                    scriptPath                        = 'logonscript.ps1'
+                    info                              = 'This is a test user'
+                    telephoneNumber                   = '+1 12345'
+                    mobile                            = '+1 23456'
+                    facsimileTelephoneNumber          = '+1 34567'
+                    Pager                             = '+1 45678'
+                    IPPhone                           = '12345'
+                    HomePhone                         = '+1 56789'
+                    Enabled                           = $true
+                    Manager                           = 'John Doe'
+                    userWorkstations                  = 'PC01,PC02'
+                    O                                 = 'Contoso'
+                    middleName                        = 'User1'
+                    ThumbnailPhoto                    = [System.Byte[]] (
+                        255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 1, 1, 1, 0, 96, 0, 96, 0, 0, 255, 225, 0, 102, 69, 120, 105
+                    )
+                    PasswordNeverExpires              = $false
+                    CannotChangePassword              = $false
+                    pwdLastSet                        = 0
+                    TrustedForDelegation              = $false
+                    AccountNotDelegated               = $true
+                    AllowReversiblePasswordEncryption = $false
+                    CompoundIdentitySupported         = $false
+                    PasswordNotRequired               = $false
+                    SmartcardLogonRequired            = $false
+                    ServicePrincipalName              = @('spn/a', 'spn/b')
+                    ProxyAddresses                    = @('testuser1@fabrikam.com', 'testuser2@fabrikam.com')
+                    AdminDescription                  = 'User_'
+                    'msDS-PhoneticDisplayName'        = 'Test User Phonetic'
+                    PreferredLanguage                 = 'en-US'
+                    displayNamePrintable              = 'Test User Simple'
+                }
+            }
         }
 
         It 'Should call the expected mocks' {
-            Assert-MockCalled -CommandName Assert-Module `
-                -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                -Exactly -Times 1
-            Assert-MockCalled -CommandName Get-ADUser `
-                -ParameterFilter { $Server -eq $testDomainController } `
-                -Exactly -Times 1
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    DomainName       = 'contoso.com'
+                    UserName         = 'TestUser'
+                    DomainController = 'TESTDC'
+                }
+
+                Get-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADUser -ParameterFilter { $Server -eq 'TESTDC' } -Exactly -Times 1 -Scope It
         }
     }
 
     Context 'When the "Credential" parameter is specified' {
         BeforeAll {
-            Mock -CommandName Get-ADUser -MockWith { $mockGetADUserResult }
-
-            Get-TargetResource @getTargetResourceParameters -Credential $testCredential
+            Mock -CommandName Get-ADUser -MockWith {
+                @{
+                    samAccountName                    = 'TestUser'
+                    cn                                = 'TestUser'
+                    UserPrincipalName                 = 'testuser@contoso.com'
+                    DisplayName                       = 'Test User'
+                    distinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                    GivenName                         = 'Test'
+                    Initials                          = 'T'
+                    sn                                = 'User'
+                    Description                       = 'This is the test user'
+                    StreetAddress                     = '1 Highway Road'
+                    PostOfficeBox                     = 'PO Box 1'
+                    l                                 = 'Cityville'
+                    St                                = 'State'
+                    PostalCode                        = 'AA1 1AA'
+                    c                                 = 'US'
+                    Department                        = 'IT'
+                    Division                          = 'Global'
+                    Company                           = 'Contoso'
+                    physicalDeliveryOfficeName        = 'Office 1'
+                    title                             = 'Test'
+                    mail                              = 'testuser@contoso.com'
+                    EmployeeID                        = 'ID1'
+                    EmployeeNumber                    = '1'
+                    HomeDirectory                     = '\\fs01\users\testuser'
+                    HomeDrive                         = 'H:'
+                    wWWHomePage                       = 'www.contoso.com/users/testuser'
+                    ProfilePath                       = 'profilepath'
+                    scriptPath                        = 'logonscript.ps1'
+                    info                              = 'This is a test user'
+                    telephoneNumber                   = '+1 12345'
+                    mobile                            = '+1 23456'
+                    facsimileTelephoneNumber          = '+1 34567'
+                    Pager                             = '+1 45678'
+                    IPPhone                           = '12345'
+                    HomePhone                         = '+1 56789'
+                    Enabled                           = $true
+                    Manager                           = 'John Doe'
+                    userWorkstations                  = 'PC01,PC02'
+                    O                                 = 'Contoso'
+                    middleName                        = 'User1'
+                    ThumbnailPhoto                    = [System.Byte[]] (
+                        255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 1, 1, 1, 0, 96, 0, 96, 0, 0, 255, 225, 0, 102, 69, 120, 105
+                    )
+                    PasswordNeverExpires              = $false
+                    CannotChangePassword              = $false
+                    pwdLastSet                        = 0
+                    TrustedForDelegation              = $false
+                    AccountNotDelegated               = $true
+                    AllowReversiblePasswordEncryption = $false
+                    CompoundIdentitySupported         = $false
+                    PasswordNotRequired               = $false
+                    SmartcardLogonRequired            = $false
+                    ServicePrincipalName              = @('spn/a', 'spn/b')
+                    ProxyAddresses                    = @('testuser1@fabrikam.com', 'testuser2@fabrikam.com')
+                    AdminDescription                  = 'User_'
+                    'msDS-PhoneticDisplayName'        = 'Test User Phonetic'
+                    PreferredLanguage                 = 'en-US'
+                    displayNamePrintable              = 'Test User Simple'
+                }
+            }
         }
 
         It 'Should call the expected mocks' {
-            Assert-MockCalled -CommandName Assert-Module `
-                -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } `
-                -Exactly -Times 1
-            Assert-MockCalled -CommandName Get-ADUser `
-                -ParameterFilter { $Credential -eq $testCredential } `
-                -Exactly -Times 1
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    DomainName = 'contoso.com'
+                    UserName   = 'TestUser'
+                    Credential = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                }
+
+                Get-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADUser -ParameterFilter { $null -ne $Credential } -Exactly -Times 1 -Scope It
         }
     }
 }
 
-Describe 'ADUser\Test-TargetResource' -Skip:$true {
+Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' -Skip:$true {
     BeforeAll {
         $testTargetResourceParams = @{
             DomainName = $mockResource.DomainName
@@ -512,7 +1140,7 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
             }
 
             It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Get-TargetResource `
+                Should -Invoke -CommandName Get-TargetResource `
                     -ParameterFilter { $UserName -eq $testTargetResourcePresentParams.UserName } `
                     -Exactly -Times 1
             }
@@ -582,12 +1210,12 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
             Context 'When the "DomainController" parameter is specified' {
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourcePresentParams `
-                            -DomainController $testDomainController } | Should -Not -Throw
+                            -DomainController 'TESTDC' } | Should -Not -Throw
                 }
 
                 It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
-                        -ParameterFilter { $DomainController -eq $testDomainController } `
+                    Should -Invoke -CommandName Get-TargetResource `
+                        -ParameterFilter { $DomainController -eq 'TESTDC' } `
                         -Exactly -Times 1
                 }
             }
@@ -599,7 +1227,7 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                 }
 
                 It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
+                    Should -Invoke -CommandName Get-TargetResource `
                         -ParameterFilter { $Credential -eq $testCredential } `
                         -Exactly -Times 1
                 }
@@ -619,10 +1247,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential } `
@@ -638,10 +1266,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -Exactly -Times 0
                         }
                     }
@@ -654,10 +1282,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
@@ -678,10 +1306,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
@@ -702,10 +1330,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
@@ -728,10 +1356,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential } `
@@ -747,10 +1375,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -Exactly -Times 0
                         }
                     }
@@ -763,10 +1391,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
@@ -787,10 +1415,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
@@ -811,10 +1439,10 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $testTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
@@ -832,7 +1460,7 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
             }
 
             It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Get-TargetResource `
+                Should -Invoke -CommandName Get-TargetResource `
                     -ParameterFilter { $UserName -eq $testTargetResourceAbsentParams.UserName } `
                     -Exactly -Times 1
             }
@@ -850,7 +1478,7 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
             }
 
             It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Get-TargetResource `
+                Should -Invoke -CommandName Get-TargetResource `
                     -ParameterFilter { $UserName -eq $testTargetResourceAbsentParams.UserName } `
                     -Exactly -Times 1
             }
@@ -878,7 +1506,7 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
             }
 
             It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Get-TargetResource `
+                Should -Invoke -CommandName Get-TargetResource `
                     -ParameterFilter { $UserName -eq $testTargetResourceAbsentParams.UserName } `
                     -Exactly -Times 1
             }
@@ -886,7 +1514,7 @@ Describe 'ADUser\Test-TargetResource' -Skip:$true {
     }
 }
 
-Describe 'ADUser\Set-TargetResource' -Skip:$true {
+Describe 'MSFT_ADUser\Set-TargetResource' -Tag 'Set' -Skip:$true {
     BeforeAll {
         $setTargetResourceParams = @{
             DomainName = $mockResource.DomainName
@@ -934,26 +1562,26 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                     }
 
                     It 'Should call the correct mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
+                        Should -Invoke -CommandName Get-TargetResource `
                             -ParameterFilter { `
                                 $Name -eq $setTargetResourceParamsChangedProperty.Name } `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Set-ADUser `
+                        Should -Invoke -CommandName Set-ADUser `
                             -ParameterFilter { $TargetName -eq $setTargetResourceParamsChangedProperty.Name } `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Move-ADObject `
+                        Should -Invoke -CommandName Move-ADObject `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Rename-ADObject `
+                        Should -Invoke -CommandName Rename-ADObject `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                        Should -Invoke -CommandName Set-ADAccountPassword `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Test-Password `
+                        Should -Invoke -CommandName Test-Password `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Remove-ADUser `
+                        Should -Invoke -CommandName Remove-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName New-ADUser `
+                        Should -Invoke -CommandName New-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                        Should -Invoke -CommandName Restore-ADCommonObject `
                             -Exactly -Times 0
                     }
                 }
@@ -973,27 +1601,27 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                             }
 
                             It 'Should call the correct mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
+                                Should -Invoke -CommandName Get-TargetResource `
                                     -ParameterFilter { `
                                         $Name -eq $setTargetResourceParamsChangedProperty.Name } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADUser `
+                                Should -Invoke -CommandName Set-ADUser `
                                     -ParameterFilter { `
                                         $TargetName -eq $setTargetResourceParamsChangedProperty.Name } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Move-ADObject `
+                                Should -Invoke -CommandName Move-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Rename-ADObject `
+                                Should -Invoke -CommandName Rename-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                Should -Invoke -CommandName Set-ADAccountPassword `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Test-Password `
+                                Should -Invoke -CommandName Test-Password `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADUser `
+                                Should -Invoke -CommandName Remove-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName New-ADUser `
+                                Should -Invoke -CommandName New-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                Should -Invoke -CommandName Restore-ADCommonObject `
                                     -Exactly -Times 0
                             }
                         }
@@ -1010,27 +1638,27 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the correct mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { `
                                     $Name -eq $setTargetResourceParamsChangedProperty.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -ParameterFilter { `
                                     $TargetName -eq $setTargetResourceParamsChangedProperty.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1049,27 +1677,27 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the correct mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { `
                                     $Name -eq $setTargetResourceParamsChangedProperty.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -ParameterFilter { `
                                     $TargetName -eq $setTargetResourceParamsChangedProperty.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1087,26 +1715,26 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                 }
 
                 It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
+                    Should -Invoke -CommandName Get-TargetResource `
                         -ParameterFilter { `
                             $Name -eq $setTargetResourcePresentParams.Name } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Move-ADObject `
+                    Should -Invoke -CommandName Move-ADObject `
                         -ParameterFilter { $TargetPath -eq $changedTargetPath } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Set-ADUser `
+                    Should -Invoke -CommandName Set-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Rename-ADObject `
+                    Should -Invoke -CommandName Rename-ADObject `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                    Should -Invoke -CommandName Set-ADAccountPassword `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Test-Password `
+                    Should -Invoke -CommandName Test-Password `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Remove-ADUser `
+                    Should -Invoke -CommandName Remove-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName New-ADUser `
+                    Should -Invoke -CommandName New-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                    Should -Invoke -CommandName Restore-ADCommonObject `
                         -Exactly -Times 0
                 }
             }
@@ -1122,26 +1750,26 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                 }
 
                 It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
+                    Should -Invoke -CommandName Get-TargetResource `
                         -ParameterFilter { `
                             $Name -eq $setTargetResourcePresentParams.Name } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Rename-ADObject `
+                    Should -Invoke -CommandName Rename-ADObject `
                         -ParameterFilter { $NewName -eq $testCommonName } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Move-ADObject `
+                    Should -Invoke -CommandName Move-ADObject `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Set-ADUser `
+                    Should -Invoke -CommandName Set-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                    Should -Invoke -CommandName Set-ADAccountPassword `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Test-Password `
+                    Should -Invoke -CommandName Test-Password `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Remove-ADUser `
+                    Should -Invoke -CommandName Remove-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName New-ADUser `
+                    Should -Invoke -CommandName New-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                    Should -Invoke -CommandName Restore-ADCommonObject `
                         -Exactly -Times 0
                 }
             }
@@ -1149,12 +1777,12 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
             Context 'When the "DomainController" parameter is specified' {
                 It 'Should not throw' {
                     { Set-TargetResource @setTargetResourcePresentParams `
-                            -DomainController $testDomainController } | Should -Not -Throw
+                            -DomainController 'TESTDC' } | Should -Not -Throw
                 }
 
                 It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
-                        -ParameterFilter { $DomainController -eq $testDomainController } `
+                    Should -Invoke -CommandName Get-TargetResource `
+                        -ParameterFilter { $DomainController -eq 'TESTDC' } `
                         -Exactly -Times 1
                 }
             }
@@ -1174,28 +1802,28 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -ParameterFilter { $NewPassword -eq $testCredential.Password } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1208,24 +1836,24 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1238,29 +1866,29 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
                                     $Credential -eq $testCredential } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -ParameterFilter { $NewPassword -eq $testCredential.Password } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1277,29 +1905,29 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
                                     $PasswordAuthentication -eq $testPasswordAuthentication } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -ParameterFilter { $NewPassword -eq $testCredential.Password } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1316,29 +1944,29 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -ParameterFilter { `
                                     $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
                                     $PasswordAuthentication -eq $testPasswordAuthentication } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -ParameterFilter { $NewPassword -eq $testCredential.Password } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1357,27 +1985,27 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                             }
 
                             It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
+                                Should -Invoke -CommandName Get-TargetResource `
                                     -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-Password `
+                                Should -Invoke -CommandName Test-Password `
                                     -ParameterFilter { `
                                         $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                         $Password -eq $testCredential } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                Should -Invoke -CommandName Set-ADAccountPassword `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Rename-ADObject `
+                                Should -Invoke -CommandName Rename-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Move-ADObject `
+                                Should -Invoke -CommandName Move-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADUser `
+                                Should -Invoke -CommandName Set-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADUser `
+                                Should -Invoke -CommandName Remove-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName New-ADUser `
+                                Should -Invoke -CommandName New-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                Should -Invoke -CommandName Restore-ADCommonObject `
                                     -Exactly -Times 0
                             }
                         }
@@ -1390,24 +2018,24 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                             }
 
                             It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
+                                Should -Invoke -CommandName Get-TargetResource `
                                     -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                Should -Invoke -CommandName Set-ADAccountPassword `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Rename-ADObject `
+                                Should -Invoke -CommandName Rename-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Move-ADObject `
+                                Should -Invoke -CommandName Move-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADUser `
+                                Should -Invoke -CommandName Set-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Test-Password `
+                                Should -Invoke -CommandName Test-Password `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADUser `
+                                Should -Invoke -CommandName Remove-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName New-ADUser `
+                                Should -Invoke -CommandName New-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                Should -Invoke -CommandName Restore-ADCommonObject `
                                     -Exactly -Times 0
                             }
                         }
@@ -1420,28 +2048,28 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                             }
 
                             It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
+                                Should -Invoke -CommandName Get-TargetResource `
                                     -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-Password `
+                                Should -Invoke -CommandName Test-Password `
                                     -ParameterFilter { `
                                         $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                         $Password -eq $testCredential -and `
                                         $Credential -eq $testCredential } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                Should -Invoke -CommandName Set-ADAccountPassword `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Rename-ADObject `
+                                Should -Invoke -CommandName Rename-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Move-ADObject `
+                                Should -Invoke -CommandName Move-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADUser `
+                                Should -Invoke -CommandName Set-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADUser `
+                                Should -Invoke -CommandName Remove-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName New-ADUser `
+                                Should -Invoke -CommandName New-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                Should -Invoke -CommandName Restore-ADCommonObject `
                                     -Exactly -Times 0
                             }
                         }
@@ -1459,28 +2087,28 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                             }
 
                             It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
+                                Should -Invoke -CommandName Get-TargetResource `
                                     -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-Password `
+                                Should -Invoke -CommandName Test-Password `
                                     -ParameterFilter { `
                                         $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                         $Password -eq $testCredential -and `
                                         $PasswordAuthentication -eq $testPasswordAuthentication } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                Should -Invoke -CommandName Set-ADAccountPassword `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Rename-ADObject `
+                                Should -Invoke -CommandName Rename-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Move-ADObject `
+                                Should -Invoke -CommandName Move-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADUser `
+                                Should -Invoke -CommandName Set-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADUser `
+                                Should -Invoke -CommandName Remove-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName New-ADUser `
+                                Should -Invoke -CommandName New-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                Should -Invoke -CommandName Restore-ADCommonObject `
                                     -Exactly -Times 0
                             }
                         }
@@ -1498,28 +2126,28 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                             }
 
                             It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
+                                Should -Invoke -CommandName Get-TargetResource `
                                     -ParameterFilter { $Name -eq $setTargetResourcePresentParams.Name } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Test-Password `
+                                Should -Invoke -CommandName Test-Password `
                                     -ParameterFilter { `
                                         $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                         $Password -eq $testCredential -and `
                                         $PasswordAuthentication -eq $testPasswordAuthentication } `
                                     -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                                Should -Invoke -CommandName Set-ADAccountPassword `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Rename-ADObject `
+                                Should -Invoke -CommandName Rename-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Move-ADObject `
+                                Should -Invoke -CommandName Move-ADObject `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADUser `
+                                Should -Invoke -CommandName Set-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADUser `
+                                Should -Invoke -CommandName Remove-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName New-ADUser `
+                                Should -Invoke -CommandName New-ADUser `
                                     -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                                Should -Invoke -CommandName Restore-ADCommonObject `
                                     -Exactly -Times 0
                             }
                         }
@@ -1540,25 +2168,25 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                 }
 
                 It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
+                    Should -Invoke -CommandName Get-TargetResource `
                         -ParameterFilter { `
                             $Name -eq $setTargetResourcePresentParams.Name } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Set-ADUser `
+                    Should -Invoke -CommandName Set-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Test-Password `
+                    Should -Invoke -CommandName Test-Password `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                    Should -Invoke -CommandName Set-ADAccountPassword `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Rename-ADObject `
+                    Should -Invoke -CommandName Rename-ADObject `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Move-ADObject `
+                    Should -Invoke -CommandName Move-ADObject `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Remove-ADUser `
+                    Should -Invoke -CommandName Remove-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName New-ADUser `
+                    Should -Invoke -CommandName New-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                    Should -Invoke -CommandName Restore-ADCommonObject `
                         -Exactly -Times 0
                 }
             }
@@ -1570,26 +2198,26 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
             }
 
             It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Get-TargetResource `
+                Should -Invoke -CommandName Get-TargetResource `
                     -ParameterFilter { `
                         $Name -eq $setTargetResourceAbsentParams.Name } `
                     -Exactly -Times 1
-                Assert-MockCalled -CommandName Remove-ADUser `
+                Should -Invoke -CommandName Remove-ADUser `
                     -ParameterFilter { $Identity -eq $setTargetResourceAbsentParams.UserName } `
                     -Exactly -Times 1
-                Assert-MockCalled -CommandName Set-ADUser `
+                Should -Invoke -CommandName Set-ADUser `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Test-Password `
+                Should -Invoke -CommandName Test-Password `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                Should -Invoke -CommandName Set-ADAccountPassword `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Rename-ADObject `
+                Should -Invoke -CommandName Rename-ADObject `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Move-ADObject `
+                Should -Invoke -CommandName Move-ADObject `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName New-ADUser `
+                Should -Invoke -CommandName New-ADUser `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                Should -Invoke -CommandName Restore-ADCommonObject `
                     -Exactly -Times 0
             }
         }
@@ -1622,26 +2250,26 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { `
                                     $Name -eq $setTargetResourceNewParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -ParameterFilter { $NewName -eq $setTargetResourceNewParams.CommonName } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1659,26 +2287,26 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                         }
 
                         It 'Should call the correct mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
+                            Should -Invoke -CommandName Get-TargetResource `
                                 -ParameterFilter { `
                                     $Name -eq $setTargetResourceNewParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADUser `
+                            Should -Invoke -CommandName New-ADUser `
                                 -ParameterFilter { $TargetName -eq $setTargetResourceNewParams.Name } `
                                 -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADUser `
+                            Should -Invoke -CommandName Set-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Move-ADObject `
+                            Should -Invoke -CommandName Move-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Rename-ADObject `
+                            Should -Invoke -CommandName Rename-ADObject `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADAccountPassword `
+                            Should -Invoke -CommandName Set-ADAccountPassword `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Test-Password `
+                            Should -Invoke -CommandName Test-Password `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADUser `
+                            Should -Invoke -CommandName Remove-ADUser `
                                 -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
+                            Should -Invoke -CommandName Restore-ADCommonObject `
                                 -Exactly -Times 0
                         }
                     }
@@ -1696,26 +2324,26 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                 }
 
                 It 'Should call the correct mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
+                    Should -Invoke -CommandName Get-TargetResource `
                         -ParameterFilter { `
                             $Name -eq $setTargetResourceNewParams.Name } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName New-ADUser `
+                    Should -Invoke -CommandName New-ADUser `
                         -ParameterFilter { $AccountPassword -eq $setTargetResourceNewParams.Password.Password } `
                         -Exactly -Times 1
-                    Assert-MockCalled -CommandName Set-ADUser `
+                    Should -Invoke -CommandName Set-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Move-ADObject `
+                    Should -Invoke -CommandName Move-ADObject `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Rename-ADObject `
+                    Should -Invoke -CommandName Rename-ADObject `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Set-ADAccountPassword `
+                    Should -Invoke -CommandName Set-ADAccountPassword `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Test-Password `
+                    Should -Invoke -CommandName Test-Password `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Remove-ADUser `
+                    Should -Invoke -CommandName Remove-ADUser `
                         -Exactly -Times 0
-                    Assert-MockCalled -CommandName Restore-ADCommonObject `
+                    Should -Invoke -CommandName Restore-ADCommonObject `
                         -Exactly -Times 0
                 }
             }
@@ -1734,25 +2362,25 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                     }
 
                     It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
+                        Should -Invoke -CommandName Get-TargetResource `
                             -ParameterFilter { `
                                 $Name -eq $setTargetResourcePresentParams.Name } `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                        Should -Invoke -CommandName Restore-ADCommonObject `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Set-ADUser `
+                        Should -Invoke -CommandName Set-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName New-ADUser `
+                        Should -Invoke -CommandName New-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Remove-ADUser `
+                        Should -Invoke -CommandName Remove-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Test-Password `
+                        Should -Invoke -CommandName Test-Password `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                        Should -Invoke -CommandName Set-ADAccountPassword `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Rename-ADObject `
+                        Should -Invoke -CommandName Rename-ADObject `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Move-ADObject `
+                        Should -Invoke -CommandName Move-ADObject `
                             -Exactly -Times 0
                     }
                 }
@@ -1764,25 +2392,25 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                     }
 
                     It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
+                        Should -Invoke -CommandName Get-TargetResource `
                             -ParameterFilter { `
                                 $Name -eq $setTargetResourcePresentParams.Name } `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                        Should -Invoke -CommandName Restore-ADCommonObject `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName New-ADUser `
+                        Should -Invoke -CommandName New-ADUser `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Set-ADUser `
+                        Should -Invoke -CommandName Set-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Remove-ADUser `
+                        Should -Invoke -CommandName Remove-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Test-Password `
+                        Should -Invoke -CommandName Test-Password `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                        Should -Invoke -CommandName Set-ADAccountPassword `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Rename-ADObject `
+                        Should -Invoke -CommandName Rename-ADObject `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Move-ADObject `
+                        Should -Invoke -CommandName Move-ADObject `
                             -Exactly -Times 0
                     }
                 }
@@ -1798,25 +2426,25 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
                     }
 
                     It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
+                        Should -Invoke -CommandName Get-TargetResource `
                             -ParameterFilter { `
                                 $Name -eq $setTargetResourcePresentParams.Name } `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName Restore-ADCommonObject `
+                        Should -Invoke -CommandName Restore-ADCommonObject `
                             -Exactly -Times 1
-                        Assert-MockCalled -CommandName New-ADUser `
+                        Should -Invoke -CommandName New-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Set-ADUser `
+                        Should -Invoke -CommandName Set-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Remove-ADUser `
+                        Should -Invoke -CommandName Remove-ADUser `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Test-Password `
+                        Should -Invoke -CommandName Test-Password `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Set-ADAccountPassword `
+                        Should -Invoke -CommandName Set-ADAccountPassword `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Rename-ADObject `
+                        Should -Invoke -CommandName Rename-ADObject `
                             -Exactly -Times 0
-                        Assert-MockCalled -CommandName Move-ADObject `
+                        Should -Invoke -CommandName Move-ADObject `
                             -Exactly -Times 0
                     }
                 }
@@ -1829,25 +2457,25 @@ Describe 'ADUser\Set-TargetResource' -Skip:$true {
             }
 
             It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Get-TargetResource `
+                Should -Invoke -CommandName Get-TargetResource `
                     -ParameterFilter { `
                         $Name -eq $setTargetResourceAbsentParams.Name } `
                     -Exactly -Times 1
-                Assert-MockCalled -CommandName Restore-ADCommonObject `
+                Should -Invoke -CommandName Restore-ADCommonObject `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName New-ADUser `
+                Should -Invoke -CommandName New-ADUser `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Set-ADUser `
+                Should -Invoke -CommandName Set-ADUser `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Remove-ADUser `
+                Should -Invoke -CommandName Remove-ADUser `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Test-Password `
+                Should -Invoke -CommandName Test-Password `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Set-ADAccountPassword `
+                Should -Invoke -CommandName Set-ADAccountPassword `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Rename-ADObject `
+                Should -Invoke -CommandName Rename-ADObject `
                     -Exactly -Times 0
-                Assert-MockCalled -CommandName Move-ADObject `
+                Should -Invoke -CommandName Move-ADObject `
                     -Exactly -Times 0
             }
         }
