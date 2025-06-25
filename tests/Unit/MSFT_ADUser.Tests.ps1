@@ -202,60 +202,60 @@ AfterAll {
 # }
 
 # $mockChangedResource = @{
-#     Path                              = 'OU=Staff,DC=contoso,DC=com'
-#     DisplayName                       = 'Test User Changed'
-#     Initials                          = 'S'
-#     Enabled                           = $false
-#     GivenName                         = 'Test Changed'
-#     CommonName                        = 'Common Changed'
-#     Description                       = 'This is the test user changed'
-#     Surname                           = 'User Changed'
-#     StreetAddress                     = '1 Highway Road Changed'
-#     POBox                             = 'PO Box 1 Changed'
-#     City                              = 'Cityville Changed'
-#     State                             = 'State Changed'
-#     ServicePrincipalNames             = 'spn/c', 'spn/d'
-#     ThumbnailPhoto                    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhq'
-#     PostalCode                        = 'AA1 1AA Changed'
-#     Country                           = 'GB'
-#     Department                        = 'IT Changed'
-#     Division                          = 'Global Changed'
-#     Company                           = 'Contoso Changed'
-#     Office                            = 'Office 1 Changed'
-#     JobTitle                          = 'Test Changed'
-#     EmailAddress                      = 'testuserchanged@contoso.com'
-#     EmployeeID                        = 'ID1 Changed'
-#     EmployeeNumber                    = '2'
-#     HomeDirectory                     = '\\fs01\users\testuserchanged'
-#     HomeDrive                         = 'I:'
-#     HomePage                          = 'www.contoso.com/users/testuserchanged'
-#     ProfilePath                       = 'changed profile path'
-#     LogonScript                       = 'logonscript-changed.ps1'
-#     Notes                             = 'This is a test user changed'
-#     OfficePhone                       = '+1 123456'
-#     MobilePhone                       = '+1 234567'
-#     Fax                               = '+1 345678'
-#     Pager                             = '+1 456789'
-#     IPPhone                           = '123456'
-#     HomePhone                         = '+1 567890'
-#     Manager                           = 'John Doe Changed'
-#     LogonWorkstations                 = 'PC03,PC04'
-#     Organization                      = 'Contoso Changed'
-#     OtherName                         = 'User1 Changed'
-#     PasswordNeverExpires              = $true
-#     CannotChangePassword              = $true
-#     ChangePasswordAtLogon             = $false
-#     TrustedForDelegation              = $true
-#     AccountNotDelegated               = $false
-#     AllowReversiblePasswordEncryption = $true
-#     CompoundIdentitySupported         = $true
-#     PasswordNotRequired               = $true
-#     SmartcardLogonRequired            = $true
-#     ProxyAddresses                    = 'testuser3@fabrikam.com', 'testuser4@fabrikam.com'
-#     AdminDescription                  = 'User_ Changed'
-#     PhoneticDisplayName               = 'Test User Phonetic Changed'
-#     PreferredLanguage                 = 'en-GB'
-#     SimpleDisplayName                 = 'Test User Simple Changed'
+# Path                              = 'OU=Staff,DC=contoso,DC=com'
+# DisplayName                       = 'Test User Changed'
+# Initials                          = 'S'
+# Enabled                           = $false
+# GivenName                         = 'Test Changed'
+# CommonName                        = 'Common Changed'
+# Description                       = 'This is the test user changed'
+# Surname                           = 'User Changed'
+# StreetAddress                     = '1 Highway Road Changed'
+# POBox                             = 'PO Box 1 Changed'
+# City                              = 'Cityville Changed'
+# State                             = 'State Changed'
+# ServicePrincipalNames             = 'spn/c', 'spn/d'
+# ThumbnailPhoto                    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhq'
+# PostalCode                        = 'AA1 1AA Changed'
+# Country                           = 'GB'
+# Department                        = 'IT Changed'
+# Division                          = 'Global Changed'
+# Company                           = 'Contoso Changed'
+# Office                            = 'Office 1 Changed'
+# JobTitle                          = 'Test Changed'
+# EmailAddress                      = 'testuserchanged@contoso.com'
+# EmployeeID                        = 'ID1 Changed'
+# EmployeeNumber                    = '2'
+# HomeDirectory                     = '\\fs01\users\testuserchanged'
+# HomeDrive                         = 'I:'
+# HomePage                          = 'www.contoso.com/users/testuserchanged'
+# ProfilePath                       = 'changed profile path'
+# LogonScript                       = 'logonscript-changed.ps1'
+# Notes                             = 'This is a test user changed'
+# OfficePhone                       = '+1 123456'
+# MobilePhone                       = '+1 234567'
+# Fax                               = '+1 345678'
+# Pager                             = '+1 456789'
+# IPPhone                           = '123456'
+# HomePhone                         = '+1 567890'
+# Manager                           = 'John Doe Changed'
+# LogonWorkstations                 = 'PC03,PC04'
+# Organization                      = 'Contoso Changed'
+# OtherName                         = 'User1 Changed'
+# PasswordNeverExpires              = $true
+# CannotChangePassword              = $true
+# ChangePasswordAtLogon             = $false
+# TrustedForDelegation              = $true
+# AccountNotDelegated               = $false
+# AllowReversiblePasswordEncryption = $true
+# CompoundIdentitySupported         = $true
+# PasswordNotRequired               = $true
+# SmartcardLogonRequired            = $true
+# ProxyAddresses                    = 'testuser3@fabrikam.com', 'testuser4@fabrikam.com'
+# AdminDescription                  = 'User_ Changed'
+# PhoneticDisplayName               = 'Test User Phonetic Changed'
+# PreferredLanguage                 = 'en-GB'
+# SimpleDisplayName                 = 'Test User Simple Changed'
 # }
 
 # $mockGetADUserResult = @{
@@ -1114,88 +1114,393 @@ Describe 'MSFT_ADUser\Get-TargetResource' -Tag 'Get' {
     }
 }
 
-Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' -Skip:$true {
-    BeforeAll {
-        $testTargetResourceParams = @{
-            DomainName = $mockResource.DomainName
-            UserName   = $mockResource.UserName
-        }
-
-        $testTargetResourcePresentParams = $testTargetResourceParams.Clone()
-        $testTargetResourcePresentParams.Ensure = 'Present'
-
-        $testTargetResourceAbsentParams = $testTargetResourceParams.Clone()
-        $testTargetResourceAbsentParams.Ensure = 'Absent'
-    }
-
+Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' {
     Context 'When the Resource is Present' {
         BeforeAll {
-            Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourcePresentResult }
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    DomainName                        = 'contoso.com'
+                    UserName                          = 'TestUser'
+                    Path                              = 'CN=Users,DC=contoso,DC=com'
+                    DistinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                    DisplayName                       = 'Test User'
+                    Initials                          = 'T'
+                    Enabled                           = $true
+                    GivenName                         = 'Test'
+                    CommonName                        = 'TestUser'
+                    Password                          = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                    Description                       = 'This is the test user'
+                    Surname                           = 'User'
+                    StreetAddress                     = '1 Highway Road'
+                    POBox                             = 'PO Box 1'
+                    City                              = 'Cityville'
+                    State                             = 'State'
+                    UserPrincipalName                 = 'testuser@contoso.com'
+                    ServicePrincipalNames             = 'spn/a', 'spn/b'
+                    ThumbnailPhoto                    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhp'
+                    ThumbnailPhotoHash                = 'D8719F18D789F449CBD14B5798BE79F7'
+                    PostalCode                        = 'AA1 1AA'
+                    Country                           = 'US'
+                    Department                        = 'IT'
+                    Division                          = 'Global'
+                    Company                           = 'Contoso'
+                    Office                            = 'Office 1'
+                    JobTitle                          = 'Test'
+                    EmailAddress                      = 'testuser@contoso.com'
+                    EmployeeID                        = 'ID1'
+                    EmployeeNumber                    = '1'
+                    HomeDirectory                     = '\\fs01\users\testuser'
+                    HomeDrive                         = 'H:'
+                    HomePage                          = 'www.contoso.com/users/testuser'
+                    ProfilePath                       = 'profilepath'
+                    LogonScript                       = 'logonscript.ps1'
+                    Notes                             = 'This is a test user'
+                    OfficePhone                       = '+1 12345'
+                    MobilePhone                       = '+1 23456'
+                    Fax                               = '+1 34567'
+                    Pager                             = '+1 45678'
+                    IPPhone                           = '12345'
+                    HomePhone                         = '+1 56789'
+                    Manager                           = 'John Doe'
+                    LogonWorkstations                 = 'PC01,PC02'
+                    Organization                      = 'Contoso'
+                    OtherName                         = 'User1'
+                    PasswordNeverExpires              = $false
+                    CannotChangePassword              = $false
+                    ChangePasswordAtLogon             = $true
+                    TrustedForDelegation              = $false
+                    AccountNotDelegated               = $true
+                    AllowReversiblePasswordEncryption = $false
+                    CompoundIdentitySupported         = $false
+                    PasswordNotRequired               = $false
+                    SmartcardLogonRequired            = $false
+                    ProxyAddresses                    = 'testuser1@fabrikam.com', 'testuser2@fabrikam.com'
+                    AdminDescription                  = 'User_'
+                    PhoneticDisplayName               = 'Test User Phonetic'
+                    PreferredLanguage                 = 'en-US'
+                    SimpleDisplayName                 = 'Test User Simple'
+                    Ensure                            = 'Present'
+                }
+            }
+
             Mock -CommandName Test-Password
         }
 
         Context 'When the Resource should be Present' {
             It 'Should not throw' {
-                { Test-TargetResource @testTargetResourcePresentParams } | Should -Not -Throw
-            }
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-            It 'Should call the expected mocks' {
-                Should -Invoke -CommandName Get-TargetResource `
-                    -ParameterFilter { $UserName -eq $testTargetResourcePresentParams.UserName } `
-                    -Exactly -Times 1
-            }
-
-            foreach ($property in $mockChangedResource.Keys)
-            {
-                Context "When the '$property' property is not in the desired state" {
-                    BeforeAll {
-                        $testTargetResourceNotInDesiredStateParams = $testTargetResourcePresentParams.Clone()
-                        $testTargetResourceNotInDesiredStateParams.$property = $mockChangedResource.$property
+                    $mockParameters = @{
+                        DomainName = 'contoso.com'
+                        UserName   = 'TestUser'
+                        Ensure     = 'Present'
                     }
 
-                    It 'Should return $false' {
-                        Test-TargetResource @testTargetResourceNotInDesiredStateParams | Should -Be $false
+                    { Test-TargetResource @mockParameters } | Should -Not -Throw
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+            }
+
+            BeforeDiscovery {
+                $testCases = @(
+                    @{
+                        Property = 'Path'
+                        Value    = 'OU=Staff,DC=contoso,DC=com'
+                    }
+                    @{
+                        Property = 'DisplayName'
+                        Value    = 'Test User Changed'
+                    }
+                    @{
+                        Property = 'Initials'
+                        Value    = 'S'
+                    }
+                    @{
+                        Property = 'Enabled'
+                        Value    = $false
+                    }
+                    @{
+                        Property = 'GivenName'
+                        Value    = 'Test Changed'
+                    }
+                    @{
+                        Property = 'CommonName'
+                        Value    = 'Common Changed'
+                    }
+                    @{
+                        Property = 'Description'
+                        Value    = 'This is the test user changed'
+                    }
+                    @{
+                        Property = 'Surname'
+                        Value    = 'User Changed'
+                    }
+                    @{
+                        Property = 'StreetAddress'
+                        Value    = '1 Highway Road Changed'
+                    }
+                    @{
+                        Property = 'POBox'
+                        Value    = 'PO Box 1 Changed'
+                    }
+                    @{
+                        Property = 'City'
+                        Value    = 'Cityville Changed'
+                    }
+                    @{
+                        Property = 'State'
+                        Value    = 'State Changed'
+                    }
+                    @{
+                        Property = 'ServicePrincipalNames'
+                        Value    = 'spn/c', 'spn/d'
+                    }
+                    @{
+                        Property = 'ThumbnailPhoto'
+                        Value    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhq'
+                    }
+                    @{
+                        Property = 'PostalCode'
+                        Value    = 'AA1 1AA Changed'
+                    }
+                    @{
+                        Property = 'Country'
+                        Value    = 'GB'
+                    }
+                    @{
+                        Property = 'Department'
+                        Value    = 'IT Changed'
+                    }
+                    @{
+                        Property = 'Division'
+                        Value    = 'Global Changed'
+                    }
+                    @{
+                        Property = 'Company'
+                        Value    = 'Contoso Changed'
+                    }
+                    @{
+                        Property = 'Office'
+                        Value    = 'Office 1 Changed'
+                    }
+                    @{
+                        Property = 'JobTitle'
+                        Value    = 'Test Changed'
+                    }
+                    @{
+                        Property = 'EmailAddress'
+                        Value    = 'testuserchanged@contoso.com'
+                    }
+                    @{
+                        Property = 'EmployeeID'
+                        Value    = 'ID1 Changed'
+                    }
+                    @{
+                        Property = 'EmployeeNumber'
+                        Value    = '2'
+                    }
+                    @{
+                        Property = 'HomeDirectory'
+                        Value    = '\\fs01\users\testuserchanged'
+                    }
+                    @{
+                        Property = 'HomeDrive'
+                        Value    = 'I:'
+                    }
+                    @{
+                        Property = 'HomePage'
+                        Value    = 'www.contoso.com/users/testuserchanged'
+                    }
+                    @{
+                        Property = 'ProfilePath'
+                        Value    = 'changed profile path'
+                    }
+                    @{
+                        Property = 'LogonScript'
+                        Value    = 'logonscript-changed.ps1'
+                    }
+                    @{
+                        Property = 'Notes'
+                        Value    = 'This is a test user changed'
+                    }
+                    @{
+                        Property = 'OfficePhone'
+                        Value    = '+1 123456'
+                    }
+                    @{
+                        Property = 'MobilePhone'
+                        Value    = '+1 234567'
+                    }
+                    @{
+                        Property = 'Fax'
+                        Value    = '+1 345678'
+                    }
+                    @{
+                        Property = 'Pager'
+                        Value    = '+1 456789'
+                    }
+                    @{
+                        Property = 'IPPhone'
+                        Value    = '123456'
+                    }
+                    @{
+                        Property = 'HomePhone'
+                        Value    = '+1 567890'
+                    }
+                    @{
+                        Property = 'Manager'
+                        Value    = 'John Doe Changed'
+                    }
+                    @{
+                        Property = 'LogonWorkstations'
+                        Value    = 'PC03,PC04'
+                    }
+                    @{
+                        Property = 'Organization'
+                        Value    = 'Contoso Changed'
+                    }
+                    @{
+                        Property = 'OtherName'
+                        Value    = 'User1 Changed'
+                    }
+                    @{
+                        Property = 'PasswordNeverExpires'
+                        Value    = $true
+                    }
+                    @{
+                        Property = 'CannotChangePassword'
+                        Value    = $true
+                    }
+                    @{
+                        Property = 'ChangePasswordAtLogon'
+                        Value    = $false
+                    }
+                    @{
+                        Property = 'TrustedForDelegation'
+                        Value    = $true
+                    }
+                    @{
+                        Property = 'AccountNotDelegated'
+                        Value    = $false
+                    }
+                    @{
+                        Property = 'AllowReversiblePasswordEncryption'
+                        Value    = $true
+                    }
+                    @{
+                        Property = 'CompoundIdentitySupported'
+                        Value    = $true
+                    }
+                    @{
+                        Property = 'PasswordNotRequired'
+                        Value    = $true
+                    }
+                    @{
+                        Property = 'SmartcardLogonRequired'
+                        Value    = $true
+                    }
+                    @{
+                        Property = 'ProxyAddresses'
+                        Value    = 'testuser3@fabrikam.com', 'testuser4@fabrikam.com'
+                    }
+                    @{
+                        Property = 'AdminDescription'
+                        Value    = 'User_ Changed'
+                    }
+                    @{
+                        Property = 'PhoneticDisplayName'
+                        Value    = 'Test User Phonetic Changed'
+                    }
+                    @{
+                        Property = 'PreferredLanguage'
+                        Value    = 'en-GB'
+                    }
+                    @{
+                        Property = 'SimpleDisplayName'
+                        Value    = 'Test User Simple Changed'
+                    }
+                )
+            }
+
+            Context 'When the property ''<Property>'' is not in the desired state' -ForEach $testCases {
+                It 'Should return $false' {
+                    InModuleScope -Parameters $_ -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            DomainName = 'contoso.com'
+                            UserName   = 'TestUser'
+                            Ensure     = 'Present'
+                        }
+
+                        $mockParameters.$Property = $Value
+
+                        Test-TargetResource @mockParameters | Should -BeFalse
                     }
                 }
 
-                if ($mockChangedResource.$property -isnot [Boolean])
+
+                if ($Value -isnot [Boolean])
                 {
-                    if ($mockChangedResource.$property -isnot [Array])
+                    if ($Value -isnot [Array])
                     {
-                        Context "When the '$property' parameter should be null" {
-                            BeforeAll {
-                                $testTargetResourceNullParams = $testTargetResourcePresentParams.Clone()
-                                $testTargetResourceNullParams.$property = $null
-                            }
-
+                        Context 'When the ''<Property>'' parameter should be null' {
                             It 'Should return $false' {
-                                Test-TargetResource @testTargetResourceNullParams | Should -Be $false
+                                InModuleScope -Parameters $_ -ScriptBlock {
+                                    Set-StrictMode -Version 1.0
+
+                                    $mockParameters = @{
+                                        DomainName = 'contoso.com'
+                                        UserName   = 'TestUser'
+                                        Ensure     = 'Present'
+                                    }
+
+                                    $mockParameters.$Property = $null
+
+                                    Test-TargetResource @mockParameters | Should -BeFalse
+                                }
                             }
                         }
                     }
 
-                    Context "When the '$property' parameter should be empty" {
-                        BeforeAll {
-                            $testTargetResourceEmptyParams = $testTargetResourcePresentParams.Clone()
-                            $testTargetResourceEmptyParams.$property = ''
-                        }
-
+                    Context 'When the ''<Property>'' parameter should be empty' {
                         It 'Should return $false' {
-                            Test-TargetResource @testTargetResourceEmptyParams | Should -Be $false
+                            InModuleScope -Parameters $_ -ScriptBlock {
+                                Set-StrictMode -Version 1.0
+
+                                $mockParameters = @{
+                                    DomainName = 'contoso.com'
+                                    UserName   = 'TestUser'
+                                    Ensure     = 'Present'
+                                }
+
+                                $mockParameters.$Property = ''
+
+                                Test-TargetResource @mockParameters | Should -BeFalse
+                            }
                         }
                     }
                 }
 
-                if ($mockChangedResource.$property -is [Array])
+                if ($Value -is [Array])
                 {
-                    Context "When the '$property' parameter should be an empty array" {
-                        BeforeAll {
-                            $testTargetResourceEmptyArrayParams = $testTargetResourcePresentParams.Clone()
-                            $testTargetResourceEmptyArrayParams.$property = @()
-                        }
-
+                    Context 'When the ''<Property>'' parameter should be an empty array' {
                         It 'Should return $false' {
-                            Test-TargetResource @testTargetResourceEmptyArrayParams | Should -Be $false
+                            InModuleScope -Parameters $_ -ScriptBlock {
+                                Set-StrictMode -Version 1.0
+
+                                $mockParameters = @{
+                                    DomainName = 'contoso.com'
+                                    UserName   = 'TestUser'
+                                    Ensure     = 'Present'
+                                }
+
+                                $mockParameters.$Property = @()
+
+                                Test-TargetResource @mockParameters | Should -BeFalse
+                            }
                         }
                     }
                 }
@@ -1203,142 +1508,181 @@ Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' -Skip:$true {
 
             Context 'When all the resource properties are in the desired state' {
                 It 'Should return the desired result' {
-                    Test-TargetResource @testTargetResourcePresentParams | Should -Be $true
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            DomainName = 'contoso.com'
+                            UserName   = 'TestUser'
+                            Ensure     = 'Present'
+                        }
+
+                        Test-TargetResource @mockParameters | Should -BeTrue
+                    }
                 }
             }
 
-            Context 'When the "DomainController" parameter is specified' {
-                It 'Should not throw' {
-                    { Test-TargetResource @testTargetResourcePresentParams `
-                            -DomainController 'TESTDC' } | Should -Not -Throw
-                }
-
+            Context 'When the ''DomainController'' parameter is specified' {
                 It 'Should call the expected mocks' {
-                    Should -Invoke -CommandName Get-TargetResource `
-                        -ParameterFilter { $DomainController -eq 'TESTDC' } `
-                        -Exactly -Times 1
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            DomainName       = 'contoso.com'
+                            UserName         = 'TestUser'
+                            Ensure           = 'Present'
+                            DomainController = 'TESTDC'
+                        }
+
+                        { Test-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $DomainController -eq 'TESTDC' } -Exactly -Times 1 -Scope It
                 }
             }
 
-            Context 'When the "Credential" parameter is specified' {
-                It 'Should not throw' {
-                    { Test-TargetResource @testTargetResourcePresentParams `
-                            -Credential $testCredential } | Should -Not -Throw
-                }
-
+            Context 'When the ''Credential'' parameter is specified' {
                 It 'Should call the expected mocks' {
-                    Should -Invoke -CommandName Get-TargetResource `
-                        -ParameterFilter { $Credential -eq $testCredential } `
-                        -Exactly -Times 1
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            DomainName = 'contoso.com'
+                            UserName   = 'TestUser'
+                            Ensure     = 'Present'
+                            Credential = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                        }
+
+                        { Test-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $null -ne $Credential } -Exactly -Times 1 -Scope It
                 }
             }
 
-            Context 'When the "Password" parameter is specified' {
+            Context 'When the ''Password'' parameter is specified' {
                 Context 'When the specified Password has changed' {
                     BeforeAll {
                         Mock -CommandName Test-Password -MockWith { $false }
                     }
 
-                    Context 'When the "PasswordNeverResets" parameter is False' {
+                    Context 'When the ''PasswordNeverResets'' parameter is False' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordNeverResets $false | Should -BeFalse
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName          = 'contoso.com'
+                                    UserName            = 'TestUser'
+                                    Ensure              = 'Present'
+                                    Password            = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                    PasswordNeverResets = $false
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeFalse
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
-                    Context 'When the "PasswordNeverResets" parameter is True' {
+                    Context 'When the ''PasswordNeverResets'' parameter is True' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordNeverResets $true | Should -BeTrue
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -Exactly -Times 0
+                                $mockParameters = @{
+                                    DomainName          = 'contoso.com'
+                                    UserName            = 'TestUser'
+                                    Ensure              = 'Present'
+                                    Password            = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                    PasswordNeverResets = $true
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeTrue
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -Exactly -Times 0 -Scope It
                         }
                     }
 
-                    Context 'When the "Credential" parameter is specified' {
+                    Context 'When the ''Credential'' parameter is specified' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Credential $testCredential `
-                                -Password $testCredential | Should -BeFalse
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential -and `
-                                    $Credential -eq $testCredential } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName = 'contoso.com'
+                                    UserName   = 'TestUser'
+                                    Ensure     = 'Present'
+                                    Credential = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                    Password   = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeFalse
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password -and
+                                $null -ne $Credential
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
-                    Context 'When the "PasswordAuthentication" parameter is specified as "Default"' {
-                        BeforeAll {
-                            $testPasswordAuthentication = 'Default'
-                        }
-
+                    Context 'When the ''PasswordAuthentication'' parameter is specified as ''Default''' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordAuthentication $testPasswordAuthentication | Should -BeFalse
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential -and `
-                                    $PasswordAuthentication -eq $testPasswordAuthentication } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName             = 'contoso.com'
+                                    UserName               = 'TestUser'
+                                    Ensure                 = 'Present'
+                                    PasswordAuthentication = 'Default'
+                                    Password               = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeFalse
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password -and
+                                $PasswordAuthentication -eq 'Default'
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
-                    Context 'When the "PasswordAuthentication" parameter is specified as "Negotiate"' {
-                        BeforeAll {
-                            $testPasswordAuthentication = 'Negotiate'
-                        }
-
+                    Context 'When the ''PasswordAuthentication'' parameter is specified as ''Negotiate''' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordAuthentication $testPasswordAuthentication | Should -BeFalse
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential -and `
-                                    $PasswordAuthentication -eq $testPasswordAuthentication } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName             = 'contoso.com'
+                                    UserName               = 'TestUser'
+                                    Ensure                 = 'Present'
+                                    PasswordAuthentication = 'Negotiate'
+                                    Password               = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeFalse
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password -and
+                                $null -ne $PasswordAuthentication
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -1348,106 +1692,123 @@ Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' -Skip:$true {
                         Mock -CommandName Test-Password -MockWith { $true }
                     }
 
-                    Context 'When the "PasswordNeverResets" parameter is False' {
+                    Context 'When the ''PasswordNeverResets'' parameter is False' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordNeverResets $false | Should -BeTrue
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName          = 'contoso.com'
+                                    UserName            = 'TestUser'
+                                    Ensure              = 'Present'
+                                    Password            = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                    PasswordNeverResets = $false
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeTrue
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
-                    Context 'When the "PasswordNeverResets" parameter is True' {
+                    Context 'When the ''PasswordNeverResets'' parameter is True' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordNeverResets $true | Should -BeTrue
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -Exactly -Times 0
+                                $mockParameters = @{
+                                    DomainName          = 'contoso.com'
+                                    UserName            = 'TestUser'
+                                    Ensure              = 'Present'
+                                    Password            = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                    PasswordNeverResets = $true
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeTrue
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -Exactly -Times 0 -Scope It
                         }
                     }
 
-                    Context 'When the "Credential" parameter is specified' {
+                    Context 'When the ''Credential'' parameter is specified' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Credential $testCredential `
-                                -Password $testCredential | Should -BeTrue
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential -and `
-                                    $Credential -eq $testCredential } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName = 'contoso.com'
+                                    UserName   = 'TestUser'
+                                    Ensure     = 'Present'
+                                    Credential = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                    Password   = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeTrue
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password -and
+                                $null -ne $Credential
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
                     Context 'When the "PasswordAuthentication" parameter is specified as "Default"' {
-                        BeforeAll {
-                            $testPasswordAuthentication = 'Default'
-                        }
-
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordAuthentication $testPasswordAuthentication | Should -BeTrue
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential -and `
-                                    $PasswordAuthentication -eq $testPasswordAuthentication } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName             = 'contoso.com'
+                                    UserName               = 'TestUser'
+                                    Ensure                 = 'Present'
+                                    PasswordAuthentication = 'Default'
+                                    Password               = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeTrue
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password -and
+                                $PasswordAuthentication -eq 'Default'
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
 
-                    Context 'When the "PasswordAuthentication" parameter is specified as "Negotiate"' {
-                        BeforeAll {
-                            $testPasswordAuthentication = 'Negotiate'
-                        }
-
+                    Context 'When the ''PasswordAuthentication'' parameter is specified as ''Negotiate''' {
                         It 'Should return the desired result' {
-                            Test-TargetResource @testTargetResourcePresentParams `
-                                -Password $testCredential `
-                                -PasswordAuthentication $testPasswordAuthentication | Should -BeTrue
-                        }
+                            InModuleScope -ScriptBlock {
+                                Set-StrictMode -Version 1.0
 
-                        It 'Should call the expected mocks' {
-                            Should -Invoke -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name } `
-                                -Exactly -Times 1
-                            Should -Invoke -CommandName Test-Password `
-                                -ParameterFilter { `
-                                    $UserName -eq $testTargetResourcePresentParams.UserName -and `
-                                    $Password -eq $testCredential -and `
-                                    $PasswordAuthentication -eq $testPasswordAuthentication } `
-                                -Exactly -Times 1
+                                $mockParameters = @{
+                                    DomainName             = 'contoso.com'
+                                    UserName               = 'TestUser'
+                                    Ensure                 = 'Present'
+                                    PasswordAuthentication = 'Negotiate'
+                                    Password               = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                                }
+
+                                Test-TargetResource @mockParameters | Should -BeTrue
+                            }
+
+                            Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
+                            Should -Invoke -CommandName Test-Password -ParameterFilter {
+                                $UserName -eq 'TestUser' -and
+                                $null -ne $Password -and
+                                $PasswordAuthentication -eq 'Negotiate'
+                            } -Exactly -Times 1 -Scope It
                         }
                     }
                 }
@@ -1456,59 +1817,152 @@ Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' -Skip:$true {
 
         Context 'When the Resource should be Absent' {
             It 'Should return the desired result' {
-                Test-TargetResource @testTargetResourceAbsentParams | Should -BeFalse
-            }
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-            It 'Should call the expected mocks' {
-                Should -Invoke -CommandName Get-TargetResource `
-                    -ParameterFilter { $UserName -eq $testTargetResourceAbsentParams.UserName } `
-                    -Exactly -Times 1
+                    $mockParameters = @{
+                        DomainName = 'contoso.com'
+                        UserName   = 'TestUser'
+                        Ensure     = 'Absent'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
             }
         }
     }
 
     Context 'When the Resource is Absent' {
         BeforeAll {
-            Mock -CommandName Get-TargetResource -MockWith { $testTargetResourceAbsentParams }
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    DomainName = 'contoso.com'
+                    UserName   = 'TestUser'
+                    Ensure     = 'Absent'
+                }
+            }
         }
 
         Context 'When the Resource should be Present' {
             It 'Should return the desired result' {
-                Test-TargetResource @testTargetResourcePresentParams | Should -BeFalse
-            }
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-            It 'Should call the expected mocks' {
-                Should -Invoke -CommandName Get-TargetResource `
-                    -ParameterFilter { $UserName -eq $testTargetResourceAbsentParams.UserName } `
-                    -Exactly -Times 1
+                    $mockParameters = @{
+                        DomainName = 'contoso.com'
+                        UserName   = 'TestUser'
+                        Ensure     = 'Present'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
             }
 
             Context 'When ChangePasswordAtLogon is true and does not match the AD Account property' {
                 BeforeAll {
-                    $mockGetTargetResourceAbsentPasswordTrueResult = `
-                        $mockGetTargetResourceAbsentResult.Clone()
-                    $mockGetTargetResourceAbsentPasswordTrueResult['ChangePasswordAtLogon'] = $false
-
-                    Mock -CommandName Get-TargetResource `
-                        -MockWith { $mockGetTargetResourceAbsentPasswordTrueResult }
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        @{
+                            DomainName                        = 'contoso.com'
+                            UserName                          = 'TestUser'
+                            Path                              = 'CN=Users,DC=contoso,DC=com'
+                            DistinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                            DisplayName                       = 'Test User'
+                            Initials                          = 'T'
+                            Enabled                           = $true
+                            GivenName                         = 'Test'
+                            CommonName                        = 'TestUser'
+                            Password                          = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                            Description                       = 'This is the test user'
+                            Surname                           = 'User'
+                            StreetAddress                     = '1 Highway Road'
+                            POBox                             = 'PO Box 1'
+                            City                              = 'Cityville'
+                            State                             = 'State'
+                            UserPrincipalName                 = 'testuser@contoso.com'
+                            ServicePrincipalNames             = 'spn/a', 'spn/b'
+                            ThumbnailPhoto                    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhp'
+                            ThumbnailPhotoHash                = 'D8719F18D789F449CBD14B5798BE79F7'
+                            PostalCode                        = 'AA1 1AA'
+                            Country                           = 'US'
+                            Department                        = 'IT'
+                            Division                          = 'Global'
+                            Company                           = 'Contoso'
+                            Office                            = 'Office 1'
+                            JobTitle                          = 'Test'
+                            EmailAddress                      = 'testuser@contoso.com'
+                            EmployeeID                        = 'ID1'
+                            EmployeeNumber                    = '1'
+                            HomeDirectory                     = '\\fs01\users\testuser'
+                            HomeDrive                         = 'H:'
+                            HomePage                          = 'www.contoso.com/users/testuser'
+                            ProfilePath                       = 'profilepath'
+                            LogonScript                       = 'logonscript.ps1'
+                            Notes                             = 'This is a test user'
+                            OfficePhone                       = '+1 12345'
+                            MobilePhone                       = '+1 23456'
+                            Fax                               = '+1 34567'
+                            Pager                             = '+1 45678'
+                            IPPhone                           = '12345'
+                            HomePhone                         = '+1 56789'
+                            Manager                           = 'John Doe'
+                            LogonWorkstations                 = 'PC01,PC02'
+                            Organization                      = 'Contoso'
+                            OtherName                         = 'User1'
+                            PasswordNeverExpires              = $false
+                            CannotChangePassword              = $false
+                            ChangePasswordAtLogon             = $false
+                            TrustedForDelegation              = $false
+                            AccountNotDelegated               = $true
+                            AllowReversiblePasswordEncryption = $false
+                            CompoundIdentitySupported         = $false
+                            PasswordNotRequired               = $false
+                            SmartcardLogonRequired            = $false
+                            ProxyAddresses                    = 'testuser1@fabrikam.com', 'testuser2@fabrikam.com'
+                            AdminDescription                  = 'User_'
+                            PhoneticDisplayName               = 'Test User Phonetic'
+                            PreferredLanguage                 = 'en-US'
+                            SimpleDisplayName                 = 'Test User Simple'
+                            Ensure                            = 'Absent'
+                        }
+                    }
                 }
 
                 It 'Should return the desired result' {
-                    Test-TargetResource @testTargetResourcePresentParams -ChangePasswordAtLogon $true |
-                        Should -BeFalse
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            DomainName            = 'contoso.com'
+                            UserName              = 'TestUser'
+                            Ensure                = 'Present'
+                            ChangePasswordAtLogon = $true
+                        }
+
+                        Test-TargetResource @mockParameters | Should -BeFalse
+                    }
                 }
             }
         }
 
         Context 'When the Resource should be Absent' {
             It 'Should return the desired result' {
-                Test-TargetResource @testTargetResourceAbsentParams | Should -BeTrue
-            }
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-            It 'Should call the expected mocks' {
-                Should -Invoke -CommandName Get-TargetResource `
-                    -ParameterFilter { $UserName -eq $testTargetResourceAbsentParams.UserName } `
-                    -Exactly -Times 1
+                    $mockParameters = @{
+                        DomainName = 'contoso.com'
+                        UserName   = 'TestUser'
+                        Ensure     = 'Absent'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeTrue
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $UserName -eq 'TestUser' } -Exactly -Times 1 -Scope It
             }
         }
     }
@@ -1517,15 +1971,21 @@ Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' -Skip:$true {
 Describe 'MSFT_ADUser\Set-TargetResource' -Tag 'Set' -Skip:$true {
     BeforeAll {
         $setTargetResourceParams = @{
-            DomainName = $mockResource.DomainName
-            UserName   = $mockResource.UserName
+            DomainName = 'contoso.com'
+            UserName   = 'TestUser'
         }
 
-        $setTargetResourcePresentParams = $setTargetResourceParams.Clone()
-        $setTargetResourcePresentParams['Ensure'] = 'Present'
+        $setTargetResourcePresentParams = @{
+            DomainName = 'contoso.com'
+            UserName   = 'TestUser'
+            Ensure     = 'Present'
+        }
 
-        $setTargetResourceAbsentParams = $setTargetResourceParams.Clone()
-        $setTargetResourceAbsentParams['Ensure'] = 'Absent'
+        $setTargetResourceAbsentParams = @{
+            DomainName = 'contoso.com'
+            UserName   = 'TestUser'
+            Ensure     = 'Absent'
+        }
 
         Mock -CommandName Set-ADUser
         Mock -CommandName Move-ADObject
@@ -1539,12 +1999,125 @@ Describe 'MSFT_ADUser\Set-TargetResource' -Tag 'Set' -Skip:$true {
 
     Context 'When the resource is present' {
         BeforeAll {
-            $mockChangedSetResource = $mockChangedResource.Clone()
-            $mockChangedSetResource.Remove('Path')
-            $mockChangedSetResource.Remove('CommonName')
-            $mockChangedSetResource.Remove('ChangePasswordAtLogon')
+            $mockChangedSetResource = @{
+                DisplayName                       = 'Test User Changed'
+                Initials                          = 'S'
+                Enabled                           = $false
+                GivenName                         = 'Test Changed'
+                Description                       = 'This is the test user changed'
+                Surname                           = 'User Changed'
+                StreetAddress                     = '1 Highway Road Changed'
+                POBox                             = 'PO Box 1 Changed'
+                City                              = 'Cityville Changed'
+                State                             = 'State Changed'
+                ServicePrincipalNames             = 'spn/c', 'spn/d'
+                ThumbnailPhoto                    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhq'
+                PostalCode                        = 'AA1 1AA Changed'
+                Country                           = 'GB'
+                Department                        = 'IT Changed'
+                Division                          = 'Global Changed'
+                Company                           = 'Contoso Changed'
+                Office                            = 'Office 1 Changed'
+                JobTitle                          = 'Test Changed'
+                EmailAddress                      = 'testuserchanged@contoso.com'
+                EmployeeID                        = 'ID1 Changed'
+                EmployeeNumber                    = '2'
+                HomeDirectory                     = '\\fs01\users\testuserchanged'
+                HomeDrive                         = 'I:'
+                HomePage                          = 'www.contoso.com/users/testuserchanged'
+                ProfilePath                       = 'changed profile path'
+                LogonScript                       = 'logonscript-changed.ps1'
+                Notes                             = 'This is a test user changed'
+                OfficePhone                       = '+1 123456'
+                MobilePhone                       = '+1 234567'
+                Fax                               = '+1 345678'
+                Pager                             = '+1 456789'
+                IPPhone                           = '123456'
+                HomePhone                         = '+1 567890'
+                Manager                           = 'John Doe Changed'
+                LogonWorkstations                 = 'PC03,PC04'
+                Organization                      = 'Contoso Changed'
+                OtherName                         = 'User1 Changed'
+                PasswordNeverExpires              = $true
+                CannotChangePassword              = $true
+                TrustedForDelegation              = $true
+                AccountNotDelegated               = $false
+                AllowReversiblePasswordEncryption = $true
+                CompoundIdentitySupported         = $true
+                PasswordNotRequired               = $true
+                SmartcardLogonRequired            = $true
+                ProxyAddresses                    = 'testuser3@fabrikam.com', 'testuser4@fabrikam.com'
+                AdminDescription                  = 'User_ Changed'
+                PhoneticDisplayName               = 'Test User Phonetic Changed'
+                PreferredLanguage                 = 'en-GB'
+                SimpleDisplayName                 = 'Test User Simple Changed'
+            }
 
-            Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourcePresentResult }
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    DomainName                        = 'contoso.com'
+                    UserName                          = 'TestUser'
+                    Path                              = 'CN=Users,DC=contoso,DC=com'
+                    DistinguishedName                 = 'CN=TestUser,CN=Users,DC=contoso,DC=com'
+                    DisplayName                       = 'Test User'
+                    Initials                          = 'T'
+                    Enabled                           = $true
+                    GivenName                         = 'Test'
+                    CommonName                        = 'TestUser'
+                    Password                          = [System.Management.Automation.PSCredential]::new('user', $(ConvertTo-SecureString -String 'P@ssW0rd1' -AsPlainText -Force))
+                    Description                       = 'This is the test user'
+                    Surname                           = 'User'
+                    StreetAddress                     = '1 Highway Road'
+                    POBox                             = 'PO Box 1'
+                    City                              = 'Cityville'
+                    State                             = 'State'
+                    UserPrincipalName                 = 'testuser@contoso.com'
+                    ServicePrincipalNames             = 'spn/a', 'spn/b'
+                    ThumbnailPhoto                    = '/9j/4AAQSkZJRgABAQEAYABgAAD/4QBmRXhp'
+                    ThumbnailPhotoHash                = 'D8719F18D789F449CBD14B5798BE79F7'
+                    PostalCode                        = 'AA1 1AA'
+                    Country                           = 'US'
+                    Department                        = 'IT'
+                    Division                          = 'Global'
+                    Company                           = 'Contoso'
+                    Office                            = 'Office 1'
+                    JobTitle                          = 'Test'
+                    EmailAddress                      = 'testuser@contoso.com'
+                    EmployeeID                        = 'ID1'
+                    EmployeeNumber                    = '1'
+                    HomeDirectory                     = '\\fs01\users\testuser'
+                    HomeDrive                         = 'H:'
+                    HomePage                          = 'www.contoso.com/users/testuser'
+                    ProfilePath                       = 'profilepath'
+                    LogonScript                       = 'logonscript.ps1'
+                    Notes                             = 'This is a test user'
+                    OfficePhone                       = '+1 12345'
+                    MobilePhone                       = '+1 23456'
+                    Fax                               = '+1 34567'
+                    Pager                             = '+1 45678'
+                    IPPhone                           = '12345'
+                    HomePhone                         = '+1 56789'
+                    Manager                           = 'John Doe'
+                    LogonWorkstations                 = 'PC01,PC02'
+                    Organization                      = 'Contoso'
+                    OtherName                         = 'User1'
+                    PasswordNeverExpires              = $false
+                    CannotChangePassword              = $false
+                    ChangePasswordAtLogon             = $true
+                    TrustedForDelegation              = $false
+                    AccountNotDelegated               = $true
+                    AllowReversiblePasswordEncryption = $false
+                    CompoundIdentitySupported         = $false
+                    PasswordNotRequired               = $false
+                    SmartcardLogonRequired            = $false
+                    ProxyAddresses                    = 'testuser1@fabrikam.com', 'testuser2@fabrikam.com'
+                    AdminDescription                  = 'User_'
+                    PhoneticDisplayName               = 'Test User Phonetic'
+                    PreferredLanguage                 = 'en-US'
+                    SimpleDisplayName                 = 'Test User Simple'
+                    Ensure                            = 'Present'
+                }
+            }
         }
 
         Context 'When the resource should be present' {
@@ -1873,7 +2446,7 @@ Describe 'MSFT_ADUser\Set-TargetResource' -Tag 'Set' -Skip:$true {
                                 -ParameterFilter { `
                                     $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                     $Password -eq $testCredential -and `
-                                    $Credential -eq $testCredential } `
+                                    $null -ne $Credential } `
                                 -Exactly -Times 1
                             Should -Invoke -CommandName Set-ADAccountPassword `
                                 -ParameterFilter { $NewPassword -eq $testCredential.Password } `
@@ -2055,7 +2628,7 @@ Describe 'MSFT_ADUser\Set-TargetResource' -Tag 'Set' -Skip:$true {
                                     -ParameterFilter { `
                                         $UserName -eq $setTargetResourcePresentParams.UserName -and `
                                         $Password -eq $testCredential -and `
-                                        $Credential -eq $testCredential } `
+                                        $null -ne $Credential } `
                                     -Exactly -Times 1
                                 Should -Invoke -CommandName Set-ADAccountPassword `
                                     -Exactly -Times 0
