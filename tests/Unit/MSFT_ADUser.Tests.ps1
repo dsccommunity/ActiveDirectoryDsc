@@ -398,7 +398,7 @@ Describe 'MSFT_ADUser\Get-TargetResource' -Tag 'Get' {
         }
 
 
-        Context 'When the "ChangePassswordAtLogon" parameter is false' {
+        Context 'When the ''ChangePassswordAtLogon'' parameter is false' {
             BeforeAll {
                 Mock -CommandName Get-ADUser -MockWith {
                     @{
@@ -483,7 +483,7 @@ Describe 'MSFT_ADUser\Get-TargetResource' -Tag 'Get' {
             }
         }
 
-        Context 'When the "ThumbnailPhoto" parameter is empty' {
+        Context 'When the ''ThumbnailPhoto'' parameter is empty' {
             BeforeAll {
                 Mock -CommandName Get-ADUser -MockWith {
                     @{
@@ -675,7 +675,7 @@ Describe 'MSFT_ADUser\Get-TargetResource' -Tag 'Get' {
         }
     }
 
-    Context 'When the "DomainController" parameter is specified' {
+    Context 'When the ''DomainController'' parameter is specified' {
         BeforeAll {
             Mock -CommandName Get-ADUser -MockWith {
                 @{
@@ -759,7 +759,7 @@ Describe 'MSFT_ADUser\Get-TargetResource' -Tag 'Get' {
         }
     }
 
-    Context 'When the "Credential" parameter is specified' {
+    Context 'When the ''Credential'' parameter is specified' {
         BeforeAll {
             Mock -CommandName Get-ADUser -MockWith {
                 @{
@@ -1492,7 +1492,7 @@ Describe 'MSFT_ADUser\Test-TargetResource' -Tag 'Test' {
                         }
                     }
 
-                    Context 'When the "PasswordAuthentication" parameter is specified as "Default"' {
+                    Context 'When the ''PasswordAuthentication'' parameter is specified as ''Default''' {
                         It 'Should return the desired result' {
                             InModuleScope -ScriptBlock {
                                 Set-StrictMode -Version 1.0
