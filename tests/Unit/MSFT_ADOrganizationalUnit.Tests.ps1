@@ -1182,7 +1182,7 @@ Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
                             Ensure                          = 'Present'
                         }
 
-                        $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SetResourceError -f $mockParameters.Name)
+                        $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.NewResourceError -f $mockParameters.Name)
 
                         { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
                     }
