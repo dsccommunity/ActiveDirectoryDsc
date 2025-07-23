@@ -287,7 +287,7 @@ Describe 'MSFT_ADDomainControllerProperties\Set-TargetResource' -Tag 'Set' {
                         IsSingleInstance = 'Yes'
                         ContentFreshness = 60
                     }
-                    
+
                     { Set-TargetResource @mockSetParameters } | Should -Not -Throw
                 }
 
