@@ -57,65 +57,6 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-$testDefaultParameters = @{
-    Path                               = 'CN=PC01,CN=Computers,DC=contoso,DC=com'
-    IdentityReference                  = 'CONTOSO\User'
-    AccessControlType                  = 'Allow'
-    ObjectType                         = '00000000-0000-0000-0000-000000000000'
-    ActiveDirectorySecurityInheritance = 'None'
-    InheritedObjectType                = '00000000-0000-0000-0000-000000000000'
-}
-
-# $testPresentParameters = @{
-#     Ensure                = 'Present'
-#     ActiveDirectoryRights = 'GenericAll'
-# }
-
-# $testAbsentParameters = @{
-#     Ensure                = 'Absent'
-#     ActiveDirectoryRights = 'GenericAll'
-# }
-
-# $mockADDrivePSPath = '\'
-
-# $mockGetAclPresent = {
-# $mock = [PSCustomObject] @{
-#     Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC01,CN=Computers,DC=contoso,DC=com'
-#     Owner  = 'BUILTIN\Administrators'
-#     Access = @(
-#         [PSCustomObject] @{
-#             ActiveDirectoryRights = 'GenericAll'
-#             InheritanceType       = 'None'
-#             ObjectType            = [System.Guid] '00000000-0000-0000-0000-000000000000'
-#             InheritedObjectType   = [System.Guid] '00000000-0000-0000-0000-000000000000'
-#             ObjectFlags           = 'None'
-#             AccessControlType     = 'Allow'
-#             IdentityReference     = [PSCustomObject] @{
-#                 Value = 'CONTOSO\User'
-#             }
-#             IsInherited           = $false
-#             InheritanceFlags      = 'None'
-#             PropagationFlags      = 'None'
-#         }
-#     )
-# }
-# $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value { }
-# $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value { }
-# return $mock
-# }
-
-# $mockGetAclAbsent = {
-# $mock = [PSCustomObject] @{
-#     Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC,CN=Computers,DC=lab,DC=local'
-#     Owner  = 'BUILTIN\Administrators'
-#     Access = @()
-# }
-
-# $mock | Add-Member -MemberType 'ScriptMethod' -Name 'AddAccessRule' -Value { }
-# $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value { }
-# return $mock
-# }
-
 Describe 'MSFT_ADObjectPermissionEntry\Get-TargetResource' -Tag 'Get' {
     Context 'When the desired ace is present' {
         BeforeAll {
