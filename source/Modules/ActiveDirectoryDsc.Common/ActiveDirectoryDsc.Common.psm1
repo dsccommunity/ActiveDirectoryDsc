@@ -2045,7 +2045,6 @@ function Get-CurrentUser
 #>
 function Test-Password
 {
-    #TODO: Fix the justification message
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'PasswordAuthentication')]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '', Justification = 'This is to allow testing of service accounts.')]
     [CmdletBinding()]
