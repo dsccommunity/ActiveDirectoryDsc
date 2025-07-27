@@ -215,13 +215,13 @@ Describe 'MSFT_ADOptionalFeature\Get-TargetResource' -Tag 'Get' {
                         ForestFqdn                        = 'contoso.com'
                         EnterpriseAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
                             'DummyUser',
-                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                         )
                     }
 
                     $errorRecord = Get-ObjectNotFoundRecord -Message ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
 
-                    { Get-TargetResource @featureParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @featureParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -258,7 +258,7 @@ Describe 'MSFT_ADOptionalFeature\Get-TargetResource' -Tag 'Get' {
 
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.GetUnhandledException -f $featureParameters.ForestFQDN)
 
-                { Get-TargetResource @featureParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Get-TargetResource @featureParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
         }
     }
@@ -446,9 +446,9 @@ Describe 'MSFT_ADOptionalFeature\Set-TargetResource' -Tag 'Set' {
                     )
                 }
 
-                $errorMessage = Get-InvalidOperationRecord -Message ($script:localizedData.SetUnhandledException -f $featureParameters.ForestFQDN)
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SetUnhandledException -f $featureParameters.ForestFQDN)
 
-                { Set-TargetResource @featureParameters } | Should -Throw -ExpectedMessage $errorMessage.Message
+                { Set-TargetResource @featureParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Get-ADForest -Exactly -Times 1 -Scope It
@@ -592,7 +592,7 @@ Describe 'MSFT_ADOptionalFeature\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-ObjectNotFoundRecord -Message ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
 
-                    { Set-TargetResource @featureParameters } | Should -Throw $errorRecord.Message
+                    { Set-TargetResource @featureParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -648,7 +648,7 @@ Describe 'MSFT_ADOptionalFeature\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-ObjectNotFoundRecord -Message ($script:localizedData.ForestNotFound -f $featureParameters.ForestFQDN)
 
-                    { Set-TargetResource @featureParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Set-TargetResource @featureParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -692,7 +692,7 @@ Describe 'MSFT_ADOptionalFeature\Set-TargetResource' -Tag 'Set' {
 
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SetUnhandledException -f $featureParameters.ForestFQDN)
 
-                { Get-TargetResource @featureParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Set-TargetResource @featureParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
         }
     }
