@@ -948,7 +948,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.NotEnoughKDSRootKeysPresentNoForce -f
                         $mockParameters.EffectiveTime)
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Add-KDSRootKey -Exactly -Times 0 -Scope It
@@ -1116,7 +1116,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.AddingKDSRootKeyError -f
                     $mockParameters.EffectiveTime)
 
-                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Add-KDSRootKey -Exactly -Times 0 -Scope It

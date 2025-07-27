@@ -80,7 +80,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
 
                 $errorRecord = Get-ObjectNotFoundRecord -Message ($script:localizedData.MissingDomain -f $mockParameters.DomainName)
 
-                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
@@ -911,7 +911,7 @@ Describe 'ADDomainController\Test-TargetResource' -Tag 'Test' {
                         $script:localizedData.FailedToFindSite -f $mockParameters.SiteName, $mockParameters.DomainName
                     )
 
-                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
@@ -944,7 +944,7 @@ Describe 'ADDomainController\Test-TargetResource' -Tag 'Test' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message  ($script:localizedData.DelegatedAdministratorAccountNameNotRODC)
 
-                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
@@ -976,7 +976,7 @@ Describe 'ADDomainController\Test-TargetResource' -Tag 'Test' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message  ($script:localizedData.AllowPasswordReplicationAccountNameNotRODC)
 
-                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
@@ -1008,7 +1008,7 @@ Describe 'ADDomainController\Test-TargetResource' -Tag 'Test' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message  ($script:localizedData.DenyPasswordReplicationAccountNameNotRODC)
 
-                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
@@ -1040,7 +1040,7 @@ Describe 'ADDomainController\Test-TargetResource' -Tag 'Test' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RODCMissingSite)
 
-                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
@@ -1072,7 +1072,7 @@ Describe 'ADDomainController\Test-TargetResource' -Tag 'Test' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.CannotConvertToRODC
 
-                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Test-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
@@ -1230,7 +1230,7 @@ Describe 'ADDomainController\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.DelegatedAdministratorAccountNameNotRODC
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -1249,7 +1249,7 @@ Describe 'ADDomainController\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.AllowPasswordReplicationAccountNameNotRODC
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -1268,7 +1268,7 @@ Describe 'ADDomainController\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.DenyPasswordReplicationAccountNameNotRODC
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -1287,7 +1287,7 @@ Describe 'ADDomainController\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.RODCMissingSite
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }

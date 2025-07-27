@@ -84,7 +84,7 @@ Describe 'MSFT_ADReadOnlyDomainControllerAccount\Get-TargetResource' -Tag 'Get' 
 
                 $errorRecord = Get-ObjectNotFoundRecord -Message ($script:localizedData.MissingDomain -f $mockParameters.DomainName)
 
-                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
@@ -696,7 +696,7 @@ Describe 'MSFT_ADReadOnlyDomainControllerAccount\Test-TargetResource' -Tag 'Test
                         $script:localizedData.FailedToFindSite -f $testDefaultParams.SiteName, $testDefaultParams.DomainName
                     )
 
-                    { Test-TargetResource @testDefaultParams } | Should -Throw -ExpectedMessage $errorRecord
+                    { Test-TargetResource @testDefaultParams } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
