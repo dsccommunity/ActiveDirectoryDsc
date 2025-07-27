@@ -455,7 +455,7 @@ Describe 'MSFT_ADForestProperties\Set-TargetResource' -Tag 'Set' {
                     $script:localizedData.SetTombstoneLifetimeError -f $mockParameters.TombstoneLifetime, $mockParameters.ForestName
                 )
 
-                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
         }
     }

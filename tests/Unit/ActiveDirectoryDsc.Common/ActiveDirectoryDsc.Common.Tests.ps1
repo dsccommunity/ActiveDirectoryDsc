@@ -1377,7 +1377,7 @@ Describe 'ActiveDirectoryDsc.Common\Assert-ADPSProvider' -Tag 'Private' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.AdPsProviderInstallFailureError
 
-                    { Assert-ADPSProvider } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Assert-ADPSProvider } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-PSProvider -ParameterFilter { $ErrorAction -eq 'SilentlyContinue' } -Exactly -Times 1

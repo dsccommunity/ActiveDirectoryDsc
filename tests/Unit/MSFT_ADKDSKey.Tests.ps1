@@ -244,7 +244,7 @@ Describe 'MSFT_ADKDSKey\Get-TargetResource' -Tag 'Get' {
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.EffectiveTimeInvalid -f
                     $mockParameters.EffectiveTime)
 
-                { Get-TargetResource  @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Get-TargetResource  @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Assert-HasDomainAdminRights -Exactly -Times 0 -Scope It
@@ -267,10 +267,10 @@ Describe 'MSFT_ADKDSKey\Get-TargetResource' -Tag 'Get' {
 
                 $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 
-                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.IncorrectPermissions -f
+                $errorRecord = Get-InvalidResultRecord -Message ($script:localizedData.IncorrectPermissions -f
                     $currentUser.Name)
 
-                { Get-TargetResource  @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Get-TargetResource  @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Assert-HasDomainAdminRights -Exactly -Times 1 -Scope It
@@ -296,7 +296,7 @@ Describe 'MSFT_ADKDSKey\Get-TargetResource' -Tag 'Get' {
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RetrievingKDSRootKeyError -f
                     $mockParameters.EffectiveTime)
 
-                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Assert-HasDomainAdminRights -Exactly -Times 1 -Scope It
@@ -401,7 +401,7 @@ Describe 'MSFT_ADKDSKey\Get-TargetResource' -Tag 'Get' {
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FoundKDSRootKeySameEffectiveTime -f
                         $mockParameters.EffectiveTime)
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Write-Warning -Exactly -Times 1 -Scope It
@@ -1050,7 +1050,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.KDSRootKeyRemoveError -f
                         $mockParameters.EffectiveTime)
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Remove-ADObject -Exactly -Times 1 -Scope It
@@ -1159,7 +1159,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.EffectiveTimeInvalid -f
                     $mockParameters.EffectiveTime)
 
-                { Set-TargetResource  @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Set-TargetResource  @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Compare-TargetResourceState -ParameterFilter {
@@ -1186,7 +1186,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.KDSRootKeyAddError -f
                         $mockParameters.EffectiveTime)
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Add-KdsRootKey -Exactly -Times 1 -Scope It

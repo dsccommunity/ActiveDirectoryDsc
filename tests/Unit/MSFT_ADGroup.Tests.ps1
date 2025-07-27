@@ -358,7 +358,7 @@ Describe 'MSFT_ADGroup\Get-TargetResource' -Tag 'Get' {
                         $script:localizedData.RetrievingGroupError -f $mockParameters.GroupName
                     )
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -380,7 +380,7 @@ Describe 'MSFT_ADGroup\Get-TargetResource' -Tag 'Get' {
                         $script:localizedData.RetrievingGroupMembersError -f $mockParameters.GroupName
                     )
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -972,11 +972,11 @@ Describe 'MSFT_ADGroup\Set-TargetResource' -Tag 'Set' {
 
                             $errorRecord = Get-InvalidOperationRecord -Message (
                                 $script:localizedData.MovingGroupError -f $mockParameters.GroupName,
-                                $mockParameters.Path,
+                                'OU=Test,DC=contoso,DC=com',
                                 $mockParameters.Path
                             )
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }
@@ -1219,7 +1219,7 @@ Describe 'MSFT_ADGroup\Set-TargetResource' -Tag 'Set' {
                                     $mockParameters.GroupName
                                 )
 
-                                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                             }
                         }
                     }
@@ -1252,7 +1252,7 @@ Describe 'MSFT_ADGroup\Set-TargetResource' -Tag 'Set' {
                     Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $GroupName -eq 'TestGroup' } -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Set-ADGroup -ParameterFilter {
                         $Identity -eq 'CN=TestGroup,OU=Test,DC=contoso,DC=com' -and
-                         (Get-Variable -Name Replace -ValueOnly).Info -eq 'Changed Notes'
+                        (Get-Variable -Name Replace -ValueOnly).Info -eq 'Changed Notes'
                     } -Exactly -Times 1 -Scope It
 
                     Should -Invoke -CommandName Remove-ADGroup -Exactly -Times 0 -Scope It
@@ -1288,7 +1288,7 @@ Describe 'MSFT_ADGroup\Set-TargetResource' -Tag 'Set' {
                     Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $GroupName -eq 'TestGroup' } -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Set-ADGroup -ParameterFilter {
                         $Identity -eq 'CN=TestGroup,OU=Test,DC=contoso,DC=com' -and
-                         (Get-Variable -Name Replace -ValueOnly).adminDescription -eq 'Changed Admin Description'
+                        (Get-Variable -Name Replace -ValueOnly).adminDescription -eq 'Changed Admin Description'
                     } -Exactly -Times 1 -Scope It
 
                     Should -Invoke -CommandName Remove-ADGroup -Exactly -Times 0 -Scope It
@@ -1739,7 +1739,7 @@ Describe 'MSFT_ADGroup\Set-TargetResource' -Tag 'Set' {
                             $script:localizedData.SettingGroupError -f
                             $mockParameters.GroupName)
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
                 }
             }
@@ -2053,7 +2053,8 @@ Describe 'MSFT_ADGroup\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.AddingGroupError -f $mockParameters.GroupName)
 
-                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Set-TargetResource @mockParameters } |
+                        Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -2279,7 +2280,7 @@ Describe 'MSFT_ADGroup\Set-TargetResource' -Tag 'Set' {
 
                             $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RemovingGroupError -f $mockParameters.GroupName)
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }

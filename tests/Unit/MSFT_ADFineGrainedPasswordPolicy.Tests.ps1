@@ -194,7 +194,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RetrievePasswordPolicySubjectError -f $mockParameters.Name)
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -291,7 +291,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RetrievePasswordPolicyError -f $mockParameters.Name)
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -726,7 +726,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
 
                                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.AddingPasswordPolicySubjectsError -f $mockParameters.Name)
 
-                                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                                 }
                             }
                         }
@@ -818,7 +818,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
 
                                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RemovingPasswordPolicySubjectsError -f $mockParameters.Name)
 
-                                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                                 }
                             }
                         }
@@ -987,7 +987,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
 
                         $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SettingPasswordPolicyError -f $mockParameters.Name)
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
                 }
             }
@@ -1170,7 +1170,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
 
                             $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.AddingPasswordPolicySubjectsError -f $mockParameters.Name)
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }
@@ -1204,7 +1204,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
 
                         $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.AddingPasswordPolicyError -f $mockParameters.Name)
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
                 }
             }
@@ -1365,7 +1365,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
 
                             $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RemovingDeletionProtectionError -f $mockParameters.Name)
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }
@@ -1400,7 +1400,7 @@ Describe 'MSFT_ADFineGrainedPasswordPolicy\Set-TargetResource' -Tag 'Set' {
 
                         $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RemovePasswordPolicyError -f $mockParameters.Name)
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
                 }
             }

@@ -315,7 +315,7 @@ Describe 'MSFT_ADOrganizationalUnit\Get-TargetResource' -Tag 'Get' {
 
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.GetResourceError -f $mockParameters.Name)
 
-                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
         }
     }
@@ -651,7 +651,7 @@ Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
 
                         $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SetResourceError -f $mockParameters.Name)
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
 
                     Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
@@ -841,7 +841,7 @@ Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
 
                             $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SetResourceError -f $mockParameters.Name)
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
 
                         Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
@@ -890,7 +890,7 @@ Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
 
                         $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RemoveResourceError -f $mockParameters.Name)
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
 
                     Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
@@ -1151,10 +1151,10 @@ Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
                             Ensure                          = 'Present'
                         }
 
-                        $errorRecord = Get-InvalidOperationRecord -Message $($script:localizedData.PathNotFoundError -f $mockParameters.Path)
+                        $errorRecord = Get-ObjectNotFoundRecord -Message $($script:localizedData.PathNotFoundError -f $mockParameters.Path)
 
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
 
                     Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
@@ -1184,7 +1184,7 @@ Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
 
                         $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.NewResourceError -f $mockParameters.Name)
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
 
                     Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It

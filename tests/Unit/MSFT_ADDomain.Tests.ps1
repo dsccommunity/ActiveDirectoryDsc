@@ -251,10 +251,10 @@ Describe 'MSFT_ADDomain\Get-TargetResource' -Tag 'Get' {
                     $getParameters = @{
                         DomainName                    = 'contoso.com'
                         Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                         )
                         SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
-                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                         )
                     }
 
@@ -286,7 +286,7 @@ Describe 'MSFT_ADDomain\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.GetAdForestUnexpectedError -f 'contoso.com')
 
-                    { Get-TargetResource @getParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @getParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -388,7 +388,7 @@ Describe 'MSFT_ADDomain\Test-TargetResource' -Tag 'Test' {
 }
 
 Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
-     Context 'When Installing a Forest Root Domain' {
+    Context 'When Installing a Forest Root Domain' {
         BeforeAll {
             Mock -CommandName Get-TargetResource -MockWith {
                 @{
@@ -628,7 +628,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -650,7 +650,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -672,7 +672,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -694,7 +694,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -716,7 +716,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -738,7 +738,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -760,12 +760,12 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
                     DnsDelegationCredential       = [System.Management.Automation.PSCredential]::new('Delegation',
-                (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                 }
 
@@ -785,12 +785,12 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
                     DnsDelegationCredential       = [System.Management.Automation.PSCredential]::new('Delegation',
-                    (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                 }
 
@@ -810,7 +810,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -833,7 +833,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -856,7 +856,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -879,7 +879,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'
@@ -902,7 +902,7 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                     DomainName                    = 'present.com'
                     ParentDomainName              = 'parent.com'
                     Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
                     SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode', (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainType                    = 'ChildDomain'

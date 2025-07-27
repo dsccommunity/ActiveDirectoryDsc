@@ -75,9 +75,9 @@ Describe 'MSFT_ADComputer\Get-TargetResource' -Tag 'Get' {
                     ComputerName = 'TEST01'
                 }
 
-                $errorMessage = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToRetrieveComputerAccount -f $getParameters.ComputerName)
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToRetrieveComputerAccount -f $getParameters.ComputerName)
 
-                { Get-TargetResource @getParameters } | Should -Throw -ExpectedMessage $errorMessage.Message
+                { Get-TargetResource @getParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
             Should -Invoke -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
@@ -1291,7 +1291,7 @@ Describe 'MSFT_ADComputer\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToCreateOfflineDomainJoinRequest -f $setParameters.ComputerName, 87)
 
-                    { Set-TargetResource @setParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Set-TargetResource @setParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It

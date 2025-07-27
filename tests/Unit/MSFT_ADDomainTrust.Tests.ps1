@@ -1188,7 +1188,7 @@ Describe 'MSFT_ADDomainTrust\Set-TargetResource' -Tag 'Set' {
 
                         $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.NotOptInToRecreateTrust
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
 
                     Should -Invoke -CommandName Get-TrustSourceAndTargetObject -Exactly -Times 1 -Scope It

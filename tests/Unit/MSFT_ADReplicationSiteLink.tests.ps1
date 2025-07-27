@@ -190,7 +190,7 @@ Describe 'MSFT_ADReplicationSiteLink\Get-TargetResource' -Tag 'Get' {
 
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.GetSiteLinkUnexpectedError -f $mockParameters.Name)
 
-                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
         }
     }

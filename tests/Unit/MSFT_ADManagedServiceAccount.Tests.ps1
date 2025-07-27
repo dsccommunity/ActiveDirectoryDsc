@@ -297,7 +297,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RetrievingManagedPasswordPrincipalsError -f 'User1')
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
             }
         }
@@ -400,7 +400,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Test-TargetResource' -Tag 'Test' {
                     MembershipAttribute       = 'SamAccountName'
                     Credential                = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
                         'DummyUser',
-                         (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
                     )
                     DomainController          = 'MockDC'
                     KerberosEncryptionType    = 'RC4', 'AES128', 'AES256'
@@ -805,7 +805,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                             $mockParameters.ServiceAccountName
                         )
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
                 }
             }
@@ -892,7 +892,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                                 $mockParameters.ServiceAccountName
                             )
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }
@@ -982,7 +982,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                                 $mockParameters.Path
                             )
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }
@@ -1068,7 +1068,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                                 $mockParameters.Path
                             )
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
 
@@ -1096,7 +1096,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                                 )
 
 
-                                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                             }
 
                             Should -Invoke -CommandName Get-ADDomain -Scope It -Exactly -Times 1
@@ -1124,7 +1124,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
 
                                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.GettingADDomainError)
 
-                                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                                    { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                                 }
                             }
                         }
@@ -1194,7 +1194,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                                 $script:localizedData.KdsRootKeyNotFoundError -f $setTargetResourceParametersGroup.ServiceAccountName
                             )
 
-                            { Set-TargetResource @setTargetResourceParametersGroup } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @setTargetResourceParametersGroup } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }
@@ -1231,7 +1231,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                                 $mockParameters.Path
                             )
 
-                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                         }
                     }
                 }
@@ -1322,7 +1322,7 @@ Describe -Name 'MSFT_ADManagedServiceAccount\Set-TargetResource' -Tag 'Set' {
                             $mockParameters.ServiceAccountName
                         )
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
                 }
             }

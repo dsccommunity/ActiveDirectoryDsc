@@ -82,7 +82,7 @@ Describe 'MSFT_ADObjectEnabledState\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToRetrieveComputerAccount -f $mockParameters.Identity)
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
@@ -108,7 +108,7 @@ Describe 'MSFT_ADObjectEnabledState\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToRetrieveComputerAccount -f $mockParameters.Identity)
 
-                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord.Message
+                    { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                 }
 
                 Should -Invoke -CommandName Get-ADComputer -Exactly -Times 1 -Scope It
