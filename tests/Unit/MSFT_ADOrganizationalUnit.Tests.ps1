@@ -1154,7 +1154,7 @@ Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
                         $errorRecord = Get-ObjectNotFoundRecord -Message $($script:localizedData.PathNotFoundError -f $mockParameters.Path)
 
 
-                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
                     }
 
                     Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It

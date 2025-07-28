@@ -1291,7 +1291,7 @@ Describe 'MSFT_ADComputer\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.FailedToCreateOfflineDomainJoinRequest -f $setParameters.ComputerName, 87)
 
-                    { Set-TargetResource @setParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    { Set-TargetResource @setParameters } | Should -Throw -ExpectedMessage $errorRecord
                 }
 
                 Should -Invoke -CommandName Remove-ADComputer -Exactly -Times 0 -Scope It

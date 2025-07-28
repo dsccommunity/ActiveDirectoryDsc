@@ -260,7 +260,7 @@ Describe 'MSFT_ADDomain\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SysVolPathDoesNotExistError -f 'C:\Windows\SysVol\contoso.com')
 
-                    { Get-TargetResource @getParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    { Get-TargetResource @getParameters } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
         }

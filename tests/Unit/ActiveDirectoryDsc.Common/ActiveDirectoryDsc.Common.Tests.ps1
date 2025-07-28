@@ -1452,7 +1452,7 @@ Describe 'ActiveDirectoryDsc.Common\Test-ADReplicationSite' {
         $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12'
         $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
             $mockAdministratorUser,
-                ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
+            ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
         )
 
         Mock -CommandName Get-ADDomainController -MockWith {
@@ -1502,7 +1502,7 @@ Describe 'ActiveDirectoryDsc.Common\New-CimCredentialInstance' {
             $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12'
             $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
                 $mockAdministratorUser,
-                    ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
+                ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
             )
         }
 
@@ -1574,7 +1574,7 @@ Describe 'ActiveDirectoryDsc.Common\New-ADDirectoryContext' {
             $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12'
             $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
                 $mockAdministratorUser,
-                    ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
+                ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
             )
 
             Mock -CommandName Add-TypeAssembly -Verifiable
@@ -1633,7 +1633,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             $mockAdministratorPassword = 'P@ssw0rd-12P@ssw0rd-12'
             $mockAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
                 $mockAdministratorUser,
-                    ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
+                ($mockAdministratorPassword | ConvertTo-SecureString -AsPlainText -Force)
             )
 
             $mockDomainName = 'contoso.com'
@@ -1707,7 +1707,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
                 throw New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
                     -ArgumentList @(
                     $mockErrorMessage,
-                        (New-Object -TypeName 'System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException')
+                    (New-Object -TypeName 'System.DirectoryServices.ActiveDirectory.ActiveDirectoryObjectNotFoundException')
                 )
             }
 
@@ -1762,7 +1762,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
                 $exceptionWithInnerException = New-Object -TypeName 'System.Management.Automation.MethodInvocationException' `
                     -ArgumentList @(
                     $mockErrorMessage,
-                        (New-Object -TypeName 'System.Security.Authentication.AuthenticationException')
+                    (New-Object -TypeName 'System.Security.Authentication.AuthenticationException')
                 )
 
                 $newObjectParameters = @{
@@ -1818,11 +1818,11 @@ Describe 'ActiveDirectoryDsc.Common\Test-Password' {
         $mockPassword = 'mockpassword'
         $mockPasswordCredential = [System.Management.Automation.PSCredential]::new(
             $mockUserName,
-                (ConvertTo-SecureString -String $mockPassword -AsPlainText -Force)
+            (ConvertTo-SecureString -String $mockPassword -AsPlainText -Force)
         )
         $mockCredential = [System.Management.Automation.PSCredential]::new(
             $mockUserName,
-                (ConvertTo-SecureString -String $mockPassword -AsPlainText -Force)
+            (ConvertTo-SecureString -String $mockPassword -AsPlainText -Force)
         )
         $principalContextTypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
@@ -1978,7 +1978,7 @@ Describe 'ActiveDirectoryDsc.Common\Resolve-MembersSecurityIdentifier' {
         BeforeAll {
             $testCredentials = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
                 'DummyUser',
-                    (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
             )
             $membershipAttribute = 'ObjectGUID'
 

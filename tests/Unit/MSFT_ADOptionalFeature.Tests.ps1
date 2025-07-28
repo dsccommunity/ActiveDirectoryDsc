@@ -194,7 +194,7 @@ Describe 'MSFT_ADOptionalFeature\Get-TargetResource' -Tag 'Get' {
 
                     $errorRecord = Get-InvalidArgumentRecord -Message $script:localizedData.CredentialError -ArgumentName 'EnterpriseAdministratorCredential'
 
-                    { Get-TargetResource @featureParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    { Get-TargetResource @featureParameters } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
         }
@@ -565,7 +565,7 @@ Describe 'MSFT_ADOptionalFeature\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidArgumentRecord -Message $script:localizedData.CredentialError -ArgumentName 'EnterpriseAdministratorCredential'
 
-                    { Set-TargetResource @badCredentialsProperties } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    { Set-TargetResource @badCredentialsProperties } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
         }
@@ -621,7 +621,7 @@ Describe 'MSFT_ADOptionalFeature\Set-TargetResource' -Tag 'Set' {
 
                     $errorRecord = Get-InvalidArgumentRecord -Message $script:localizedData.CredentialError -ArgumentName 'EnterpriseAdministratorCredential'
 
-                    { Set-TargetResource @badCredentialsProperties } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    { Set-TargetResource @badCredentialsProperties } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
         }

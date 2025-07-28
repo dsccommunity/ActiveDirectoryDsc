@@ -3170,7 +3170,7 @@ Describe 'MSFT_ADUser\Assert-Parameters' -Tag 'Helper' {
                 $errorRecord = Get-InvalidArgumentRecord -Message ($script:localizedData.PasswordParameterConflictError -f
                     'Enabled', $false, 'Password') -ArgumentName 'Password'
 
-                { Assert-Parameters @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                { Assert-Parameters @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
             }
         }
     }
@@ -3202,7 +3202,7 @@ Describe 'MSFT_ADUser\Assert-Parameters' -Tag 'Helper' {
                 $errorRecord = Get-InvalidArgumentRecord -Message $script:localizedData.ChangePasswordParameterConflictError -ArgumentName 'ChangePasswordAtLogon, PasswordNeverExpires'
 
                 { Assert-Parameters @mockParameters } |
-                    Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    Should -Throw -ExpectedMessage $errorRecord
             }
         }
     }
@@ -3271,7 +3271,7 @@ Describe 'MSFT_ADUser\Get-ThumbnailByteArray' -Tag 'Helper' {
 
                 $errorRecord = Get-InvalidOperationRecord -Message $script:localizedData.ThumbnailPhotoNotAFile
 
-                { Get-ThumbnailByteArray @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                { Get-ThumbnailByteArray @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
             }
         }
     }
