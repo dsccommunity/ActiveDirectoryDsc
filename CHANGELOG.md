@@ -39,6 +39,15 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Add doc generation.
   - Move module to buildModule directory.
   - Add wiki to release assets.
+- ADDomain
+  - Skip LCM reboot signal if `dsc.exe` is running.
+    ([issue #742](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/742)).
+
+### Fixed
+
+- ADDomain
+  - Report domain exists in `Get-TargetResource` during pending DC promotion reboot.
+    ([issue #742](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/742)).
 
 ## [6.7.0] - 2025-05-29
 
