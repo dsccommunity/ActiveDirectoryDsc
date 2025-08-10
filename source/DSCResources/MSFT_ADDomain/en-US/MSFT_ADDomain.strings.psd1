@@ -10,4 +10,6 @@ ConvertFrom-StringData @'
     DomainNotInDesiredState            = The domain '{0}' is NOT in the desired state. (ADD0009)
     SysVolPathDoesNotExistError        = The expected SysVol Path '{0}' does not exist. (ADD0011)
     GetAdForestUnexpectedError         = Error getting AD forest '{0}'. (ADD0014)
+    PendingReboot                      = Promotion pending reboot. (ADD0015)
+    SuppressReboot                     = No reboot will be signaled to the LCM. (ADD0016)
 '@
