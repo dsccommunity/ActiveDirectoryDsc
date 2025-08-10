@@ -170,7 +170,7 @@ Describe 'ActiveDirectoryDsc.Common\Remove-DuplicateMembers' {
         $members -is [System.Array] | Should -BeTrue
     }
 
-    It 'Should return a string array with one one entry' {
+    It 'Should return a string array with one entry' {
         $members = Remove-DuplicateMembers -Members 'User1', 'USER1', 'user1'
 
         $members.Count | Should -Be 1
