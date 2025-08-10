@@ -94,6 +94,30 @@ function Get-TargetResource
         $domainShouldBePresent = $false
     }
 
+    # If the domain is being promoted, then the LocatorDCPromoPreRebootHint registry item will exist.
+    if ($domainShouldBePresent -and (Test-Path -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint'))
+    {
+        Write-Verbose $script:localizedData.PendingReboot
+
+        return @{
+            DomainName                    = $DomainName
+            Credential                    = $Credential
+            SafeModeAdministratorPassword = $SafeModeAdministratorPassword
+            ParentDomainName              = $ParentDomainName
+            DomainNetBiosName             = $null
+            DnsDelegationCredential       = $null
+            DomainType                    = $DomainType
+            DatabasePath                  = $null
+            LogPath                       = $null
+            SysvolPath                    = $null
+            ForestMode                    = $null
+            DomainMode                    = $null
+            DomainExist                   = $true    # to prevent re-provision
+            Forest                        = $null
+            DnsRoot                       = $null
+        }
+    }
+
     if ($domainShouldBePresent)
     {
         # Test that the correct domain SysVol path exists
@@ -468,6 +492,7 @@ function Set-TargetResource
         }
 
     $targetResource = Get-TargetResource @getTargetResourceParameters
+    $needsReboot = $false
 
     if (-not $targetResource.DomainExist)
     {
@@ -541,6 +566,17 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.CreatedForest -f $DomainName)
         }
 
+        $needsReboot = $true
+    }
+    elseif (
+        [string]::IsNullOrEmpty($targetResource.SysvolPath) -and
+        (Test-Path -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint')
+    ) {
+        $needsReboot = $true
+    }
+
+    if ($needsReboot -and -not (Test-Path -Path 'HKLM:\SOFTWARE\DSC Community\ActiveDirectoryDsc\SuppressReboot'))
+    {
         <#
             Signal to the LCM to reboot the node to compensate for the one we
             suppressed from Install-ADDSForest/Install-ADDSDomain.
@@ -548,6 +584,11 @@ function Set-TargetResource
         [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '',
             Justification = 'Set LCM DSCMachineStatus to indicate reboot required')]
         $global:DSCMachineStatus = 1
+    }
+    elseif ($needsReboot)
+    {
+        Write-Verbose $script:localizedData.PendingReboot
+        Write-Verbose $script:localizedData.SuppressReboot
     }
 } #end function Set-TargetResource
 
