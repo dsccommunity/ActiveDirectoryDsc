@@ -8,14 +8,14 @@ BeforeDiscovery {
     {
         if (-not (Get-Module -Name 'DscResource.Test'))
         {
-            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            # Assumes dependencies have been resolved, so if this module is not available, run 'noop' task.
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
                 & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
             }
 
-            # If the dependencies has not been resolved, this will throw an error.
+            # If the dependencies have not been resolved, this will throw an error.
             Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
         }
     }
@@ -1167,7 +1167,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-DomainControllerObject' {
             { Get-DomainControllerObject -DomainName 'contoso.com' -ComputerName $mockComputerName } | Should -Not -Throw
 
             Should -Invoke -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
-            Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 0
+            Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 0 -Scope It
         }
 
         It 'Should return the correct values for each property' {

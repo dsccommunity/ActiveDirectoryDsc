@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-        Returns $true if the the environment variable APPVEYOR is set to $true,
+        Returns $true if the the environment variable CI is set to $true,
         and the environment variable CONFIGURATION is set to the value passed
         in the parameter Type.
 
