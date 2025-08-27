@@ -895,15 +895,15 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                     }
 
                     Set-TargetResource @mockParameters
-
-                    Should -Invoke -CommandName Add-KDSRootKey -Exactly -Times 0 -Scope It
-                    Should -Invoke -CommandName Remove-ADObject -Exactly -Times 1 -Scope It
-                    Should -Invoke -CommandName Write-Warning -Exactly -Times 0 -Scope It
-                    Should -Invoke -CommandName Get-KdsRootKey -Exactly -Times 1 -Scope It
-                    Should -Invoke -CommandName Compare-TargetResourceState -ParameterFilter {
-                        ([DateTime]::Parse('1/1/3000 13:00')) -eq $EffectiveTime
-                    } -Exactly -Times 1 -Scope It
                 }
+
+                Should -Invoke -CommandName Add-KDSRootKey -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Remove-ADObject -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Write-Warning -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Get-KdsRootKey -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Compare-TargetResourceState -ParameterFilter {
+                    ([DateTime]::Parse('1/1/3000 13:00')) -eq $EffectiveTime
+                } -Exactly -Times 1 -Scope It
             }
         }
 
@@ -1121,7 +1121,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
 
             Should -Invoke -CommandName Add-KDSRootKey -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName Remove-ADObject -Exactly -Times 0 -Scope It
-            Should -Invoke -CommandName Write-Warning -Exactly -Times 0
+            Should -Invoke -CommandName Write-Warning -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName Compare-TargetResourceState -ParameterFilter {
                 ([DateTime]::Parse('1/1/2000 13:00'))
             } -Exactly -Times 1 -Scope It

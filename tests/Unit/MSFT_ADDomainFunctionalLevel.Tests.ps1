@@ -66,7 +66,7 @@ Describe 'MSFT_ADDomainFunctionalLevel\Get-TargetResource' -Tag 'Get' {
             }
         }
 
-        It 'Should return the the correct result' {
+        It 'Should return the correct result' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 

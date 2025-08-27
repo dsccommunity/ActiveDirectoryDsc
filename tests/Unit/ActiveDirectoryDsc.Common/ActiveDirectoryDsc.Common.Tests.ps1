@@ -170,7 +170,7 @@ Describe 'ActiveDirectoryDsc.Common\Remove-DuplicateMembers' {
         $members -is [System.Array] | Should -BeTrue
     }
 
-    It 'Should return a string array with one one entry' {
+    It 'Should return a string array with one entry' {
         $members = Remove-DuplicateMembers -Members 'User1', 'USER1', 'user1'
 
         $members.Count | Should -Be 1
@@ -564,7 +564,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-ADCommonParameters' {
         $result['Identity'] | Should -Be $testIdentity
     }
 
-    it "Returns 'Name' key when 'UseNameParameter' and 'PreferCommonName' are supplied" {
+    It "Returns 'Name' key when 'UseNameParameter' and 'PreferCommonName' are supplied" {
         $testIdentity = 'contoso.com'
         $testCommonName = 'Test Common Name'
 
@@ -572,7 +572,6 @@ Describe 'ActiveDirectoryDsc.Common\Get-ADCommonParameters' {
 
         $result['Name'] | Should -Be $testCommonName
     }
-
     It "Does not return 'Credential' key by default" {
         $testIdentity = 'contoso.com'
 

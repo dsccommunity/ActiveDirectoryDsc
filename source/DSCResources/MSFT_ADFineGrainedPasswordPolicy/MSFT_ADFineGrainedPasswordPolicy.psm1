@@ -658,8 +658,7 @@ function Set-TargetResource
                         if (-not [System.String]::IsNullOrEmpty($subjectsToRemove))
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingPasswordPolicySubjects -f
-                                $Name, $($SubjectsToRemove.Count))
-
+                                $Name, $($subjectsToRemove.Count))
                             try
                             {
                                 Remove-ADFineGrainedPasswordPolicySubject @passwordPolicyParameters `

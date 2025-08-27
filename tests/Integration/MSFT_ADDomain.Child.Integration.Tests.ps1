@@ -121,7 +121,8 @@ Describe "$($script:dscResourceName).$($script:subTestName)_Integration" {
             }
 
             It 'Should return $true when Test-DscConfiguration is run' {
-                Test-DscConfiguration | Should -Be 'True'
+-                Test-DscConfiguration | Should -Be 'True'
++                Test-DscConfiguration | Should -BeTrue
             }
         }
     }
