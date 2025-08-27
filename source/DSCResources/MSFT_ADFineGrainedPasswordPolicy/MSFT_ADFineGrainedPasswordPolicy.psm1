@@ -224,8 +224,8 @@ function Get-TargetResource
 #>
 function Test-TargetResource
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge')]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -279,14 +279,14 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateScript( {
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript( {
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MaxPasswordAge,
@@ -475,8 +475,8 @@ function Test-TargetResource
 #>
 function Set-TargetResource
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge')]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
     [CmdletBinding()]
     param
     (
@@ -529,14 +529,14 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateScript( {
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MinPasswordAge,
 
         [Parameter()]
         [ValidateScript( {
-            ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
+                ([ValidateRange(0, 10675199)]$valueInDays = [TimeSpan]::Parse($_).TotalDays); $?
             })]
         [System.String]
         $MaxPasswordAge,
