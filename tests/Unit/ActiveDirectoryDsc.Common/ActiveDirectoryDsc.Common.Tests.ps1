@@ -222,14 +222,14 @@ Describe 'ActiveDirectoryDsc.Common\Test-Members' {
         $testExistingMembers = @('USER1', 'USER2', 'USER3')
         $testMembers = @('USER1', 'USER3')
 
-        Test-Members -ExistingMembers $null -Members $testMembers | Should -BeFalse
+        Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should -BeFalse
     }
 
-    It 'Fails when there are more existing members than the members required' {
+    It 'Fails when there are less existing members than the members required' {
         $testExistingMembers = @('USER1', 'USER2')
         $testMembers = @('USER1', 'USER3', 'USER2')
 
-        Test-Members -ExistingMembers $null -Members $testMembers | Should -BeFalse
+        Test-Members -ExistingMembers $testExistingMembers -Members $testMembers | Should -BeFalse
     }
 
     It 'Fails when existing members do not match required members' {
@@ -1019,7 +1019,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-DomainObject' {
             $getDomainObjectResult | Should -BeNullOrEmpty
 
             Should -Invoke -CommandName Get-ADDomain -Exactly -Times 3 -Scope It
-            Should -Invoke -CommandName Start-Sleep -Exactly -Times 3
+            Should -Invoke -CommandName Start-Sleep -Exactly -Times 3 -Scope It
         }
     }
 
@@ -1477,7 +1477,7 @@ Describe 'ActiveDirectoryDsc.Common\Test-ADReplicationSite' {
         }
     }
 
-    Context 'When a replication site exist' {
+    Context 'When a replication site exists' {
         BeforeAll {
             Mock -CommandName Get-ADReplicationSite -MockWith {
                 return 'site object'
@@ -1565,7 +1565,7 @@ Describe 'ActiveDirectoryDsc.Common\Add-TypeAssembly' {
     }
 }
 
-Describe 'ActiveDirectoryDsc.Common\New-ADDirectoryContext' {
+Describe 'ActiveDirectoryDsc.Common\Get-ADDirectoryContext' {
     Context 'When creating a new Active Directory context' {
         BeforeAll {
             # This credential object must be created before we mock New-Object.
@@ -1655,8 +1655,8 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
                     -not $PesterBoundParameters.ContainsKey('Credential')
                 } -Exactly -Times 1 -Scope It
 
-                Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
-                Should -Invoke -Command Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 0 -Scope It
             }
         }
 
@@ -1669,8 +1669,8 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
                     -not $PesterBoundParameters.ContainsKey('Credential')
                 } -Exactly -Times 1 -Scope It
 
-                Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 0 -Scope It
-                Should -Invoke -Command Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 1 -Scope It
             }
         }
 
@@ -1683,8 +1683,8 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
                     $PesterBoundParameters.ContainsKey('Credential')
                 } -Exactly -Times 1 -Scope It
 
-                Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
-                Should -Invoke -Command Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneInSiteWrapper -Exactly -Times 0 -Scope It
             }
         }
 
@@ -1720,8 +1720,8 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
         It 'Should not throw and call the correct mocks' {
             { Find-DomainController -DomainName $mockDomainName } | Should -Not -Throw
 
-            Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
-            Should -Invoke -Command Write-Verbose -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Write-Verbose -Exactly -Times 1 -Scope It
         }
 
         Assert-VerifiableMock
@@ -1746,7 +1746,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
         It 'Should throw the correct error' {
             { Find-DomainController -DomainName $mockDomainName } | Should -Throw $mockErrorMessage
 
-            Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
         }
 
         Assert-VerifiableMock
@@ -1782,7 +1782,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             It 'Should throw the correct error' {
                 { Find-DomainController -DomainName $mockDomainName } | Should -Throw $mockErrorMessage
 
-                Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
             }
         }
 
@@ -1790,7 +1790,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             It 'Should throw the correct error' {
                 { Find-DomainController -DomainName $mockDomainName -WaitForValidCredentials:$false } | Should -Throw $mockErrorMessage
 
-                Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
             }
         }
 
@@ -1802,7 +1802,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             It 'Should not throw an exception' {
                 { Find-DomainController -DomainName $mockDomainName -WaitForValidCredentials } | Should -Not -Throw
 
-                Should -Invoke -Command Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Write-Warning -Exactly -Times 1 -Scope It
             }
         }
@@ -2098,7 +2098,7 @@ Describe 'ActiveDirectoryDsc.Common\Resolve-MembersSecurityIdentifier' {
             $script:memberIndex = 0
         }
 
-        It 'Should Return the correct result' {
+        It 'Should return the correct result' {
             $result = Resolve-MembersSecurityIdentifier @resolveMembersSecurityIdentifierParms
 
             for ($i = 0; $i -lt $result.Count; $i++)
