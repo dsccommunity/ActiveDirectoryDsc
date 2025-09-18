@@ -447,7 +447,8 @@ function Get-ADDrivePSPath
 
         Returns the rightsGUID of the Extended Rights object with displayName "Send As".
 #>
-function Get-ADSchemaGuid {
+function Get-ADSchemaGuid
+{
     [CmdletBinding()]
     [OutputType([System.String])]
     param (
