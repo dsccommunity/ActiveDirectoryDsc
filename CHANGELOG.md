@@ -11,7 +11,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - `ADObjectPermissionEntry`
   - The "ObjectType" parameter now supports the display name of the object to which the access rule applies, in addition to the schema GUID.
-  - The "InheritedObjectType" parameter now supports the display name of the object type that can inherit this access rule in addition to the schema GUID.
+    ([issue #744](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/744)).
+  - The "InheritedObjectType" parameter now supports the display name of the object type that can inherit this access rule, in addition to the schema GUID.
+    ([issue #744](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/744)).
 
 ## [6.7.0] - 2025-05-29
 
