@@ -307,6 +307,16 @@ try
             }
         }
         #endregion Function Test-IsGuid
+
+        #region Function Get-EscapedLdapFilterValue
+        Describe -Name 'ADObjectPermissionEntry\Get-EscapedLdapFilterValue' {
+            Context 'Escape special characters in the input string' {
+                It 'Should return escaped LDAP filter value' {
+                    Get-EscapedLdapFilterValue -Value 'Sandman (Admin)*' | Should -Be 'Sandman \28Admin\29\2a'
+                }
+            }
+        }
+        #endregion Function Get-EscapedLdapFilterValue
     }
 }
 finally
