@@ -291,6 +291,22 @@ try
                 }
             }
         }
+
+        #region Function Test-IsGuid
+        Describe -Name 'ADObjectPermissionEntry\Test-IsGuid' {
+            Context 'When testing a valid GUID' {
+                It 'Should return true' {
+                    Test-IsGuid -InputString '550e8400-e29b-41d4-a716-446655440000' | Should -Be $true
+                }
+            }
+
+            Context 'When testing a invalid GUID' {
+                It 'Should return false' {
+                    Test-IsGuid 'abc' | Should -Be $false
+                }
+            }
+        }
+        #endregion Function Test-IsGuid
     }
 }
 finally
