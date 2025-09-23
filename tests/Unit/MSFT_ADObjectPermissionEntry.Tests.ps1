@@ -321,7 +321,7 @@ try
 
             Context 'When DisplayName matches a extended right' {
                 It 'Should return rightsGUID' {
-                    $callCount = 0
+                    $script:callCount = 0
 
                     Mock -CommandName 'Get-ADObject' -MockWith {
                         $script:callCount++
