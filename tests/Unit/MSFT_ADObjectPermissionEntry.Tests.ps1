@@ -58,14 +58,7 @@ try
 
         $mockADDrivePSPath = '\'
 
-        $mockGetADRootDSE = {
-            $mock = [PSCustomObject] @{
-                configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
-                defaultNamingContext        = 'DC=contoso,DC=com'
-                schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
-            }
-            return $mock
-        }
+        $mockADSchemaGuid = '00000000-0000-0000-0000-000000000000'
 
         $mockGetAclPresent = {
             $mock = [PSCustomObject] @{
@@ -103,6 +96,15 @@ try
             $mock | Add-Member -MemberType 'ScriptMethod' -Name 'RemoveAccessRule' -Value { }
             return $mock
         }
+
+        $mockGetADRootDSE = {
+            $mock = [PSCustomObject] @{
+                configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                defaultNamingContext        = 'DC=contoso,DC=com'
+                schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+            }
+            return $mock
+        }
         #endregion
 
         #region Function Get-ADDrivePSPath
@@ -136,6 +138,14 @@ try
         Describe 'ADObjectPermissionEntry\Get-TargetResource' {
             Mock -CommandName 'Get-ADDrivePSPath' -MockWith {
                 return $mockADDrivePSPath
+            }
+
+            Mock -CommandName 'Test-IsGuid' -MockWith {
+                return $false
+            }
+
+            Mock -CommandName 'Get-ADSchemaGuid' -MockWith {
+                return $mockADSchemaGuid
             }
 
             Context 'When the desired ace is present' {
@@ -270,6 +280,14 @@ try
         Describe 'ADObjectPermissionEntry\Set-TargetResource' {
             Mock -CommandName 'Get-ADDrivePSPath' -MockWith {
                 return $mockADDrivePSPath
+            }
+
+            Mock -CommandName 'Test-IsGuid' -MockWith {
+                return $false
+            }
+
+            Mock -CommandName 'Get-ADSchemaGuid' -MockWith {
+                return $mockADSchemaGuid
             }
 
             Context 'When the desired ace is present' {
