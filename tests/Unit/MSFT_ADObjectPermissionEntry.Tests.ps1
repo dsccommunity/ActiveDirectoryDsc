@@ -327,7 +327,7 @@ try
                         $script:callCount++
                         if ($script:callCount -eq 1)
                         {
-                            return $null
+                            return
                         }
                         else
                         {
