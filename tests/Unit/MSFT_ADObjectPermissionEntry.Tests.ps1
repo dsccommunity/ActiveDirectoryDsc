@@ -375,10 +375,20 @@ try
             }
 
             Context 'When retrieving ADRootDSE fails' {
-                It 'Should throw an exceptiuon' {
+                It 'Should throw an exception' {
                     Mock -CommandName 'Get-ADRootDSE' -MockWith { throw 'Unknown error' }
 
-                    { Get-ADSchemaGuid -DisplayName 'user' | Should -Throw
+                    { Get-ADSchemaGuid -DisplayName 'user' } | Should -Throw
+                }
+            }
+
+            Context 'When searching the Active Directory schema fails' {
+                It 'Should throw an exception' {
+                    Mock -CommandName 'Get-ADRootDSE' -MockWith $mockGetADRootDSE
+
+                    Mock -CommandName 'Get-ADObject' -MockWith { throw 'Unknown error' }
+
+                    { Get-ADSchemaGuid -DisplayName 'user' } | Should -Throw
                 }
             }
         }
