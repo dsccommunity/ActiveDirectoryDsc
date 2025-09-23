@@ -431,10 +431,10 @@ function Get-ADDrivePSPath
 
     .PARAMETER DisplayName
         The lDAPDisplayName (for schema objects) or displayName (for extended rights) to search for.
-        Only letters, digits, spaces, dashes, and underscores are allowed.
 
     .OUTPUTS
         System.String
+
         If a matching entry is found, the corresponding GUID (schemaIDGUID or rightsGUID) is returned.
 
     .EXAMPLE
@@ -488,14 +488,14 @@ function Get-ADSchemaGuid
     }
     elseif ($schemaResults.Count -eq 1)
     {
-        return ([guid]$schemaResults[0].schemaIDGUID).Guid
+        return ([System.Guid]$schemaResults[0].schemaIDGUID).Guid
     }
 
     # If not found in the schema: search the Extended Rights container
     try
     {
         $rightsResults = @(Get-ADObject `
-            -SearchBase ("CN=Extended-Rights,$($rootDse.configurationNamingContext)") `
+            -SearchBase "CN=Extended-Rights,$($rootDse.configurationNamingContext)" `
             -LDAPFilter "(&(objectClass=controlAccessRight)(displayName=$escapedDisplayName))" `
             -Properties 'displayName','rightsGUID' `
             -ErrorAction Stop)
@@ -511,7 +511,7 @@ function Get-ADSchemaGuid
     }
     elseif ($rightsResults.Count -eq 1)
     {
-        return ([guid]$rightsResults[0].rightsGUID).Guid
+        return ([System.Guid]$rightsResults[0].rightsGUID).Guid
     }
 
     throw ("No matching GUID found for the DisplayName: '{0}'." -f $DisplayName)
@@ -530,6 +530,7 @@ function Get-ADSchemaGuid
 
     .OUTPUTS
         System.Boolean
+
         Returns $true if the string is a valid GUID, otherwise returns $false.
 
     .EXAMPLE
@@ -576,8 +577,8 @@ function Test-IsGuid
         The input string to be escaped, such as a username or part of an LDAP search filter.
 
     .EXAMPLE
-        PS> Get-EscapedLdapFilterValue -Value 'Müller (Admin)*'
-        Müller \28Admin\29\2a
+        PS> Get-EscapedLdapFilterValue -Value 'Smith (Admin)*'
+        Smith \28Admin\29\2a
 
     .EXAMPLE
         PS> $filter = "(cn=$(Get-EscapedLdapFilterValue -Value 'Admin*'))"

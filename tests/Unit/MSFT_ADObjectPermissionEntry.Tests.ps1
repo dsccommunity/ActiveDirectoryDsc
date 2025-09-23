@@ -58,6 +58,15 @@ try
 
         $mockADDrivePSPath = '\'
 
+        $mockGetADRootDSE = {
+            $mock = [PsCustomObject] @{
+                configurationNamingContext  = 'CN=Configuration,DC=Fabrikam,DC=com'
+                defaultNamingContext        = 'DC=Fabrikam,DC=com'
+                schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=Fabrikam,DC=com'
+            }
+            return $mock
+        }
+
         $mockGetAclPresent = {
             $mock = [PSCustomObject] @{
                 Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -292,17 +301,43 @@ try
             }
         }
 
+        #region Function Get-ADSchemaGuid
+        Describe -Name 'ADObjectPermissionEntry\Get-ADSchemaGuid' {
+            Mock -CommandName 'Get-ADRootDSE' -MockWith $mockGetADRootDSE
+
+            Context 'When display name matches a schema object' {
+                It 'Should return schemaIDGUID' {
+                    Mock -CommandName 'Get-ADObject' -MockWith { @{ Guid = 'bf967aba-0de6-11d0-a285-00aa003049e2' } }
+
+                    # Act
+                    $schemaGuid = Get-ADSchemaGuid -DisplayName "user"
+                    
+                    # Assert
+                    $schemaGuid | Should -Be 'bf967aba-0de6-11d0-a285-00aa003049e2'
+                }
+            }
+        }
+        #endregion Function Get-ADSchemaGuid
+
         #region Function Test-IsGuid
         Describe -Name 'ADObjectPermissionEntry\Test-IsGuid' {
             Context 'When testing a valid GUID' {
                 It 'Should return true' {
-                    Test-IsGuid -InputString '550e8400-e29b-41d4-a716-446655440000' | Should -Be $true
+                    # Act
+                    $isGuid = Test-IsGuid -InputString '550e8400-e29b-41d4-a716-446655440000'
+
+                    # Assert
+                    $isGuid | Should -BeTrue
                 }
             }
 
-            Context 'When testing a invalid GUID' {
+            Context 'When testing an invalid GUID' {
                 It 'Should return false' {
-                    Test-IsGuid 'abc' | Should -Be $false
+                    # Act
+                    $isGuid = Test-IsGuid -InputString 'No valid GUID'
+
+                    # Assert
+                    $isGuid | Should -BeFalse
                 }
             }
         }
@@ -310,9 +345,13 @@ try
 
         #region Function Get-EscapedLdapFilterValue
         Describe -Name 'ADObjectPermissionEntry\Get-EscapedLdapFilterValue' {
-            Context 'Escape special characters in the input string' {
+            Context 'When value contains special characters' {
                 It 'Should return escaped LDAP filter value' {
-                    Get-EscapedLdapFilterValue -Value 'Sandman (Admin)*' | Should -Be 'Sandman \28Admin\29\2a'
+                    # Act
+                    $escapedLdapFilterValue = Get-EscapedLdapFilterValue -Value 'Smith (Admin)*'
+                    
+                    # Assert
+                    $escapedLdapFilterValue | Should -Be 'Smith \28Admin\29\2a'
                 }
             }
         }
