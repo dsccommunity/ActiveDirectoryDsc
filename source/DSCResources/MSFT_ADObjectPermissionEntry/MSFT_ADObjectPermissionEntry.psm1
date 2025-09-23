@@ -514,7 +514,7 @@ function Get-ADSchemaGuid
         return ([System.Guid]$rightsResults[0].rightsGUID).Guid
     }
 
-    throw ("No matching GUID found for the DisplayName: '{0}'." -f $DisplayName)
+    throw ($script:localizedData.NoMatchingGuidFound -f $DisplayName)
 }
 
 <#
@@ -588,9 +588,11 @@ function Test-IsGuid
 function Get-EscapedLdapFilterValue
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param (
         [Parameter(Mandatory = $true)]
-        [string]$Value
+        [System.String]
+        $Value
     )
 
     $escaped = $Value -replace '\\', '\5c'

@@ -305,15 +305,49 @@ try
         Describe -Name 'ADObjectPermissionEntry\Get-ADSchemaGuid' {
             Mock -CommandName 'Get-ADRootDSE' -MockWith $mockGetADRootDSE
 
-            Context 'When display name matches a schema object' {
+            Context 'When DisplayName matches a schema object' {
                 It 'Should return schemaIDGUID' {
-                    Mock -CommandName 'Get-ADObject' -MockWith { @{ Guid = 'bf967aba-0de6-11d0-a285-00aa003049e2' } }
+                    Mock -CommandName 'Get-ADObject' -MockWith {
+                        return @{ schemaIDGUID = 'bf967aba-0de6-11d0-a285-00aa003049e2' }
+                    }
 
                     # Act
-                    $schemaGuid = Get-ADSchemaGuid -DisplayName "user"
+                    $guid = Get-ADSchemaGuid -DisplayName 'user'
                     
                     # Assert
-                    $schemaGuid | Should -Be 'bf967aba-0de6-11d0-a285-00aa003049e2'
+                    $guid | Should -Be 'bf967aba-0de6-11d0-a285-00aa003049e2'
+                }
+            }
+
+            Context 'When DisplayName matches a extended right' {
+                It 'Should return rightsGUID' {
+                    $callCount = 0
+
+                    Mock -CommandName 'Get-ADObject' -MockWith {
+                        $script:callCount++
+                        if ($script:callCount -eq 1)
+                        {
+                            return $null
+                        }
+                        else
+                        {
+                            return @{ rightsGUID = 'ab721a54-1e2f-11d0-9819-00aa0040529b' }
+                        }
+                    }
+
+                    # Act
+                    $guid = Get-ADSchemaGuid -DisplayName 'Send As'
+                    
+                    # Assert
+                    $guid | Should -Be 'ab721a54-1e2f-11d0-9819-00aa0040529b'
+                }
+            }
+
+            Context 'When no matching GUID found for DisplayName' {
+                It 'Should throw an exception' {
+                    Mock -CommandName 'Get-ADObject' -MockWith { return $null }
+
+                    { Get-ADSchemaGuid -DisplayName 'non-existent' } | Should -Throw
                 }
             }
         }
