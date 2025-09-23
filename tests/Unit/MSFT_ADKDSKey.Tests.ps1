@@ -164,7 +164,7 @@ Describe 'MSFT_ADKDSKey\Assert-HasDomainAdminRights' -Tag 'Helper' {
                 }
             }
 
-            It 'Should the correct mocks' {
+            It 'Should call the correct mocks' {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
 
@@ -885,7 +885,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                 }
             }
 
-            It "Should call 'Remove-ADObject' when 'Ensure' is set to 'Present'" {
+            It "Should call 'Remove-ADObject' when 'Ensure' is set to 'Absent'" {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
 
@@ -936,7 +936,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                 }
             }
 
-            It "Should call NOT 'Remove-ADObject' when 'Ensure' is set to 'Present' and 'ForceRemove' is 'False'" {
+            It "Should NOT call 'Remove-ADObject' when 'Ensure' is set to 'Present' and 'ForceRemove' is 'False'" {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
 
@@ -1123,7 +1123,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
             Should -Invoke -CommandName Remove-ADObject -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName Write-Warning -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName Compare-TargetResourceState -ParameterFilter {
-                ([DateTime]::Parse('1/1/2000 13:00'))
+                [DateTime]::Parse('1/1/2000 13:00') -eq $EffectiveTime
             } -Exactly -Times 1 -Scope It
         }
 
@@ -1143,9 +1143,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
             Should -Invoke -CommandName Add-KDSRootKey -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Remove-ADObject -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName Write-Warning -Exactly -Times 1 -Scope It
-            Should -Invoke -CommandName Compare-TargetResourceState -ParameterFilter {
-                ([DateTime]::Parse('1/1/2000 13:00'))
-            } -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
         }
 
         It 'Should throw an error if EffectiveTime cannot be parsed' {
@@ -1159,12 +1157,10 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                 $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.EffectiveTimeInvalid -f
                     $mockParameters.EffectiveTime)
 
-                { Set-TargetResource  @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
             }
 
-            Should -Invoke -CommandName Compare-TargetResourceState -ParameterFilter {
-                [DateTime]::Parse('1/1/3000 13:00')
-            } -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Compare-TargetResourceState -Exactly -Times 1 -Scope It
         }
 
         Context 'When calling Add-KDSRootKey fails' {
@@ -1174,7 +1170,7 @@ Describe 'MSFT_ADKDSKey\Set-TargetResource' -Tag 'Set' {
                 }
             }
 
-            It "Should call 'Add-KdsRootKey' and throw an error when catching any errors" {
+            It 'Should call ''Add-KdsRootKey'' and throw an error when catching any errors' {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
 
