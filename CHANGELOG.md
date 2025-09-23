@@ -46,6 +46,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Migrate tests to Pester 5.
   - Add VSCode settings for Pester Extension.
 
+### Fixed
+
+- ADObjectPermissionEntry
+  - Fixed Get-TargetResource to return valid ActiveDirectoryRights when ACE is absent
+
 ## [6.7.0] - 2025-05-29
 
 ### Added
