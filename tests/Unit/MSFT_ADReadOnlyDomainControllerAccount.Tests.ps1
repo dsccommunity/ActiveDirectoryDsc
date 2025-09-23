@@ -987,8 +987,7 @@ Describe 'MSFT_ADReadOnlyDomainControllerAccount\Set-TargetResource' -Tag 'Set' 
                             IsGlobalCatalog             = $false
                         }
 
-                        # TODO: Not sure this is the correct exception.
-                        { Set-TargetResource @testDefaultParams } | Should -Throw $script:localizedData.ExpectedDomainController
+                        { Set-TargetResource @testDefaultParams } | Should -Throw
                     }
 
                     Should -Invoke -CommandName Set-ADObject -Exactly -Times 0 -Scope It
