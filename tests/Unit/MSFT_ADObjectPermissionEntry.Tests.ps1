@@ -318,13 +318,14 @@ try
                 }
             }
         }
+        #endregion Function Set-TargetResource
 
         #region Function Get-ADSchemaGuid
         Describe -Name 'ADObjectPermissionEntry\Get-ADSchemaGuid' {
-            Mock -CommandName 'Get-ADRootDSE' -MockWith $mockGetADRootDSE
-
             Context 'When DisplayName matches a schema object' {
                 It 'Should return schemaIDGUID' {
+                    Mock -CommandName 'Get-ADRootDSE' -MockWith $mockGetADRootDSE
+
                     Mock -CommandName 'Get-ADObject' -MockWith {
                         return @{ schemaIDGUID = 'bf967aba-0de6-11d0-a285-00aa003049e2' }
                     }
@@ -339,6 +340,8 @@ try
 
             Context 'When DisplayName matches an extended right' {
                 It 'Should return rightsGUID' {
+                    Mock -CommandName 'Get-ADRootDSE' -MockWith $mockGetADRootDSE
+
                     $script:mockCallCount = 0
 
                     Mock -CommandName 'Get-ADObject' -MockWith {
@@ -363,9 +366,19 @@ try
 
             Context 'When no matching GUID found for DisplayName' {
                 It 'Should throw an exception' {
+                    Mock -CommandName 'Get-ADRootDSE' -MockWith $mockGetADRootDSE
+
                     Mock -CommandName 'Get-ADObject' -MockWith { return }
 
                     { Get-ADSchemaGuid -DisplayName 'non-existent' } | Should -Throw
+                }
+            }
+
+            Context 'When retrieving ADRootDSE fails' {
+                It 'Should throw an exceptiuon' {
+                    Mock -CommandName 'Get-ADRootDSE' -MockWith { throw 'Unknown error' }
+
+                    { Get-ADSchemaGuid -DisplayName 'user' | Should -Throw
                 }
             }
         }
