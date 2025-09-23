@@ -348,7 +348,6 @@ Describe 'MSFT_ADKDSKey\Get-TargetResource' -Tag 'Get' {
 
                 $result = Get-TargetResource @mockParameters
 
-                # TODO: Should this not match the mockParameters.EffectiveTime?
                 $result.EffectiveTime | Should -Be $mockKDSRootKeyFuture.EffectiveTime
                 $result.CreationTime | Should -Be $mockKDSRootKeyFuture.CreationTime
                 $result.KeyId | Should -Be $mockKDSRootKeyFuture.KeyId
