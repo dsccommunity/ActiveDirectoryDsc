@@ -59,10 +59,10 @@ try
         $mockADDrivePSPath = '\'
 
         $mockGetADRootDSE = {
-            $mock = [PsCustomObject] @{
-                configurationNamingContext  = 'CN=Configuration,DC=Fabrikam,DC=com'
-                defaultNamingContext        = 'DC=Fabrikam,DC=com'
-                schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=Fabrikam,DC=com'
+            $mock = [PSCustomObject] @{
+                configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                defaultNamingContext        = 'DC=contoso,DC=com'
+                schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
             }
             return $mock
         }
@@ -319,13 +319,13 @@ try
                 }
             }
 
-            Context 'When DisplayName matches a extended right' {
+            Context 'When DisplayName matches an extended right' {
                 It 'Should return rightsGUID' {
-                    $script:callCount = 0
+                    $script:mockCallCount = 0
 
                     Mock -CommandName 'Get-ADObject' -MockWith {
-                        $script:callCount++
-                        if ($script:callCount -eq 1)
+                        $script:mockCallCount++
+                        if ($script:mockCallCount -eq 1)
                         {
                             return
                         }
@@ -345,7 +345,7 @@ try
 
             Context 'When no matching GUID found for DisplayName' {
                 It 'Should throw an exception' {
-                    Mock -CommandName 'Get-ADObject' -MockWith { return $null }
+                    Mock -CommandName 'Get-ADObject' -MockWith { return }
 
                     { Get-ADSchemaGuid -DisplayName 'non-existent' } | Should -Throw
                 }
