@@ -348,7 +348,7 @@ Describe 'MSFT_ADKDSKey\Get-TargetResource' -Tag 'Get' {
 
                 $result = Get-TargetResource @mockParameters
 
-                $result.EffectiveTime | Should -Be $mockKDSRootKeyFuture.EffectiveTime
+                $result.EffectiveTime | Should -Be $mockKDSRootKeyFuture.EffectiveTime.ToString('o')
                 $result.CreationTime | Should -Be $mockKDSRootKeyFuture.CreationTime
                 $result.KeyId | Should -Be $mockKDSRootKeyFuture.KeyId
                 $result.DistinguishedName | Should -Be $dn
