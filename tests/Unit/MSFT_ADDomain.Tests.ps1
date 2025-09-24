@@ -55,6 +55,7 @@ try
         $mgmtDomainMode = [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2016Domain
         $NTDSParametersRegPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
         $NetlogonParametersRegPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
+        $RebootHintRegPath = Join-Path -Path $NetlogonParametersRegPath -ChildPath 'LocatorDCPromoPreRebootHint'
 
         $mockAdministratorCredential = [System.Management.Automation.PSCredential]::new('DummyUser',
             (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
@@ -242,6 +243,33 @@ try
                             Should -Throw ($script:localizedData.GetAdForestUnexpectedError -f $mockForestName)
                     }
                 }
+
+                Context 'When the domain controller is pending reboot' {
+                    BeforeAll {
+                        Mock -CommandName Write-Verbose
+                        Mock -CommandName Test-Path `
+                            -ParameterFilter { $Path -eq $RebootHintRegPath } `
+                            -MockWith { $true }
+
+                        $mockDCPendingReboot = $mockADDomainAbsent.Clone()
+                        $mockDCPendingReboot['DomainExist'] = $true
+
+                        $result = Get-TargetResource @mockGetTargetResourceParameters
+                    }
+
+                    foreach ($property in $mockDCPendingReboot.Keys)
+                    {
+                        It "Should return the correct $property property" {
+                            $result.$property | Should -Be $mockDCPendingReboot.$property
+                        }
+                    }
+
+                    It 'Should log the localized PendingReboot message' {
+                        Assert-MockCalled -CommandName Write-Verbose -ParameterFilter {
+                            $Message -eq $script:localizedData.PendingReboot
+                        }
+                    }
+                }
             }
         }
 
@@ -365,6 +393,19 @@ try
                     Assert-MockCalled -CommandName Install-ADDSForest `
                         -ParameterFilter { $DomainMode -eq $mockDomainForestMode }
                 }
+
+                It 'Suppresses reboot when property is $true' {
+                    Mock -CommandName Write-Verbose
+
+                    Set-TargetResource @setTargetResourceForestParams -SuppressReboot $true
+
+                    Assert-MockCalled -CommandName Write-Verbose -ParameterFilter {
+                    $Message -eq $script:localizedData.PendingReboot
+                    }
+                    Assert-MockCalled -CommandName Write-Verbose -ParameterFilter {
+                    $Message -eq $script:localizedData.SuppressReboot
+                    }
+                }
             }
 
             Context 'When Installing a Child Domain' {
@@ -460,6 +501,18 @@ try
 
                     Assert-MockCalled -CommandName Install-ADDSDomain `
                         -ParameterFilter { $DomainMode -eq $mockDomainForestMode }
+                }
+                It 'Suppresses reboot when property is $true' {
+                    Mock -CommandName Write-Verbose
+
+                    Set-TargetResource @setTargetResourceDomainParams -SuppressReboot $true
+
+                    Assert-MockCalled -CommandName Write-Verbose -ParameterFilter {
+                    $Message -eq $script:localizedData.PendingReboot
+                    }
+                    Assert-MockCalled -CommandName Write-Verbose -ParameterFilter {
+                    $Message -eq $script:localizedData.SuppressReboot
+                    }
                 }
             }
         }

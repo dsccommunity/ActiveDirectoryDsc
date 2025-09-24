@@ -246,6 +246,9 @@ function Get-TargetResource
     .PARAMETER DomainMode
         The Domain Functional Level for the entire domain.
 
+    .PARAMETER SuppressReboot
+        Suppressed reboot.
+
     .NOTES
         Used Functions:
             Name               | Module
@@ -312,7 +315,11 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold', 'Win2025')]
         [System.String]
-        $DomainMode
+        $DomainMode,
+
+        [Parameter()]
+        [System.Boolean]
+        $SuppressReboot = $false
     )
 
     $getTargetResourceParameters = @{
@@ -587,7 +594,7 @@ function Set-TargetResource
         Write-Verbose $script:localizedData.PendingReboot
         Write-Verbose $script:localizedData.SuppressReboot
     }
-     elseif ($needsReboot)
+    elseif ($needsReboot)
     {
         <#
             Signal to the LCM to reboot the node to compensate for the one we
