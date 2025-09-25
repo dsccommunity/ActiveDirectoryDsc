@@ -1,300 +1,333 @@
-$script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_ADDomainDefaultPasswordPolicy'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
 
-function Invoke-TestSetup
-{
+BeforeDiscovery {
     try
     {
-        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies have been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies have not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
     }
     catch [System.IO.FileNotFoundException]
     {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
     }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'ActiveDirectoryDsc'
+    $script:dscResourceName = 'MSFT_ADDomainDefaultPasswordPolicy'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
         -DSCResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
 }
 
-function Invoke-TestCleanup
-{
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name ActiveDirectory_2019 -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# Begin Testing
+Describe 'MSFT_ADDomainDefaultPasswordPolicy\Get-TargetResource' -Tag 'Get' {
+    Context 'When the system is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ADCommonParameters -MockWith {
+                @{
+                    Identity = 'contoso.com'
+                }
+            }
 
-Invoke-TestSetup
-
-try
-{
-    InModuleScope $script:dscResourceName {
-        Set-StrictMode -Version 1.0
-
-        # Load stub cmdlets and classes.
-        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
-
-        $testDomainName = 'contoso.com'
-        $testDefaultParams = @{
-            DomainName = $testDomainName
-        }
-        $testDomainController = 'testserver.contoso.com'
-
-        $testPassword = ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force
-        $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-            'Safemode',
-            $testPassword
-        )
-
-        $fakePasswordPolicy = @{
-            ComplexityEnabled           = $true
-            LockoutDuration             = New-TimeSpan -Minutes 30
-            LockoutObservationWindow    = New-TimeSpan -Minutes 30
-            LockoutThreshold            = 3
-            MinPasswordAge              = New-TimeSpan -Days 1
-            MaxPasswordAge              = New-TimeSpan -Days 42
-            MinPasswordLength           = 7
-            PasswordHistoryCount        = 12
-            ReversibleEncryptionEnabled = $false
+            Mock -CommandName Get-ADDefaultDomainPasswordPolicy -MockWith {
+                @{
+                    ComplexityEnabled           = $true
+                    LockoutDuration             = New-TimeSpan -Minutes 30
+                    LockoutObservationWindow    = New-TimeSpan -Minutes 30
+                    LockoutThreshold            = 3
+                    MinPasswordAge              = New-TimeSpan -Days 1
+                    MaxPasswordAge              = New-TimeSpan -Days 42
+                    MinPasswordLength           = 7
+                    PasswordHistoryCount        = 12
+                    ReversibleEncryptionEnabled = $false
+                }
+            }
         }
 
-        #region Function Get-TargetResource
-        Describe 'ADDomainDefaultPasswordPolicy\Get-TargetResource' {
-            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-            It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
-                Mock -CommandName Get-ADDefaultDomainPasswordPolicy { return $fakePasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It
-            }
-
-            It 'Returns "System.Collections.Hashtable" object type' {
-                Mock -CommandName Get-ADDefaultDomainPasswordPolicy { return $fakePasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams
-
-                $result -is [System.Collections.Hashtable] | Should -BeTrue
-            }
-
-            It 'Calls "Get-ADDefaultDomainPasswordPolicy" without credentials by default' {
-                Mock -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $null } -MockWith { return $fakePasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $null } -Scope It
-            }
-
-            It 'Calls "Get-ADDefaultDomainPasswordPolicy" with credentials when specified' {
-                Mock -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $testCredential } -MockWith { return $fakePasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams -Credential $testCredential
-
-                Assert-MockCalled -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $testCredential } -Scope It
-            }
-
-            It 'Calls "Get-ADDefaultDomainPasswordPolicy" without server by default' {
-                Mock -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $null } -MockWith { return $fakePasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $null } -Scope It
-            }
-
-            It 'Calls "Get-ADDefaultDomainPasswordPolicy" with server when specified' {
-                Mock -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $testDomainController } -MockWith { return $fakePasswordPolicy; }
-
-                $result = Get-TargetResource @testDefaultParams -DomainController $testDomainController
-
-                Assert-MockCalled -CommandName Get-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $testDomainController } -Scope It
-            }
-
-        }
-        #endregion
-
-        #region Function Test-TargetResource
-        Describe 'ADDomainDefaultPasswordPolicy\Test-TargetResource' {
-            $testDomainName = 'contoso.com'
-            $testDefaultParams = @{
-                DomainName = $testDomainName
-            }
-            $testDomainController = 'testserver.contoso.com'
-
-            $testPassword = ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force
-            $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-                'Safemode',
-                $testPassword
-            )
-
-            $stubPasswordPolicy = @{
-                ComplexityEnabled           = $true
-                LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutThreshold            = 3
-                MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
-                MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
-                MinPasswordLength           = 7
-                PasswordHistoryCount        = 12
-                ReversibleEncryptionEnabled = $true
-            }
-
-            It 'Returns "System.Boolean" object type' {
-                Mock -CommandName Get-TargetResource -MockWith { return $stubPasswordPolicy; }
-
-                $result = Test-TargetResource @testDefaultParams
-
-                $result -is [System.Boolean] | Should -BeTrue
-            }
-
-            It 'Calls "Get-TargetResource" with "Credential" parameter when specified' {
-                Mock -CommandName Get-TargetResource -ParameterFilter { $Credential -eq $testCredential } { return $stubPasswordPolicy; }
-
-                $result = Test-TargetResource @testDefaultParams -Credential $testCredential
-
-                Assert-MockCalled -CommandName Get-TargetResource -ParameterFilter { $Credential -eq $testCredential } -Scope It
-            }
-
-            It 'Calls "Get-TargetResource" with "DomainController" parameter when specified' {
-                Mock -CommandName Get-TargetResource -ParameterFilter { $DomainController -eq $testDomainController } { return $stubPasswordPolicy; }
-
-                $result = Test-TargetResource @testDefaultParams -DomainController $testDomainController
-
-                Assert-MockCalled -CommandName Get-TargetResource -ParameterFilter { $DomainController -eq $testDomainController } -Scope It
-            }
-
-            foreach ($propertyName in $stubPasswordPolicy.Keys)
-            {
-                It "Passes when '$propertyName' parameter matches resource property value" {
-                    Mock -CommandName Get-TargetResource -MockWith { return $stubPasswordPolicy; }
-                    $propertyDefaultParams = $testDefaultParams.Clone()
-                    $propertyDefaultParams[$propertyName] = $stubPasswordPolicy[$propertyName]
-
-                    $result = Test-TargetResource @propertyDefaultParams
-
-                    $result | Should -BeTrue
+                $mockGetParams = @{
+                    DomainName = 'contoso.com'
                 }
 
-                It "Fails when '$propertyName' parameter does not match resource property value" {
-                    Mock -CommandName Get-TargetResource -MockWith { return $stubPasswordPolicy; }
-                    $propertyDefaultParams = $testDefaultParams.Clone()
+                $result = Get-TargetResource @mockGetParams
 
-                    switch ($stubPasswordPolicy[$propertyName].GetType())
-                    {
-                        'bool'
-                        {
-                            $propertyDefaultParams[$propertyName] = -not $stubPasswordPolicy[$propertyName]
-                        }
-                        'string'
-                        {
-                            $propertyDefaultParams[$propertyName] = 'not{0}' -f $stubPasswordPolicy[$propertyName]
-                        }
-                        default
-                        {
-                            $propertyDefaultParams[$propertyName] = $stubPasswordPolicy[$propertyName] + 1
-                        }
-                    }
+                $result.DomainName | Should -Be 'contoso.com'
+                $result.ComplexityEnabled | Should -BeTrue
+                $result.LockoutDuration | Should -Be 30
+                $result.LockoutObservationWindow | Should -Be 30
+                $result.LockoutThreshold | Should -Be 3
+                $result.MinPasswordAge | Should -Be 1440
+                $result.MaxPasswordAge | Should -Be 60480
+                $result.MinPasswordLength | Should -Be 7
+                $result.PasswordHistoryCount | Should -Be 12
+                $result.ReversibleEncryptionEnabled | Should -BeFalse
+            }
 
-                    $result = Test-TargetResource @propertyDefaultParams
-
-                    $result | Should -BeFalse
-                }
-            } #end foreach property
-
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADCommonParameters -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADDefaultDomainPasswordPolicy -Exactly -Times 1 -Scope It
         }
-        #endregion
-
-        #region Function Set-TargetResource
-        Describe 'ADDomainDefaultPasswordPolicy\Set-TargetResource' {
-            $testDomainName = 'contoso.com'
-            $testDefaultParams = @{
-                DomainName = $testDomainName
-            }
-            $testDomainController = 'testserver.contoso.com'
-
-            $testPassword = ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force
-            $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-                'Safemode',
-                $testPassword
-            )
-
-            $stubPasswordPolicy = @{
-                ComplexityEnabled           = $true
-                LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
-                LockoutThreshold            = 3
-                MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
-                MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
-                MinPasswordLength           = 7
-                PasswordHistoryCount        = 12
-                ReversibleEncryptionEnabled = $true
-            }
-
-            Mock -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
-
-            It 'Calls "Assert-Module" to check "ActiveDirectory" module is installed' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy
-
-                $result = Set-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'ActiveDirectory' } -Scope It
-            }
-
-            It 'Calls "Set-ADDefaultDomainPasswordPolicy" without "Credential" parameter by default' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $null }
-
-                $result = Set-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $null } -Scope It
-            }
-
-            It 'Calls "Set-ADDefaultDomainPasswordPolicy" with "Credential" parameter when specified' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $testCredential }
-
-                $result = Set-TargetResource @testDefaultParams -Credential $testCredential
-
-                Assert-MockCalled -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Credential -eq $testCredential } -Scope It
-            }
-
-            It 'Calls "Set-ADDefaultDomainPasswordPolicy" without "Server" parameter by default' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $null }
-
-                $result = Set-TargetResource @testDefaultParams
-
-                Assert-MockCalled -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $null } -Scope It
-            }
-
-            It 'Calls "Set-ADDefaultDomainPasswordPolicy" with "Server" parameter when specified' {
-                Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $testDomainController }
-
-                $result = Set-TargetResource @testDefaultParams -DomainController $testDomainController
-
-                Assert-MockCalled -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $Server -eq $testDomainController } -Scope It
-            }
-
-            foreach ($propertyName in $stubPasswordPolicy.Keys)
-            {
-                It "Calls 'Set-ADDefaultDomainPasswordPolicy' with '$propertyName' parameter when specified" {
-                    $propertyDefaultParams = $testDefaultParams.Clone()
-                    $propertyDefaultParams[$propertyName] = $stubPasswordPolicy[$propertyName]
-                    Mock -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) }
-
-                    $result = Set-TargetResource @propertyDefaultParams
-
-                    Assert-MockCalled -CommandName Set-ADDefaultDomainPasswordPolicy -ParameterFilter { $PSBoundParameters.ContainsKey($propertyName) } -Scope It
-                }
-
-            } #end foreach property name
-
-        }
-        #endregion
-
     }
-    #endregion
+
+    Context 'When the system is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ADCommonParameters -MockWith {
+                @{
+                    Identity = 'contoso.com'
+                }
+            }
+
+            Mock -CommandName Get-ADDefaultDomainPasswordPolicy -MockWith {
+                @{
+                    LockoutDuration          = New-TimeSpan
+                    LockoutObservationWindow = New-TimeSpan
+                    MinPasswordAge           = New-TimeSpan
+                    MaxPasswordAge           = New-TimeSpan
+                }
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockGetParams = @{
+                    DomainName = 'contoso.com'
+                }
+
+                $result = Get-TargetResource @mockGetParams
+
+                $result.DomainName | Should -Be 'contoso.com'
+                $result.ComplexityEnabled | Should -BeNullOrEmpty
+                $result.LockoutDuration | Should -Be 0
+                $result.LockoutObservationWindow | Should -Be 0
+                $result.LockoutThreshold | Should -BeNullOrEmpty
+                $result.MinPasswordAge | Should -Be 0
+                $result.MaxPasswordAge | Should -Be 0
+                $result.MinPasswordLength | Should -BeNullOrEmpty
+                $result.PasswordHistoryCount | Should -BeNullOrEmpty
+                $result.ReversibleEncryptionEnabled | Should -BeNullOrEmpty
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADCommonParameters -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADDefaultDomainPasswordPolicy -Exactly -Times 1 -Scope It
+        }
+    }
 }
-finally
-{
-    Invoke-TestCleanup
+
+Describe 'MSFT_ADDomainDefaultPasswordPolicy\Test-TargetResource' -Tag 'Test' {
+    Context 'When the system is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    DomainName                  = 'contoso.com'
+                    ComplexityEnabled           = $true
+                    LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutThreshold            = 3
+                    MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
+                    MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
+                    MinPasswordLength           = 7
+                    PasswordHistoryCount        = 12
+                    ReversibleEncryptionEnabled = $true
+                }
+            }
+        }
+
+        It 'Should return true' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockTestParams = @{
+                    DomainName                  = 'contoso.com'
+                    Credential                  = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'SafeMode',
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                    )
+                    DomainController            = 'testserver.contoso.com'
+                    ComplexityEnabled           = $true
+                    LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutThreshold            = 3
+                    MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
+                    MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
+                    MinPasswordLength           = 7
+                    PasswordHistoryCount        = 12
+                    ReversibleEncryptionEnabled = $true
+                }
+
+                Test-TargetResource @mockTestParams | Should -BeTrue
+            }
+
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the system is not in the desired state' {
+        BeforeDiscovery {
+            $testCases = @(
+                @{
+                    Name  = 'ComplexityEnabled'
+                    Value = $false
+                }
+                @{
+                    Name  = 'LockoutDuration'
+                    Value = (New-TimeSpan -Minutes 60).TotalMinutes
+                }
+                @{
+                    Name  = 'LockoutObservationWindow'
+                    Value = (New-TimeSpan -Minutes 60).TotalMinutes
+                }
+                @{
+                    Name  = 'LockoutThreshold'
+                    Value = 5
+                }
+                @{
+                    Name  = 'MinPasswordAge'
+                    Value = (New-TimeSpan -Days 5).TotalMinutes
+                }
+                @{
+                    Name  = 'MaxPasswordAge'
+                    Value = (New-TimeSpan -Days 60).TotalMinutes
+                }
+                @{
+                    Name  = 'MinPasswordLength'
+                    Value = 10
+                }
+                @{
+                    Name  = 'PasswordHistoryCount'
+                    Value = 10
+                }
+                @{
+                    Name  = 'ReversibleEncryptionEnabled'
+                    Value = $false
+                }
+            )
+        }
+
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    DomainName                  = 'contoso.com'
+                    ComplexityEnabled           = $true
+                    LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutThreshold            = 3
+                    MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
+                    MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
+                    MinPasswordLength           = 7
+                    PasswordHistoryCount        = 12
+                    ReversibleEncryptionEnabled = $true
+                }
+            }
+        }
+
+        It 'Should return false when parameter <Name> does not match' -ForEach $testCases {
+            InModuleScope -Parameters $_ -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockTestParams = @{
+                    DomainName                  = 'contoso.com'
+                    ComplexityEnabled           = $true
+                    LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutThreshold            = 3
+                    MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
+                    MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
+                    MinPasswordLength           = 7
+                    PasswordHistoryCount        = 12
+                    ReversibleEncryptionEnabled = $true
+                }
+
+                $mockTestParams.$Name = $Value
+
+                Test-TargetResource @mockTestParams | Should -BeFalse
+            }
+
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+        }
+    }
+}
+
+Describe 'MSFT_ADDomainDefaultPasswordPolicy\Set-TargetResource' -Tag 'Set' {
+    Context 'When the system is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ADCommonParameters -MockWith {
+                @{
+                    Identity = 'contoso.com'
+                }
+            }
+
+            Mock -CommandName Set-ADDefaultDomainPasswordPolicy
+        }
+
+        It 'Should not throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockSetParams = @{
+                    DomainName                  = 'contoso.com'
+                    ComplexityEnabled           = $true
+                    LockoutDuration             = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutObservationWindow    = (New-TimeSpan -Minutes 30).TotalMinutes
+                    LockoutThreshold            = 3
+                    MinPasswordAge              = (New-TimeSpan -Days 1).TotalMinutes
+                    MaxPasswordAge              = (New-TimeSpan -Days 42).TotalMinutes
+                    MinPasswordLength           = 7
+                    PasswordHistoryCount        = 12
+                    ReversibleEncryptionEnabled = $true
+                }
+
+                { Set-TargetResource @mockSetParams } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADCommonParameters -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-ADDefaultDomainPasswordPolicy -Exactly -Times 1 -Scope It
+        }
+    }
 }

@@ -3,13 +3,6 @@
 ConvertFrom-StringData @'
     WasExpectingDomainController        = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADCOMMON0001)
     FailedEvaluatingDomainController    = Could not evaluate if the node is a domain controller. (ADCOMMON0002)
-    EvaluatePropertyState               = Evaluating the state of the property '{0}'. (ADCOMMON0003)
-    PropertyInDesiredState              = The parameter '{0}' is in desired state. (ADCOMMON0004)
-    PropertyNotInDesiredState           = The parameter '{0}' is not in desired state. (ADCOMMON0005)
-    ArrayDoesNotMatch                   = One or more values in an array does not match the desired state. Details of the changes are below. (ADCOMMON0006)
-    ArrayValueThatDoesNotMatch          = {0} - {1} (ADCOMMON0007)
-    PropertyValueOfTypeDoesNotMatch     = {0} value does not match. Current value is '{1}', but expected the value '{2}'. (ADCOMMON0008)
-    UnableToCompareType                 = Unable to compare the type {0} as it is not handled by the Test-DscPropertyState cmdlet. (ADCOMMON0009)
     MembersAndIncludeExcludeError       = The '{0}' and '{1}' and/or '{2}' parameters conflict. The '{0}' parameter should not be used in any combination with the '{1}' and '{2}' parameters. (ADCOMMON0011)
     IncludeAndExcludeConflictError      = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values. (ADCOMMON0014)
     RecycleBinRestoreFailed             = Failed restoring {0} ({1}) from the recycle bin. (ADCOMMON0017)

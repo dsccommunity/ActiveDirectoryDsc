@@ -214,7 +214,7 @@ function Assert-MemberParameters
         {
             # If Members are provided, Include and Exclude are not allowed.
             $errorMessage = $script:localizedData.MembersAndIncludeExcludeError -f 'Members', 'MembersToInclude', 'MembersToExclude'
-            New-InvalidArgumentException -ArgumentName 'Members' -Message $errorMessage
+            New-ArgumentException -ArgumentName 'Members' -Message $errorMessage
         }
     }
 
@@ -227,10 +227,9 @@ function Assert-MemberParameters
         if ($member -in $MembersToExclude)
         {
             $errorMessage = $script:localizedData.IncludeAndExcludeConflictError -f $member, 'MembersToInclude', 'MembersToExclude'
-            New-InvalidArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
+            New-ArgumentException -ArgumentName 'MembersToInclude, MembersToExclude' -Message $errorMessage
         }
     }
-
 }
 
 <#
@@ -256,7 +255,7 @@ function Assert-MemberParameters
 function Remove-DuplicateMembers
 {
     [CmdletBinding()]
-    [OutputType([System.String[]])]
+    [OutputType([System.Object[]])]
     param
     (
         [Parameter()]
@@ -966,7 +965,7 @@ function Restore-ADCommonObject
     # If more than one object is returned, we pick the one that was changed last.
     $restorableObject = Get-ADObject @getAdObjectParams |
         Sort-Object -Descending -Property 'whenChanged' |
-            Select-Object -First 1
+        Select-Object -First 1
 
     $restoredObject = $null
 
@@ -1052,7 +1051,6 @@ function Get-ADDomainNameFromDistinguishedName
     $domainName = $domainFqdn -replace 'DC=', '' -replace ',', '.'
 
     return $domainName
-
 }
 
 <#
@@ -1217,7 +1215,7 @@ function Get-DomainObject
     )
 
     $getADDomainParameters = @{
-        Identity = $Identity
+        Identity    = $Identity
         ErrorAction = 'Stop'
     }
 
@@ -1264,7 +1262,7 @@ function Get-DomainObject
             $retries++
 
             Write-Verbose ($script:localizedData.RetryingGetADDomain -f
-                    $retries, $MaximumRetries, $RetryIntervalInSeconds)
+                $retries, $MaximumRetries, $RetryIntervalInSeconds)
 
             Start-Sleep -Seconds $RetryIntervalInSeconds
         }
@@ -1453,252 +1451,6 @@ function Convert-PropertyMapToObjectProperties
     }
 
     return $objectProperties
-}
-
-<#
-    .SYNOPSIS
-        Compares current and desired values for any DSC resource.
-
-    .DESCRIPTION
-        The Compare-ResourcePropertyState function is used to compare current and desired values for any DSC resource,
-        and return a hashtable with the result of the comparison. An array of hashtables is returned containing the
-        results of the comparison with the following properties:
-
-        - ParameterName - The name of the parameter
-        - Expected - The expected value of the parameter
-        - Actual - The actual value of the parameter
-
-    .EXAMPLE
-        Compare-ResourcePropertyState -CurrentValues $targetResource -DesiredValues $PSBoundParameters
-
-    .PARAMETER CurrentValues
-        Specifies the current values that should be compared to to desired values. Normally the values returned from
-        Get-TargetResource.
-
-    .PARAMETER DesiredValues
-        Specifies the values set in the configuration and is provided in the call to the functions *-TargetResource,
-        and that will be compared against current values. Normally set to $PSBoundParameters.
-
-    .PARAMETER Properties
-        Specifies an array of property names, from the keys provided in DesiredValues, that will be compared. If this
-        parameter is not set, all the keys in the DesiredValues will be compared.
-
-    .PARAMETER IgnoreProperties
-        Specifies an array of property names to ignore in the comparison.
-
-    .INPUTS
-        None
-
-    .OUTPUTS
-        System.Collections.Hashtable[]
-#>
-function Compare-ResourcePropertyState
-{
-    [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable[]])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Collections.Hashtable]
-        $CurrentValues,
-
-        [Parameter(Mandatory = $true)]
-        [System.Collections.Hashtable]
-        $DesiredValues,
-
-        [Parameter()]
-        [System.String[]]
-        $Properties,
-
-        [Parameter()]
-        [System.String[]]
-        $IgnoreProperties
-    )
-
-    if ($PSBoundParameters.ContainsKey('Properties'))
-    {
-        # Filter out the parameters (keys) not specified in Properties
-        $desiredValuesToRemove = $DesiredValues.Keys |
-            Where-Object -FilterScript {
-                $_ -notin $Properties
-            }
-
-        $desiredValuesToRemove |
-            ForEach-Object -Process {
-                $DesiredValues.Remove($_)
-            }
-    }
-    else
-    {
-        <#
-            Remove any common parameters that might be part of DesiredValues,
-            if it $PSBoundParameters was used to pass the desired values.
-        #>
-        $commonParametersToRemove = $DesiredValues.Keys |
-            Where-Object -FilterScript {
-                $_ -in [System.Management.Automation.PSCmdlet]::CommonParameters `
-                    -or $_ -in [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
-            }
-
-        $commonParametersToRemove |
-            ForEach-Object -Process {
-                $DesiredValues.Remove($_)
-            }
-    }
-
-    # Remove any properties that should be ignored.
-    if ($PSBoundParameters.ContainsKey('IgnoreProperties'))
-    {
-        $IgnoreProperties |
-            ForEach-Object -Process {
-                if ($DesiredValues.ContainsKey($_))
-                {
-                    $DesiredValues.Remove($_)
-                }
-            }
-    }
-
-    $compareTargetResourceStateReturnValue = @()
-
-    foreach ($parameterName in $DesiredValues.Keys)
-    {
-        Write-Verbose -Message ($script:localizedData.EvaluatePropertyState -f $parameterName) -Verbose
-
-        $parameterState = @{
-            ParameterName = $parameterName
-            Expected      = $DesiredValues.$parameterName
-            Actual        = $CurrentValues.$parameterName
-        }
-
-        # Check if the parameter is in compliance.
-        $isPropertyInDesiredState = Test-DscPropertyState -Values @{
-            CurrentValue = $CurrentValues.$parameterName
-            DesiredValue = $DesiredValues.$parameterName
-        }
-
-        if ($isPropertyInDesiredState)
-        {
-            Write-Verbose -Message ($script:localizedData.PropertyInDesiredState -f $parameterName) -Verbose
-
-            $parameterState['InDesiredState'] = $true
-        }
-        else
-        {
-            Write-Verbose -Message ($script:localizedData.PropertyNotInDesiredState -f $parameterName) -Verbose
-
-            $parameterState['InDesiredState'] = $false
-        }
-
-        $compareTargetResourceStateReturnValue += $parameterState
-    }
-
-    return $compareTargetResourceStateReturnValue
-}
-
-<#
-    .SYNOPSIS
-        Compares the current and the desired value of a property.
-
-    .DESCRIPTION
-        The Test-DscPropertyState function is used to compare the current and the desired value of a property. A
-        boolean is returned that represents the result of the comparison.
-
-    .EXAMPLE
-        Test-DscPropertyState -Values @{CurrentValue = 'John'; DesiredValue = 'Alice'}
-
-    .EXAMPLE
-        Test-DscPropertyState -Values @{CurrentValue = 1; DesiredValue = 2}
-
-    .PARAMETER Values
-        Specifies a hash table with the current value (the CurrentValue key) and desired value (the DesiredValue key).
-
-    .INPUTS
-        None
-
-    .OUTPUTS
-        System.Boolean
-#>
-function Test-DscPropertyState
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Collections.Hashtable]
-        $Values
-    )
-
-    if ($null -eq $Values.CurrentValue -and $null -eq $Values.DesiredValue)
-    {
-        # Both values are $null so return $true
-        $returnValue = $true
-    }
-    elseif ($null -eq $Values.CurrentValue -or $null -eq $Values.DesiredValue)
-    {
-        # Either CurrentValue or DesiredValue are $null so return $false
-        $returnValue = $false
-    }
-    elseif ($Values.DesiredValue.GetType().IsArray -or $Values.CurrentValue.GetType().IsArray)
-    {
-        $compareObjectParameters = @{
-            ReferenceObject  = $Values.CurrentValue
-            DifferenceObject = $Values.DesiredValue
-        }
-
-        $arrayCompare = Compare-Object @compareObjectParameters
-
-        if ($null -ne $arrayCompare)
-        {
-            Write-Verbose -Message $script:localizedData.ArrayDoesNotMatch -Verbose
-
-            $arrayCompare |
-                ForEach-Object -Process {
-                    Write-Verbose -Message ($script:localizedData.ArrayValueThatDoesNotMatch -f `
-                            $_.InputObject, $_.SideIndicator) -Verbose
-                }
-
-            $returnValue = $false
-        }
-        else
-        {
-            $returnValue = $true
-        }
-    }
-    elseif ($Values.CurrentValue -ne $Values.DesiredValue)
-    {
-        $desiredType = $Values.DesiredValue.GetType()
-
-        $returnValue = $false
-
-        $supportedTypes = @(
-            'String'
-            'Int32'
-            'UInt32'
-            'Int16'
-            'UInt16'
-            'Single'
-            'Boolean'
-        )
-
-        if ($desiredType.Name -notin $supportedTypes)
-        {
-            Write-Warning -Message ($script:localizedData.UnableToCompareType -f $desiredType.Name)
-        }
-        else
-        {
-            Write-Verbose -Message (
-                $script:localizedData.PropertyValueOfTypeDoesNotMatch `
-                    -f $desiredType.Name, $Values.CurrentValue, $Values.DesiredValue
-            ) -Verbose
-        }
-    }
-    else
-    {
-        $returnValue = $true
-    }
-
-    return $returnValue
 }
 
 <#
@@ -1901,20 +1653,20 @@ function Add-TypeAssembly
     {
         if ($TypeName -as [Type])
         {
-            Write-Verbose -Message ($script:localizedData.TypeAlreadyExistInSession -f $TypeName) -Verbose
+            Write-Verbose -Message ($script:localizedData.TypeAlreadyExistInSession -f $TypeName)
 
             # The type already exists so no need to load the type again.
             return
         }
         else
         {
-            Write-Verbose -Message ($script:localizedData.TypeDoesNotExistInSession -f $TypeName) -Verbose
+            Write-Verbose -Message ($script:localizedData.TypeDoesNotExistInSession -f $TypeName)
         }
     }
 
     try
     {
-        Write-Verbose -Message ($script:localizedData.AddingAssemblyToSession -f $AssemblyName) -Verbose
+        Write-Verbose -Message ($script:localizedData.AddingAssemblyToSession -f $AssemblyName)
 
         Add-Type -AssemblyName $AssemblyName
     }
@@ -2293,6 +2045,8 @@ function Get-CurrentUser
 #>
 function Test-Password
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'PasswordAuthentication')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '', Justification = 'This is to allow testing of service accounts.')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -2409,6 +2163,8 @@ function Test-Password
 #>
 function Test-PrincipalContextCredentials
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'PasswordAuthentication')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUsernameAndPasswordParams', '', Justification = 'This is to allow testing of service accounts.')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -2813,7 +2569,7 @@ function Resolve-MembersSecurityIdentifier
             {
                 if ($PrepareForMembership.IsPresent)
                 {
-                    "<SID=$($securityIdentifier)>"
+                    [System.String[]] "<SID=$($securityIdentifier)>"
                 }
                 else
                 {

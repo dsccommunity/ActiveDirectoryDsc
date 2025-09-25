@@ -1,867 +1,1223 @@
-$script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_ADOrganizationalUnit'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
 
-function Invoke-TestSetup
-{
+BeforeDiscovery {
     try
     {
-        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies have been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies have not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
     }
     catch [System.IO.FileNotFoundException]
     {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
     }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'ActiveDirectoryDsc'
+    $script:dscResourceName = 'MSFT_ADOrganizationalUnit'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
         -DSCResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
 }
 
-function Invoke-TestCleanup
-{
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name ActiveDirectory_2019 -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# Begin Testing
+Describe 'MSFT_ADOrganizationalUnit\Get-TargetResource' -Tag 'Get' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
 
-Invoke-TestSetup
-
-try
-{
-    InModuleScope $script:dscResourceName {
-        Set-StrictMode -Version 1.0
-
-        # Load stub cmdlets and classes.
-        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
-
-        $testCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
-            'DummyUser',
-            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
-        )
-
-        $testDomainController = 'TESTDC'
-
-        $testPresentParams = @{
-            Name        = 'TestOU'
-            Path        = 'OU=Fake,DC=contoso,DC=com'
-            Description = 'Test AD OU description'
-            Ensure      = 'Present'
-        }
-
-        $testAbsentParams = $testPresentParams.Clone()
-        $testAbsentParams['Ensure'] = 'Absent'
-
-        $mockName = 'TestOU'
-        $mockPath = 'OU=Fake,DC=contoso,DC=com'
-        $mockDistinguishedName = 'OU=' + $mockName + ',' + $mockPath
-
-        $mockResource = @{
-            Name                            = $mockName
-            Path                            = $mockPath
-            Description                     = 'Test AD OU description'
-            ProtectedFromAccidentalDeletion = $false
-            DistinguishedName               = $mockDistinguishedName
-            Ensure                          = 'Present'
-        }
-
-        $mockAbsentResource = @{
-            Name                            = $mockResource.Name
-            Path                            = $mockResource.Path
-            Description                     = $null
-            ProtectedFromAccidentalDeletion = $null
-            DistinguishedName               = $null
-            Ensure                          = 'Absent'
-        }
-
-        $mockChangedResource = @{
-            Description                     = 'Changed Test AD OU description'
-            ProtectedFromAccidentalDeletion = $true
-        }
-
-        $mockProtectedAdOu = $mockResource.Clone()
-        $mockProtectedAdOu['ProtectedFromAccidentalDeletion'] = $true
-
-        $mockGetTargetResourcePresentResult = $mockResource.Clone()
-        $mockGetTargetResourcePresentResult['Ensure'] = 'Present'
-
-        $mockGetTargetResourceAbsentResult = $mockResource.Clone()
-        $mockGetTargetResourceAbsentResult['Ensure'] = 'Absent'
-
-        #region Function Get-TargetResource
-        Describe 'ADOrganizationalUnit\Get-TargetResource' -Tag 'Get' {
-            BeforeAll {
-                $getTargetResourceParameters = @{
-                    Name = $mockResource.Name
-                    Path = $mockResource.Path
-                }
-
-                $mockGetADOrganizationUnitResult = @{
-                    Name                            = $mockResource.Name
-                    Path                            = $mockResource.Path
-                    Description                     = $mockResource.Description
-                    ProtectedFromAccidentalDeletion = $mockResource.ProtectedFromAccidentalDeletion
-                    DistinguishedName               = $mockResource.DistinguishedName
-                }
-
-                Mock -CommandName Assert-Module
-            }
-
-            Context 'When the resource is Present' {
-                BeforeAll {
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith { $mockGetADOrganizationUnitResult }
-                }
-
-                It 'Should return the correct result' {
-                    $result = Get-TargetResource @getTargetResourceParameters
-
-                    $result.Ensure | Should -Be 'Present'
-                    $result.Name | Should -Be $mockResource.Name
-                    $result.Path | Should -Be $mockResource.Path
-                    $result.Description | Should -Be $mockResource.Description
-                    $result.ProtectedFromAccidentalDeletion | Should -Be $mockResource.ProtectedFromAccidentalDeletion
-                    $result.DistinguishedName | Should -Be $mockResource.DistinguishedName
-                }
-
-                It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Assert-Module `
-                        -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
-                    Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path } `
-                        -Exactly -Times 1
+    Context 'When the resource is Present' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $false
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
                 }
             }
-            Context 'When the OU has apostrophe' {
-                BeforeAll {
-                    $mockGetADOrganizationUnitApostropheResult = $mockGetADOrganizationUnitResult.Clone()
-                    $mockGetADOrganizationUnitApostropheResult['Name'] = "Jones's OU"
+        }
 
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith {
-                        return $mockGetADOrganizationUnitApostropheResult
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name = 'TestOU'
+                    Path = 'OU=Fake,DC=contoso,DC=com'
+                }
+
+                $result = Get-TargetResource @mockParameters
+
+                $result.Ensure | Should -Be 'Present'
+                $result.Name | Should -Be $mockParameters.Name
+                $result.Path | Should -Be $mockParameters.Path
+                $result.Description | Should -Be 'Test AD OU description'
+                $result.ProtectedFromAccidentalDeletion | Should -BeFalse
+                $result.DistinguishedName | Should -Be 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADOrganizationalUnit -ParameterFilter {
+                $SearchBase -eq 'OU=Fake,DC=contoso,DC=com'
+            } -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the OU has apostrophe' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                return @{
+                    Name                            = "Jones's OU"
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $false
+                    DistinguishedName               = "Jones's OU" + ',OU=Fake,DC=contoso,DC=com'
+                }
+            }
+        }
+
+        It 'Should return the desired result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name = "Jones's OU"
+                    Path = 'OU=Fake,DC=contoso,DC=com'
+                }
+
+                $targetResource = Get-TargetResource @mockParameters
+
+                $targetResource.Name | Should -Be "Jones's OU"
+            }
+
+            # Regression tests for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/674.
+            Should -Invoke -CommandName Get-ADOrganizationalUnit -ParameterFilter {
+                $Filter -eq ('Name -eq "{0}"' -f "Jones's OU")
+            }
+        }
+    }
+
+    Context 'When the OU is protected' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $true
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                }
+            }
+        }
+
+        It 'Should return the desired result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name = 'TestOU'
+                    Path = 'OU=Fake,DC=contoso,DC=com'
+                }
+
+                $result = Get-TargetResource @mockParameters
+
+                $result.ProtectedFromAccidentalDeletion | Should -BeTrue
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADOrganizationalUnit -ParameterFilter {
+                $SearchBase -eq 'OU=Fake,DC=contoso,DC=com'
+            } -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the "Credential" parameter is specified' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $false
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                }
+            }
+        }
+
+        It 'Should not throw' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name       = 'TestOU'
+                    Path       = 'OU=Fake,DC=contoso,DC=com'
+                    Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'DummyUser',
+                        (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                    )
+                }
+
+                { Get-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADOrganizationalUnit -ParameterFilter {
+                $SearchBase -eq 'OU=Fake,DC=contoso,DC=com' -and
+                $null -ne $Credential
+            }  -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the "DomainController" parameter is specified' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $false
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                }
+            }
+        }
+
+        It 'Should not throw' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name             = 'TestOU'
+                    Path             = 'OU=Fake,DC=contoso,DC=com'
+                    DomainController = 'TESTDC'
+                }
+
+                { Get-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADOrganizationalUnit `
+                -ParameterFilter { $SearchBase -eq 'OU=Fake,DC=contoso,DC=com' -and
+                $Server -eq 'TESTDC'
+            }  -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the resource is Absent' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name = 'TestOU'
+                    Path = 'OU=Fake,DC=contoso,DC=com'
+                }
+
+                $result = Get-TargetResource @mockParameters
+
+                $result.Ensure | Should -Be 'Absent'
+                $result.Name | Should -Be $mockParameters.Name
+                $result.Path | Should -Be $mockParameters.Path
+                $result.Description | Should -BeNullOrEmpty
+                $result.ProtectedFromAccidentalDeletion | Should -BeNullOrEmpty
+                $result.DistinguishedName | Should -BeNullOrEmpty
+            }
+
+            Should -Invoke -CommandName Assert-Module  -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADOrganizationalUnit -ParameterFilter {
+                $SearchBase -eq 'OU=Fake,DC=contoso,DC=com'
+            }  -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the OU parent path does not exist' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith {
+                throw [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]::new()
+            }
+        }
+
+        It 'Returns the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name = 'TestOU'
+                    Path = 'OU=Fake,DC=contoso,DC=com'
+                }
+
+                $result = Get-TargetResource @mockParameters
+
+                $result.Ensure | Should -Be 'Absent'
+                $result.ProtectedFromAccidentalDeletion | Should -BeNullOrEmpty
+                $result.Description | Should -BeNullOrEmpty
+                $result.DistinguishedName | Should -BeNullOrEmpty
+            }
+        }
+    }
+
+    Context 'When "Get-ADOrganizationUnit" throws an unexpected error' {
+        BeforeAll {
+            Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw 'error' }
+        }
+
+        It 'Should throw the correct exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Name = 'TestOU'
+                    Path = 'OU=Fake,DC=contoso,DC=com'
+                }
+
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.GetResourceError -f $mockParameters.Name)
+
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+            }
+        }
+    }
+}
+
+Describe 'MSFT_ADOrganizationalUnit\Test-TargetResource' -Tag 'Test' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
+
+    Context 'When the Resource is Present' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $false
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    Ensure                          = 'Present'
+                }
+            }
+        }
+
+        Context 'When the Resource should be Present' {
+            BeforeDiscovery {
+                $testCases = @(
+                    @{
+                        Property = 'Description'
+                        Value    = 'Changed Test AD OU description'
+                    }
+                    @{
+                        Property = 'ProtectedFromAccidentalDeletion'
+                        Value    = $true
+                    }
+                )
+            }
+
+            It 'Should not throw' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Name                            = 'TestOU'
+                        Path                            = 'OU=Fake,DC=contoso,DC=com'
+                        Description                     = 'Test AD OU description'
+                        Ensure                          = 'Present'
+                        ProtectedFromAccidentalDeletion = $false
+                    }
+
+                    { Test-TargetResource @mockParameters } | Should -Not -Throw
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                    $Name -eq 'TestOU' -and
+                    $Path -eq 'OU=Fake,DC=contoso,DC=com'
+                }  -Exactly -Times 1 -Scope It
+            }
+
+            Context 'When the <Property> resource property is not in the desired state' -ForEach $testCases {
+                It 'Should return $false' {
+                    InModuleScope -Parameters $_ -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            Ensure                          = 'Present'
+                            ProtectedFromAccidentalDeletion = $false
+                        }
+
+                        $mockParameters.$Property = $Value
+
+                        Test-TargetResource @mockParameters | Should -BeFalse
                     }
                 }
+            }
 
-                It 'Should return the desired result' {
-                    $getTargetResourceParamsWithApostrophe = $getTargetResourceParameters.Clone()
-                    $getTargetResourceParamsWithApostrophe['Name'] = "Jones's OU"
+            Context 'When all the resource properties are in the desired state' {
+                It 'Should return $true' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-                    $targetResource = Get-TargetResource @getTargetResourceParamsWithApostrophe
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            Ensure                          = 'Present'
+                            ProtectedFromAccidentalDeletion = $false
+                        }
 
-                    $targetResource.Name | Should -Be "Jones's OU"
-
-                    # Regression tests for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/674.
-                    Assert-MockCalled -CommandName Get-ADOrganizationalUnit -ParameterFilter {
-                        $Filter -eq ('Name -eq "{0}"' -f "Jones's OU")
+                        Test-TargetResource @mockParameters | Should -BeTrue
                     }
                 }
             }
 
-            Context 'When the OU is protected' {
-                BeforeAll {
-                    $mockGetADOrganizationUnitProtectedResult = $mockGetADOrganizationUnitResult.Clone()
-                    $mockGetADOrganizationUnitProtectedResult['ProtectedFromAccidentalDeletion'] = $true
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith { $mockGetADOrganizationUnitProtectedResult }
+            # Regression test for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/624.
+            Context 'When parameter RestoreFromRecycleBin is specified' {
+                It 'Should return $true' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            RestoreFromRecycleBin           = $true
+                        }
+
+                        Test-TargetResource @mockParameters | Should -BeTrue
+                    }
+                }
+            }
+        }
+
+        Context 'When the Resource should be Absent' {
+            It 'Should return $false' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Name                            = 'TestOU'
+                        Path                            = 'OU=Fake,DC=contoso,DC=com'
+                        Description                     = 'Test AD OU description'
+                        Ensure                          = 'Absent'
+                        ProtectedFromAccidentalDeletion = $false
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
                 }
 
-                It 'Should return the desired result' {
-                    $targetResource = Get-TargetResource @getTargetResourceParameters
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                    $Name -eq 'TestOU' -and
+                    $Path -eq 'OU=Fake,DC=contoso,DC=com'
+                }  -Exactly -Times 1 -Scope It
+            }
+        }
+    }
 
-                    $targetResource.ProtectedFromAccidentalDeletion | Should -BeTrue
+    Context 'When the Resource is Absent' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $true
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    Ensure                          = 'Absent'
+                }
+            }
+        }
+
+        Context 'When the Resource should be Present' {
+            It 'Should return $false' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Name                            = 'TestOU'
+                        Path                            = 'OU=Fake,DC=contoso,DC=com'
+                        Description                     = 'Test AD OU description'
+                        Ensure                          = 'Present'
+                        ProtectedFromAccidentalDeletion = $false
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
                 }
 
-                It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Assert-Module `
-                        -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
-                    Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path } `
-                        -Exactly -Times 1
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                    $Name -eq 'TestOU' -and
+                    $Path -eq 'OU=Fake,DC=contoso,DC=com'
+                }  -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the Resource should be Absent' {
+            It 'Should return $true' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Name                            = 'TestOU'
+                        Path                            = 'OU=Fake,DC=contoso,DC=com'
+                        Description                     = 'Test AD OU description'
+                        Ensure                          = 'Absent'
+                        ProtectedFromAccidentalDeletion = $false
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeTrue
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                    $Name -eq 'TestOU' -and
+                    $Path -eq 'OU=Fake,DC=contoso,DC=com'
+                }  -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+}
+
+Describe 'MSFT_ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
+    BeforeAll {
+        Mock -CommandName New-ADOrganizationalUnit
+        Mock -CommandName Set-ADOrganizationalUnit
+        Mock -CommandName Remove-ADOrganizationalUnit
+        Mock -CommandName Restore-ADCommonObject
+    }
+
+    Context 'When the Resource is Present' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $false
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    Ensure                          = 'Present'
+                }
+            }
+        }
+
+        BeforeDiscovery {
+            $testCases = @(
+                @{
+                    Property = 'Description'
+                    Value    = 'Changed Test AD OU description'
+                }
+                @{
+                    Property = 'ProtectedFromAccidentalDeletion'
+                    Value    = $true
+                }
+            )
+        }
+
+        Context 'When the Resource should be Present' {
+            Context 'When <Property> has changed' -ForEach $testCases {
+                It 'Should not throw' {
+                    InModuleScope -Parameters $_ -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                        }
+
+                        $mockParameters.$Property = $Value
+
+                        { Set-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                        $Name -eq 'TestOU'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter {
+                        $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
                 }
             }
 
             Context 'When the "Credential" parameter is specified' {
-                BeforeAll {
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith { $mockGetADOrganizationUnitResult }
-                }
                 It 'Should not throw' {
-                    { Get-TargetResource @getTargetResourceParameters -Credential $testCredential } |
-                        Should -Not -Throw
-                }
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-                It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Assert-Module `
-                        -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
-                    Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path -and `
-                            $Credential -eq $testCredential } `
-                        -Exactly -Times 1
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                            Credential                      = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                                'DummyUser',
+                                (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                            )
+                        }
+
+                        { Set-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter { $null -ne $Credential } -Exactly -Times 1 -Scope It
                 }
             }
 
             Context 'When the "DomainController" parameter is specified' {
-                BeforeAll {
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith { $mockGetADOrganizationUnitResult }
-                }
                 It 'Should not throw' {
-                    { Get-TargetResource @getTargetResourceParameters -DomainController $testDomainController } |
-                        Should -Not -Throw
-                }
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-                It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Assert-Module `
-                        -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
-                    Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path -and `
-                            $Server -eq $testDomainController } `
-                        -Exactly -Times 1
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                            DomainController                = 'TESTDC'
+                        }
+
+                        { Set-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter { $Server -eq 'TESTDC' } -Exactly -Times 1 -Scope It
                 }
             }
 
-            Context 'When the resource is Absent' {
+            Context 'When Set-ADOrganizationalUnit throws an exception' {
                 BeforeAll {
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith {
-                        throw New-Object Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException
-                    }
+                    Mock -CommandName Set-ADOrganizationalUnit -MockWith { throw }
                 }
 
-                It 'Should return the correct result' {
-                    $result = Get-TargetResource @getTargetResourceParameters
-
-                    $result.Ensure | Should -Be 'Absent'
-                    $result.Name | Should -Be $mockResource.Name
-                    $result.Path | Should -Be $mockResource.Path
-                    $result.Description | Should -BeNullOrEmpty
-                    $result.ProtectedFromAccidentalDeletion | Should -BeNullOrEmpty
-                    $result.DistinguishedName | Should -BeNullOrEmpty
-                }
-
-                It 'Should call the expected mocks' {
-                    Assert-MockCalled -CommandName Assert-Module `
-                        -ParameterFilter { $ModuleName -eq 'ActiveDirectory' }
-                    Assert-MockCalled -CommandName Get-ADOrganizationalUnit `
-                        -ParameterFilter { $SearchBase -eq $getTargetResourceParameters.Path } `
-                        -Exactly -Times 1
-                }
-            }
-
-            Context 'When the OU parent path does not exist' {
-                It 'Returns the correct result' {
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith {
-                        throw [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]::new()
-                    }
-
-                    $targetResource = Get-TargetResource @getTargetResourceParameters
-                    $targetResource.Ensure | Should -Be 'Absent'
-                }
-            }
-
-            Context 'When "Get-ADOrganizationUnit" throws an unexpected error' {
                 It 'Should throw the correct exception' {
-                    Mock -CommandName Get-ADOrganizationalUnit -MockWith { throw 'error' }
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
 
-                    { Get-TargetResource @getTargetResourceParameters } |
-                        Should -Throw ($script:localizedData.GetResourceError -f $getTargetResourceParameters.Name)
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                        }
+
+                        $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SetResourceError -f $mockParameters.Name)
+
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                        $Name -eq 'TestOU'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter {
+                        $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
                 }
             }
         }
-        #endregion
 
-        #region Function Test-TargetResource
-        Describe 'ADOrganizationalUnit\Test-TargetResource' -Tag 'Test' {
-            BeforeAll {
-                $testTargetResourceParams = @{
-                    Name                            = $mockResource.Name
-                    Path                            = $mockResource.Path
-                    Description                     = $mockResource.Description
-                    ProtectedFromAccidentalDeletion = $mockResource.ProtectedFromAccidentalDeletion
+        Context 'When the Resource should be Absent' {
+            It 'Should not throw' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Name                            = 'TestOU'
+                        Path                            = 'OU=Fake,DC=contoso,DC=com'
+                        Description                     = 'Test AD OU description'
+                        ProtectedFromAccidentalDeletion = $false
+                        Ensure                          = 'Absent'
+                    }
+
+                    { Set-TargetResource @mockParameters } | Should -Not -Throw
                 }
 
-                $testTargetResourcePresentParams = $testTargetResourceParams.Clone()
-                $testTargetResourcePresentParams['Ensure'] = 'Present'
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                    $Name -eq 'TestOU'
+                } -Exactly -Times 1 -Scope It
 
-                $testTargetResourceAbsentParams = $testTargetResourceParams.Clone()
-                $testTargetResourceAbsentParams['Ensure'] = 'Absent'
+                Should -Invoke -CommandName Remove-ADOrganizationalUnit -ParameterFilter {
+                    $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                } -Exactly -Times 1 -Scope It
 
-                Mock -CommandName Assert-Module
+                Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
             }
 
-            Context 'When the Resource is Present' {
+            Context 'When the OrganizationalUnit is protected from deletion' {
                 BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourcePresentResult }
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $true
+                            DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                            Ensure                          = 'Present'
+                        }
+                    }
                 }
 
-                Context 'When the Resource should be Present' {
+                It 'Should not throw' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Absent'
+                        }
+
+                        { Set-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                        $Name -eq 'TestOU'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter {
+                        $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com' -and
+                        $ProtectedFromAccidentalDeletion -eq $false
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -ParameterFilter {
+                        $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                }
+
+                Context 'When the "Credential" parameter is specified' {
+                    It 'Should not throw' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $mockParameters = @{
+                                Name                            = 'TestOU'
+                                Path                            = 'OU=Fake,DC=contoso,DC=com'
+                                Description                     = 'Test AD OU description'
+                                ProtectedFromAccidentalDeletion = $false
+                                Ensure                          = 'Absent'
+                                Credential                      = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                                    'DummyUser',
+                                    (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                                )
+                            }
+
+                            { Set-TargetResource @mockParameters } | Should -Not -Throw
+                        }
+
+                        Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                            $Name -eq 'TestOU'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter {
+                            $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com' -and
+                            $ProtectedFromAccidentalDeletion -eq $false -and
+                            $null -ne $Credential
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName Remove-ADOrganizationalUnit -ParameterFilter {
+                            $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com' -and
+                            $null -ne $Credential
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When the "DomainController" parameter is specified' {
+                    It 'Should not throw' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $mockParameters = @{
+                                Name                            = 'TestOU'
+                                Path                            = 'OU=Fake,DC=contoso,DC=com'
+                                Description                     = 'Test AD OU description'
+                                ProtectedFromAccidentalDeletion = $false
+                                Ensure                          = 'Absent'
+                                DomainController                = 'TESTDC'
+                            }
+
+                            { Set-TargetResource @mockParameters } | Should -Not -Throw
+                        }
+
+                        Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                            $Name -eq 'TestOU' -and
+                            $DomainController -eq 'TESTDC'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter {
+                            $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com' -and
+                            $ProtectedFromAccidentalDeletion -eq $false -and
+                            $Server -eq 'TESTDC'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName Remove-ADOrganizationalUnit -ParameterFilter {
+                            $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com' -and
+                            $Server -eq 'TESTDC'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When Set-ADOrganizationalUnit throws an exception' {
+                    BeforeAll {
+                        Mock -CommandName Set-ADOrganizationalUnit -MockWith { throw 'error' }
+                    }
+
+                    It 'Should throw the correct exception' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $mockParameters = @{
+                                Name                            = 'TestOU'
+                                Path                            = 'OU=Fake,DC=contoso,DC=com'
+                                Description                     = 'Test AD OU description'
+                                ProtectedFromAccidentalDeletion = $false
+                                Ensure                          = 'Absent'
+                            }
+
+                            $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.SetResourceError -f $mockParameters.Name)
+
+                            { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                        }
+
+                        Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                            $Name -eq 'TestOU'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName Set-ADOrganizationalUnit -ParameterFilter {
+                            $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com' -and
+                            $ProtectedFromAccidentalDeletion -eq $false
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                    }
+                }
+            }
+
+            Context 'When Remove-ADOrganizationalUnit throws an exception' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                            Ensure                          = 'Present'
+                        }
+                    }
+
+                    Mock -CommandName Remove-ADOrganizationalUnit -MockWith { throw }
+                }
+
+                It 'Should throw the correct exception' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Absent'
+                        }
+
+                        $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.RemoveResourceError -f $mockParameters.Name)
+
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                        $Name -eq 'TestOU'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -ParameterFilter {
+                        $Identity -eq 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                }
+            }
+        }
+    }
+
+    Context 'When the Resource is Absent' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Name                            = 'TestOU'
+                    Path                            = 'OU=Fake,DC=contoso,DC=com'
+                    Description                     = 'Test AD OU description'
+                    ProtectedFromAccidentalDeletion = $true
+                    DistinguishedName               = 'OU=TestOU,OU=Fake,DC=contoso,DC=com'
+                    Ensure                          = 'Absent'
+                }
+            }
+        }
+
+        Context 'When the Resource should be Present' {
+            It 'Should not throw' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Name                            = 'TestOU'
+                        Path                            = 'OU=Fake,DC=contoso,DC=com'
+                        Description                     = 'Test AD OU description'
+                        ProtectedFromAccidentalDeletion = $false
+                        Ensure                          = 'Present'
+                    }
+
+                    { Set-TargetResource @mockParameters } | Should -Not -Throw
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+            }
+
+            Context 'When the "RestoreFromRecycleBin" parameter is specified' {
+                BeforeAll {
+                    Mock -CommandName Restore-ADCommonObject -MockWith { $true }
+                }
+
+                It 'Should not throw' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                            RestoreFromRecycleBin           = $true
+                        }
+
+                        { Set-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -ParameterFilter { $Identity -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                }
+
+                Context 'When the "Credential" parameter is specified' {
+                    It 'Should not throw' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $mockParameters = @{
+                                Name                            = 'TestOU'
+                                Path                            = 'OU=Fake,DC=contoso,DC=com'
+                                Description                     = 'Test AD OU description'
+                                ProtectedFromAccidentalDeletion = $false
+                                Ensure                          = 'Present'
+                                RestoreFromRecycleBin           = $true
+                                Credential                      = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                                    'DummyUser',
+                                    (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                                )
+                            }
+
+                            { Set-TargetResource @mockParameters } | Should -Not -Throw
+                        }
+
+                        Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                            $Name -eq 'TestOU'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName Restore-ADCommonObject -ParameterFilter {
+                            $Identity -eq 'TestOU' -and
+                            $null -ne $Credential
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When the "DomainController" parameter is specified' {
+                    It 'Should not throw' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $mockParameters = @{
+                                Name                            = 'TestOU'
+                                Path                            = 'OU=Fake,DC=contoso,DC=com'
+                                Description                     = 'Test AD OU description'
+                                ProtectedFromAccidentalDeletion = $false
+                                Ensure                          = 'Present'
+                                RestoreFromRecycleBin           = $true
+                                DomainController                = 'TESTDC'
+                            }
+
+                            { Set-TargetResource @mockParameters } | Should -Not -Throw
+                        }
+
+                        Should -Invoke -CommandName Get-TargetResource -ParameterFilter {
+                            $Name -eq 'TestOU'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName Restore-ADCommonObject -ParameterFilter {
+                            $Identity -eq 'TestOU' -and
+                            $Server -eq 'TESTDC'
+                        } -Exactly -Times 1 -Scope It
+
+                        Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    }
+                }
+
+                Context 'When Restore from Recycle Bin was unsuccessful' {
+                    BeforeAll {
+                        Mock -CommandName Restore-ADCommonObject -MockWith { $false }
+                    }
 
                     It 'Should not throw' {
-                        { Test-TargetResource @testTargetResourcePresentParams } | Should -Not -Throw
-                    }
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
 
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name -and `
-                                $Path -eq $testTargetResourcePresentParams.Path } `
-                            -Exactly -times 1
-                    }
-
-                    foreach ($property in $mockChangedResource.Keys)
-                    {
-                        Context "When the $property resource property is not in the desired state" {
-                            BeforeAll {
-                                $testTargetResourceNotInDesiredStateParams = $testTargetResourcePresentParams.Clone()
-                                $testTargetResourceNotInDesiredStateParams[$property] = $mockChangedResource.$property
-                            }
-
-                            It 'Should return $false' {
-                                Test-TargetResource @testTargetResourceNotInDesiredStateParams | Should -Be $false
-                            }
-                        }
-                    }
-
-                    Context 'When all the resource properties are in the desired state' {
-                        It 'Should return $true' {
-                            Test-TargetResource @testTargetResourcePresentParams | Should -BeTrue
-                        }
-                    }
-
-                    # Regression test for issue https://github.com/dsccommunity/ActiveDirectoryDsc/issues/624.
-                    Context 'When parameter RestoreFromRecycleBin is specified' {
-                        It 'Should return $true' {
-                            $mockTestTargetResourceParameters = @{
-                                Name                            = $mockResource.Name
-                                Path                            = $mockResource.Path
-                                Description                     = $mockResource.Description
-                                ProtectedFromAccidentalDeletion = $mockResource.ProtectedFromAccidentalDeletion
+                            $mockParameters = @{
+                                Name                            = 'TestOU'
+                                Path                            = 'OU=Fake,DC=contoso,DC=com'
+                                Description                     = 'Test AD OU description'
+                                ProtectedFromAccidentalDeletion = $false
+                                Ensure                          = 'Present'
                                 RestoreFromRecycleBin           = $true
                             }
 
-                            Test-TargetResource @mockTestTargetResourceParameters | Should -BeTrue
+                            { Set-TargetResource @mockParameters } | Should -Not -Throw
                         }
-                    }
-                }
 
-                Context 'When the Resource should be Absent' {
-
-                    It 'Should return $false' {
-                        Test-TargetResource @testTargetResourceAbsentParams | Should -Be $false
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $Name -eq $testTargetResourceAbsentParams.Name -and `
-                                $Path -eq $testTargetResourceAbsentParams.Path } `
-                            -Exactly -times 1
+                        Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Restore-ADCommonObject -ParameterFilter { $Identity -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                        Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
                     }
                 }
             }
 
-            Context 'When the Resource is Absent' {
+            Context 'When the "Credential" parameter is specified' {
+                It 'Should not throw' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                            Credential                      = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                                'DummyUser',
+                                (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                            )
+                        }
+
+                        { Set-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -ParameterFilter {
+                        $Name -eq 'TestOU' -and
+                        $null -ne $Credential
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When the "DomainController" parameter is specified' {
+                It 'Should not throw' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                            DomainController                = 'TESTDC'
+                        }
+
+                        { Set-TargetResource @mockParameters } | Should -Not -Throw
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -ParameterFilter {
+                        $Name -eq 'TestOU' -and
+                        $Server -eq 'TESTDC'
+                    } -Exactly -Times 1 -Scope It
+
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When New-ADOrganizationalUnit throws ADIdentityNotFoundException' {
                 BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourceAbsentResult }
+                    Mock -CommandName New-ADOrganizationalUnit -MockWith { throw [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]::new() }
                 }
 
-                Context 'When the Resource should be Present' {
-                    It 'Should return $false' {
-                        Test-TargetResource @testTargetResourcePresentParams | Should -Be $false
+                It 'Should throw the correct exception' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                        }
+
+                        $errorRecord = Get-ObjectNotFoundRecord -Message $($script:localizedData.PathNotFoundError -f $mockParameters.Path)
+
+
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
                     }
 
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $Name -eq $testTargetResourcePresentParams.Name -and `
-                                $Path -eq $testTargetResourcePresentParams.Path } `
-                            -Exactly -Times 1
-                    }
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When New-ADOrganizationalUnit throws an unexpected exception' {
+                BeforeAll {
+                    Mock -CommandName New-ADOrganizationalUnit -MockWith { throw }
                 }
 
-                Context 'When the Resource should be Absent' {
-                    It 'Should return $true' {
-                        Test-TargetResource @testTargetResourceAbsentParams | Should -Be $true
+                It 'Should throw the correct exception' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $mockParameters = @{
+                            Name                            = 'TestOU'
+                            Path                            = 'OU=Fake,DC=contoso,DC=com'
+                            Description                     = 'Test AD OU description'
+                            ProtectedFromAccidentalDeletion = $false
+                            Ensure                          = 'Present'
+                        }
+
+                        $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.NewResourceError -f $mockParameters.Name)
+
+                        { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
                     }
 
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $Name -eq $testTargetResourceAbsentParams.Name -and `
-                                $Path -eq $testTargetResourceAbsentParams.Path } `
-                            -Exactly -times 1
-                    }
+                    Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-ADOrganizationalUnit -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
                 }
             }
         }
-        #endregion
 
-        #region Function Set-TargetResource
+        Context 'When the Resource should be Absent' {
+            It 'Should not throw' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-        Describe 'ADOrganizationalUnit\Set-TargetResource' -Tag 'Set' {
-            BeforeAll {
-                $setTargetResourceParameters = @{
-                    Name                            = $mockResource.Name
-                    Path                            = $mockResource.Path
-                    Description                     = $mockResource.Description
-                    ProtectedFromAccidentalDeletion = $mockResource.ProtectedFromAccidentalDeletion
+                    $mockParameters = @{
+                        Name                            = 'TestOU'
+                        Path                            = 'OU=Fake,DC=contoso,DC=com'
+                        Description                     = 'Test AD OU description'
+                        ProtectedFromAccidentalDeletion = $false
+                        Ensure                          = 'Absent'
+                    }
+
+                    { Set-TargetResource @mockParameters } | Should -Not -Throw
                 }
 
-                $setTargetResourcePresentParameters = $setTargetResourceParameters.Clone()
-                $setTargetResourcePresentParameters.Ensure = 'Present'
-
-                $setTargetResourceAbsentParameters = $setTargetResourceParameters.Clone()
-                $setTargetResourceAbsentParameters.Ensure = 'Absent'
-
-                Mock -CommandName New-ADOrganizationalUnit
-                Mock -CommandName Set-ADOrganizationalUnit
-                Mock -CommandName Remove-ADOrganizationalUnit
-                Mock -CommandName Restore-ADCommonObject
-            }
-
-            Context 'When the Resource is Present' {
-                BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourcePresentResult }
-                }
-
-                Context 'When the Resource should be Present' {
-                    foreach ($property in $mockChangedResource.Keys)
-                    {
-                        Context "When $property has changed" {
-                            BeforeAll {
-                                $setTargetResourceParametersChangedProperty = $setTargetResourcePresentParameters.Clone()
-                                $setTargetResourceParametersChangedProperty.$property = $mockChangedResource.$property
-                            }
-
-                            It 'Should not throw' {
-                                { Set-TargetResource @setTargetResourceParametersChangedProperty } | Should -Not -Throw
-                            }
-
-                            It 'Should call the correct mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourceParametersChangedProperty.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                    -ParameterFilter { $Identity -eq $mockDistinguishedName } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                            }
-                        }
-                    }
-
-                    Context 'When the "Credential" parameter is specified' {
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentParameters -Credential $testCredential } |
-                                Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                -ParameterFilter { $Credential -eq $testCredential } -Exactly -Times 1
-                        }
-                    }
-
-                    Context 'When the "DomainController" parameter is specified' {
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentParameters -DomainController $testDomainController } |
-                                Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                -ParameterFilter { $Server -eq $testDomainController } -Exactly -Times 1
-                        }
-                    }
-                    Context 'When Set-ADOrganizationalUnit throws an exception' {
-                        BeforeAll {
-                            Mock -CommandName Set-ADOrganizationalUnit -MockWith { throw $mockError }
-                        }
-
-                        It 'Should throw the correct exception' {
-                            { Set-TargetResource @setTargetResourcePresentParameters } |
-                                Should -Throw ($script:localizedData.SetResourceError -f
-                                    $setTargetResourcePresentParameters.Name)
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                -ParameterFilter { $Identity -eq $mockDistinguishedName } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                        }
-                    }
-                }
-
-                Context 'When the Resource should be Absent' {
-                    It 'Should not throw' {
-                        { Set-TargetResource @setTargetResourceAbsentParameters } | Should -Not -Throw
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName Remove-ADOrganizationalUnit `
-                            -ParameterFilter { $Identity -eq $mockDistinguishedName } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                        Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                        Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                    }
-
-                    Context 'When the OrganizationalUnit is protected from deletion' {
-                        BeforeAll {
-                            $mockGetTargetResourcePresentProtectedResult = $mockGetTargetResourcePresentResult.Clone()
-                            $mockGetTargetResourcePresentProtectedResult['ProtectedFromAccidentalDeletion'] = $true
-
-                            Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourcePresentProtectedResult }
-                        }
-
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourceAbsentParameters } | Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                -ParameterFilter { $Identity -eq $mockDistinguishedName -and `
-                                    $ProtectedFromAccidentalDeletion -eq $false } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit `
-                                -ParameterFilter { $Identity -eq $mockDistinguishedName } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                        }
-
-                        Context 'When the "Credential" parameter is specified' {
-                            It 'Should not throw' {
-                                { Set-TargetResource @setTargetResourceAbsentParameters -Credential $testCredential } |
-                                    Should -Not -Throw
-                            }
-
-                            It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                    -ParameterFilter { $Identity -eq $mockDistinguishedName -and `
-                                        $ProtectedFromAccidentalDeletion -eq $false -and `
-                                        $Credential -eq $testCredential } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit `
-                                    -ParameterFilter { $Identity -eq $mockDistinguishedName -and `
-                                        $Credential -eq $testCredential } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                            }
-                        }
-
-                        Context 'When the "DomainController" parameter is specified' {
-                            It 'Should not throw' {
-                                { Set-TargetResource @setTargetResourceAbsentParameters -DomainController $testDomainController } |
-                                    Should -Not -Throw
-                            }
-
-                            It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name -and `
-                                        $DomainController -eq $testDomainController } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                    -ParameterFilter { $Identity -eq $mockDistinguishedName -and `
-                                        $ProtectedFromAccidentalDeletion -eq $false -and `
-                                        $Server -eq $testDomainController } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit `
-                                    -ParameterFilter { $Identity -eq $mockDistinguishedName -and `
-                                        $Server -eq $testDomainController } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                            }
-                        }
-                        Context 'When Set-ADOrganizationalUnit throws an exception' {
-                            BeforeAll {
-                                Mock -CommandName Set-ADOrganizationalUnit -MockWith { throw 'error' }
-                            }
-
-                            It 'Should throw the correct exception' {
-                                { Set-TargetResource @setTargetResourceAbsentParameters } | `
-                                        Should -Throw ($script:localizedData.SetResourceError -f
-                                        $setTargetResourceAbsentParameters.Name)
-                            }
-
-                            It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADOrganizationalUnit `
-                                    -ParameterFilter { $Identity -eq $mockDistinguishedName -and `
-                                        $ProtectedFromAccidentalDeletion -eq $false } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                            }
-                        }
-                    }
-
-                    Context 'When Remove-ADOrganizationalUnit throws an exception' {
-                        BeforeAll {
-                            Mock -CommandName Remove-ADOrganizationalUnit -MockWith { throw 'error' }
-                        }
-
-                        It 'Should throw the correct exception' {
-                            { Set-TargetResource @setTargetResourceAbsentParameters } | `
-                                    Should -Throw ($script:localizedData.RemoveResourceError -f
-                                    $setTargetResourceAbsentParameters.Name)
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit `
-                                -ParameterFilter { $Identity -eq $mockDistinguishedName } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                        }
-                    }
-                }
-            }
-
-            Context 'When the Resource is Absent' {
-                BeforeAll {
-                    Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourceAbsentResult }
-                }
-
-                Context 'When the Resource should be Present' {
-                    It 'Should not throw' {
-                        { Set-TargetResource @setTargetResourcePresentParameters } | Should -Not -Throw
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName New-ADOrganizationalUnit `
-                            -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                        Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                        Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                    }
-
-                    Context 'When the "RestoreFromRecycleBin" parameter is specified' {
-                        BeforeAll {
-                            $setTargetResourcePresentRecycleBinParameters = $setTargetResourcePresentParameters.Clone()
-                            $setTargetResourcePresentRecycleBinParameters['RestoreFromRecycleBin'] = $true
-
-                            Mock -CommandName Restore-ADCommonObject -MockWith { $true }
-                        }
-
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentRecycleBinParameters } | Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentRecycleBinParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Restore-ADCommonObject `
-                                -ParameterFilter { $Identity -eq $setTargetResourcePresentRecycleBinParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                        }
-
-                        Context 'When the "Credential" parameter is specified' {
-                            It 'Should not throw' {
-                                { Set-TargetResource @setTargetResourcePresentRecycleBinParameters `
-                                        -Credential $testCredential } | Should -Not -Throw
-                            }
-
-                            It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourcePresentRecycleBinParameters.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
-                                    -ParameterFilter { `
-                                        $Identity -eq $setTargetResourcePresentRecycleBinParameters.Name -and `
-                                        $Credential -eq $testCredential } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            }
-                        }
-
-                        Context 'When the "DomainController" parameter is specified' {
-                            It 'Should not throw' {
-                                { Set-TargetResource @setTargetResourcePresentRecycleBinParameters `
-                                        -DomainController $testDomainController } | Should -Not -Throw
-                            }
-
-                            It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourcePresentRecycleBinParameters.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
-                                    -ParameterFilter { `
-                                        $Identity -eq $setTargetResourcePresentRecycleBinParameters.Name -and `
-                                        $Server -eq $testDomainController } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            }
-                        }
-
-                        Context 'When Restore from Recycle Bin was unsuccessful' {
-                            BeforeAll {
-                                Mock -CommandName Restore-ADCommonObject -MockWith { $false }
-                            }
-
-                            It 'Should not throw' {
-                                { Set-TargetResource @setTargetResourcePresentRecycleBinParameters } | Should -Not -Throw
-                            }
-
-                            It 'Should call the expected mocks' {
-                                Assert-MockCalled -CommandName Get-TargetResource `
-                                    -ParameterFilter { $Name -eq $setTargetResourcePresentRecycleBinParameters.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Restore-ADCommonObject `
-                                    -ParameterFilter { $Identity -eq $setTargetResourcePresentRecycleBinParameters.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName New-ADOrganizationalUnit `
-                                    -ParameterFilter { $Name -eq $setTargetResourcePresentRecycleBinParameters.Name } `
-                                    -Exactly -Times 1
-                                Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                                Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            }
-                        }
-                    }
-
-                    Context 'When the "Credential" parameter is specified' {
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentParameters `
-                                    -Credential $testCredential } | Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name -and `
-                                    $Credential -eq $testCredential } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                        }
-                    }
-
-                    Context 'When the "DomainController" parameter is specified' {
-                        It 'Should not throw' {
-                            { Set-TargetResource @setTargetResourcePresentParameters `
-                                    -DomainController $testDomainController } | Should -Not -Throw
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name -and `
-                                    $Server -eq $testDomainController } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                        }
-                    }
-
-                    Context 'When New-ADOrganizationalUnit throws ADIdentityNotFoundException' {
-                        BeforeAll {
-                            $ADIdentityNotFoundException = `
-                                [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]::new()
-
-                            Mock -CommandName New-ADOrganizationalUnit -MockWith { throw $ADIdentityNotFoundException }
-                        }
-
-                        It 'Should throw the correct exception' {
-                            { Set-TargetResource @setTargetResourcePresentParameters } |
-                                Should -Throw ($script:localizedData.PathNotFoundError -f
-                                    $setTargetResourcePresentParameters.Path)
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                        }
-                    }
-
-                    Context 'When New-ADOrganizationalUnit throws an unexpected exception' {
-                        BeforeAll {
-                            Mock -CommandName New-ADOrganizationalUnit -MockWith { throw $mockError }
-                        }
-
-                        It 'Should throw the correct exception' {
-                            { Set-TargetResource @setTargetResourcePresentParameters } |
-                                Should -Throw ($script:localizedData.NewResourceError -f
-                                    $setTargetResourcePresentParameters.Name)
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName New-ADOrganizationalUnit `
-                                -ParameterFilter { $Name -eq $setTargetResourcePresentParameters.Name } `
-                                -Exactly -Times 1
-                            Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                            Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                        }
-                    }
-                }
-
-                Context 'When the Resource should be Absent' {
-                    It 'Should not throw' {
-                        { Set-TargetResource @setTargetResourceAbsentParameters -Verbose } | Should -Not -Throw
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $Name -eq $setTargetResourceAbsentParameters.Name } `
-                            -Exactly -Times 1
-                        Assert-MockCalled -CommandName New-ADOrganizationalUnit -Exactly -Times 0
-                        Assert-MockCalled -CommandName Set-ADOrganizationalUnit -Exactly -Times 0
-                        Assert-MockCalled -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0
-                        Assert-MockCalled -CommandName Restore-ADCommonObject -Exactly -Times 0
-                    }
-                }
+                Should -Invoke -CommandName Get-TargetResource -ParameterFilter { $Name -eq 'TestOU' } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName New-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Set-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Remove-ADOrganizationalUnit -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Restore-ADCommonObject -Exactly -Times 0 -Scope It
             }
         }
-        #endregion
     }
-    #endregion
-}
-finally
-{
-    Invoke-TestCleanup
 }

@@ -8,95 +8,111 @@
         Invoke-pester -Script @{Path='.\MSFT_ADUser.Integration.Tests.ps1';Parameters=@{Verbose=$true;Debug=$true}}
 #>
 
-[CmdletBinding()]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Suppressing this rule because Script Analyzer does not understand Pester syntax.')]
 param ()
 
-Set-StrictMode -Version 1.0
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies have been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-$script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceFriendlyName = 'ADUser'
-$script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
+            # If the dependencies have not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
 
-try
-{
-    Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop' -Verbose:$false
+    <#
+        Need to define that variables here to be used in the Pester Discover to
+        build the ForEach-blocks.
+    #>
+    $script:dscResourceFriendlyName = 'ADUser'
+    $script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
 }
-catch [System.IO.FileNotFoundException]
-{
-    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-}
 
-$script:testEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:dscModuleName `
-    -DSCResourceName $script:dscResourceName `
-    -ResourceType 'Mof' `
-    -TestType 'Integration'
+BeforeAll {
+    # Need to define the variables here which will be used in Pester Run.
+    $script:dscModuleName = 'ActiveDirectoryDsc'
+    $script:dscResourceFriendlyName = 'ADUser'
+    $script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
 
-try
-{
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Integration'
+
     $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:dscResourceName).config.ps1"
     . $configFile
+}
 
-    Describe "$($script:dscResourceName)_Integration" {
-        BeforeAll {
-            $resourceId = "[$($script:dscResourceFriendlyName)]Integration_Test"
-        }
-        foreach ($testName in $ConfigurationData.AllNodes.Tests.Keys)
-        {
-            $configurationName = "$($script:dscResourceName)_$($testName)_Config"
+AfterAll {
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-            Context ('When using configuration {0}' -f $configurationName) {
-                BeforeAll {
-                    $configurationParameters = @{
-                        OutputPath        = $TestDrive
-                        # The variable $ConfigurationData was dot-sourced above.
-                        ConfigurationData = $ConfigurationData
-                    }
+Describe "$($script:dscResourceName)_Integration" {
+    BeforeAll {
+        $resourceId = "[$($script:dscResourceFriendlyName)]Integration_Test"
+    }
+    foreach ($testName in $ConfigurationData.AllNodes.Tests.Keys)
+    {
+        $configurationName = "$($script:dscResourceName)_$($testName)_Config"
 
-                    & $configurationName @configurationParameters -Debug:$false
-
-                    $startDscConfigurationParameters = @{
-                        Path         = $TestDrive
-                        ComputerName = 'localhost'
-                        Wait         = $true
-                        Force        = $true
-                        ErrorAction  = 'Stop'
-                    }
+        Context ('When using configuration {0}' -f $configurationName) {
+            BeforeAll {
+                $configurationParameters = @{
+                    OutputPath        = $TestDrive
+                    # The variable $ConfigurationData was dot-sourced above.
+                    ConfigurationData = $ConfigurationData
                 }
 
-                It 'Should compile and apply the MOF without throwing' {
-                    { Start-DscConfiguration @startDscConfigurationParameters } |
-                        Should -Not -Throw
-                }
+                & $configurationName @configurationParameters -Debug:$false
 
-                It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { $script:currentConfiguration = Get-DscConfiguration -ErrorAction Stop } |
-                        Should -Not -Throw
+                $startDscConfigurationParameters = @{
+                    Path         = $TestDrive
+                    ComputerName = 'localhost'
+                    Wait         = $true
+                    Force        = $true
+                    ErrorAction  = 'Stop'
                 }
+            }
 
-                $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
-                    $_.ConfigurationName -eq $configurationName `
-                        -and $_.ResourceId -eq $resourceId
-                }
+            It 'Should compile and apply the MOF without throwing' {
+                { Start-DscConfiguration @startDscConfigurationParameters } |
+                    Should -Not -Throw
+            }
 
-                foreach ($property in $ConfigurationData.AllNodes.Tests.$testName.Keys)
-                {
-                    It "Should have set the correct '$property' property" {
-                        $resourceCurrentState.$property | Sort-Object |
-                            Should -Be ($ConfigurationData.AllNodes.Tests.$testName.$property | Sort-Object)
-                    }
-                }
+            It 'Should be able to call Get-DscConfiguration without throwing' {
+                { $script:currentConfiguration = Get-DscConfiguration -ErrorAction Stop } |
+                    Should -Not -Throw
+            }
 
-                It 'Should return $true when Test-DscConfiguration is run' {
-                    Test-DscConfiguration | Should -Be 'True'
+            $resourceCurrentState = $script:currentConfiguration | Where-Object -FilterScript {
+                $_.ConfigurationName -eq $configurationName `
+                    -and $_.ResourceId -eq $resourceId
+            }
+
+            foreach ($property in $ConfigurationData.AllNodes.Tests.$testName.Keys)
+            {
+                It "Should have set the correct '$property' property" {
+                    $resourceCurrentState.$property | Sort-Object |
+                        Should -Be ($ConfigurationData.AllNodes.Tests.$testName.$property | Sort-Object)
                 }
+            }
+
+            It 'Should return $true when Test-DscConfiguration is run' {
+                Test-DscConfiguration | Should -Be 'True'
             }
         }
     }
-}
-finally
-{
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-    #endregion
 }

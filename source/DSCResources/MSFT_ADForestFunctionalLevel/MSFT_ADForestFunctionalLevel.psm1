@@ -19,7 +19,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         or NetBIOS name.
 
     .PARAMETER ForestMode
-        Specifies the the functional level for the Active Directory forest.
+        Specifies the functional level for the Active Directory forest.
 
         Not used in Get-TargetResource.
 #>
@@ -64,7 +64,7 @@ function Get-TargetResource
         or NetBIOS name.
 
     .PARAMETER ForestMode
-        Specifies the the functional level for the Active Directory forest.
+        Specifies the functional level for the Active Directory forest.
 #>
 function Test-TargetResource
 {
@@ -114,7 +114,7 @@ function Test-TargetResource
         or NetBIOS name.
 
     .PARAMETER ForestMode
-        Specifies the the functional level for the Active Directory forest.
+        Specifies the functional level for the Active Directory forest.
 #>
 function Set-TargetResource
 {
@@ -167,7 +167,7 @@ function Set-TargetResource
         or NetBIOS name.
 
     .PARAMETER ForestMode
-       Specifies the the functional level for the Active Directory forest.
+       Specifies the functional level for the Active Directory forest.
 #>
 function Compare-TargetResourceState
 {

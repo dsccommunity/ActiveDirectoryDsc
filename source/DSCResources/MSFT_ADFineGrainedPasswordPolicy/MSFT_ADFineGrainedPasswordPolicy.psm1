@@ -1,8 +1,11 @@
-$script:resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$script:modulesFolderPath = Join-Path -Path $script:resourceModulePath -ChildPath 'Modules'
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
 
-$script:localizationModulePath = Join-Path -Path $script:modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
-Import-Module -Name (Join-Path -Path $script:localizationModulePath -ChildPath 'ActiveDirectoryDsc.Common.psm1')
+$aDCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'ActiveDirectoryDsc.Common'
+Import-Module -Name $aDCommonModulePath
+
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
 
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
@@ -221,6 +224,8 @@ function Get-TargetResource
 #>
 function Test-TargetResource
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -470,6 +475,8 @@ function Test-TargetResource
 #>
 function Set-TargetResource
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MinPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '', MessageId = 'MaxPasswordAge', Justification = 'Contains "Password" in name but is a TimeSpan string, not credential material.')]
     [CmdletBinding()]
     param
     (
@@ -651,8 +658,7 @@ function Set-TargetResource
                         if (-not [System.String]::IsNullOrEmpty($subjectsToRemove))
                         {
                             Write-Verbose -Message ($script:localizedData.RemovingPasswordPolicySubjects -f
-                                $Name, $($SubjectstoRemove.Count))
-
+                                $Name, $($subjectsToRemove.Count))
                             try
                             {
                                 Remove-ADFineGrainedPasswordPolicySubject @passwordPolicyParameters `

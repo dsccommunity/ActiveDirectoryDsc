@@ -1,400 +1,462 @@
-$script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_ADForestProperties'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
 
-function Invoke-TestSetup
-{
+BeforeDiscovery {
     try
     {
-        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies have been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies have not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
     }
     catch [System.IO.FileNotFoundException]
     {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
     }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'ActiveDirectoryDsc'
+    $script:dscResourceName = 'MSFT_ADForestProperties'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
         -DSCResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
 }
 
-function Invoke-TestCleanup
-{
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name ActiveDirectory_2019 -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# Begin Testing
-
-Invoke-TestSetup
-
-try
-{
-    InModuleScope $script:dscResourceName {
-        Set-StrictMode -Version 1.0
-
-        # Load stub cmdlets and classes.
-        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
-
-        $mockUserName = 'admin@contoso.com'
-        $mockPassword = 'P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force
-        $mockCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' `
-            -ArgumentList @($mockUserName, $mockPassword)
-        $mockCimCredential = New-CimCredentialInstance -Credential $mockCredential
-
-        $mockResource = @{
-            ForestName                 = 'contoso.com'
-            ServicePrincipalNameSuffix = 'test.com'
-            UserPrincipalNameSuffix    = 'pester.net'
-            TombstoneLifetime          = 180
-        }
-
-        $forestDN = 'DC=' + $mockResource.ForestName.replace('.', ',DC=')
-
-        $mockChangedResource = @{
-            ServicePrincipalNameSuffix         = 'test.net'
-            UserPrincipalNameSuffix            = 'cloudapp.net', 'fabrikam.com'
-            TombstoneLifetime                  = 200
-            ServicePrincipalNameSuffixToRemove = $mockResource.ServicePrincipalNameSuffix
-            ServicePrincipalNameSuffixToAdd    = 'test.net'
-            UserPrincipalNameSuffixToRemove    = $mockResource.UserPrincipalNameSuffix
-            UserPrincipalNameSuffixToAdd       = 'cloudapp.net', 'fabrikam.com'
-        }
-
-        $mockChangedReplaceResource = @{
-            ServicePrincipalNameSuffix = $mockChangedResource.ServicePrincipalNameSuffix
-            UserPrincipalNameSuffix    = $mockChangedResource.UserPrincipalNameSuffix
-            TombstoneLifetime          = $mockChangedResource.TombstoneLifetime
-        }
-
-        $mockChangedAddRemoveResource = @{
-            ServicePrincipalNameSuffixToRemove = $mockResource.ServicePrincipalNameSuffix
-            ServicePrincipalNameSuffixToAdd    = $mockChangedResource.ServicePrincipalNameSuffix
-            UserPrincipalNameSuffixToRemove    = $mockResource.UserPrincipalNameSuffix
-            UserPrincipalNameSuffixToAdd       = $mockChangedResource.UserPrincipalNameSuffix
-        }
-
-        $mockADrootDSE = @{
-            configurationNamingContext = "CN=Configuration,$forestDN"
-        }
-
-        $mockDirectoryPartition = @{
-            tombstonelifetime = $mockResource.TombstoneLifetime
-        }
-
-        $mockGetTargetResourceResult = @{
-            Credential                         = $mockCimCredential
-            ForestName                         = $mockResource.forestName
-            ServicePrincipalNameSuffix         = $mockResource.ServicePrincipalNameSuffix
-            ServicePrincipalNameSuffixToAdd    = @()
-            ServicePrincipalNameSuffixToRemove = @()
-            TombstoneLifetime                  = $mockResource.tombstoneLifetime
-            UserPrincipalNameSuffix            = $mockResource.UserPrincipalNameSuffix
-            UserPrincipalNameSuffixToAdd       = @()
-            UserPrincipalNameSuffixToRemove    = @()
-        }
-
-        Mock -CommandName Assert-Module
-        Mock -CommandName Get-ADRootDSE -MockWith { $mockADRootDSE }
-
-        Describe 'MSFT_ADForestProperties\Get-TargetResource' {
-
-            BeforeAll {
-                $getTargetResourceParameters = @{
-                    ForestName = $mockResource.ForestName
-                }
-
-                $mockGetADForestResult = @{
-                    Name        = $mockResource.ForestName
-                    SpnSuffixes = $mockResource.ServicePrincipalNameSuffix
-                    UpnSuffixes = $mockResource.UserPrincipalNameSuffix
-                }
-
-                Mock -CommandName Get-ADForest -MockWith { $mockGetADForestResult }
-                Mock -CommandName Get-ADObject -ParameterFilter { $Properties -eq 'tombstonelifetime' } `
-                    -MockWith { $mockDirectoryPartition }
-
-                $targetResource = Get-TargetResource @getTargetResourceParameters
-            }
-
-            foreach ($property in $mockResource.Keys)
-            {
-                It "Should return the correct $property property" {
-                    $targetResource.$property | Should -Be $mockResource.$property
+Describe 'MSFT_ADForestProperties\Get-TargetResource' -Tag 'Get' {
+    Context 'When getting the current state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                @{
+                    configurationNamingContext = 'CN=Configuration,DC=contoso,DC=com'
                 }
             }
 
-            It 'Should call the expected mocks' {
-                Assert-MockCalled -CommandName Assert-Module `
-                    -ParameterFilter { $ModuleName -eq $script:psModuleName } `
-                    -Exactly -Times 1
-
-                Assert-MockCalled Get-ADRootDSE `
-                    -Exactly -Times 1
-
-                Assert-MockCalled Get-ADObject `
-                    -ParameterFilter { $Properties -eq 'tombstonelifetime' } `
-                    -Exactly -Times 1
-            }
-
-            Context 'When the Credential parameter is specified' {
-                $getTargetResourceParameters = @{
-                    Credential = $mockCredential
-                    ForestName = $mockResource.ForestName
+            Mock -CommandName Get-ADForest -MockWith {
+                @{
+                    Name        = 'contoso.com'
+                    SpnSuffixes = 'test.com'
+                    UpnSuffixes = 'pester.net'
                 }
-
-                It 'Should not throw' {
-                    { $targetResource = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
+            }
+            Mock -CommandName Get-ADObject -ParameterFilter {
+                $Properties -eq 'tombstonelifetime'
+            } -MockWith {
+                @{
+                    tombstonelifetime = 180
                 }
             }
         }
 
-        Describe 'MSFT_ADForestProperties\Test-TargetResource' {
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-            BeforeAll {
-                Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourceResult }
-            }
-
-            Context 'When the target resource is in the desired state' {
-                Context 'When using add/remove parameters' {
-                    BeforeAll {
-                        $testTargetResourceAddRemoveParameters = @{
-                            ForestName                         = $mockResource.ForestName
-                            ServicePrincipalNameSuffixToRemove = $mockChangedResource.ServicePrincipalNameSuffix
-                            ServicePrincipalNameSuffixToAdd    = $mockResource.ServicePrincipalNameSuffix
-                            UserPrincipalNameSuffixToRemove    = $mockChangedResource.UserPrincipalNameSuffix
-                            UserPrincipalNameSuffixToAdd       = $mockResource.UserPrincipalNameSuffix
-                        }
-                    }
-
-                    It 'Should return $true' {
-                        Test-TargetResource @testTargetResourceAddRemoveParameters -Verbose | Should -BeTrue
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Assert-Module `
-                            -ParameterFilter { $ModuleName -eq $script:psModuleName } `
-                            -Exactly -Times 1
-
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $ForestName -eq $testTargetResourceAddRemoveParameters.ForestName } `
-                            -Exactly -Times 1
-                    }
+                $mockParameters = @{
+                    ForestName = 'contoso.com'
                 }
 
-                Context 'When using replace parameters' {
-                    BeforeAll {
-                        $testTargetResourceReplaceParameters = @{
-                            ForestName                 = $mockResource.ForestName
-                            ServicePrincipalNameSuffix = $mockResource.ServicePrincipalNameSuffix
-                            UserPrincipalNameSuffix    = $mockResource.UserPrincipalNameSuffix
-                            TombstoneLifetime          = $mockResource.TombstoneLifetime
-                            Credential                 = $mockCredential
-                        }
-                    }
+                $result = Get-TargetResource @mockParameters
 
-                    It 'Should return $true' {
-                        Test-TargetResource @testTargetResourceReplaceParameters -Verbose | Should -BeTrue
-                    }
-
-                    It 'Should call the expected mocks' {
-                        Assert-MockCalled -CommandName Assert-Module `
-                            -ParameterFilter { $ModuleName -eq $script:psModuleName } `
-                            -Exactly -Times 1
-
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $ForestName -eq $testTargetResourceAddRemoveParameters.ForestName } `
-                            -Exactly -Times 1
-                    }
-                }
+                $result.ForestName | Should -Be 'contoso.com'
+                $result.ServicePrincipalNameSuffix | Should -Be 'test.com'
+                $result.UserPrincipalNameSuffix | Should -Be 'pester.net'
+                $result.TombstoneLifetime | Should -Be 180
             }
 
-            Context 'When the target resource is not in the desired state' {
-
-                foreach ($property in $mockChangedResource.Keys)
-                {
-                    Context "When the $property resource property is not in the desired state" {
-                        BeforeAll {
-                            $testTargetResourceNotInDesiredStateParameters = @{
-                                ForestName = $mockResource.forestName
-                                Credential = $mockCredential
-                            }
-                            $testTargetResourceNotInDesiredStateParameters.$property = $mockChangedResource.$property
-                        }
-
-                        It 'Should return $false' {
-                            Test-TargetResource @testTargetResourceNotInDesiredStateParameters | Should -BeFalse
-                        }
-
-                        It 'Should call the expected mocks' {
-                            Assert-MockCalled -CommandName Assert-Module `
-                                -ParameterFilter { $ModuleName -eq $script:psModuleName } `
-                                -Exactly -Times 1
-
-                            Assert-MockCalled -CommandName Get-TargetResource `
-                                -ParameterFilter { $ForestName -eq `
-                                    $testTargetResourceNotInDesiredStateParameters.ForestName } `
-                                -Exactly -Times 1
-                        }
-                    }
-                }
-            }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADRootDSE -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADObject -ParameterFilter { $Properties -eq 'tombstonelifetime' } -Exactly -Times 1 -Scope It
         }
 
-        Describe 'MSFT_ADForestProperties\Set-TargetResource' {
 
-            BeforeAll {
-                $setTargetResourceParameters = @{
-                    ForestName = $mockResource.ForestName
-                    Credential = $mockCredential
-                }
+        Context 'When the Credential parameter is specified' {
+            It 'Should not throw' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-                Mock -CommandName Get-TargetResource -MockWith { $mockGetTargetResourceResult }
-                Mock -CommandName Set-ADForest
-                Mock -CommandName Set-ADObject
-            }
+                    $mockParameters = @{
+                        Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' `
+                            -ArgumentList @(
+                            'admin@contoso.com',
+                            ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
 
-            foreach ($property in $mockChangedResource.Keys)
-            {
-                Context "When $property has changed" {
-                    BeforeAll {
-                        $setChangedTargetResourceParametersProperty = $setTargetResourceParameters.Clone()
-                        $setChangedTargetResourceParametersProperty.$property = $mockChangedResource.$property
+                        ForestName = 'contoso.com'
                     }
 
-                    It 'Should not throw' {
-                        { Set-TargetResource @setChangedTargetResourceParametersProperty } | Should -Not -Throw
-                    }
-
-                    It 'Should call the correct mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
-                            -Exactly -Times 1
-
-                        if ($property -eq 'TombstoneLifeTime')
-                        {
-                            Assert-MockCalled -CommandName Set-ADForest `
-                                -Exactly -Times 0
-
-                            Assert-MockCalled -CommandName Set-ADObject `
-                                -Exactly -Times 1
-                        }
-                        else
-                        {
-                            Assert-MockCalled -CommandName Set-ADForest `
-                                -Exactly -Times 1
-
-                            Assert-MockCalled -CommandName Set-ADObject `
-                                -Exactly -Times 0
-                        }
-                    }
-                }
-            }
-
-            Context 'When both ServicePrincipalNameSuffixAdd and ServicePrincipalNameSuffixRemove have been specified' {
-                BeforeAll {
-                    $setChangedTargetResourceParametersProperty = $setTargetResourceParameters.Clone()
-                    $setChangedTargetResourceParametersProperty.ServicePrincipalNameSuffixToAdd = `
-                        $mockChangedAddRemoveResource.ServicePrincipalNameSuffixToAdd
-                    $setChangedTargetResourceParametersProperty.ServicePrincipalNameSuffixToRemove = `
-                        $mockChangedAddRemoveResource.ServicePrincipalNameSuffixToRemove
-                }
-
-                It 'Should not throw' {
-                    { Set-TargetResource @setChangedTargetResourceParametersProperty } | Should -Not -Throw
-                }
-
-                It 'Should call the correct mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
-                        -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
-                        -Exactly -Times 1
-
-                    Assert-MockCalled -CommandName Set-ADForest  `
-                        -Exactly -Times 1
-                }
-            }
-
-            Context 'When both UserPrincipalNameSuffixAdd and UserPrincipalNameSuffixRemove have been specified' {
-                BeforeAll {
-                    $setChangedTargetResourceParametersProperty = $setTargetResourceParameters.Clone()
-                    $setChangedTargetResourceParametersProperty.UserPrincipalNameSuffixToAdd = `
-                        $mockChangedAddRemoveResource.UserPrincipalNameSuffixToAdd
-                    $setChangedTargetResourceParametersProperty.UserPrincipalNameSuffixToRemove = `
-                        $mockChangedAddRemoveResource.UserPrincipalNameSuffixToRemove
-                }
-
-                It 'Should not throw' {
-                    { Set-TargetResource @setChangedTargetResourceParametersProperty } | Should -Not -Throw
-                }
-
-                It 'Should call the correct mocks' {
-                    Assert-MockCalled -CommandName Get-TargetResource `
-                        -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
-                        -Exactly -Times 1
-
-                    Assert-MockCalled -CommandName Set-ADForest  `
-                        -Exactly -Times 1
-                }
-            }
-
-            foreach ($property in $mockChangedReplaceResource.Keys)
-            {
-                Context "When $property has changed to an empty value" {
-                    BeforeAll {
-                        $setChangedTargetResourceParametersProperty = $setTargetResourceParameters.Clone()
-                        $setChangedTargetResourceParametersProperty.$property = ''
-                    }
-
-                    It 'Should not throw' {
-                        { Set-TargetResource @setChangedTargetResourceParametersProperty } | Should -Not -Throw
-                    }
-
-                    It 'Should call the correct mocks' {
-                        Assert-MockCalled -CommandName Get-TargetResource `
-                            -ParameterFilter { $ForestName -eq $setChangedTargetResourceParametersProperty.ForestName } `
-                            -Exactly -Times 1
-
-                        if ($property -eq 'TombstoneLifeTime')
-                        {
-                            Assert-MockCalled -CommandName Set-ADForest `
-                                -Exactly -Times 0
-
-                            Assert-MockCalled -CommandName Set-ADObject `
-                                -Exactly -Times 1
-                        }
-                        else
-                        {
-                            Assert-MockCalled -CommandName Set-ADForest `
-                                -Exactly -Times 1
-
-                            Assert-MockCalled -CommandName Set-ADObject `
-                                -Exactly -Times 0
-                        }
-                    }
-                }
-            }
-
-            Context 'When Set-ADObject throws an exception' {
-                BeforeAll {
-                    $setTargetResourceTombstoneParameters = @{
-                        ForestName        = $mockResource.ForestName
-                        TombstoneLifetime = $mockChangedResource.TombstoneLifetime
-                        Credential        = $mockCredential
-                    }
-                    Mock -CommandName Set-ADObject -MockWith { throw 'Error' }
-                }
-
-                It 'Should throw the correct exception' {
-                    { Set-TargetResource @setTargetResourceTombstoneParameters } | Should -Throw (
-                        $script:localizedData.SetTombstoneLifetimeError -f
-                        $setTargetResourceTombstoneParameters.TombstoneLifetime,
-                        $setTargetResourceTombstoneParameters.ForestName )
+                    { Get-TargetResource @mockParameters } | Should -Not -Throw
                 }
             }
         }
     }
 }
-finally
-{
-    Invoke-TestCleanup
+
+Describe 'MSFT_ADForestProperties\Test-TargetResource' -Tag 'Test' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+        Mock -CommandName Assert-MemberParameters
+
+        Mock -CommandName Get-TargetResource -MockWith {
+            @{
+                Credential                         = New-CimCredentialInstance -Credential (New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'admin@contoso.com',
+                        ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                    )
+                )
+
+                ForestName                         = 'contoso.com'
+                ServicePrincipalNameSuffix         = 'test.com'
+                ServicePrincipalNameSuffixToAdd    = @()
+                ServicePrincipalNameSuffixToRemove = @()
+                TombstoneLifetime                  = 180
+                UserPrincipalNameSuffix            = 'pester.net'
+                UserPrincipalNameSuffixToAdd       = @()
+                UserPrincipalNameSuffixToRemove    = @()
+            }
+        }
+    }
+
+    Context 'When the target resource is in the desired state' {
+        Context 'When using add/remove parameters' {
+            It 'Should return $true' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        ForestName                         = 'contoso.com'
+                        ServicePrincipalNameSuffixToRemove = 'test.net'
+                        ServicePrincipalNameSuffixToAdd    = 'test.com'
+                        UserPrincipalNameSuffixToRemove    = 'cloudapp.net', 'fabrikam.com'
+                        UserPrincipalNameSuffixToAdd       = 'pester.net'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeTrue
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When using replace parameters' {
+            It 'Should return $true' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        ForestName                 = 'contoso.com'
+                        ServicePrincipalNameSuffix = 'test.com'
+                        UserPrincipalNameSuffix    = 'pester.net'
+                        TombstoneLifetime          = 180
+                        Credential                 = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'admin@contoso.com',
+                            ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+
+                    Test-TargetResource @mockParameters -Verbose | Should -BeTrue
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+
+    Context 'When the target resource is not in the desired state' {
+        BeforeDiscovery {
+            $testCases = @(
+                @{
+                    Property = 'ServicePrincipalNameSuffix'
+                    Value    = 'test.net'
+                }
+                @{
+                    Property = 'UserPrincipalNameSuffix'
+                    Value    = 'cloudapp.net', 'fabrikam.com'
+                }
+                @{
+                    Property = 'TombstoneLifetime'
+                    Value    = 200
+                }
+                @{
+                    Property = 'ServicePrincipalNameSuffixToRemove'
+                    Value    = 'test.com'
+                }
+                @{
+                    Property = 'ServicePrincipalNameSuffixToAdd'
+                    Value    = 'test.net'
+                }
+                @{
+                    Property = 'UserPrincipalNameSuffixToRemove'
+                    Value    = 'pester.net'
+                }
+                @{
+                    Property = 'UserPrincipalNameSuffixToAdd'
+                    Value    = 'cloudapp.net', 'fabrikam.com'
+                }
+            )
+        }
+
+        Context 'When the <Property> resource property is not in the desired state' -ForEach $testCases {
+            It 'Should return $false' {
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        ForestName = 'contoso.com'
+                        Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                            'admin@contoso.com',
+                            ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                        )
+                    }
+
+                    $mockParameters.$Property = $Value
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+}
+
+Describe 'MSFT_ADForestProperties\Set-TargetResource' -Tag 'Set' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+        Mock -CommandName Get-ADRootDSE -MockWith {
+            @{
+                configurationNamingContext = 'CN=Configuration,DC=contoso,DC=com'
+            }
+        }
+
+        Mock -CommandName Get-TargetResource -MockWith {
+            @{
+                Credential                         = New-CimCredentialInstance -Credential (New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'admin@contoso.com',
+                        ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                    )
+                )
+                ForestName                         = 'contoso.com'
+                ServicePrincipalNameSuffix         = 'test.com'
+                ServicePrincipalNameSuffixToAdd    = @()
+                ServicePrincipalNameSuffixToRemove = @()
+                TombstoneLifetime                  = 180
+                UserPrincipalNameSuffix            = 'pester.net'
+                UserPrincipalNameSuffixToAdd       = @()
+                UserPrincipalNameSuffixToRemove    = @()
+            }
+        }
+
+        Mock -CommandName Set-ADForest
+        Mock -CommandName Set-ADObject
+    }
+
+    BeforeDiscovery {
+        $testCases = @(
+            @{
+                Property = 'ServicePrincipalNameSuffix'
+                Value    = 'test.net'
+            }
+            @{
+                Property = 'UserPrincipalNameSuffix'
+                Value    = 'cloudapp.net', 'fabrikam.com'
+            }
+            @{
+                Property = 'TombstoneLifetime'
+                Value    = 200
+            }
+            @{
+                Property = 'ServicePrincipalNameSuffixToRemove'
+                Value    = 'test.com'
+            }
+            @{
+                Property = 'ServicePrincipalNameSuffixToAdd'
+                Value    = 'test.net'
+            }
+            @{
+                Property = 'UserPrincipalNameSuffixToRemove'
+                Value    = 'pester.net'
+            }
+            @{
+                Property = 'UserPrincipalNameSuffixToAdd'
+                Value    = 'cloudapp.net', 'fabrikam.com'
+            }
+        )
+    }
+
+    Context 'When <Property> has changed' -ForEach $testCases {
+        It 'Should not throw' {
+            InModuleScope -Parameters $_ -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestName = 'contoso.com'
+                    Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'admin@contoso.com',
+                        ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                    )
+                }
+
+                $mockParameters.$Property = $Value
+
+                { Set-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+
+            if ($Property -eq 'TombstoneLifeTime')
+            {
+                Should -Invoke -CommandName Set-ADForest -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Set-ADObject -Exactly -Times 1 -Scope It
+            }
+            else
+            {
+                Should -Invoke -CommandName Set-ADForest -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-ADObject -Exactly -Times 0 -Scope It
+            }
+        }
+    }
+
+    Context 'When both ServicePrincipalNameSuffixAdd and ServicePrincipalNameSuffixRemove have been specified' {
+        It 'Should not throw' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestName                         = 'contoso.com'
+                    Credential                         = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'admin@contoso.com',
+                        ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                    )
+                    ServicePrincipalNameSuffixToAdd    = 'test.net'
+                    ServicePrincipalNameSuffixToRemove = 'test.com'
+                }
+
+                { Set-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-ADForest -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When both UserPrincipalNameSuffixAdd and UserPrincipalNameSuffixRemove have been specified' {
+        It 'Should not throw' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestName                      = 'contoso.com'
+                    Credential                      = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'admin@contoso.com',
+                        ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                    )
+                    UserPrincipalNameSuffixToAdd    = 'cloudapp.net', 'fabrikam.com'
+                    UserPrincipalNameSuffixToRemove = 'pester.net'
+                }
+
+                { Set-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-ADForest -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When <_> has changed to an empty value' -ForEach @('ServicePrincipalNameSuffix', 'UserPrincipalNameSuffix' , 'TombstoneLifetime') {
+        It 'Should not throw' {
+            InModuleScope -Parameters @{ Value = $_ } -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestName = 'contoso.com'
+                    Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'admin@contoso.com',
+                        ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                    )
+                    $Value     = ''
+                }
+
+                { Set-TargetResource @mockParameters } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+
+            if ($_ -eq 'TombstoneLifeTime')
+            {
+                Should -Invoke -CommandName Set-ADForest -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Set-ADObject -Exactly -Times 1 -Scope It
+            }
+            else
+            {
+                Should -Invoke -CommandName Set-ADForest -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-ADObject -Exactly -Times 0 -Scope It
+            }
+        }
+    }
+
+    Context 'When Set-ADObject throws an exception' {
+        BeforeAll {
+            Mock -CommandName Set-ADObject -MockWith { throw 'Error' }
+        }
+
+        It 'Should throw the correct exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    ForestName        = 'contoso.com'
+                    TombstoneLifetime = 200
+                    Credential        = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @(
+                        'admin@contoso.com',
+                        ('P@ssw0rd-12P@ssw0rd-12' | ConvertTo-SecureString -AsPlainText -Force)
+                    )
+                }
+
+                $errorRecord = Get-InvalidOperationRecord -Message (
+                    $script:localizedData.SetTombstoneLifetimeError -f $mockParameters.TombstoneLifetime, $mockParameters.ForestName
+                )
+
+                { Set-TargetResource @mockParameters } | Should -Throw -ExpectedMessage ($errorRecord.Exception.Message + '*')
+            }
+        }
+    }
 }

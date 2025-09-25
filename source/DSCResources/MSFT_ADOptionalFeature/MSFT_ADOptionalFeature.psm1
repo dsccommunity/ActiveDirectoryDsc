@@ -72,7 +72,7 @@ function Get-TargetResource
     catch [System.Security.Authentication.AuthenticationException]
     {
         $errorMessage = $script:localizedData.CredentialError
-        New-InvalidArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
+        New-ArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
     }
     catch
     {
@@ -166,7 +166,7 @@ function Set-TargetResource
     catch [System.Security.Authentication.AuthenticationException]
     {
         $errorMessage = $script:localizedData.CredentialError
-        New-InvalidArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
+        New-ArgumentException -Message $errorMessage -ArgumentName 'EnterpriseAdministratorCredential'
     }
     catch
     {

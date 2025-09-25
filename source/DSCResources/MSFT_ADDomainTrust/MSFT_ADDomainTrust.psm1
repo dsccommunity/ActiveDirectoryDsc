@@ -90,7 +90,7 @@ function Get-TargetResource
     {
         # Find trust between source & destination.
         Write-Verbose -Message (
-            $script:localizedData.CheckingTrustMessage -f $SourceDomainName, $TargetDomainName, $directoryContextTyp
+            $script:localizedData.CheckingTrustMessage -f $SourceDomainName, $TargetDomainName, $TrustType
         )
 
         $trust = $trustSource.GetTrustRelationship($trustTarget)
@@ -98,13 +98,13 @@ function Get-TargetResource
         $returnValue['TrustDirection'] = $trust.TrustDirection
         $returnValue['TrustType'] = ConvertFrom-DirectoryContextType -DirectoryContextType $trust.TrustType
 
-        Write-Verbose -Message ($script:localizedData.TrustPresentMessage -f $SourceDomainName, $TargetDomainName, $directoryContextType)
+        Write-Verbose -Message ($script:localizedData.TrustPresentMessage -f $SourceDomainName, $TargetDomainName, $returnValue.TrustType)
 
         $returnValue['Ensure'] = 'Present'
     }
     catch
     {
-        Write-Verbose -Message ($script:localizedData.TrustAbsentMessage -f $SourceDomainName, $TargetDomainName, $directoryContextType)
+        Write-Verbose -Message ($script:localizedData.TrustAbsentMessage -f $SourceDomainName, $TargetDomainName, $returnValue.TrustType)
 
         $returnValue['Ensure'] = 'Absent'
         $returnValue['TrustDirection'] = $null
@@ -269,7 +269,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    throw $script:localizedData.NotOptInToRecreateTrust
+                    New-InvalidOperationException -Message $script:localizedData.NotOptInToRecreateTrust
                 }
             }
 

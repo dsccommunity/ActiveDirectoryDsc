@@ -42,7 +42,6 @@
         'Get-DomainControllerObject'
         'Test-IsDomainController'
         'Convert-PropertyMapToObjectProperties'
-        'Compare-ResourcePropertyState'
         'Assert-ADPSDrive'
         'New-CimCredentialInstance'
         'Add-TypeAssembly'

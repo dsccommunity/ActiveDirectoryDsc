@@ -403,7 +403,6 @@ function Set-TargetResource
                 $errorMessage = $script:localizedData.SetResourceError -f $Name
                 New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
             }
-
         }
         else
         {

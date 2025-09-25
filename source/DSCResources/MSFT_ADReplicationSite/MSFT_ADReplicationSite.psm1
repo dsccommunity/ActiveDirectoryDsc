@@ -132,6 +132,7 @@ function Set-TargetResource
                 }
 
                 New-ADReplicationSite @newADReplicationSiteParameters
+                return # this prevents the description from being set below
             }
         }
 

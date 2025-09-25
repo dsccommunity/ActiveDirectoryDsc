@@ -1,334 +1,355 @@
-$script:dscModuleName = 'ActiveDirectoryDsc'
-$script:dscResourceName = 'MSFT_ADReplicationSite'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-function Invoke-TestSetup
-{
+BeforeDiscovery {
     try
     {
-        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies have been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies have not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
     }
     catch [System.IO.FileNotFoundException]
     {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
     }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'ActiveDirectoryDsc'
+    $script:dscResourceName = 'MSFT_ADReplicationSite'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
         -DSCResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
 }
 
-function Invoke-TestCleanup
-{
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name ActiveDirectory_2019 -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# Begin Testing
-
-Invoke-TestSetup
-
-try
-{
-    InModuleScope $script:dscResourceName {
-        Set-StrictMode -Version 1.0
-
-        # Load stub cmdlets and classes.
-        Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\ActiveDirectory_2019.psm1') -Force
-
-        $presentSiteName = 'DemoSite'
-        $absentSiteName = 'MissingSite'
-        $genericDescription = "Demonstration Site Description"
-
-        $presentSiteMock = [PSCustomObject] @{
-            Name              = $presentSiteName
-            DistinguishedName = "CN=$presentSiteName,CN=Sites,CN=Configuration,DC=contoso,DC=com"
-            Description       = $genericDescription
-        }
-
-        $defaultFirstSiteNameSiteMock = [PSCustomObject] @{
-            Name              = 'Default-First-Site-Name'
-            DistinguishedName = "CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com"
-        }
-
-        $absentSiteDefaultRenameMock = @{
-            Ensure                     = 'Absent'
-            Name                       = $presentSiteName
-            Description                = $null
-            RenameDefaultFirstSiteName = $true
-        }
-
-        $presentSiteTestPresent = @{
-            Ensure      = 'Present'
-            Name        = $presentSiteName
-            Description = $genericDescription
-        }
-
-        $presentSiteTestPresentEmptyDescription = @{
-            Ensure      = 'Present'
-            Name        = $presentSiteName
-            Description = $null
-        }
-
-        $presentSiteTestNoDescription = @{
-            Ensure = 'Present'
-            Name   = $presentSiteName
-        }
-
-        $presentSiteTestAbsent = @{
-            Ensure      = 'Absent'
-            Name        = $presentSiteName
-            Description = $genericDescription
-        }
-
-        $presentSiteTestMismatchDescription = @{
-            Ensure      = 'Present'
-            Name        = $presentSiteName
-            Description = 'Some random test description'
-        }
-
-        $absentSiteTestPresent = @{
-            Ensure      = 'Present'
-            Name        = $absentSiteName
-            Description = $genericDescription
-        }
-        $absentSiteTestAbsent = @{
-            Ensure      = 'Absent'
-            Name        = $absentSiteName
-            Description = $genericDescription
-        }
-
-        $presentSiteTestPresentRename = @{
-            Ensure                     = 'Present'
-            Name                       = $presentSiteName
-            Description                = $genericDescription
-            RenameDefaultFirstSiteName = $true
-        }
-
-        #region Function Get-TargetResource
-        Describe 'When getting the Target Resource Information' {
-            It 'Should return a "System.Collections.Hashtable" object type with specified attributes' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
-
-                # Act
-                $targetResource = Get-TargetResource -Name $presentSiteName
-
-                # Assert
-                $targetResource -is [System.Collections.Hashtable] | Should -BeTrue
-                $targetResource.Description | Should -BeOfType String
-                $targetResource.Name | Should -Not -BeNullOrEmpty
-                $targetResource.Ensure | Should -Not -BeNullOrEmpty
-            }
-
-            It 'Should return present if the site exists' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
-
-                # Act
-                $targetResource = Get-TargetResource -Name $presentSiteName
-
-                # Assert
-                $targetResource.Ensure | Should -Be 'Present'
-                $targetResource.Name | Should -Be $presentSiteName
-                $targetResource.Description | Should -Be $genericDescription
-            }
-
-            It 'Should return absent if the site does not exist' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite
-
-                # Act
-                $targetResource = Get-TargetResource -Name $absentSiteName
-
-                # Assert
-                $targetResource.Ensure | Should -Be 'Absent'
-                $targetResource.Name | Should -Be $absentSiteName
-                $targetResource.Description | Should -BeNullOrEmpty
-            }
-        }
-        #endregion
-
-        #region Function Test-TargetResource
-        Describe 'When testing the Target Resource configuration' {
-            It 'Should return a "System.Boolean" object type' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
-
-                # Act
-                $targetResourceState = Test-TargetResource @presentSiteTestPresent
-
-                # Assert
-                $targetResourceState -is [System.Boolean] | Should -BeTrue
-            }
-
-            It 'Should return true if the site should exist and does exist' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
-
-                # Act
-                $targetResourceState = Test-TargetResource @presentSiteTestPresent
-
-                # Assert
-                $targetResourceState | Should -BeTrue
-            }
-
-            It 'Should return false if the site should exist but does not exist' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite
-
-                # Act
-                $targetResourceState = Test-TargetResource @absentSiteTestPresent
-
-                # Assert
-                $targetResourceState | Should -BeFalse
-            }
-
-            It 'Should return false if the site should not exist but does exist' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
-
-                # Act
-                $targetResourceState = Test-TargetResource @presentSiteTestAbsent
-
-                # Assert
-                $targetResourceState | Should -BeFalse
-            }
-
-            It 'Should return true if the site should not exist and does not exist' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite
-
-                # Act
-                $targetResourceState = Test-TargetResource @absentSiteTestAbsent
-
-                # Assert
-                $targetResourceState | Should -BeTrue
-            }
-
-            It 'Should return false if the site exists but the description is mismatched' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite { $presentSiteTestPresent }
-
-                # Act
-                $targetResourceState = Test-TargetResource @presentSiteTestMismatchDescription
-
-                # Assert
-                $targetResourceState | Should -BeFalse
-            }
-
-            It 'Should return true if the site exists with description set, but no description is defined' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite { $presentSiteTestPresentEmptyDescription }
-
-                # Act
-                $targetResourceState = Test-TargetResource @presentSiteTestNoDescription
-
-                # Assert
-                $targetResourceState | Should -BeTrue
-            }
-
-            It 'Should return true if the site exists with no description set, and no description defined' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite { $presentSiteTestPresent }
-
-                # Act
-                $targetResourceState = Test-TargetResource @presentSiteTestNoDescription
-
-                # Assert
-                $targetResourceState | Should -BeTrue
+Describe 'MSFT_ADReplicationSite\Get-TargetResource' -Tag 'Get' {
+    Context 'When the resource exists' {
+        BeforeAll {
+            Mock -CommandName Get-ADReplicationSite -MockWith {
+                @{
+                    Name              = 'DemoSite'
+                    DistinguishedName = 'CN=DemoSite,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                    Description       = 'Demonstration Site Description'
+                }
             }
         }
 
-        #endregion
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-        #region Function Set-TargetResource
-        Describe 'ADReplicationSite\Set-TargetResource' {
-            It 'Should add a new site' {
+                $result = Get-TargetResource -Name 'DemoSite'
 
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite
-                Mock -CommandName 'New-ADReplicationSite' -Verifiable
-                Mock -CommandName 'Set-ADReplicationSite' -Verifiable
-
-                # Act
-                Set-TargetResource @presentSiteTestPresent
-
-                # Assert
-                Assert-MockCalled -CommandName 'New-ADReplicationSite' -Times 1 -Scope It
-            }
-
-            It 'Should rename the Default-First-Site-Name if it exists' {
-
-                # Arrange
-                Mock -CommandName Get-TargetResource -MockWith { $absentSiteDefaultRenameMock }
-                Mock -CommandName Get-ADReplicationSite -MockWith { $defaultFirstSiteNameSiteMock }
-                Mock -CommandName 'Rename-ADObject' -Verifiable
-                Mock -CommandName 'New-ADReplicationSite' -Verifiable
-                Mock -CommandName Set-ADReplicationSite -Verifiable
-
-                # Act
-                Set-TargetResource @presentSiteTestPresentRename
-
-                # Assert
-                Assert-MockCalled -CommandName 'Rename-ADObject' -Times 1 -Scope It
-                Assert-MockCalled -CommandName 'New-ADReplicationSite' -Times 0 -Scope It
-            }
-
-            It 'Should add a new site if the Default-First-Site-Name does not exist' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite
-                Mock -CommandName 'Rename-ADObject' -Verifiable
-                Mock -CommandName 'New-ADReplicationSite' -Verifiable
-
-                # Act
-                Set-TargetResource @presentSiteTestPresentRename
-
-                # Assert
-                Assert-MockCalled -CommandName 'Rename-ADObject' -Times 0 -Scope It
-                Assert-MockCalled -CommandName 'New-ADReplicationSite' -Times 1 -Scope It
-            }
-
-            It 'Should update a site if the description does not match' {
-                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteTestPresent }
-                Mock -CommandName Set-ADReplicationSite -Verifiable
-
-                Set-TargetResource @presentSiteTestMismatchDescription
-
-                Assert-MockCalled -CommandName Set-ADReplicationSite -Times 1 -Scope It
-                Assert-MockCalled -CommandName Get-ADReplicationSite -Times 1 -Scope It -Exactly
-            }
-
-            It 'Should remove an existing site' {
-
-                # Arrange
-                Mock -CommandName Get-ADReplicationSite -MockWith { $presentSiteMock }
-                Mock -CommandName 'Remove-ADReplicationSite' -Verifiable
-
-                # Act
-                Set-TargetResource @presentSiteTestAbsent
-
-                # Assert
-                Assert-MockCalled -CommandName 'Remove-ADReplicationSite' -Times 1 -Scope It
+                $result | Should -BeOfType [System.Collections.Hashtable]
+                $result.Name | Should -Be 'DemoSite'
+                $result.Description | Should -Be 'Demonstration Site Description'
+                $result.Ensure | Should -Be 'Present'
             }
         }
-        #endregion
     }
-    #endregion
+
+    Context 'When the resource does not exist' {
+        BeforeAll {
+            Mock -CommandName Get-ADReplicationSite
+        }
+
+        It 'Should return absent' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $result = Get-TargetResource -Name 'MissingSite'
+
+                $result.Ensure | Should -Be 'Absent'
+                $result.Name | Should -Be 'MissingSite'
+                $result.Description | Should -BeNullOrEmpty
+            }
+        }
+    }
 }
-finally
-{
-    Invoke-TestCleanup
+
+Describe 'MSFT_ADReplicationSite\Test-TargetResource' -Tag 'Test' {
+    Context 'When a resource exists' {
+        BeforeAll {
+            Mock -CommandName Get-ADReplicationSite -MockWith {
+                @{
+                    Name              = 'DemoSite'
+                    DistinguishedName = 'CN=DemoSite,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                    Description       = 'Demonstration Site Description'
+                }
+            }
+        }
+
+        Context 'When the resource is in the desired state' {
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Ensure      = 'Present'
+                        Name        = 'DemoSite'
+                        Description = 'Demonstration Site Description'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeTrue
+                }
+            }
+        }
+
+        Context 'When the resource is not in the desired state' {
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Ensure      = 'Absent'
+                        Name        = 'DemoSite'
+                        Description = 'Demonstration Site Description'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
+                }
+            }
+        }
+    }
+
+    Context 'When a resource does not exist' {
+        BeforeAll {
+            Mock -CommandName Get-ADReplicationSite
+        }
+
+        Context 'When the resource is in the desired state' {
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Ensure      = 'Absent'
+                        Name        = 'DemoSite'
+                        Description = 'Demonstration Site Description'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeTrue
+                }
+            }
+        }
+
+        Context 'When the resource is not in the desired state' {
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $mockParameters = @{
+                        Ensure      = 'Present'
+                        Name        = 'MissingSite'
+                        Description = 'Demonstration Site Description'
+                    }
+
+                    Test-TargetResource @mockParameters | Should -BeFalse
+                }
+            }
+        }
+    }
+}
+
+
+Describe 'MSFT_ADReplicationSite\Set-TargetResource' -Tag 'Set' {
+    Context 'When a site is missing' {
+        BeforeAll {
+            Mock -CommandName Get-ADReplicationSite
+            Mock -CommandName New-ADReplicationSite
+            Mock -CommandName Set-ADReplicationSite
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Ensure      = 'Absent'
+                    Name        = 'DemoSite'
+                    Description = 'Demonstration Site Description'
+                }
+            }
+        }
+
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Ensure      = 'Present'
+                    Name        = 'DemoSite'
+                    Description = 'Demonstration Site Description'
+                }
+
+                Set-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName New-ADReplicationSite -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the Default-First-Site-Name exists and should be renamed' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Ensure                     = 'Absent'
+                    Name                       = 'DemoSite'
+                    Description                = $null
+                    RenameDefaultFirstSiteName = $true
+                }
+            }
+
+            Mock -CommandName Get-ADReplicationSite -MockWith {
+                [PSCustomObject] @{
+                    Name              = 'Default-First-Site-Name'
+                    DistinguishedName = 'CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=contoso,DC=com'
+                }
+            }
+
+            Mock -CommandName Rename-ADObject
+            Mock -CommandName New-ADReplicationSite
+            Mock -CommandName Set-ADReplicationSite
+        }
+
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Ensure                     = 'Present'
+                    Name                       = 'DemoSite'
+                    Description                = 'Demonstration Site Description'
+                    RenameDefaultFirstSiteName = $true
+                }
+
+                Set-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName Rename-ADObject -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName New-ADReplicationSite -Exactly -Times 0 -Scope It
+        }
+    }
+
+    Context 'When the Default-First-Site-Name does not exist' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Ensure      = 'Absent'
+                    Name        = 'DemoSite'
+                    Description = $null
+                }
+            }
+
+            Mock -CommandName Get-ADReplicationSite
+            Mock -CommandName Rename-ADObject
+            Mock -CommandName New-ADReplicationSite
+        }
+
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Ensure      = 'Present'
+                    Name        = 'DemoSite'
+                    Description = 'Demonstration Site Description'
+                }
+
+                Set-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName Rename-ADObject -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName New-ADReplicationSite -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the site description does not match' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Ensure      = 'Present'
+                    Name        = 'DemoSite'
+                    Description = $null
+                }
+            }
+
+            Mock -CommandName Set-ADReplicationSite
+        }
+
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Ensure      = 'Present'
+                    Name        = 'DemoSite'
+                    Description = 'Some random test description'
+                }
+
+                Set-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName Set-ADReplicationSite -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the site should be removed' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Ensure      = 'Present'
+                    Name        = 'DemoSite'
+                    Description = 'Demonstration Site Description'
+                }
+            }
+
+            Mock -CommandName Remove-ADReplicationSite
+        }
+
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Ensure      = 'Absent'
+                    Name        = 'DemoSite'
+                    Description = 'Demonstration Site Description'
+                }
+
+                Set-TargetResource @mockParameters
+            }
+
+            Should -Invoke -CommandName Remove-ADReplicationSite -Exactly -Times 1 -Scope It
+        }
+    }
 }

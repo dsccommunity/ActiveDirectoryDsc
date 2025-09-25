@@ -10,6 +10,7 @@
     "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationForFirstPipeline",
     "powershell.codeFormatting.preset": "Custom",
     "powershell.codeFormatting.alignPropertyValuePairs": true,
+    "powershell.codeFormatting.useConstantStrings": true,
     "powershell.developer.bundledModulesPath": "${cwd}/output/RequiredModules",
     "powershell.scriptAnalysis.settingsPath": ".vscode\\analyzersettings.psd1",
     "powershell.scriptAnalysis.enable": true,
@@ -19,6 +20,9 @@
     "files.associations": {
         "*.ps1xml": "xml"
     },
+    "cSpell.dictionaries": [
+        "powershell"
+    ],
     "cSpell.words": [
         "COMPANYNAME",
         "ICONURI",
@@ -32,10 +36,30 @@
         "keepachangelog",
         "notin",
         "pscmdlet",
-        "steppable"
+        "steppable",
+        "HKLM",
+        "NTDS",
+        "Sysvol",
+        "contoso",
+        "netlogon",
+        "TESTDC",
+        "ADATUM"
+    ],
+    "cSpell.ignorePaths": [
+        ".git"
     ],
     "[markdown]": {
         "files.trimTrailingWhitespace": false,
         "files.encoding": "utf8"
-    }
+    },
+    "powershell.pester.useLegacyCodeLens": false,
+    "pester.testFilePath": [
+        "[tT]ests/[qQ][aA]/*.[tT]ests.[pP][sS]1",
+        "[tT]ests/[uU]nit/**/*.[tT]ests.[pP][sS]1",
+        "[tT]ests/[uU]nit/*.[tT]ests.[pP][sS]1"
+    ],
+    "pester.runTestsInNewProcess": true,
+    "pester.pesterModulePath": "./output/RequiredModules/Pester",
+    "powershell.pester.codeLens": true,
+    "pester.suppressCodeLensNotice": true,
 }
