@@ -63,6 +63,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
     Context 'When the domain could not be found' {
         BeforeAll {
             Mock -CommandName Assert-Module
+            Mock -CommandName Test-IsDomainController -MockWith { $true }
             Mock -CommandName Get-DomainObject -MockWith {
                 return $null
             }
@@ -84,6 +85,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
             }
 
             Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
         }
     }
@@ -91,6 +93,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
     Context 'When the system is in the desired state' {
         BeforeAll {
             Mock -CommandName Assert-Module
+            Mock -CommandName Test-IsDomainController -MockWith { $true }
             Mock -CommandName Get-DomainObject -MockWith { $true }
             Mock -CommandName Get-ItemProperty -ParameterFilter {
                 $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
@@ -145,6 +148,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-DomainControllerObject -ParameterFilter { $DomainName -eq 'present.com' } -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed -eq $true } -Exactly -Times 1 -Scope It
@@ -189,6 +193,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-DomainControllerObject -ParameterFilter { $DomainName -eq 'present.com' } -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed -eq $true } -Exactly -Times 1 -Scope It
@@ -271,6 +276,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-DomainControllerObject -ParameterFilter { $DomainName -eq 'present.com' } -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-ADComputer -ParameterFilter { $Properties -eq 'ManagedBy' } -Exactly -Times 1 -Scope It
@@ -284,9 +290,9 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
             }
         }
 
-        Context 'When the node should not be a Domain Controller' {
+        Context 'When the node is not a Domain Controller' {
             BeforeAll {
-                Mock -CommandName Get-DomainControllerObject
+                Mock -CommandName Test-IsDomainController -MockWith { $false }
             }
 
             It 'Should return the expected result' {
@@ -319,8 +325,9 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Get-DomainControllerObject -ParameterFilter { $DomainName -eq 'present.com' } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Get-DomainObject -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Get-DomainControllerObject -ParameterFilter { $DomainName -eq 'present.com' } -Exactly -Times 0 -Scope It
                 Should -Invoke -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed -eq $true } -Exactly -Times 0 -Scope It
                 Should -Invoke -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Denied -eq $true } -Exactly -Times 0 -Scope It
                 Should -Invoke -CommandName Get-ItemProperty -ParameterFilter { $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' } -Exactly -Times 0 -Scope It
