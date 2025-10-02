@@ -33,7 +33,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Used Functions:
             Name                                            | Module
             ------------------------------------------------|--------------------------
-            Get-ADDomain                                    | ActiveDirectory
+            Get-DomainObject                                | ActiveDirectoryDsc.Common
             Get-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
             Test-IsDomainController                         | ActiveDirectoryDsc.Common
             Get-DomainControllerObject                      | ActiveDirectoryDsc.Common
@@ -466,7 +466,7 @@ function Set-TargetResource
     {
         # Node is a domain controller. We check if other properties are in desired state
 
-        Write-Verbose -Message ($script:localizedData.IsDomainController -f $env:COMPUTERNAME)
+        Write-Verbose -Message ($script:localizedData.IsDomainControllerInDomain -f $env:COMPUTERNAME, $DomainName)
 
         $domainControllerObject = Get-DomainControllerObject `
             -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential

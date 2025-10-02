@@ -8,6 +8,7 @@ ConvertFrom-StringData @'
     MissingDomain                               = Current node could not find the domain '{0}'. (ADDC0008)
     Promoting                                   = Promoting the current node to be a domain controller for the domain '{1}'. (ADDC0009)
     Promoted                                    = The current node '{0}' has been promoted to a domain controller for the domain '{1}'. (ADDC0010)
+    IsDomainControllerInDomain                  = The current node '{0}' is a domain controller in the domain '{1}'. (ADDC0017)
     AddGlobalCatalog                            = Adding Global Catalog to the domain controller. (ADDC0011)
     RemoveGlobalCatalog                         = Removing Global Catalog from the domain controller. (ADDC0012)
     MovingDomainController                      = Moving Domain Controller from site '{0}' to site '{1}'. (ADDC0013)
