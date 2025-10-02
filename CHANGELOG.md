@@ -9,6 +9,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
+- ADReadOnlyDomainControllerAccount
+  - Added read-only value Enabled stating whether a pre-staged account is Enabled or Disabled (Unoccupied).
 - `ActiveDirectoryDsc`
   - Added strings.psd1 for HQRM compliance.
 
