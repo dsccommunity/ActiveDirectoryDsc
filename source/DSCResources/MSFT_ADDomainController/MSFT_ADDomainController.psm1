@@ -192,6 +192,7 @@ function Get-TargetResource
 
     .PARAMETER SiteName
         Provide the name of the site you want the Domain Controller to be added to.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER InstallationMediaPath
         Provide the path for the IFM folder that was created with ntdsutil.
@@ -199,18 +200,23 @@ function Get-TargetResource
 
     .PARAMETER IsGlobalCatalog
         Specifies if the domain controller will be a Global Catalog (GC).
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER ReadOnlyReplica
-        Specifies if the domain controller should be provisioned as read-only domain controller
+        Specifies if the domain controller should be provisioned as read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DelegatedAdministratorAccountName
         Specifies the user or group that is the delegated administrator of this read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DenyPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication denied list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER FlexibleSingleMasterOperationRole
         Specifies one or more Flexible Single Master Operation (FSMO) roles to
@@ -224,6 +230,7 @@ function Get-TargetResource
         The parameter `InstallDns` is only used during the provisioning of a domain
         controller. The parameter cannot be used to install or uninstall the DNS
         server on an already provisioned domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER UseExistingAccount
         Specifies whether to use an existing read only domain controller account.
@@ -671,6 +678,7 @@ function Set-TargetResource
 
     .PARAMETER SiteName
         Provide the name of the site you want the Domain Controller to be added to.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER InstallationMediaPath
         Provide the path for the IFM folder that was created with ntdsutil.
@@ -678,18 +686,23 @@ function Set-TargetResource
 
     .PARAMETER IsGlobalCatalog
         Specifies if the domain controller will be a Global Catalog (GC).
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER ReadOnlyReplica
-        Specifies if the domain controller should be provisioned as read-only domain controller
+        Specifies if the domain controller should be provisioned as read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DelegatedAdministratorAccountName
         Specifies the user or group that is the delegated administrator of this read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DenyPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication denied list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER FlexibleSingleMasterOperationRole
         Specifies one or more Flexible Single Master Operation (FSMO) roles to
@@ -703,6 +716,7 @@ function Set-TargetResource
         The parameter `InstallDns` is only used during the provisioning of a domain
         controller. The parameter cannot be used to install or uninstall the DNS
         server on an already provisioned domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
         Not used in Test-TargetResource.
 

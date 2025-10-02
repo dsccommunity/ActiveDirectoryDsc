@@ -17,7 +17,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Fixed
 - ADDomainController
   - Check the operating system to see if it is a domain controller prior to locating the domain controller object.
-    Fixes [issue #747](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/747)
+    Fixes [issue #747](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/747).
+  - Updated documentation to reflect parameters that should not be used with UseExistingAccount.
 - ActiveDirectoryDsc.Common
   - Removed operating system check from Get-DomainControllerObject and moved into ADDomainController above.
 
