@@ -20,6 +20,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Check the operating system to see if it is a domain controller prior to locating the domain controller object.
     Fixes [issue #747](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/747).
   - Updated documentation to reflect parameters that should not be used with UseExistingAccount.
+  - Additional guards against null properties when getting DelegatedAdministratorAccountName.
 - ActiveDirectoryDsc.Common
   - Removed operating system check from Get-DomainControllerObject and moved into ADDomainController above.
 
