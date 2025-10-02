@@ -60,7 +60,7 @@ AfterAll {
 }
 
 Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
-    Context 'When the domain could not be found' {
+    Context 'When the node is a Domain Controller but domain could not be found' {
         BeforeAll {
             Mock -CommandName Assert-Module
             Mock -CommandName Test-IsDomainController -MockWith { $true }
@@ -89,7 +89,35 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
             Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
         }
     }
+        Context 'When the node is a Domain Controller but no domain controller object can be found' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Test-IsDomainController -MockWith { $true }
+            Mock -CommandName Get-DomainObject -MockWith { $true }
+            Mock -CommandName Get-DomainControllerObject
+        }
 
+        It 'Should throw the correct exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParameters = @{
+                    Credential                    = [System.Management.Automation.PSCredential]::Empty
+                    SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::Empty
+                    DomainName                    = 'present.com'
+                }
+
+                $errorRecord = Get-ObjectNotFoundRecord -Message ($script:localizedData.WasExpectingDomainController)
+
+                { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-DomainControllerObject -ParameterFilter { $DomainName -eq 'present.com' } -Exactly -Times 1 -Scope It
+        }
+    }
     Context 'When the system is in the desired state' {
         BeforeAll {
             Mock -CommandName Assert-Module
@@ -293,6 +321,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
         Context 'When the node is not a Domain Controller' {
             BeforeAll {
                 Mock -CommandName Test-IsDomainController -MockWith { $false }
+                Mock -CommandName Get-DomainControllerObject
             }
 
             It 'Should return the expected result' {
