@@ -99,7 +99,11 @@ function Get-TargetResource
                     $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
                         Get-ADObject -Properties objectSid -Credential $Credential
 
-                    $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
+                    if ($domainControllerManagedByObject.objectSid)
+                    {
+                        $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
+                    }
+
                 }
             }
 
