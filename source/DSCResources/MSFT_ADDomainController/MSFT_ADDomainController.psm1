@@ -464,7 +464,7 @@ function Set-TargetResource
     {
         # Node is a domain controller. We check if other properties are in desired state
 
-        Write-Verbose -Message ($script:localizedData.IsDomainControllerInDomain -f $env:COMPUTERNAME, $DomainName)
+        Write-Verbose -Message ($script:localizedData.IsDomainController -f $env:COMPUTERNAME, $DomainName)
 
         $domainControllerObject = Get-DomainControllerObject `
             -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
