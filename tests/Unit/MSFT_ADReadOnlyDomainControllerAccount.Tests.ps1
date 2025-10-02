@@ -116,6 +116,7 @@ Describe 'MSFT_ADReadOnlyDomainControllerAccount\Get-TargetResource' -Tag 'Get' 
                         IsGlobalCatalog  = $true
                         IsReadOnly       = $true
                         ComputerObjectDN = $mockDomainControllerComputerObject
+                        Enabled          = $true
                     }
                 }
                 Mock -CommandName Get-ADComputer { $mockDomainControllerComputerObject }
@@ -156,6 +157,7 @@ Describe 'MSFT_ADReadOnlyDomainControllerAccount\Get-TargetResource' -Tag 'Get' 
                     $result.AllowPasswordReplicationAccountName | Should -HaveCount 1
                     $result.AllowPasswordReplicationAccountName | Should -Be 'allowedAccount'
                     $result.DenyPasswordReplicationAccountName | Should -Be 'deniedAccount'
+                    $result.Enabled | Should -BeTrue
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
@@ -195,6 +197,7 @@ Describe 'MSFT_ADReadOnlyDomainControllerAccount\Get-TargetResource' -Tag 'Get' 
                     $result.DelegatedAdministratorAccountName | Should -BeNullOrEmpty
                     $result.AllowPasswordReplicationAccountName | Should -BeNullOrEmpty
                     $result.DenyPasswordReplicationAccountName | Should -BeNullOrEmpty
+                    $result.Enabled | Should -BeFalse
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It

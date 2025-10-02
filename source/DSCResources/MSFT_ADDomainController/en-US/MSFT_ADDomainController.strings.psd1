@@ -4,7 +4,7 @@ ConvertFrom-StringData @'
     WasExpectingDomainController                = The operating system is indicating that this is domain controller, but was unable to retrieve the domain controller object. (ADDC0004)
     NotDomainController                         = The current node '{0}' is not a domain controller. (ADDC0006)
     IsDomainController                          = The current node '{0}' is a domain controller for the domain '{1}'. (ADDC0007)
-    FoundDomainControllerObject                 = Found the domain controller object of the current node '{0}' for the domain '{1}'. *(ADDC0005)
+    FoundDomainControllerObject                 = Found the domain controller object of the current node '{0}' for the domain '{1}'. (ADDC0005)
     MissingDomain                               = Current node could not find the domain '{0}'. (ADDC0008)
     Promoting                                   = Promoting the current node to be a domain controller for the domain '{1}'. (ADDC0009)
     Promoted                                    = The current node '{0}' has been promoted to a domain controller for the domain '{1}'. (ADDC0010)
