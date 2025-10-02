@@ -15,6 +15,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Added strings.psd1 for HQRM compliance.
 
 ### Fixed
+
 - ADDomainController
   - Check the operating system to see if it is a domain controller prior to locating the domain controller object.
     Fixes [issue #747](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/747).
