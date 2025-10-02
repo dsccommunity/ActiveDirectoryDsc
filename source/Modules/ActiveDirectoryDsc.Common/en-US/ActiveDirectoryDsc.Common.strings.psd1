@@ -1,8 +1,7 @@
 # Localized resources for helper module ActiveDirectoryDsc.Common.
 
 ConvertFrom-StringData @'
-    WasExpectingDomainController        = The operating system product type code returned 2, which indicates that this is domain controller, but was unable to retrieve the domain controller object. (ADCOMMON0001)
-    FailedEvaluatingDomainController    = Could not evaluate if the node is a domain controller. (ADCOMMON0002)
+    FailedGetDomainController           = Could not get an Active Directory domain controller object for domain '{1}', computer '{0}'. (ADCOMMON0002)
     MembersAndIncludeExcludeError       = The '{0}' and '{1}' and/or '{2}' parameters conflict. The '{0}' parameter should not be used in any combination with the '{1}' and '{2}' parameters. (ADCOMMON0011)
     IncludeAndExcludeConflictError      = The member '{0}' is included in both '{1}' and '{2}' parameter values. The same member must not be included in both '{1}' and '{2}' parameter values. (ADCOMMON0014)
     RecycleBinRestoreFailed             = Failed restoring {0} ({1}) from the recycle bin. (ADCOMMON0017)

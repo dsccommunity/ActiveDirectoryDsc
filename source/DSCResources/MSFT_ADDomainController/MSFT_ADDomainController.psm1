@@ -64,69 +64,78 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
-
-    $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose:$VerbosePreference
-
-    if (-not $Domain)
+    if ((Test-IsDomainController) -eq $true)
     {
-        $errorMessage = $script:localizedData.MissingDomain -f $DomainName
-        New-ObjectNotFoundException -Message $errorMessage
-    }
+        Write-Verbose -Message $script:localizedData.IsDomainController
 
-    Write-Verbose -Message ($script:localizedData.DomainPresent -f $DomainName)
+        Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
 
-    $domainControllerObject = Get-DomainControllerObject `
-        -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
+        $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose:$VerbosePreference
 
-    if ($domainControllerObject)
-    {
-        Write-Verbose -Message ($script:localizedData.IsDomainController -f
-            $domainControllerObject.Name, $domainControllerObject.Domain)
-
-        # If this is a read-only domain controller, retrieve any user or group that is a delegated administrator via the ManagedBy attribute
-        $delegateAdministratorAccountName = $null
-        if ($domainControllerObject.IsReadOnly)
+        if (-not $Domain)
         {
-            $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
-                Get-ADComputer -Properties ManagedBy -Credential $Credential
-            if ($domainControllerComputerObject.ManagedBy)
-            {
-                $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
-                    Get-ADObject -Properties objectSid -Credential $Credential
-
-                $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
-            }
+            $errorMessage = $script:localizedData.MissingDomain -f $DomainName
+            New-ObjectNotFoundException -Message $errorMessage
         }
 
-        $allowedPasswordReplicationAccountName = (
-            Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject |
-                ForEach-Object -MemberName sAMAccountName)
-        $deniedPasswordReplicationAccountName = (
-            Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject |
-                ForEach-Object -MemberName sAMAccountName)
-        $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
-        $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
-        $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
+        Write-Verbose -Message ($script:localizedData.DomainPresent -f $DomainName)
 
-        $targetResource = @{
-            AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
-            Credential                          = $Credential
-            DatabasePath                        = $serviceNTDS.'DSA Working Directory'
-            DelegatedAdministratorAccountName   = $delegateAdministratorAccountName
-            DenyPasswordReplicationAccountName  = @($deniedPasswordReplicationAccountName)
-            DomainName                          = $domainControllerObject.Domain
-            Ensure                              = $true
-            FlexibleSingleMasterOperationRole   = @($domainControllerObject.OperationMasterRoles)
-            InstallationMediaPath               = $null
-            InstallDns                          = $installDns
-            IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
-            LogPath                             = $serviceNTDS.'Database log files path'
-            ReadOnlyReplica                     = $domainControllerObject.IsReadOnly
-            SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
-            SiteName                            = $domainControllerObject.Site
-            SysvolPath                          = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
-            UseExistingAccount                  = $UseExistingAccount
+        $domainControllerObject = Get-DomainControllerObject `
+            -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
+
+        if ($domainControllerObject)
+        {
+            Write-Verbose -Message ($script:localizedData.FoundDomainControllerObject -f
+                $domainControllerObject.Name, $domainControllerObject.Domain)
+
+            # If this is a read-only domain controller, retrieve any user or group that is a delegated administrator via the ManagedBy attribute
+            $delegateAdministratorAccountName = $null
+            if ($domainControllerObject.IsReadOnly)
+            {
+                $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
+                    Get-ADComputer -Properties ManagedBy -Credential $Credential
+                if ($domainControllerComputerObject.ManagedBy)
+                {
+                    $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
+                        Get-ADObject -Properties objectSid -Credential $Credential
+
+                    $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
+                }
+            }
+
+            $allowedPasswordReplicationAccountName = (
+                Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject |
+                    ForEach-Object -MemberName sAMAccountName)
+            $deniedPasswordReplicationAccountName = (
+                Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject |
+                    ForEach-Object -MemberName sAMAccountName)
+            $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
+            $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
+            $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
+
+            $targetResource = @{
+                AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
+                Credential                          = $Credential
+                DatabasePath                        = $serviceNTDS.'DSA Working Directory'
+                DelegatedAdministratorAccountName   = $delegateAdministratorAccountName
+                DenyPasswordReplicationAccountName  = @($deniedPasswordReplicationAccountName)
+                DomainName                          = $domainControllerObject.Domain
+                Ensure                              = $true
+                FlexibleSingleMasterOperationRole   = @($domainControllerObject.OperationMasterRoles)
+                InstallationMediaPath               = $null
+                InstallDns                          = $installDns
+                IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
+                LogPath                             = $serviceNTDS.'Database log files path'
+                ReadOnlyReplica                     = $domainControllerObject.IsReadOnly
+                SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
+                SiteName                            = $domainControllerObject.Site
+                SysvolPath                          = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+                UseExistingAccount                  = $UseExistingAccount
+            }
+        }
+        else {
+            $errorMessage = $script:localizedData.WasExpectingDomainController
+            New-InvalidResultException -Message $errorMessage
         }
     }
     else

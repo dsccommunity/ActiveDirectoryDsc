@@ -1283,11 +1283,10 @@ function Get-DomainObject
 
 <#
     .SYNOPSIS
-        Gets the domain controller object if the node is a domain controller.
+        Gets an Active Directory domain controller object.
 
     .DESCRIPTION
-        The Get-DomainControllerObject function is used to get the domain controller object if the node is a domain
-        controller, otherwise it returns $null.
+        The Get-DomainControllerObject function is used to get an Active Directory domain controller object.
 
     .EXAMPLE
         Get-DomainControllerObject -DomainName contoso.com
@@ -1348,21 +1347,10 @@ function Get-DomainControllerObject
         }
 
         $domainControllerObject = Get-ADDomainController @getADDomainControllerParameters
-
-        # If we are getting the domain controller object for the local computer
-        if ($env:COMPUTERNAME -eq $ComputerName)
-        {
-            # If we can't find the object but the computer is a domain controller, throw an exception
-            if (-not $domainControllerObject -and (Test-IsDomainController) -eq $true)
-            {
-                $errorMessage = $script:localizedData.WasExpectingDomainController
-                New-InvalidResultException -Message $errorMessage
-            }
-        }
     }
     catch
     {
-        $errorMessage = $script:localizedData.FailedEvaluatingDomainController
+        $errorMessage = $script:localizedData.FailedGetDomainController -f $ComputerName, $DomainName
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $_
     }
 

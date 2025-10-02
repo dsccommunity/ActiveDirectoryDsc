@@ -62,7 +62,7 @@ Gets the current user identity.
 Gets the domain object with retries.
 
 ### [Get-DomainControllerObject](docs/Get-DomainControllerObject.md)
-Gets the domain controller object if the node is a domain controller.
+Gets an Active Directory domain controller object.
 
 ### [Get-DomainName](docs/Get-DomainName.md)
 Gets the domain name of this computer.
@@ -105,4 +105,3 @@ Tests Members of an array.
 
 ### [Test-Password](docs/Test-Password.md)
 Tests the validity of a user's password.
-
