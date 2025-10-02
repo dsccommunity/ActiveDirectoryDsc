@@ -67,8 +67,6 @@ function Get-TargetResource
 
     if ((Test-IsDomainController) -eq $true)
     {
-        Write-Verbose -Message ($script:localizedData.IsDomainController -f $env:COMPUTERNAME)
-
         Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
 
         $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose:$VerbosePreference
