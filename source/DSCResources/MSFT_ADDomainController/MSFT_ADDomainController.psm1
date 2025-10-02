@@ -93,18 +93,21 @@ function Get-TargetResource
             $delegateAdministratorAccountName = $null
             if ($domainControllerObject.IsReadOnly)
             {
-                $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
-                    Get-ADComputer -Properties ManagedBy -Credential $Credential
-                if ($domainControllerComputerObject.ManagedBy)
+                if ($domainControllerObject.ComputerObjectDN)
                 {
-                    $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
-                        Get-ADObject -Properties objectSid -Credential $Credential
-
-                    if ($domainControllerManagedByObject.objectSid)
+                    $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
+                        Get-ADComputer -Properties ManagedBy -Credential $Credential
+                    if ($domainControllerComputerObject.ManagedBy)
                     {
-                        $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
-                    }
+                        $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
+                            Get-ADObject -Properties objectSid -Credential $Credential
 
+                        if ($domainControllerManagedByObject.objectSid)
+                        {
+                            $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
+                        }
+
+                    }
                 }
             }
 
