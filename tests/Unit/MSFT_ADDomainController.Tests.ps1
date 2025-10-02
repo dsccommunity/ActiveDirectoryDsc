@@ -325,7 +325,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-DomainObject -Exactly -Times 0 -Scope It
                 Should -Invoke -CommandName Get-DomainControllerObject -ParameterFilter { $DomainName -eq 'present.com' } -Exactly -Times 0 -Scope It
                 Should -Invoke -CommandName Get-ADDomainControllerPasswordReplicationPolicy -ParameterFilter { $Allowed -eq $true } -Exactly -Times 0 -Scope It

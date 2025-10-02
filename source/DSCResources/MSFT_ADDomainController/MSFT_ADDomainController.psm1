@@ -35,6 +35,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
             ------------------------------------------------|--------------------------
             Get-ADDomain                                    | ActiveDirectory
             Get-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
+            Test-IsDomainController                         | ActiveDirectoryDsc.Common
             Get-DomainControllerObject                      | ActiveDirectoryDsc.Common
             Assert-Module                                   | DscResource.Common
             New-ObjectNotFoundException                     | DscResource.Common
