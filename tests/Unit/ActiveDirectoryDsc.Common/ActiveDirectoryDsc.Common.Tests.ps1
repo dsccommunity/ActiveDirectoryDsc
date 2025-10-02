@@ -1115,7 +1115,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-DomainControllerObject' {
         }
     }
 
-    Context 'When domain controller object can be found' {
+    Context 'When domain controller object could be found' {
         BeforeAll {
             Mock -CommandName Get-ADDomainController -MockWith {
                 return @{
@@ -1137,7 +1137,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-DomainControllerObject' {
         }
     }
 
-    Context 'When domain controller object can be found, using specific credential' {
+    Context 'When domain controller object could be found, using specific credential' {
         BeforeAll {
             Mock -CommandName Get-ADDomainController -MockWith {
                 return @{

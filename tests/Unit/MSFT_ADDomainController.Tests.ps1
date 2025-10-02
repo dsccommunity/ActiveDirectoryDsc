@@ -89,7 +89,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
             Should -Invoke -CommandName Get-DomainObject -Exactly -Times 1 -Scope It
         }
     }
-        Context 'When the node is a Domain Controller but no domain controller object can be found' {
+        Context 'When the node is a Domain Controller but domain controller object could not be found' {
         BeforeAll {
             Mock -CommandName Assert-Module
             Mock -CommandName Test-IsDomainController -MockWith { $true }
@@ -107,7 +107,7 @@ Describe 'MSFT_ADDomainController\Get-TargetResource' -Tag 'Get' {
                     DomainName                    = 'present.com'
                 }
 
-                $errorRecord = Get-ObjectNotFoundRecord -Message ($script:localizedData.WasExpectingDomainController)
+                $errorRecord = Get-InvalidResultRecord -Message ($script:localizedData.WasExpectingDomainController)
 
                 { Get-TargetResource @mockParameters } | Should -Throw -ExpectedMessage $errorRecord
             }
