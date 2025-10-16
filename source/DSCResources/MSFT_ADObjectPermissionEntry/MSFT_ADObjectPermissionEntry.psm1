@@ -74,7 +74,7 @@ function Get-TargetResource
         Ensure                             = 'Absent'
         Path                               = $Path
         IdentityReference                  = $IdentityReference
-        ActiveDirectoryRights              = ''
+        ActiveDirectoryRights              = [System.String[]] @()
         AccessControlType                  = $AccessControlType
         ObjectType                         = $ObjectType
         ActiveDirectorySecurityInheritance = $ActiveDirectorySecurityInheritance
