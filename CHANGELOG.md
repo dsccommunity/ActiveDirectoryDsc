@@ -9,6 +9,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Added
 
+- ADReadOnlyDomainControllerAccount
+  - Added read-only value Enabled indicating whether a pre-staged account is Enabled or Disabled (Unoccupied).
 - `ActiveDirectoryDsc`
   - Added strings.psd1 for HQRM compliance.
 
@@ -50,6 +52,14 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - ADObjectPermissionEntry
   - Fixed Get-TargetResource to return valid ActiveDirectoryRights when ACE is absent
+- ADDomainController
+  - Check the operating system to see if it is a domain controller before locating the
+    domain controller object.
+    Fixes [issue #747](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/747).
+  - Updated documentation to reflect parameters that should not be used with UseExistingAccount.
+  - Additional guards against null properties when getting DelegatedAdministratorAccountName.
+- ActiveDirectoryDsc.Common
+  - Removed operating system check from Get-DomainControllerObject and moved into ADDomainController above.
 
 ## [6.7.0] - 2025-05-29
 
