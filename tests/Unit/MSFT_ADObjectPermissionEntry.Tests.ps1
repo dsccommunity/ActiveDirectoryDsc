@@ -119,7 +119,7 @@ Describe 'MSFT_ADObjectPermissionEntry\Get-TargetResource' -Tag 'Get' {
                 $targetResource.Ensure | Should -Be 'Present'
                 $targetResource.Path | Should -Be $testDefaultParameters.Path
                 $targetResource.IdentityReference | Should -Be $testDefaultParameters.IdentityReference
-                $targetResource.ActiveDirectoryRights | Should -Be 'GenericAll'
+                $targetResource.ActiveDirectoryRights | Should -Be @('GenericAll')
                 $targetResource.AccessControlType | Should -Be $testDefaultParameters.AccessControlType
                 $targetResource.ObjectType | Should -Be $testDefaultParameters.ObjectType
                 $targetResource.ActiveDirectorySecurityInheritance | Should -Be $testDefaultParameters.ActiveDirectorySecurityInheritance
@@ -169,7 +169,7 @@ Describe 'MSFT_ADObjectPermissionEntry\Get-TargetResource' -Tag 'Get' {
                 $targetResource.Ensure | Should -Be 'Absent'
                 $targetResource.Path | Should -Be $testDefaultParameters.Path
                 $targetResource.IdentityReference | Should -Be $testDefaultParameters.IdentityReference
-                $targetResource.ActiveDirectoryRights | Should -Be ''
+                $targetResource.ActiveDirectoryRights | Should -Be @()
                 $targetResource.AccessControlType | Should -Be $testDefaultParameters.AccessControlType
                 $targetResource.ObjectType | Should -Be $testDefaultParameters.ObjectType
                 $targetResource.ActiveDirectorySecurityInheritance | Should -Be $testDefaultParameters.ActiveDirectorySecurityInheritance

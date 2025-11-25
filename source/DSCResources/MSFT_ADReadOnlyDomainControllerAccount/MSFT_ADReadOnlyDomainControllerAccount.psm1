@@ -124,6 +124,7 @@ function Get-TargetResource
             InstallDns                          = $InstallDns
             IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
             SiteName                            = $domainControllerObject.Site
+            Enabled                             = $domainControllerObject.Enabled
         }
     }
     else
@@ -142,6 +143,7 @@ function Get-TargetResource
             InstallDns                          = $false
             IsGlobalCatalog                     = $false
             SiteName                            = $null
+            Enabled                             = $false
         }
     }
 

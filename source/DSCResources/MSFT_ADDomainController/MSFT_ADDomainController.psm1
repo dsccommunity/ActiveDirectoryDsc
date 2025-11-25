@@ -33,8 +33,9 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Used Functions:
             Name                                            | Module
             ------------------------------------------------|--------------------------
-            Get-ADDomain                                    | ActiveDirectory
+            Get-DomainObject                                | ActiveDirectoryDsc.Common
             Get-ADDomainControllerPasswordReplicationPolicy | ActiveDirectory
+            Test-IsDomainController                         | ActiveDirectoryDsc.Common
             Get-DomainControllerObject                      | ActiveDirectoryDsc.Common
             Assert-Module                                   | DscResource.Common
             New-ObjectNotFoundException                     | DscResource.Common
@@ -64,69 +65,83 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'ActiveDirectory'
 
-    Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
-
-    $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose:$VerbosePreference
-
-    if (-not $Domain)
+    if ((Test-IsDomainController) -eq $true)
     {
-        $errorMessage = $script:localizedData.MissingDomain -f $DomainName
-        New-ObjectNotFoundException -Message $errorMessage
-    }
+        Write-Verbose -Message ($script:localizedData.ResolveDomainName -f $DomainName)
 
-    Write-Verbose -Message ($script:localizedData.DomainPresent -f $DomainName)
+        $Domain = Get-DomainObject -Identity $DomainName -Credential $Credential -ErrorOnUnexpectedExceptions -Verbose:$VerbosePreference
 
-    $domainControllerObject = Get-DomainControllerObject `
-        -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
-
-    if ($domainControllerObject)
-    {
-        Write-Verbose -Message ($script:localizedData.IsDomainController -f
-            $domainControllerObject.Name, $domainControllerObject.Domain)
-
-        # If this is a read-only domain controller, retrieve any user or group that is a delegated administrator via the ManagedBy attribute
-        $delegateAdministratorAccountName = $null
-        if ($domainControllerObject.IsReadOnly)
+        if (-not $Domain)
         {
-            $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
-                Get-ADComputer -Properties ManagedBy -Credential $Credential
-            if ($domainControllerComputerObject.ManagedBy)
-            {
-                $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
-                    Get-ADObject -Properties objectSid -Credential $Credential
-
-                $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
-            }
+            $errorMessage = $script:localizedData.MissingDomain -f $DomainName
+            New-ObjectNotFoundException -Message $errorMessage
         }
 
-        $allowedPasswordReplicationAccountName = (
-            Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject |
-                ForEach-Object -MemberName sAMAccountName)
-        $deniedPasswordReplicationAccountName = (
-            Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject |
-                ForEach-Object -MemberName sAMAccountName)
-        $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
-        $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
-        $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
+        Write-Verbose -Message ($script:localizedData.DomainPresent -f $DomainName)
 
-        $targetResource = @{
-            AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
-            Credential                          = $Credential
-            DatabasePath                        = $serviceNTDS.'DSA Working Directory'
-            DelegatedAdministratorAccountName   = $delegateAdministratorAccountName
-            DenyPasswordReplicationAccountName  = @($deniedPasswordReplicationAccountName)
-            DomainName                          = $domainControllerObject.Domain
-            Ensure                              = $true
-            FlexibleSingleMasterOperationRole   = @($domainControllerObject.OperationMasterRoles)
-            InstallationMediaPath               = $null
-            InstallDns                          = $installDns
-            IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
-            LogPath                             = $serviceNTDS.'Database log files path'
-            ReadOnlyReplica                     = $domainControllerObject.IsReadOnly
-            SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
-            SiteName                            = $domainControllerObject.Site
-            SysvolPath                          = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
-            UseExistingAccount                  = $UseExistingAccount
+        $domainControllerObject = Get-DomainControllerObject `
+            -DomainName $DomainName -ComputerName $env:COMPUTERNAME -Credential $Credential
+
+        if ($domainControllerObject)
+        {
+            Write-Verbose -Message ($script:localizedData.FoundDomainControllerObject -f
+                $domainControllerObject.Name, $domainControllerObject.Domain)
+
+            # If this is a read-only domain controller, retrieve any user or group that is a delegated administrator via the ManagedBy attribute
+            $delegateAdministratorAccountName = $null
+            if ($domainControllerObject.IsReadOnly)
+            {
+                if ($domainControllerObject.ComputerObjectDN)
+                {
+                    $domainControllerComputerObject = $domainControllerObject.ComputerObjectDN |
+                        Get-ADComputer -Properties ManagedBy -Credential $Credential
+                    if ($domainControllerComputerObject.ManagedBy)
+                    {
+                        $domainControllerManagedByObject = $domainControllerComputerObject.ManagedBy |
+                            Get-ADObject -Properties objectSid -Credential $Credential
+
+                        if ($domainControllerManagedByObject.objectSid)
+                        {
+                            $delegateAdministratorAccountName = Resolve-SamAccountName -ObjectSid $domainControllerManagedByObject.objectSid
+                        }
+
+                    }
+                }
+            }
+
+            $allowedPasswordReplicationAccountName = (
+                Get-ADDomainControllerPasswordReplicationPolicy -Allowed -Identity $domainControllerObject |
+                    ForEach-Object -MemberName sAMAccountName)
+            $deniedPasswordReplicationAccountName = (
+                Get-ADDomainControllerPasswordReplicationPolicy -Denied -Identity $domainControllerObject |
+                    ForEach-Object -MemberName sAMAccountName)
+            $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
+            $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
+            $installDns = [System.Boolean](Get-Service -Name dns -ErrorAction SilentlyContinue)
+
+            $targetResource = @{
+                AllowPasswordReplicationAccountName = @($allowedPasswordReplicationAccountName)
+                Credential                          = $Credential
+                DatabasePath                        = $serviceNTDS.'DSA Working Directory'
+                DelegatedAdministratorAccountName   = $delegateAdministratorAccountName
+                DenyPasswordReplicationAccountName  = @($deniedPasswordReplicationAccountName)
+                DomainName                          = $domainControllerObject.Domain
+                Ensure                              = $true
+                FlexibleSingleMasterOperationRole   = @($domainControllerObject.OperationMasterRoles)
+                InstallationMediaPath               = $null
+                InstallDns                          = $installDns
+                IsGlobalCatalog                     = $domainControllerObject.IsGlobalCatalog
+                LogPath                             = $serviceNTDS.'Database log files path'
+                ReadOnlyReplica                     = $domainControllerObject.IsReadOnly
+                SafemodeAdministratorPassword       = $SafemodeAdministratorPassword
+                SiteName                            = $domainControllerObject.Site
+                SysvolPath                          = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+                UseExistingAccount                  = $UseExistingAccount
+            }
+        }
+        else {
+            $errorMessage = $script:localizedData.WasExpectingDomainController
+            New-InvalidResultException -Message $errorMessage
         }
     }
     else
@@ -183,6 +198,7 @@ function Get-TargetResource
 
     .PARAMETER SiteName
         Provide the name of the site you want the Domain Controller to be added to.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER InstallationMediaPath
         Provide the path for the IFM folder that was created with ntdsutil.
@@ -190,18 +206,23 @@ function Get-TargetResource
 
     .PARAMETER IsGlobalCatalog
         Specifies if the domain controller will be a Global Catalog (GC).
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER ReadOnlyReplica
-        Specifies if the domain controller should be provisioned as read-only domain controller
+        Specifies if the domain controller should be provisioned as read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DelegatedAdministratorAccountName
         Specifies the user or group that is the delegated administrator of this read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DenyPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication denied list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER FlexibleSingleMasterOperationRole
         Specifies one or more Flexible Single Master Operation (FSMO) roles to
@@ -215,6 +236,7 @@ function Get-TargetResource
         The parameter `InstallDns` is only used during the provisioning of a domain
         controller. The parameter cannot be used to install or uninstall the DNS
         server on an already provisioned domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER UseExistingAccount
         Specifies whether to use an existing read only domain controller account.
@@ -662,6 +684,7 @@ function Set-TargetResource
 
     .PARAMETER SiteName
         Provide the name of the site you want the Domain Controller to be added to.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER InstallationMediaPath
         Provide the path for the IFM folder that was created with ntdsutil.
@@ -669,18 +692,23 @@ function Set-TargetResource
 
     .PARAMETER IsGlobalCatalog
         Specifies if the domain controller will be a Global Catalog (GC).
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER ReadOnlyReplica
-        Specifies if the domain controller should be provisioned as read-only domain controller
+        Specifies if the domain controller should be provisioned as read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DelegatedAdministratorAccountName
         Specifies the user or group that is the delegated administrator of this read-only domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER AllowPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication allowed list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER DenyPasswordReplicationAccountName
         Provides a list of the users, computers, and groups to add to the password replication denied list.
+        Should not be used alongside UseExistingAccount parameter.
 
     .PARAMETER FlexibleSingleMasterOperationRole
         Specifies one or more Flexible Single Master Operation (FSMO) roles to
@@ -694,6 +722,7 @@ function Set-TargetResource
         The parameter `InstallDns` is only used during the provisioning of a domain
         controller. The parameter cannot be used to install or uninstall the DNS
         server on an already provisioned domain controller.
+        Should not be used alongside UseExistingAccount parameter.
 
         Not used in Test-TargetResource.
 

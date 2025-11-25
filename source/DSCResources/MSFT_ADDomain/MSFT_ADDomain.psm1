@@ -94,6 +94,30 @@ function Get-TargetResource
         $domainShouldBePresent = $false
     }
 
+    # If the domain is being promoted, then the LocatorDCPromoPreRebootHint registry item will exist.
+    if ($domainShouldBePresent -and (Test-Path -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint'))
+    {
+        Write-Verbose $script:localizedData.PendingReboot
+
+        return @{
+            DomainName                    = $DomainName
+            Credential                    = $Credential
+            SafeModeAdministratorPassword = $SafeModeAdministratorPassword
+            ParentDomainName              = $ParentDomainName
+            DomainNetBiosName             = $null
+            DnsDelegationCredential       = $null
+            DomainType                    = $DomainType
+            DatabasePath                  = $null
+            LogPath                       = $null
+            SysvolPath                    = $null
+            ForestMode                    = $null
+            DomainMode                    = $null
+            DomainExist                   = $true    # to prevent re-provision
+            Forest                        = $null
+            DnsRoot                       = $null
+        }
+    }
+
     if ($domainShouldBePresent)
     {
         # Test that the correct domain SysVol path exists
@@ -222,6 +246,9 @@ function Get-TargetResource
     .PARAMETER DomainMode
         The Domain Functional Level for the entire domain.
 
+    .PARAMETER SuppressReboot
+        Suppressed reboot.
+
     .NOTES
         Used Functions:
             Name               | Module
@@ -288,7 +315,11 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold', 'Win2025')]
         [System.String]
-        $DomainMode
+        $DomainMode,
+
+        [Parameter()]
+        [System.Boolean]
+        $SuppressReboot = $false
     )
 
     $getTargetResourceParameters = @{
@@ -373,6 +404,9 @@ function Test-TargetResource
     .PARAMETER DomainMode
         The Domain Functional Level for the entire domain.
 
+    .PARAMETER SuppressReboot
+        Suppressed reboot.
+
     .NOTES
         Used Functions:
             Name                           | Module
@@ -446,7 +480,11 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet('Win2008', 'Win2008R2', 'Win2012', 'Win2012R2', 'WinThreshold', 'Win2025')]
         [System.String]
-        $DomainMode
+        $DomainMode,
+
+        [Parameter()]
+        [System.Boolean]
+        $SuppressReboot = $false
     )
 
     # Debug can pause Install-ADDSForest/Install-ADDSDomain, so we remove it.
@@ -468,6 +506,7 @@ function Set-TargetResource
         }
 
     $targetResource = Get-TargetResource @getTargetResourceParameters
+    $needsReboot = $false
 
     if (-not $targetResource.DomainExist)
     {
@@ -541,6 +580,22 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.CreatedForest -f $DomainName)
         }
 
+        $needsReboot = $true
+    }
+    elseif (
+        [string]::IsNullOrEmpty($targetResource.SysvolPath) -and
+        (Test-Path -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint')
+    ) {
+        $needsReboot = $true
+    }
+
+    if ($needsReboot -and $SuppressReboot)
+    {
+        Write-Verbose $script:localizedData.PendingReboot
+        Write-Verbose $script:localizedData.SuppressReboot
+    }
+    elseif ($needsReboot)
+    {
         <#
             Signal to the LCM to reboot the node to compensate for the one we
             suppressed from Install-ADDSForest/Install-ADDSDomain.
