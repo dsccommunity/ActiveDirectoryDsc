@@ -24,15 +24,16 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Indicates whether to Allow or Deny access to the target object.
 
     .PARAMETER ObjectType
-        The schema GUID of the object to which the access rule applies.
+        The schema GUID or display name of the object to which the access rule
+        applies.
 
     .PARAMETER ActiveDirectorySecurityInheritance
         One of the 'ActiveDirectorySecurityInheritance' enumeration values that
         specifies the inheritance type of the access rule.
 
     .PARAMETER InheritedObjectType
-        The schema GUID of the child object type that can inherit this access
-        rule.
+        The schema GUID or display name of the child object type that can
+        inherit this access rule.
 #>
 function Get-TargetResource
 {
@@ -66,6 +67,16 @@ function Get-TargetResource
         [System.String]
         $InheritedObjectType
     )
+
+    if (-not (Test-IsGuid -InputString $ObjectType))
+    {
+        $ObjectType = Get-ADSchemaGuid -DisplayName $ObjectType
+    }
+
+    if (-not (Test-IsGuid -InputString $InheritedObjectType))
+    {
+        $InheritedObjectType = Get-ADSchemaGuid -DisplayName $InheritedObjectType
+    }
 
     $ADDrivePSPath = Get-ADDrivePSPath
 
@@ -155,15 +166,16 @@ function Get-TargetResource
         Indicates whether to Allow or Deny access to the target object.
 
     .PARAMETER ObjectType
-        The schema GUID of the object to which the access rule applies.
+        The schema GUID or display name of the object to which the access rule
+        applies.
 
     .PARAMETER ActiveDirectorySecurityInheritance
         One of the 'ActiveDirectorySecurityInheritance' enumeration values that
         specifies the inheritance type of the access rule.
 
     .PARAMETER InheritedObjectType
-        The schema GUID of the child object type that can inherit this access
-        rule.
+        The schema GUID or display name of the child object type that can
+        inherit this access rule.
 #>
 function Set-TargetResource
 {
@@ -206,6 +218,16 @@ function Set-TargetResource
         [System.String]
         $InheritedObjectType
     )
+
+    if (-not (Test-IsGuid -InputString $ObjectType))
+    {
+        $ObjectType = Get-ADSchemaGuid -DisplayName $ObjectType
+    }
+
+    if (-not (Test-IsGuid -InputString $InheritedObjectType))
+    {
+        $InheritedObjectType = Get-ADSchemaGuid -DisplayName $InheritedObjectType
+    }
 
     $ADDrivePSPath = Get-ADDrivePSPath
 
@@ -282,15 +304,16 @@ function Set-TargetResource
         Indicates whether to Allow or Deny access to the target object.
 
     .PARAMETER ObjectType
-        The schema GUID of the object to which the access rule applies.
+        The schema GUID or display name of the object to which the access rule
+        applies.
 
     .PARAMETER ActiveDirectorySecurityInheritance
         One of the 'ActiveDirectorySecurityInheritance' enumeration values that
         specifies the inheritance type of the access rule.
 
     .PARAMETER InheritedObjectType
-        The schema GUID of the child object type that can inherit this access
-        rule.
+        The schema GUID or display name of the child object type that can
+        inherit this access rule.
 #>
 function Test-TargetResource
 {
@@ -396,4 +419,187 @@ function Get-ADDrivePSPath
     $adDrivePSPath = (Get-Item -Path 'AD:').PSPath
     Write-Verbose -Message ($script:localizedData.RetrievedADDrivePSPath -f $adDrivePSPath)
     return $adDrivePSPath
+}
+
+<#
+    .SYNOPSIS
+        Retrieves the schemaIDGUID or rightsGUID of an Active Directory object based on its display name.
+
+    .DESCRIPTION
+        This function searches the Active Directory schema for an object with the matching lDAPDisplayName, 
+        or the Extended Rights container for an object with the matching displayName.
+
+    .PARAMETER DisplayName
+        The lDAPDisplayName (for schema objects) or displayName (for extended rights) to search for.
+
+    .OUTPUTS
+        System.String
+
+        If a matching entry is found, the corresponding GUID (schemaIDGUID or rightsGUID) is returned.
+
+    .EXAMPLE
+        PS C:\> Get-ADSchemaGuid -DisplayName "user"
+
+        Returns the schemaIDGUID of the schema object with lDAPDisplayName "user".
+
+    .EXAMPLE
+        PS C:\> Get-ADSchemaGuid -DisplayName "Send As"
+
+        Returns the rightsGUID of the Extended Rights object with displayName "Send As".
+#>
+function Get-ADSchemaGuid
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DisplayName
+    )
+
+    try
+    {
+        $rootDse = Get-ADRootDSE -ErrorAction Stop
+    }
+    catch
+    {
+        throw ($script:localizedData.FailedToRetrieveRootDSE -f $_)
+    }
+
+    $escapedDisplayName = Get-EscapedLdapFilterValue -Value $DisplayName
+
+    # Search the schema for a matching lDAPDisplayName
+    try
+    {
+        $schemaResults = @(Get-ADObject `
+            -SearchBase $rootDse.schemaNamingContext `
+            -LDAPFilter "(&(schemaIDGUID=*)(lDAPDisplayName=$escapedDisplayName))" `
+            -Properties 'lDAPDisplayName','schemaIDGUID' `
+            -ErrorAction Stop)
+    }
+    catch
+    {
+        throw ($script:localizedData.ErrorSearchingSchema -f $DisplayName, $_)
+    }
+
+    if ($schemaResults.Count -gt 1)
+    {
+        throw ($script:localizedData.ErrorMultipleSchemaObjectsFound -f $DisplayName)
+    }
+    elseif ($schemaResults.Count -eq 1)
+    {
+        return ([System.Guid]$schemaResults[0].schemaIDGUID).Guid
+    }
+
+    # If not found in the schema: search the Extended Rights container
+    try
+    {
+        $rightsResults = @(Get-ADObject `
+            -SearchBase "CN=Extended-Rights,$($rootDse.configurationNamingContext)" `
+            -LDAPFilter "(&(objectClass=controlAccessRight)(displayName=$escapedDisplayName))" `
+            -Properties 'displayName','rightsGUID' `
+            -ErrorAction Stop)
+    }
+    catch
+    {
+        throw ($script:localizedData.ErrorSearchingExtendedRights -f $DisplayName, $_)
+    }
+
+    if ($rightsResults.Count -gt 1)
+    {
+        throw ($script:localizedData.ErrorMultipleExtendedRightsFound -f $DisplayName)
+    }
+    elseif ($rightsResults.Count -eq 1)
+    {
+        return ([System.Guid]$rightsResults[0].rightsGUID).Guid
+    }
+
+    throw ($script:localizedData.NoMatchingGuidFound -f $DisplayName)
+}
+
+<#
+    .SYNOPSIS
+        Checks whether a string is a valid GUID.
+
+    .DESCRIPTION
+        The 'Test-IsGuid' function uses the .NET method [System.Guid]::TryParse() to 
+        determine whether the provided string is a valid GUID (Globally Unique Identifier).
+
+    .PARAMETER InputString
+        The string to be tested for a valid GUID format.
+
+    .OUTPUTS
+        System.Boolean
+
+        Returns $true if the string is a valid GUID, otherwise returns $false.
+
+    .EXAMPLE
+        Test-IsGuid "550e8400-e29b-41d4-a716-446655440000"
+
+        Returns 'True' because the string is a valid GUID.
+
+    .EXAMPLE
+        Test-IsGuid "abc"
+
+        Returns 'False' because the string is not a valid GUID.
+#>
+function Test-IsGuid
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $InputString
+    )
+
+    $nullGuid = [System.Guid]::Empty
+    return [System.Guid]::TryParse($InputString, [ref]$nullGuid)
+}
+
+<#
+    .SYNOPSIS
+        Escapes a string for safe use in an LDAP filter according to RFC 4515.
+
+    .DESCRIPTION
+        This function replaces special characters in the input string with their corresponding 
+        escape sequences for use in LDAP filters (e.g., in Active Directory queries). It prevents 
+        syntax errors or unexpected behavior when constructing LDAP search filters.
+
+        The following characters are escaped:
+        \ => \5c
+        * => \2a
+        ( => \28
+        ) => \29
+        NULL byte (ASCII 0) => \00
+
+    .PARAMETER Value
+        The input string to be escaped, such as a username or part of an LDAP search filter.
+
+    .EXAMPLE
+        PS> Get-EscapedLdapFilterValue -Value 'Smith (Admin)*'
+        Smith \28Admin\29\2a
+
+    .EXAMPLE
+        PS> $filter = "(cn=$(Get-EscapedLdapFilterValue -Value 'Admin*'))"
+        PS> $filter
+        (cn=Admin\2a)
+#>
+function Get-EscapedLdapFilterValue
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Value
+    )
+
+    $escaped = $Value -replace '\\', '\5c'
+    $escaped = $escaped -replace '\*', '\2a'
+    $escaped = $escaped -replace '\(', '\28'
+    $escaped = $escaped -replace '\)', '\29'
+    $escaped = $escaped -replace "`0", '\00'
+
+    return $escaped
 }

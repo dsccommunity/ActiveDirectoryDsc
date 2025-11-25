@@ -64,6 +64,14 @@ Describe 'MSFT_ADObjectPermissionEntry\Get-TargetResource' -Tag 'Get' {
                 return '\'
             }
 
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $false
+            }
+
+            Mock -CommandName Get-ADSchemaGuid -MockWith {
+                return '00000000-0000-0000-0000-000000000000'
+            }
+
             Mock -CommandName Get-Acl -MockWith {
                 $mock = [PSCustomObject] @{
                     Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -126,6 +134,10 @@ Describe 'MSFT_ADObjectPermissionEntry\Get-TargetResource' -Tag 'Get' {
                 return '\'
             }
 
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $true
+            }
+
             Mock -CommandName Get-Acl -MockWith {
                 $mock = [PSCustomObject] @{
                     Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC,CN=Computers,DC=lab,DC=local'
@@ -172,6 +184,10 @@ Describe 'MSFT_ADObjectPermissionEntry\Get-TargetResource' -Tag 'Get' {
                 return '\'
             }
 
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $true
+            }
+
             Mock -CommandName Get-Acl -MockWith { throw New-Object System.Management.Automation.ItemNotFoundException }
         }
 
@@ -198,6 +214,10 @@ Describe 'MSFT_ADObjectPermissionEntry\Get-TargetResource' -Tag 'Get' {
         BeforeAll {
             Mock -CommandName Get-ADDrivePSPath -MockWith {
                 return '\'
+            }
+
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $true
             }
 
             Mock -CommandName Get-Acl -MockWith { throw 'Unknown Error' }
@@ -227,6 +247,14 @@ Describe 'MSFT_ADObjectPermissionEntry\Test-TargetResource' -Tag 'Test' {
         BeforeAll {
             Mock -CommandName Get-ADDrivePSPath -MockWith {
                 return '\'
+            }
+
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $false
+            }
+
+            Mock -CommandName Get-ADSchemaGuid -MockWith {
+                return '00000000-0000-0000-0000-000000000000'
             }
 
             Mock -CommandName Get-Acl -MockWith {
@@ -308,6 +336,10 @@ Describe 'MSFT_ADObjectPermissionEntry\Test-TargetResource' -Tag 'Test' {
                 return '\'
             }
 
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $true
+            }
+
             Mock -CommandName Get-Acl -MockWith {
                 $mock = [PSCustomObject] @{
                     Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC,CN=Computers,DC=lab,DC=local'
@@ -375,6 +407,14 @@ Describe 'MSFT_ADObjectPermissionEntry\Set-TargetResource' -Tag 'Set' {
                 return '\'
             }
 
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $false
+            }
+
+            Mock -CommandName Get-ADSchemaGuid -MockWith {
+                return '00000000-0000-0000-0000-000000000000'
+            }
+
             Mock -CommandName Get-Acl -MockWith {
                 $mock = [PSCustomObject] @{
                     Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC01,CN=Computers,DC=contoso,DC=com'
@@ -436,6 +476,10 @@ Describe 'MSFT_ADObjectPermissionEntry\Set-TargetResource' -Tag 'Set' {
                 return '\'
             }
 
+            Mock -CommandName Test-IsGuid -MockWith {
+                return $true
+            }
+
             Mock -CommandName Get-Acl -MockWith {
                 $mock = [PSCustomObject] @{
                     Path   = 'Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=PC,CN=Computers,DC=lab,DC=local'
@@ -495,5 +539,296 @@ Describe -Name 'MSFT_ADObjectPermissionEntry\Get-ADDrivePSPath' -Tag 'Helper' {
         }
 
         Should -Invoke -CommandName Assert-ADPSDrive -Exactly -Times 1 -Scope It
+    }
+}
+
+Describe -Name 'MSFT_ADObjectPermissionEntry\Get-ADSchemaGuid' -Tag 'Helper' {
+    Context 'When DisplayName matches a schema object' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                $mock = [PSCustomObject] @{
+                    configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                    defaultNamingContext        = 'DC=contoso,DC=com'
+                    schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+                }
+                return $mock
+            }
+
+            Mock -CommandName Get-ADObject -MockWith {
+                return @{ schemaIDGUID = ([guid]'bf967aba-0de6-11d0-a285-00aa003049e2').ToByteArray() }
+            }
+        }
+
+        It 'Should return schemaIDGUID' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $guid = Get-ADSchemaGuid -DisplayName 'user'
+
+                $guid | Should -Be 'bf967aba-0de6-11d0-a285-00aa003049e2'
+            }
+        }
+    }
+
+    Context 'When DisplayName matches an extended right' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                $mock = [PSCustomObject] @{
+                    configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                    defaultNamingContext        = 'DC=contoso,DC=com'
+                    schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+                }
+                return $mock
+            }
+
+            $script:mockCallCount = 0
+
+            Mock -CommandName Get-ADObject -MockWith {
+                $script:mockCallCount++
+                if ($script:mockCallCount -eq 1)
+                {
+                    return
+                }
+                else
+                {
+                    return @{ rightsGUID = 'ab721a54-1e2f-11d0-9819-00aa0040529b' }
+                }
+            }
+        }
+
+        It 'Should return rightsGUID' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $guid = Get-ADSchemaGuid -DisplayName 'Send As'
+
+                $guid | Should -Be 'ab721a54-1e2f-11d0-9819-00aa0040529b'
+            }
+        }
+    }
+
+    Context 'When no matching GUID found for DisplayName' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                $mock = [PSCustomObject] @{
+                    configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                    defaultNamingContext        = 'DC=contoso,DC=com'
+                    schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+                }
+                return $mock
+            }
+
+            Mock -CommandName Get-ADObject
+        }
+
+        It 'Should throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                { Get-ADSchemaGuid -DisplayName 'non-existent' } | Should -Throw
+            }
+        }
+    }
+
+    Context 'When retrieving ADRootDSE fails' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith { throw 'Unknown error' }
+        }
+
+        It 'Should throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                { Get-ADSchemaGuid -DisplayName 'user' } | Should -Throw
+            }
+        }
+    }
+
+    Context 'When searching the Active Directory schema fails' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                $mock = [PSCustomObject] @{
+                    configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                    defaultNamingContext        = 'DC=contoso,DC=com'
+                    schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+                }
+                return $mock
+            }
+
+            Mock -CommandName Get-ADObject -MockWith { throw 'Unknown error' }
+        }
+
+        It 'Should throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                { Get-ADSchemaGuid -DisplayName 'user' } | Should -Throw
+            }
+        }
+    }
+
+    Context 'When searching the Extended Rights container fails' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                $mock = [PSCustomObject] @{
+                    configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                    defaultNamingContext        = 'DC=contoso,DC=com'
+                    schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+                }
+                return $mock
+            }
+
+            $script:mockCallCount = 0
+
+            Mock -CommandName Get-ADObject -MockWith {
+                $script:mockCallCount++
+                if ($script:mockCallCount -eq 1)
+                {
+                    return
+                }
+                else
+                {
+                    throw 'Unknown error'
+                }
+            }
+        }
+
+        It 'Should throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                { Get-ADSchemaGuid -DisplayName 'user' } | Should -Throw
+            }
+        }
+    }
+
+    Context 'When multiple schema objects are found' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                $mock = [PSCustomObject] @{
+                    configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                    defaultNamingContext        = 'DC=contoso,DC=com'
+                    schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+                }
+                return $mock
+            }
+
+            Mock -CommandName Get-ADObject -MockWith {
+                return @(
+                    @{ schemaIDGUID = ([guid]'bf967aba-0de6-11d0-a285-00aa003049e2').ToByteArray() }
+                    @{ schemaIDGUID = ([guid]'00a0a7cf-3f83-4d47-a203-f1c6bf6d8251').ToByteArray() }
+                )
+            }
+        }
+
+        It 'Should throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                { Get-ADSchemaGuid -DisplayName 'user' } | Should -Throw
+            }
+        }
+    }
+
+    Context 'When multiple extended rights objects are found' {
+        BeforeAll {
+            Mock -CommandName Get-ADRootDSE -MockWith {
+                $mock = [PSCustomObject] @{
+                    configurationNamingContext  = 'CN=Configuration,DC=contoso,DC=com'
+                    defaultNamingContext        = 'DC=contoso,DC=com'
+                    schemaNamingContext         = 'CN=Schema,CN=Configuration,DC=contoso,DC=com'
+                }
+                return $mock
+            }
+
+            $script:mockCallCount = 0
+
+            Mock -CommandName Get-ADObject -MockWith {
+                $script:mockCallCount++
+                if ($script:mockCallCount -eq 1)
+                {
+                    return
+                }
+                else
+                {
+                    return @(
+                        @{ rightsGUID = 'ab721a54-1e2f-11d0-9819-00aa0040529b' }
+                        @{ rightsGUID = '735c1fed-227f-4a80-920b-671da2705bd6' }
+                    )
+                }
+            }
+        }
+
+        It 'Should throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                { Get-ADSchemaGuid -DisplayName 'user' } | Should -Throw
+            }
+        }
+    }
+}
+
+Describe -Name 'MSFT_ADObjectPermissionEntry\Test-IsGuid' -Tag 'Helper' {
+    It 'Should return true if testing a valid GUID' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $isGuid = Test-IsGuid -InputString '550e8400-e29b-41d4-a716-446655440000'
+
+            $isGuid | Should -BeTrue
+        }
+    }
+
+    It 'Should return false if testing an invalid GUID' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $isGuid = Test-IsGuid -InputString 'No valid GUID'
+
+            $isGuid | Should -BeFalse
+        }
+    }
+}
+
+Describe -Name 'MSFT_ADObjectPermissionEntry\Get-EscapedLdapFilterValue' -Tag 'Helper' {
+    It 'Should escape backslash character' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $escapedLdapFilterValue = Get-EscapedLdapFilterValue -Value 'Smith \ Admin'
+
+            $escapedLdapFilterValue | Should -Be 'Smith \5c Admin'
+        }
+    }
+
+    It 'Should escape asterisk character' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $escapedLdapFilterValue = Get-EscapedLdapFilterValue -Value 'Smith *Admin*'
+
+            $escapedLdapFilterValue | Should -Be 'Smith \2aAdmin\2a'
+        }
+    }
+
+    It 'Should escape opening and closing parentheses characters' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $escapedLdapFilterValue = Get-EscapedLdapFilterValue -Value 'Smith (Admin)'
+
+            $escapedLdapFilterValue | Should -Be 'Smith \28Admin\29'
+        }
+    }
+
+    It 'Should escape NULL character' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $escapedLdapFilterValue = Get-EscapedLdapFilterValue -Value "Smith`0Admin"
+
+            $escapedLdapFilterValue | Should -Be 'Smith\00Admin'
+        }
     }
 }
