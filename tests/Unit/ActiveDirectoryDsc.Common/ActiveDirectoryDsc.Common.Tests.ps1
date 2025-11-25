@@ -1115,70 +1115,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-DomainControllerObject' {
         }
     }
 
-    Context 'When current node is not a domain controller' {
-        BeforeAll {
-            Mock -CommandName Get-ADDomainController
-            Mock -CommandName Test-IsDomainController -MockWith {
-                return $false
-            }
-        }
-
-        It 'Should return $null' {
-            $getDomainControllerObjectResult = Get-DomainControllerObject -DomainName 'contoso.com'
-            $getDomainControllerObjectResult | Should -BeNullOrEmpty
-
-            Should -Invoke -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
-        }
-    }
-
-    Context 'When current node is not a domain controller, but operating system information says it should be' {
-        BeforeAll {
-            Mock -CommandName Get-ADDomainController
-            Mock -CommandName Test-IsDomainController -MockWith {
-                return $true
-            }
-        }
-
-        It 'Should throw the correct error' {
-            { Get-DomainControllerObject -DomainName 'contoso.com' } | Should -Throw $script:localizedData.WasExpectingDomainController
-
-            Should -Invoke -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
-        }
-    }
-
-    Context 'When the domain controller object is a remote computer and local computer is a domain controller' {
-        BeforeAll {
-            Mock -CommandName Get-ADDomainController -MockWith {
-                return @{
-                    Site            = 'MySite'
-                    Domain          = 'contoso.com'
-                    IsGlobalCatalog = $true
-                }
-            }
-            Mock -CommandName Test-IsDomainController -MockWith {
-                return $true
-            }
-
-            $mockComputerName = "Mock-$($env:COMPUTERNAME)"
-        }
-
-        It 'Should not throw and call the correct mocks' {
-            { Get-DomainControllerObject -DomainName 'contoso.com' -ComputerName $mockComputerName } | Should -Not -Throw
-
-            Should -Invoke -CommandName Get-ADDomainController -Exactly -Times 1 -Scope It
-            Should -Invoke -CommandName Test-IsDomainController -Exactly -Times 0 -Scope It
-        }
-
-        It 'Should return the correct values for each property' {
-            $getDomainControllerObjectResult = Get-DomainControllerObject -DomainName 'contoso.com' -ComputerName $mockComputerName
-
-            $getDomainControllerObjectResult.Site | Should -Be 'MySite'
-            $getDomainControllerObjectResult.Domain | Should -Be 'contoso.com'
-            $getDomainControllerObjectResult.IsGlobalCatalog | Should -BeTrue
-        }
-    }
-
-    Context 'When current node is a domain controller' {
+    Context 'When domain controller object could be found' {
         BeforeAll {
             Mock -CommandName Get-ADDomainController -MockWith {
                 return @{
@@ -1200,7 +1137,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-DomainControllerObject' {
         }
     }
 
-    Context 'When current node is a domain controller, and using specific credential' {
+    Context 'When domain controller object could be found, using specific credential' {
         BeforeAll {
             Mock -CommandName Get-ADDomainController -MockWith {
                 return @{
