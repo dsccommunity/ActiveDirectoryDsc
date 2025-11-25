@@ -13,6 +13,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Added read-only value Enabled indicating whether a pre-staged account is Enabled or Disabled (Unoccupied).
 - `ActiveDirectoryDsc`
   - Added strings.psd1 for HQRM compliance.
+- ADDomain
+  - Skip LCM reboot signal if `SuppressReboot` parameter is set to `true`
+    ([issue #742](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/742)).
 
 ### Removed
 
@@ -51,7 +54,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 ### Fixed
 
 - ADObjectPermissionEntry
-  - Fixed Get-TargetResource to return valid ActiveDirectoryRights when ACE is absent
+  - Fixed Get-TargetResource to return valid ActiveDirectoryRights when ACE is absent.
+- ADDomain
+  - Report domain exists in `Get-TargetResource` during pending DC promotion reboot.
+    ([issue #742](https://github.com/dsccommunity/ActiveDirectoryDsc/issues/742)).
 - ADDomainController
   - Check the operating system to see if it is a domain controller before locating the
     domain controller object.

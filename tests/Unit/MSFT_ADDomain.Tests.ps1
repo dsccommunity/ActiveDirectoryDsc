@@ -290,6 +290,60 @@ Describe 'MSFT_ADDomain\Get-TargetResource' -Tag 'Get' {
                 }
             }
         }
+
+        Context 'When the domain controller is pending reboot' {
+            BeforeAll {
+                # Reboot hint registry value seen by the resource
+                Mock -CommandName Test-Path -ParameterFilter {
+                    $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint'
+                } -MockWith { $true }
+
+                # While pending reboot, the resource should report DomainExist = $true but avoid
+                # querying AD/NTDS state (returning the "absent-like" values for the rest).
+                Mock -CommandName Get-ItemPropertyValue -ParameterFilter {
+                    $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters' -and
+                    $Name -eq 'SysVol'
+                } -MockWith { 'C:\Windows\SysVol' }
+            }
+
+            It 'Should return DomainExist = $true and null/empty for the rest of the discovery properties' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $getParameters = @{
+                        DomainName                    = 'contoso.com'
+                        Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        )
+                        SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        )
+                    }
+
+                    $result = Get-TargetResource @getParameters
+
+                    $result.DomainName                    | Should -Be $getParameters.DomainName
+                    $result.Credential                    | Should -Be $getParameters.Credential
+                    $result.SafeModeAdministratorPassword | Should -Be $getParameters.SafeModeAdministratorPassword
+
+                    # Key expectations
+                    $result.DomainExist | Should -BeTrue
+
+                    # Everything else should be "not discovered" while pending reboot
+                    $result.ParentDomainName        | Should -Be ''
+                    $result.DomainNetBiosName       | Should -BeNullOrEmpty
+                    $result.DnsDelegationCredential | Should -BeNullOrEmpty
+                    $result.DomainType              | Should -Be 'ChildDomain'
+                    $result.DatabasePath            | Should -BeNullOrEmpty
+                    $result.LogPath                 | Should -BeNullOrEmpty
+                    $result.SysvolPath              | Should -BeNullOrEmpty
+                    $result.ForestMode              | Should -BeNullOrEmpty
+                    $result.DomainMode              | Should -BeNullOrEmpty
+                    $result.Forest                  | Should -BeNullOrEmpty
+                    $result.DnsRoot                 | Should -BeNullOrEmpty
+                }
+            }
+        }
     }
 }
 
@@ -590,6 +644,86 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
                 }
 
                 Should -Invoke -CommandName Install-ADDSForest -ParameterFilter { $DomainMode -eq 'WinThreshold' } -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When SuppressReboot is $true' {
+            It 'Should not set $global:DSCMachineStatus' {
+                InModuleScope -ScriptBlock {
+                    if (Test-Path variable:\global:DSCMachineStatus) {
+                        Remove-Variable -Name DSCMachineStatus -Scope Global -Force
+                    }
+
+                    $setParameters = @{
+                        DomainName                    = 'present.com'
+                        Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        )
+                        SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        )
+                        SuppressReboot                = $true
+                    }
+
+                    Set-TargetResource @setParameters
+
+                    Test-Path variable:\global:DSCMachineStatus | Should -BeFalse
+                }
+            }
+        }
+
+        Context 'When the domain controller is pending reboot and SuppressReboot is $false' {
+            BeforeAll {
+                # Make the resource think a reboot is pending after installation.
+                Mock -CommandName Test-Path -ParameterFilter {
+                    $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint'
+                } -MockWith { $true }
+
+                # After install, the resource re-checks state; return "pending reboot" signal.
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        DomainName                    = 'contoso.com'
+                        Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        ParentDomainName              = ''
+                        DomainNetBiosName             = $null
+                        DnsDelegationCredential       = $null
+                        DomainType                    = 'ChildDomain'
+                        DatabasePath                  = $null
+                        LogPath                       = $null
+                        SysvolPath                    = $null
+                        ForestMode                    = $null
+                        DomainMode                    = $null
+                        DomainExist                   = $true
+                        Forest                        = $null
+                        DnsRoot                       = $null
+                    }
+                }
+            }
+
+            It 'Should set $global:DSCMachineStatus to 1' {
+                InModuleScope -ScriptBlock {
+                    if (Test-Path variable:\global:DSCMachineStatus) {
+                        Remove-Variable -Name DSCMachineStatus -Scope Global -Force
+                    }
+
+                    $setParameters = @{
+                        DomainName                    = 'present.com'
+                        Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        )
+                        SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force)
+                        )
+                        SuppressReboot                = $false
+                    }
+
+                    Set-TargetResource @setParameters
+
+                    (Get-Variable -Name DSCMachineStatus -Scope Global -ValueOnly -ErrorAction SilentlyContinue) | Should -Be 1
+                }
             }
         }
     }
@@ -915,6 +1049,84 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
             Should -Invoke -CommandName Install-ADDSDomain -ParameterFilter {
                 $DomainMode -eq 'WinThreshold'
             } -Exactly -Times 1 -Scope It
+        }
+
+        Context 'When SuppressReboot is $true' {
+            It 'Should not set $global:DSCMachineStatus' {
+                InModuleScope -ScriptBlock {
+                    if (Test-Path variable:\global:DSCMachineStatus) {
+                        Remove-Variable -Name DSCMachineStatus -Scope Global -Force
+                    }
+
+                    $setParameters = @{
+                        DomainName                    = 'present.com'
+                        ParentDomainName              = 'parent.com'
+                        Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        DomainType                    = 'ChildDomain'
+                        SuppressReboot                = $true
+                    }
+
+                    Set-TargetResource @setParameters
+
+                    Test-Path variable:\global:DSCMachineStatus | Should -BeFalse
+                }
+            }
+        }
+
+        Context 'When the domain controller is pending reboot and SuppressReboot is $false' {
+            BeforeAll {
+                Mock -CommandName Test-Path -ParameterFilter {
+                    $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint'
+                } -MockWith { $true }
+
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        DomainName                    = 'contoso.com'
+                        Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        ParentDomainName              = ''
+                        DomainNetBiosName             = $null
+                        DnsDelegationCredential       = $null
+                        DomainType                    = 'ChildDomain'
+                        DatabasePath                  = $null
+                        LogPath                       = $null
+                        SysvolPath                    = $null
+                        ForestMode                    = $null
+                        DomainMode                    = $null
+                        DomainExist                   = $true
+                        Forest                        = $null
+                        DnsRoot                       = $null
+                    }
+                }
+            }
+
+            It 'Should set $global:DSCMachineStatus to 1' {
+                InModuleScope -ScriptBlock {
+                    if (Test-Path variable:\global:DSCMachineStatus) {
+                        Remove-Variable -Name DSCMachineStatus -Scope Global -Force
+                    }
+
+                    $setParameters = @{
+                        DomainName                    = 'present.com'
+                        ParentDomainName              = 'parent.com'
+                        Credential                    = [System.Management.Automation.PSCredential]::new('DummyUser',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        SafeModeAdministratorPassword = [System.Management.Automation.PSCredential]::new('Safemode',
+                            (ConvertTo-SecureString -String 'DummyPassword' -AsPlainText -Force))
+                        DomainType                    = 'ChildDomain'
+                        SuppressReboot                = $false
+                    }
+
+                    Set-TargetResource @setParameters
+
+                    (Get-Variable -Name DSCMachineStatus -Scope Global -ValueOnly -ErrorAction SilentlyContinue) | Should -Be 1
+                }
+            }
         }
     }
 }
