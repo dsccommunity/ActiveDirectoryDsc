@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [6.7.1] - 2025-12-05
+
 ### Added
 
 - ADReadOnlyDomainControllerAccount
