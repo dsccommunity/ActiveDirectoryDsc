@@ -1647,6 +1647,9 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
                 )
             }
 
+            # Pester v6 throws instead of calling the real command when no -ParameterFilter
+            # matches. Suppress unmatched Write-Verbose calls (v5 let them through).
+            Mock -CommandName Write-Verbose -MockWith { }
             Mock -CommandName Write-Verbose -ParameterFilter {
                 $Message -like 'Searching for a domain controller*'
             } -MockWith {
@@ -1658,7 +1661,9 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             { Find-DomainController -DomainName $mockDomainName } | Should -Not -Throw
 
             Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
-            Should -Invoke -CommandName Write-Verbose -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Write-Verbose -ParameterFilter {
+                $Message -like 'Searching for a domain controller*'
+            } -Exactly -Times 1 -Scope It
         }
 
         Should -InvokeVerifiable
