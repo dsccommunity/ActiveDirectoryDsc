@@ -7,6 +7,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Changed
+
+- `ActiveDirectoryDsc`
+  - Updated unit tests for Pester 6 compatibility - forward unmatched `Test-Path`
+    mock calls to the real cmdlet, suppress unmatched `Write-Verbose` calls, and
+    replace the removed `Assert-VerifiableMock` with `Should -InvokeVerifiable`.
+
 ## [6.7.1] - 2025-12-05
 
 ### Added

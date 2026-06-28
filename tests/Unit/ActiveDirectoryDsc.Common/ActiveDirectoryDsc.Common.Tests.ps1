@@ -756,7 +756,7 @@ Describe 'ActiveDirectoryDsc.Common\Restore-ADCommonObject' {
         }
 
         It 'Should call Get-ADObject as well as Restore-ADObject' {
-            Assert-VerifiableMock
+            Should -InvokeVerifiable
         }
 
         It 'Should throw an InvalidOperationException when object parent does not exist' {
@@ -1558,7 +1558,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-ADDirectoryContext' {
             }
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 }
 
@@ -1625,7 +1625,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             }
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 
     Context 'When no domain controller is found' {
@@ -1661,7 +1661,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             Should -Invoke -CommandName Write-Verbose -Exactly -Times 1 -Scope It
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 
     Context 'When the lookup for a domain controller fails' {
@@ -1686,7 +1686,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 
     Context 'When the Find-DomainController throws an authentication exception' {

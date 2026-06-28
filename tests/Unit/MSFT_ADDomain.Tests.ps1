@@ -62,6 +62,9 @@ AfterAll {
 Describe 'MSFT_ADDomain\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
+        # Pester v6 throws instead of calling the real command when no -ParameterFilter
+        # matches. Forward unmatched Test-Path calls to the real cmdlet to keep v5 behaviour.
+        Mock -CommandName Test-Path -MockWith { & (Get-Command -Name 'Test-Path' -CommandType Cmdlet) @PesterBoundParameters }
         Mock -CommandName Test-Path -ParameterFilter {
             $Path -eq 'C:\Windows\SysVol\contoso.com'
         } -MockWith { $true }
@@ -675,6 +678,9 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
         Context 'When the domain controller is pending reboot and SuppressReboot is $false' {
             BeforeAll {
                 # Make the resource think a reboot is pending after installation.
+                # Pester v6 throws instead of calling the real command when no -ParameterFilter
+                # matches. Forward unmatched Test-Path calls to the real cmdlet to keep v5 behaviour.
+                Mock -CommandName Test-Path -MockWith { & (Get-Command -Name 'Test-Path' -CommandType Cmdlet) @PesterBoundParameters }
                 Mock -CommandName Test-Path -ParameterFilter {
                     $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint'
                 } -MockWith { $true }
@@ -1078,6 +1084,9 @@ Describe 'MSFT_ADDomain\Set-TargetResource' -Tag 'Set' {
 
         Context 'When the domain controller is pending reboot and SuppressReboot is $false' {
             BeforeAll {
+                # Pester v6 throws instead of calling the real command when no -ParameterFilter
+                # matches. Forward unmatched Test-Path calls to the real cmdlet to keep v5 behaviour.
+                Mock -CommandName Test-Path -MockWith { & (Get-Command -Name 'Test-Path' -CommandType Cmdlet) @PesterBoundParameters }
                 Mock -CommandName Test-Path -ParameterFilter {
                     $Path -eq 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\LocatorDCPromoPreRebootHint'
                 } -MockWith { $true }
