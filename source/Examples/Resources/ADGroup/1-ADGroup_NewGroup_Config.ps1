@@ -22,18 +22,21 @@ Configuration ADGroup_NewGroup_Config
 {
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('DomainLocal', 'Global', 'Universal')]
         [System.String]
         $Scope = 'Global',
 
+        [Parameter()]
         [ValidateSet('Security', 'Distribution')]
         [System.String]
         $Category = 'Security',
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Description

@@ -76,7 +76,7 @@ param
         "common across the $ModuleName Module"
 )
 
-Function Remove-MetaData
+function Remove-MetaData
 {
     [CmdletBinding()]
     param
@@ -132,7 +132,7 @@ Add-TypeAssembly -AssemblyName 'System.DirectoryServices.AccountManagement' `
     -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext'
 
 
-If (Test-Path -Path $Path)
+if (Test-Path -Path $Path)
 {
     Write-Verbose -Message "Removing the current $Path directory"
     Remove-Item -Path $Path -Recurse

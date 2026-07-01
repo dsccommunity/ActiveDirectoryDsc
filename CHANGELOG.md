@@ -7,6 +7,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Changed
+
+- README
+  - Updated PSGallery Pre-Release badge.
+- Examples
+  - Updated to pass HQRM.
+
 ## [6.7.1] - 2025-12-05
 
 ### Added
