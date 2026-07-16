@@ -21,7 +21,7 @@ Updated author, copyright notice, and URLs.
 #>
 Configuration ADDomainDefaultPasswordPolicy_ConfigureDefaultPasswordPolicy_Config
 {
-    Param
+    param
     (
         [Parameter(Mandatory = $true)]
         [System.String]

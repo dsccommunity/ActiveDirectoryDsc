@@ -11,7 +11,7 @@ groups and OUs.
 ![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/ActiveDirectoryDsc/13/main)
 [![codecov](https://codecov.io/gh/dsccommunity/ActiveDirectoryDsc/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/ActiveDirectoryDsc)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/ActiveDirectoryDsc/13/main)](https://dsccommunity.visualstudio.com/ActiveDirectoryDsc/_test/analytics?definitionId=13&contextType=build)
-[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/ActiveDirectoryDsc?label=ActiveDirectoryDsc%20Preview)](https://www.powershellgallery.com/packages/ActiveDirectoryDsc/)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/v/ActiveDirectoryDsc?label=ActiveDirectoryDsc%20Preview&include_prereleases)](https://www.powershellgallery.com/packages/ActiveDirectoryDsc/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/ActiveDirectoryDsc?label=ActiveDirectoryDsc)](https://www.powershellgallery.com/packages/ActiveDirectoryDsc/)
 
 ## Code of Conduct
