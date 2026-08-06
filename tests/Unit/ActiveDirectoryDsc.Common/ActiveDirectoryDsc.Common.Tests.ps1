@@ -756,7 +756,7 @@ Describe 'ActiveDirectoryDsc.Common\Restore-ADCommonObject' {
         }
 
         It 'Should call Get-ADObject as well as Restore-ADObject' {
-            Assert-VerifiableMock
+            Should -InvokeVerifiable
         }
 
         It 'Should throw an InvalidOperationException when object parent does not exist' {
@@ -1558,7 +1558,7 @@ Describe 'ActiveDirectoryDsc.Common\Get-ADDirectoryContext' {
             }
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 }
 
@@ -1625,7 +1625,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             }
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 
     Context 'When no domain controller is found' {
@@ -1647,6 +1647,9 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
                 )
             }
 
+            # Pester v6 throws instead of calling the real command when no -ParameterFilter
+            # matches. Suppress unmatched Write-Verbose calls (v5 let them through).
+            Mock -CommandName Write-Verbose -MockWith { }
             Mock -CommandName Write-Verbose -ParameterFilter {
                 $Message -like 'Searching for a domain controller*'
             } -MockWith {
@@ -1658,10 +1661,12 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             { Find-DomainController -DomainName $mockDomainName } | Should -Not -Throw
 
             Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
-            Should -Invoke -CommandName Write-Verbose -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Write-Verbose -ParameterFilter {
+                $Message -like 'Searching for a domain controller*'
+            } -Exactly -Times 1 -Scope It
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 
     Context 'When the lookup for a domain controller fails' {
@@ -1686,7 +1691,7 @@ Describe 'ActiveDirectoryDsc.Common\Find-DomainController' -Tag 'FindDomainContr
             Should -Invoke -CommandName Find-DomainControllerFindOneWrapper -Exactly -Times 1 -Scope It
         }
 
-        Assert-VerifiableMock
+        Should -InvokeVerifiable
     }
 
     Context 'When the Find-DomainController throws an authentication exception' {

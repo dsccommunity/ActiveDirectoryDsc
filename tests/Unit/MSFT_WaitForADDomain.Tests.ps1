@@ -157,6 +157,9 @@ Describe 'MSFT_WaitForADDomain\Get-TargetResource' -Tag 'Get' {
 
             Context 'When using BuiltInCredential parameter' {
                 BeforeAll {
+                    # Pester v6 throws instead of calling the real command when no -ParameterFilter
+                    # matches. Suppress unmatched Write-Verbose calls (v5 let them through).
+                    Mock -CommandName Write-Verbose -MockWith { }
                     Mock -CommandName Write-Verbose -ParameterFilter {
                         $Message -like 'Impersonating the credentials ''BuiltInCredential''*'
                     } -MockWith {
@@ -185,7 +188,9 @@ Describe 'MSFT_WaitForADDomain\Get-TargetResource' -Tag 'Get' {
                         $result.Credential | Should -BeNullOrEmpty
                     }
 
-                    Should -Invoke -CommandName Write-Verbose -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Write-Verbose -ParameterFilter {
+                        $Message -like 'Impersonating the credentials ''BuiltInCredential''*'
+                    } -Exactly -Times 1 -Scope It
                 }
             }
         }
