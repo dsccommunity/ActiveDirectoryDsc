@@ -9,9 +9,7 @@
 
     InvokeBuild                    = 'latest'
     PSScriptAnalyzer               = 'latest'
-    Pester                         = @{
-        Version = '6.0.0'
-    }
+    Pester                         = 'latest'
     Plaster                        = 'latest'
     ModuleBuilder                  = 'latest'
     ChangelogManagement            = 'latest'
