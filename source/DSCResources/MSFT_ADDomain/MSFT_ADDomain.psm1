@@ -521,6 +521,7 @@ function Set-TargetResource
         {
             $installADDSParameters['DnsDelegationCredential'] = $DnsDelegationCredential
             $installADDSParameters['CreateDnsDelegation'] = $true
+            $installADDSParameters['InstallDns'] = $true
         }
 
         if ($PSBoundParameters.ContainsKey('DatabasePath'))
@@ -557,6 +558,8 @@ function Set-TargetResource
             }
 
             Install-ADDSDomain @installADDSParameters
+            
+            Start-Service -Name "netlogon"
 
             Write-Verbose -Message ($script:localizedData.CreatedChildDomain)
         }
@@ -576,6 +579,8 @@ function Set-TargetResource
             }
 
             Install-ADDSForest @installADDSParameters
+            
+            Start-Service -Name "netlogon"
 
             Write-Verbose -Message ($script:localizedData.CreatedForest -f $DomainName)
         }
